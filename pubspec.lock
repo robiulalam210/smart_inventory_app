@@ -241,6 +241,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "10.8.3"
+  date_format:
+    dependency: "direct main"
+    description:
+      name: date_format
+      sha256: a48254e60bdb7f1d5a15cac7f86e37491808056c0a99dbdc850841def4754ddc
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.9"
   dbus:
     dependency: transitive
     description:
@@ -701,6 +709,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.2.2"
+  init:
+    dependency: "direct main"
+    description:
+      name: init
+      sha256: "4e222f616f16f47a89ac64022472de03082bd1e6f39d25308217d6e630597e6c"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.0"
   intl:
     dependency: "direct main"
     description:
@@ -1061,6 +1077,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.0.3"
+  primer_progress_bar:
+    dependency: "direct main"
+    description:
+      name: primer_progress_bar
+      sha256: "41a3a9f6b5c54e35959346da653ac48219364ecf0b020756d5cde78e34084083"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.5.0"
   printing:
     dependency: "direct main"
     description:

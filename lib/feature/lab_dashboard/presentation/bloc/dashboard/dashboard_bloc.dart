@@ -17,7 +17,7 @@ part 'dashboard_state.dart';
 class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
   final DatabaseHelper dbHelper;
   final List<Widget> myScreens = [
-    AppWrapper(child: LabDashboardScreen()),
+    AppWrapper(child: DashboardScreen()),
     BlocProvider(create: (_) => LabBillingBloc(), child: AppWrapper(child: BillingScreen())),
     AppWrapper(child: TransactionScreen()),
     AppWrapper(child: SampleCollectionScreen()),
