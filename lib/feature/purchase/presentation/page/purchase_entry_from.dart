@@ -2,7 +2,7 @@ import 'dart:async';
 
 import '../../../../core/core.dart';
 import '../../../feature.dart';
-
+import 'package:flutter/cupertino.dart';
 
 class PurchaseCreateScreen extends StatefulWidget {
   const PurchaseCreateScreen({super.key});
@@ -15,7 +15,6 @@ class _PurchaseCreateScreenState extends State<PurchaseCreateScreen> {
   @override
   void initState() {
     super.initState();
-
     checkTokenAndLogoutIfExpired();
   }
 
@@ -45,17 +44,11 @@ class _PurchaseCreateScreenState extends State<PurchaseCreateScreen> {
   final FocusNode focusCategoryNode = FocusNode();
   final FocusNode focusInventoryNode = FocusNode();
 
-
-
   @override
   Widget build(BuildContext context) {
-
-
     return Container(
       color: AppColors.bg,
-      child: SafeArea(
-        child:_buildMainContent(),
-      ),
+      child: SafeArea(child: _buildMainContent()),
     );
   }
 
@@ -75,11 +68,8 @@ class _PurchaseCreateScreenState extends State<PurchaseCreateScreen> {
             lg: 2,
             xl: 2,
             child: Container(
-              decoration:
-              BoxDecoration(color: AppColors.whiteColor),
-              child: isBigScreen
-                  ? const Sidebar()
-                  : const SizedBox.shrink(),
+              decoration: BoxDecoration(color: AppColors.whiteColor),
+              child: isBigScreen ? const Sidebar() : const SizedBox.shrink(),
             ),
           ),
         ResponsiveCol(
@@ -91,29 +81,15 @@ class _PurchaseCreateScreenState extends State<PurchaseCreateScreen> {
           child: Container(
             color: AppColors.bg,
             child: Column(
-              mainAxisSize: MainAxisSize.min,
+              mainAxisSize: MainAxisSize.max,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Flexible(
-                  child: SingleChildScrollView(
-                    physics:
-                    const NeverScrollableScrollPhysics(),
-                    padding: EdgeInsets.zero,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        PurchaseEntryForm(),
-
-                      ],
-                    ),
-                  ),
-                ),
+                PurchaseEntryForm(),
                 gapH20,
                 FutureBuilder<Widget>(
                   future: buildActionButtons(),
                   builder: (context, snapshot) {
-                    if (snapshot.connectionState ==
-                        ConnectionState.waiting) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
                       return const CircularProgressIndicator();
                     } else if (snapshot.hasError) {
                       return Text('Error: ${snapshot.error}');
@@ -121,8 +97,7 @@ class _PurchaseCreateScreenState extends State<PurchaseCreateScreen> {
                       return snapshot.data!;
                     }
                   },
-                )
-                // buildActionButtons(),
+                ),
               ],
             ),
           ),
@@ -131,72 +106,44 @@ class _PurchaseCreateScreenState extends State<PurchaseCreateScreen> {
     );
   }
 
-
   Future<Widget> buildActionButtons() async {
-
-
-
-
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-
         Wrap(
           children: [
-
-            AppButton(
-              name: 'Summery',
-              onPressed: () {
-
-              },
-              color: Colors.grey,
-            ),
+            AppButton(name: 'Summery', onPressed: () {}, color: Colors.grey),
             gapW4,
             AppButton(
               name: 'Finder',
-              onPressed: () {
-
-              },
-              color: Color(0xffff6347),
+              onPressed: () {},
+              color: const Color(0xffff6347),
             ),
-
-
             gapW4,
             AppButton(
               name: 'Due Collection',
-              onPressed: () {
-
-              },
+              onPressed: () {},
               color: Colors.black,
             ),
           ],
         ),
         Row(
           children: [
-
             const SizedBox(width: 10),
             AppButton(
               name: 'Preview',
-              onPressed: () async {
-
-              },
+              onPressed: () async {},
               color: const Color(0xff800000),
             ),
             const SizedBox(width: 10),
-            AppButton(
-              name: 'Submit',
-              onPressed: (){},
-            ),
+            AppButton(name: 'Submit', onPressed: () {}),
             const SizedBox(width: 5),
           ],
         ),
       ],
     );
   }
-
-
-
 }
 
 class PurchaseEntryForm extends StatefulWidget {
@@ -210,23 +157,60 @@ class _PurchaseEntryFormState extends State<PurchaseEntryForm> {
   // Example controllers
   final TextEditingController supplierController = TextEditingController();
   final TextEditingController warehouseController = TextEditingController();
-  final TextEditingController purchaseDateController = TextEditingController(text: "2025-10-11");
+  final TextEditingController purchaseDateController = TextEditingController(
+    text: "2025-10-11",
+  );
   final TextEditingController purchaseDocController = TextEditingController();
   final TextEditingController productController = TextEditingController();
-  final TextEditingController priceController = TextEditingController(text: "0");
-  final TextEditingController quantityController = TextEditingController(text: "0");
+  final TextEditingController priceController = TextEditingController(
+    text: "0",
+  );
+  final TextEditingController quantityController = TextEditingController(
+    text: "0",
+  );
   String discountType = "Tk";
-  final TextEditingController discountController = TextEditingController(text: "0");
-  final TextEditingController ticketTotalController = TextEditingController(text: "0");
-  final TextEditingController netTotalController = TextEditingController(text: "0");
+  final TextEditingController discountController = TextEditingController(
+    text: "0",
+  );
+  final TextEditingController ticketTotalController = TextEditingController(
+    text: "0",
+  );
+  final TextEditingController netTotalController = TextEditingController(
+    text: "0",
+  );
   String overallDiscountType = "Tk";
-  final TextEditingController overallDiscountController = TextEditingController(text: "0");
+  final TextEditingController overallDiscountController = TextEditingController(
+    text: "0",
+  );
   String overallVatType = "Tk";
-  final TextEditingController overallVatController = TextEditingController(text: "0");
+  final TextEditingController overallVatController = TextEditingController(
+    text: "0",
+  );
   String serviceChargeType = "Tk";
-  final TextEditingController serviceChargeController = TextEditingController(text: "0");
+  final TextEditingController serviceChargeController = TextEditingController(
+    text: "0",
+  );
   String deliveryChargeType = "Tk";
-  final TextEditingController deliveryChargeController = TextEditingController(text: "0");
+  final TextEditingController deliveryChargeController = TextEditingController(
+    text: "0",
+  );
+
+  // Money receipt/payment section
+  bool withMoneyReceipt = false;
+  final TextEditingController paymentMethodController = TextEditingController(
+    text: "Cash",
+  );
+  final TextEditingController accountController = TextEditingController(
+    text: "Hand Cash (16601.80)",
+  );
+  final TextEditingController payableAmountController = TextEditingController();
+  final TextEditingController returnAmountController = TextEditingController(
+    text: "0",
+  );
+  final TextEditingController remarkController = TextEditingController();
+
+  final List<String> paymentMethods = ["Cash", "Mobile banking"];
+  final List<String> accounts = ["Hand Cash (16601.80)", "Bank A", "Bank B"];
   bool instantPay = false;
 
   @override
@@ -237,16 +221,15 @@ class _PurchaseEntryFormState extends State<PurchaseEntryForm> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 8),
             const Text(
               "Create Purchase",
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
             ),
             const SizedBox(height: 18),
-            Card(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-              margin: EdgeInsets.zero,
-              color: const Color(0xFFF6F6F6),
+            Container(
+              decoration: BoxDecoration(
+                  color: AppColors.white50Color.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(AppSizes.radius)),
               child: Padding(
                 padding: const EdgeInsets.all(20),
                 child: Column(
@@ -262,13 +245,15 @@ class _PurchaseEntryFormState extends State<PurchaseEntryForm> {
                           ),
                         ),
                         const SizedBox(width: 12),
-
                         Expanded(
                           child: _buildTextField(
                             label: "* Purchase Date",
                             controller: purchaseDateController,
                             readOnly: true,
-                            suffixIcon: const Icon(Icons.calendar_today, size: 16),
+                            suffixIcon: const Icon(
+                              Icons.calendar_today,
+                              size: 16,
+                            ),
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -285,10 +270,16 @@ class _PurchaseEntryFormState extends State<PurchaseEntryForm> {
                               const SizedBox(width: 4),
                               OutlinedButton.icon(
                                 icon: const Icon(Icons.upload_file, size: 16),
-                                label: const Text("Click to Upload", style: TextStyle(fontSize: 13)),
+                                label: const Text(
+                                  "Click to Upload",
+                                  style: TextStyle(fontSize: 13),
+                                ),
                                 onPressed: () {}, // implement upload logic
                                 style: OutlinedButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 12,
+                                    horizontal: 8,
+                                  ),
                                 ),
                               ),
                             ],
@@ -326,7 +317,8 @@ class _PurchaseEntryFormState extends State<PurchaseEntryForm> {
                         Expanded(
                           child: _buildToggleInput(
                             type: discountType,
-                            onTypeChanged: (v) => setState(() => discountType = v),
+                            onTypeChanged: (v) =>
+                                setState(() => discountType = v),
                             controller: discountController,
                             label: "Discount Type",
                           ),
@@ -370,125 +362,212 @@ class _PurchaseEntryFormState extends State<PurchaseEntryForm> {
                     Row(
                       children: [
                         Expanded(
-                          child: _buildToggleInput(
+                          child: _buildToggleInputDiscount(
                             type: overallDiscountType,
-                            onTypeChanged: (v) => setState(() => overallDiscountType = v),
+                            onTypeChanged: (v) =>
+                                setState(() => overallDiscountType = v),
                             controller: overallDiscountController,
                             label: "OVERALL DISCOUNT",
                           ),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
-                          child: _buildToggleInput(
+                          child: _buildToggleInputDiscount(
                             type: overallVatType,
-                            onTypeChanged: (v) => setState(() => overallVatType = v),
+                            onTypeChanged: (v) =>
+                                setState(() => overallVatType = v),
                             controller: overallVatController,
                             label: "OVERALL VAT",
                           ),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
-                          child: _buildToggleInput(
+                          child: _buildToggleInputDiscount(
                             type: serviceChargeType,
-                            onTypeChanged: (v) => setState(() => serviceChargeType = v),
+                            onTypeChanged: (v) =>
+                                setState(() => serviceChargeType = v),
                             controller: serviceChargeController,
                             label: "SERVICE CHARGE",
                           ),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
-                          child: _buildToggleInput(
+                          child: _buildToggleInputDiscount(
                             type: deliveryChargeType,
-                            onTypeChanged: (v) => setState(() => deliveryChargeType = v),
+                            onTypeChanged: (v) =>
+                                setState(() => deliveryChargeType = v),
                             controller: deliveryChargeController,
                             label: "DELIVERY CHARGE",
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 20),
                     Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        // Order Overview
+                        Expanded(flex: 2, child: _OrderOverviewBox()),
+                        const SizedBox(width: 16),
+                        // Payment/Money Receipt Section
                         Expanded(
                           flex: 3,
-                          child: Card(
-                            color: Colors.white,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-                            child: Padding(
-                              padding: const EdgeInsets.all(16),
-                              child: Table(
-                                columnWidths: const {
-                                  0: FlexColumnWidth(2),
-                                  1: FlexColumnWidth(1),
-                                },
-                                children: const [
-                                  TableRow(children: [
-                                    Text("Ticket Total"),
-                                    Align(alignment: Alignment.centerRight, child: Text("0")),
-                                  ]),
-                                  TableRow(children: [
-                                    Text("Specific Discount (-)"),
-                                    Align(alignment: Alignment.centerRight, child: Text("0")),
-                                  ]),
-                                  TableRow(children: [
-                                    Text("Net Total", style: TextStyle(fontWeight: FontWeight.bold)),
-                                    Align(alignment: Alignment.centerRight, child: Text("0", style: TextStyle(fontWeight: FontWeight.bold))),
-                                  ]),
-                                  TableRow(children: [
-                                    Text("Discount (-)"),
-                                    Align(alignment: Alignment.centerRight, child: Text("0")),
-                                  ]),
-                                  TableRow(children: [
-                                    Text("Vat (+)"),
-                                    Align(alignment: Alignment.centerRight, child: Text("0")),
-                                  ]),
-                                  TableRow(children: [
-                                    Text("Service Charge (+)"),
-                                    Align(alignment: Alignment.centerRight, child: Text("0")),
-                                  ]),
-                                  TableRow(children: [
-                                    Text("Gross Total", style: TextStyle(fontWeight: FontWeight.bold)),
-                                    Align(alignment: Alignment.centerRight, child: Text("0.00", style: TextStyle(fontWeight: FontWeight.bold))),
-                                  ]),
+                          child: Container(
+                            color: const Color(0xFFF6F6F6),
+                            padding: const EdgeInsets.all(0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Checkbox(
+                                      value: instantPay,
+                                      onChanged: (v) => setState(() => instantPay = v!),
+                                    ),
+                                    const Text("Instant Pay"),
+                                  ],
+                                ),
+                                // Only show payment fields if checked!
+                                if (instantPay) ...[
+                                  const SizedBox(height: 8),
+                                  Row(
+                                    children: [
+                                      // Payment Method
+                                      Expanded(
+                                        child: _buildDropdownButton(
+                                          label: "* Payment Method",
+                                          value: paymentMethodController.text,
+                                          items: paymentMethods,
+                                          onChanged: (val) {
+                                            setState(
+                                                  () => paymentMethodController.text =
+                                                  val ?? paymentMethodController.text,
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      // Account
+                                      Expanded(
+                                        child: _buildDropdownButton(
+                                          label: "* Account",
+                                          value: accountController.text,
+                                          items: accounts,
+                                          onChanged: (val) {
+                                            setState(
+                                                  () => accountController.text =
+                                                  val ?? accountController.text,
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: CustomInputField(
+                                          controller: payableAmountController,
+                                          labelText: "* Payable Amount",
+                                          hintText: "Enter Client Payable Amount",
+                                          keyboardType: TextInputType.number,
+                                          isRequired: true,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: CustomInputField(
+                                          controller: returnAmountController,
+                                          labelText: "Return Amount",
+                                          hintText: "0",
+                                          keyboardType: TextInputType.number,
+                                          isRequired: false,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 8),
+
                                 ],
-                              ),
+                              ],
                             ),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          flex: 1,
-                          child: Row(
-                            children: [
-                              Checkbox(
-                                value: instantPay,
-                                onChanged: (v) => setState(() => instantPay = v!),
-                              ),
-                              const Text("Instant Pay"),
-                            ],
                           ),
                         ),
                       ],
                     ),
+                    const SizedBox(height: 16),
+
                   ],
                 ),
               ),
             ),
-            const SizedBox(height: 20),
-            ElevatedButton.icon(
-              icon: const Icon(Icons.send, color: Colors.white, size: 18),
-              label: const Text("Create Purchase"),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFF57A56),
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
-                textStyle: const TextStyle(fontSize: 16),
-              ),
-              onPressed: () {},
-            ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildDropdownButton({
+    required String label,
+    required String value,
+    required List<String> items,
+    required ValueChanged<String?> onChanged,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: AppTextStyle.labelDropdownTextStyle(context)),
+        const SizedBox(height: 4),
+        DropdownButtonFormField<String>(
+          value: value,
+          items: items
+              .map((item) => DropdownMenuItem(value: item, child: Text(item)))
+              .toList(),
+          onChanged: onChanged,
+          isExpanded: true,
+          decoration: InputDecoration(
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(5)),
+            isDense: true,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 10,
+              vertical: 11,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    bool isRequired = false,
+    bool readOnly = false,
+    Widget? suffixIcon,
+  }) {
+    return CustomInputField(
+      controller: controller,
+      readOnly: readOnly,
+      textInputAction: TextInputAction.next,
+      hintText: label,
+      keyboardType: TextInputType.text,
+    );
+  }
+
+  Widget _buildNumberField({
+    required TextEditingController controller,
+    required String label,
+    bool isRequired = false,
+    bool readOnly = false,
+    String? initialValue,
+  }) {
+    return CustomInputField(
+      controller: controller,
+      readOnly: readOnly,
+      isRequired: isRequired,
+      keyboardType: TextInputType.number,
+      hintText: label,
     );
   }
 
@@ -511,86 +590,184 @@ class _PurchaseEntryFormState extends State<PurchaseEntryForm> {
     );
   }
 
-  Widget _buildTextField({
-    required String label,
-    required TextEditingController controller,
-    bool readOnly = false,
-    Widget? suffixIcon,
-  }) {
-    return TextField(
-      controller: controller,
-      readOnly: readOnly,
-      decoration: InputDecoration(
-        labelText: label,
-        border: const OutlineInputBorder(),
-        isDense: true,
-        suffixIcon: suffixIcon,
-      ),
-    );
-  }
-
-  Widget _buildNumberField({
-    required String label,
-    required TextEditingController controller,
-    bool readOnly = false,
-  }) {
-    return TextField(
-      controller: controller,
-      readOnly: readOnly,
-      keyboardType: TextInputType.number,
-      decoration: InputDecoration(
-        labelText: label,
-        border: const OutlineInputBorder(),
-        isDense: true,
-      ),
-    );
-  }
-
   Widget _buildToggleInput({
     required String type,
     required ValueChanged<String> onTypeChanged,
     required TextEditingController controller,
     required String label,
   }) {
-    return Card(
-      margin: EdgeInsets.zero,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: AppTextStyle.labelDropdownTextStyle(context)),
+        const SizedBox(height: 4),
+        Row(
+          children: [
+            CupertinoSegmentedControl<String>(
+              groupValue: type,
+              children: const {
+                "Tk": Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                  child: Text("Tk"),
+                ),
+                "%": Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                  child: Text("%"),
+                ),
+              },
+              onValueChanged: onTypeChanged,
+              padding: const EdgeInsets.symmetric(horizontal: 0),
+              selectedColor: Colors.deepOrangeAccent,
+              unselectedColor: Colors.white,
+              borderColor: Colors.deepOrangeAccent,
+              pressedColor: Colors.deepOrangeAccent,
+            ),
+            const SizedBox(width: 8),
+            SizedBox(
+              width: 50,
+              child: CustomInputField(
+                controller: controller,
+                isRequiredLable: false,
+                keyboardType: TextInputType.number,
+                hintText: '',
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+ Widget _buildToggleInputDiscount({
+    required String type,
+    required ValueChanged<String> onTypeChanged,
+    required TextEditingController controller,
+    required String label,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: AppTextStyle.labelDropdownTextStyle(context)),
+        const SizedBox(height: 4),
+        Row(
+          children: [
+            CupertinoSegmentedControl<String>(
+              groupValue: type,
+              children: const {
+                "Tk": Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+                  child: Text("Tk"),
+                ),
+                "%": Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                  child: Text("%"),
+                ),
+              },
+              onValueChanged: onTypeChanged,
+              padding: const EdgeInsets.symmetric(horizontal: 0),
+              selectedColor: Colors.deepOrangeAccent,
+              unselectedColor: Colors.white,
+              borderColor: Colors.deepOrangeAccent,
+              pressedColor: Colors.deepOrangeAccent,
+            ),
+            const SizedBox(width: 8),
+            SizedBox(
+              width: 80,
+              child: CustomInputField(
+                controller: controller,
+                isRequiredLable: false,
+                keyboardType: TextInputType.number,
+                hintText: '',
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _OrderOverviewBox extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(AppSizes.radius),
+      ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 4),
-            Row(
-              children: [
-                ToggleButtons(
-                  isSelected: [type == "Tk", type == "%"],
-                  borderRadius: BorderRadius.circular(4),
-                  onPressed: (i) => onTypeChanged(i == 0 ? "Tk" : "%"),
-                  children: const [
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 8.0),
-                      child: Text("Tk"),
+            Text("Order Overview", style: AppTextStyle.cardTitle(context)),
+            Divider(),
+            gapH8,
+            Table(
+              columnWidths: const {
+                0: FlexColumnWidth(2),
+                1: FlexColumnWidth(1),
+              },
+              children: const [
+                TableRow(
+                  children: [
+                    Text("Ticket Total"),
+                    Align(alignment: Alignment.centerRight, child: Text("0")),
+                  ],
+                ),
+                TableRow(
+                  children: [
+                    Text("Specific Discount (-)"),
+                    Align(alignment: Alignment.centerRight, child: Text("0")),
+                  ],
+                ),
+                TableRow(
+                  children: [
+                    Text(
+                      "Net Total",
+                      style: TextStyle(fontWeight: FontWeight.bold),
                     ),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 8.0),
-                      child: Text("%"),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: Text(
+                        "0",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
                     ),
                   ],
                 ),
-                const SizedBox(width: 8),
-                SizedBox(
-                  width: 50,
-                  child: TextField(
-                    controller: controller,
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      isDense: true,
-                      contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+                TableRow(
+                  children: [
+                    Text("Discount (-)"),
+                    Align(alignment: Alignment.centerRight, child: Text("0")),
+                  ],
+                ),
+                TableRow(
+                  children: [
+                    Text("Vat (+)"),
+                    Align(alignment: Alignment.centerRight, child: Text("0")),
+                  ],
+                ),
+                TableRow(
+                  children: [
+                    Text("Service Charge (+)"),
+                    Align(alignment: Alignment.centerRight, child: Text("0")),
+                  ],
+                ),
+                TableRow(
+                  children: [
+                    Text(
+                      "Gross Total",
+                      style: TextStyle(fontWeight: FontWeight.bold),
                     ),
-                  ),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: Text(
+                        "0.00",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),

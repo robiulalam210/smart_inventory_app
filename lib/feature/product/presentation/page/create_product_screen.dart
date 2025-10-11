@@ -19,6 +19,13 @@ class _ProductCreateScreenState extends State<ProductCreateScreen> {
 
   @override
   void dispose() {
+    productNameController.dispose();
+    purchasePriceController.dispose();
+    sellingPriceController.dispose();
+    openingStockController.dispose();
+    barcodeController.dispose();
+    alertQtyController.dispose();
+    productDescriptionController.dispose();
     super.dispose();
   }
 
@@ -52,200 +59,166 @@ class _ProductCreateScreenState extends State<ProductCreateScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Center(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 12),
-            child: Container(
-              constraints: const BoxConstraints(maxWidth: 860),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
+    final isBigScreen = Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
+
+    return Container(
+      color: AppColors.bg,
+      child: SafeArea(
+        child: ResponsiveRow(
+          spacing: 0,
+          runSpacing: 0,
+          children: [
+            if (isBigScreen)
+              ResponsiveCol(
+                xs: 0,
+                sm: 1,
+                md: 1,
+                lg: 2,
+                xl: 2,
+                child: Container(
+                  decoration: BoxDecoration(color: AppColors.whiteColor),
+                  child: isBigScreen ? const Sidebar() : const SizedBox.shrink(),
+                ),
               ),
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Form(
-                  key: _formKey,
+            ResponsiveCol(
+              xs: 12,
+              sm: 12,
+              md: 12,
+              lg: 10,
+              xl: 10,
+              child: Container(
+                color: AppColors.bg,
+                child:  SingleChildScrollView(
+                  padding: EdgeInsets.zero,
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Padding(
-                        padding: EdgeInsets.only(bottom: 14.0),
-                        child: Text(
-                          "Create Product",
-                          style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 17,
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 16),
+                        child: Form(
+                          key: _formKey,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: _buildDropdownField(
+                                      label: "* Category",
+                                      value: productCategory,
+                                      items: categories,
+                                      hint: "Select Category",
+                                      onChanged: (val) => setState(() => productCategory = val),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: _buildDropdownField(
+                                      label: "* Unit",
+                                      value: productUnit,
+                                      items: units,
+                                      hint: "Select Unit",
+                                      onChanged: (val) => setState(() => productUnit = val),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: _buildDropdownField(
+                                      label: "* Brand",
+                                      value: productBrand,
+                                      items: brands,
+                                      hint: "Select Brand",
+                                      onChanged: (val) => setState(() => productBrand = val),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 14),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    flex: 2,
+                                    child: _buildTextField(
+                                      label: "* Product Name",
+                                      hint: "Enter Product Name",
+                                      controller: productNameController,
+                                      isRequired: true, keyboardType: TextInputType.text,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: _buildTextField(
+                                      label: "* Purchase Price",
+                                      hint: "0",
+                                      controller: purchasePriceController,
+                                      keyboardType: TextInputType.number,
+                                      isRequired: true,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: _buildTextField(
+                                      label: "* Selling Price",
+                                      hint: "0",
+                                      controller: sellingPriceController,
+                                      keyboardType: TextInputType.number,
+                                      isRequired: true,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: _buildTextField(
+                                      label: "* Opening Stock",
+                                      hint: "0",
+                                      controller: openingStockController,
+                                      keyboardType: TextInputType.number,
+                                      isRequired: true,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 14),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: _buildTextField(
+                                      label: "Barcode",
+                                      hint: "Enter Barcode",
+                                      controller: barcodeController,
+                                      keyboardType: TextInputType.text,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: _buildTextField(
+                                      label: "* Alert Qty",
+                                      hint: "5",
+                                      controller: alertQtyController,
+                                      keyboardType: TextInputType.number,
+                                      isRequired: true,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 14),
+                              _buildTextField(
+                                label: "Description",
+                                hint: "Product Description",
+                                controller: productDescriptionController,
+                                maxLines: 2,
+                                keyboardType: TextInputType.multiline,
+                              ),
+                            ],
                           ),
                         ),
                       ),
-                      Container(
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF1F1F1),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        padding: const EdgeInsets.all(22),
-                        child: Column(
-                          children: [
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: _buildDropdownField(
-                                    label: "* Product Category",
-                                    value: productCategory,
-                                    items: categories,
-                                    hint: "Select Product Category",
-                                    onChanged: (val) => setState(() => productCategory = val),
-                                  ),
-                                ),
-                                const SizedBox(width: 16),
-                                Expanded(
-                                  child: _buildDropdownField(
-                                    label: "* Product Unit",
-                                    value: productUnit,
-                                    items: units,
-                                    hint: "Select Product Unit",
-                                    onChanged: (val) => setState(() => productUnit = val),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 16),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: _buildDropdownField(
-                                    label: "Select Brand",
-                                    value: productBrand,
-                                    items: brands,
-                                    hint: "Select Product Brand",
-                                    onChanged: (val) => setState(() => productBrand = val),
-                                  ),
-                                ),
-                                const SizedBox(width: 16),
-                                Expanded(
-                                  child: _buildTextField(
-                                    label: "* Product Name",
-                                    hint: "Enter Product Name",
-                                    controller: productNameController,
-                                    isRequired: true,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 16),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: _buildTextField(
-                                    label: "Purchase Price",
-                                    controller: purchasePriceController,
-                                    keyboardType: TextInputType.number,
-                                  ),
-                                ),
-                                const SizedBox(width: 16),
-                                Expanded(
-                                  child: _buildTextField(
-                                    label: "Selling Price",
-                                    controller: sellingPriceController,
-                                    keyboardType: TextInputType.number,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 16),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: _buildTextField(
-                                    label: "Product Opening Stock",
-                                    controller: openingStockController,
-                                    keyboardType: TextInputType.number,
-                                  ),
-                                ),
-                                const SizedBox(width: 16),
-                                Expanded(
-                                  child: _buildTextField(
-                                    label: "Product Barcode",
-                                    hint: "Enter Product Barcode",
-                                    controller: barcodeController,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 16),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: _buildTextField(
-                                    label: "Alert Quantity",
-                                    controller: alertQtyController,
-                                    keyboardType: TextInputType.number,
-                                  ),
-                                ),
-                                const SizedBox(width: 16),
-                                Expanded(
-                                  child: Row(
-                                    children: [
-                                      Expanded(
-                                        child: _buildTextField(
-                                          label: "Product Picture",
-                                          controller: TextEditingController(text: productPicture ?? ""),
-                                          readOnly: true,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      OutlinedButton.icon(
-                                        icon: const Icon(Icons.upload_file, size: 16),
-                                        label: const Text("Click to Upload", style: TextStyle(fontSize: 13)),
-                                        onPressed: () {
-                                          // TODO: Implement file picker
-                                        },
-                                        style: OutlinedButton.styleFrom(
-                                          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 16),
-                            _buildTextField(
-                              label: "Product Description",
-                              hint: "Write Product Description",
-                              controller: productDescriptionController,
-                              maxLines: 2,
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: ElevatedButton.icon(
-                          icon: const Icon(Icons.send, color: Colors.white, size: 18),
-                          label: const Text("Create"),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFF57A56),
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
-                            textStyle: const TextStyle(fontSize: 16),
-                          ),
-                          onPressed: () {
-                            if (_formKey.currentState!.validate()) {
-                              // Implement create product logic
-                            }
-                          },
-                        ),
-                      ),
+                      gapH20,
                     ],
                   ),
                 ),
               ),
             ),
-          ),
+          ],
         ),
       ),
     );
@@ -289,27 +262,26 @@ class _ProductCreateScreenState extends State<ProductCreateScreen> {
     required TextEditingController controller,
     bool readOnly = false,
     bool isRequired = false,
-    TextInputType? keyboardType,
+    required TextInputType keyboardType,
     int maxLines = 1,
   }) {
-    return TextFormField(
+    return CustomInputField(
       controller: controller,
       readOnly: readOnly,
-      maxLines: maxLines,
-      keyboardType: keyboardType,
-      decoration: InputDecoration(
-        labelText: label,
-        hintText: hint,
-        border: const OutlineInputBorder(),
-        isDense: true,
-        contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
-      ),
+      // keyboardType: keyboardType,
+      // decoration: InputDecoration(
+      //   labelText: label,
+      //   hintText: hint,
+      //   border: const OutlineInputBorder(),
+      //   isDense: true,
+      //   contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
+      // ),
       validator: isRequired
           ? (v) {
         if (v == null || v.isEmpty) return "Required";
         return null;
       }
-          : null,
+          : null, hintText: hint??"",labelText: label, keyboardType: keyboardType,
     );
   }
 }
