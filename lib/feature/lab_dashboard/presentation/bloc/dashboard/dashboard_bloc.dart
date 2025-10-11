@@ -2,6 +2,7 @@ import '../../../../../core/configs/configs.dart';
 import '../../../../../enery_screen.dart';
 import '../../../../money_receipt/presentation/page/monery_receipt_create.dart';
 import '../../../../money_receipt/presentation/page/money_receipt_list_screen.dart';
+import '../../../../product/presentation/page/create_product_screen.dart';
 import '../../../../product/presentation/page/product_setup.dart';
 import '../../../../purchase/presentation/page/purchase_entry_from.dart';
 import '../../../../purchase/presentation/page/purchase_list_screen.dart';
@@ -26,7 +27,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     AppWrapper(child: MoneyReceiptForm()),
     AppWrapper(child: MoneyReceiptListScreen()),
 
-    AppWrapper(child: ProductSetupScreen()),
+    AppWrapper(child: ProductCreateScreen()),
     AppWrapper(child: ProductSetupScreen()),
     AppWrapper(child: ProductSetupScreen()),
     AppWrapper(child: ProductSetupScreen()),
