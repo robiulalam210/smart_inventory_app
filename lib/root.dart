@@ -84,12 +84,7 @@ class _RootScreenState extends State<RootScreen> {
                                       onPressed: isLoading
                                           ? null
                                           : () {
-                                        LabTechnologistRepoDb().fetchUnsyncedLabDataNested();
-                                              // LabBillingRepository()
-                                              //     .fetchAllOfflineInvoiceDetails();
-                                              // context
-                                              //     .read<InvoiceUnSyncBloc>()
-                                              //     .add(LoadUnSyncInvoice());
+
                                             },
                                       color: Colors.orange,
                                       name: isLoading ? "Syncing..." : "Sync",

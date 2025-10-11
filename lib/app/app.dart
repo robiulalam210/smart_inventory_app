@@ -3,8 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 import '../core/core.dart';
 import '../feature/feature.dart';
-import '../feature/report_delivery/data/repositories/report_delivery_repo_db.dart';
-import '../feature/report_delivery/presentation/bloc/report_delivery_bloc.dart';
+
 
 class MyApp extends StatelessWidget {
   final DatabaseHelper dbHelper;
@@ -33,10 +32,7 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (context) => DoctorBloc()),
         BlocProvider(create: (context) => LabBillingBloc()),
         BlocProvider(create: (context) => TransactionBloc()),
-        BlocProvider(create: (context) => SampleCollectorBloc()),
-        BlocProvider(create: (context) => LabTechnologistBloc()),
-        BlocProvider(create: (context) => CollectorBloc()),
-        BlocProvider(create: (context) => BoothBloc()),
+
         BlocProvider(create: (context) => DueCollectionBloc()),
         BlocProvider(
             create: (context) => InvoiceUnSyncBloc(
@@ -59,8 +55,6 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (context) => AllInvoiceSetupBloc()),
         BlocProvider(create: (context) => AllSetupCombinedCubit()),
         BlocProvider(create: (context) => RefundBloc()),
-        BlocProvider(
-            create: (context) => ReportDeliveryBloc(ReportDeliveryRepoDb())),
         BlocProvider(create: (context) => PrintLayoutBloc(PrintLayoutRepoDb())),
       ],
       child: Center(

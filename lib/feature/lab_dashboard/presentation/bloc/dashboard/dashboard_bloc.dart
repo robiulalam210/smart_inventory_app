@@ -2,9 +2,7 @@ import '../../../../../core/configs/configs.dart';
 import '../../../../../enery_screen.dart';
 import '../../../../lab_billing/presentation/bloc/lab_billing/lab_billing_bloc.dart';
 import '../../../../lab_billing/presentation/pages/billing_screen.dart';
-import '../../../../lab_technologist/presentation/pages/lab_technologist_screen.dart';
-import '../../../../report_delivery/presentation/page/report_delivery_screen.dart';
-import '../../../../sample_collector/presentation/pages/sample_collection_screen.dart';
+import '../../../../product/presentation/page/product_setup.dart';
 import '../../../../transactions/presentation/pages/transactions_screen.dart';
 import '../../../data/models/dashboard/dashboard_model.dart';
 import '../../../data/repositories/dashboard_repo_db/dashboard_repo_db.dart';
@@ -20,9 +18,8 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     AppWrapper(child: DashboardScreen()),
     BlocProvider(create: (_) => LabBillingBloc(), child: AppWrapper(child: BillingScreen())),
     AppWrapper(child: TransactionScreen()),
-    AppWrapper(child: SampleCollectionScreen()),
-    AppWrapper(child: LabTechnologistScreen()),
-    AppWrapper(child: ReportDeliveryScreen()),
+    AppWrapper(child: ProductSetupScreen()),
+
   ];
 
   DashboardBloc(this.dbHelper) : super(DashboardScreenChanged(0)) {

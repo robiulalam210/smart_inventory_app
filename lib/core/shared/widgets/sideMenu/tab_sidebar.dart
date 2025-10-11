@@ -98,20 +98,13 @@ class TabSidebar extends StatelessWidget {
                             ),
                             MenuTile(
                               isSubmenu: true,
-                              title: "Lab Technologist",
+                              title: "Product Setup",
                               isSelected: currentIndex == 4,
                               onPressed: () {
                                 bloc.add(ChangeDashboardScreen(index: 4));
                               },
                             ),
-                            MenuTile(
-                              isSubmenu: true,
-                              title: "Report Delivery",
-                              isSelected: currentIndex == 5,
-                              onPressed: () {
-                                bloc.add(ChangeDashboardScreen(index: 5));
-                              },
-                            ),
+
                           ],
                         ),
                       ],
