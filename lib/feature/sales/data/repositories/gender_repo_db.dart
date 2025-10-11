@@ -1,6 +1,6 @@
-import '/feature/lab_billing/data/models/common_model.dart';
 
 import '../../../../core/database/database_info.dart';
+import '../models/common_model.dart';
 
 class GenderRepositories {
   DatabaseHelper dbHelper = DatabaseHelper();

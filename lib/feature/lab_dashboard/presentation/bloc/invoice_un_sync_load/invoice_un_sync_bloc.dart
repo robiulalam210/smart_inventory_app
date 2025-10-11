@@ -1,6 +1,6 @@
 import '../../../../../core/configs/configs.dart';
 import '../../../../../core/repositories/post_response.dart';
-import '../../../../lab_billing/data/repositories/lab_billing_db_repo.dart';
+import '../../../../sales/data/repositories/lab_billing_db_repo.dart';
 import '../../../../splash/presentation/bloc/connectivity_bloc/connectivity_bloc.dart';
 import '../../../../splash/presentation/bloc/connectivity_bloc/connectivity_state.dart';
 import '../../../data/models/invoice_server_response_model.dart';

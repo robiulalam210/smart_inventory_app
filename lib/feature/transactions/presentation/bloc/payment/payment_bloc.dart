@@ -1,7 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/cupertino.dart';
 
-import '../../../../lab_billing/data/repositories/lab_billing_db_repo.dart';
+import '../../../../sales/data/repositories/lab_billing_db_repo.dart';
 
 part 'payment_event.dart';
 

@@ -9,45 +9,40 @@ export 'auth/presentation/bloc/auth_state.dart';
 export 'auth/presentation/pages/login_scr.dart';
 
 //!-----Lab Billing -----------
-export 'lab_billing/data/models/doctors_model/doctor_model.dart';
-export 'lab_billing/data/models/inventory_model/inventory_model.dart';
-export 'lab_billing/data/models/patient_model/patient_model.dart';
-export 'lab_billing/data/models/tests_model/tests_model.dart';
-export 'lab_billing/data/models/tests_model/test_categories_model.dart';
-export 'lab_billing/data/repositories/blood_repo_db.dart';
-export 'lab_billing/data/repositories/doctor_repo_db.dart';
-export 'lab_billing/data/repositories/gender_repo_db.dart';
-export 'lab_billing/data/repositories/inventory_repo.dart';
-export 'lab_billing/data/repositories/lab_billing_db_repo.dart';
-export 'lab_billing/data/repositories/patient_repo.dart';
-export 'lab_billing/data/repositories/test_repo_db.dart';
-export 'lab_billing/presentation/bloc/blood_group_bloc/blood_group_bloc.dart';
-export 'lab_billing/presentation/bloc/doctor_bloc/doctor_bloc.dart';
-export 'lab_billing/presentation/bloc/gender_bloc/gender_bloc.dart';
-export 'lab_billing/presentation/bloc/inventory_bloc/inventory_bloc.dart';
-export 'lab_billing/presentation/bloc/inventory_bloc/inventory_event.dart';
-export 'lab_billing/presentation/bloc/inventory_bloc/inventory_state.dart';
-export 'lab_billing/presentation/bloc/lab_billing/lab_billing_bloc.dart';
-export 'lab_billing/presentation/bloc/patient_bloc/patient_bloc.dart';
-export 'lab_billing/presentation/bloc/patient_bloc/patient_state.dart';
-export 'lab_billing/presentation/bloc/patient_bloc/patient_event.dart';
-export 'lab_billing/presentation/bloc/test_bloc/test_bloc.dart';
-export 'lab_billing/presentation/bloc/test_categories_bloc/test_categories_bloc.dart';
-export 'lab_billing/presentation/pages/billing_screen.dart';
+export 'sales/data/models/doctors_model/doctor_model.dart';
+export 'sales/data/models/inventory_model/inventory_model.dart';
+export 'sales/data/models/patient_model/patient_model.dart';
+export 'sales/data/models/tests_model/tests_model.dart';
+export 'sales/data/models/tests_model/test_categories_model.dart';
+export 'sales/data/repositories/blood_repo_db.dart';
+export 'sales/data/repositories/doctor_repo_db.dart';
+export 'sales/data/repositories/gender_repo_db.dart';
+export 'sales/data/repositories/inventory_repo.dart';
+export 'sales/data/repositories/lab_billing_db_repo.dart';
+export 'sales/data/repositories/patient_repo.dart';
+export 'sales/data/repositories/test_repo_db.dart';
+export 'sales/presentation/bloc/doctor_bloc/doctor_bloc.dart';
+export 'sales/presentation/bloc/inventory_bloc/inventory_bloc.dart';
+export 'sales/presentation/bloc/inventory_bloc/inventory_event.dart';
+export 'sales/presentation/bloc/inventory_bloc/inventory_state.dart';
+export 'sales/presentation/bloc/lab_billing/lab_billing_bloc.dart';
+export 'sales/presentation/bloc/test_bloc/test_bloc.dart';
+export 'sales/presentation/bloc/test_categories_bloc/test_categories_bloc.dart';
+export 'sales/presentation/pages/billing_screen.dart';
 
-export 'lab_billing/presentation/widgets/item_test_table/test_item_table.dart';
-export 'lab_billing/presentation/widgets/patient_info_section/patient_info_section.dart';
-export 'lab_billing/presentation/widgets/payment/payment_screen.dart';
-export 'lab_billing/presentation/widgets/search/inventory_search_field.dart';
-export 'lab_billing/presentation/widgets/search/test_category.dart';
-export 'lab_billing/presentation/widgets/search/test_searchbar.dart';
-export 'lab_billing/presentation/widgets/visit_type_toggle/visit_type_toggle.dart';
+export 'sales/presentation/widgets/item_test_table/test_item_table.dart';
+export 'sales/presentation/widgets/patient_info_section/sales_entry_section.dart';
+export 'sales/presentation/widgets/payment/payment_screen.dart';
+export 'sales/presentation/widgets/search/inventory_search_field.dart';
+export 'sales/presentation/widgets/search/test_category.dart';
+export 'sales/presentation/widgets/search/test_searchbar.dart';
+export 'sales/presentation/widgets/visit_type_toggle/visit_type_toggle.dart';
 
-export 'lab_billing/presentation/bloc/due_collection/due_collection_bloc.dart';
-export 'lab_billing/presentation/bloc/summary_bloc/summary_bloc.dart';
-export 'lab_billing/data/repositories/summery_repo_db.dart';
-export 'lab_billing/presentation/bloc/finder_bloc/finder_bloc.dart';
-export 'lab_billing/data/repositories/finder_repo_db.dart';
+export 'sales/presentation/bloc/due_collection/due_collection_bloc.dart';
+export 'sales/presentation/bloc/summary_bloc/summary_bloc.dart';
+export 'sales/data/repositories/summery_repo_db.dart';
+export 'sales/presentation/bloc/finder_bloc/finder_bloc.dart';
+export 'sales/data/repositories/finder_repo_db.dart';
 
 //!-----Lab Dashboard -----------
 

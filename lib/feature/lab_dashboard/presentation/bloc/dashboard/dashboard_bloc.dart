@@ -1,8 +1,8 @@
 import '../../../../../core/configs/configs.dart';
 import '../../../../../enery_screen.dart';
-import '../../../../lab_billing/presentation/bloc/lab_billing/lab_billing_bloc.dart';
-import '../../../../lab_billing/presentation/pages/billing_screen.dart';
 import '../../../../product/presentation/page/product_setup.dart';
+import '../../../../sales/presentation/bloc/lab_billing/lab_billing_bloc.dart';
+import '../../../../sales/presentation/pages/billing_screen.dart';
 import '../../../../transactions/presentation/pages/transactions_screen.dart';
 import '../../../data/models/dashboard/dashboard_model.dart';
 import '../../../data/repositories/dashboard_repo_db/dashboard_repo_db.dart';

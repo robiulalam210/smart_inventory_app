@@ -28,7 +28,6 @@ class MyApp extends StatelessWidget {
         BlocProvider(
             create: (context) =>
                 SplashBloc(authBloc: context.read<AuthBloc>())),
-        BlocProvider(create: (context) => PatientBloc()),
         BlocProvider(create: (context) => DoctorBloc()),
         BlocProvider(create: (context) => LabBillingBloc()),
         BlocProvider(create: (context) => TransactionBloc()),
@@ -43,8 +42,7 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (context) => TestBloc()),
         BlocProvider(create: (context) => TestCategoriesBloc()),
         BlocProvider(create: (context) => InventoryBloc()),
-        BlocProvider(create: (context) => GenderBloc()),
-        BlocProvider(create: (context) => BloodGroupBloc()),
+
         BlocProvider(create: (context) => SummaryBloc(SummeryRepoDB())),
         BlocProvider(
             create: (context) => FinderBloc(finderRepo: FinderRepoDb())),
