@@ -92,12 +92,8 @@ class _SidebarState extends State<Sidebar> {
                         ),
                         ExpansionTile(
                           initiallyExpanded:
-                              currentIndex == 0 ||
-                              currentIndex == 1 ||
-                              currentIndex == 2 ||
-                              currentIndex == 3 ||
-                              currentIndex == 4 ||
-                              currentIndex == 5,
+                          currentIndex == 3 ||
+                              currentIndex == 4 ,
 
                           title: Text(
                             "Money Receipt",
@@ -112,18 +108,18 @@ class _SidebarState extends State<Sidebar> {
                             MenuTile(
                               isSubmenu: true,
                               title: "Create Money Receipt",
-                              isSelected: currentIndex == 1,
+                              isSelected: currentIndex == 3,
                               onPressed: () {
-                                bloc.add(ChangeDashboardScreen(index: 1));
+                                bloc.add(ChangeDashboardScreen(index: 3));
                               },
                             ),
 
                             MenuTile(
                               isSubmenu: true,
                               title: "Money Receipt",
-                              isSelected: currentIndex == 2,
+                              isSelected: currentIndex == 4,
                               onPressed: () {
-                                bloc.add(ChangeDashboardScreen(index: 2));
+                                bloc.add(ChangeDashboardScreen(index: 4));
                               },
                             ),
                           ],
@@ -207,12 +203,9 @@ class _SidebarState extends State<Sidebar> {
                         ),
                         ExpansionTile(
                           initiallyExpanded:
-                              currentIndex == 0 ||
-                              currentIndex == 1 ||
-                              currentIndex == 2 ||
-                              currentIndex == 3 ||
-                              currentIndex == 4 ||
-                              currentIndex == 5,
+                              currentIndex == 13 ||
+                              currentIndex == 14 ,
+
 
                           title: Text(
                             "Purchase ",
@@ -226,18 +219,18 @@ class _SidebarState extends State<Sidebar> {
                           children: [
                             MenuTile(
                               isSubmenu: true,
-                              title: " Purchase ",
-                              isSelected: currentIndex == 4,
+                              title: "Create Purchase ",
+                              isSelected: currentIndex == 13,
                               onPressed: () {
-                                bloc.add(ChangeDashboardScreen(index: 4));
+                                bloc.add(ChangeDashboardScreen(index: 13));
                               },
                             ),
                             MenuTile(
                               isSubmenu: true,
                               title: "Purchase List ",
-                              isSelected: currentIndex == 4,
+                              isSelected: currentIndex == 14,
                               onPressed: () {
-                                bloc.add(ChangeDashboardScreen(index: 4));
+                                bloc.add(ChangeDashboardScreen(index: 14));
                               },
                             ),
                           ],
@@ -246,12 +239,10 @@ class _SidebarState extends State<Sidebar> {
 
                         ExpansionTile(
                           initiallyExpanded:
-                              currentIndex == 0 ||
-                              currentIndex == 1 ||
-                              currentIndex == 2 ||
+
                               currentIndex == 3 ||
-                              currentIndex == 4 ||
-                              currentIndex == 5,
+                              currentIndex == 4 ,
+
 
                           title: Text(
                             "Return ",
