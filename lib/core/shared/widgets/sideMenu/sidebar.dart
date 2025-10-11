@@ -220,17 +220,17 @@ class _SidebarState extends State<Sidebar> {
                             MenuTile(
                               isSubmenu: true,
                               title: "Create Purchase ",
-                              isSelected: currentIndex == 13,
+                              isSelected: currentIndex == 12,
                               onPressed: () {
-                                bloc.add(ChangeDashboardScreen(index: 13));
+                                bloc.add(ChangeDashboardScreen(index: 12));
                               },
                             ),
                             MenuTile(
                               isSubmenu: true,
                               title: "Purchase List ",
-                              isSelected: currentIndex == 14,
+                              isSelected: currentIndex == 13,
                               onPressed: () {
-                                bloc.add(ChangeDashboardScreen(index: 14));
+                                bloc.add(ChangeDashboardScreen(index: 13));
                               },
                             ),
                           ],
