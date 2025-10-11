@@ -88,14 +88,7 @@ class TabSidebar extends StatelessWidget {
                                 bloc.add(ChangeDashboardScreen(index: 2));
                               },
                             ),
-                            MenuTile(
-                              isSubmenu: true,
-                              title: "Sample Collection",
-                              isSelected: currentIndex == 3,
-                              onPressed: () {
-                                bloc.add(ChangeDashboardScreen(index: 3));
-                              },
-                            ),
+
                             MenuTile(
                               isSubmenu: true,
                               title: "Product Setup",

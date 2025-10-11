@@ -40,6 +40,18 @@ class _SidebarState extends State<Sidebar> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: AppSizes.paddingInside),
                       children: [
+                        MenuTile(
+                          isSubmenu: true,
+                          title: "My Dashboard",
+                          isSelected: currentIndex == 0,
+                          onPressed: () {
+                            bloc.add(ChangeDashboardScreen(index: 0));
+                            context.read<DashboardBloc>().add(
+                                LoadDashboardData(
+                                    filter: DateRangeFilter.last7Days));
+                          },
+                        ),
+
                         ExpansionTile(
                           initiallyExpanded: currentIndex == 0 ||
                               currentIndex == 1 ||
@@ -47,31 +59,20 @@ class _SidebarState extends State<Sidebar> {
                               currentIndex == 3 ||
                               currentIndex == 4 ||
                               currentIndex == 5,
-                          leading:
-                              SvgPicture.asset("assets/icons/menu_light.svg"),
+
                           title: Text(
-                            "Great Lab",
+                            "Sales",
                             style: TextStyle(
                               fontWeight: FontWeight.w600,
                               color:
-                                  Theme.of(context).textTheme.bodyMedium!.color,
+                              Theme.of(context).textTheme.bodyMedium!.color,
                             ),
                           ),
                           children: [
+
                             MenuTile(
                               isSubmenu: true,
-                              title: "Dashboard",
-                              isSelected: currentIndex == 0,
-                              onPressed: () {
-                                bloc.add(ChangeDashboardScreen(index: 0));
-                                context.read<DashboardBloc>().add(
-                                    LoadDashboardData(
-                                        filter: DateRangeFilter.last7Days));
-                              },
-                            ),
-                            MenuTile(
-                              isSubmenu: true,
-                              title: "Billing",
+                              title: "Sale",
                               isSelected: currentIndex == 1,
                               onPressed: () {
                                 bloc.add(ChangeDashboardScreen(index: 1));
@@ -86,17 +87,33 @@ class _SidebarState extends State<Sidebar> {
                                 bloc.add(ChangeDashboardScreen(index: 2));
                               },
                             ),
-                            MenuTile(
-                              isSubmenu: true,
-                              title: "Sample Collection",
-                              isSelected: currentIndex == 3,
-                              onPressed: () {
-                                bloc.add(ChangeDashboardScreen(index: 3));
-                              },
+
+
+
+                          ],
+                        ),
+                        ExpansionTile(
+                          initiallyExpanded: currentIndex == 0 ||
+                              currentIndex == 1 ||
+                              currentIndex == 2 ||
+                              currentIndex == 3 ||
+                              currentIndex == 4 ||
+                              currentIndex == 5,
+
+                          title: Text(
+                            "Product Setup",
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color:
+                              Theme.of(context).textTheme.bodyMedium!.color,
                             ),
+                          ),
+                          children: [
+
+
                             MenuTile(
                               isSubmenu: true,
-                              title: "Product Setup",
+                              title: "Product ",
                               isSelected: currentIndex == 4,
                               onPressed: () {
                                 bloc.add(ChangeDashboardScreen(index: 4));

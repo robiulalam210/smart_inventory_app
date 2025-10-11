@@ -60,43 +60,7 @@ class _RootScreenState extends State<RootScreen> {
                       ),
                     ),
 
-                    BlocBuilder<AllSetupBloc, AllSetupState>(
-                      builder: (context, setupState) {
-                        return BlocBuilder<AllInvoiceSetupBloc,
-                            AllInvoiceSetupState>(
-                          builder: (context, invoiceSetupState) {
-                            return BlocBuilder<SyncBloc, SyncState>(
-                              builder: (context, syncState) {
-                                return BlocBuilder<InvoiceUnSyncBloc,
-                                    InvoiceUnSyncState>(
-                                  builder: (context, invoiceUnSyncState) {
-                                    final isLoading =
-                                        setupState is AllSetupLoading ||
-                                            invoiceSetupState
-                                                is AllInvoiceSetupLoading ||
-                                            syncState is SyncServerLoading ||
-                                            invoiceUnSyncState
-                                                is InvoiceUnSyncLoading ||
-                                            invoiceUnSyncState
-                                                is PostInvoiceUnSyncLoading;
-
-                                    return AppButton(
-                                      onPressed: isLoading
-                                          ? null
-                                          : () {
-
-                                            },
-                                      color: Colors.orange,
-                                      name: isLoading ? "Syncing..." : "Sync",
-                                    );
-                                  },
-                                );
-                              },
-                            );
-                          },
-                        );
-                      },
-                    ),
+              
 
                     gapW8,
                     BlocBuilder<ConnectivityBloc, ConnectivityState>(
