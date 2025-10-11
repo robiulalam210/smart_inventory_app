@@ -25,9 +25,9 @@ class AppWrapper extends StatelessWidget {
           primaryColor: Colors.green,
         );
 
-        context
-            .read<InvoiceUnSyncBloc>()
-            .add(LoadUnSyncInvoice(isSingleSync: true));
+        // context
+        //     .read<InvoiceUnSyncBloc>()
+        //     .add(LoadUnSyncInvoice(isSingleSync: true));
       },
       child: child,
     );

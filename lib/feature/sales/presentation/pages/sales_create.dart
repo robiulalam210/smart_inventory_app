@@ -3,9 +3,7 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import '../../../../core/core.dart';
 import '../../../feature.dart';
-import '../widgets/bill_summery/bill_summery.dart';
-import '../widgets/finder_invoice/finder_invoice.dart';
-import '../widgets/invoice_due_collection/invoice_due_collection.dart';
+
 
 class SalesScreen extends StatefulWidget {
   const SalesScreen({super.key});
@@ -151,7 +149,7 @@ class _SalesScreenState extends State<SalesScreen> {
             AppButton(
               name: 'Summery',
               onPressed: () {
-                showFullWidthDialog(context);
+
               },
               color: Colors.grey,
             ),
@@ -159,7 +157,7 @@ class _SalesScreenState extends State<SalesScreen> {
             AppButton(
               name: 'Finder',
               onPressed: () {
-                showFinderInvoiceWidthDialog(context);
+
               },
               color: Color(0xffff6347),
             ),
@@ -169,14 +167,7 @@ class _SalesScreenState extends State<SalesScreen> {
             AppButton(
               name: 'Due Collection',
               onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (context) => SizedBox(
-                    // width: 750,
-                    // height: 600,
-                    child: InvoiceDueCollectionViewDialog(),
-                  ),
-                );
+
               },
               color: Colors.black,
             ),
@@ -196,7 +187,7 @@ class _SalesScreenState extends State<SalesScreen> {
             const SizedBox(width: 10),
             AppButton(
               name: 'Submit',
-              onPressed: () => _handlePayment(),
+              onPressed: (){},
             ),
             const SizedBox(width: 5),
           ],
@@ -205,153 +196,6 @@ class _SalesScreenState extends State<SalesScreen> {
     );
   }
 
-  void _handlePayment() {
-    final labBillingBloc = context.read<LabBillingBloc>();
 
-    if (labBillingBloc.patientModel == null &&
-        labBillingBloc.nameController.text.isEmpty) {
-      showCustomToast(
-        context: context,
-        title: 'Warning!',
-        description: 'Please select or add patient name!',
-        type: ToastificationType.warning,
-        icon: Icons.warning,
-        primaryColor: Colors.orange,
-      );
 
-      // appSnackBar(context, "Please select or add patient name!");
-    } else if (labBillingBloc.patientModel == null &&
-        labBillingBloc.phoneCController.value == "") {
-      showCustomToast(
-        context: context,
-        title: 'Warning!',
-        description: 'Please select or add patient mobile number!',
-        type: ToastificationType.warning,
-        icon: Icons.warning,
-        primaryColor: Colors.orange,
-      );
-    } else if (labBillingBloc.patientModel == null &&
-        labBillingBloc.yearController.text.isEmpty) {
-      showCustomToast(
-        context: context,
-        title: 'Warning!',
-        description: 'Please select or add patient age!',
-        type: ToastificationType.warning,
-        icon: Icons.warning,
-        primaryColor: Colors.orange,
-      );
-    } else if (labBillingBloc.patientModel == null &&
-        labBillingBloc.gender == null) {
-      showCustomToast(
-        context: context,
-        title: 'Warning!',
-        description: 'Please select or add patient gender!',
-        type: ToastificationType.warning,
-        icon: Icons.warning,
-        primaryColor: Colors.orange,
-      );
-    } else if (labBillingBloc.testItems.isEmpty) {
-      showCustomToast(
-        context: context,
-        title: 'Warning!',
-        description: 'Please add test!',
-        type: ToastificationType.warning,
-        icon: Icons.warning,
-        primaryColor: Colors.orange,
-      );
-    } else {
-      final labBillingBloc = context.read<LabBillingBloc>();
-
-      showDialog(
-        context: context,
-        useSafeArea: true,
-        barrierDismissible: false,
-        builder: (BuildContext dialogContext) {
-          return BlocProvider.value(
-            value: labBillingBloc,
-            child: Builder(
-              builder: (innerContext) => AlertDialog(
-                backgroundColor: AppColors.whiteColor,
-                content: SizedBox(
-                  width: 750,
-                  height: 500,
-                  child: PaymentScreen(),
-                ),
-                actions: [
-                  AppButton(
-                    size: 150,
-                    name: "Cancel",
-                    color: AppColors.redColor,
-                    onPressed: () =>
-                        _showCancelConfirmationDialog(innerContext),
-                  ),
-                  const SizedBox(width: 10),
-                  AppButton(
-                    name: "Save & Print",
-                    size: 150,
-                    color: AppColors.primaryColor,
-                    onPressed: () => _handleSaveAndPrint(innerContext),
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-      );
-    }
-  }
-
-  void _handleSaveAndPrint(BuildContext context) async {
-    final connectivityBloc = context.read<ConnectivityBloc>(); // ✅ fixed here
-    final token = await LocalDB.getLoginInfo();
-    showCustomToast(
-      context: context,
-      title: 'Warning!',
-      description: 'Please select a Payment Method!',
-      type: ToastificationType.warning,
-      icon: Icons.warning,
-      primaryColor: Colors.orange,
-    );
-
-    AppRoutes.pop(context);
-  }
-
-  void _showCancelConfirmationDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return CupertinoAlertDialog(
-          // backgroundColor: AppColors.whiteColor,
-          title: const Text('Cancel Payment'),
-          content: const Text('Are you sure you want to cancel the payment?'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text(
-                'No',
-                style: TextStyle(color: AppColors.error),
-              ),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Close confirmation
-                Navigator.of(context).pop(); // Close payment dialog
-                showCustomToast(
-                  context: context,
-                  title: 'Warning!',
-                  description: 'Payment Cancelled!',
-                  type: ToastificationType.warning,
-                  icon: Icons.warning,
-                  primaryColor: Colors.orange,
-                );
-              },
-              child: const Text('Yes'),
-            ),
-          ],
-        );
-      },
-    );
-  }
 }
