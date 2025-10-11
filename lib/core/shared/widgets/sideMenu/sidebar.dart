@@ -38,7 +38,8 @@ class _SidebarState extends State<Sidebar> {
                     height: MediaQuery.of(context).size.height - 100,
                     child: ListView(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: AppSizes.paddingInside),
+                        horizontal: AppSizes.paddingInside,
+                      ),
                       children: [
                         MenuTile(
                           isSubmenu: true,
@@ -47,13 +48,16 @@ class _SidebarState extends State<Sidebar> {
                           onPressed: () {
                             bloc.add(ChangeDashboardScreen(index: 0));
                             context.read<DashboardBloc>().add(
-                                LoadDashboardData(
-                                    filter: DateRangeFilter.last7Days));
+                              LoadDashboardData(
+                                filter: DateRangeFilter.last7Days,
+                              ),
+                            );
                           },
                         ),
 
                         ExpansionTile(
-                          initiallyExpanded: currentIndex == 0 ||
+                          initiallyExpanded:
+                              currentIndex == 0 ||
                               currentIndex == 1 ||
                               currentIndex == 2 ||
                               currentIndex == 3 ||
@@ -64,12 +68,12 @@ class _SidebarState extends State<Sidebar> {
                             "Sales",
                             style: TextStyle(
                               fontWeight: FontWeight.w600,
-                              color:
-                              Theme.of(context).textTheme.bodyMedium!.color,
+                              color: Theme.of(
+                                context,
+                              ).textTheme.bodyMedium!.color,
                             ),
                           ),
                           children: [
-
                             MenuTile(
                               isSubmenu: true,
                               title: "Sale",
@@ -81,19 +85,17 @@ class _SidebarState extends State<Sidebar> {
 
                             MenuTile(
                               isSubmenu: true,
-                              title: "Transactions",
+                              title: "Sale List",
                               isSelected: currentIndex == 2,
                               onPressed: () {
                                 bloc.add(ChangeDashboardScreen(index: 2));
                               },
                             ),
-
-
-
                           ],
                         ),
                         ExpansionTile(
-                          initiallyExpanded: currentIndex == 0 ||
+                          initiallyExpanded:
+                              currentIndex == 0 ||
                               currentIndex == 1 ||
                               currentIndex == 2 ||
                               currentIndex == 3 ||
@@ -101,16 +103,61 @@ class _SidebarState extends State<Sidebar> {
                               currentIndex == 5,
 
                           title: Text(
-                            "Product Setup",
+                            "Money Receipt",
                             style: TextStyle(
                               fontWeight: FontWeight.w600,
-                              color:
-                              Theme.of(context).textTheme.bodyMedium!.color,
+                              color: Theme.of(
+                                context,
+                              ).textTheme.bodyMedium!.color,
                             ),
                           ),
                           children: [
+                            MenuTile(
+                              isSubmenu: true,
+                              title: "Create Money Receipt",
+                              isSelected: currentIndex == 1,
+                              onPressed: () {
+                                bloc.add(ChangeDashboardScreen(index: 1));
+                              },
+                            ),
 
+                            MenuTile(
+                              isSubmenu: true,
+                              title: "Money Receipt",
+                              isSelected: currentIndex == 2,
+                              onPressed: () {
+                                bloc.add(ChangeDashboardScreen(index: 2));
+                              },
+                            ),
+                          ],
+                        ),
+                        ExpansionTile(
+                          initiallyExpanded:
+                              currentIndex == 0 ||
+                              currentIndex == 1 ||
+                              currentIndex == 2 ||
+                              currentIndex == 3 ||
+                              currentIndex == 4 ||
+                              currentIndex == 5,
 
+                          title: Text(
+                            "Products ",
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: Theme.of(
+                                context,
+                              ).textTheme.bodyMedium!.color,
+                            ),
+                          ),
+                          children: [
+                            MenuTile(
+                              isSubmenu: true,
+                              title: "Create Product ",
+                              isSelected: currentIndex == 4,
+                              onPressed: () {
+                                bloc.add(ChangeDashboardScreen(index: 4));
+                              },
+                            ),
                             MenuTile(
                               isSubmenu: true,
                               title: "Product ",
@@ -119,7 +166,443 @@ class _SidebarState extends State<Sidebar> {
                                 bloc.add(ChangeDashboardScreen(index: 4));
                               },
                             ),
+                            MenuTile(
+                              isSubmenu: true,
+                              title: "Source ",
+                              isSelected: currentIndex == 4,
+                              onPressed: () {
+                                bloc.add(ChangeDashboardScreen(index: 4));
+                              },
+                            ),
+                            MenuTile(
+                              isSubmenu: true,
+                              title: "Unit ",
+                              isSelected: currentIndex == 4,
+                              onPressed: () {
+                                bloc.add(ChangeDashboardScreen(index: 4));
+                              },
+                            ),
+                            MenuTile(
+                              isSubmenu: true,
+                              title: "Brand ",
+                              isSelected: currentIndex == 4,
+                              onPressed: () {
+                                bloc.add(ChangeDashboardScreen(index: 4));
+                              },
+                            ),
+                            MenuTile(
+                              isSubmenu: true,
+                              title: "Category ",
+                              isSelected: currentIndex == 4,
+                              onPressed: () {
+                                bloc.add(ChangeDashboardScreen(index: 4));
+                              },
+                            ),
+                            MenuTile(
+                              isSubmenu: true,
+                              title: "Group ",
+                              isSelected: currentIndex == 4,
+                              onPressed: () {
+                                bloc.add(ChangeDashboardScreen(index: 4));
+                              },
+                            ),
+                          ],
+                        ),
+                        ExpansionTile(
+                          initiallyExpanded:
+                              currentIndex == 0 ||
+                              currentIndex == 1 ||
+                              currentIndex == 2 ||
+                              currentIndex == 3 ||
+                              currentIndex == 4 ||
+                              currentIndex == 5,
 
+                          title: Text(
+                            "Purchase ",
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: Theme.of(
+                                context,
+                              ).textTheme.bodyMedium!.color,
+                            ),
+                          ),
+                          children: [
+                            MenuTile(
+                              isSubmenu: true,
+                              title: " Purchase ",
+                              isSelected: currentIndex == 4,
+                              onPressed: () {
+                                bloc.add(ChangeDashboardScreen(index: 4));
+                              },
+                            ),
+                            MenuTile(
+                              isSubmenu: true,
+                              title: "Purchase List ",
+                              isSelected: currentIndex == 4,
+                              onPressed: () {
+                                bloc.add(ChangeDashboardScreen(index: 4));
+                              },
+                            ),
+                          ],
+                        ),
+
+                        ExpansionTile(
+                          initiallyExpanded:
+                              currentIndex == 0 ||
+                              currentIndex == 1 ||
+                              currentIndex == 2 ||
+                              currentIndex == 3 ||
+                              currentIndex == 4 ||
+                              currentIndex == 5,
+
+                          title: Text(
+                            "Transfer ",
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: Theme.of(
+                                context,
+                              ).textTheme.bodyMedium!.color,
+                            ),
+                          ),
+                          children: [
+                            MenuTile(
+                              isSubmenu: true,
+                              title: "Create Transfer ",
+                              isSelected: currentIndex == 4,
+                              onPressed: () {
+                                bloc.add(ChangeDashboardScreen(index: 4));
+                              },
+                            ),
+                            MenuTile(
+                              isSubmenu: true,
+                              title: "Transfer List ",
+                              isSelected: currentIndex == 4,
+                              onPressed: () {
+                                bloc.add(ChangeDashboardScreen(index: 4));
+                              },
+                            ),
+                          ],
+                        ),
+                        ExpansionTile(
+                          initiallyExpanded:
+                              currentIndex == 0 ||
+                              currentIndex == 1 ||
+                              currentIndex == 2 ||
+                              currentIndex == 3 ||
+                              currentIndex == 4 ||
+                              currentIndex == 5,
+
+                          title: Text(
+                            "Return ",
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: Theme.of(
+                                context,
+                              ).textTheme.bodyMedium!.color,
+                            ),
+                          ),
+                          children: [
+                            MenuTile(
+                              isSubmenu: true,
+                              title: "Sales Return",
+                              isSelected: currentIndex == 4,
+                              onPressed: () {
+                                bloc.add(ChangeDashboardScreen(index: 4));
+                              },
+                            ),
+                            MenuTile(
+                              isSubmenu: true,
+                              title: "Bad Stock List ",
+                              isSelected: currentIndex == 4,
+                              onPressed: () {
+                                bloc.add(ChangeDashboardScreen(index: 4));
+                              },
+                            ),
+                            MenuTile(
+                              isSubmenu: true,
+                              title: "Purchase Return",
+                              isSelected: currentIndex == 4,
+                              onPressed: () {
+                                bloc.add(ChangeDashboardScreen(index: 4));
+                              },
+                            ),
+                          ],
+                        ),
+                        ExpansionTile(
+                          initiallyExpanded:
+                              currentIndex == 0 ||
+                              currentIndex == 1 ||
+                              currentIndex == 2 ||
+                              currentIndex == 3 ||
+                              currentIndex == 4 ||
+                              currentIndex == 5,
+
+                          title: Text(
+                            "Accounts ",
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: Theme.of(
+                                context,
+                              ).textTheme.bodyMedium!.color,
+                            ),
+                          ),
+                          children: [
+                            MenuTile(
+                              isSubmenu: true,
+                              title: "Accounts  ",
+                              isSelected: currentIndex == 4,
+                              onPressed: () {
+                                bloc.add(ChangeDashboardScreen(index: 4));
+                              },
+                            ),
+                            MenuTile(
+                              isSubmenu: true,
+                              title: "Customer Balance Adjustment ",
+                              isSelected: currentIndex == 4,
+                              onPressed: () {
+                                bloc.add(ChangeDashboardScreen(index: 4));
+                              },
+                            ),
+                            MenuTile(
+                              isSubmenu: true,
+                              title: "Customer Balance Adjustment ",
+                              isSelected: currentIndex == 4,
+                              onPressed: () {
+                                bloc.add(ChangeDashboardScreen(index: 4));
+                              },
+                            ),
+                            MenuTile(
+                              isSubmenu: true,
+                              title: "Balance Adjustment ",
+                              isSelected: currentIndex == 4,
+                              onPressed: () {
+                                bloc.add(ChangeDashboardScreen(index: 4));
+                              },
+                            ),
+                            MenuTile(
+                              isSubmenu: true,
+                              title: "Balance Transfer",
+                              isSelected: currentIndex == 4,
+                              onPressed: () {
+                                bloc.add(ChangeDashboardScreen(index: 4));
+                              },
+                            ),
+                          ],
+                        ),
+                        ExpansionTile(
+                          initiallyExpanded:
+                              currentIndex == 0 ||
+                              currentIndex == 1 ||
+                              currentIndex == 2 ||
+                              currentIndex == 3 ||
+                              currentIndex == 4 ||
+                              currentIndex == 5,
+
+                          title: Text(
+                            "Customer ",
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: Theme.of(
+                                context,
+                              ).textTheme.bodyMedium!.color,
+                            ),
+                          ),
+                          children: [
+                            MenuTile(
+                              isSubmenu: true,
+                              title: "Create Customer ",
+                              isSelected: currentIndex == 4,
+                              onPressed: () {
+                                bloc.add(ChangeDashboardScreen(index: 4));
+                              },
+                            ),
+                            MenuTile(
+                              isSubmenu: true,
+                              title: "Customer List ",
+                              isSelected: currentIndex == 4,
+                              onPressed: () {
+                                bloc.add(ChangeDashboardScreen(index: 4));
+                              },
+                            ),
+                          ],
+                        ),
+
+                        ExpansionTile(
+                          initiallyExpanded:
+                              currentIndex == 0 ||
+                              currentIndex == 1 ||
+                              currentIndex == 2 ||
+                              currentIndex == 3 ||
+                              currentIndex == 4 ||
+                              currentIndex == 5,
+
+                          title: Text(
+                            "Supplier ",
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: Theme.of(
+                                context,
+                              ).textTheme.bodyMedium!.color,
+                            ),
+                          ),
+                          children: [
+                            MenuTile(
+                              isSubmenu: true,
+                              title: " Supplier  List",
+                              isSelected: currentIndex == 4,
+                              onPressed: () {
+                                bloc.add(ChangeDashboardScreen(index: 4));
+                              },
+                            ),
+                            MenuTile(
+                              isSubmenu: true,
+                              title: 'Payment List',
+                              isSelected: currentIndex == 4,
+                              onPressed: () {
+                                bloc.add(ChangeDashboardScreen(index: 4));
+                              },
+                            ),
+                            MenuTile(
+                              isSubmenu: true,
+                              title: 'Supplier Payment',
+                              isSelected: currentIndex == 4,
+                              onPressed: () {
+                                bloc.add(ChangeDashboardScreen(index: 4));
+                              },
+                            ),
+                          ],
+                        ),
+
+                        ExpansionTile(
+                          initiallyExpanded:
+                              currentIndex == 0 ||
+                              currentIndex == 1 ||
+                              currentIndex == 2 ||
+                              currentIndex == 3 ||
+                              currentIndex == 4 ||
+                              currentIndex == 5,
+
+                          title: Text(
+                            "Expense ",
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: Theme.of(
+                                context,
+                              ).textTheme.bodyMedium!.color,
+                            ),
+                          ),
+                          children: [
+                            MenuTile(
+                              isSubmenu: true,
+                              title: " Expense  List",
+                              isSelected: currentIndex == 4,
+                              onPressed: () {
+                                bloc.add(ChangeDashboardScreen(index: 4));
+                              },
+                            ),
+                            MenuTile(
+                              isSubmenu: true,
+                              title: 'Expense Head',
+                              isSelected: currentIndex == 4,
+                              onPressed: () {
+                                bloc.add(ChangeDashboardScreen(index: 4));
+                              },
+                            ),
+                          ],
+                        ),
+                        ExpansionTile(
+                          initiallyExpanded:
+                              currentIndex == 0 ||
+                              currentIndex == 1 ||
+                              currentIndex == 2 ||
+                              currentIndex == 3 ||
+                              currentIndex == 4 ||
+                              currentIndex == 5,
+
+                          title: Text(
+                            "Reports ",
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: Theme.of(
+                                context,
+                              ).textTheme.bodyMedium!.color,
+                            ),
+                          ),
+                          children: [
+                            MenuTile(
+                              isSubmenu: true,
+                              title: "Bad Stock Report",
+                              isSelected: currentIndex == 4,
+                              onPressed: () {
+                                bloc.add(ChangeDashboardScreen(index: 4));
+                              },
+                            ),
+                            MenuTile(
+                              isSubmenu: true,
+                              title: 'Supplier Due/Advance Report',
+                              isSelected: currentIndex == 4,
+                              onPressed: () {
+                                bloc.add(ChangeDashboardScreen(index: 4));
+                              },
+                            ),
+                            MenuTile(
+                              isSubmenu: true,
+                              title: 'Supplier Ledger',
+                              isSelected: currentIndex == 4,
+                              onPressed: () {
+                                bloc.add(ChangeDashboardScreen(index: 4));
+                              },
+                            ),
+
+                            MenuTile(
+                              isSubmenu: true,
+                              title: 'Customer Ledger',
+                              isSelected: currentIndex == 4,
+                              onPressed: () {
+                                bloc.add(ChangeDashboardScreen(index: 4));
+                              },
+                            ),
+
+                            MenuTile(
+                              isSubmenu: true,
+                              title: 'Customer Due/Advance Report',
+                              isSelected: currentIndex == 4,
+                              onPressed: () {
+                                bloc.add(ChangeDashboardScreen(index: 4));
+                              },
+                            ),
+                            MenuTile(
+                              isSubmenu: true,
+                              title: 'Expense Report',
+                              isSelected: currentIndex == 4,
+                              onPressed: () {
+                                bloc.add(ChangeDashboardScreen(index: 4));
+                              },
+                            ),
+                            MenuTile(
+                              isSubmenu: true,
+                              title: 'Purchase Report',
+                              isSelected: currentIndex == 4,
+                              onPressed: () {
+                                bloc.add(ChangeDashboardScreen(index: 4));
+                              },
+                            ),
+                            MenuTile(
+                              isSubmenu: true,
+                              title: 'Sales Report',
+                              isSelected: currentIndex == 4,
+                              onPressed: () {
+                                bloc.add(ChangeDashboardScreen(index: 4));
+                              },
+                            ),
+                            MenuTile(
+                              isSubmenu: true,
+                              title: 'Profit/Loss Report',
+                              isSelected: currentIndex == 4,
+                              onPressed: () {
+                                bloc.add(ChangeDashboardScreen(index: 4));
+                              },
+                            ),
                           ],
                         ),
                       ],
