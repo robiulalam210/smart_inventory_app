@@ -1,5 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:smart_inventory/core/core.dart';
+
+// This class is unchanged.
+class ProductRowData {
+  final TextEditingController productController = TextEditingController();
+  final TextEditingController priceController = TextEditingController(
+    text: "0",
+  );
+  final TextEditingController quantityController = TextEditingController(
+    text: "1",
+  );
+  String discountType = "Tk";
+  final TextEditingController discountController = TextEditingController(
+    text: "0",
+  );
+  final TextEditingController ticketTotalController = TextEditingController(
+    text: "0",
+  );
+  final TextEditingController netTotalController = TextEditingController(
+    text: "0",
+  );
+}
 
 class SalesEntrySection extends StatefulWidget {
   const SalesEntrySection({super.key});
@@ -11,23 +33,52 @@ class SalesEntrySection extends StatefulWidget {
 class _SalesEntrySectionState extends State<SalesEntrySection> {
   // Example controllers and lists
   final TextEditingController customerController = TextEditingController();
-  final TextEditingController salesByController = TextEditingController(text: "MAHMUDUL HAQUE ARMAAN");
-  final TextEditingController dateController = TextEditingController(text: "11-10-2025");
+  final TextEditingController salesByController = TextEditingController(
+    text: "MAHMUDUL HAQUE ARMAAN",
+  );
+  final TextEditingController dateController = TextEditingController(
+    text: "11-10-2025",
+  );
   final TextEditingController branchController = TextEditingController();
   final List<ProductRowData> products = [ProductRowData()];
   String vatType = "Tk";
   String discountType = "Tk";
   String serviceChargeType = "Tk";
   String deliveryChargeType = "Tk";
-  final TextEditingController overallVatController = TextEditingController(text: "0");
-  final TextEditingController overallDiscountController = TextEditingController(text: "0");
-  final TextEditingController serviceChargeController = TextEditingController(text: "0");
-  final TextEditingController deliveryChargeController = TextEditingController(text: "0");
+  final TextEditingController overallVatController = TextEditingController(
+    text: "0",
+  );
+  final TextEditingController overallDiscountController = TextEditingController(
+    text: "0",
+  );
+  final TextEditingController serviceChargeController = TextEditingController(
+    text: "0",
+  );
+  final TextEditingController deliveryChargeController = TextEditingController(
+    text: "0",
+  );
+
+  // Money receipt/payment section
   bool withMoneyReceipt = false;
+  final TextEditingController paymentMethodController = TextEditingController(
+    text: "Cash",
+  );
+  final TextEditingController accountController = TextEditingController(
+    text: "Hand Cash (16601.80)",
+  );
+  final TextEditingController payableAmountController = TextEditingController();
+  final TextEditingController returnAmountController = TextEditingController(
+    text: "0",
+  );
   final TextEditingController remarkController = TextEditingController();
 
   void addProductRow() => setState(() => products.add(ProductRowData()));
+
   void removeProductRow(int index) => setState(() => products.removeAt(index));
+
+  // For dropdown demo
+  final List<String> paymentMethods = ["Cash", "Mobile banking"];
+  final List<String> accounts = ["Hand Cash (16601.80)", "Bank A", "Bank B"];
 
   @override
   Widget build(BuildContext context) {
@@ -61,16 +112,14 @@ class _SalesEntrySectionState extends State<SalesEntrySection> {
                 child: _buildTextField(
                   controller: dateController,
                   label: "Date",
-
                   isRequired: true,
                   readOnly: true,
                   suffixIcon: const Icon(Icons.calendar_today, size: 16),
                 ),
               ),
-
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
 
           // Items Information
           Align(
@@ -123,7 +172,8 @@ class _SalesEntrySectionState extends State<SalesEntrySection> {
                     Expanded(
                       child: _buildToggleInput(
                         type: row.discountType,
-                        onTypeChanged: (v) => setState(() => row.discountType = v),
+                        onTypeChanged: (v) =>
+                            setState(() => row.discountType = v),
                         controller: row.discountController,
                         label: "Discount Type",
                       ),
@@ -151,13 +201,13 @@ class _SalesEntrySectionState extends State<SalesEntrySection> {
                       width: 36,
                       child: index == products.length - 1
                           ? IconButton(
-                        icon: const Icon(Icons.add),
-                        onPressed: addProductRow,
-                      )
+                              icon: const Icon(Icons.add),
+                              onPressed: addProductRow,
+                            )
                           : IconButton(
-                        icon: const Icon(Icons.remove_circle_outline),
-                        onPressed: () => removeProductRow(index),
-                      ),
+                              icon: const Icon(Icons.remove_circle_outline),
+                              onPressed: () => removeProductRow(index),
+                            ),
                     ),
                   ],
                 ),
@@ -208,47 +258,110 @@ class _SalesEntrySectionState extends State<SalesEntrySection> {
           ),
           const SizedBox(height: 16),
 
-          // Order Overview and Remarks
+          // Order Overview and With Money Receipt Section
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                flex: 2,
-                child: _OrderOverviewBox(),
-              ),
+              // Order Overview
+              Expanded(flex: 2, child: _OrderOverviewBox()),
               const SizedBox(width: 16),
+              // Payment/Money Receipt Section
               Expanded(
                 flex: 3,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Checkbox(
-                          value: withMoneyReceipt,
-                          onChanged: (v) => setState(() => withMoneyReceipt = v!),
+                child: Container(
+                  color: const Color(0xFFF6F6F6),
+                  padding: const EdgeInsets.all(0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Checkbox(
+                            value: withMoneyReceipt,
+                            onChanged: (v) => setState(() => withMoneyReceipt = v!),
+                          ),
+                          const Text("With Money Receipt"),
+                        ],
+                      ),
+// Only show payment fields if checked!
+                      if (withMoneyReceipt) ...[
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            // Payment Method
+                            Expanded(
+                              child: _buildDropdownButton(
+                                label: "* Payment Method",
+                                value: paymentMethodController.text,
+                                items: paymentMethods,
+                                onChanged: (val) {
+                                  setState(
+                                        () => paymentMethodController.text =
+                                        val ?? paymentMethodController.text,
+                                  );
+                                },
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            // Account
+                            Expanded(
+                              child: _buildDropdownButton(
+                                label: "* Account",
+                                value: accountController.text,
+                                items: accounts,
+                                onChanged: (val) {
+                                  setState(
+                                        () => accountController.text =
+                                        val ?? accountController.text,
+                                  );
+                                },
+                              ),
+                            ),
+                          ],
                         ),
-                        const Text("With Money Receipt"),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: CustomInputField(
+                                controller: payableAmountController,
+                                labelText: "* Payable Amount",
+                                hintText: "Enter Client Payable Amount",
+                                keyboardType: TextInputType.number,
+                                isRequired: true,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: CustomInputField(
+                                controller: returnAmountController,
+                                labelText: "Return Amount",
+                                hintText: "0",
+                                keyboardType: TextInputType.number,
+                                isRequired: false,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+
                       ],
-                    ),
-                    const SizedBox(height: 8),
-                    TextField(
-                      controller: remarkController,
-                      decoration: const InputDecoration(
+                      const SizedBox(height: 8),
+                      CustomInputField(
+                        controller: remarkController,
                         labelText: "Remark",
                         hintText: "Enter Remark",
-                        border: OutlineInputBorder(),
+
+                        isRequired: false,
+                        keyboardType: TextInputType.text,
                       ),
-                      maxLines: 3,
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ],
           ),
           const SizedBox(height: 16),
-
-
         ],
       ),
     );
@@ -262,12 +375,43 @@ class _SalesEntrySectionState extends State<SalesEntrySection> {
   }) {
     return CustomInputField(
       controller: controller,
-      hintText: hint??"",
+      hintText: hint ?? "",
       labelText: label,
       suffixIcon: const Icon(Icons.arrow_drop_down),
-
       readOnly: true,
-      onTap: () {}, keyboardType: TextInputType.text,
+      onTap: () {},
+      keyboardType: TextInputType.text,
+    );
+  }
+
+  Widget _buildDropdownButton({
+    required String label,
+    required String value,
+    required List<String> items,
+    required ValueChanged<String?> onChanged,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: AppTextStyle.labelDropdownTextStyle(context)),
+        const SizedBox(height: 4),
+        DropdownButtonFormField<String>(
+          value: value,
+          items: items
+              .map((item) => DropdownMenuItem(value: item, child: Text(item)))
+              .toList(),
+          onChanged: onChanged,
+          isExpanded: true,
+          decoration: InputDecoration(
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(5)),
+            isDense: true,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 10,
+              vertical: 11,
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -280,8 +424,10 @@ class _SalesEntrySectionState extends State<SalesEntrySection> {
   }) {
     return CustomInputField(
       controller: controller,
-      readOnly: readOnly, textInputAction: TextInputAction.next, hintText: label, keyboardType: TextInputType.text,
-
+      readOnly: readOnly,
+      textInputAction: TextInputAction.next,
+      hintText: label,
+      keyboardType: TextInputType.text,
     );
   }
 
@@ -296,7 +442,8 @@ class _SalesEntrySectionState extends State<SalesEntrySection> {
       controller: controller,
       readOnly: readOnly,
       isRequired: isRequired,
-      keyboardType: TextInputType.number, hintText: label,
+      keyboardType: TextInputType.number,
+      hintText: label,
     );
   }
 
@@ -309,31 +456,37 @@ class _SalesEntrySectionState extends State<SalesEntrySection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
+        Text(label, style: AppTextStyle.labelDropdownTextStyle(context)),
+        const SizedBox(height: 4),
         Row(
           children: [
-            ToggleButtons(
-              isSelected: [type == "Tk", type == "%"],
-              onPressed: (i) => onTypeChanged(i == 0 ? "Tk" : "%"),
-              children: const [Padding(
-                padding: EdgeInsets.symmetric(horizontal: 8.0),
-                child: Text("Tk"),
-              ), Padding(
-                padding: EdgeInsets.symmetric(horizontal: 8.0),
-                child: Text("%"),
-              )],
+            CupertinoSegmentedControl<String>(
+              groupValue: type,
+              children: const {
+                "Tk": Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                  child: Text("Tk"),
+                ),
+                "%": Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                  child: Text("%"),
+                ),
+              },
+              onValueChanged: onTypeChanged,
+              padding: const EdgeInsets.symmetric(horizontal: 0),
+              selectedColor: Colors.deepOrangeAccent,
+              unselectedColor: Colors.white,
+              borderColor: Colors.deepOrangeAccent,
+              pressedColor: Colors.deepOrangeAccent,
             ),
             const SizedBox(width: 8),
             SizedBox(
               width: 50,
-              child: TextField(
+              child: CustomInputField(
                 controller: controller,
+                isRequiredLable: false,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  isDense: true,
-                  contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 8),
-                ),
+                hintText: '',
               ),
             ),
           ],
@@ -343,57 +496,92 @@ class _SalesEntrySectionState extends State<SalesEntrySection> {
   }
 }
 
-class ProductRowData {
-  final TextEditingController productController = TextEditingController();
-  final TextEditingController priceController = TextEditingController(text: "0");
-  final TextEditingController quantityController = TextEditingController(text: "1");
-  String discountType = "Tk";
-  final TextEditingController discountController = TextEditingController(text: "0");
-  final TextEditingController ticketTotalController = TextEditingController(text: "0");
-  final TextEditingController netTotalController = TextEditingController(text: "0");
-}
-
+// The order overview box remains unchanged
 class _OrderOverviewBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    // Replace with your logic and controllers
-    return Card(
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(AppSizes.radius),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: Table(
-          columnWidths: const {
-            0: FlexColumnWidth(2),
-            1: FlexColumnWidth(1),
-          },
-          children: const [
-            TableRow(children: [
-              Text("Ticket Total"),
-              Align(alignment: Alignment.centerRight, child: Text("0")),
-            ]),
-            TableRow(children: [
-              Text("Specific Discount (-)"),
-              Align(alignment: Alignment.centerRight, child: Text("0")),
-            ]),
-            TableRow(children: [
-              Text("Net Total", style: TextStyle(fontWeight: FontWeight.bold)),
-              Align(alignment: Alignment.centerRight, child: Text("0", style: TextStyle(fontWeight: FontWeight.bold))),
-            ]),
-            TableRow(children: [
-              Text("Discount (-)"),
-              Align(alignment: Alignment.centerRight, child: Text("0")),
-            ]),
-            TableRow(children: [
-              Text("Vat (+)"),
-              Align(alignment: Alignment.centerRight, child: Text("0")),
-            ]),
-            TableRow(children: [
-              Text("Service Charge (+)"),
-              Align(alignment: Alignment.centerRight, child: Text("0")),
-            ]),
-            TableRow(children: [
-              Text("Gross Total", style: TextStyle(fontWeight: FontWeight.bold)),
-              Align(alignment: Alignment.centerRight, child: Text("0.00", style: TextStyle(fontWeight: FontWeight.bold))),
-            ]),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text("Order Overview", style: AppTextStyle.cardTitle(context)),
+
+            Divider(),
+            gapH8,
+            Table(
+              columnWidths: const {
+                0: FlexColumnWidth(2),
+                1: FlexColumnWidth(1),
+              },
+              children: const [
+                TableRow(
+                  children: [
+                    Text("Ticket Total"),
+                    Align(alignment: Alignment.centerRight, child: Text("0")),
+                  ],
+                ),
+                TableRow(
+                  children: [
+                    Text("Specific Discount (-)"),
+                    Align(alignment: Alignment.centerRight, child: Text("0")),
+                  ],
+                ),
+                TableRow(
+                  children: [
+                    Text(
+                      "Net Total",
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: Text(
+                        "0",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ],
+                ),
+                TableRow(
+                  children: [
+                    Text("Discount (-)"),
+                    Align(alignment: Alignment.centerRight, child: Text("0")),
+                  ],
+                ),
+                TableRow(
+                  children: [
+                    Text("Vat (+)"),
+                    Align(alignment: Alignment.centerRight, child: Text("0")),
+                  ],
+                ),
+                TableRow(
+                  children: [
+                    Text("Service Charge (+)"),
+                    Align(alignment: Alignment.centerRight, child: Text("0")),
+                  ],
+                ),
+                TableRow(
+                  children: [
+                    Text(
+                      "Gross Total",
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: Text(
+                        "0.00",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ],
         ),
       ),

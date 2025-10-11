@@ -22,7 +22,7 @@ class AppColors{
 
   static const Color primaryColor             = Color(0xFF6ab129);
   static const Color primaryColorBg             = Color(0xFFCEE2CE);
-  static const Color bg               = Color(0xFFF3f2ef);
+  static const Color bg               = Color(0xffEFF9FF);
   static const Color lightGreen               = Color(0xFFFCFCFC);
   static const Color whiteColor               =Color(0xFFFFFFFF);
   static const Color blackColor               = Color(0xFF191919);

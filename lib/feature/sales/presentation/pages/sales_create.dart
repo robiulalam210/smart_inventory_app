@@ -4,7 +4,6 @@ import 'package:flutter/cupertino.dart';
 import '../../../../core/core.dart';
 import '../../../feature.dart';
 
-
 class SalesScreen extends StatefulWidget {
   const SalesScreen({super.key});
 
@@ -46,17 +45,11 @@ class _SalesScreenState extends State<SalesScreen> {
   final FocusNode focusCategoryNode = FocusNode();
   final FocusNode focusInventoryNode = FocusNode();
 
-
-
   @override
   Widget build(BuildContext context) {
-
-
     return Container(
       color: AppColors.bg,
-      child: SafeArea(
-        child:_buildMainContent(),
-      ),
+      child: SafeArea(child: _buildMainContent()),
     );
   }
 
@@ -76,11 +69,8 @@ class _SalesScreenState extends State<SalesScreen> {
             lg: 2,
             xl: 2,
             child: Container(
-              decoration:
-              BoxDecoration(color: AppColors.whiteColor),
-              child: isBigScreen
-                  ? const Sidebar()
-                  : const SizedBox.shrink(),
+              decoration: BoxDecoration(color: AppColors.whiteColor),
+              child: isBigScreen ? const Sidebar() : const SizedBox.shrink(),
             ),
           ),
         ResponsiveCol(
@@ -97,15 +87,11 @@ class _SalesScreenState extends State<SalesScreen> {
               children: [
                 Flexible(
                   child: SingleChildScrollView(
-                    physics:
-                    const NeverScrollableScrollPhysics(),
+                    physics: const NeverScrollableScrollPhysics(),
                     padding: EdgeInsets.zero,
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
-                      children: [
-                        SalesEntrySection(),
-
-                      ],
+                      children: [SalesEntrySection()],
                     ),
                   ),
                 ),
@@ -113,8 +99,7 @@ class _SalesScreenState extends State<SalesScreen> {
                 FutureBuilder<Widget>(
                   future: buildActionButtons(),
                   builder: (context, snapshot) {
-                    if (snapshot.connectionState ==
-                        ConnectionState.waiting) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
                       return const CircularProgressIndicator();
                     } else if (snapshot.hasError) {
                       return Text('Error: ${snapshot.error}');
@@ -122,7 +107,7 @@ class _SalesScreenState extends State<SalesScreen> {
                       return snapshot.data!;
                     }
                   },
-                )
+                ),
                 // buildActionButtons(),
               ],
             ),
@@ -132,70 +117,43 @@ class _SalesScreenState extends State<SalesScreen> {
     );
   }
 
-
   Future<Widget> buildActionButtons() async {
-
-
-
-
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-
         Wrap(
           children: [
-
-            AppButton(
-              name: 'Summery',
-              onPressed: () {
-
-              },
-              color: Colors.grey,
-            ),
+            AppButton(name: 'Summery', onPressed: () {}, color: Colors.grey),
             gapW4,
             AppButton(
               name: 'Finder',
-              onPressed: () {
-
-              },
+              onPressed: () {},
               color: Color(0xffff6347),
             ),
-
 
             gapW4,
             AppButton(
               name: 'Due Collection',
-              onPressed: () {
-
-              },
+              onPressed: () {},
               color: Colors.black,
             ),
           ],
         ),
         Row(
           children: [
-
             const SizedBox(width: 10),
             AppButton(
               name: 'Preview',
-              onPressed: () async {
-
-              },
+              onPressed: () async {},
               color: const Color(0xff800000),
             ),
             const SizedBox(width: 10),
-            AppButton(
-              name: 'Submit',
-              onPressed: (){},
-            ),
+            AppButton(name: 'Submit', onPressed: () {}),
             const SizedBox(width: 5),
           ],
         ),
       ],
     );
   }
-
-
-
 }
