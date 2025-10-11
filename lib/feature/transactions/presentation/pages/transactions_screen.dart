@@ -103,379 +103,62 @@ class _TransactionScreenState extends State<TransactionScreen> {
     return Container(
       color: AppColors.bg,
       child: SafeArea(
-        child: MultiBlocListener(
-          listeners: [
-            BlocListener<AllSetupBloc, AllSetupState>(
-              listener: (context, state) {
-                context.read<AllSetupCombinedCubit>().updateSetup(state);
-              },
-            ),
-            BlocListener<AllInvoiceSetupBloc, AllInvoiceSetupState>(
-              listener: (context, state) {
-                context.read<AllSetupCombinedCubit>().updateInvoice(state);
-              },
-            ),
-            BlocListener<AllSetupCombinedCubit, AllSetupCombinedState>(
-              listener: (context, state) {
-                if (state.setupState is AllSetupLoaded &&
-                    state.invoiceState is AllInvoiceSetupLoaded) {
-                  // AppRoutes.pop(context);
-                  final setup = state.setupState as AllSetupLoaded;
-                  final invoice = state.invoiceState as AllInvoiceSetupLoaded;
-
-                  final doctorsList = setup.allSetupModel.data?.doctors ?? [];
-                  final boothsList = setup.allSetupModel.data?.booths ?? [];
-                  final collectorInfoList =
-                      setup.allSetupModel.data?.collectorInfo ?? [];
-                  final testParameterList =
-                      setup.allSetupModel.data?.testParameterSetup ?? [];
-                  final testNameConfigList =
-                      setup.allSetupModel.data?.testNameConfigSetup ?? [];
-                  final parameterGroupList =
-                      setup.allSetupModel.data?.parameterGroupSetup ?? [];
-                  final parameterList =
-                      setup.allSetupModel.data?.parameterSetup ?? [];
-                  final printLayout = setup.allSetupModel.data?.printLayout;
-                  final categoriesList =
-                      setup.allSetupModel.data?.testCategory ?? [];
-                  final testNamesList =
-                      setup.allSetupModel.data?.testName ?? [];
-                  final gendersList = setup.allSetupModel.data?.gender ?? [];
-                  final bloodGroupsList =
-                      setup.allSetupModel.data?.bloodGroup ?? [];
-                  final inventoryList =
-                      setup.allSetupModel.data?.inventories ?? [];
-                  final patientsList = setup.allSetupModel.data?.patient ?? [];
-                  final testGroupList =
-                      setup.allSetupModel.data?.testGroup ?? [];
-                  final specimenList = setup.allSetupModel.data?.specimen ?? [];
-                  final caseEffectList =
-                      setup.allSetupModel.data?.caseEffect ?? [];
-                  final marketerList =
-                      setup.allSetupModel.data?.marketerList ?? [];
-                  final invoices = invoice.allSetupModel.data ?? [];
-
-                  context.read<SyncBloc>().add(SyncAllData(
-                        doctors: doctorsList,
-                        categories: categoriesList,
-                        testNames: testNamesList,
-                        genders: gendersList,
-                        bloodGroups: bloodGroupsList,
-                        patients: patientsList,
-                        inventoryItems: inventoryList,
-                        invoices: invoices,
-                        booths: boothsList,
-                        collectorInfo: collectorInfoList,
-                        parameterGroupSetup: parameterGroupList,
-                        parameterSetup: parameterList,
-                        testParameterSetup: testParameterList,
-                        testNameConfigSetup: testNameConfigList,
-                        setupSpecimen: specimenList,
-                        setupTestGroup: testGroupList,
-                        printLayout: printLayout,
-                        caseEffect: caseEffectList,
-                        marketerList: marketerList,
-                      ));
-                }
-
-                if (state.setupState is AllSetupError) {
-                  // AppRoutes.pop(context);
-
-                  final error = state.setupState as AllSetupError;
-                  showCustomToast(
-                    context: context,
-                    title: 'Failed!',
-                    description: 'Setup Error: ${error.message}',
-                    type: ToastificationType.error,
-                    icon: Icons.error,
-                    primaryColor: Colors.red,
+        child: Stack(
+          children: [
+            _buildMainContent(),
+            BlocBuilder<SyncBloc, SyncState>(
+              builder: (context, state) {
+                if (state is SyncInProgress) {
+                  return Center(
+                    child: Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Text('Synchronizing Data',
+                              style: TextStyle(
+                                  fontSize: 18, fontWeight: FontWeight.bold)),
+                          const SizedBox(height: 16),
+                          SizedBox(
+                            width: 200,
+                            child: LinearProgressIndicator(
+                              value: state.percentage / 100,
+                              backgroundColor: Colors.grey[200],
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Theme.of(context).primaryColor,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            '${state.progress}/${state.total} (${state.percentage.toStringAsFixed(1)}%)',
+                            style: const TextStyle(fontSize: 14),
+                          ),
+                          const SizedBox(height: 8),
+                          if (state.currentOperation.isNotEmpty)
+                            Text(
+                              state.currentOperation,
+                              style: const TextStyle(fontSize: 12),
+                              textAlign: TextAlign.center,
+                            ),
+                        ],
+                      ),
+                    ),
                   );
                 }
-
-                if (state.invoiceState is AllInvoiceSetupError) {
-                  final error = state.invoiceState as AllInvoiceSetupError;
-                  showCustomToast(
-                    context: context,
-                    title: 'Failed!',
-                    description: 'Invoice Error: ${error.message}',
-                    type: ToastificationType.error,
-                    icon: Icons.error,
-                    primaryColor: Colors.red,
-                  );
-                }
-              },
-            ),
-            BlocListener<SyncBloc, SyncState>(
-              listener: (context, state) {
-                if (state is SyncSuccess) {
-                  _applyFiltersAndFetch();
-                  showCustomToast(
-                    context: context,
-                    title: 'Success!',
-                    description: 'Sync completed successfully.',
-                    type: ToastificationType.success,
-                    icon: Icons.check_circle,
-                    primaryColor: Colors.green,
-                  );
-                } else if (state is SyncFailure) {
-                  showCustomToast(
-                    context: context,
-                    title: 'Failed!',
-                    description: state.error,
-                    type: ToastificationType.error,
-                    icon: Icons.error,
-                    primaryColor: Colors.red,
-                  );
-                }
-                if (state is SyncServerLoading) {
-                  appLoader(context, "Loading in, please wait...");
-                }
-                if (state is SyncServerSuccess) {
-                  AppRoutes.pop(context);
-                  _applyFiltersAndFetch();
-                  showCustomToast(
-                    context: context,
-                    title: 'Success!',
-                    description: 'Sync completed successfully.',
-                    type: ToastificationType.success,
-                    icon: Icons.check_circle,
-                    primaryColor: Colors.green,
-                  );
-
-                  BlocProvider.of<AllSetupBloc>(context)
-                      .add(FetchAllSetupEvent(context));
-                  BlocProvider.of<AllInvoiceSetupBloc>(context)
-                      .add(FetchAllInvoiceSetupEvent(context));
-                }
-                if (state is FullRefundServerInvoiceFailure) {
-                  AppRoutes.pop(context);
-                  showCustomToast(
-                    context: context,
-                    title: 'Failed!',
-                    description: state.error,
-                    type: ToastificationType.error,
-                    icon: Icons.error,
-                    primaryColor: Colors.red,
-                  );
-                }
-
-                if (state is FullRefundServerInvoiceSuccess) {
-                  _applyFiltersAndFetch();
-                  showCustomToast(
-                    context: context,
-                    title: 'Success!',
-                    description: 'Sync completed successfully.',
-                    type: ToastificationType.success,
-                    icon: Icons.check_circle,
-                    primaryColor: Colors.green,
-                  );
-                } else if (state is FullRefundServerInvoiceFailure) {
-                  showCustomToast(
-                    context: context,
-                    title: 'Failed!',
-                    description: state.error,
-                    type: ToastificationType.error,
-                    icon: Icons.error,
-                    primaryColor: Colors.red,
-                  );
-                }
-                if (state is RefundInvoicesLoading) {
-                  appLoader(context, "Refund  in, please wait...");
-                }
-              },
-            ),
-            BlocListener<PaymentBloc, PaymentState>(
-              listener: _handlePaymentState,
-            ),
-            BlocListener<InvoiceUnSyncBloc, InvoiceUnSyncState>(
-              listener: (context, state) async {
-                if (state is InvoiceUnSyncLoading) {
-                  appLoader(context, "Loading in, please wait...");
-                } else if (state is InvoiceUnSyncLoaded) {
-                  AppRoutes.pop(context);
-                  context.read<InvoiceUnSyncBloc>().add(
-                        PostUnSyncInvoice(
-                            body: state.invoices ?? [],
-                            invoiceCreate: false,
-                            isSingleSync: false),
-                      );
-                } else if (state is InvoiceUnSyncEmpty) {
-                  AppRoutes.pop(context);
-                  BlocProvider.of<AllSetupBloc>(context)
-                      .add(FetchAllSetupEvent(context));
-
-                  BlocProvider.of<AllInvoiceSetupBloc>(context)
-                      .add(FetchAllInvoiceSetupEvent(context));
-                } else if (state is InvoiceSyncError) {
-                  AppRoutes.pop(context);
-                  showCustomToast(
-                    context: context,
-                    title: 'Failed!',
-                    description: state.error,
-                    type: ToastificationType.error,
-                    icon: Icons.error,
-                    primaryColor: Colors.red,
-                  );
-                } else if (state is PostInvoiceUnSyncLoading) {
-                  appLoader(context, "Post Loading in, please wait...");
-                } else if (state is PostInvoiceUnSyncLoaded) {
-                  AppRoutes.pop(context);
-
-                  Timer(Duration(milliseconds: 500), () {
-                    if (!state.isCreate) {
-                      for (var invoiceItem in state.invoices.data ?? []) {
-                        syncBloc.add(SyncInvoiceAndPatientEvent(
-                          invoice: invoiceItem.invoice!.toJson(),
-                          patient: invoiceItem.patient!.toJson(),
-                          moneyReceipt: List<Map<String, dynamic>>.from(
-                              invoiceItem.moneyReceipt
-                                      ?.map((e) => e.toJson()) ??
-                                  []),
-                          test: List<Map<String, dynamic>>.from(
-                              invoiceItem.test?.map((e) => e.toJson()) ?? []),
-                          inventory: List<Map<String, dynamic>>.from(
-                              invoiceItem.inventory?.map((e) => e.toJson()) ??
-                                  []),
-                          isSingleSync: state.isSingleSync,
-                        ));
-                      }
-                    }
-                  });
-                } else if (state is PostInvoiceSyncError) {
-                  AppRoutes.pop(context);
-                  showCustomToast(
-                    context: context,
-                    title: 'Failed!',
-                    description: 'Sync Server failed: ${state.error}',
-                    type: ToastificationType.error,
-                    icon: Icons.error,
-                    primaryColor: Colors.red,
-                  );
-                }
-              },
-            ),
-            BlocListener<RefundBloc, RefundState>(
-              listener: (context, state) async {
-                if (state is RefundInvoicesLoading) {
-                  appLoader(context, "Loading in, please wait...");
-                } else if (state is RefundInvoicesLoaded) {
-                  AppRoutes.pop(context);
-
-                  syncBloc.add(FullRefundInvoice(
-                    invoice: state.fullRefundInvoiceModel.toJson(),
-                    isFullRefund: state.isFullRefund,
-                  ));
-                } else if (state is RefundInvoicesError) {
-                  AppRoutes.pop(context);
-                  showCustomToast(
-                    context: context,
-                    title: 'Failed!',
-                    description: state.error,
-                    type: ToastificationType.error,
-                    icon: Icons.error,
-                    primaryColor: Colors.red,
-                  );
-                } else if (state is PostInvoiceUnSyncLoading) {
-                  appLoader(context, "Post Loading in, please wait...");
-                } else if (state is PostInvoiceUnSyncLoaded) {
-                  AppRoutes.pop(context);
-                }
+                return const SizedBox();
               },
             ),
           ],
-          child: Stack(
-            children: [
-              _buildMainContent(),
-              BlocBuilder<SyncBloc, SyncState>(
-                builder: (context, state) {
-                  if (state is SyncInProgress) {
-                    return Center(
-                      child: Container(
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Text('Synchronizing Data',
-                                style: TextStyle(
-                                    fontSize: 18, fontWeight: FontWeight.bold)),
-                            const SizedBox(height: 16),
-                            SizedBox(
-                              width: 200,
-                              child: LinearProgressIndicator(
-                                value: state.percentage / 100,
-                                backgroundColor: Colors.grey[200],
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                  Theme.of(context).primaryColor,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              '${state.progress}/${state.total} (${state.percentage.toStringAsFixed(1)}%)',
-                              style: const TextStyle(fontSize: 14),
-                            ),
-                            const SizedBox(height: 8),
-                            if (state.currentOperation.isNotEmpty)
-                              Text(
-                                state.currentOperation,
-                                style: const TextStyle(fontSize: 12),
-                                textAlign: TextAlign.center,
-                              ),
-                          ],
-                        ),
-                      ),
-                    );
-                  }
-                  return const SizedBox();
-                },
-              ),
-            ],
-          ),
         ),
       ),
     );
   }
 
-  void _handlePaymentState(BuildContext context, PaymentState state) {
-    if (state is PaymentLoading) {
-      appLoader(context, "Loading");
-    } else if (state is PaymentSuccess) {
-      Navigator.of(context).pop();
-
-      final transactionBloc = context.read<TransactionBloc>();
-
-      transactionBloc.add(LoadMoneyReceiptDetails(
-          invoiceId: state.response['receiptNumber'],
-          context: context,
-          isRefund: false));
-
-      transactionBloc.add(LoadTransactionInvoices());
-      showCustomToast(
-        context: context,
-        title: 'Success!',
-        description: 'Partial payment recorded!',
-        type: ToastificationType.success,
-        icon: Icons.check_circle,
-        primaryColor: Colors.green,
-      );
-      _applyFiltersAndFetch(); // Reload with current filters
-    } else if (state is PaymentError) {
-      Navigator.of(context).pop();
-      showCustomToast(
-        context: context,
-        title: 'Warning!',
-        description: 'Error: ${state.error}',
-        type: ToastificationType.error,
-        icon: Icons.warning,
-        primaryColor: Colors.red,
-      );
-      _applyFiltersAndFetch();
-    }
-  }
 
   Widget _buildMainContent() {
     final isBigScreen =

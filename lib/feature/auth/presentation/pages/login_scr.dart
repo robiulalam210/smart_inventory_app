@@ -73,10 +73,7 @@ class _LogInScreenState extends State<LogInScreen> {
           listener: (context, state) async {
             if (state is AuthAuthenticated || state is AuthAuthenticatedOffline) {
               _dismissLoaderIfOpen();
-              if (state is AuthAuthenticated) {
-                BlocProvider.of<AllSetupBloc>(context).add(FetchAllSetupEvent(context));
-                BlocProvider.of<AllInvoiceSetupBloc>(context).add(FetchAllInvoiceSetupEvent(context));
-              }
+
               showCustomToast(
                 context: context,
                 title: 'Success!',

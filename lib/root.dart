@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'core/core.dart';
 import 'feature/feature.dart';
+import 'feature/sales/presentation/pages/sales_list_screen.dart';
 import 'feature/splash/presentation/bloc/connectivity_bloc/connectivity_state.dart';
 
 final GlobalKey<ScaffoldState> _drawerKey = GlobalKey();
@@ -24,7 +25,8 @@ class _RootScreenState extends State<RootScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isSmallScreen = Responsive.isMobile(context) ||
+    final isSmallScreen =
+        Responsive.isMobile(context) ||
         Responsive.isTablet(context) ||
         Responsive.isSmallDesktop(context);
     final isBigScreen =
@@ -46,21 +48,19 @@ class _RootScreenState extends State<RootScreen> {
                     Expanded(
                       child: Padding(
                         padding: EdgeInsets.symmetric(
-                            horizontal:
-                                Responsive.isMobile(context) ? 8.0 : 16.0),
+                          horizontal: Responsive.isMobile(context) ? 8.0 : 16.0,
+                        ),
                         child: Text(
                           AppConstants.appName,
-                          style:
-                              Theme.of(context).textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                    color: AppColors.primaryColor,
-                                  ),
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.primaryColor,
+                              ),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ),
-
-              
 
                     gapW8,
                     BlocBuilder<ConnectivityBloc, ConnectivityState>(
@@ -115,12 +115,13 @@ class _RootScreenState extends State<RootScreen> {
                 onRefresh: () async {},
                 child: ListView(
                   padding: EdgeInsets.zero,
-                  physics: const ScrollPhysics(),
+                  // physics: const ScrollPhysics(),
                   children: [
                     if (isBigScreen) Header(drawerKey: _drawerKey),
                     Padding(
                       padding: EdgeInsets.symmetric(
-                        horizontal: AppSizes.bodyPadding *
+                        horizontal:
+                            AppSizes.bodyPadding *
                             (Responsive.isMobile(context) ? 0.5 : 1.5),
                       ),
                       child: bloc.myScreens[currentIndex],
@@ -143,7 +144,6 @@ Color getConnectivityColor(ConnectivityState state) {
   return Colors.grey;
 }
 
-
 void _showLogoutConfirmation(BuildContext context) {
   showDialog(
     context: context,
@@ -161,10 +161,7 @@ void _showLogoutConfirmation(BuildContext context) {
 
             AppRoutes.pushAndRemoveUntil(context, LogInScreen());
           },
-          child: const Text(
-            "Sign Out",
-            style: TextStyle(color: Colors.red),
-          ),
+          child: const Text("Sign Out", style: TextStyle(color: Colors.red)),
         ),
       ],
     ),

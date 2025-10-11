@@ -2,7 +2,8 @@ import '../../../../../core/configs/configs.dart';
 import '../../../../../enery_screen.dart';
 import '../../../../product/presentation/page/product_setup.dart';
 import '../../../../sales/presentation/bloc/lab_billing/lab_billing_bloc.dart';
-import '../../../../sales/presentation/pages/billing_screen.dart';
+import '../../../../sales/presentation/pages/sales_create.dart';
+import '../../../../sales/presentation/pages/sales_list_screen.dart';
 import '../../../../transactions/presentation/pages/transactions_screen.dart';
 import '../../../data/models/dashboard/dashboard_model.dart';
 import '../../../data/repositories/dashboard_repo_db/dashboard_repo_db.dart';
@@ -16,8 +17,10 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
   final DatabaseHelper dbHelper;
   final List<Widget> myScreens = [
     AppWrapper(child: DashboardScreen()),
-    BlocProvider(create: (_) => LabBillingBloc(), child: AppWrapper(child: BillingScreen())),
-    AppWrapper(child: TransactionScreen()),
+    AppWrapper(child: SalesListScreen()),
+
+    BlocProvider(create: (_) => LabBillingBloc(), child: AppWrapper(child: SalesScreen())),
+    AppWrapper(child: SalesListScreen()),
     AppWrapper(child: ProductSetupScreen()),
 
   ];

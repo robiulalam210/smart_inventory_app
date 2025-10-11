@@ -7,14 +7,14 @@ import '../widgets/bill_summery/bill_summery.dart';
 import '../widgets/finder_invoice/finder_invoice.dart';
 import '../widgets/invoice_due_collection/invoice_due_collection.dart';
 
-class BillingScreen extends StatefulWidget {
-  const BillingScreen({super.key});
+class SalesScreen extends StatefulWidget {
+  const SalesScreen({super.key});
 
   @override
-  State<BillingScreen> createState() => _BillingScreenState();
+  State<SalesScreen> createState() => _SalesScreenState();
 }
 
-class _BillingScreenState extends State<BillingScreen> {
+class _SalesScreenState extends State<SalesScreen> {
   @override
   void initState() {
     super.initState();

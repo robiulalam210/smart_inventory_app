@@ -57,12 +57,9 @@ class _SidebarState extends State<Sidebar> {
 
                         ExpansionTile(
                           initiallyExpanded:
-                              currentIndex == 0 ||
                               currentIndex == 1 ||
-                              currentIndex == 2 ||
-                              currentIndex == 3 ||
-                              currentIndex == 4 ||
-                              currentIndex == 5,
+                              currentIndex == 2 ,
+
 
                           title: Text(
                             "Sales",
@@ -246,43 +243,7 @@ class _SidebarState extends State<Sidebar> {
                           ],
                         ),
 
-                        ExpansionTile(
-                          initiallyExpanded:
-                              currentIndex == 0 ||
-                              currentIndex == 1 ||
-                              currentIndex == 2 ||
-                              currentIndex == 3 ||
-                              currentIndex == 4 ||
-                              currentIndex == 5,
 
-                          title: Text(
-                            "Transfer ",
-                            style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              color: Theme.of(
-                                context,
-                              ).textTheme.bodyMedium!.color,
-                            ),
-                          ),
-                          children: [
-                            MenuTile(
-                              isSubmenu: true,
-                              title: "Create Transfer ",
-                              isSelected: currentIndex == 4,
-                              onPressed: () {
-                                bloc.add(ChangeDashboardScreen(index: 4));
-                              },
-                            ),
-                            MenuTile(
-                              isSubmenu: true,
-                              title: "Transfer List ",
-                              isSelected: currentIndex == 4,
-                              onPressed: () {
-                                bloc.add(ChangeDashboardScreen(index: 4));
-                              },
-                            ),
-                          ],
-                        ),
                         ExpansionTile(
                           initiallyExpanded:
                               currentIndex == 0 ||

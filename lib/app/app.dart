@@ -1,3 +1,4 @@
+import '../feature/sales/presentation/pages/sales_list_screen.dart';
 import '/feature/transactions/presentation/bloc/refund/refund_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
@@ -24,7 +25,6 @@ class MyApp extends StatelessWidget {
             authService: AuthService(),
           ),
         ),
-        BlocProvider(create: (context) => AllSetupBloc()),
         BlocProvider(
             create: (context) =>
                 SplashBloc(authBloc: context.read<AuthBloc>())),
@@ -50,8 +50,7 @@ class MyApp extends StatelessWidget {
             create: (context) => SyncBloc(
                 syncRepo: SetupAllSyncRepo(dbHelper),
                 unSyncRepo: UnSyncRepo())),
-        BlocProvider(create: (context) => AllInvoiceSetupBloc()),
-        BlocProvider(create: (context) => AllSetupCombinedCubit()),
+
         BlocProvider(create: (context) => RefundBloc()),
         BlocProvider(create: (context) => PrintLayoutBloc(PrintLayoutRepoDb())),
       ],
@@ -71,7 +70,6 @@ class MyApp extends StatelessWidget {
           debugShowCheckedModeBanner: false,
           theme: AppTheme.light(context),
           home: const SplashScreen(),
-          // home: const SearchAndAddDemo(),
         ),
       ),
     );
