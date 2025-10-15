@@ -5,6 +5,7 @@ import 'package:smart_inventory/feature/products/unit/presentation/pages/unit_sc
 
 import '../../../../../core/configs/configs.dart';
 import '../../../../../enery_screen.dart';
+import '../../../../customer/presentation/pages/customer_screen.dart';
 import '../../../../money_receipt/presentation/page/monery_receipt_create.dart';
 import '../../../../money_receipt/presentation/page/money_receipt_list_screen.dart';
 import '../../../../product/presentation/page/create_product_screen.dart';
@@ -43,6 +44,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     AppWrapper(child: CategoriesScreen()),
     AppWrapper(child: GroupsScreen()),
     AppWrapper(child: AccountScreen()),
+    AppWrapper(child: CustomerScreen()),
 
     // AppWrapper(child: PurchaseCreateScreen()),
     // AppWrapper(child: PurchaseListScreen()),

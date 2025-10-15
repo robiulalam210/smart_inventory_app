@@ -204,6 +204,13 @@ class _SidebarState extends State<Sidebar> {
                               onPressed: () {
                                 bloc.add(ChangeDashboardScreen(index: 11));
                               },
+                            ),MenuTile(
+                              isSubmenu: true,
+                              title: "Customers ",
+                              isSelected: currentIndex == 12,
+                              onPressed: () {
+                                bloc.add(ChangeDashboardScreen(index: 12));
+                              },
                             ),
                           ],
                         ),

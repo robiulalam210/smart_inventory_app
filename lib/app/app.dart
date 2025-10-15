@@ -1,5 +1,6 @@
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
+import 'package:smart_inventory/feature/customer/presentation/bloc/customer/customer_bloc.dart';
 import '../core/core.dart';
 import '../feature/accounts/presentation/bloc/account/account_bloc.dart';
 import '../feature/feature.dart';
@@ -73,6 +74,8 @@ class MyApp extends StatelessWidget {
         ),
         BlocProvider(
           create: (_) => AccountBloc(),
+        ), BlocProvider(
+          create: (_) => CustomerBloc(),
         ),
       ],
       child: Center(
