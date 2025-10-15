@@ -5,6 +5,7 @@ import '../feature/feature.dart';
 import '../feature/products/brand/presentation/bloc/brand/brand_bloc.dart';
 import '../feature/products/categories/presentation/bloc/categories/categories_bloc.dart';
 import '../feature/products/groups/presentation/bloc/groups/groups_bloc.dart';
+import '../feature/products/product/presentation/bloc/products/products_bloc.dart';
 import '../feature/products/soruce/presentation/bloc/source/source_bloc.dart';
 import '../feature/products/unit/presentation/bloc/unit/unti_bloc.dart';
 
@@ -66,9 +67,9 @@ class MyApp extends StatelessWidget {
         BlocProvider(
           create: (_) => SourceBloc(),
         ),
-        // BlocProvider(
-        //   create: (_) => ProductsBloc(),
-        // ),
+        BlocProvider(
+          create: (_) => ProductsBloc(),
+        ),
         // BlocProvider(
         //   create: (_) => ProductStockBloc(),
         // ),

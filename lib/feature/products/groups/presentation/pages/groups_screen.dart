@@ -1,20 +1,21 @@
-import 'package:dokani_360/widgets/app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lottie/lottie.dart';
-import '../../../blocs/products/groups/groups_bloc.dart';
-import '../../../configs/app_colors.dart';
-import '../../../configs/app_images.dart';
-import '../../../configs/app_routes.dart';
-import '../../../configs/app_text.dart';
-import '../../../widgets/app_alert_dialog.dart';
-import '../../../widgets/app_dropdown.dart';
-import '../../../widgets/app_loader.dart';
-import '../../../widgets/coustom_filter_ui.dart';
-import '../../../widgets/coustom_search_text_field.dart';
-import '../../../widgets/pagination_bar.dart';
-import 'create_groups/create_groups_setup.dart';
-import 'widget/widget.dart';
+
+import '../../../../../core/configs/app_colors.dart';
+import '../../../../../core/configs/app_images.dart';
+import '../../../../../core/configs/app_routes.dart';
+import '../../../../../core/configs/app_text.dart';
+import '../../../../../core/shared/widgets/sideMenu/sidebar.dart';
+import '../../../../../core/widgets/app_alert_dialog.dart';
+import '../../../../../core/widgets/app_dropdown.dart';
+import '../../../../../core/widgets/app_loader.dart';
+import '../../../../../core/widgets/coustom_search_text_field.dart';
+import '../../../../../core/widgets/custom_filter_ui.dart';
+import '../../../../../responsive.dart';
+import '../bloc/groups/groups_bloc.dart';
+import '../widget/widget.dart';
+
 
 class GroupsScreen extends StatefulWidget {
   const GroupsScreen({super.key});
@@ -43,22 +44,56 @@ class _GroupsScreenState extends State<GroupsScreen> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.bg,
-      appBar: appBar(title: "Groups List", context: context),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          setupGroups(context, "Create Groups", "Create", id: "");
-        },
-        backgroundColor: AppColors.whiteColor,
-        child: const Icon(
-          Icons.add,
-          color: AppColors.primaryColor,
+
+    @override
+    Widget build(BuildContext context) {
+      final isBigScreen =
+          Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
+      return Container(
+        color: AppColors.bg,
+        child: SafeArea(
+          child: ResponsiveRow(
+            spacing: 0,
+            runSpacing: 0,
+            children: [
+              if (isBigScreen) _buildSidebar(),
+              _buildContentArea(isBigScreen),
+            ],
+          ),
         ),
-      ),
-      body: Container(
+      );
+    }
+
+    Widget _buildSidebar() {
+      return ResponsiveCol(
+        xs: 0,
+        sm: 1,
+        md: 1,
+        lg: 2,
+        xl: 2,
+        child: Container(
+          decoration: const BoxDecoration(color: Colors.white),
+          child: const Sidebar(),
+        ),
+      );
+    }
+
+    Widget _buildContentArea(bool isBigScreen) {
+      return ResponsiveCol(
+        xs: 12,
+        sm: 12,
+        md: 12,
+        lg: 10,
+        xl: 10,
+        child: Container(color: AppColors.bg, child: buildContent()),
+      );
+    }
+
+
+  Widget buildContent() {
+    return SizedBox(
+
+      child: Container(
         padding:AppTextStyle.getResponsivePaddingBody(context),
         child: BlocListener<GroupsBloc, GroupsState>(
           listener: (context, state) {
@@ -118,35 +153,14 @@ class _GroupsScreenState extends State<GroupsScreen> {
                           child: Lottie.asset(AppImages.noData),
                         );
                       } else {
-                        return Column(
-                          children: [
-                            const SizedBox(height: 5),
-                            Expanded(
-                              child: ListView.builder(
-                                itemCount: state.list.length,
-                                itemBuilder: (_, index) {
-                                  final warehouse = state.list[index];
-                                  return GroupsCard(
-                                      group: warehouse, index: index + 1);
-                                },
-                              ),
-                            ),
-                            PaginationBar(
-                              totalPages: state.totalPages,
-                              currentPage: state.currentPage,
-                              onPageSelected: (page) {
-                                _fetchApi(
-                                  filterText: context
-                                      .read<GroupsBloc>()
-                                      .filterTextController
-                                      .text,
-                                  pageNumber: page,
-                                );
-                              },
-                              activeColor: AppColors.primaryColor,
-                              inactiveColor: AppColors.grey,
-                            ),
-                          ],
+                        return ListView.builder(
+                          shrinkWrap: true,
+                          itemCount: state.list.length,
+                          itemBuilder: (_, index) {
+                            final warehouse = state.list[index];
+                            return GroupsCard(
+                                group: warehouse, index: index + 1);
+                          },
                         );
                       }
                     } else if (state is GroupsListFailed) {
@@ -164,7 +178,9 @@ class _GroupsScreenState extends State<GroupsScreen> {
         ),
       ),
     );
+
   }
+
 
   void _showFilterMenu(BuildContext context, Offset offset) async {
     final screenSize = MediaQuery.of(context).size;

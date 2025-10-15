@@ -26,7 +26,7 @@ class AppUrls {
   static final String unit          = '$baseUrl/units/';
   static final String category          = '$baseUrl/categories/';
   static final String group          = '$baseUrl/groups/';
-  static final String product          = '$baseUrl/user/product';
+  static final String product          = '$baseUrl/products';
   static final String productStock          = '$baseUrl/user/product/stock-info?status=1&total=true';
   static final String source          = '$baseUrl/sources/';
 

@@ -18,21 +18,18 @@ Future<String> getResponse({
   final Map<String, String> header = {
     "Content-Type": "application/json",
     'Authorization': 'Bearer ${token?['token']}',
-    "branch-id": " ${token?['branchId']}",
-    "branch-name": " ${token?['branchName']}",
-    "bs-type": "${token?['bsType']}",
-    "user-id": "${token?['userId']}",
-    "is-super-admin": "false",
+
   };
   logger.i("getResponse header: $header");
 
   try {
     final response = await http
         .get(uriUrl, headers: header)
-        .timeout(const Duration(seconds: 50));
+        .timeout(const Duration(seconds: 80));
 
     // logger.i("getResponse body: ${response.body}");
     logger.i("getResponse statusCode: ${response.statusCode}");
+    logger.i("getResponse statusCode: ${response.body}");
 
     // Check for 401 Unauthorized error
     if (response.statusCode == 401) {

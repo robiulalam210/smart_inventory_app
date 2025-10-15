@@ -1,11 +1,10 @@
-import 'package:dokani_360/models/product/groups.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_advanced_switch/flutter_advanced_switch.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:iconsax/iconsax.dart';
-import '../../../../blocs/products/groups/groups_bloc.dart';
-import '../../../../configs/app_colors.dart';
-import '../create_groups/create_groups_setup.dart';
+
+import '../../../../../core/configs/app_colors.dart';
+import '../../data/model/groups.dart';
+
 
 class GroupsCard extends StatefulWidget {
   final GroupsModel group;

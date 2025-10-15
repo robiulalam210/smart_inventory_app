@@ -1,8 +1,9 @@
-import 'package:dokani_360/blocs/blocs.dart';
-import 'package:dokani_360/models/product/unit_model.dart';
+
 import 'package:hugeicons/hugeicons.dart';
-import '../../../../widgets/delete_dialog.dart';
-import '../create_unit/create_unit_setup.dart';
+
+import '../../../../../core/configs/configs.dart';
+import '../../data/model/unit_model.dart';
+
 
 class UnitCard extends StatelessWidget {
   final UnitsModel units;

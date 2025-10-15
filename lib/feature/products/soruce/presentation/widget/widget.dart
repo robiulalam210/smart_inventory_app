@@ -1,8 +1,9 @@
-import 'package:dokani_360/blocs/blocs.dart';
 import 'package:hugeicons/hugeicons.dart';
-import '../../../../models/product/source_model.dart';
-import '../../../../widgets/delete_dialog.dart';
-import '../create_source/create_unit_setup.dart';
+
+import '../../../../../core/configs/configs.dart';
+import '../../data/model/source_model.dart';
+import '../bloc/source/source_bloc.dart';
+
 
 class SourceCard extends StatelessWidget {
   final SourceModel source;

@@ -1,7 +1,13 @@
-import '../../../configs/configs.dart';
-import 'create_unit/create_unit_setup.dart';
-import 'widget/widget.dart';
 
+
+
+import '../../../../../core/configs/configs.dart';
+import '../../../../../core/shared/widgets/sideMenu/sidebar.dart';
+import '../../../../../core/widgets/app_alert_dialog.dart';
+import '../../../../../core/widgets/app_loader.dart';
+import '../../../../../core/widgets/coustom_search_text_field.dart';
+import '../bloc/unit/unti_bloc.dart';
+import '../widget/widget.dart';
 
 class UnitScreen extends StatefulWidget {
   const UnitScreen({super.key});
@@ -44,141 +50,158 @@ class _UnitScreenState extends State<UnitScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.bg,
-      appBar:appBar(title: "Unit List", context: context),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          dataBloc.nameController.clear();
-          dataBloc.shortNameController.clear();
-          setupUnit(context, "Create Unit", "Create",id: "");
-        },
-        backgroundColor: AppColors.whiteColor,
-        child: const Icon(
-          Icons.add,
-          color: AppColors.primaryColor,
-        ),
-      ),
-      body: Container(
-        padding:AppTextStyle.getResponsivePaddingBody(context),
-        child: BlocListener<UnitBloc, UnitState>(
-          listener: (context, state) {
-            if (state is UnitAddLoading) {
-              appLoader(context, "Creating unit, please wait...");
-            }if (state is UnitUpdateLoading) {
-              appLoader(context, "Update unit, please wait...");
-            }else if (state is UnitDeleteLoading) {
-              appLoader(context, "Deleted unit, please wait...");
-            } else if (state is UnitAddSuccess) {
-              Navigator.pop(context); // Close loader dialog
-              Navigator.pop(context); // Close loader dialog
-              _fetchApiData(); // Reload warehouse list
-            } else if (state is UnitUpdateSuccess) {
-              Navigator.pop(context); // Close loader dialog
-              Navigator.pop(context); // Close loader dialog
-              _fetchApiData(); // Reload warehouse list
-            } else if (state is UnitDeleteSuccess) {
-              Navigator.pop(context); // Close loader dialog
-              _fetchApiData(); // Reload warehouse list
-            } else if (state is UnitAddFailed) {
-              Navigator.pop(context); // Close loader dialog
-              Navigator.pop(context); // Close loader dialog
-              _fetchApiData();
-              appAlertDialog(context, state.content,
-                  title: state.title,
-                  actions: [
-                    TextButton(
-                        onPressed: () => AppRoutes.pop(context),
-                        child: const Text("Dismiss"))
-                  ]);
-            }else if (state is UnitUpdateFailed) {
-              Navigator.pop(context); // Close loader dialog
-              Navigator.pop(context); // Close loader dialog
-              _fetchApiData();
-              appAlertDialog(context, state.content,
-                  title: state.title,
-                  actions: [
-                    TextButton(
-                        onPressed: () => AppRoutes.pop(context),
-                        child: const Text("Dismiss"))
-                  ]);
-            }
-          },
-          child: Column(
-            children: [
-
-              CustomSearchTextFormField(
-                controller: context.read<UnitBloc>().filterTextController,
-                onChanged: (value) {
-                  _fetchApiData(
-                    filterText: value,
-
-                  );
-                },
-                onClear: (){
-                  context.read<UnitBloc>().filterTextController.clear();
-                  _fetchApiData();
-
-                },
-                hintText: "Search Name", // Pass dynamic hintText if needed
-              ),
-
-
-              Expanded(
-                child: BlocBuilder<UnitBloc,UnitState>(
-                  builder: (context, state) {
-                    if (state is UnitListLoading) {
-                      return const Center(child: CircularProgressIndicator());
-                    } else if (state is UnitListSuccess) {
-                      if (state.list.isEmpty) {
-                        return Center(
-                          child: Lottie.asset(AppImages.noData),
-                        );
-                      } else {
-                        return Column(
-                          children: [
-                            const SizedBox(height: 5),
-                            Expanded(
-                              child: ListView.builder(
-                                itemCount: state.list.length,
-                                itemBuilder: (_, index) {
-                                  final warehouse = state.list[index];
-                                  return UnitCard(
-                                      units: warehouse, index: index+1);
-                                },
-                              ),
-                            ),
-                            PaginationBar(
-                              totalPages: state.totalPages,
-                              currentPage: state.currentPage,
-                              onPageSelected: (page) {
-                                _fetchApiData(
-                                  filterText:context.read<UnitBloc>(). filterTextController.text,
-
-                                  pageNumber: page,
-                                );
-                              },
-                              activeColor: AppColors.primaryColor,
-                              inactiveColor: AppColors.grey,
-                            ),
-                          ],
-                        );
-                      }
-
-                    } else if (state is UnitListFailed) {
-                      return Center(
-                          child: Text('Failed to load unit screen: ${state.content}'));
-                    } else {
-                      return Container();
-                    }
-                  },
-                ),
-              ),
-            ],
-          ),
+    final isBigScreen =
+        Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
+    return Container(
+      color: AppColors.bg,
+      child: SafeArea(
+        child: ResponsiveRow(
+          spacing: 0,
+          runSpacing: 0,
+          children: [
+            if (isBigScreen) _buildSidebar(),
+            _buildContentArea(isBigScreen),
+          ],
         ),
       ),
     );
+  }
+
+  Widget _buildSidebar() {
+    return ResponsiveCol(
+      xs: 0,
+      sm: 1,
+      md: 1,
+      lg: 2,
+      xl: 2,
+      child: Container(
+        decoration: const BoxDecoration(color: Colors.white),
+        child: const Sidebar(),
+      ),
+    );
+  }
+
+  Widget _buildContentArea(bool isBigScreen) {
+    return ResponsiveCol(
+      xs: 12,
+      sm: 12,
+      md: 12,
+      lg: 10,
+      xl: 10,
+      child:     SizedBox(
+
+    child: Container(
+    padding:AppTextStyle.getResponsivePaddingBody(context),
+    child: BlocListener<UnitBloc, UnitState>(
+    listener: (context, state) {
+    if (state is UnitAddLoading) {
+    appLoader(context, "Creating unit, please wait...");
+    }if (state is UnitUpdateLoading) {
+    appLoader(context, "Update unit, please wait...");
+    }else if (state is UnitDeleteLoading) {
+    appLoader(context, "Deleted unit, please wait...");
+    } else if (state is UnitAddSuccess) {
+    Navigator.pop(context); // Close loader dialog
+    Navigator.pop(context); // Close loader dialog
+    _fetchApiData(); // Reload warehouse list
+    } else if (state is UnitUpdateSuccess) {
+    Navigator.pop(context); // Close loader dialog
+    Navigator.pop(context); // Close loader dialog
+    _fetchApiData(); // Reload warehouse list
+    } else if (state is UnitDeleteSuccess) {
+    Navigator.pop(context); // Close loader dialog
+    _fetchApiData(); // Reload warehouse list
+    } else if (state is UnitAddFailed) {
+    Navigator.pop(context); // Close loader dialog
+    Navigator.pop(context); // Close loader dialog
+    _fetchApiData();
+    appAlertDialog(context, state.content,
+    title: state.title,
+    actions: [
+    TextButton(
+    onPressed: () => AppRoutes.pop(context),
+    child: const Text("Dismiss"))
+    ]);
+    }else if (state is UnitUpdateFailed) {
+    Navigator.pop(context); // Close loader dialog
+    Navigator.pop(context); // Close loader dialog
+    _fetchApiData();
+    appAlertDialog(context, state.content,
+    title: state.title,
+    actions: [
+    TextButton(
+    onPressed: () => AppRoutes.pop(context),
+    child: const Text("Dismiss"))
+    ]);
+    }
+    },
+    child: Column(
+    children: [
+
+    CustomSearchTextFormField(
+    controller: context.read<UnitBloc>().filterTextController,
+    onChanged: (value) {
+    _fetchApiData(
+    filterText: value,
+
+    );
+    },
+    onClear: (){
+    context.read<UnitBloc>().filterTextController.clear();
+    _fetchApiData();
+
+    },
+    hintText: "Search Name", // Pass dynamic hintText if needed
+    ),
+
+
+    SizedBox(
+    height: 400,
+    child: BlocBuilder<UnitBloc,UnitState>(
+    builder: (context, state) {
+    if (state is UnitListLoading) {
+    return const Center(child: CircularProgressIndicator());
+    } else if (state is UnitListSuccess) {
+    if (state.list.isEmpty) {
+    return Center(
+    child: Lottie.asset(AppImages.noData),
+    );
+    } else {
+    return Column(
+    children: [
+    const SizedBox(height: 5),
+    Expanded(
+    child: ListView.builder(
+    itemCount: state.list.length,
+    itemBuilder: (_, index) {
+    final warehouse = state.list[index];
+    return UnitCard(
+    units: warehouse, index: index+1);
+    },
+    ),
+    ),
+
+    ],
+    );
+    }
+
+    } else if (state is UnitListFailed) {
+    return Center(
+    child: Text('Failed to load unit screen: ${state.content}'));
+    } else {
+    return Container();
+    }
+    },
+    ),
+    ),
+    ],
+    ),
+    ),
+    ),
+    )
+    );
+
+
   }
 }
 

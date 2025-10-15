@@ -1,3 +1,7 @@
+import 'package:smart_inventory/feature/products/groups/presentation/pages/groups_screen.dart';
+import 'package:smart_inventory/feature/products/soruce/presentation/pages/source_screen.dart';
+import 'package:smart_inventory/feature/products/unit/presentation/pages/unit_screen.dart';
+
 import '../../../../../core/configs/configs.dart';
 import '../../../../../enery_screen.dart';
 import '../../../../money_receipt/presentation/page/monery_receipt_create.dart';
@@ -6,6 +10,7 @@ import '../../../../product/presentation/page/create_product_screen.dart';
 import '../../../../product/presentation/page/product_setup.dart';
 import '../../../../products/brand/presentation/pages/brand_screen.dart';
 import '../../../../products/categories/presentation/pages/categories_screen.dart';
+import '../../../../products/product/presentation/pages/product_screen.dart';
 import '../../../../purchase/presentation/page/purchase_entry_from.dart';
 import '../../../../purchase/presentation/page/purchase_list_screen.dart';
 import '../../../../sales/presentation/pages/sales_create.dart';
@@ -29,16 +34,16 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     AppWrapper(child: MoneyReceiptForm()),
     AppWrapper(child: MoneyReceiptListScreen()),
 
-    AppWrapper(child: ProductCreateScreen()),
-    AppWrapper(child: ProductSetupScreen()),
-    AppWrapper(child: ProductSetupScreen()),
-    AppWrapper(child: ProductSetupScreen()),
+    // AppWrapper(child: ProductCreateScreen()),
+    AppWrapper(child: ProductsScreen()),
+    AppWrapper(child: SourceScreen()),
+    AppWrapper(child: UnitScreen()),
     AppWrapper(child: BrandScreen()),
     AppWrapper(child: CategoriesScreen()),
-    AppWrapper(child: ProductSetupScreen()),
+    AppWrapper(child: GroupsScreen()),
 
-    AppWrapper(child: PurchaseCreateScreen()),
-    AppWrapper(child: PurchaseListScreen()),
+    // AppWrapper(child: PurchaseCreateScreen()),
+    // AppWrapper(child: PurchaseListScreen()),
 
   ];
 
