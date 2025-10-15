@@ -4,6 +4,8 @@ import '../../../../money_receipt/presentation/page/monery_receipt_create.dart';
 import '../../../../money_receipt/presentation/page/money_receipt_list_screen.dart';
 import '../../../../product/presentation/page/create_product_screen.dart';
 import '../../../../product/presentation/page/product_setup.dart';
+import '../../../../products/brand/presentation/pages/brand_screen.dart';
+import '../../../../products/categories/presentation/pages/categories_screen.dart';
 import '../../../../purchase/presentation/page/purchase_entry_from.dart';
 import '../../../../purchase/presentation/page/purchase_list_screen.dart';
 import '../../../../sales/presentation/pages/sales_create.dart';
@@ -31,8 +33,8 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     AppWrapper(child: ProductSetupScreen()),
     AppWrapper(child: ProductSetupScreen()),
     AppWrapper(child: ProductSetupScreen()),
-    AppWrapper(child: ProductSetupScreen()),
-    AppWrapper(child: ProductSetupScreen()),
+    AppWrapper(child: BrandScreen()),
+    AppWrapper(child: CategoriesScreen()),
     AppWrapper(child: ProductSetupScreen()),
 
     AppWrapper(child: PurchaseCreateScreen()),

@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-
 import 'package:http/http.dart' as http;
 
 import '../../../../core/configs/app_constants.dart';
@@ -14,33 +13,43 @@ Future<LoginModel> loginService({required Map payload}) async {
   logger.f("url $url");
   logger.f("payload $payload");
 
-  final Map<String, String> header = {
-    "Content-Type": "application/json",
-  };
+  final headers = {"Content-Type": "application/json"};
 
   try {
-    final response =
-        await http.post(url, body: jsonEncode(payload), headers: header);
+    final response = await http
+        .post(url, body: jsonEncode(payload), headers: headers)
+        .timeout(const Duration(seconds: 10));
+
     logger.i("login response: ${response.body}");
 
-    final parsed = loginModelFromJson(response.body);
+    if (response.statusCode == 200) {
+      final parsed = loginModelFromJson(response.body);
 
-    // You can determine success by checking for access_token or status/message
-    if (parsed.accessToken != null && parsed.accessToken!.isNotEmpty) {
-      parsed.success = true;
+      // Determine success by token availability
+      if (parsed.tokens?.access != null &&
+          parsed.tokens!.access!.isNotEmpty) {
+        parsed.success = true;
+        parsed.message = "Login successful";
+      } else {
+        parsed.success = false;
+        parsed.message = "Invalid credentials or missing token";
+      }
+
+      return parsed;
     } else {
-      parsed.success = false;
+      return LoginModel(
+        success: false,
+        message: "Server error: ${response.statusCode}",
+      );
     }
-
-    return parsed;
   } on TimeoutException catch (e) {
     logger.e("TimeoutException in loginService: $e");
     return LoginModel(success: false, message: "Request timed out");
   } on SocketException catch (e) {
     logger.e("SocketException in loginService: $e");
-    return LoginModel(success: false, message: "No Internet connection");
+    return LoginModel(success: false, message: "No internet connection");
   } catch (e) {
     logger.e("Exception in loginService: $e");
-    return LoginModel(success: false, message: "Unexpected error");
+    return LoginModel(success: false, message: "Unexpected error occurred");
   }
 }

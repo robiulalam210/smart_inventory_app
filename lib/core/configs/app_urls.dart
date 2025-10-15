@@ -13,13 +13,22 @@ class AppUrls {
 
   static final String baseUrl = "$baseUrlMain/api"; //!Server url
 
-  static final String login          = '$baseUrl/login-with-saas';
+  static final String login          = '$baseUrl/auth/login/';
   static final String patient          = '$baseUrl/user/bloc/change-password';
   static final String saveInvoice          = '$baseUrl/great-lab-save-invoice';
   static final String setUpData          = '$baseUrl/lab-offline/setup-data';
   static final String syncInvoice          = '$baseUrl/lab-offline/sync/invoice';
   static final String fullInvoiceRefund          = '$baseUrl/great-lab-invoice-full-refund/';
   static final String getInvoice          = '$baseUrl/lab-offline/invoice';
+
+
+  static final String brand          = '$baseUrl/brands/';
+  static final String unit          = '$baseUrl/units/';
+  static final String category          = '$baseUrl/categories/';
+  static final String group          = '$baseUrl/groups/';
+  static final String product          = '$baseUrl/user/product';
+  static final String productStock          = '$baseUrl/user/product/stock-info?status=1&total=true';
+  static final String source          = '$baseUrl/sources/';
 
 
 

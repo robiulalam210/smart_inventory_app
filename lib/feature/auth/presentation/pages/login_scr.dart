@@ -160,13 +160,13 @@ class _LogInScreenState extends State<LogInScreen> {
                                   isRequired: true,
                                   hintText: "Email Address",
                                   keyboardType: TextInputType.emailAddress,
-                                  validator: (value) {
-                                    return value!.trim().isEmpty
-                                        ? 'Please enter email address'
-                                        : AppConstants.emailRegex.hasMatch(value.trim())
-                                        ? null
-                                        : 'Invalid email address';
-                                  },
+                                  // validator: (value) {
+                                  //   return value!.trim().isEmpty
+                                  //       ? 'Please enter email address'
+                                  //       : AppConstants.emailRegex.hasMatch(value.trim())
+                                  //       ? null
+                                  //       : 'Invalid email address';
+                                  // },
                                   controller: emailCon,
                                 ),
                                 AppTextField(

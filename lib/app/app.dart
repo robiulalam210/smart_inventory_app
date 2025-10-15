@@ -2,6 +2,11 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 import '../core/core.dart';
 import '../feature/feature.dart';
+import '../feature/products/brand/presentation/bloc/brand/brand_bloc.dart';
+import '../feature/products/categories/presentation/bloc/categories/categories_bloc.dart';
+import '../feature/products/groups/presentation/bloc/groups/groups_bloc.dart';
+import '../feature/products/soruce/presentation/bloc/source/source_bloc.dart';
+import '../feature/products/unit/presentation/bloc/unit/unti_bloc.dart';
 
 
 class MyApp extends StatelessWidget {
@@ -40,6 +45,33 @@ class MyApp extends StatelessWidget {
                 unSyncRepo: UnSyncRepo())),
 
         BlocProvider(create: (context) => PrintLayoutBloc(PrintLayoutRepoDb())),
+
+
+
+        BlocProvider(
+          create: (_) => BrandBloc(),
+        ),
+        BlocProvider(
+          create: (_) => UnitBloc(),
+        ),
+        BlocProvider(
+          create: (_) => CategoriesBloc(),
+        ),
+
+
+
+        BlocProvider(
+          create: (_) => GroupsBloc(),
+        ),
+        BlocProvider(
+          create: (_) => SourceBloc(),
+        ),
+        // BlocProvider(
+        //   create: (_) => ProductsBloc(),
+        // ),
+        // BlocProvider(
+        //   create: (_) => ProductStockBloc(),
+        // ),
       ],
       child: Center(
         child: MaterialApp(

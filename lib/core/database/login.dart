@@ -10,9 +10,6 @@ class LocalDB {
     required String email,
     required String password,
     required String token,
-    required dynamic branchId,
-    required String branchName,
-    required String bsType,
     required dynamic userId,
     required String userName,
     required String userType,
@@ -24,9 +21,6 @@ class LocalDB {
     await prefs.setString('${_prefix}email', email);
     await prefs.setString('${_prefix}password', password);
     await prefs.setString('${_prefix}token', token);
-    await prefs.setString('${_prefix}branchId', branchId.toString());
-    await prefs.setString('${_prefix}branchName', branchName);
-    await prefs.setString('${_prefix}bsType', bsType);
     await prefs.setString('${_prefix}userId', userId.toString());
     await prefs.setString('${_prefix}userName', userName);
     await prefs.setString('${_prefix}userType', userType);
