@@ -57,9 +57,7 @@ class _SidebarState extends State<Sidebar> {
 
                         ExpansionTile(
                           initiallyExpanded:
-                              currentIndex == 1 ||
-                              currentIndex == 2 ,
-
+                              currentIndex == 1 || currentIndex == 2,
 
                           title: Text(
                             "Sales",
@@ -92,8 +90,7 @@ class _SidebarState extends State<Sidebar> {
                         ),
                         ExpansionTile(
                           initiallyExpanded:
-                          currentIndex == 3 ||
-                              currentIndex == 4 ,
+                              currentIndex == 3 || currentIndex == 4,
 
                           title: Text(
                             "Money Receipt",
@@ -131,6 +128,7 @@ class _SidebarState extends State<Sidebar> {
                               currentIndex == 7 ||
                               currentIndex == 8 ||
                               currentIndex == 9 ||
+                              currentIndex == 10 ||
                               currentIndex == 10,
 
                           title: Text(
@@ -197,6 +195,14 @@ class _SidebarState extends State<Sidebar> {
                               isSelected: currentIndex == 10,
                               onPressed: () {
                                 bloc.add(ChangeDashboardScreen(index: 10));
+                              },
+                            ),
+                            MenuTile(
+                              isSubmenu: true,
+                              title: "Accounts ",
+                              isSelected: currentIndex == 11,
+                              onPressed: () {
+                                bloc.add(ChangeDashboardScreen(index: 11));
                               },
                             ),
                           ],

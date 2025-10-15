@@ -1,6 +1,7 @@
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 import '../core/core.dart';
+import '../feature/accounts/presentation/bloc/account/account_bloc.dart';
 import '../feature/feature.dart';
 import '../feature/products/brand/presentation/bloc/brand/brand_bloc.dart';
 import '../feature/products/categories/presentation/bloc/categories/categories_bloc.dart';
@@ -70,9 +71,9 @@ class MyApp extends StatelessWidget {
         BlocProvider(
           create: (_) => ProductsBloc(),
         ),
-        // BlocProvider(
-        //   create: (_) => ProductStockBloc(),
-        // ),
+        BlocProvider(
+          create: (_) => AccountBloc(),
+        ),
       ],
       child: Center(
         child: MaterialApp(

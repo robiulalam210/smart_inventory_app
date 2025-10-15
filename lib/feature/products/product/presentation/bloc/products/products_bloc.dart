@@ -69,8 +69,7 @@ class ProductsBloc extends Bloc<ProductsEvent, ProductsState> {
 
       // ✅ success check
       if (response.success == true) {
-        print(response.success);
-        print(response.data);
+
         // Store product list
         list = response.data;
 
