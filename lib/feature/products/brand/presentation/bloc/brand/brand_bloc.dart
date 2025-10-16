@@ -1,6 +1,3 @@
-
-
-
 import '../../../../../../core/configs/configs.dart';
 import '../../../../../../core/repositories/delete_response.dart';
 import '../../../../../../core/repositories/get_response.dart';
@@ -11,50 +8,52 @@ import '../../../../../common/data/models/app_parse_json.dart';
 import '../../../data/model/brand_model.dart';
 
 part 'brand_event.dart';
+
 part 'brand_state.dart';
 
 class BrandBloc extends Bloc<BrandEvent, BrandState> {
-
   List<BrandModel> brandModel = [];
   final int _itemsPerPage = 20;
   String selectedState = "";
   String selectedId = "";
   TextEditingController filterTextController = TextEditingController();
 
-
   TextEditingController nameController = TextEditingController();
   TextEditingController addressController = TextEditingController();
 
   BrandBloc() : super(BrandInitial()) {
-    on<FetchBrandList >(_onFetchBrandList);
+    on<FetchBrandList>(_onFetchBrandList);
     on<AddBrand>(_onCreateBrandList);
     on<UpdateBrand>(_onUpdateBrandList);
     on<DeleteBrand>(_onDeleteBrandList);
   }
 
   Future<void> _onFetchBrandList(
-      FetchBrandList event, Emitter<BrandState> emit) async {
-
+    FetchBrandList event,
+    Emitter<BrandState> emit,
+  ) async {
     emit(BrandListLoading());
 
     try {
-      final res  = await getResponse(url: AppUrls.brand, context: event.context); // Use the correct API URL
+      final res = await getResponse(
+        url: AppUrls.brand,
+        context: event.context,
+      ); // Use the correct API URL
 
-
-
-
-    ApiResponse response = appParseJson(
-    res,
-    (data) =>
-    List<BrandModel>.from(data.map((x) => BrandModel.fromJson(x))),
-    );
+      ApiResponse response = appParseJson(
+        res,
+        (data) =>
+            List<BrandModel>.from(data.map((x) => BrandModel.fromJson(x))),
+      );
       final data = response.data;
       if (data == null || data.isEmpty) {
-        emit(BrandListSuccess(
-          list: [],
-          totalPages: 0,
-          currentPage: event.pageNumber,
-        ));
+        emit(
+          BrandListSuccess(
+            list: [],
+            totalPages: 0,
+            currentPage: event.pageNumber,
+          ),
+        );
         return;
       }
       // Store all warehouses for filtering and pagination
@@ -66,21 +65,24 @@ class BrandBloc extends Bloc<BrandEvent, BrandState> {
 
       final totalPages = (filteredData.length / _itemsPerPage).ceil();
 
-      emit(BrandListSuccess(
-        list: paginatedPage,
-        totalPages: totalPages,
-        currentPage: event.pageNumber,
-      ));
+      emit(
+        BrandListSuccess(
+          list: paginatedPage,
+          totalPages: totalPages,
+          currentPage: event.pageNumber,
+        ),
+      );
     } catch (error) {
-      emit(BrandListFailed(title: "Error",content: error.toString()));
+      emit(BrandListFailed(title: "Error", content: error.toString()));
     }
   }
 
-  List<BrandModel> _filterBrand(
-      List<BrandModel> list, String filterText) {
+  List<BrandModel> _filterBrand(List<BrandModel> list, String filterText) {
     return list.where((data) {
-      final matchesText = filterText.isEmpty || data.name!.toLowerCase().contains(filterText.toLowerCase());
-      return  matchesText;
+      final matchesText =
+          filterText.isEmpty ||
+          data.name!.toLowerCase().contains(filterText.toLowerCase());
+      return matchesText;
     }).toList();
   }
 
@@ -91,9 +93,10 @@ class BrandBloc extends Bloc<BrandEvent, BrandState> {
     return list.sublist(start, end > list.length ? list.length : end);
   }
 
-
   Future<void> _onCreateBrandList(
-      AddBrand event, Emitter<BrandState> emit) async {
+    AddBrand event,
+    Emitter<BrandState> emit,
+  ) async {
     emit(BrandAddLoading());
 
     try {
@@ -101,18 +104,17 @@ class BrandBloc extends Bloc<BrandEvent, BrandState> {
 
       // Log the response for debugging
 
-      ApiResponse response = appParseJson(
-        res,
-            (data) {
-          // Check if data is a Map (object)
-          if (data is Map<String, dynamic>) {
-            // Create a BrandModel from the single object
-            return BrandModel.fromJson(data);
-          } else {
-            throw Exception("Expected data to be an object but got ${data.runtimeType}");
-          }
-        },
-      );
+      ApiResponse response = appParseJson(res, (data) {
+        // Check if data is a Map (object)
+        if (data is Map<String, dynamic>) {
+          // Create a BrandModel from the single object
+          return BrandModel.fromJson(data);
+        } else {
+          throw Exception(
+            "Expected data to be an object but got ${data.runtimeType}",
+          );
+        }
+      });
 
       if (response.success == false) {
         emit(BrandAddFailed(title: '', content: response.message ?? ""));
@@ -127,68 +129,65 @@ class BrandBloc extends Bloc<BrandEvent, BrandState> {
     }
   }
 
-
-
-
   Future<void> _onUpdateBrandList(
-      UpdateBrand event, Emitter<BrandState> emit) async {
-
+    UpdateBrand event,
+    Emitter<BrandState> emit,
+  ) async {
     emit(BrandAddLoading());
 
     try {
-      final res  = await patchResponse(url: AppUrls.brand+event.id.toString(),payload: event.body!); // Use the correct API URL
+      final res = await patchResponse(
+        url: AppUrls.brand + event.id.toString(),
+        payload: event.body!,
+      ); // Use the correct API URL
 
       ApiResponse response = appParseJson(
         res,
-            (data) => List<BrandModel>.from(data.map((x) => BrandModel.fromJson(x))),
+        (data) =>
+            List<BrandModel>.from(data.map((x) => BrandModel.fromJson(x))),
       );
       if (response.success == false) {
-        emit(BrandAddFailed(title: 'Alert', content: response.message??""));
+        emit(BrandAddFailed(title: 'Alert', content: response.message ?? ""));
         return;
       }
       clearData();
-      emit(BrandAddSuccess(
-
-      ));
+      emit(BrandAddSuccess());
     } catch (error) {
       clearData();
-      emit(BrandAddFailed(title: "Error",content: error.toString()));
-
+      emit(BrandAddFailed(title: "Error", content: error.toString()));
     }
   }
 
-
   Future<void> _onDeleteBrandList(
-      DeleteBrand event, Emitter<BrandState> emit) async {
-
+    DeleteBrand event,
+    Emitter<BrandState> emit,
+  ) async {
     emit(BrandDeleteLoading());
 
     try {
-      final res  = await deleteResponse(url: AppUrls.brand+event.id.toString()); // Use the correct API URL
+      final res = await deleteResponse(
+        url: AppUrls.brand + event.id.toString(),
+      ); // Use the correct API URL
 
       ApiResponse response = appParseJson(
         res,
-            (data) => List<BrandModel>.from(data.map((x) => BrandModel.fromJson(x))),
+        (data) =>
+            List<BrandModel>.from(data.map((x) => BrandModel.fromJson(x))),
       );
       if (response.success == false) {
-        emit(BrandDeleteFailed(title: 'Json', content: response.message??""));
+        emit(BrandDeleteFailed(title: 'Json', content: response.message ?? ""));
         return;
       }
       clearData();
-      emit(BrandDeleteSuccess(
-
-      ));
+      emit(BrandDeleteSuccess());
     } catch (error) {
       clearData();
-      emit(BrandDeleteFailed(title: "Error",content: error.toString()));
-
+      emit(BrandDeleteFailed(title: "Error", content: error.toString()));
     }
   }
 
-  clearData(){
+  clearData() {
     nameController.clear();
     addressController.clear();
   }
-
 }
-

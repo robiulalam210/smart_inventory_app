@@ -142,7 +142,8 @@ class _GroupsScreenState extends State<GroupsScreen> {
                   ),
                 ],
               ),
-              Expanded(
+              SizedBox(
+                height: 500,
                 child: BlocBuilder<GroupsBloc, GroupsState>(
                   builder: (context, state) {
                     if (state is GroupsListLoading) {

@@ -1,6 +1,3 @@
-
-
-
 import '../../../../../core/configs/configs.dart';
 import '../../../../../core/repositories/get_response.dart';
 import '../../../../../core/repositories/post_response.dart';
@@ -9,10 +6,10 @@ import '../../../../common/data/models/app_parse_json.dart';
 import '../../../data/model/account_model.dart';
 
 part 'account_event.dart';
+
 part 'account_state.dart';
 
 class AccountBloc extends Bloc<AccountEvent, AccountState> {
-
   AccountModel? selectedAccountFrom;
   AccountModel? selectedAccountTo;
   List<AccountModel> list = [];
@@ -23,29 +20,28 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
   String selectedLocation = " ";
   String selectedId = "";
 
-  List<String> accountType = ["Bank", "Cash","Mobile Bank"];
+  List<String> accountType = ["Bank", "Cash", "Mobile Bank"];
 
   TextEditingController filterTextController = TextEditingController();
-
 
   TextEditingController accountNameController = TextEditingController();
   TextEditingController accountNumberController = TextEditingController();
   TextEditingController bankNameController = TextEditingController();
   TextEditingController branchNameController = TextEditingController();
   TextEditingController routingNameController = TextEditingController();
-  TextEditingController accountOpeningBalanceController = TextEditingController();
+  TextEditingController accountOpeningBalanceController =
+      TextEditingController();
   TextEditingController shortNameController = TextEditingController();
 
   AccountBloc() : super(AccountInitial()) {
-    on<FetchAccountList >(_onFetchAccountList);
-    on<AddAccount >(_onCreateAccountList);
+    on<FetchAccountList>(_onFetchAccountList);
+    on<AddAccount>(_onCreateAccountList);
   }
 
-
   Future<void> _onFetchAccountList(
-      FetchAccountList event,
-      Emitter<AccountState> emit,
-      ) async {
+    FetchAccountList event,
+    Emitter<AccountState> emit,
+  ) async {
     emit(AccountListLoading());
 
     try {
@@ -56,22 +52,27 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
 
       ApiResponse response = appParseJson(
         res,
-            (data) => List<AccountModel>.from(
-          data.map((x) => AccountModel.fromJson(x)),
-        ),
+        (data) =>
+            List<AccountModel>.from(data.map((x) => AccountModel.fromJson(x))),
       );
+      final data = response.data;
 
       if (response.success == true) {
-        final List<AccountModel> accountList = response.data ?? [];
-
-        if (accountList.isEmpty) {
-          emit(AccountListFailed(title: "Error", content: "No Data"));
+        final data = response.data;
+        if (data == null || data.isEmpty) {
+          emit(
+            AccountListSuccess(
+              list: [],
+              totalPages: 0,
+              currentPage: event.pageNumber,
+            ),
+          );
           return;
         }
 
         // Filter and paginate accounts
         final filteredAccount = _filterData(
-          accountList,
+          data,
           event.filterText,
           event.accountType,
         );
@@ -81,19 +82,25 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
           event.pageNumber,
         );
 
-        final totalPages =
-        (filteredAccount.length / _itemsPerPage).ceil().clamp(1, double.infinity).toInt();
+        final totalPages = (filteredAccount.length / _itemsPerPage)
+            .ceil()
+            .clamp(1, double.infinity)
+            .toInt();
 
-        emit(AccountListSuccess(
-          list: paginatedAccounts,
-          totalPages: totalPages,
-          currentPage: event.pageNumber,
-        ));
+        emit(
+          AccountListSuccess(
+            list: paginatedAccounts,
+            totalPages: totalPages,
+            currentPage: event.pageNumber,
+          ),
+        );
       } else {
-        emit(AccountListFailed(
-          title: "Error",
-          content: response.message ?? "Unknown Error",
-        ));
+        emit(
+          AccountListFailed(
+            title: "Error",
+            content: response.message ?? "Unknown Error",
+          ),
+        );
       }
     } catch (error) {
       emit(AccountListFailed(title: "Error", content: error.toString()));
@@ -101,14 +108,17 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
   }
 
   List<AccountModel> _filterData(
-      List<AccountModel> accounts,
-      String filterText,
-      String accountType,
-      ) {
+    List<AccountModel> accounts,
+    String filterText,
+    String accountType,
+  ) {
     return accounts.where((account) {
-      final matchesText = filterText.isEmpty ||
-          (account.acName?.toLowerCase().contains(filterText.toLowerCase()) ?? false);
-      final matchesType = accountType.isEmpty ||
+      final matchesText =
+          filterText.isEmpty ||
+          (account.acName?.toLowerCase().contains(filterText.toLowerCase()) ??
+              false);
+      final matchesType =
+          accountType.isEmpty ||
           (account.acType?.toString().toLowerCase() ==
               accountType.toString().toLowerCase());
       return matchesText && matchesType;
@@ -116,40 +126,44 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
   }
 
   List<AccountModel> _paginatePage(
-      List<AccountModel> accounts,
-      int pageNumber,
-      ) {
+    List<AccountModel> accounts,
+    int pageNumber,
+  ) {
     final start = pageNumber * _itemsPerPage;
     final end = start + _itemsPerPage;
     if (start >= accounts.length) return [];
-    return accounts.sublist(start, end > accounts.length ? accounts.length : end);
+    return accounts.sublist(
+      start,
+      end > accounts.length ? accounts.length : end,
+    );
   }
 
-
   Future<void> _onCreateAccountList(
-      AddAccount event, Emitter<AccountState> emit) async {
-
+    AddAccount event,
+    Emitter<AccountState> emit,
+  ) async {
     emit(AccountAddLoading());
 
     try {
-      final res  = await postResponse(url: AppUrls.account,payload: event.body); // Use the correct API URL
+      final res = await postResponse(
+        url: AppUrls.account,
+        payload: event.body,
+      ); // Use the correct API URL
 
       ApiResponse response = appParseJson(
         res,
-            (data) => List<AccountModel>.from(data.map((x) => AccountModel.fromJson(x))),
+        (data) =>
+            List<AccountModel>.from(data.map((x) => AccountModel.fromJson(x))),
       );
       if (response.success == false) {
-        emit(AccountAddFailed(title: '', content: response.message??""));
+        emit(AccountAddFailed(title: '', content: response.message ?? ""));
         return;
       }
-     clearData();
-      emit(AccountAddSuccess(
-
-      ));
+      clearData();
+      emit(AccountAddSuccess());
     } catch (error) {
-     clearData();
-      emit(AccountAddFailed(title: "Error",content: error.toString()));
-
+      clearData();
+      emit(AccountAddFailed(title: "Error", content: error.toString()));
     }
   }
 
@@ -182,12 +196,10 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
   //   }
   // }
 
-
-  clearData(){
+  clearData() {
     accountOpeningBalanceController.clear();
     accountNumberController.clear();
     accountNameController.clear();
-    selectedState="";
+    selectedState = "";
   }
-
 }

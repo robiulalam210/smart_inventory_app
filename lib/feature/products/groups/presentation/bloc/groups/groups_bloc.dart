@@ -1,7 +1,3 @@
-
-
-
-
 import '../../../../../../core/configs/configs.dart';
 import '../../../../../../core/repositories/get_response.dart';
 import '../../../../../../core/repositories/patch_response.dart';
@@ -35,12 +31,16 @@ class GroupsBloc extends Bloc<GroupsEvent, GroupsState> {
   }
 
   Future<void> _onFetchWarehouseList(
-      FetchGroupsList event, Emitter<GroupsState> emit) async {
+    FetchGroupsList event,
+    Emitter<GroupsState> emit,
+  ) async {
     emit(GroupsListLoading());
 
     try {
-      final res =
-          await getResponse(url: AppUrls.group, context: event.context); // Use the correct API URL
+      final res = await getResponse(
+        url: AppUrls.group,
+        context: event.context,
+      ); // Use the correct API URL
 
       ApiResponse<List<GroupsModel>> response = appParseJson<List<GroupsModel>>(
         res,
@@ -49,8 +49,13 @@ class GroupsBloc extends Bloc<GroupsEvent, GroupsState> {
       );
       final data = response.data;
       if (data == null || data.isEmpty) {
-        emit(GroupsListFailed(title: "Error", content: "No Data"));
-
+        emit(
+          GroupsListSuccess(
+            list: [],
+            totalPages: 0,
+            currentPage: event.pageNumber,
+          ),
+        );
         return;
       }
       // Store all warehouses for filtering and pagination
@@ -58,48 +63,61 @@ class GroupsBloc extends Bloc<GroupsEvent, GroupsState> {
 
       // Apply filtering and pagination
       final filteredWarehouses = _filterData(list, event.filterText);
-      final paginatedWarehouses =
-          __paginatePage(filteredWarehouses, event.pageNumber);
+      final paginatedWarehouses = __paginatePage(
+        filteredWarehouses,
+        event.pageNumber,
+      );
 
       final totalPages = (filteredWarehouses.length / _itemsPerPage).ceil();
 
-      emit(GroupsListSuccess(
-        list: paginatedWarehouses,
-        totalPages: totalPages,
-        currentPage: event.pageNumber,
-      ));
+      emit(
+        GroupsListSuccess(
+          list: paginatedWarehouses,
+          totalPages: totalPages,
+          currentPage: event.pageNumber,
+        ),
+      );
     } catch (error) {
       emit(GroupsListFailed(title: "Error", content: error.toString()));
     }
   }
 
   List<GroupsModel> _filterData(
-      List<GroupsModel> warehouses, String filterText) {
+    List<GroupsModel> warehouses,
+    String filterText,
+  ) {
     return warehouses.where((warehouse) {
-      final matchesText = filterText.isEmpty ||
-              warehouse.name!
-                  .toLowerCase()
-                  .contains(filterText.toLowerCase());
+      final matchesText =
+          filterText.isEmpty ||
+          warehouse.name!.toLowerCase().contains(filterText.toLowerCase());
       return matchesText;
     }).toList();
   }
 
   List<GroupsModel> __paginatePage(
-      List<GroupsModel> warehouses, int pageNumber) {
+    List<GroupsModel> warehouses,
+    int pageNumber,
+  ) {
     final start = pageNumber * _itemsPerPage;
     final end = start + _itemsPerPage;
     if (start >= warehouses.length) return [];
     return warehouses.sublist(
-        start, end > warehouses.length ? warehouses.length : end);
+      start,
+      end > warehouses.length ? warehouses.length : end,
+    );
   }
 
   Future<void> _onCreateWarehouseList(
-      AddGroups event, Emitter<GroupsState> emit) async {
+    AddGroups event,
+    Emitter<GroupsState> emit,
+  ) async {
     emit(GroupsAddLoading());
 
     try {
       final res = await postResponse(
-          url: AppUrls.group, payload: event.body); // Use the correct API URL
+        url: AppUrls.group,
+        payload: event.body,
+      ); // Use the correct API URL
 
       ApiResponse response = appParseJson(
         res,
@@ -119,13 +137,16 @@ class GroupsBloc extends Bloc<GroupsEvent, GroupsState> {
   }
 
   Future<void> _onUpdateGroupsList(
-      UpdateGroups event, Emitter<GroupsState> emit) async {
+    UpdateGroups event,
+    Emitter<GroupsState> emit,
+  ) async {
     emit(GroupsAddLoading());
 
     try {
       final res = await patchResponse(
-          url: AppUrls.group + event.id.toString(),
-          payload: event.body!); // Use the correct API URL
+        url: AppUrls.group + event.id.toString(),
+        payload: event.body!,
+      ); // Use the correct API URL
 
       ApiResponse response = appParseJson(
         res,
@@ -143,19 +164,23 @@ class GroupsBloc extends Bloc<GroupsEvent, GroupsState> {
       emit(GroupsAddFailed(title: "Error", content: error.toString()));
     }
   }
+
   Future<void> _onUpdateSwitchGroupsList(
-      UpdateSwitchGroups event, Emitter<GroupsState> emit) async {
+    UpdateSwitchGroups event,
+    Emitter<GroupsState> emit,
+  ) async {
     emit(GroupsSwitchLoading());
 
     try {
       final res = await patchResponse(
-          url: AppUrls.group + event.id.toString(),
-          payload: event.body!); // Use the correct API URL
+        url: AppUrls.group + event.id.toString(),
+        payload: event.body!,
+      ); // Use the correct API URL
 
       ApiResponse response = appParseJson(
         res,
-            (data) =>
-        List<GroupsModel>.from(data.map((x) => GroupsModel.fromJson(x))),
+        (data) =>
+            List<GroupsModel>.from(data.map((x) => GroupsModel.fromJson(x))),
       );
       if (response.success == false) {
         emit(GroupSwitchFailed(title: 'Json', content: response.message ?? ""));
@@ -168,6 +193,7 @@ class GroupsBloc extends Bloc<GroupsEvent, GroupsState> {
       emit(GroupSwitchFailed(title: "Error", content: error.toString()));
     }
   }
+
   // Future<void> _onDeleteBrandList(
   //     DeleteUnit event, Emitter<UnitState> emit) async {
   //
