@@ -1,6 +1,8 @@
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:smart_inventory/feature/customer/presentation/bloc/customer/customer_bloc.dart';
+import 'package:smart_inventory/feature/expense/expense_head/presentation/bloc/expense_head/expense_head_bloc.dart';
+import 'package:smart_inventory/feature/expense/presentation/bloc/expense_list/expense_bloc.dart';
 import '../core/core.dart';
 import '../feature/accounts/presentation/bloc/account/account_bloc.dart';
 import '../feature/feature.dart';
@@ -10,7 +12,6 @@ import '../feature/products/groups/presentation/bloc/groups/groups_bloc.dart';
 import '../feature/products/product/presentation/bloc/products/products_bloc.dart';
 import '../feature/products/soruce/presentation/bloc/source/source_bloc.dart';
 import '../feature/products/unit/presentation/bloc/unit/unti_bloc.dart';
-
 
 class MyApp extends StatelessWidget {
   final DatabaseHelper dbHelper;
@@ -32,8 +33,8 @@ class MyApp extends StatelessWidget {
           ),
         ),
         BlocProvider(
-            create: (context) =>
-                SplashBloc(authBloc: context.read<AuthBloc>())),
+          create: (context) => SplashBloc(authBloc: context.read<AuthBloc>()),
+        ),
         BlocProvider(create: (context) => DoctorBloc()),
 
         BlocProvider(create: (context) => TestBloc()),
@@ -43,40 +44,25 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (context) => SummaryBloc(SummeryRepoDB())),
 
         BlocProvider(
-            create: (context) => SyncBloc(
-                syncRepo: SetupAllSyncRepo(dbHelper),
-                unSyncRepo: UnSyncRepo())),
+          create: (context) => SyncBloc(
+            syncRepo: SetupAllSyncRepo(dbHelper),
+            unSyncRepo: UnSyncRepo(),
+          ),
+        ),
 
         BlocProvider(create: (context) => PrintLayoutBloc(PrintLayoutRepoDb())),
 
+        BlocProvider(create: (_) => BrandBloc()),
+        BlocProvider(create: (_) => UnitBloc()),
+        BlocProvider(create: (_) => CategoriesBloc()),
 
-
-        BlocProvider(
-          create: (_) => BrandBloc(),
-        ),
-        BlocProvider(
-          create: (_) => UnitBloc(),
-        ),
-        BlocProvider(
-          create: (_) => CategoriesBloc(),
-        ),
-
-
-
-        BlocProvider(
-          create: (_) => GroupsBloc(),
-        ),
-        BlocProvider(
-          create: (_) => SourceBloc(),
-        ),
-        BlocProvider(
-          create: (_) => ProductsBloc(),
-        ),
-        BlocProvider(
-          create: (_) => AccountBloc(),
-        ), BlocProvider(
-          create: (_) => CustomerBloc(),
-        ),
+        BlocProvider(create: (_) => GroupsBloc()),
+        BlocProvider(create: (_) => SourceBloc()),
+        BlocProvider(create: (_) => ProductsBloc()),
+        BlocProvider(create: (_) => AccountBloc()),
+        BlocProvider(create: (_) => CustomerBloc()),
+        BlocProvider(create: (_) => ExpenseBloc()),
+        BlocProvider(create: (_) => ExpenseHeadBloc()),
       ],
       child: Center(
         child: MaterialApp(

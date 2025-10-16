@@ -34,6 +34,13 @@ class AppUrls {
 
 
 
+  static final String expenseHead          = '$baseUrl/expenses/expense-heads/';
+  static final String expense          = '$baseUrl/expenses/expense/';
+
+
+
+
+
   //!for App update link
   static const String playStoreLink= '';
   static const String appStoreLink = '';

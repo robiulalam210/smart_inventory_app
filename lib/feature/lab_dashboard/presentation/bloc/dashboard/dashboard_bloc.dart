@@ -1,4 +1,6 @@
 import 'package:smart_inventory/feature/accounts/presentation/pages/account_screen.dart';
+import 'package:smart_inventory/feature/expense/expense_head/presentation/pages/expense_screen.dart';
+import 'package:smart_inventory/feature/expense/presentation/pages/expense_list_screen.dart';
 import 'package:smart_inventory/feature/products/groups/presentation/pages/groups_screen.dart';
 import 'package:smart_inventory/feature/products/soruce/presentation/pages/source_screen.dart';
 import 'package:smart_inventory/feature/products/unit/presentation/pages/unit_screen.dart';
@@ -45,6 +47,11 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     AppWrapper(child: GroupsScreen()),
     AppWrapper(child: AccountScreen()),
     AppWrapper(child: CustomerScreen()),
+
+    AppWrapper(child: ExpenseListScreen()),
+    AppWrapper(child: ExpenseHeadScreen()),
+    AppWrapper(child: ExpenseListScreen()),
+
 
     // AppWrapper(child: PurchaseCreateScreen()),
     // AppWrapper(child: PurchaseListScreen()),

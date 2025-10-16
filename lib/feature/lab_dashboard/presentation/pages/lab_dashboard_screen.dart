@@ -344,7 +344,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                 MainAxisAlignment.spaceAround,
                                             children: [
                                               StatsCardMonthly(
-                                                title: "Total Sold Quantity",
+                                                title: "Total Sold Quantity\n",
                                                 count: "0",
                                                 //state.dashboard.salesData?.totalQuantitySold?.toStringAsFixed(2) ?? "0",
                                                 color: Colors.pink,
@@ -595,119 +595,119 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           const SizedBox(height: 16),
 
                           // ==== TABBED INVENTORY/ANALYTICS VIEW ====
-                          Container(
-                            height: AppSizes.height(context) * 0.50,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: DefaultTabController(
-                              length: 6,
-                              child: Column(
-                                children: [
-                                  TabBar(
-                                    tabs: const [
-                                      Tab(text: 'Top Selling'),
-                                      Tab(text: 'Low Stock'),
-                                      Tab(text: 'Top Customers Due'),
-                                      Tab(text: 'Top Suppliers Due'),
-                                      Tab(text: 'Current Balance'),
-                                      Tab(text: 'Sales & Purchase Stats'),
-                                    ],
-                                    isScrollable: true,
-                                    dividerColor: Colors.transparent,
-                                    tabAlignment: TabAlignment.start,
-                                    labelColor: Colors.black,
-                                    indicatorColor: Colors.orangeAccent,
-                                    // labelStyle: AppTextStyle.cardLevelText(context),
-                                  ),
-                                  Expanded(
-                                    child: TabBarView(
-                                      children: [
-                                        SingleChildScrollView(
-                                          child: topSelling(context, []),
-                                        ),
-                                        //state.dashboard.topProduct ?? []
-                                        SingleChildScrollView(
-                                          child: lowStock(context, []),
-                                        ),
-                                        //state.dashboard.lowStockProducts ?? []
-                                        SingleChildScrollView(
-                                          child: customer(
-                                            context,
-                                            itemName: "Customers",
-                                            lowStockProducts: [],
-                                          ),
-                                        ),
-                                        //state.dashboard.topClients ?? []
-                                        SingleChildScrollView(
-                                          child: customer(
-                                            context,
-                                            itemName: "Supplier",
-                                            lowStockProducts: [],
-                                          ),
-                                        ),
-                                        //state.dashboard.topSuppliers ?? []
-                                        Padding(
-                                          padding: const EdgeInsets.all(16.0),
-                                          child: ListView.builder(
-                                            shrinkWrap: true,
-                                            physics:
-                                                const NeverScrollableScrollPhysics(),
-                                            itemCount: 0,
-                                            //state.dashboard.accounts?.length ?? 0,
-                                            itemBuilder: (_, index) {
-                                              // final account = state.dashboard.accounts?[index];
-                                              // return AccountCardDashbord(account: account!, index: index + 1);
-                                              return SizedBox();
-                                            },
-                                          ),
-                                        ),
-                                        SingleChildScrollView(
-                                          child: Container(
-                                            padding: const EdgeInsets.all(8),
-                                            decoration: BoxDecoration(
-                                              color: Colors.white,
-                                              borderRadius:
-                                                  BorderRadius.circular(8),
-                                            ),
-                                            child: Column(
-                                              children: [
-                                                // statisticsChart([]), //state.dashboard.revenueAndPurchase ?? []
-                                                const Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment.center,
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.center,
-                                                  children: [
-                                                    CircleAvatar(
-                                                      maxRadius: 5,
-                                                      backgroundColor:
-                                                          Colors.blueAccent,
-                                                    ),
-                                                    SizedBox(width: 5),
-                                                    Text("Sales"),
-                                                    SizedBox(width: 5),
-                                                    CircleAvatar(
-                                                      maxRadius: 5,
-                                                      backgroundColor:
-                                                          Colors.greenAccent,
-                                                    ),
-                                                    SizedBox(width: 5),
-                                                    Text("Purchase"),
-                                                  ],
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
+                          // Container(
+                          //   height: AppSizes.height(context) * 0.50,
+                          //   decoration: BoxDecoration(
+                          //     color: Colors.white,
+                          //     borderRadius: BorderRadius.circular(8),
+                          //   ),
+                          //   child: DefaultTabController(
+                          //     length: 6,
+                          //     child: Column(
+                          //       children: [
+                          //         TabBar(
+                          //           tabs: const [
+                          //             Tab(text: 'Top Selling'),
+                          //             Tab(text: 'Low Stock'),
+                          //             Tab(text: 'Top Customers Due'),
+                          //             Tab(text: 'Top Suppliers Due'),
+                          //             Tab(text: 'Current Balance'),
+                          //             Tab(text: 'Sales & Purchase Stats'),
+                          //           ],
+                          //           isScrollable: true,
+                          //           dividerColor: Colors.transparent,
+                          //           tabAlignment: TabAlignment.start,
+                          //           labelColor: Colors.black,
+                          //           indicatorColor: Colors.orangeAccent,
+                          //           // labelStyle: AppTextStyle.cardLevelText(context),
+                          //         ),
+                          //         Expanded(
+                          //           child: TabBarView(
+                          //             children: [
+                          //               SingleChildScrollView(
+                          //                 child: topSelling(context, []),
+                          //               ),
+                          //               //state.dashboard.topProduct ?? []
+                          //               SingleChildScrollView(
+                          //                 child: lowStock(context, []),
+                          //               ),
+                          //               //state.dashboard.lowStockProducts ?? []
+                          //               SingleChildScrollView(
+                          //                 child: customer(
+                          //                   context,
+                          //                   itemName: "Customers",
+                          //                   lowStockProducts: [],
+                          //                 ),
+                          //               ),
+                          //               //state.dashboard.topClients ?? []
+                          //               SingleChildScrollView(
+                          //                 child: customer(
+                          //                   context,
+                          //                   itemName: "Supplier",
+                          //                   lowStockProducts: [],
+                          //                 ),
+                          //               ),
+                          //               //state.dashboard.topSuppliers ?? []
+                          //               Padding(
+                          //                 padding: const EdgeInsets.all(16.0),
+                          //                 child: ListView.builder(
+                          //                   shrinkWrap: true,
+                          //                   physics:
+                          //                       const NeverScrollableScrollPhysics(),
+                          //                   itemCount: 0,
+                          //                   //state.dashboard.accounts?.length ?? 0,
+                          //                   itemBuilder: (_, index) {
+                          //                     // final account = state.dashboard.accounts?[index];
+                          //                     // return AccountCardDashbord(account: account!, index: index + 1);
+                          //                     return SizedBox();
+                          //                   },
+                          //                 ),
+                          //               ),
+                          //               SingleChildScrollView(
+                          //                 child: Container(
+                          //                   padding: const EdgeInsets.all(8),
+                          //                   decoration: BoxDecoration(
+                          //                     color: Colors.white,
+                          //                     borderRadius:
+                          //                         BorderRadius.circular(8),
+                          //                   ),
+                          //                   child: Column(
+                          //                     children: [
+                          //                       // statisticsChart([]), //state.dashboard.revenueAndPurchase ?? []
+                          //                       const Row(
+                          //                         mainAxisAlignment:
+                          //                             MainAxisAlignment.center,
+                          //                         crossAxisAlignment:
+                          //                             CrossAxisAlignment.center,
+                          //                         children: [
+                          //                           CircleAvatar(
+                          //                             maxRadius: 5,
+                          //                             backgroundColor:
+                          //                                 Colors.blueAccent,
+                          //                           ),
+                          //                           SizedBox(width: 5),
+                          //                           Text("Sales"),
+                          //                           SizedBox(width: 5),
+                          //                           CircleAvatar(
+                          //                             maxRadius: 5,
+                          //                             backgroundColor:
+                          //                                 Colors.greenAccent,
+                          //                           ),
+                          //                           SizedBox(width: 5),
+                          //                           Text("Purchase"),
+                          //                         ],
+                          //                       ),
+                          //                     ],
+                          //                   ),
+                          //                 ),
+                          //               ),
+                          //             ],
+                          //           ),
+                          //         ),
+                          //       ],
+                          //     ),
+                          //   ),
+                          // ),
                         ],
                       ),
                     ),
@@ -778,17 +778,17 @@ class StatsCardMonthly extends StatelessWidget {
                         Container(
                           width: 30,
                           height: 30,
-                          decoration: BoxDecoration(
-                            color: color.withValues(alpha: 0.5),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Image.asset(
-                            icon,
-                            color: Colors.white,
-                            width: Responsive.isMobile(context)
-                                ? 35
-                                : 50, // Replace with your AppColors.whiteColor if defined
-                          ),
+                          // decoration: BoxDecoration(
+                          //   color: color.withValues(alpha: 0.5),
+                          //   shape: BoxShape.circle,
+                          // ),
+                          // child: Image.asset(
+                          //   icon,
+                          //   color: Colors.white,
+                          //   width: Responsive.isMobile(context)
+                          //       ? 35
+                          //       : 50, // Replace with your AppColors.whiteColor if defined
+                          // ),
                         ),
                         const SizedBox(width: 3),
                         SizedBox(

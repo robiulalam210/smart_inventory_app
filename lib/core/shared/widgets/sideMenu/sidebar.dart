@@ -1,4 +1,3 @@
-import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../../feature/lab_dashboard/presentation/bloc/dashboard/dashboard_bloc.dart';
 import '../../../configs/configs.dart';
@@ -204,7 +203,8 @@ class _SidebarState extends State<Sidebar> {
                               onPressed: () {
                                 bloc.add(ChangeDashboardScreen(index: 11));
                               },
-                            ),MenuTile(
+                            ),
+                            MenuTile(
                               isSubmenu: true,
                               title: "Customers ",
                               isSelected: currentIndex == 12,
@@ -214,6 +214,49 @@ class _SidebarState extends State<Sidebar> {
                             ),
                           ],
                         ),
+
+                        ExpansionTile(
+                          initiallyExpanded:
+                              currentIndex == 13 ||
+                              currentIndex == 14 ||
+                              currentIndex == 15 ,
+
+                          title: Text(
+                            "Expense ",
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: Theme.of(
+                                context,
+                              ).textTheme.bodyMedium!.color,
+                            ),
+                          ),
+                          children: [
+                            MenuTile(
+                              isSubmenu: true,
+                              title: "Expense  List",
+                              isSelected: currentIndex == 13,
+                              onPressed: () {
+                                bloc.add(ChangeDashboardScreen(index: 13));
+                              },
+                            ),
+                            MenuTile(
+                              isSubmenu: true,
+                              title: 'Expense Head',
+                              isSelected: currentIndex == 14,
+                              onPressed: () {
+                                bloc.add(ChangeDashboardScreen(index: 14));
+                              },
+                            ),  MenuTile(
+                              isSubmenu: true,
+                              title: 'Expense Head',
+                              isSelected: currentIndex == 15,
+                              onPressed: () {
+                                bloc.add(ChangeDashboardScreen(index: 15));
+                              },
+                            ),
+                          ],
+                        ),
+
                         // ExpansionTile(
                         //   initiallyExpanded:
                         //       currentIndex == 12 ||
@@ -438,43 +481,7 @@ class _SidebarState extends State<Sidebar> {
                         //   ],
                         // ),
                         //
-                        // ExpansionTile(
-                        //   initiallyExpanded:
-                        //       currentIndex == 0 ||
-                        //       currentIndex == 1 ||
-                        //       currentIndex == 2 ||
-                        //       currentIndex == 3 ||
-                        //       currentIndex == 4 ||
-                        //       currentIndex == 5,
-                        //
-                        //   title: Text(
-                        //     "Expense ",
-                        //     style: TextStyle(
-                        //       fontWeight: FontWeight.w600,
-                        //       color: Theme.of(
-                        //         context,
-                        //       ).textTheme.bodyMedium!.color,
-                        //     ),
-                        //   ),
-                        //   children: [
-                        //     MenuTile(
-                        //       isSubmenu: true,
-                        //       title: " Expense  List",
-                        //       isSelected: currentIndex == 4,
-                        //       onPressed: () {
-                        //         bloc.add(ChangeDashboardScreen(index: 4));
-                        //       },
-                        //     ),
-                        //     MenuTile(
-                        //       isSubmenu: true,
-                        //       title: 'Expense Head',
-                        //       isSelected: currentIndex == 4,
-                        //       onPressed: () {
-                        //         bloc.add(ChangeDashboardScreen(index: 4));
-                        //       },
-                        //     ),
-                        //   ],
-                        // ),
+
                         // ExpansionTile(
                         //   initiallyExpanded:
                         //       currentIndex == 0 ||
