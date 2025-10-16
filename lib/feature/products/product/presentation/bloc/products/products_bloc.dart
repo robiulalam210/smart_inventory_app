@@ -1,5 +1,3 @@
-
-
 import '../../../../../../core/configs/configs.dart';
 import '../../../../../../core/repositories/delete_response.dart';
 import '../../../../../../core/repositories/get_response.dart';
@@ -20,14 +18,18 @@ class ProductsBloc extends Bloc<ProductsEvent, ProductsState> {
   List<String> statesList = ["Active", "Inactive"];
 
   TextEditingController productNameController = TextEditingController();
-  TextEditingController productPurchasePriceController =
-      TextEditingController(text: "0");
-  TextEditingController productSellingPriceController =
-      TextEditingController(text: "0");
-  TextEditingController productOpeningStockController =
-      TextEditingController(text: "0");
-  TextEditingController productAlertQuantityController =
-      TextEditingController(text: "5");
+  TextEditingController productPurchasePriceController = TextEditingController(
+    text: "0",
+  );
+  TextEditingController productSellingPriceController = TextEditingController(
+    text: "0",
+  );
+  TextEditingController productOpeningStockController = TextEditingController(
+    text: "0",
+  );
+  TextEditingController productAlertQuantityController = TextEditingController(
+    text: "5",
+  );
   TextEditingController productDescriptionController = TextEditingController();
   TextEditingController productBarCodeController = TextEditingController();
 
@@ -48,9 +50,9 @@ class ProductsBloc extends Bloc<ProductsEvent, ProductsState> {
   }
 
   Future<void> _onFetchProductList(
-      FetchProductsList event,
-      Emitter<ProductsState> emit,
-      ) async {
+    FetchProductsList event,
+    Emitter<ProductsState> emit,
+  ) async {
     emit(ProductsListLoading());
 
     try {
@@ -62,68 +64,65 @@ class ProductsBloc extends Bloc<ProductsEvent, ProductsState> {
       // Parse API response
       ApiResponse response = appParseJson(
         res,
-            (data) => List<ProductModel>.from(
-          data.map((x) => ProductModel.fromJson(x)),
-        ),
+        (data) =>
+            List<ProductModel>.from(data.map((x) => ProductModel.fromJson(x))),
       );
 
       // ✅ success check
       if (response.success == true) {
-
         // Store product list
         list = response.data;
 
         // Filter and paginate
 
-
-
-
-
-
-        emit(ProductsListSuccess(
-          list: list,
-          totalPages: 1,
-          currentPage: event.pageNumber,
-        ));
+        emit(
+          ProductsListSuccess(
+            list: list,
+            totalPages: 1,
+            currentPage: event.pageNumber,
+          ),
+        );
       } else {
-        emit(ProductsListFailed(
-          title: "Error",
-          content: response.message ?? "Unknown Error",
-        ));
+        emit(
+          ProductsListFailed(
+            title: "Error",
+            content: response.message ?? "Unknown Error",
+          ),
+        );
       }
-    } catch (error,st) {
-
+    } catch (error, st) {
       print(error);
       print(st);
-      emit(ProductsListFailed(
-        title: "Error",
-        content: error.toString(),
-      ));
+      emit(ProductsListFailed(title: "Error", content: error.toString()));
     }
   }
 
-// ✅ Cleaner filter method
+  // ✅ Cleaner filter method
   List<ProductModel> _filterProduct(
-      List<ProductModel> list,
-      String filterText,
-      String state,
-      String category,
-      ) {
+    List<ProductModel> list,
+    String filterText,
+    String state,
+    String category,
+  ) {
     return list.where((product) {
-      final matchesText = filterText.isEmpty ||
-          (product.name?.toLowerCase().contains(filterText.toLowerCase()) ?? false);
+      final matchesText =
+          filterText.isEmpty ||
+          (product.name?.toLowerCase().contains(filterText.toLowerCase()) ??
+              false);
 
-      final matchesCategory = category.isEmpty ||
+      final matchesCategory =
+          category.isEmpty ||
           (product.name?.toLowerCase() == category.toLowerCase());
 
-      final matchesState = state.isEmpty ||
+      final matchesState =
+          state.isEmpty ||
           (product.name?.toString() == (state == 'Active' ? '1' : '0'));
 
       return matchesText && matchesCategory && matchesState;
     }).toList();
   }
 
-// ✅ Pagination stays same
+  // ✅ Pagination stays same
   List<ProductModel> _paginatePage(List<ProductModel> list, int pageNumber) {
     final start = pageNumber * _itemsPerPage;
     final end = start + _itemsPerPage;
@@ -132,7 +131,9 @@ class ProductsBloc extends Bloc<ProductsEvent, ProductsState> {
   }
 
   Future<void> _onCreateProductList(
-      AddProducts event, Emitter<ProductsState> emit) async {
+    AddProducts event,
+    Emitter<ProductsState> emit,
+  ) async {
     emit(ProductsAddLoading());
 
     try {
@@ -159,7 +160,9 @@ class ProductsBloc extends Bloc<ProductsEvent, ProductsState> {
   }
 
   Future<void> _onUpdateProductList(
-      UpdateProducts event, Emitter<ProductsState> emit) async {
+    UpdateProducts event,
+    Emitter<ProductsState> emit,
+  ) async {
     emit(ProductsAddLoading());
 
     try {
@@ -199,13 +202,15 @@ class ProductsBloc extends Bloc<ProductsEvent, ProductsState> {
   }
 
   Future<void> _onDeleteProductList(
-      DeleteProducts event, Emitter<ProductsState> emit) async {
+    DeleteProducts event,
+    Emitter<ProductsState> emit,
+  ) async {
     emit(ProductsDeleteLoading());
 
     try {
       final res = await deleteResponse(
-          url:
-              "${AppUrls.product}/${event.id.toString()}"); // Use the correct API URL
+        url: "${AppUrls.product}/${event.id.toString()}",
+      ); // Use the correct API URL
 
       ApiResponse response = appParseJson(
         res,
@@ -213,8 +218,9 @@ class ProductsBloc extends Bloc<ProductsEvent, ProductsState> {
             List<ProductModel>.from(data.map((x) => ProductModel.fromJson(x))),
       );
       if (response.success == false) {
-        emit(ProductsDeleteFailed(
-            title: 'Json', content: response.message ?? ""));
+        emit(
+          ProductsDeleteFailed(title: 'Json', content: response.message ?? ""),
+        );
         return;
       }
       //  clearData();

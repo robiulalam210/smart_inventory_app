@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
+import '../../feature/auth/presentation/pages/login_scr.dart';
 import '../configs/configs.dart';
 
 Future<String> getResponse({
@@ -37,7 +38,7 @@ Future<String> getResponse({
       await LocalDB
           .delLoginInfo(); // Assuming a method to clear stored login info
       // Redirect to login screen
-      // AppRoutes.pushAndRemoveUntil(context, const LogInScreen());
+      AppRoutes.pushAndRemoveUntil(context, const LogInScreen());
       return '''
       {
          "success": false,

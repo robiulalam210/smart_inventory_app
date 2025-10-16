@@ -196,6 +196,24 @@ class _SidebarState extends State<Sidebar> {
                                 bloc.add(ChangeDashboardScreen(index: 10));
                               },
                             ),
+
+
+                          ],
+                        ),
+                        ExpansionTile(
+                          initiallyExpanded:
+                          currentIndex == 11  ,
+
+                          title: Text(
+                            "Accounts ",
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: Theme.of(
+                                context,
+                              ).textTheme.bodyMedium!.color,
+                            ),
+                          ),
+                          children: [
                             MenuTile(
                               isSubmenu: true,
                               title: "Accounts ",
@@ -204,17 +222,34 @@ class _SidebarState extends State<Sidebar> {
                                 bloc.add(ChangeDashboardScreen(index: 11));
                               },
                             ),
+
+                          ],
+                        ),
+                        ExpansionTile(
+                          initiallyExpanded:
+                          currentIndex == 12  ,
+
+                          title: Text(
+                            "Customers ",
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: Theme.of(
+                                context,
+                              ).textTheme.bodyMedium!.color,
+                            ),
+                          ),
+                          children: [
                             MenuTile(
                               isSubmenu: true,
-                              title: "Customers ",
+                              title: "Customer ",
                               isSelected: currentIndex == 12,
                               onPressed: () {
                                 bloc.add(ChangeDashboardScreen(index: 12));
                               },
                             ),
+
                           ],
                         ),
-
                         ExpansionTile(
                           initiallyExpanded:
                               currentIndex == 13 ||
@@ -248,7 +283,7 @@ class _SidebarState extends State<Sidebar> {
                               },
                             ),  MenuTile(
                               isSubmenu: true,
-                              title: 'Expense Head',
+                              title: 'Expense Sub Head',
                               isSelected: currentIndex == 15,
                               onPressed: () {
                                 bloc.add(ChangeDashboardScreen(index: 15));

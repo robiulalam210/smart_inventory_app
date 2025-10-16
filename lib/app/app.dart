@@ -5,6 +5,7 @@ import 'package:smart_inventory/feature/expense/expense_head/presentation/bloc/e
 import 'package:smart_inventory/feature/expense/presentation/bloc/expense_list/expense_bloc.dart';
 import '../core/core.dart';
 import '../feature/accounts/presentation/bloc/account/account_bloc.dart';
+import '../feature/expense/expense_sub_head/presentation/bloc/expense_sub_head/expense_sub_head_bloc.dart';
 import '../feature/feature.dart';
 import '../feature/products/brand/presentation/bloc/brand/brand_bloc.dart';
 import '../feature/products/categories/presentation/bloc/categories/categories_bloc.dart';
@@ -63,6 +64,7 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (_) => CustomerBloc()),
         BlocProvider(create: (_) => ExpenseBloc()),
         BlocProvider(create: (_) => ExpenseHeadBloc()),
+        BlocProvider(create: (_) => ExpenseSubHeadBloc()),
       ],
       child: Center(
         child: MaterialApp(
