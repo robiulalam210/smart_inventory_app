@@ -291,10 +291,43 @@ class _SidebarState extends State<Sidebar> {
                             ),
                           ],
                         ),
-
                         ExpansionTile(
                           initiallyExpanded:
-                              currentIndex == 12 ||
+                          currentIndex == 16 ||
+                              currentIndex == 17 ,
+
+
+                          title: Text(
+                            "Staff ",
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: Theme.of(
+                                context,
+                              ).textTheme.bodyMedium!.color,
+                            ),
+                          ),
+                          children: [
+                            MenuTile(
+                              isSubmenu: true,
+                              title: "Create Purchase ",
+                              isSelected: currentIndex == 16,
+                              onPressed: () {
+                                bloc.add(ChangeDashboardScreen(index: 16));
+                              },
+                            ),
+                            // MenuTile(
+                            //   isSubmenu: true,
+                            //   title: "Purchase List ",
+                            //   isSelected: currentIndex == 12,
+                            //   onPressed: () {
+                            //     bloc.add(ChangeDashboardScreen(index: 12));
+                            //   },
+                            // ),
+                          ],
+                        ),
+                        ExpansionTile(
+                          initiallyExpanded:
+                              currentIndex == 1 ||
                               currentIndex == 12 ,
 
 

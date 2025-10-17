@@ -5,81 +5,82 @@ import '../../../../common/data/models/api_response_mod.dart';
 import '../../../../common/data/models/app_parse_json.dart';
 import '../../../data/models/pos_sale_model.dart';
 
-
 part 'possale_event.dart';
 
 part 'possale_state.dart';
 
 class PosSaleBloc extends Bloc<PosSaleEvent, PosSaleState> {
-  List<String> posTypeList=["Sale","Pos Sale"];
+  List<String> posTypeList = ["Sale", "Pos Sale"];
   List<PosSaleModel> list = [];
-
-
 
   PosSaleBloc() : super(PosSaleInitial()) {
     on<FetchPosSaleList>(_onFetchPosSaleList);
   }
 
   Future<void> _onFetchPosSaleList(
-      FetchPosSaleList event, Emitter<PosSaleState> emit) async {
+    FetchPosSaleList event,
+    Emitter<PosSaleState> emit,
+  ) async {
     emit(PosSaleListLoading());
-
     list = [];
 
     try {
       final res = await getResponse(
-        url: AppUrls.posSale + event.dropdownFilter,
-
+        url: AppUrls.posSale + (event.dropdownFilter ?? ''),
         context: event.context,
       );
 
-      // Decode JSON response
-      Map<String, dynamic> parsedRes = jsonDecode(res);
+      // Parse and wrap response with ApiResponse
+      ApiResponse response = appParseJson(
+        res,
+        (data) =>
+            List<PosSaleModel>.from(data.map((x) => PosSaleModel.fromJson(x))),
+      );
 
-      // Check if success is true
-      if (parsedRes['success'] == true) {
-        List<PosSaleModel> productList = List<PosSaleModel>.from(
-          parsedRes['data'].map((item) => PosSaleModel.fromJson(item)),
-        );
+      if (response.success == true) {
+        final data = response.data ?? [];
 
-        if (productList.isEmpty) {
-          emit(PosSaleListFailed(title: "Error", content: "No Data"));
+        if (data.isEmpty) {
+          emit(PosSaleListFailed(title: "Error", content: "No data found"));
           return;
         }
 
-        // Store and filter products
-        list = productList;
-        final filteredAccount = _filterData(
-            list,
-            event.filterText,
-            event.customer,
-            event.seller,
-            event.posType,
-            event.startDate,
-            event.endDate);
+        // Filter sales data based on user inputs
+        // final filteredSales = _filterData(
+        //   data,
+        //   event.filterText,
+        //   event.customer,
+        //   event.seller,
+        //   event.posType,
+        //   event.startDate,
+        //   event.endDate,
+        // );
 
-        // Emit all filtered data (No pagination)
-        emit(PosSaleListSuccess(
-          list: filteredAccount,
-        ));
+        emit(PosSaleListSuccess(list: data));
       } else {
-        emit(PosSaleListFailed(
-            title: "Error", content: parsedRes['message'] ?? "Unknown Error"));
+        emit(
+          PosSaleListFailed(
+            title: "Error",
+            content: response.message ?? "Unknown error occurred",
+          ),
+        );
       }
-    } catch (error) {
-      emit(PosSaleListFailed(title: "Error", content: error.toString()));
+    } catch (error, st) {
+      print(error);
+      print(st);
+      emit(PosSaleListFailed(title: "Exception", content: error.toString()));
     }
   }
 
   List<PosSaleModel> _filterData(
-      List<PosSaleModel> posSale,
-      String filterText,
-      String customerName,
-      String sellerName,
-      String paymentType,
-      DateTime? startDate,
-      DateTime? endDate,
-      ) {
+    List<PosSaleModel> posSale,
+    String filterText,
+    String customerName,
+    String sellerName,
+    String paymentType,
+    DateTime? startDate,
+    DateTime? endDate,
+  ) {
     return posSale.where((sale) {
       final invoiceNo = sale.invoiceNo?.toLowerCase() ?? '';
       final customer = sale.customerName?.toLowerCase() ?? '';
@@ -87,28 +88,32 @@ class PosSaleBloc extends Bloc<PosSaleEvent, PosSaleState> {
       final saleDate = sale.saleDate;
 
       // Check filterText (invoiceNo, customerName, customerPhone)
-      final matchesText = filterText.isEmpty ||
+      final matchesText =
+          filterText.isEmpty ||
           invoiceNo.contains(filterText.toLowerCase()) ||
-          customer.contains(filterText.toLowerCase()) ;
+          customer.contains(filterText.toLowerCase());
 
       // Check customerName filter
-      final matchesCustomer = customerName.isEmpty || customer.contains(customerName.toLowerCase());
+      final matchesCustomer =
+          customerName.isEmpty || customer.contains(customerName.toLowerCase());
 
       // Check sellerName filter
 
       // Check paymentType filter
-      final matchesPaymentType = paymentType.isEmpty || payment.contains(paymentType.toLowerCase());
+      final matchesPaymentType =
+          paymentType.isEmpty || payment.contains(paymentType.toLowerCase());
 
       // Check date range filter with specific date comparisons
-      final matchesDate = (startDate == null || saleDate != null && !saleDate.isBefore(startDate)) &&
+      final matchesDate =
+          (startDate == null ||
+              saleDate != null && !saleDate.isBefore(startDate)) &&
           (endDate == null || saleDate != null && !saleDate.isAfter(endDate));
 
       // Return true if all filters match
-      return matchesText && matchesCustomer  && matchesPaymentType && matchesDate;
+      return matchesText &&
+          matchesCustomer &&
+          matchesPaymentType &&
+          matchesDate;
     }).toList();
   }
-
-
 }
-
-

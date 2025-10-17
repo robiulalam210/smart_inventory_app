@@ -84,11 +84,11 @@ class ResponsiveRow extends StatelessWidget {
 
 // Responsive Column Widget
 class ResponsiveCol extends StatelessWidget {
-  final int? xs;
-  final int? sm;
-  final int? md;
-  final int? lg;
-  final int? xl;
+  final double? xs;
+  final double? sm;
+  final double? md;
+  final double? lg;
+  final double? xl;
   final Widget child;
 
   const ResponsiveCol({
@@ -106,7 +106,7 @@ class ResponsiveCol extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final width = constraints.maxWidth;
-        int? columns;
+        double? columns;
 
         if (width >= 2600 && xl != null) {
           columns = xl;
@@ -120,11 +120,9 @@ class ResponsiveCol extends StatelessWidget {
           columns = xs;
         }
 
-        if (columns == null || columns <= 0) {
-          return child;
-        }
+        final double colSpan = columns ?? 12; // fallback
+        final double colWidth = width / 12 * colSpan;
 
-        final colWidth = width / 12 * columns;
         return SizedBox(
           width: colWidth,
           child: child,
@@ -133,6 +131,57 @@ class ResponsiveCol extends StatelessWidget {
     );
   }
 }
+
+// class ResponsiveCol extends StatelessWidget {
+//   final int? xs;
+//   final int? sm;
+//   final int? md;
+//   final int? lg;
+//   final int? xl;
+//   final Widget child;
+//
+//   const ResponsiveCol({
+//     super.key,
+//     this.xs,
+//     this.sm,
+//     this.md,
+//     this.lg,
+//     this.xl,
+//     required this.child,
+//   });
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return LayoutBuilder(
+//       builder: (context, constraints) {
+//         final width = constraints.maxWidth;
+//         int? columns;
+//
+//         if (width >= 2600 && xl != null) {
+//           columns = xl;
+//         } else if (width >= 1200 && lg != null) {
+//           columns = lg;
+//         } else if (width >= 900 && md != null) {
+//           columns = md;
+//         } else if (width >= 600 && sm != null) {
+//           columns = sm;
+//         } else {
+//           columns = xs;
+//         }
+//
+//         if (columns == null || columns <= 0) {
+//           return child;
+//         }
+//
+//         final colWidth = width / 12 * columns;
+//         return SizedBox(
+//           width: colWidth,
+//           child: child,
+//         );
+//       },
+//     );
+//   }
+// }
 
 
 

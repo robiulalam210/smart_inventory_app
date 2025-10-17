@@ -7,6 +7,7 @@ import '../../../../../accounts/data/model/account_model.dart';
 import '../../../../../common/data/models/api_response_mod.dart';
 import '../../../../../common/data/models/app_parse_json.dart';
 import '../../../../../customer/data/model/customer_model.dart';
+import '../../../../../users_list/data/model/user_model.dart';
 import '../../../../data/models/create_pos_sale_model.dart';
 
 part 'create_pos_sale_event.dart';
@@ -17,9 +18,12 @@ class CreatePosSaleBloc extends Bloc<CreatePosSaleEvent, CreatePosSaleState> {
   var customType = "Saved Customer";
   List customTypeList = ["Saved Customer", "Walk In Customer"];
   CustomerModel? selectClintModel;
-  // UsersListModel? selectSalesModel;
+  UsersListModel? selectSalesModel;
   AccountModel? accountModel;
-
+  String selectedAccount = "";
+  String selectedAccountId = "";
+  List paymentMethod = ["Bank", "Cash", "Mobile Banking"];
+  String selectedPaymentMethod = "Cash";
   TextEditingController dateEditingController = TextEditingController();
   TextEditingController customerPhoneController = TextEditingController();
   TextEditingController itemPriceController = TextEditingController();
@@ -32,6 +36,7 @@ class CreatePosSaleBloc extends Bloc<CreatePosSaleEvent, CreatePosSaleState> {
   TextEditingController clientPhoneController = TextEditingController();
   TextEditingController vatOverAllController = TextEditingController();
   TextEditingController discountOverAllController = TextEditingController();
+  TextEditingController payableAmount = TextEditingController();
   TextEditingController serviceChargeOverAllController =
       TextEditingController();
   TextEditingController deliveryChargeOverAllController =

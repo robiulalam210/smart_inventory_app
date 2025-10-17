@@ -19,7 +19,7 @@ class PosSaleModel {
   final String? netTotal;
   final String? payableAmount;
   final String? paidAmount;
-  final int? dueAmount;
+  final dynamic dueAmount;
   final String? overallDiscount;
   final String? overallDiscountType;
   final String? overallDeliveryCharge;
@@ -120,7 +120,7 @@ class Item {
   final String? unitPrice;
   final String? discount;
   final String? discountType;
-  final int? subtotal;
+  final dynamic subtotal;
 
   Item({
     this.id,

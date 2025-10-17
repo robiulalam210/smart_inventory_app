@@ -4,6 +4,7 @@ import 'package:smart_inventory/feature/expense/presentation/pages/expense_list_
 import 'package:smart_inventory/feature/products/groups/presentation/pages/groups_screen.dart';
 import 'package:smart_inventory/feature/products/soruce/presentation/pages/source_screen.dart';
 import 'package:smart_inventory/feature/products/unit/presentation/pages/unit_screen.dart';
+import 'package:smart_inventory/feature/sales/presentation/pages/pos_sale_screen.dart';
 
 import '../../../../../core/configs/configs.dart';
 import '../../../../../enery_screen.dart';
@@ -21,6 +22,7 @@ import '../../../../purchase/presentation/page/purchase_list_screen.dart';
 import '../../../../sales/presentation/pages/create_pos_sale/create_pos_sale.dart';
 import '../../../../sales/presentation/pages/sales_create.dart';
 import '../../../../sales/presentation/pages/sales_list_screen.dart';
+import '../../../../users_list/presentation/pages/users_screen.dart';
 import '../../../data/models/dashboard/dashboard_model.dart';
 import '../../../data/repositories/dashboard_repo_db/dashboard_repo_db.dart';
 import '../../pages/lab_dashboard_screen.dart';
@@ -34,8 +36,9 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
   final List<Widget> myScreens = [
     AppWrapper(child: DashboardScreen()),
 
-    AppWrapper(child: SalesScreen()),
     AppWrapper(child: CreatePosSalePage()),
+    AppWrapper(child: PosSaleScreen()),
+
     // AppWrapper(child: SalesListScreen()),
 
     AppWrapper(child: MoneyReceiptForm()),
@@ -54,6 +57,8 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     AppWrapper(child: ExpenseListScreen()),
     AppWrapper(child: ExpenseHeadScreen()),
     AppWrapper(child: ExpenseSubHeadScreen()),
+
+    AppWrapper(child: UsersScreen()),
 
 
     // AppWrapper(child: PurchaseCreateScreen()),

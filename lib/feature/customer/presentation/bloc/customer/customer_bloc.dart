@@ -85,6 +85,7 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
           event.filterText,
           event.status,
         );
+        list=filteredCustomers;
 
         emit(CustomerSuccess(list: filteredCustomers));
       } else {

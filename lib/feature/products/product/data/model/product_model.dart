@@ -60,7 +60,11 @@ class ProductModel {
     this.createdAt,
     this.updatedAt,
   });
-
+  @override
+  String toString() {
+    // TODO: implement toString
+    return name??"";
+  }
   factory ProductModel.fromJson(Map<String, dynamic> json) => ProductModel(
     id: json["id"],
     company: json["company"],

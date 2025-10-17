@@ -22,7 +22,11 @@ class CustomerModel {
     this.phone,
     this.address,
   });
-
+  @override
+  String toString() {
+    // TODO: implement toString
+    return name??"";
+  }
   factory CustomerModel.fromJson(Map<String, dynamic> json) => CustomerModel(
     id: json["id"],
     company: json["company"],

@@ -19,6 +19,8 @@ class AccountModel {
   final String? openingBalance;
   final int? company;
 
+
+
   AccountModel({
     this.acId,
     this.acName,
@@ -30,6 +32,12 @@ class AccountModel {
     this.openingBalance,
     this.company,
   });
+
+  @override
+  String toString() {
+    // TODO: implement toString
+    return acName??"";
+  }
 
   factory AccountModel.fromJson(Map<String, dynamic> json) => AccountModel(
     acId: json["ac_id"],
