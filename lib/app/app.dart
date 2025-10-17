@@ -3,6 +3,8 @@ import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:smart_inventory/feature/customer/presentation/bloc/customer/customer_bloc.dart';
 import 'package:smart_inventory/feature/expense/expense_head/presentation/bloc/expense_head/expense_head_bloc.dart';
 import 'package:smart_inventory/feature/expense/presentation/bloc/expense_list/expense_bloc.dart';
+import 'package:smart_inventory/feature/sales/presentation/bloc/possale/crate_pos_sale/create_pos_sale_bloc.dart';
+import 'package:smart_inventory/feature/sales/presentation/bloc/possale/possale_bloc.dart';
 import '../core/core.dart';
 import '../feature/accounts/presentation/bloc/account/account_bloc.dart';
 import '../feature/expense/expense_sub_head/presentation/bloc/expense_sub_head/expense_sub_head_bloc.dart';
@@ -36,13 +38,7 @@ class MyApp extends StatelessWidget {
         BlocProvider(
           create: (context) => SplashBloc(authBloc: context.read<AuthBloc>()),
         ),
-        BlocProvider(create: (context) => DoctorBloc()),
 
-        BlocProvider(create: (context) => TestBloc()),
-        BlocProvider(create: (context) => TestCategoriesBloc()),
-        BlocProvider(create: (context) => InventoryBloc()),
-
-        BlocProvider(create: (context) => SummaryBloc(SummeryRepoDB())),
 
         BlocProvider(
           create: (context) => SyncBloc(
@@ -65,6 +61,9 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (_) => ExpenseBloc()),
         BlocProvider(create: (_) => ExpenseHeadBloc()),
         BlocProvider(create: (_) => ExpenseSubHeadBloc()),
+
+        BlocProvider(create: (_) => PosSaleBloc()),
+        BlocProvider(create: (_) => CreatePosSaleBloc()),
       ],
       child: Center(
         child: MaterialApp(

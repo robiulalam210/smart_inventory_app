@@ -9,23 +9,7 @@ export 'auth/presentation/bloc/auth_state.dart';
 export 'auth/presentation/pages/login_scr.dart';
 
 //!-----Lab Billing -----------
-export 'sales/data/models/doctors_model/doctor_model.dart';
-export 'sales/data/models/inventory_model/inventory_model.dart';
-export 'sales/data/models/patient_model/patient_model.dart';
-export 'sales/data/models/tests_model/tests_model.dart';
-export 'sales/data/models/tests_model/test_categories_model.dart';
-export 'sales/data/repositories/blood_repo_db.dart';
-export 'sales/data/repositories/doctor_repo_db.dart';
-export 'sales/data/repositories/gender_repo_db.dart';
-export 'sales/data/repositories/inventory_repo.dart';
-export 'sales/data/repositories/patient_repo.dart';
-export 'sales/data/repositories/test_repo_db.dart';
-export 'sales/presentation/bloc/doctor_bloc/doctor_bloc.dart';
-export 'sales/presentation/bloc/inventory_bloc/inventory_bloc.dart';
-export 'sales/presentation/bloc/inventory_bloc/inventory_event.dart';
-export 'sales/presentation/bloc/inventory_bloc/inventory_state.dart';
-export 'sales/presentation/bloc/test_bloc/test_bloc.dart';
-export 'sales/presentation/bloc/test_categories_bloc/test_categories_bloc.dart';
+
 export 'sales/presentation/pages/sales_create.dart';
 
 export 'sales/presentation/widgets/item_test_table/test_item_table.dart';
@@ -34,8 +18,7 @@ export 'sales/presentation/widgets/payment/payment_screen.dart';
 
 export 'sales/presentation/widgets/visit_type_toggle/visit_type_toggle.dart';
 
-export 'sales/presentation/bloc/summary_bloc/summary_bloc.dart';
-export 'sales/data/repositories/summery_repo_db.dart';
+
 
 //!-----Lab Dashboard -----------
 
