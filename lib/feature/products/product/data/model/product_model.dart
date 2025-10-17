@@ -13,22 +13,24 @@ class ProductModel {
   final int? company;
   final int? category;
   final int? unit;
-  final dynamic brand;
-  final dynamic group;
-  final dynamic source;
+  final int? brand;
+  final int? group;
+  final int? source;
+  final Info? categoryInfo;
+  final Info? unitInfo;
+  final Info? brandInfo;
+  final Info? groupInfo;
+  final Info? sourceInfo;
   final String? name;
   final String? sku;
-  final dynamic barCode;
   final String? purchasePrice;
   final String? sellingPrice;
   final int? openingStock;
   final int? stockQty;
   final int? alertQuantity;
-  final dynamic description;
+  final String? description;
   final dynamic image;
   final bool? isActive;
-  final dynamic unitName;
-  final dynamic unitSubName;
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
@@ -40,9 +42,13 @@ class ProductModel {
     this.brand,
     this.group,
     this.source,
+    this.categoryInfo,
+    this.unitInfo,
+    this.brandInfo,
+    this.groupInfo,
+    this.sourceInfo,
     this.name,
     this.sku,
-    this.barCode,
     this.purchasePrice,
     this.sellingPrice,
     this.openingStock,
@@ -51,8 +57,6 @@ class ProductModel {
     this.description,
     this.image,
     this.isActive,
-    this.unitName,
-    this.unitSubName,
     this.createdAt,
     this.updatedAt,
   });
@@ -65,9 +69,13 @@ class ProductModel {
     brand: json["brand"],
     group: json["group"],
     source: json["source"],
+    categoryInfo: json["category_info"] == null ? null : Info.fromJson(json["category_info"]),
+    unitInfo: json["unit_info"] == null ? null : Info.fromJson(json["unit_info"]),
+    brandInfo: json["brand_info"] == null ? null : Info.fromJson(json["brand_info"]),
+    groupInfo: json["group_info"] == null ? null : Info.fromJson(json["group_info"]),
+    sourceInfo: json["source_info"] == null ? null : Info.fromJson(json["source_info"]),
     name: json["name"],
     sku: json["sku"],
-    barCode: json["bar_code"],
     purchasePrice: json["purchase_price"],
     sellingPrice: json["selling_price"],
     openingStock: json["opening_stock"],
@@ -76,8 +84,6 @@ class ProductModel {
     description: json["description"],
     image: json["image"],
     isActive: json["is_active"],
-    unitName: json["unit_name"],
-    unitSubName: json["unit_sub_name"],
     createdAt: json["created_at"] == null ? null : DateTime.parse(json["created_at"]),
     updatedAt: json["updated_at"] == null ? null : DateTime.parse(json["updated_at"]),
   );
@@ -90,9 +96,13 @@ class ProductModel {
     "brand": brand,
     "group": group,
     "source": source,
+    "category_info": categoryInfo?.toJson(),
+    "unit_info": unitInfo?.toJson(),
+    "brand_info": brandInfo?.toJson(),
+    "group_info": groupInfo?.toJson(),
+    "source_info": sourceInfo?.toJson(),
     "name": name,
     "sku": sku,
-    "bar_code": barCode,
     "purchase_price": purchasePrice,
     "selling_price": sellingPrice,
     "opening_stock": openingStock,
@@ -101,9 +111,27 @@ class ProductModel {
     "description": description,
     "image": image,
     "is_active": isActive,
-    "unit_name": unitName,
-    "unit_sub_name": unitSubName,
     "created_at": createdAt?.toIso8601String(),
     "updated_at": updatedAt?.toIso8601String(),
+  };
+}
+
+class Info {
+  final int? id;
+  final String? name;
+
+  Info({
+    this.id,
+    this.name,
+  });
+
+  factory Info.fromJson(Map<String, dynamic> json) => Info(
+    id: json["id"],
+    name: json["name"],
+  );
+
+  Map<String, dynamic> toJson() => {
+    "id": id,
+    "name": name,
   };
 }

@@ -158,10 +158,10 @@ class _ProductsScreenState extends State<ProductsScreen> {
                     ],
                   ),
                   SizedBox(
-                    height: 500,
+                    // height: 500,
                     child: BlocBuilder<ProductsBloc, ProductsState>(
                       builder: (context, state) {
-                        print(state);
+
                         if (state is ProductsListLoading) {
                           return const Center(child: CircularProgressIndicator());
                         } else if (state is ProductsListSuccess) {
@@ -170,20 +170,10 @@ class _ProductsScreenState extends State<ProductsScreen> {
                               child: Lottie.asset(AppImages.noData),
                             );
                           } else {
-                            return ListView.builder(
-                              shrinkWrap: true,
-                              itemCount: state.list.length,
-                              itemBuilder: (_, index) {
-                                final product = state.list[index];
-                                return InkWell(
-                                  onTap: () {
+                            return
+                              ProductDataTableWidget(products: state.list,);
 
-                                  },
-                                  child: ProductCard(
-                                      product: product, index: index),
-                                );
-                              },
-                            );
+
                           }
                         } else if (state is ProductsListFailed) {
                           return Center(
