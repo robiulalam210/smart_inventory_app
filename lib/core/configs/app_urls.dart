@@ -39,6 +39,8 @@ class AppUrls {
   static final String expenseSubHead          = '$baseUrl/expenses/expense-subheads/';
   static final String expense          = '$baseUrl/expenses/expense/';
   static final String posSale          = '$baseUrl/sales/';
+  static final String purchase          = '$baseUrl/purchases/';
+  static final String supplierList          = '$baseUrl/suppliers/';
 
 
 

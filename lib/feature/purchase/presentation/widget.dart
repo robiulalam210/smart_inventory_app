@@ -1,0 +1,174 @@
+import 'package:google_fonts/google_fonts.dart';
+import 'package:hugeicons/hugeicons.dart';
+import 'package:smart_inventory/feature/purchase/data/model/purchase_sale_model.dart';
+
+import '../../../../core/configs/configs.dart';
+
+import 'package:flutter/material.dart';
+
+
+class PurchaseDataTableWidget extends StatelessWidget {
+  final List<PurchaseModel> sales;
+
+  const PurchaseDataTableWidget({super.key, required this.sales});
+
+  @override
+  Widget build(BuildContext context) {
+    final verticalScrollController = ScrollController();
+    final horizontalScrollController = ScrollController();
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final totalWidth = constraints.maxWidth;
+        const numColumns = 12;
+        const minColumnWidth = 100.0;
+
+        final dynamicColumnWidth =
+        (totalWidth / numColumns).clamp(minColumnWidth, double.infinity);
+
+        return Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            color: Colors.white,
+          ),
+          child: Scrollbar(
+            controller: verticalScrollController,
+            thumbVisibility: true,
+            child: SingleChildScrollView(
+              controller: verticalScrollController,
+              scrollDirection: Axis.vertical,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Scrollbar(
+                  controller: horizontalScrollController,
+                  thumbVisibility: true,
+                  child: SingleChildScrollView(
+                    controller: horizontalScrollController,
+                    scrollDirection: Axis.horizontal,
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 10),
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(minWidth: totalWidth),
+                        child: DataTable(
+                          dataRowMinHeight: 40,
+                          columnSpacing: 0,
+                          headingTextStyle: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          headingRowColor: MaterialStateProperty.all(
+                            const Color(0xFF6AB129),
+                          ),
+                          columns: _buildColumns(dynamicColumnWidth),
+                          rows: sales
+                              .asMap()
+                              .entries
+                              .map(
+                                (entry) => _buildDataRow(
+                              entry.key + 1,
+                              entry.value,
+                              dynamicColumnWidth,
+                            ),
+                          )
+                              .toList(),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  List<DataColumn> _buildColumns(double columnWidth) {
+    const labels = [
+      "SL",
+      "Invoice No",
+      "Customer",
+      "Sale Type",
+      "Date",
+      "Gross Total",
+      "Net Total",
+      "Payable",
+      "Paid",
+      "Due",
+      "Payment Method",
+      "Account Name",
+    ];
+
+    return labels
+        .map(
+          (label) => DataColumn(
+        label: SizedBox(
+          width: columnWidth,
+          child: Padding(
+            padding: const EdgeInsets.all(4),
+            child: Text(
+              label,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ),
+      ),
+    )
+        .toList();
+  }
+
+  DataRow _buildDataRow(int index, PurchaseModel sale, double columnWidth) {
+    return DataRow(
+      cells: [
+        _buildDataCell(index.toString(), columnWidth),
+        _buildDataCell(sale.invoiceNo.toString(), columnWidth),
+        _buildDataCell(sale.supplierName.toString(), columnWidth),
+        _buildDataCell(sale.supplierName.toString(), columnWidth),
+        _buildDataCell(
+          sale.date.toString().split('T').first,
+          columnWidth,
+        ),
+        _buildDataCell(sale.total.toString(), columnWidth),
+        _buildDataCell(sale.total.toString(), columnWidth),
+        _buildDataCell(sale.accountName.toString(), columnWidth),
+        _buildDataCell(sale.overallDeliveryCharge.toString(), columnWidth),
+        _buildDataCell(
+          sale.accountId.toString(),
+          columnWidth,
+          isDue: true,
+        ),
+        _buildDataCell(sale.paymentMethod.toString(), columnWidth),
+        _buildDataCell(sale.accountName.toString(), columnWidth),
+      ],
+    );
+  }
+
+  DataCell _buildDataCell(String text, double width, {bool isDue = false}) {
+    return DataCell(
+      SizedBox(
+        width: width,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
+          child: SelectableText(
+            text,
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w500,
+              color: isDue && (double.tryParse(text) ?? 0) > 0
+                  ? Colors.red
+                  : Colors.black,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ),
+      ),
+    );
+  }
+}

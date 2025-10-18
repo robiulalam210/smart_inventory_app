@@ -309,7 +309,7 @@ class _SidebarState extends State<Sidebar> {
                           children: [
                             MenuTile(
                               isSubmenu: true,
-                              title: "Create Purchase ",
+                              title: "User ",
                               isSelected: currentIndex == 16,
                               onPressed: () {
                                 bloc.add(ChangeDashboardScreen(index: 16));
@@ -327,8 +327,8 @@ class _SidebarState extends State<Sidebar> {
                         ),
                         ExpansionTile(
                           initiallyExpanded:
-                              currentIndex == 1 ||
-                              currentIndex == 12 ,
+                              currentIndex == 17 ||
+                              currentIndex == 18 ,
 
 
                           title: Text(
@@ -344,17 +344,17 @@ class _SidebarState extends State<Sidebar> {
                             MenuTile(
                               isSubmenu: true,
                               title: "Create Purchase ",
-                              isSelected: currentIndex == 12,
+                              isSelected: currentIndex == 17,
                               onPressed: () {
-                                bloc.add(ChangeDashboardScreen(index: 12));
+                                bloc.add(ChangeDashboardScreen(index: 17));
                               },
                             ),
                             MenuTile(
                               isSubmenu: true,
                               title: "Purchase List ",
-                              isSelected: currentIndex == 12,
+                              isSelected: currentIndex == 18,
                               onPressed: () {
-                                bloc.add(ChangeDashboardScreen(index: 12));
+                                  bloc.add(ChangeDashboardScreen(index: 18));
                               },
                             ),
                           ],

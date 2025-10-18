@@ -45,17 +45,6 @@ class PosSaleBloc extends Bloc<PosSaleEvent, PosSaleState> {
           return;
         }
 
-        // Filter sales data based on user inputs
-        // final filteredSales = _filterData(
-        //   data,
-        //   event.filterText,
-        //   event.customer,
-        //   event.seller,
-        //   event.posType,
-        //   event.startDate,
-        //   event.endDate,
-        // );
-
         emit(PosSaleListSuccess(list: data));
       } else {
         emit(
