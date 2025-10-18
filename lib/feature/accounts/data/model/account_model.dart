@@ -33,12 +33,12 @@ class AccountModel {
     this.company,
   });
 
+
+// Add this toString method
   @override
   String toString() {
-    // TODO: implement toString
-    return acName??"";
+    return '$acName - $acNumber${bankName != null ? ' ($bankName)' : ''}';
   }
-
   factory AccountModel.fromJson(Map<String, dynamic> json) => AccountModel(
     acId: json["ac_id"],
     acName: json["ac_name"],

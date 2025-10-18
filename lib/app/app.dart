@@ -3,6 +3,7 @@ import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:smart_inventory/feature/customer/presentation/bloc/customer/customer_bloc.dart';
 import 'package:smart_inventory/feature/expense/expense_head/presentation/bloc/expense_head/expense_head_bloc.dart';
 import 'package:smart_inventory/feature/expense/presentation/bloc/expense_list/expense_bloc.dart';
+import 'package:smart_inventory/feature/money_receipt/presentation/bloc/money_receipt/money_receipt_bloc.dart';
 import 'package:smart_inventory/feature/purchase/presentation/bloc/create_purchase/create_purchase_bloc.dart';
 import 'package:smart_inventory/feature/purchase/presentation/bloc/purchase_bloc.dart';
 import 'package:smart_inventory/feature/sales/presentation/bloc/possale/crate_pos_sale/create_pos_sale_bloc.dart';
@@ -72,6 +73,7 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (_) => SupplierListBloc()),
         BlocProvider(create: (_) => CreatePurchaseBloc()),
         BlocProvider(create: (_) => PurchaseBloc()),
+        BlocProvider(create: (_) => MoneyReceiptBloc()),
       ],
       child: Center(
         child: MaterialApp(

@@ -28,6 +28,31 @@ class FetchPosSaleList extends PosSaleEvent{
 
 }
 
+class FetchCustomerSaleList extends PosSaleEvent{
+  BuildContext context;
+
+  final String filterText;
+  final String location;
+  final String customer;
+  final String seller;
+  final String posType;
+  final DateTime? startDate;
+  final DateTime? endDate;
+  final String dropdownFilter;
+  final int pageNumber;
+
+  FetchCustomerSaleList(this.context,{
+    this.filterText = '',
+    this.location = '',
+    this.customer = '',
+    this.seller = '',
+    this.posType = '',
+    this.startDate,
+    this.endDate,
+    this.dropdownFilter = '',
+    this.pageNumber = 0});
+
+}
 
 
 

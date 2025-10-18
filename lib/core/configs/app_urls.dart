@@ -41,6 +41,7 @@ class AppUrls {
   static final String posSale          = '$baseUrl/sales/';
   static final String purchase          = '$baseUrl/purchases/';
   static final String supplierList          = '$baseUrl/suppliers/';
+  static final String moneyReceipt          = '$baseUrl/money-receipts/';
 
 
 

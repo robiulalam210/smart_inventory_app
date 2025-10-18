@@ -86,7 +86,7 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
             .ceil()
             .clamp(1, double.infinity)
             .toInt();
-
+list=data;
         emit(
           AccountListSuccess(
             list: paginatedAccounts,
