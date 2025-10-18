@@ -77,8 +77,8 @@ class CustomInputFieldState extends State<CustomInputField> {
       padding: const EdgeInsets.all(0),
       child: ConstrainedBox(
         constraints: BoxConstraints(
-          maxHeight: 55, // Adjust max height as needed
-          minHeight: 35, // Adjust max height as needed
+          maxHeight: 52, // Adjust max height as needed
+          minHeight: 32, // Adjust max height as needed
         ),
         child: SingleChildScrollView(
           scrollDirection: Axis.vertical,
@@ -152,7 +152,7 @@ class CustomInputFieldState extends State<CustomInputField> {
                     suffixIcon: widget.suffixIcon,
 
                       contentPadding: const EdgeInsets.only(
-                          top: 12.0, bottom: 12.0, left: 6),
+                          top: 8.0, bottom: 8.0, left: 6),
                     errorBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(AppSizes.radius),
                         borderSide:  BorderSide(color: AppColors.error, )),
@@ -259,7 +259,7 @@ class CustomInputFieldPayRollState extends State<CustomInputFieldPayRoll> {
       padding: const EdgeInsets.all(0),
       child: ConstrainedBox(
         constraints: BoxConstraints(
-          maxHeight: widget.maxLine * 24.0, // Adjust max height as needed
+          maxHeight: widget.maxLine * 28.0, // Adjust max height as needed
         ),
         child: SingleChildScrollView(
           scrollDirection: Axis.vertical,

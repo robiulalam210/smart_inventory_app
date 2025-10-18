@@ -15,10 +15,10 @@ class PosSaleModel {
   final String? customerName;
   final String? saleType;
   final DateTime? saleDate;
-  final String? grossTotal;
-  final String? netTotal;
-  final String? payableAmount;
-  final String? paidAmount;
+  final dynamic grossTotal;
+  final dynamic netTotal;
+  final dynamic payableAmount;
+  final dynamic paidAmount;
   final dynamic dueAmount;
   final String? overallDiscount;
   final String? overallDiscountType;

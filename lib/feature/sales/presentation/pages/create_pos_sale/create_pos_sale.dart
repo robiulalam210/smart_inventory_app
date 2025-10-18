@@ -584,7 +584,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                           controller: context
                               .read<CreatePosSaleBloc>()
                               .dateEditingController,
-                          hintText: 'Purchase Date',
+                          hintText: 'Sale Date',
                           keyboardType: TextInputType.datetime,
                           autofillHints: AutofillHints.name,
                           bottom: 15.0,
@@ -676,137 +676,9 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                               },
                             ),
                           ),
-                          ResponsiveCol(
-                            xs: 12,
-                            sm: 1,
-                            md: 1,
-                            lg: 1,
-                            xl: 1,
-                            child: TextFormField(
-                              style: AppTextStyle.cardLevelText(context),
-                              controller: controllers[index]?["total"]
-                                ?..text =
-                                    products[index]["total"]?.toString() ?? "0",
-                              keyboardType: TextInputType.number,
-                              decoration: InputDecoration(
-                                label: Text(
-                                  "Total Amount",
-                                  style: AppTextStyle.cardLevelText(context),
-                                ),
-                                fillColor: AppColors.whiteColor,
-                                filled: true,
-                                hintStyle: AppTextStyle.cardLevelText(context),
-                                isCollapsed: true,
-                                enabledBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(5),
-                                  borderSide: BorderSide(
-                                    color: AppColors.primaryColor.withValues(
-                                      alpha: 0.5,
-                                    ),
-                                    width: 0.5,
-                                  ),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(5),
-                                  borderSide: BorderSide(
-                                    color: AppColors.primaryColor.withValues(
-                                      alpha: 0.5,
-                                    ),
-                                    width: 0.5,
-                                  ),
-                                ),
-                                contentPadding: const EdgeInsets.only(
-                                  top: 10.0,
-                                  bottom: 10.0,
-                                  left: 12,
-                                ),
-                                isDense: true,
-                                hintText: "total",
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(6),
-                                  borderSide: const BorderSide(
-                                    color: Colors.transparent,
-                                  ),
-                                ),
-                              ),
-                              onChanged: (value) {
-                                setState(() {
-                                  products[index]["total"] =
-                                      double.tryParse(value) ?? 0.0;
-                                  updateTotal(
-                                    index,
-                                  ); // Recalculate total when discount value changes
-                                });
-                              },
-                            ),
-                          ),
 
-                          ResponsiveCol(
-                            xs: 12,
-                            sm: 1,
-                            md: 1,
-                            lg: 1,
-                            xl: 1,
-                            child: TextFormField(
-                              style: AppTextStyle.cardLevelText(context),
-                              controller: controllers[index]?["ticket_total"]
-                                ?..text =
-                                    products[index]["ticket_total"]
-                                        ?.toString() ??
-                                    "0",
-                              keyboardType: TextInputType.number,
-                              decoration: InputDecoration(
-                                label: Text(
-                                  "Ticket Total",
-                                  style: AppTextStyle.cardLevelText(context),
-                                ),
-                                fillColor: AppColors.whiteColor,
-                                filled: true,
-                                hintStyle: AppTextStyle.cardLevelText(context),
-                                isCollapsed: true,
-                                enabledBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(5),
-                                  borderSide: BorderSide(
-                                    color: AppColors.primaryColor.withValues(
-                                      alpha: 0.5,
-                                    ),
-                                    width: 0.5,
-                                  ),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(5),
-                                  borderSide: BorderSide(
-                                    color: AppColors.primaryColor.withValues(
-                                      alpha: 0.5,
-                                    ),
-                                    width: 0.5,
-                                  ),
-                                ),
-                                contentPadding: const EdgeInsets.only(
-                                  top: 10.0,
-                                  bottom: 10.0,
-                                  left: 12,
-                                ),
-                                isDense: true,
-                                hintText: "ticket total",
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(6),
-                                  borderSide: const BorderSide(
-                                    color: Colors.transparent,
-                                  ),
-                                ),
-                              ),
-                              onChanged: (value) {
-                                setState(() {
-                                  products[index]["ticket_total"] =
-                                      double.tryParse(value) ?? 0.0;
-                                  updateTotal(
-                                    index,
-                                  ); // Recalculate total when discount value changes
-                                });
-                              },
-                            ),
-                          ),
+
+
                           ResponsiveCol(
                             xs: 12,
                             sm: 1,
@@ -894,7 +766,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                                     horizontal: 2.0,
                                   ),
                                   child: Text(
-                                    'Fixed',
+                                    'TK',
                                     style: TextStyle(
                                       fontFamily: GoogleFonts.playfairDisplay()
                                           .fontFamily,
@@ -909,9 +781,10 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                                 'percent': Padding(
                                   padding: const EdgeInsets.symmetric(
                                     horizontal: 2.0,
+                                    vertical: 2
                                   ),
                                   child: Text(
-                                    ' Percent',
+                                    '%',
                                     style: TextStyle(
                                       fontFamily: GoogleFonts.playfairDisplay()
                                           .fontFamily,
@@ -1068,6 +941,137 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                               ],
                             ),
                           ),
+
+                          ResponsiveCol(
+                            xs: 12,
+                            sm: 1,
+                            md: 1,
+                            lg: 1,
+                            xl: 1,
+                            child: TextFormField(
+                              style: AppTextStyle.cardLevelText(context),
+                              controller: controllers[index]?["ticket_total"]
+                                ?..text =
+                                    products[index]["ticket_total"]
+                                        ?.toString() ??
+                                        "0",
+                              keyboardType: TextInputType.number,
+                              decoration: InputDecoration(
+                                label: Text(
+                                  "Net Total",
+                                  style: AppTextStyle.cardLevelText(context),
+                                ),
+                                fillColor: AppColors.whiteColor,
+                                filled: true,
+                                hintStyle: AppTextStyle.cardLevelText(context),
+                                isCollapsed: true,
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(5),
+                                  borderSide: BorderSide(
+                                    color: AppColors.primaryColor.withValues(
+                                      alpha: 0.5,
+                                    ),
+                                    width: 0.5,
+                                  ),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(5),
+                                  borderSide: BorderSide(
+                                    color: AppColors.primaryColor.withValues(
+                                      alpha: 0.5,
+                                    ),
+                                    width: 0.5,
+                                  ),
+                                ),
+                                contentPadding: const EdgeInsets.only(
+                                  top: 10.0,
+                                  bottom: 10.0,
+                                  left: 12,
+                                ),
+                                isDense: true,
+                                hintText: "ticket total",
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(6),
+                                  borderSide: const BorderSide(
+                                    color: Colors.transparent,
+                                  ),
+                                ),
+                              ),
+                              onChanged: (value) {
+                                setState(() {
+                                  products[index]["ticket_total"] =
+                                      double.tryParse(value) ?? 0.0;
+                                  updateTotal(
+                                    index,
+                                  ); // Recalculate total when discount value changes
+                                });
+                              },
+                            ),
+                          ),
+                          ResponsiveCol(
+                            xs: 12,
+                            sm: 1,
+                            md: 1,
+                            lg: 1,
+                            xl: 1,
+                            child: TextFormField(
+                              style: AppTextStyle.cardLevelText(context),
+                              controller: controllers[index]?["total"]
+                                ?..text =
+                                    products[index]["total"]?.toString() ?? "0",
+                              keyboardType: TextInputType.number,
+                              decoration: InputDecoration(
+                                label: Text(
+                                  "Total Amount",
+                                  style: AppTextStyle.cardLevelText(context),
+                                ),
+                                fillColor: AppColors.whiteColor,
+                                filled: true,
+                                hintStyle: AppTextStyle.cardLevelText(context),
+                                isCollapsed: true,
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(5),
+                                  borderSide: BorderSide(
+                                    color: AppColors.primaryColor.withValues(
+                                      alpha: 0.5,
+                                    ),
+                                    width: 0.5,
+                                  ),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(5),
+                                  borderSide: BorderSide(
+                                    color: AppColors.primaryColor.withValues(
+                                      alpha: 0.5,
+                                    ),
+                                    width: 0.5,
+                                  ),
+                                ),
+                                contentPadding: const EdgeInsets.only(
+                                  top: 10.0,
+                                  bottom: 10.0,
+                                  left: 12,
+                                ),
+                                isDense: true,
+                                hintText: "total",
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(6),
+                                  borderSide: const BorderSide(
+                                    color: Colors.transparent,
+                                  ),
+                                ),
+                              ),
+                              onChanged: (value) {
+                                setState(() {
+                                  products[index]["total"] =
+                                      double.tryParse(value) ?? 0.0;
+                                  updateTotal(
+                                    index,
+                                  ); // Recalculate total when discount value changes
+                                });
+                              },
+                            ),
+                          ),
                           ResponsiveCol(
                             xs: 12,
                             sm: 1,
@@ -1124,9 +1128,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                                     padding: EdgeInsets.zero,
                                     children: {
                                       'fixed': Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 2.0,
-                                        ),
+                                        padding:  EdgeInsets.zero,
                                         child: Text(
                                           'TK',
                                           style: TextStyle(
@@ -1142,9 +1144,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                                         ),
                                       ),
                                       'percent': Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 0.0,
-                                        ),
+                                        padding:  EdgeInsets.zero,
                                         child: Text(
                                           ' %',
                                           style: TextStyle(
@@ -1288,9 +1288,9 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                                         const TextInputType.numberWithOptions(
                                           decimal: true,
                                         ),
-                                    validator: (value) => value!.isEmpty
-                                        ? 'Please enter Vat '
-                                        : null,
+                                    // validator: (value) => value!.isEmpty
+                                    //     ? 'Please enter Vat '
+                                    //     : null,
                                     onChanged: (value) {
                                       calculateVatTotal();
                                       setState(() {});
@@ -1535,7 +1535,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                                   Expanded(
                                     flex: 4,
                                     child: Text(
-                                      "Ticket Total",
+                                      "Product Total",
                                       style: AppTextStyle.cardLevelHead(
                                         context,
                                       ),
@@ -2150,22 +2150,21 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
         "items": transferProducts,
         "customer_type": isWalkInCustomer ? "walk_in" : "saved_customer",
         "with_money_receipt": _isChecked ? "Yes" : "No",
+        "paid_amount": context.read<CreatePosSaleBloc>().payableAmount.text,
       };
 
       if (isWalkInCustomer) {
-
         body.remove('customer_id');
       } else {
         body['customer_id'] = selectedCustomer?.id.toString() ?? '';
       }
-
 
       if (_isChecked == true) {
         body['payment_method'] = context
             .read<CreatePosSaleBloc>()
             .selectedPaymentMethod
             .toString();
-        body['account'] = context
+        body['account_id'] = context
             .read<CreatePosSaleBloc>()
             .accountModel!
             .acId

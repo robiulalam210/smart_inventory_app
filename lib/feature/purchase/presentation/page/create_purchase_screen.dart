@@ -46,13 +46,9 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
 
   @override
   void initState() {
-    context.read<AccountBloc>().add(
-      FetchAccountList(context),
-    );
+    context.read<AccountBloc>().add(FetchAccountList(context));
 
-    context.read<SupplierListBloc>().add(
-      FetchSupplierList(context),
-    );
+    context.read<SupplierListBloc>().add(FetchSupplierList(context));
 
     super.initState();
 
@@ -62,7 +58,7 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
 
     // Initialize date controller
     context.read<CreatePurchaseBloc>().dateEditingController.text =
-    DateTime.now().toIso8601String().split('T')[0];
+        DateTime.now().toIso8601String().split('T')[0];
 
     addProduct(); // Initialize with one product row
   }
@@ -87,9 +83,12 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
   }
 
   void updateTotal(int index) {
-    final price = double.tryParse(controllers[index]?["price"]?.text ?? '') ?? 0.0;
-    final quantity = double.tryParse(controllers[index]?["quantity"]?.text ?? '') ?? 0.0;
-    final discount = double.tryParse(controllers[index]?["discount"]?.text ?? '') ?? 0.0;
+    final price =
+        double.tryParse(controllers[index]?["price"]?.text ?? '') ?? 0.0;
+    final quantity =
+        double.tryParse(controllers[index]?["quantity"]?.text ?? '') ?? 0.0;
+    final discount =
+        double.tryParse(controllers[index]?["discount"]?.text ?? '') ?? 0.0;
     final discountType = products[index]["discount_type"] as String? ?? '';
 
     double total = price * quantity;
@@ -119,9 +118,13 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
 
   double calculateDeliveryTotal() {
     double total = calculateTotalForAllProducts();
-    deliveryCharge = double.tryParse(
-      context.read<CreatePurchaseBloc>().deliveryChargeOverAllController.text,
-    ) ??
+    deliveryCharge =
+        double.tryParse(
+          context
+              .read<CreatePurchaseBloc>()
+              .deliveryChargeOverAllController
+              .text,
+        ) ??
         0.0;
 
     if (selectedOverallDeliveryType == 'percentage') {
@@ -132,9 +135,10 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
 
   double calculateDiscountTotal() {
     double total = calculateTotalForAllProducts();
-    discount = double.tryParse(
-      context.read<CreatePurchaseBloc>().discountOverAllController.text,
-    ) ??
+    discount =
+        double.tryParse(
+          context.read<CreatePurchaseBloc>().discountOverAllController.text,
+        ) ??
         0.0;
 
     if (selectedOverallDiscountType == 'percentage') {
@@ -145,9 +149,13 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
 
   double calculateServiceChargeTotal() {
     double total = calculateTotalForAllProducts();
-    double enteredServiceCharge = double.tryParse(
-      context.read<CreatePurchaseBloc>().serviceChargeOverAllController.text,
-    ) ??
+    double enteredServiceCharge =
+        double.tryParse(
+          context
+              .read<CreatePurchaseBloc>()
+              .serviceChargeOverAllController
+              .text,
+        ) ??
         0.0;
 
     serviceCharge = (selectedOverallServiceChargeType == 'percentage')
@@ -255,7 +263,8 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isBigScreen = Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
+    final isBigScreen =
+        Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
     return Container(
       color: AppColors.bg,
       child: SafeArea(
@@ -345,13 +354,22 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                               isLabel: false,
                               isRequired: true,
                               isNeedAll: false,
-                              value: context.read<CreatePurchaseBloc>().supplierListModel,
-                              itemList: context.read<SupplierListBloc>().supplierListModel,
+                              value: context
+                                  .read<CreatePurchaseBloc>()
+                                  .supplierListModel,
+                              itemList: context
+                                  .read<SupplierListBloc>()
+                                  .supplierListModel,
                               onChanged: (newVal) {
-                                context.read<CreatePurchaseBloc>().supplierListModel = newVal;
+                                context
+                                        .read<CreatePurchaseBloc>()
+                                        .supplierListModel =
+                                    newVal;
                               },
                               validator: (value) {
-                                return value == null ? 'Please select Supplier' : null;
+                                return value == null
+                                    ? 'Please select Supplier'
+                                    : null;
                               },
                               itemBuilder: (item) => DropdownMenuItem(
                                 value: item,
@@ -378,7 +396,9 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                           radius: 10,
                           isRequired: true,
                           readOnly: true,
-                          controller: context.read<CreatePurchaseBloc>().dateEditingController,
+                          controller: context
+                              .read<CreatePurchaseBloc>()
+                              .dateEditingController,
                           hintText: 'Purchase Date',
                           keyboardType: TextInputType.datetime,
                           bottom: 15.0,
@@ -414,11 +434,21 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
 
                     if (!controllers.containsKey(index)) {
                       controllers[index] = {
-                        "quantity": TextEditingController(text: product["quantity"].toString()),
-                        "price": TextEditingController(text: product["price"].toString()),
-                        "discount": TextEditingController(text: product["discount"].toString()),
-                        "total": TextEditingController(text: product["total"].toString()),
-                        "ticket_total": TextEditingController(text: product["ticket_total"].toString()),
+                        "quantity": TextEditingController(
+                          text: product["quantity"].toString(),
+                        ),
+                        "price": TextEditingController(
+                          text: product["price"].toString(),
+                        ),
+                        "discount": TextEditingController(
+                          text: product["discount"].toString(),
+                        ),
+                        "total": TextEditingController(
+                          text: product["total"].toString(),
+                        ),
+                        "ticket_total": TextEditingController(
+                          text: product["ticket_total"].toString(),
+                        ),
                       };
                     }
 
@@ -451,8 +481,11 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                                     hint: "Select Product",
                                     value: product["product"],
                                     itemList: context.read<ProductsBloc>().list,
-                                    onChanged: (newVal) => onProductChanged(index, newVal),
-                                    validator: (value) => value == null ? 'Please select Product' : null,
+                                    onChanged: (newVal) =>
+                                        onProductChanged(index, newVal),
+                                    validator: (value) => value == null
+                                        ? 'Please select Product'
+                                        : null,
                                     itemBuilder: (item) => DropdownMenuItem(
                                       value: item,
                                       child: Text(item.toString()),
@@ -462,112 +495,8 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                               },
                             ),
                           ),
-                          ResponsiveCol(
-                            xs: 12,
-                            sm: 1,
-                            md: 1,
-                            lg: 1,
-                            xl: 1,
-                            child: TextFormField(
-                              style: AppTextStyle.cardLevelText(context),
-                              controller: controllers[index]?["total"],
-                              keyboardType: TextInputType.number,
-                              decoration: InputDecoration(
-                                label: Text(
-                                  "Total Amount",
-                                  style: AppTextStyle.cardLevelText(context),
-                                ),
-                                fillColor: AppColors.whiteColor,
-                                filled: true,
-                                hintStyle: AppTextStyle.cardLevelText(context),
-                                isCollapsed: true,
-                                enabledBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(5),
-                                  borderSide: BorderSide(
-                                    color: AppColors.primaryColor.withOpacity(0.5),
-                                    width: 0.5,
-                                  ),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(5),
-                                  borderSide: BorderSide(
-                                    color: AppColors.primaryColor.withOpacity(0.5),
-                                    width: 0.5,
-                                  ),
-                                ),
-                                contentPadding: const EdgeInsets.only(
-                                  top: 10.0,
-                                  bottom: 10.0,
-                                  left: 12,
-                                ),
-                                isDense: true,
-                                hintText: "total",
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(6),
-                                  borderSide: const BorderSide(color: Colors.transparent),
-                                ),
-                              ),
-                              onChanged: (value) {
-                                setState(() {
-                                  products[index]["total"] = double.tryParse(value) ?? 0.0;
-                                  updateTotal(index);
-                                });
-                              },
-                            ),
-                          ),
-                          ResponsiveCol(
-                            xs: 12,
-                            sm: 1,
-                            md: 1,
-                            lg: 1,
-                            xl: 1,
-                            child: TextFormField(
-                              style: AppTextStyle.cardLevelText(context),
-                              controller: controllers[index]?["ticket_total"],
-                              keyboardType: TextInputType.number,
-                              decoration: InputDecoration(
-                                label: Text(
-                                  "Ticket Total",
-                                  style: AppTextStyle.cardLevelText(context),
-                                ),
-                                fillColor: AppColors.whiteColor,
-                                filled: true,
-                                hintStyle: AppTextStyle.cardLevelText(context),
-                                isCollapsed: true,
-                                enabledBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(5),
-                                  borderSide: BorderSide(
-                                    color: AppColors.primaryColor.withOpacity(0.5),
-                                    width: 0.5,
-                                  ),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(5),
-                                  borderSide: BorderSide(
-                                    color: AppColors.primaryColor.withOpacity(0.5),
-                                    width: 0.5,
-                                  ),
-                                ),
-                                contentPadding: const EdgeInsets.only(
-                                  top: 10.0,
-                                  bottom: 10.0,
-                                  left: 12,
-                                ),
-                                isDense: true,
-                                hintText: "ticket total",
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(6),
-                                  borderSide: const BorderSide(color: Colors.transparent),
-                                ),
-                              ),
-                              onChanged: (value) {
-                                setState(() {
-                                  products[index]["ticket_total"] = double.tryParse(value) ?? 0.0;
-                                  updateTotal(index);
-                                });
-                              },
-                            ),
-                          ),
+
+
                           ResponsiveCol(
                             xs: 12,
                             sm: 1,
@@ -590,14 +519,18 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                                 enabledBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(5),
                                   borderSide: BorderSide(
-                                    color: AppColors.primaryColor.withOpacity(0.5),
+                                    color: AppColors.primaryColor.withOpacity(
+                                      0.5,
+                                    ),
                                     width: 0.5,
                                   ),
                                 ),
                                 focusedBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(5),
                                   borderSide: BorderSide(
-                                    color: AppColors.primaryColor.withOpacity(0.5),
+                                    color: AppColors.primaryColor.withOpacity(
+                                      0.5,
+                                    ),
                                     width: 0.5,
                                   ),
                                 ),
@@ -610,7 +543,9 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                                 hintText: "price",
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(6),
-                                  borderSide: const BorderSide(color: Colors.transparent),
+                                  borderSide: const BorderSide(
+                                    color: Colors.transparent,
+                                  ),
                                 ),
                               ),
                               inputFormatters: [
@@ -624,7 +559,8 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                               },
                               onChanged: (value) {
                                 setState(() {
-                                  final parsedValue = double.tryParse(value) ?? 1;
+                                  final parsedValue =
+                                      double.tryParse(value) ?? 1;
                                   products[index]["price"] = parsedValue;
                                   updateTotal(index);
                                 });
@@ -641,24 +577,34 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                               padding: EdgeInsets.zero,
                               children: {
                                 'fixed': Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 2.0,
+                                  ),
                                   child: Text(
                                     'Fixed',
                                     style: TextStyle(
-                                      fontFamily: GoogleFonts.playfairDisplay().fontFamily,
-                                      color: products[index]["discount_type"] == 'fixed'
+                                      fontFamily: GoogleFonts.playfairDisplay()
+                                          .fontFamily,
+                                      color:
+                                          products[index]["discount_type"] ==
+                                              'fixed'
                                           ? Colors.white
                                           : Colors.black,
                                     ),
                                   ),
                                 ),
                                 'percentage': Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 2.0,
+                                  ),
                                   child: Text(
                                     ' Percent',
                                     style: TextStyle(
-                                      fontFamily: GoogleFonts.playfairDisplay().fontFamily,
-                                      color: products[index]["discount_type"] == 'percentage'
+                                      fontFamily: GoogleFonts.playfairDisplay()
+                                          .fontFamily,
+                                      color:
+                                          products[index]["discount_type"] ==
+                                              'percentage'
                                           ? Colors.white
                                           : Colors.black,
                                     ),
@@ -686,7 +632,10 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                             child: TextFormField(
                               controller: controllers[index]?["discount"],
                               style: AppTextStyle.cardLevelText(context),
-                              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                              keyboardType:
+                                  const TextInputType.numberWithOptions(
+                                    decimal: true,
+                                  ),
                               decoration: InputDecoration(
                                 fillColor: AppColors.whiteColor,
                                 filled: true,
@@ -695,14 +644,18 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                                 enabledBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(5),
                                   borderSide: BorderSide(
-                                    color: AppColors.primaryColor.withOpacity(0.5),
+                                    color: AppColors.primaryColor.withOpacity(
+                                      0.5,
+                                    ),
                                     width: 0.5,
                                   ),
                                 ),
                                 focusedBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(5),
                                   borderSide: BorderSide(
-                                    color: AppColors.primaryColor.withOpacity(0.5),
+                                    color: AppColors.primaryColor.withOpacity(
+                                      0.5,
+                                    ),
                                     width: 0.5,
                                   ),
                                 ),
@@ -715,12 +668,15 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                                 hintText: "Discount",
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(6),
-                                  borderSide: const BorderSide(color: Colors.transparent),
+                                  borderSide: const BorderSide(
+                                    color: Colors.transparent,
+                                  ),
                                 ),
                               ),
                               onChanged: (value) {
                                 setState(() {
-                                  products[index]["discount"] = double.tryParse(value) ?? 0.0;
+                                  products[index]["discount"] =
+                                      double.tryParse(value) ?? 0.0;
                                   updateTotal(index);
                                 });
                               },
@@ -739,13 +695,16 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                                   onPressed: () {
                                     setState(() {
                                       int? currentQuantity = int.tryParse(
-                                        controllers[index]?["quantity"]?.text ?? "0",
+                                        controllers[index]?["quantity"]?.text ??
+                                            "0",
                                       );
-                                      if (currentQuantity != null && currentQuantity > 1) {
+                                      if (currentQuantity != null &&
+                                          currentQuantity > 1) {
                                         controllers[index]!["quantity"]!.text =
                                             (currentQuantity - 1).toString();
                                         products[index]["quantity"] =
-                                            controllers[index]!["quantity"]!.text;
+                                            controllers[index]!["quantity"]!
+                                                .text;
                                         updateTotal(index);
                                       }
                                     });
@@ -762,7 +721,11 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                                   onPressed: () {
                                     setState(() {
                                       int currentQuantity =
-                                          int.tryParse(controllers[index]!["quantity"]!.text) ?? 0;
+                                          int.tryParse(
+                                            controllers[index]!["quantity"]!
+                                                .text,
+                                          ) ??
+                                          0;
                                       controllers[index]!["quantity"]!.text =
                                           (currentQuantity + 1).toString();
                                       products[index]["quantity"] =
@@ -774,6 +737,127 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                               ],
                             ),
                           ),
+
+                          ResponsiveCol(
+                            xs: 12,
+                            sm: 1,
+                            md: 1,
+                            lg: 1,
+                            xl: 1,
+                            child: TextFormField(
+                              style: AppTextStyle.cardLevelText(context),
+                              controller: controllers[index]?["ticket_total"],
+                              keyboardType: TextInputType.number,
+                              decoration: InputDecoration(
+                                label: Text(
+                                  "Ticket Total",
+                                  style: AppTextStyle.cardLevelText(context),
+                                ),
+                                fillColor: AppColors.whiteColor,
+                                filled: true,
+                                hintStyle: AppTextStyle.cardLevelText(context),
+                                isCollapsed: true,
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(5),
+                                  borderSide: BorderSide(
+                                    color: AppColors.primaryColor.withOpacity(
+                                      0.5,
+                                    ),
+                                    width: 0.5,
+                                  ),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(5),
+                                  borderSide: BorderSide(
+                                    color: AppColors.primaryColor.withOpacity(
+                                      0.5,
+                                    ),
+                                    width: 0.5,
+                                  ),
+                                ),
+                                contentPadding: const EdgeInsets.only(
+                                  top: 10.0,
+                                  bottom: 10.0,
+                                  left: 12,
+                                ),
+                                isDense: true,
+                                hintText: "ticket total",
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(6),
+                                  borderSide: const BorderSide(
+                                    color: Colors.transparent,
+                                  ),
+                                ),
+                              ),
+                              onChanged: (value) {
+                                setState(() {
+                                  products[index]["ticket_total"] =
+                                      double.tryParse(value) ?? 0.0;
+                                  updateTotal(index);
+                                });
+                              },
+                            ),
+                          ),
+                          ResponsiveCol(
+                            xs: 12,
+                            sm: 1,
+                            md: 1,
+                            lg: 1,
+                            xl: 1,
+                            child: TextFormField(
+                              style: AppTextStyle.cardLevelText(context),
+                              controller: controllers[index]?["total"],
+                              keyboardType: TextInputType.number,
+                              decoration: InputDecoration(
+                                label: Text(
+                                  "Total Amount",
+                                  style: AppTextStyle.cardLevelText(context),
+                                ),
+                                fillColor: AppColors.whiteColor,
+                                filled: true,
+                                hintStyle: AppTextStyle.cardLevelText(context),
+                                isCollapsed: true,
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(5),
+                                  borderSide: BorderSide(
+                                    color: AppColors.primaryColor.withOpacity(
+                                      0.5,
+                                    ),
+                                    width: 0.5,
+                                  ),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(5),
+                                  borderSide: BorderSide(
+                                    color: AppColors.primaryColor.withOpacity(
+                                      0.5,
+                                    ),
+                                    width: 0.5,
+                                  ),
+                                ),
+                                contentPadding: const EdgeInsets.only(
+                                  top: 10.0,
+                                  bottom: 10.0,
+                                  left: 12,
+                                ),
+                                isDense: true,
+                                hintText: "total",
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(6),
+                                  borderSide: const BorderSide(
+                                    color: Colors.transparent,
+                                  ),
+                                ),
+                              ),
+                              onChanged: (value) {
+                                setState(() {
+                                  products[index]["total"] =
+                                      double.tryParse(value) ?? 0.0;
+                                  updateTotal(index);
+                                });
+                              },
+                            ),
+                          ),
                           ResponsiveCol(
                             xs: 12,
                             sm: 1,
@@ -782,8 +866,12 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                             xl: 1,
                             child: IconButton(
                               icon: Icon(
-                                product == products[products.length - 1] ? Icons.add : Icons.remove,
-                                color: products.length == 1 ? Colors.green : Colors.red,
+                                product == products[products.length - 1]
+                                    ? Icons.add
+                                    : Icons.remove,
+                                color: products.length == 1
+                                    ? Colors.green
+                                    : Colors.red,
                               ),
                               onPressed: () {
                                 if (product == products[products.length - 1]) {
@@ -826,24 +914,36 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                                     padding: EdgeInsets.zero,
                                     children: {
                                       'fixed': Padding(
-                                        padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 2.0,
+                                        ),
                                         child: Text(
                                           'TK',
                                           style: TextStyle(
-                                            fontFamily: GoogleFonts.playfairDisplay().fontFamily,
-                                            color: selectedOverallDiscountType == 'fixed'
+                                            fontFamily:
+                                                GoogleFonts.playfairDisplay()
+                                                    .fontFamily,
+                                            color:
+                                                selectedOverallDiscountType ==
+                                                    'fixed'
                                                 ? Colors.white
                                                 : Colors.black,
                                           ),
                                         ),
                                       ),
                                       'percentage': Padding(
-                                        padding: const EdgeInsets.symmetric(horizontal: 0.0),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 0.0,
+                                        ),
                                         child: Text(
                                           ' %',
                                           style: TextStyle(
-                                            fontFamily: GoogleFonts.playfairDisplay().fontFamily,
-                                            color: selectedOverallDiscountType == 'percentage'
+                                            fontFamily:
+                                                GoogleFonts.playfairDisplay()
+                                                    .fontFamily,
+                                            color:
+                                                selectedOverallDiscountType ==
+                                                    'percentage'
                                                 ? Colors.white
                                                 : Colors.black,
                                           ),
@@ -868,10 +968,13 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                                     controller: context
                                         .read<CreatePurchaseBloc>()
                                         .discountOverAllController,
-                                    hintText: 'Discount ',isRequiredLable: false,
+                                    hintText: 'Discount ',
+                                    isRequiredLable: false,
                                     fillColor: Colors.white,
                                     keyboardType:
-                                    const TextInputType.numberWithOptions(decimal: true),
+                                        const TextInputType.numberWithOptions(
+                                          decimal: true,
+                                        ),
                                     onChanged: (value) {
                                       calculateDiscountTotal();
                                       setState(() {});
@@ -906,24 +1009,36 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                                     padding: EdgeInsets.zero,
                                     children: {
                                       'fixed': Padding(
-                                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 4.0,
+                                        ),
                                         child: Text(
                                           'TK',
                                           style: TextStyle(
-                                            fontFamily: GoogleFonts.playfairDisplay().fontFamily,
-                                            color: selectedOverallServiceChargeType == 'fixed'
+                                            fontFamily:
+                                                GoogleFonts.playfairDisplay()
+                                                    .fontFamily,
+                                            color:
+                                                selectedOverallServiceChargeType ==
+                                                    'fixed'
                                                 ? Colors.white
                                                 : Colors.black,
                                           ),
                                         ),
                                       ),
                                       'percentage': Padding(
-                                        padding: const EdgeInsets.symmetric(horizontal: 0.0),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 0.0,
+                                        ),
                                         child: Text(
                                           '%',
                                           style: TextStyle(
-                                            fontFamily: GoogleFonts.playfairDisplay().fontFamily,
-                                            color: selectedOverallServiceChargeType == 'percentage'
+                                            fontFamily:
+                                                GoogleFonts.playfairDisplay()
+                                                    .fontFamily,
+                                            color:
+                                                selectedOverallServiceChargeType ==
+                                                    'percentage'
                                                 ? Colors.white
                                                 : Colors.black,
                                           ),
@@ -932,11 +1047,13 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                                     },
                                     onValueChanged: (value) {
                                       setState(() {
-                                        selectedOverallServiceChargeType = value;
+                                        selectedOverallServiceChargeType =
+                                            value;
                                         calculateServiceChargeTotal();
                                       });
                                     },
-                                    groupValue: selectedOverallServiceChargeType,
+                                    groupValue:
+                                        selectedOverallServiceChargeType,
                                     unselectedColor: Colors.grey[300],
                                     selectedColor: AppColors.primaryColor,
                                     borderColor: AppColors.primaryColor,
@@ -948,10 +1065,13 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                                     controller: context
                                         .read<CreatePurchaseBloc>()
                                         .serviceChargeOverAllController,
-                                    hintText: 'Charge ',isRequiredLable: false,
+                                    hintText: 'Charge ',
+                                    isRequiredLable: false,
                                     fillColor: Colors.white,
                                     keyboardType:
-                                    const TextInputType.numberWithOptions(decimal: true),
+                                        const TextInputType.numberWithOptions(
+                                          decimal: true,
+                                        ),
                                     onChanged: (value) {
                                       calculateServiceChargeTotal();
                                       setState(() {});
@@ -986,24 +1106,36 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                                     padding: EdgeInsets.zero,
                                     children: {
                                       'fixed': Padding(
-                                        padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 2.0,
+                                        ),
                                         child: Text(
                                           'TK',
                                           style: TextStyle(
-                                            fontFamily: GoogleFonts.playfairDisplay().fontFamily,
-                                            color: selectedOverallDeliveryType == 'fixed'
+                                            fontFamily:
+                                                GoogleFonts.playfairDisplay()
+                                                    .fontFamily,
+                                            color:
+                                                selectedOverallDeliveryType ==
+                                                    'fixed'
                                                 ? Colors.white
                                                 : Colors.black,
                                           ),
                                         ),
                                       ),
                                       'percentage': Padding(
-                                        padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 2.0,
+                                        ),
                                         child: Text(
                                           '%',
                                           style: TextStyle(
-                                            fontFamily: GoogleFonts.playfairDisplay().fontFamily,
-                                            color: selectedOverallDeliveryType == 'percentage'
+                                            fontFamily:
+                                                GoogleFonts.playfairDisplay()
+                                                    .fontFamily,
+                                            color:
+                                                selectedOverallDeliveryType ==
+                                                    'percentage'
                                                 ? Colors.white
                                                 : Colors.black,
                                           ),
@@ -1032,7 +1164,9 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                                     isRequiredLable: false,
                                     fillColor: Colors.white,
                                     keyboardType:
-                                    const TextInputType.numberWithOptions(decimal: true),
+                                        const TextInputType.numberWithOptions(
+                                          decimal: true,
+                                        ),
                                     onChanged: (value) {
                                       calculateDeliveryTotal();
                                       setState(() {});
@@ -1079,14 +1213,19 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                                     flex: 4,
                                     child: Text(
                                       "Ticket Total",
-                                      style: AppTextStyle.cardLevelHead(context),
+                                      style: AppTextStyle.cardLevelHead(
+                                        context,
+                                      ),
                                     ),
                                   ),
                                   Expanded(
                                     flex: 2,
                                     child: Text(
-                                      calculateTotalTicketForAllProducts().toStringAsFixed(2),
-                                      style: AppTextStyle.cardLevelText(context),
+                                      calculateTotalTicketForAllProducts()
+                                          .toStringAsFixed(2),
+                                      style: AppTextStyle.cardLevelText(
+                                        context,
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -1098,14 +1237,18 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                                     flex: 4,
                                     child: Text(
                                       "Specific Discount (-)",
-                                      style: AppTextStyle.cardLevelHead(context),
+                                      style: AppTextStyle.cardLevelHead(
+                                        context,
+                                      ),
                                     ),
                                   ),
                                   Expanded(
                                     flex: 2,
                                     child: Text(
                                       discount.toStringAsFixed(2),
-                                      style: AppTextStyle.cardLevelText(context),
+                                      style: AppTextStyle.cardLevelText(
+                                        context,
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -1117,14 +1260,19 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                                     flex: 4,
                                     child: Text(
                                       "Sub Total",
-                                      style: AppTextStyle.cardLevelHead(context),
+                                      style: AppTextStyle.cardLevelHead(
+                                        context,
+                                      ),
                                     ),
                                   ),
                                   Expanded(
                                     flex: 2,
                                     child: Text(
-                                      calculateTotalForAllProducts().toStringAsFixed(2),
-                                      style: AppTextStyle.cardLevelText(context),
+                                      calculateTotalForAllProducts()
+                                          .toStringAsFixed(2),
+                                      style: AppTextStyle.cardLevelText(
+                                        context,
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -1136,14 +1284,18 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                                     flex: 4,
                                     child: Text(
                                       "Discount (-)",
-                                      style: AppTextStyle.cardLevelHead(context),
+                                      style: AppTextStyle.cardLevelHead(
+                                        context,
+                                      ),
                                     ),
                                   ),
                                   Expanded(
                                     flex: 2,
                                     child: Text(
                                       discount.toStringAsFixed(2),
-                                      style: AppTextStyle.cardLevelText(context),
+                                      style: AppTextStyle.cardLevelText(
+                                        context,
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -1155,14 +1307,18 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                                     flex: 4,
                                     child: Text(
                                       "Service Charge (+)	",
-                                      style: AppTextStyle.cardLevelHead(context),
+                                      style: AppTextStyle.cardLevelHead(
+                                        context,
+                                      ),
                                     ),
                                   ),
                                   Expanded(
                                     flex: 2,
                                     child: Text(
                                       serviceCharge.toStringAsFixed(2),
-                                      style: AppTextStyle.cardLevelText(context),
+                                      style: AppTextStyle.cardLevelText(
+                                        context,
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -1174,14 +1330,18 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                                     flex: 4,
                                     child: Text(
                                       "Delivery Charge (+)	",
-                                      style: AppTextStyle.cardLevelHead(context),
+                                      style: AppTextStyle.cardLevelHead(
+                                        context,
+                                      ),
                                     ),
                                   ),
                                   Expanded(
                                     flex: 2,
                                     child: Text(
                                       deliveryCharge.toStringAsFixed(2),
-                                      style: AppTextStyle.cardLevelText(context),
+                                      style: AppTextStyle.cardLevelText(
+                                        context,
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -1193,14 +1353,20 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                                     flex: 4,
                                     child: Text(
                                       "Net Total",
-                                      style: AppTextStyle.cardLevelHead(context),
+                                      style: AppTextStyle.cardLevelHead(
+                                        context,
+                                      ),
                                     ),
                                   ),
                                   Expanded(
                                     flex: 2,
                                     child: Text(
-                                      calculateAllFinalTotal().toStringAsFixed(2),
-                                      style: AppTextStyle.cardLevelText(context),
+                                      calculateAllFinalTotal().toStringAsFixed(
+                                        2,
+                                      ),
+                                      style: AppTextStyle.cardLevelText(
+                                        context,
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -1234,139 +1400,175 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                             ),
                             _isChecked
                                 ? Row(
-                              children: [
-                                Expanded(
-                                  child: AppDropdown<String>(
-                                    label: "Payment Method",
-                                    context: context,
-                                    hint: context
-                                        .read<CreatePurchaseBloc>()
-                                        .selectedPaymentMethod
-                                        .isEmpty
-                                        ? "Select Payment Method"
-                                        : context
-                                        .read<CreatePurchaseBloc>()
-                                        .selectedPaymentMethod,
-                                    isLabel: false,
-                                    isRequired: true,
-                                    isNeedAll: false,
-                                    value: context
-                                        .read<CreatePurchaseBloc>()
-                                        .selectedPaymentMethod
-                                        .isEmpty
-                                        ? null
-                                        : context
-                                        .read<CreatePurchaseBloc>()
-                                        .selectedPaymentMethod,
-                                    itemList: context
-                                        .read<CreatePurchaseBloc>()
-                                        .paymentMethod,
-                                    onChanged: (newVal) {
-                                      context
-                                          .read<CreatePurchaseBloc>()
-                                          .selectedPaymentMethod = newVal.toString();
-                                      setState(() {});
-                                    },
-                                    validator: (value) {
-                                      return value == null
-                                          ? 'Please select a payment method'
-                                          : null;
-                                    },
-                                    itemBuilder: (item) => DropdownMenuItem(
-                                      value: item,
-                                      child: Text(
-                                        item.toString(),
-                                        style: const TextStyle(
-                                          color: AppColors.blackColor,
-                                          fontFamily: 'Quicksand',
-                                          fontWeight: FontWeight.w300,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 5),
-                                Expanded(
-                                  child: BlocBuilder<AccountBloc, AccountState>(
-                                    builder: (context, state) {
-                                      if (state is AccountListLoading) {
-                                        return const Center(
-                                            child: CircularProgressIndicator());
-                                      } else if (state is AccountListSuccess) {
-                                        final filteredList = context
-                                            .read<CreatePurchaseBloc>()
-                                            .selectedPaymentMethod
-                                            .isNotEmpty
-                                            ? state.list.where((item) {
-                                          return item.acType?.toLowerCase() ==
+                                    children: [
+                                      Expanded(
+                                        child: AppDropdown<String>(
+                                          label: "Payment Method",
+                                          context: context,
+                                          hint:
                                               context
                                                   .read<CreatePurchaseBloc>()
                                                   .selectedPaymentMethod
-                                                  .toLowerCase();
-                                        }).toList()
-                                            : state.list;
-
-                                        return AppDropdown(
-                                          label: "Account",
-                                          context: context,
-                                          hint: "Select Account",
+                                                  .isEmpty
+                                              ? "Select Payment Method"
+                                              : context
+                                                    .read<CreatePurchaseBloc>()
+                                                    .selectedPaymentMethod,
                                           isLabel: false,
                                           isRequired: true,
                                           isNeedAll: false,
-                                          value: context
-                                              .read<CreatePurchaseBloc>()
-                                              .selectedAccount
-                                              .isEmpty
+                                          value:
+                                              context
+                                                  .read<CreatePurchaseBloc>()
+                                                  .selectedPaymentMethod
+                                                  .isEmpty
                                               ? null
                                               : context
+                                                    .read<CreatePurchaseBloc>()
+                                                    .selectedPaymentMethod,
+                                          itemList: context
                                               .read<CreatePurchaseBloc>()
-                                              .selectedAccount,
-                                          itemList: filteredList,
+                                              .paymentMethod,
                                           onChanged: (newVal) {
                                             context
                                                 .read<CreatePurchaseBloc>()
-                                                .selectedAccount = newVal.toString();
-
-                                            var matchingAccount = filteredList.firstWhere(
-                                                  (acc) =>
-                                              acc.acName.toString() ==
-                                                  newVal.toString().split("[").first,
-                                            );
-
-                                            context
-                                                .read<CreatePurchaseBloc>()
-                                                .selectedAccountId =
-                                                matchingAccount.acId.toString();
+                                                .selectedPaymentMethod = newVal
+                                                .toString();
+                                            setState(() {});
                                           },
                                           validator: (value) {
                                             return value == null
-                                                ? 'Please select an account'
+                                                ? 'Please select a payment method'
                                                 : null;
                                           },
-                                          itemBuilder: (item) => DropdownMenuItem(
-                                            value: item.toString(),
-                                            child: Text(
-                                              item.toString(),
-                                              style: const TextStyle(
-                                                color: AppColors.blackColor,
-                                                fontFamily: 'Quicksand',
-                                                fontWeight: FontWeight.w300,
+                                          itemBuilder: (item) =>
+                                              DropdownMenuItem(
+                                                value: item,
+                                                child: Text(
+                                                  item.toString(),
+                                                  style: const TextStyle(
+                                                    color: AppColors.blackColor,
+                                                    fontFamily: 'Quicksand',
+                                                    fontWeight: FontWeight.w300,
+                                                  ),
+                                                ),
                                               ),
-                                            ),
-                                          ),
-                                        );
-                                      } else if (state is AccountListFailed) {
-                                        return Center(
-                                            child: Text(
-                                                'Failed to load accounts: ${state.content}'));
-                                      } else {
-                                        return Container();
-                                      }
-                                    },
-                                  ),
-                                )
-                              ],
-                            )
+                                        ),
+                                      ),
+                                      const SizedBox(width: 5),
+                                      Expanded(
+                                        child: BlocBuilder<AccountBloc, AccountState>(
+                                          builder: (context, state) {
+                                            if (state is AccountListLoading) {
+                                              return const Center(
+                                                child:
+                                                    CircularProgressIndicator(),
+                                              );
+                                            } else if (state
+                                                is AccountListSuccess) {
+                                              final filteredList =
+                                                  context
+                                                      .read<
+                                                        CreatePurchaseBloc
+                                                      >()
+                                                      .selectedPaymentMethod
+                                                      .isNotEmpty
+                                                  ? state.list.where((item) {
+                                                      return item.acType
+                                                              ?.toLowerCase() ==
+                                                          context
+                                                              .read<
+                                                                CreatePurchaseBloc
+                                                              >()
+                                                              .selectedPaymentMethod
+                                                              .toLowerCase();
+                                                    }).toList()
+                                                  : state.list;
+
+                                              return AppDropdown(
+                                                label: "Account",
+                                                context: context,
+                                                hint: "Select Account",
+                                                isLabel: false,
+                                                isRequired: true,
+                                                isNeedAll: false,
+                                                value:
+                                                    context
+                                                        .read<
+                                                          CreatePurchaseBloc
+                                                        >()
+                                                        .selectedAccount
+                                                        .isEmpty
+                                                    ? null
+                                                    : context
+                                                          .read<
+                                                            CreatePurchaseBloc
+                                                          >()
+                                                          .selectedAccount,
+                                                itemList: filteredList,
+                                                onChanged: (newVal) {
+                                                  context
+                                                      .read<
+                                                        CreatePurchaseBloc
+                                                      >()
+                                                      .selectedAccount = newVal
+                                                      .toString();
+
+                                                  var matchingAccount =
+                                                      filteredList.firstWhere(
+                                                        (acc) =>
+                                                            acc.acName
+                                                                .toString() ==
+                                                            newVal
+                                                                .toString()
+                                                                .split("[")
+                                                                .first,
+                                                      );
+
+                                                  context
+                                                          .read<
+                                                            CreatePurchaseBloc
+                                                          >()
+                                                          .selectedAccountId =
+                                                      matchingAccount.acId
+                                                          .toString();
+                                                },
+                                                validator: (value) {
+                                                  return value == null
+                                                      ? 'Please select an account'
+                                                      : null;
+                                                },
+                                                itemBuilder: (item) =>
+                                                    DropdownMenuItem(
+                                                      value: item.toString(),
+                                                      child: Text(
+                                                        item.toString(),
+                                                        style: const TextStyle(
+                                                          color: AppColors
+                                                              .blackColor,
+                                                          fontFamily:
+                                                              'Quicksand',
+                                                          fontWeight:
+                                                              FontWeight.w300,
+                                                        ),
+                                                      ),
+                                                    ),
+                                              );
+                                            } else if (state
+                                                is AccountListFailed) {
+                                              return Center(
+                                                child: Text(
+                                                  'Failed to load accounts: ${state.content}',
+                                                ),
+                                              );
+                                            } else {
+                                              return Container();
+                                            }
+                                          },
+                                        ),
+                                      ),
+                                    ],
+                                  )
                                 : Container(),
                             const SizedBox(height: 10),
                           ],
@@ -1428,56 +1630,76 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
       var transferProducts = products
           .map(
             (product) => {
-          "product_id": product["product_id"].toString(),
-          "qty": double.tryParse(product["quantity"].toString()),
-          "price": double.tryParse(product["price"].toString()),
-          "discount": double.tryParse(product["discount"].toString()),
-          "discount_type": product["discount_type"].toString(),
-          "product_total": (double.tryParse(product["price"].toString()) ?? 0) *
-              (double.tryParse(product["quantity"].toString()) ?? 0),
-        },
-      )
+              "product_id": product["product_id"].toString(),
+              "qty": double.tryParse(product["quantity"].toString()),
+              "price": double.tryParse(product["price"].toString()),
+              "discount": double.tryParse(product["discount"].toString()),
+              "discount_type": product["discount_type"].toString(),
+              "product_total":
+                  (double.tryParse(product["price"].toString()) ?? 0) *
+                  (double.tryParse(product["quantity"].toString()) ?? 0),
+            },
+          )
           .toList();
 
       Map<String, dynamic> body = {
         "instant_pay": _isChecked,
         "date": DateFormat("yyyy-MM-dd").format(
           DateFormat("dd-MM-yyyy").parse(
-            context.read<CreatePurchaseBloc>().dateEditingController.text.trim(),
+            context
+                .read<CreatePurchaseBloc>()
+                .dateEditingController
+                .text
+                .trim(),
           ),
         ),
-        "service_charge": context
-            .read<CreatePurchaseBloc>()
-            .serviceChargeOverAllController
-            .text
-            .isEmpty
+        "service_charge":
+            context
+                .read<CreatePurchaseBloc>()
+                .serviceChargeOverAllController
+                .text
+                .isEmpty
             ? 0
             : double.tryParse(
-          context.read<CreatePurchaseBloc>().serviceChargeOverAllController.text,
-        ),
-        "delivery_charge": context
-            .read<CreatePurchaseBloc>()
-            .deliveryChargeOverAllController
-            .text
-            .isEmpty
+                context
+                    .read<CreatePurchaseBloc>()
+                    .serviceChargeOverAllController
+                    .text,
+              ),
+        "delivery_charge":
+            context
+                .read<CreatePurchaseBloc>()
+                .deliveryChargeOverAllController
+                .text
+                .isEmpty
             ? 0
             : double.tryParse(
-          context.read<CreatePurchaseBloc>().deliveryChargeOverAllController.text,
-        ),
+                context
+                    .read<CreatePurchaseBloc>()
+                    .deliveryChargeOverAllController
+                    .text,
+              ),
         "purchase_items": transferProducts,
         "sub_total": calculateTotalForAllProducts().toStringAsFixed(2),
-        "supplier": context.read<CreatePurchaseBloc>().supplierListModel?.id.toString(),
-        "overall_discount": context
+        "supplier": context
             .read<CreatePurchaseBloc>()
-            .discountOverAllController
-            .text
-            .isEmpty
+            .supplierListModel
+            ?.id
+            .toString(),
+        "overall_discount":
+            context
+                .read<CreatePurchaseBloc>()
+                .discountOverAllController
+                .text
+                .isEmpty
             ? 0.0
             : double.tryParse(
-          context.read<CreatePurchaseBloc>().discountOverAllController.text,
-        ),
+                context
+                    .read<CreatePurchaseBloc>()
+                    .discountOverAllController
+                    .text,
+              ),
         "overall_discount_type": selectedOverallDiscountType.toLowerCase(),
-
 
         "overall_service_type": selectedOverallServiceChargeType
             .toString()
@@ -1487,18 +1709,18 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
             .toString()
             .toLowerCase(),
 
-
-
         // Convert list to JSON string
-
-
       };
 
       if (_isChecked == true) {
-        body['payment_method'] =
-            context.read<CreatePurchaseBloc>().selectedPaymentMethod.toString();
-        body['account_id'] =
-            context.read<CreatePurchaseBloc>().selectedAccountId.toString();
+        body['payment_method'] = context
+            .read<CreatePurchaseBloc>()
+            .selectedPaymentMethod
+            .toString();
+        body['account_id'] = context
+            .read<CreatePurchaseBloc>()
+            .selectedAccountId
+            .toString();
       }
 
       log(body.toString());

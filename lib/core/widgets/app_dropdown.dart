@@ -33,14 +33,14 @@ class AppDropdown<T> extends FormField<T> {
             }
 
             return Container(
-              padding: EdgeInsets.all(2),
+              // padding: EdgeInsets.all(2),
               decoration: BoxDecoration(
-                color: Colors.white,
+                // color: Colors.white,
                 borderRadius: BorderRadius.all(Radius.circular(2))
               ),
            
               height:
-                  isLabel == true ? 35 : 55, // ✅ Fixed height for the dropdown
+                  isLabel == true ? 50 : 70, // ✅ Fixed height for the dropdown
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -66,7 +66,9 @@ class AppDropdown<T> extends FormField<T> {
                   if (!isLabel) const SizedBox(height: 2),
 
                   // Dropdown with fixed height
-                  Expanded(
+                  SizedBox(
+
+                     height: 30,
                       child: Container(
                     padding: EdgeInsets.all(5), // 👈 Removed extra padding
                     decoration: BoxDecoration(
