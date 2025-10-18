@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'core/core.dart';
 import 'feature/feature.dart';
-import 'feature/sales/presentation/pages/sales_list_screen.dart';
 import 'feature/splash/presentation/bloc/connectivity_bloc/connectivity_state.dart';
 
 final GlobalKey<ScaffoldState> _drawerKey = GlobalKey();

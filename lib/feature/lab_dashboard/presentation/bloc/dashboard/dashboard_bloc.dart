@@ -12,7 +12,7 @@ import '../../../../../enery_screen.dart';
 import '../../../../customer/presentation/pages/customer_screen.dart';
 import '../../../../expense/expense_sub_head/presentation/pages/expense_sub_head_screen.dart';
 import '../../../../money_receipt/presentation/page/monery_receipt_create.dart';
-import '../../../../money_receipt/presentation/page/money_receipt_list_screen.dart';
+import '../../../../money_receipt/presentation/page/money_receipt_list.dart';
 
 import '../../../../products/brand/presentation/pages/brand_screen.dart';
 import '../../../../products/categories/presentation/pages/categories_screen.dart';
@@ -41,7 +41,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     // AppWrapper(child: SalesListScreen()),
 
     AppWrapper(child: MoneyReceiptForm()),
-    AppWrapper(child: MoneyReceiptListScreen()),
+    AppWrapper(child: MoneyReceiptScreen()),
 
     // AppWrapper(child: ProductCreateScreen()),
     AppWrapper(child: ProductsScreen()),

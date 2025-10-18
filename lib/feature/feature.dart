@@ -10,13 +10,7 @@ export 'auth/presentation/pages/login_scr.dart';
 
 //!-----Lab Billing -----------
 
-export 'sales/presentation/pages/sales_create.dart';
 
-export 'sales/presentation/widgets/item_test_table/test_item_table.dart';
-export 'sales/presentation/widgets/patient_info_section/sales_entry_section.dart';
-export 'sales/presentation/widgets/payment/payment_screen.dart';
-
-export 'sales/presentation/widgets/visit_type_toggle/visit_type_toggle.dart';
 
 
 
