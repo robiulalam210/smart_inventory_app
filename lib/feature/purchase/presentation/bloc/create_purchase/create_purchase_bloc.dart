@@ -20,7 +20,7 @@ class CreatePurchaseBloc extends Bloc<CreatePurchaseEvent, CreatePurchaseState> 
   String selectedAccount = "";
 
   String selectedAccountId = "";
-  List paymentMethod = ["Bank", "Cash", "Mobile Banking"];
+  List<String> paymentMethod = ["Bank", "Cash", "Mobile Banking"];
   String selectedPaymentMethod = "Cash";
   TextEditingController dateEditingController=TextEditingController();
   TextEditingController serviceChargeOverAllController=TextEditingController();
@@ -35,7 +35,6 @@ class CreatePurchaseBloc extends Bloc<CreatePurchaseEvent, CreatePurchaseState> 
 
 
   TextEditingController discountOverAllController=TextEditingController();
-  TextEditingController vatOverAllController=TextEditingController();
 
 
   CreatePurchaseBloc() : super(CreatePurchaseInitial()) {

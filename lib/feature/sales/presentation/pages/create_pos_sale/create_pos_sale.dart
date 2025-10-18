@@ -16,6 +16,7 @@ import '../../../../../core/widgets/app_snack_bar.dart';
 import '../../../../../core/widgets/input_field.dart';
 import '../../../../accounts/data/model/account_model.dart';
 import '../../../../accounts/presentation/bloc/account/account_bloc.dart';
+import '../../../../customer/data/model/customer_model.dart';
 import '../../../../customer/presentation/bloc/customer/customer_bloc.dart';
 import '../../../../products/product/presentation/bloc/products/products_bloc.dart';
 import '../../bloc/possale/crate_pos_sale/create_pos_sale_bloc.dart';
@@ -107,7 +108,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
 
     if (discountType == 'fixed') {
       total -= discount;
-    } else if (discountType == 'percentage') {
+    } else if (discountType == 'percent') {
       final discountAmount = (total * (discount / 100));
       total -= discountAmount;
     }
@@ -134,7 +135,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
         0.0;
 
     // Apply Discount
-    if (selectedOverallDiscountType == 'percentage') {
+    if (selectedOverallDiscountType == 'percent') {
       discount = (total * (discount / 100));
     }
     total -= discount;
@@ -164,7 +165,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
         0.0;
 
     // Apply VAT
-    if (selectedOverallVatType == 'percentage') {
+    if (selectedOverallVatType == 'percent') {
       vat = (total * (vat / 100));
     }
     total += vat;
@@ -187,7 +188,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
         0.0;
 
     // Apply Delivery Charge
-    if (selectedOverallDeliveryType == 'percentage') {
+    if (selectedOverallDeliveryType == 'percent') {
       deliveryCharge = (total * (deliveryCharge / 100));
     }
     total += deliveryCharge;
@@ -204,7 +205,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
         ) ??
         0.0;
 
-    if (selectedOverallServiceChargeType == 'percentage') {
+    if (selectedOverallServiceChargeType == 'percent') {
       serviceCharge = (total * (serviceCharge / 100));
     }
     total += serviceCharge;
@@ -221,7 +222,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
           context.read<CreatePosSaleBloc>().discountOverAllController.text,
         ) ??
         0.0;
-    if (selectedOverallDiscountType == 'percentage') {
+    if (selectedOverallDiscountType == 'percent') {
       discount = calculateTotalForAllProducts() * (discount / 100);
     } // Fixed discount does not change
     total -= discount;
@@ -232,7 +233,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
           context.read<CreatePosSaleBloc>().vatOverAllController.text,
         ) ??
         0.0;
-    if (selectedOverallVatType == 'percentage') {
+    if (selectedOverallVatType == 'percent') {
       vat = calculateTotalForAllProducts() * (vat / 100);
     }
     total += vat;
@@ -246,7 +247,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
               .text,
         ) ??
         0.0;
-    if (selectedOverallDeliveryType == 'percentage') {
+    if (selectedOverallDeliveryType == 'percent') {
       deliveryCharge = calculateTotalForAllProducts() * (deliveryCharge / 100);
     }
     total += deliveryCharge;
@@ -257,7 +258,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
           context.read<CreatePosSaleBloc>().serviceChargeOverAllController.text,
         ) ??
         0.0;
-    if (selectedOverallServiceChargeType == 'percentage') {
+    if (selectedOverallServiceChargeType == 'percent') {
       serviceCharge = calculateTotalForAllProducts() * (serviceCharge / 100);
     }
     total += serviceCharge;
@@ -369,7 +370,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
       double productDiscount = (product["discount"] ?? 0).toDouble();
       double ticketTotal = (product["ticket_total"] ?? 0).toDouble();
 
-      if (product["discount_type"] == 'percentage') {
+      if (product["discount_type"] == 'percent') {
         productDiscount = ticketTotal * (productDiscount / 100);
       }
 
@@ -482,12 +483,28 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                               value: context
                                   .read<CreatePosSaleBloc>()
                                   .selectClintModel,
-                              itemList: context.read<CustomerBloc>().list,
+                              itemList:
+                                  [
+                                    CustomerModel(
+                                      name: 'Walk-in-customer',
+                                      id: -1,
+                                    ),
+                                  ] +
+                                  context.read<CustomerBloc>().list,
                               onChanged: (newVal) {
                                 context
                                         .read<CreatePosSaleBloc>()
                                         .selectClintModel =
                                     newVal;
+
+                                // Update customer type based on selection
+                                if (newVal?.id == -1) {
+                                  context.read<CreatePosSaleBloc>().customType =
+                                      "Walking Customer";
+                                } else {
+                                  context.read<CreatePosSaleBloc>().customType =
+                                      "Saved Customer";
+                                }
                               },
                               validator: (value) {
                                 return value == null
@@ -889,7 +906,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                                     ),
                                   ),
                                 ),
-                                'percentage': Padding(
+                                'percent': Padding(
                                   padding: const EdgeInsets.symmetric(
                                     horizontal: 2.0,
                                   ),
@@ -900,7 +917,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                                           .fontFamily,
                                       color:
                                           products[index]["discount_type"] ==
-                                              'percentage'
+                                              'percent'
                                           ? Colors.white
                                           : Colors.black,
                                     ),
@@ -1124,7 +1141,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                                           ),
                                         ),
                                       ),
-                                      'percentage': Padding(
+                                      'percent': Padding(
                                         padding: const EdgeInsets.symmetric(
                                           horizontal: 0.0,
                                         ),
@@ -1136,7 +1153,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                                                     .fontFamily,
                                             color:
                                                 selectedOverallDiscountType ==
-                                                    'percentage'
+                                                    'percent'
                                                 ? Colors.white
                                                 : Colors.black,
                                           ),
@@ -1225,7 +1242,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                                           ),
                                         ),
                                       ),
-                                      'percentage': Padding(
+                                      'percent': Padding(
                                         padding: const EdgeInsets.symmetric(
                                           horizontal: 0.0,
                                         ),
@@ -1237,7 +1254,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                                                     .fontFamily,
                                             color:
                                                 selectedOverallVatType ==
-                                                    'percentage'
+                                                    'percent'
                                                 ? Colors.white
                                                 : Colors.black,
                                           ),
@@ -1327,7 +1344,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                                           ),
                                         ),
                                       ),
-                                      'percentage': Padding(
+                                      'percent': Padding(
                                         padding: const EdgeInsets.symmetric(
                                           horizontal: 0.0,
                                         ),
@@ -1339,7 +1356,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                                                     .fontFamily,
                                             color:
                                                 selectedOverallServiceChargeType ==
-                                                    'percentage'
+                                                    'percent'
                                                 ? Colors.white
                                                 : Colors.black,
                                           ),
@@ -1432,7 +1449,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                                           ),
                                         ),
                                       ),
-                                      'percentage': Padding(
+                                      'percent': Padding(
                                         padding: const EdgeInsets.symmetric(
                                           horizontal: 2.0,
                                         ),
@@ -1444,7 +1461,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                                                     .fontFamily,
                                             color:
                                                 selectedOverallDeliveryType ==
-                                                    'percentage'
+                                                    'percent'
                                                 ? Colors.white
                                                 : Colors.black,
                                           ),
@@ -2052,6 +2069,10 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
             },
           )
           .toList();
+
+      final customerBloc = context.read<CreatePosSaleBloc>();
+      final selectedCustomer = customerBloc.selectClintModel;
+      final isWalkInCustomer = selectedCustomer?.id == -1;
       Map<String, dynamic> body = {
         "type": "normal_sale",
 
@@ -2066,19 +2087,16 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
         "sale_by":
             context.read<CreatePosSaleBloc>().selectSalesModel?.id.toString() ??
             '',
+        "overall_vat_type": selectedOverallVatType.toString().toLowerCase(),
         "vat":
-            context
-                .read<CreatePosSaleBloc>()
-                .discountOverAllController
-                .text
-                .isEmpty
+            context.read<CreatePosSaleBloc>().vatOverAllController.text.isEmpty
             ? 0
             : double.tryParse(
-                context
-                    .read<CreatePosSaleBloc>()
-                    .discountOverAllController
-                    .text,
+                context.read<CreatePosSaleBloc>().vatOverAllController.text,
               ),
+        "overall_service_type": selectedOverallServiceChargeType
+            .toString()
+            .toLowerCase(),
         "service_charge":
             context
                 .read<CreatePosSaleBloc>()
@@ -2092,6 +2110,9 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                     .serviceChargeOverAllController
                     .text,
               ),
+        "overall_delivery_type": selectedOverallDeliveryType
+            .toString()
+            .toLowerCase(),
         "delivery_charge":
             context
                 .read<CreatePosSaleBloc>()
@@ -2105,10 +2126,11 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                     .deliveryChargeOverAllController
                     .text,
               ),
-        "change_amount": changeAmountController.text,
 
-        "remark": context.read<CreatePosSaleBloc>().remarkController.text,
-        "items": transferProducts,
+        // "change_amount": changeAmountController.text,
+        "overall_discount_type": selectedOverallDiscountType
+            .toString()
+            .toLowerCase(),
         // Convert list to JSON string
         "overall_discount":
             context
@@ -2123,34 +2145,20 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                     .discountOverAllController
                     .text,
               ),
-        "customer_type": context
-            .read<CreatePosSaleBloc>()
-            .customType
-            .toString()
-            .toLowerCase()
-            .split(" ")
-            .join("_"),
-        "overall_discount_type": selectedOverallDiscountType.toLowerCase(),
+
+        "remark": context.read<CreatePosSaleBloc>().remarkController.text,
+        "items": transferProducts,
+        "customer_type": isWalkInCustomer ? "walk_in" : "saved_customer",
         "with_money_receipt": _isChecked ? "Yes" : "No",
       };
 
-      if (context
-              .read<CreatePosSaleBloc>()
-              .customType
-              .toString()
-              .toLowerCase()
-              .split(" ")
-              .join("_") ==
-          "walking_customer") {
-        body['phone_number'] = context
-            .read<CreatePosSaleBloc>()
-            .customerPhoneController
-            .text;
+      if (isWalkInCustomer) {
+
+        body.remove('customer_id');
       } else {
-        body['customer_id'] =
-            context.read<CreatePosSaleBloc>().selectClintModel?.id.toString() ??
-            '';
+        body['customer_id'] = selectedCustomer?.id.toString() ?? '';
       }
+
 
       if (_isChecked == true) {
         body['payment_method'] = context
@@ -2163,7 +2171,9 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
             .acId
             .toString();
         if (calculateAllFinalTotal() <=
-            double.parse(context.read<CreatePosSaleBloc>().payableAmount.text)) {
+            double.parse(
+              context.read<CreatePosSaleBloc>().payableAmount.text,
+            )) {
           // context.read<CreatePosSaleBloc>().add(AddPosSale(body: body));
         } else {
           appSnackBar(context, "Payable Gross amount", color: Colors.redAccent);
@@ -2171,7 +2181,6 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
       }
       log(body.toString());
       context.read<CreatePosSaleBloc>().add(AddPosSale(body: body));
-
     }
   }
 
