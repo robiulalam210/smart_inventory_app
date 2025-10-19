@@ -13,8 +13,9 @@ final String filterApiURL;
   final String state;
   final String category;
   final int pageNumber;
+  final int pageSize;
 
-  FetchProductsList(this.context,{this.filterText = '',this.state='',this.category='',this.filterApiURL='', this.pageNumber = 0});
+  FetchProductsList(this.context,{this.filterText = '',this.state='',this.category='',this.filterApiURL='', this.pageNumber = 0,this.pageSize = 10});
 }
 
 class AddProducts extends ProductsEvent {

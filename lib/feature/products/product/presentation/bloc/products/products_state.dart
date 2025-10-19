@@ -9,18 +9,27 @@ final class ProductsInitial extends ProductsState {}
 
 final class ProductsListLoading extends ProductsState {}
 
-final class ProductsListSuccess extends ProductsState {
-  String selectedState = "";
-
+class ProductsListSuccess extends ProductsState {
   final List<ProductModel> list;
   final int totalPages;
-  final int currentPage;
+  final int currentPage; // 1-based
+  final int count; // total items
+  final int pageSize;
+  final int from;
+  final int to;
 
-  ProductsListSuccess({
+   ProductsListSuccess({
     required this.list,
     required this.totalPages,
     required this.currentPage,
+    required this.count,
+    required this.pageSize,
+    required this.from,
+    required this.to,
   });
+
+  @override
+  List<Object?> get props => [list, totalPages, currentPage, count, pageSize, from, to];
 }
 final class ProductsListFailed extends ProductsState {
   final String title, content;

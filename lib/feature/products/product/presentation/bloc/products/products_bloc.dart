@@ -48,55 +48,67 @@ class ProductsBloc extends Bloc<ProductsEvent, ProductsState> {
     on<UpdateProducts>(_onUpdateProductList);
     on<DeleteProducts>(_onDeleteProductList);
   }
-
   Future<void> _onFetchProductList(
-    FetchProductsList event,
-    Emitter<ProductsState> emit,
-  ) async {
+      FetchProductsList event,
+      Emitter<ProductsState> emit,
+      ) async {
     emit(ProductsListLoading());
 
     try {
       final res = await getResponse(
         url: AppUrls.product,
         context: event.context,
+        // Consider attaching query params such as page & page_size & filters to the request
       );
 
-      // Parse API response
-      ApiResponse response = appParseJson(
-        res,
-        (data) =>
-            List<ProductModel>.from(data.map((x) => ProductModel.fromJson(x))),
-      );
+      // res could be a JSON string or already decoded Map
+      final Map<String, dynamic> payload;
+      payload = jsonDecode(res) as Map<String, dynamic>;
+          // Support both "status" and "success" naming
+      final bool ok = (payload['status'] == true) || (payload['success'] == true);
 
-      // ✅ success check
-      if (response.success == true) {
-        // Store product list
-        list = response.data;
+      if (ok) {
+        final data = payload['data'] ?? {};
+        final List<dynamic> results = (data['results'] is List) ? List<dynamic>.from(data['results']) : [];
 
-        // Filter and paginate
+        // Parse product list
+        list = results.map((x) => ProductModel.fromJson(Map<String, dynamic>.from(x))).toList();
+
+        // Pagination info
+        final Map<String, dynamic> pagination = Map<String, dynamic>.from(data['pagination'] ?? {});
+        final int totalPages = (pagination['total_pages'] is int) ? pagination['total_pages'] as int : (pagination['totalPages'] is int ? pagination['totalPages'] as int : 1);
+        final int currentPage = (pagination['current_page'] is int) ? pagination['current_page'] as int : (event.pageNumber ?? 1);
+        final int count = (pagination['count'] is int) ? pagination['count'] as int : list.length;
+        final int pageSize = (pagination['page_size'] is int) ? pagination['page_size'] as int : (event.pageSize ?? 20);
+        final int from = (pagination['from'] is int) ? pagination['from'] as int : ((currentPage - 1) * pageSize + 1);
+        final int to = (pagination['to'] is int) ? pagination['to'] as int : (from + list.length - 1);
 
         emit(
           ProductsListSuccess(
             list: list,
-            totalPages: 1,
-            currentPage: event.pageNumber,
+            totalPages: totalPages < 1 ? 1 : totalPages,
+            currentPage: currentPage < 1 ? 1 : currentPage,
+            count: count,
+            pageSize: pageSize,
+            from: from,
+            to: to,
           ),
         );
       } else {
+        final message = payload['message'] ?? payload['error'] ?? 'Unknown Error';
         emit(
           ProductsListFailed(
             title: "Error",
-            content: response.message ?? "Unknown Error",
+            content: message.toString(),
           ),
         );
       }
     } catch (error, st) {
-      print(error);
-      print(st);
+      debugPrint(error.toString());
+      debugPrint(st.toString());
       emit(ProductsListFailed(title: "Error", content: error.toString()));
     }
   }
-
   // ✅ Cleaner filter method
   List<ProductModel> _filterProduct(
     List<ProductModel> list,

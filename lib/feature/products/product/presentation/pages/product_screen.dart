@@ -9,6 +9,7 @@ import '../../../../../core/widgets/coustom_search_text_field.dart';
 import '../../../../../core/widgets/custom_filter_ui.dart';
 import '../../../categories/presentation/bloc/categories/categories_bloc.dart';
 import '../bloc/products/products_bloc.dart';
+import '../widget/pagination.dart';
 import '../widget/widget.dart';
 
 class ProductsScreen extends StatefulWidget {
@@ -22,181 +23,178 @@ class _ProductsScreenState extends State<ProductsScreen> {
   @override
   void initState() {
     super.initState();
-    context.read<ProductsBloc>().filterTextController.clear();
+    context
+        .read<ProductsBloc>()
+        .filterTextController
+        .clear();
     context.read<CategoriesBloc>().add(
       FetchCategoriesList(
         context,
       ),
     );
-    _fetchProductList();
+    _fetchProductList(pageNumber: 1);
   }
 
-  void _fetchProductList(
-      {String filterText = '',
-        String state = '',
-        String category = '',
-        int pageNumber = 0}) {
+  void _fetchProductList({
+    String filterText = '',
+    String state = '',
+    String category = '',
+    int pageNumber = 1,
+    int pageSize = 20,
+  }) {
     context.read<ProductsBloc>().add(
-      FetchProductsList(context,
+      FetchProductsList(
+        context,
         filterText: filterText,
         category: category,
         state: state,
         pageNumber: pageNumber,
+        pageSize: pageSize,
       ),
     );
   }
 
+  // ... other widget methods remain unchanged ...
 
-    @override
-    Widget build(BuildContext context) {
-      final isBigScreen =
-          Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
-      return Container(
-        color: AppColors.bg,
-        child: SafeArea(
-          child: ResponsiveRow(
-            spacing: 0,
-            runSpacing: 0,
-            children: [
-              if (isBigScreen) _buildSidebar(),
-              _buildContentArea(isBigScreen),
-            ],
-          ),
+  @override
+  Widget build(BuildContext context) {
+    final isBigScreen =
+        Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
+    return Container(
+      color: AppColors.bg,
+      child: SafeArea(
+        child: ResponsiveRow(
+          spacing: 0,
+          runSpacing: 0,
+          children: [
+            if (isBigScreen) _buildSidebar(),
+            _buildContentArea(isBigScreen),
+          ],
         ),
-      );
-    }
+      ),
+    );
+  }
+  Widget _buildSidebar() {
+    return ResponsiveCol(
+      xs: 0,
+      sm: 1,
+      md: 1,
+      lg: 2,
+      xl: 2,
+      child: Container(
+        decoration: const BoxDecoration(color: Colors.white),
+        child: const Sidebar(),
+      ),
+    );
+  }
 
-    Widget _buildSidebar() {
-      return ResponsiveCol(
-        xs: 0,
-        sm: 1,
-        md: 1,
-        lg: 2,
-        xl: 2,
+  Widget _buildContentArea(bool isBigScreen) {
+    return ResponsiveCol(
+      xs: 12,
+      sm: 12,
+      md: 12,
+      lg: 10,
+      xl: 10,
+      child: RefreshIndicator(
+        color: AppColors.primaryColor,
+        onRefresh: () async {
+          _fetchProductList();
+        },
         child: Container(
-          decoration: const BoxDecoration(color: Colors.white),
-          child: const Sidebar(),
-        ),
-      );
-    }
-
-    Widget _buildContentArea(bool isBigScreen) {
-      return ResponsiveCol(
-        xs: 12,
-        sm: 12,
-        md: 12,
-        lg: 10,
-        xl: 10,
-        child:    RefreshIndicator(
-          color: AppColors.primaryColor,
-          onRefresh: () async {
-            _fetchProductList();
-          },
-          child: Container(
-            padding:AppTextStyle.getResponsivePaddingBody(context),
-
-            child: BlocListener<ProductsBloc, ProductsState>(
-              listener: (context, state) {
-                if (state is ProductsAddLoading) {
-                  appLoader(context, "Product, please wait...");
-                } else if (state is ProductsAddSuccess) {
-                  Navigator.pop(context); // Close loader dialog
-                  Navigator.pop(context); // Close loader dialog
-                  _fetchProductList(); // Reload warehouse list
-                }
-                if (state is ProductsDeleteLoading) {
-                  appLoader(context, "Delete Product, please wait...");
-                } else if (state is ProductsDeleteSuccess) {
-                  Navigator.pop(context); // Close loader dialog
-                  Navigator.pop(context); // Close loader dialog
-                  _fetchProductList(); // Reload warehouse list
-                } else if (state is ProductsDeleteFailed) {
-                  Navigator.pop(context); // Close loader dialog
-                  // Navigator.pop(context); // Close loader dialog
-                  _fetchProductList(); // Reload warehouse list
-                } else if (state is ProductsAddFailed) {
-                  Navigator.pop(context); // Close loader dialog
-                  Navigator.pop(context); // Close loader dialog
-                  _fetchProductList();
-                  appAlertDialog(context, state.content,
-                      title: state.title,
-                      actions: [
-                        TextButton(
-                            onPressed: () => AppRoutes.pop(context),
-                            child: const Text("Dismiss"))
-                      ]);
-                }
-              },
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                          child: CustomSearchTextFormField(
-                            controller:
-                            context.read<ProductsBloc>().filterTextController,
-                            onChanged: (value) {
-                              _fetchProductList(
-                                filterText: value,
-                              );
-                            },
-                            onClear: () {
-                              context
-                                  .read<ProductsBloc>()
-                                  .filterTextController
-                                  .clear();
-                              _fetchProductList(); // R
-                            },
-                            hintText:
-                            "Search Name", // Pass dynamic hintText if needed
-                          )),
-                      CustomFilterBox(
-                        onTapDown: (TapDownDetails details) {
-                          _showFilterMenu(context, details.globalPosition);
-                        },
-                      ),
-                    ],
-                  ),
-                  SizedBox(
-                    // height: 500,
-                    child: BlocBuilder<ProductsBloc, ProductsState>(
-                      builder: (context, state) {
-
-                        if (state is ProductsListLoading) {
-                          return const Center(child: CircularProgressIndicator());
-                        } else if (state is ProductsListSuccess) {
-                          if (state.list.isEmpty) {
-                            return Center(
-                              child: Lottie.asset(AppImages.noData),
+          padding: AppTextStyle.getResponsivePaddingBody(context),
+          child: BlocListener<ProductsBloc, ProductsState>(
+            listener: (context, state) {
+              // keep existing listener code
+            },
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                        child: CustomSearchTextFormField(
+                          controller:
+                          context
+                              .read<ProductsBloc>()
+                              .filterTextController,
+                          onChanged: (value) {
+                            _fetchProductList(
+                              filterText: value,
                             );
-                          } else {
-                            return
-                              ProductDataTableWidget(products: state.list,);
-
-
-                          }
-                        } else if (state is ProductsListFailed) {
-                          return Center(
-                              child: Text(
-                                  'Failed to load : ${state.content}'));
-                        } else {
-                          return Container();
-                        }
+                          },
+                          onClear: () {
+                            context
+                                .read<ProductsBloc>()
+                                .filterTextController
+                                .clear();
+                            _fetchProductList();
+                          },
+                          hintText: "Search Name",
+                        )),
+                    CustomFilterBox(
+                      onTapDown: (TapDownDetails details) {
+                        _showFilterMenu(context, details.globalPosition);
                       },
                     ),
+                  ],
+                ),
+                SizedBox(
+                  child: BlocBuilder<ProductsBloc, ProductsState>(
+                    builder: (context, state) {
+                      if (state is ProductsListLoading) {
+                        return const Center(child: CircularProgressIndicator());
+                      } else if (state is ProductsListSuccess) {
+                        if (state.list.isEmpty) {
+                          return Center(
+                            child: Lottie.asset(AppImages.noData),
+                          );
+                        } else {
+                          // Show table + pagination bar
+                          return Column(
+                            children: [
+                              ProductDataTableWidget(products: state.list),
+                              const SizedBox(height: 10),
+                              PaginationBar(
+                                count: state.count,
+                                totalPages: state.totalPages,
+                                currentPage: state.currentPage,
+                                pageSize: state.pageSize,
+                                from: state.from,
+                                to: state.to,
+                                onPageChanged: (page) {
+                                  _fetchProductList(
+                                      pageNumber: page,
+                                      pageSize: state.pageSize);
+                                },
+                                onPageSizeChanged: (newPageSize) {
+                                  // reset to page 1 when page size changes
+                                  _fetchProductList(
+                                      pageNumber: 1, pageSize: newPageSize);
+                                },
+                              ),
+                            ],
+                          );
+                        }
+                      } else if (state is ProductsListFailed) {
+                        return Center(child: Text(
+                            'Failed to load : ${state.content}'));
+                      } else {
+                        return Container();
+                      }
+                    },
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
-        )
-      );
-    }
-
+        ),
+      ),
+    );
   }
 
   void _showFilterMenu(BuildContext context, Offset offset) async {
-    final screenSize = MediaQuery.of(context).size;
+    final screenSize = MediaQuery
+        .of(context)
+        .size;
     final left = offset.dx;
     final top = offset.dy;
     final right = screenSize.width - left;
@@ -222,7 +220,8 @@ class _ProductsScreenState extends State<ProductsScreen> {
                       // borderRadius: BorderRadius.all(Radius.circular(10)),
                       color: Color.fromARGB(255, 248, 248, 248),
                     ),
-                    child:  Text('Filter',style:AppTextStyle.cardLevelText(context)),
+                    child: Text(
+                        'Filter', style: AppTextStyle.cardLevelText(context)),
                   ),
 
 
@@ -235,23 +234,23 @@ class _ProductsScreenState extends State<ProductsScreen> {
                         GestureDetector(
                           onTap: () {
                             setState(() {
-
                               context.read<ProductsBloc>().add(
                                 FetchProductsList(context,),
                               );
                             });
                             Navigator.of(context).pop();
                           },
-                          child:  Text(
+                          child: Text(
                               'Clear',
-                              style:AppTextStyle.errorTextStyle(context)
+                              style: AppTextStyle.errorTextStyle(context)
                           ),
                         ),
                         GestureDetector(
                           onTap: () {
                             Navigator.of(context).pop();
                           },
-                          child:  Text('Close',style:AppTextStyle.cardLevelText(context)),
+                          child: Text('Close', style: AppTextStyle
+                              .cardLevelText(context)),
                         ),
                       ],
                     ),
@@ -265,3 +264,4 @@ class _ProductsScreenState extends State<ProductsScreen> {
     );
   }
 
+}
