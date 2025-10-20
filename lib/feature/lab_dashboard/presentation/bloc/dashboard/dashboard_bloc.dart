@@ -1,4 +1,5 @@
 import 'package:smart_inventory/feature/accounts/presentation/pages/account_screen.dart';
+import 'package:smart_inventory/feature/customer/presentation/pages/create_customer_screen.dart';
 import 'package:smart_inventory/feature/expense/expense_head/presentation/pages/expense_screen.dart';
 import 'package:smart_inventory/feature/expense/presentation/pages/expense_list_screen.dart';
 import 'package:smart_inventory/feature/products/groups/presentation/pages/groups_screen.dart';
@@ -6,6 +7,7 @@ import 'package:smart_inventory/feature/products/soruce/presentation/pages/sourc
 import 'package:smart_inventory/feature/products/unit/presentation/pages/unit_screen.dart';
 import 'package:smart_inventory/feature/purchase/presentation/page/pos_sale_screen.dart';
 import 'package:smart_inventory/feature/sales/presentation/pages/pos_sale_screen.dart';
+import 'package:smart_inventory/feature/supplier/presentation/pages/create_supplierr_screen.dart';
 
 import '../../../../../core/configs/configs.dart';
 import '../../../../../enery_screen.dart';
@@ -40,35 +42,42 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     AppWrapper(child: CreatePosSalePage()),
     AppWrapper(child: PosSaleScreen()),
 
-    // AppWrapper(child: SalesListScreen()),
-
     AppWrapper(child: MoneyReceiptForm()),
     AppWrapper(child: MoneyReceiptScreen()),
 
-    // AppWrapper(child: ProductCreateScreen()),
+    AppWrapper(child: CreatePurchaseScreen()),
+    AppWrapper(child: PurchaseScreen()),
+
     AppWrapper(child: ProductsScreen()),
-    AppWrapper(child: SourceScreen()),
-    AppWrapper(child: UnitScreen()),
-    AppWrapper(child: BrandScreen()),
-    AppWrapper(child: CategoriesScreen()),
-    AppWrapper(child: GroupsScreen()),
-    // AppWrapper(child: AccountScreen()),
+    AppWrapper(child: ProductsScreen()),
+
+    AppWrapper(child: AccountScreen()),
     AppWrapper(child: CreateAccountScreen(submitText: "Save",)),
+
     AppWrapper(child: CustomerScreen()),
+    AppWrapper(child: CreateCustomerScreen()),
+
+    AppWrapper(child: SupplierScreen()),
+    AppWrapper(child: CreateSupplierScreen()),
+    AppWrapper(child: CreateSupplierScreen()),
+    AppWrapper(child: CreateSupplierScreen()),
+
 
     AppWrapper(child: ExpenseListScreen()),
     AppWrapper(child: ExpenseHeadScreen()),
     AppWrapper(child: ExpenseSubHeadScreen()),
 
-    AppWrapper(child: UsersScreen()),
+    // AppWrapper(child: SourceScreen()),
+    // AppWrapper(child: UnitScreen()),
+    // AppWrapper(child: BrandScreen()),
+    // AppWrapper(child: CategoriesScreen()),
+    // AppWrapper(child: GroupsScreen()),
+    // AppWrapper(child: UsersScreen()),
 
 
-    AppWrapper(child: CreatePurchaseScreen()),
-    AppWrapper(child: PurchaseScreen()),
 
-    AppWrapper(child: SupplierScreen()),
-    AppWrapper(child: SupplierScreen()),
-    AppWrapper(child: SupplierScreen()),
+
+
 
   ];
 

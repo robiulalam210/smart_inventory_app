@@ -45,12 +45,6 @@ class MyApp extends StatelessWidget {
         ),
 
 
-        BlocProvider(
-          create: (context) => SyncBloc(
-            syncRepo: SetupAllSyncRepo(dbHelper),
-            unSyncRepo: UnSyncRepo(),
-          ),
-        ),
 
         BlocProvider(create: (context) => PrintLayoutBloc(PrintLayoutRepoDb())),
 

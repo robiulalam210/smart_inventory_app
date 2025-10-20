@@ -26,7 +26,6 @@ export 'lab_dashboard/data/repositories/setup_repo_sync_all/setup_repo_db_sync.d
 export 'lab_dashboard/data/repositories/unsync_update_invoice_db/unsync_update_invoice_db.dart';
 
 export 'lab_dashboard/presentation/bloc/dashboard/dashboard_bloc.dart';
-export 'lab_dashboard/presentation/bloc/synchronization_bloc/synchronization_bloc.dart';
 export 'lab_dashboard/presentation/pages/lab_dashboard_screen.dart';
 export 'lab_dashboard/presentation/widgets/billing_chart.dart';
 export 'lab_dashboard/presentation/widgets/dashboard_card.dart';
