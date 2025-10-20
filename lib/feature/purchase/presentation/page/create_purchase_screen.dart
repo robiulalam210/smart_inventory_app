@@ -1644,7 +1644,7 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
 
       Map<String, dynamic> body = {
         "instant_pay": _isChecked,
-        "date": DateFormat("yyyy-MM-dd").format(
+        "purchase_date": DateFormat("yyyy-MM-dd").format(
           DateFormat("dd-MM-yyyy").parse(
             context
                 .read<CreatePurchaseBloc>()

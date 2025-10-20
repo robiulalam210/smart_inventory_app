@@ -76,20 +76,14 @@ class ProductDataTableWidget extends StatelessWidget {
 
   List<DataColumn> _buildColumns(double columnWidth) {
     const columnLabels = [
-      'ID',
+      'SL',
       'Name',
       'SKU',
       'Category',
       'Brand',
       'Unit',
-      'Group',
-      'Source',
-      'Purchase Price',
-      'Selling Price',
-      'Stock Qty',
-      'Alert Qty',
       'Status',
-      'Description',
+
     ];
 
     return columnLabels
@@ -124,23 +118,10 @@ class ProductDataTableWidget extends StatelessWidget {
         _buildDataCell(product.categoryInfo?.name ?? 'N/A', columnWidth),
         _buildDataCell(product.brandInfo?.name ?? 'N/A', columnWidth),
         _buildDataCell(product.unitInfo?.name ?? 'N/A', columnWidth),
-        _buildDataCell(product.groupInfo?.name ?? 'N/A', columnWidth),
-        _buildDataCell(product.sourceInfo?.name ?? 'N/A', columnWidth),
-        _buildDataCell(
-            double.tryParse(product.purchasePrice.toString())
-                ?.toStringAsFixed(2) ??
-                '0.00',
-            columnWidth),
-        _buildDataCell(
-            double.tryParse(product.sellingPrice.toString())
-                ?.toStringAsFixed(2) ??
-                '0.00',
-            columnWidth),
-        _buildDataCell(product.stockQty.toString(), columnWidth),
-        _buildDataCell(product.alertQuantity.toString(), columnWidth),
+
         _buildDataCell(product.isActive??false ? 'Active' : 'Inactive', columnWidth,
             isStatus: true),
-        _buildDataCell(product.description ?? 'N/A', columnWidth),
+
       ],
     );
   }

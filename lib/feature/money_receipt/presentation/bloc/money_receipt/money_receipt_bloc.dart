@@ -130,65 +130,65 @@ class MoneyReceiptBloc extends Bloc<MoneyReceiptEvent, MoneyReceiptState> {
       moneyReceiptModel = data;
 
       // Apply filtering and pagination
-      final filteredWarehouses = _filterData(
-          moneyReceiptModel, event.filterText,event.customer,event.seller,event.paymentMethod, event.startDate, event.endDate);
+      // final filteredWarehouses = _filterData(
+      //     moneyReceiptModel, event.filterText,event.customer,event.seller,event.paymentMethod, event.startDate, event.endDate);
 
 
 
       emit(MoneyReceiptListSuccess(
-        list: filteredWarehouses,
+        list: moneyReceiptModel,
 
       ));
     } catch (error) {
       emit(MoneyReceiptListFailed(title: "Error", content: error.toString()));
     }
   }
-
-  List<MoneyreceiptModel> _filterData(
-      List<MoneyreceiptModel> warehouses,
-      String filterTextMrNo,
-      String customerName,
-      String sellerName,
-      String paymentType,
-      DateTime? startDate,
-      DateTime? endDate,
-      ) {
-
-
-    return warehouses.where((warehouse) {
-      final matchesDate = (startDate == null || endDate == null) ||
-          (warehouse.paymentDate != null &&
-              ((warehouse.paymentDate!.isAfter(startDate) &&
-                  warehouse.paymentDate!.isBefore(endDate)) ||
-                  warehouse.paymentDate!.isAtSameMomentAs(startDate) ||
-                  warehouse.paymentDate!.isAtSameMomentAs(endDate)));
-
-      final matchesMrNo = filterTextMrNo.isEmpty ||
-          (warehouse.mrNo?.toLowerCase() ?? '').contains(filterTextMrNo.toLowerCase());
-
-      final matchesCustomer = customerName.isEmpty ||
-          (warehouse.customerName?.toLowerCase() ?? '').contains(customerName.toLowerCase());
-
-      final matchesSeller = sellerName.isEmpty ||
-          (warehouse.sellerName?.toLowerCase() ?? '').contains(sellerName.toLowerCase());
-
-      final matchesPaymentType = paymentType.isEmpty ||
-          (warehouse.paymentMethod?.toLowerCase() ?? '').contains(paymentType.toLowerCase());
-
-      debugPrint(
-          'Checking: MR:${warehouse.mrNo}, Customer:${warehouse.customerName}, Seller:${warehouse.sellerName}, '
-              'PaymentType:${warehouse.paymentMethod}, Date:${warehouse.paymentDate} => '
-              '[Date:$matchesDate | MR:$matchesMrNo | Custom:$matchesCustomer | Seller:$matchesSeller | Pay:$matchesPaymentType]'
-      );
-
-      return matchesDate &&
-          matchesMrNo &&
-          matchesCustomer &&
-          matchesSeller &&
-          matchesPaymentType;
-    }).toList();
-  }
-
+  //
+  // List<MoneyreceiptModel> _filterData(
+  //     List<MoneyreceiptModel> warehouses,
+  //     String filterTextMrNo,
+  //     String customerName,
+  //     String sellerName,
+  //     String paymentType,
+  //     DateTime? startDate,
+  //     DateTime? endDate,
+  //     ) {
+  //
+  //
+  //   return warehouses.where((warehouse) {
+  //     final matchesDate = (startDate == null || endDate == null) ||
+  //         (warehouse.paymentDate != null &&
+  //             ((warehouse.paymentDate!.isAfter(startDate) &&
+  //                 warehouse.paymentDate!.isBefore(endDate)) ||
+  //                 warehouse.paymentDate!.isAtSameMomentAs(startDate) ||
+  //                 warehouse.paymentDate!.isAtSameMomentAs(endDate)));
+  //
+  //     final matchesMrNo = filterTextMrNo.isEmpty ||
+  //         (warehouse.mrNo?.toLowerCase() ?? '').contains(filterTextMrNo.toLowerCase());
+  //
+  //     final matchesCustomer = customerName.isEmpty ||
+  //         (warehouse.customerName?.toLowerCase() ?? '').contains(customerName.toLowerCase());
+  //
+  //     final matchesSeller = sellerName.isEmpty ||
+  //         (warehouse.sellerName?.toLowerCase() ?? '').contains(sellerName.toLowerCase());
+  //
+  //     final matchesPaymentType = paymentType.isEmpty ||
+  //         (warehouse.paymentMethod?.toLowerCase() ?? '').contains(paymentType.toLowerCase());
+  //
+  //     debugPrint(
+  //         'Checking: MR:${warehouse.mrNo}, Customer:${warehouse.customerName}, Seller:${warehouse.sellerName}, '
+  //             'PaymentType:${warehouse.paymentMethod}, Date:${warehouse.paymentDate} => '
+  //             '[Date:$matchesDate | MR:$matchesMrNo | Custom:$matchesCustomer | Seller:$matchesSeller | Pay:$matchesPaymentType]'
+  //     );
+  //
+  //     return matchesDate &&
+  //         matchesMrNo &&
+  //         matchesCustomer &&
+  //         matchesSeller &&
+  //         matchesPaymentType;
+  //   }).toList();
+  // }
+  //
 
   Future<void> _onCreateMoneyReceiptList(
       AddMoneyReceipt event, Emitter<MoneyReceiptState> emit) async {

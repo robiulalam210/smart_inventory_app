@@ -88,17 +88,14 @@ class PosSaleDataTableWidget extends StatelessWidget {
   List<DataColumn> _buildColumns(double columnWidth) {
     const labels = [
       "SL",
-      "Invoice No",
-      "Customer",
-      "Sale Type",
-      "Date",
-      "Gross Total",
-      "Net Total",
-      "Payable",
-      "Paid",
+      "Receipt No",
+      "Sale Date",
+      "Customer Name",
+      "Sales By",
+      "Created By",
+      "Grand Total",
       "Due",
-      "Payment Method",
-      "Account Name",
+
     ];
 
     return labels
@@ -129,23 +126,22 @@ class PosSaleDataTableWidget extends StatelessWidget {
       cells: [
         _buildDataCell(index.toString(), columnWidth),
         _buildDataCell(sale.invoiceNo.toString(), columnWidth),
-        _buildDataCell(sale.customerName.toString(), columnWidth),
-        _buildDataCell(sale.saleType.toString(), columnWidth),
         _buildDataCell(
           sale.saleDate.toString().split('T').first,
           columnWidth,
         ),
-        _buildDataCell(sale.grossTotal.toString(), columnWidth),
-        _buildDataCell(sale.netTotal.toString(), columnWidth),
+        _buildDataCell(sale.customerName.toString(), columnWidth),
+        _buildDataCell(sale.customerName.toString(), columnWidth),
+        _buildDataCell(sale.customerName.toString(), columnWidth),
+
         _buildDataCell(sale.payableAmount.toString(), columnWidth),
-        _buildDataCell(sale.paidAmount.toString(), columnWidth),
+
         _buildDataCell(
           sale.dueAmount.toString(),
           columnWidth,
           isDue: true,
         ),
-        _buildDataCell(sale.paymentMethod.toString(), columnWidth),
-        _buildDataCell(sale.accountName.toString(), columnWidth),
+
       ],
     );
   }
