@@ -1,3 +1,5 @@
+import 'package:smart_inventory/feature/accounts/data/model/create_account_model.dart';
+
 import '../../../../../core/configs/configs.dart';
 import '../../../../../core/repositories/get_response.dart';
 import '../../../../../core/repositories/post_response.dart';
@@ -152,8 +154,7 @@ list=data;
 
       ApiResponse response = appParseJson(
         res,
-        (data) =>
-            List<AccountModel>.from(data.map((x) => AccountModel.fromJson(x))),
+            (data) => List<AccountModel>.from(data.map((x) => AccountModel.fromJson(x))),
       );
       if (response.success == false) {
         emit(AccountAddFailed(title: '', content: response.message ?? ""));

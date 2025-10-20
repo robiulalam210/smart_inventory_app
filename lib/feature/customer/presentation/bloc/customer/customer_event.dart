@@ -20,13 +20,13 @@ class FetchCustomerList extends CustomerEvent {
 }
 
 class AddCustomer extends CustomerEvent {
-  final Map<String, String>? body;
+  final Map<String, dynamic>? body;
 
   AddCustomer({this.body});
 }
 
 class UpdateCustomer extends CustomerEvent {
-  final Map<String, String>? body;
+  final Map<String, dynamic>? body;
   final String? id;
 
   UpdateCustomer({this.body, this.id});

@@ -27,7 +27,7 @@ class FetchAccountList extends AccountEvent{
 
 
 class AddAccount extends AccountEvent {
-  final Map<String,String>? body;
+  final Map<String,dynamic>? body;
 
   AddAccount({this.body});
 }

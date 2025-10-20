@@ -19,13 +19,13 @@ class FetchSupplierList extends SupplierListEvent {
 }
 
 class AddSupplierList extends SupplierListEvent {
-  final Map<String, String>? body;
+  final Map<String, dynamic>? body;
 
   AddSupplierList({this.body});
 }
 
 class UpdateSupplierList extends SupplierListEvent {
-  final Map<String, String>? body;
+  final Map<String, dynamic>? body;
   final String? branchId;
 
   UpdateSupplierList({this.body, this.branchId});

@@ -359,7 +359,48 @@ class _SidebarState extends State<Sidebar> {
                             ),
                           ],
                         ),
+                        ExpansionTile(
+                          initiallyExpanded:
+                          currentIndex == 19 ||
+                              currentIndex == 20 ||
+                              currentIndex == 21 ,
 
+                          title: Text(
+                            "Supplier ",
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: Theme.of(
+                                context,
+                              ).textTheme.bodyMedium!.color,
+                            ),
+                          ),
+                          children: [
+                            MenuTile(
+                              isSubmenu: true,
+                              title: " Supplier  List",
+                              isSelected: currentIndex == 19,
+                              onPressed: () {
+                                bloc.add(ChangeDashboardScreen(index: 19));
+                              },
+                            ),
+                            MenuTile(
+                              isSubmenu: true,
+                              title: 'Payment List',
+                              isSelected: currentIndex == 20,
+                              onPressed: () {
+                                bloc.add(ChangeDashboardScreen(index: 20));
+                              },
+                            ),
+                            MenuTile(
+                              isSubmenu: true,
+                              title: 'Supplier Payment',
+                              isSelected: currentIndex == 21,
+                              onPressed: () {
+                                bloc.add(ChangeDashboardScreen(index: 21));
+                              },
+                            ),
+                          ],
+                        ),
 
                         ExpansionTile(
                           initiallyExpanded:
@@ -405,89 +446,9 @@ class _SidebarState extends State<Sidebar> {
                           ],
                         ),
 
-                        ExpansionTile(
-                          initiallyExpanded:
-                              currentIndex == 0 ||
-                              currentIndex == 1 ||
-                              currentIndex == 2 ||
-                              currentIndex == 3 ||
-                              currentIndex == 4 ||
-                              currentIndex == 5,
 
-                          title: Text(
-                            "Customer ",
-                            style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              color: Theme.of(
-                                context,
-                              ).textTheme.bodyMedium!.color,
-                            ),
-                          ),
-                          children: [
-                            MenuTile(
-                              isSubmenu: true,
-                              title: "Create Customer ",
-                              isSelected: currentIndex == 4,
-                              onPressed: () {
-                                bloc.add(ChangeDashboardScreen(index: 4));
-                              },
-                            ),
-                            MenuTile(
-                              isSubmenu: true,
-                              title: "Customer List ",
-                              isSelected: currentIndex == 4,
-                              onPressed: () {
-                                bloc.add(ChangeDashboardScreen(index: 4));
-                              },
-                            ),
-                          ],
-                        ),
 
-                        ExpansionTile(
-                          initiallyExpanded:
-                              currentIndex == 0 ||
-                              currentIndex == 1 ||
-                              currentIndex == 2 ||
-                              currentIndex == 3 ||
-                              currentIndex == 4 ||
-                              currentIndex == 5,
 
-                          title: Text(
-                            "Supplier ",
-                            style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              color: Theme.of(
-                                context,
-                              ).textTheme.bodyMedium!.color,
-                            ),
-                          ),
-                          children: [
-                            MenuTile(
-                              isSubmenu: true,
-                              title: " Supplier  List",
-                              isSelected: currentIndex == 4,
-                              onPressed: () {
-                                bloc.add(ChangeDashboardScreen(index: 4));
-                              },
-                            ),
-                            MenuTile(
-                              isSubmenu: true,
-                              title: 'Payment List',
-                              isSelected: currentIndex == 4,
-                              onPressed: () {
-                                bloc.add(ChangeDashboardScreen(index: 4));
-                              },
-                            ),
-                            MenuTile(
-                              isSubmenu: true,
-                              title: 'Supplier Payment',
-                              isSelected: currentIndex == 4,
-                              onPressed: () {
-                                bloc.add(ChangeDashboardScreen(index: 4));
-                              },
-                            ),
-                          ],
-                        ),
 
 
                         ExpansionTile(

@@ -21,6 +21,7 @@ extension StringCasingExtension on String {
 
 class AppConstants {
   static const String appName = 'Great Clinic';
+  static const int appNumberLimit = 11;
 
   static final RegExp emailRegex = RegExp(
     r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.([a-zA-Z]{2,})+",
