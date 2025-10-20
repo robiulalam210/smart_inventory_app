@@ -37,7 +37,7 @@ class AccountModel {
 // Add this toString method
   @override
   String toString() {
-    return '$acName - $acNumber${bankName != null ? ' ($bankName)' : ''}';
+    return '$acName-$acNumber${bankName != null ? '($bankName)' : ''}';
   }
   factory AccountModel.fromJson(Map<String, dynamic> json) => AccountModel(
     acId: json["ac_id"],

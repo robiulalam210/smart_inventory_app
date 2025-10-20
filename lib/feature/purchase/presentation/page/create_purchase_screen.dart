@@ -1507,33 +1507,32 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                                                           .selectedAccount,
                                                 itemList: filteredList,
                                                 onChanged: (newVal) {
-                                                  context
-                                                      .read<
-                                                        CreatePurchaseBloc
-                                                      >()
-                                                      .selectedAccount = newVal
-                                                      .toString();
+                                                  print(newVal);
+                                                  context.read<CreatePurchaseBloc>().selectedAccount = newVal.toString();
 
-                                                  var matchingAccount =
-                                                      filteredList.firstWhere(
-                                                        (acc) =>
-                                                            acc.acName
-                                                                .toString() ==
-                                                            newVal
-                                                                .toString()
-                                                                .split("[")
-                                                                .first,
-                                                      );
+                                                  try {
+                                                    // Extract account number from the selected value
+                                                    String selectedAccountNumber = newVal.toString().split("-").last.trim().split("(").first;
+                                                    print(selectedAccountNumber);
 
-                                                  context
-                                                          .read<
-                                                            CreatePurchaseBloc
-                                                          >()
-                                                          .selectedAccountId =
-                                                      matchingAccount.acId
-                                                          .toString();
-                                                },
-                                                validator: (value) {
+                                                    // Find matching account safely
+                                                    var matchingAccount = filteredList.firstWhere(
+                                                          (acc) => acc.acNumber.toString().trim() == selectedAccountNumber,
+                                                    );
+
+                                                    if (matchingAccount.acNumber != null) {
+                                                      context.read<CreatePurchaseBloc>().selectedAccountId = matchingAccount.acId.toString();
+                                                      print("Selected Account ID: ${matchingAccount.acId}");
+                                                    } else {
+                                                      print("No matching account found for: $selectedAccountNumber");
+                                                      // context.read<CreatePurchaseBloc>().selectedAccountId = null;
+                                                      // You might want to show an error message to the user here
+                                                    }
+                                                  } catch (e) {
+                                                    print("Error finding account: $e");
+                                                    // context.read<CreatePurchaseBloc>().selectedAccountId = null;
+                                                  }
+                                                },                                                validator: (value) {
                                                   return value == null
                                                       ? 'Please select an account'
                                                       : null;
