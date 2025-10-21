@@ -20,6 +20,8 @@ import '../feature/products/groups/presentation/bloc/groups/groups_bloc.dart';
 import '../feature/products/product/presentation/bloc/products/products_bloc.dart';
 import '../feature/products/soruce/presentation/bloc/source/source_bloc.dart';
 import '../feature/products/unit/presentation/bloc/unit/unti_bloc.dart';
+import '../feature/supplier/presentation/bloc/supplier_invoice/supplier_invoice_bloc.dart';
+import '../feature/supplier/presentation/bloc/supplier_payment/supplier_payment_bloc.dart';
 
 class MyApp extends StatelessWidget {
   final DatabaseHelper dbHelper;
@@ -65,6 +67,8 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (_) => CreatePosSaleBloc()),
         BlocProvider(create: (_) => UserBloc()),
         BlocProvider(create: (_) => SupplierListBloc()),
+        BlocProvider(create: (_) => SupplierPaymentBloc()),
+        BlocProvider(create: (_) => SupplierInvoiceBloc()),
         BlocProvider(create: (_) => CreatePurchaseBloc()),
         BlocProvider(create: (_) => PurchaseBloc()),
         BlocProvider(create: (_) => MoneyReceiptBloc()),

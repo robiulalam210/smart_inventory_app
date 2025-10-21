@@ -25,6 +25,8 @@ import '../../../../purchase/presentation/page/create_purchase_screen.dart';
 import '../../../../sales/presentation/pages/create_pos_sale/create_pos_sale.dart';
 
 import '../../../../supplier/presentation/pages/supplier_list_screen.dart';
+import '../../../../supplier/presentation/pages/supplier_payment_create.dart';
+import '../../../../supplier/presentation/pages/supplier_payment_list_screen.dart';
 import '../../../../users_list/presentation/pages/users_screen.dart';
 import '../../../data/models/dashboard/dashboard_model.dart';
 import '../../../data/repositories/dashboard_repo_db/dashboard_repo_db.dart';
@@ -59,8 +61,8 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
 
     AppWrapper(child: SupplierScreen()),
     AppWrapper(child: CreateSupplierScreen()),
-    AppWrapper(child: CreateSupplierScreen()),
-    AppWrapper(child: CreateSupplierScreen()),
+    AppWrapper(child: SupplierPaymentForm()),
+    AppWrapper(child: SupplierPaymentScreen()),
 
 
     AppWrapper(child: ExpenseListScreen()),
