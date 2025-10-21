@@ -84,9 +84,12 @@ class _ExpenseHeadCardState extends State<ExpenseHeadCard> {
                     context: context,
                     builder: (context) {
                       return Dialog(
-                        child: ExpenseHeadCreate(
-                          id: widget.expenseHead.id.toString(),
-                          name: widget.expenseHead.name,
+                        child: SizedBox(
+                          width: AppSizes.width(context)*0.50,
+                          child: ExpenseHeadCreate(
+                            id: widget.expenseHead.id.toString(),
+                            name: widget.expenseHead.name,
+                          ),
                         ),
                       );
                     },

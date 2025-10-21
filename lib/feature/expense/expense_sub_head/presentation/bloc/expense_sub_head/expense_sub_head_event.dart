@@ -17,13 +17,13 @@ class FetchSubExpenseHeadList extends ExpenseSubHeadEvent {
 }
 
 class AddSubExpenseHead extends ExpenseSubHeadEvent {
-  final Map<String, String>? body;
+  final Map<String, dynamic>? body;
 
   AddSubExpenseHead({this.body});
 }
 
 class UpdateSubExpenseHead extends ExpenseSubHeadEvent {
-  final Map<String, String>? body;
+  final Map<String, dynamic>? body;
   final String? id;
 
   UpdateSubExpenseHead({this.body, this.id});

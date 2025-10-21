@@ -1,13 +1,12 @@
-
-
 import '../../../../../core/configs/configs.dart';
 import '../../../../../core/shared/widgets/sideMenu/sidebar.dart';
 import '../../../../../core/widgets/app_alert_dialog.dart';
+import '../../../../../core/widgets/app_button.dart';
 import '../../../../../core/widgets/app_loader.dart';
 import '../../../../../core/widgets/coustom_search_text_field.dart';
 import '../bloc/expense_sub_head/expense_sub_head_bloc.dart';
 import '../widget/widget.dart';
-
+import 'expense_sub_head_create.dart';
 
 class ExpenseSubHeadScreen extends StatefulWidget {
   const ExpenseSubHeadScreen({super.key});
@@ -157,6 +156,23 @@ class _ExpenseHeadScreenState extends State<ExpenseSubHeadScreen> {
                           hintText:
                               "Search Name", // Pass dynamic hintText if needed
                         ),
+                      ),
+                      gapW16,
+                      AppButton(
+                        name: "Create Sub Expanse Head",
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (context) {
+                              return Dialog(
+                                child: SizedBox(
+                                  width: AppSizes.width(context) * 0.50,
+                                  child: ExpenseSubHeadCreate(),
+                                ),
+                              );
+                            },
+                          );
+                        },
                       ),
                     ],
                   ),

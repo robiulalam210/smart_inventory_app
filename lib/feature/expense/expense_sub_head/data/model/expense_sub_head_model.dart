@@ -12,12 +12,14 @@ class ExpenseSubHeadModel {
   final int? id;
   final String? name;
   final int? head;
+  final String? headName;
   final int? company;
 
   ExpenseSubHeadModel({
     this.id,
     this.name,
     this.head,
+    this.headName,
     this.company,
   });
 
@@ -25,6 +27,7 @@ class ExpenseSubHeadModel {
     id: json["id"],
     name: json["name"],
     head: json["head"],
+    headName: json["head_name"],
     company: json["company"],
   );
 
@@ -32,6 +35,7 @@ class ExpenseSubHeadModel {
     "id": id,
     "name": name,
     "head": head,
+    "head_name": headName,
     "company": company,
   };
 }

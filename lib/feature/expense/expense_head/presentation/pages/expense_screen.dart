@@ -159,14 +159,19 @@ class _ExpenseHeadScreenState extends State<ExpenseHeadScreen> {
                           hintText:
                               "Search Name", // Pass dynamic hintText if needed
                         ),
-                      ),gapW16,
+                      )
+
+                      ,gapW16,
                       AppButton(name: "Create Expanse Head", onPressed: (){
                         showDialog(
                           context: context,
                           builder: (context) {
                             return Dialog(
-                              child: ExpenseHeadCreate(
+                              child: SizedBox(
+                                width: AppSizes.width(context)*0.50,
+                                child: ExpenseHeadCreate(
 
+                                ),
                               ),
                             );
                           },

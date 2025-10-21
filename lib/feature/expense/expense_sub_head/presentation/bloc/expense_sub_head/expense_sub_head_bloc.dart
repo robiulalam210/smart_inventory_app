@@ -35,7 +35,7 @@ class ExpenseSubHeadBloc extends Bloc<ExpenseSubHeadEvent, ExpenseSubHeadState> 
 
     try {
       final res = await getResponse(
-          url: AppUrls.expenseSubHead, context: event.context); // Use the correct API URL
+          url: AppUrls.expenseSubHead, context: event.context);
 
       ApiResponse<List<ExpenseSubHeadModel>> response =
       appParseJson<List<ExpenseSubHeadModel>>(
@@ -46,7 +46,6 @@ class ExpenseSubHeadBloc extends Bloc<ExpenseSubHeadEvent, ExpenseSubHeadState> 
       final data = response.data;
 
       if (data == null || data.isEmpty) {
-
         emit(ExpenseSubHeadListSuccess(
           list: [],
           totalPages: 0,
@@ -96,89 +95,109 @@ class ExpenseSubHeadBloc extends Bloc<ExpenseSubHeadEvent, ExpenseSubHeadState> 
         start, end > list.length ? list.length : end);
   }
 
-
-
-
   Future<void> _onCreateExpenseHead(
       AddSubExpenseHead event, Emitter<ExpenseSubHeadState> emit) async {
-
     emit(ExpenseSubHeadAddLoading());
 
     try {
-      final res  = await postResponse(url: AppUrls.expenseSubHead,payload: event.body); // Use the correct API URL
-
-      ApiResponse response = appParseJson(
-        res,
-            (data) => List<ExpenseSubHeadModel>.from(data.map((x) => ExpenseSubHeadModel.fromJson(x))),
+      final res = await postResponse(
+          url: AppUrls.expenseSubHead,
+          payload: event.body
       );
+
+      // FIX: Parse as single object instead of list
+      ApiResponse<ExpenseSubHeadModel> response = appParseJson<ExpenseSubHeadModel>(
+        res,
+            (data) => ExpenseSubHeadModel.fromJson(data), // Single object, not list
+      );
+
       if (response.success == false) {
-        emit(ExpenseSubHeadAddFailed(title: '', content: response.message??""));
+        emit(ExpenseSubHeadAddFailed(
+            title: 'Error',
+            content: response.message ?? "Failed to create expense sub head"
+        ));
         return;
       }
-      // clearData();
-      emit(ExpenseSubHeadAddSuccess(
 
-      ));
+      emit(ExpenseSubHeadAddSuccess());
     } catch (error) {
-      // clearData();
-      emit(ExpenseSubHeadAddFailed(title: "Error",content: error.toString()));
-
+      emit(ExpenseSubHeadAddFailed(
+          title: "Error",
+          content: error.toString()
+      ));
     }
   }
 
   Future<void> _onUpdateExpenseHead(
       UpdateSubExpenseHead event, Emitter<ExpenseSubHeadState> emit) async {
-
     emit(ExpenseSubHeadAddLoading());
 
     try {
-      final res  = await patchResponse(url: AppUrls.expenseSubHead+event.id.toString(),payload: event.body!); // Use the correct API URL
-
-      ApiResponse response = appParseJson(
-        res,
-            (data) => List<ExpenseSubHeadModel>.from(data.map((x) => ExpenseSubHeadModel.fromJson(x))),
+      final res = await patchResponse(
+          url: "${AppUrls.expenseSubHead + event.id.toString()}/",
+          payload: event.body!
       );
+
+      // FIX: Parse as single object instead of list
+      ApiResponse<ExpenseSubHeadModel> response = appParseJson<ExpenseSubHeadModel>(
+        res,
+            (data) => ExpenseSubHeadModel.fromJson(data), // Single object, not list
+      );
+
       if (response.success == false) {
-        emit(ExpenseSubHeadAddFailed(title: '', content: response.message??""));
+        emit(ExpenseSubHeadAddFailed(
+            title: 'Error',
+            content: response.message ?? "Failed to update expense sub head"
+        ));
         return;
       }
-      // clearData();
-      emit(ExpenseSubHeadAddSuccess(
 
-      ));
+      emit(ExpenseSubHeadAddSuccess());
     } catch (error) {
-      // clearData();
-      emit(ExpenseSubHeadAddFailed(title: "Error",content: error.toString()));
-
+      emit(ExpenseSubHeadAddFailed(
+          title: "Error",
+          content: error.toString()
+      ));
     }
   }
 
-
-
   Future<void> _onDeleteExpenseHeadScreen(
       DeleteSubExpenseHead event, Emitter<ExpenseSubHeadState> emit) async {
-
     emit(ExpenseSubHeadAddLoading());
 
     try {
-      final res  = await deleteResponse(url: AppUrls.expenseSubHead+event.id.toString()); // Use the correct API URL
-
-      ApiResponse response = appParseJson(
-        res,
-            (data) => List<ExpenseSubHeadModel>.from(data.map((x) => ExpenseSubHeadModel.fromJson(x))),
+      final res = await deleteResponse(
+          url: "${AppUrls.expenseSubHead + event.id.toString()}/"
       );
+
+      // FIX: For delete, we don't need to parse the response as ExpenseSubHeadModel
+      // Just check if the operation was successful
+      ApiResponse<dynamic> response = appParseJson<dynamic>(
+        res,
+            (data) => data, // Just return the data as-is
+      );
+
       if (response.success == false) {
-        emit(ExpenseSubHeadAddFailed(title: 'Json', content: response.message??""));
+        emit(ExpenseSubHeadAddFailed(
+            title: 'Error',
+            content: response.message ?? "Failed to delete expense sub head"
+        ));
         return;
       }
-      //  clearData();
-      emit(ExpenseSubHeadAddSuccess(
 
-      ));
+      emit(ExpenseSubHeadAddSuccess());
     } catch (error) {
-      // clearData();
-      emit(ExpenseSubHeadAddFailed(title: "Error",content: error.toString()));
-
+      emit(ExpenseSubHeadAddFailed(
+          title: "Error",
+          content: error.toString()
+      ));
     }
+  }
+
+  // Helper method to clear form data
+  void clearData() {
+    name.clear();
+    filterTextController.clear();
+    selectedState = "";
   }
 }
