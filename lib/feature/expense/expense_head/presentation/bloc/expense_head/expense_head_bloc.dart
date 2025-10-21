@@ -1,6 +1,5 @@
-
-
-
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../../core/configs/configs.dart';
 import '../../../../../../core/repositories/delete_response.dart';
@@ -12,7 +11,6 @@ import '../../../../../common/data/models/app_parse_json.dart';
 import '../../../data/model/expense_head_model.dart';
 
 part 'expense_head_event.dart';
-
 part 'expense_head_state.dart';
 
 class ExpenseHeadBloc extends Bloc<ExpenseHeadEvent, ExpenseHeadState> {
@@ -27,48 +25,36 @@ class ExpenseHeadBloc extends Bloc<ExpenseHeadEvent, ExpenseHeadState> {
     on<FetchExpenseHeadList>(_onFetchExpenseHeadList);
     on<AddExpenseHead>(_onCreateExpenseHead);
     on<UpdateExpenseHead>(_onUpdateExpenseHead);
-    on<DeleteExpenseHead>(_onDeleteExpenseHeadScreen);
+    on<DeleteExpenseHead>(_onDeleteExpenseHead);
   }
 
+  // ---------------------------------------------------------------------------
+  // FETCH LIST
+  // ---------------------------------------------------------------------------
   Future<void> _onFetchExpenseHeadList(
       FetchExpenseHeadList event, Emitter<ExpenseHeadState> emit) async {
     emit(ExpenseHeadListLoading());
 
     try {
-      final res = await getResponse(
-          url: AppUrls.expenseHead, context: event.context); // Use the correct API URL
+      final res = await getResponse(url: AppUrls.expenseHead, context: event.context);
 
       ApiResponse<List<ExpenseHeadModel>> response =
-          appParseJson<List<ExpenseHeadModel>>(
+      appParseJson<List<ExpenseHeadModel>>(
         res,
-        (data) => List<ExpenseHeadModel>.from(
-            data.map((x) => ExpenseHeadModel.fromJson(x))),
+            (data) => List<ExpenseHeadModel>.from(
+          data.map((x) => ExpenseHeadModel.fromJson(x)),
+        ),
       );
-      final data = response.data;
 
-      if (data == null || data.isEmpty) {
+      final data = response.data ?? [];
 
-        emit(ExpenseHeadListSuccess(
-          list: [],
-          totalPages: 0,
-          currentPage: event.pageNumber,
-        ));
-        return;
-      }
-
-      // Store all warehouses for filtering and pagination
       list = data;
-
-      // Apply filtering and pagination
-      final filteredWarehouses =
-          _filterExpenseHead(list, event.filterText);
-      final paginatedWarehouses =
-          _paginatePage(filteredWarehouses, event.pageNumber);
-
-      final totalPages = (filteredWarehouses.length / _itemsPerPage).ceil();
+      final filtered = _filterExpenseHead(list, event.filterText);
+      final paginated = _paginatePage(filtered, event.pageNumber);
+      final totalPages = (filtered.length / _itemsPerPage).ceil();
 
       emit(ExpenseHeadListSuccess(
-        list: paginatedWarehouses,
+        list: paginated,
         totalPages: totalPages,
         currentPage: event.pageNumber,
       ));
@@ -77,109 +63,104 @@ class ExpenseHeadBloc extends Bloc<ExpenseHeadEvent, ExpenseHeadState> {
     }
   }
 
-  List<ExpenseHeadModel> _filterExpenseHead(
-      List<ExpenseHeadModel> list, String filterText) {
-    return list.where((warehouse) {
-      final matchesText = filterText.isEmpty ||
-              warehouse.name!
-                  .toLowerCase()
-                  .contains(filterText.toLowerCase());
+  List<ExpenseHeadModel> _filterExpenseHead(List<ExpenseHeadModel> list, String filterText) {
+    return list.where((item) {
+      final matchesText =
+          filterText.isEmpty || item.name!.toLowerCase().contains(filterText.toLowerCase());
       return matchesText;
     }).toList();
   }
 
-  List<ExpenseHeadModel> _paginatePage(
-      List<ExpenseHeadModel> list, int pageNumber) {
+  List<ExpenseHeadModel> _paginatePage(List<ExpenseHeadModel> list, int pageNumber) {
     final start = pageNumber * _itemsPerPage;
     final end = start + _itemsPerPage;
     if (start >= list.length) return [];
-    return list.sublist(
-        start, end > list.length ? list.length : end);
+    return list.sublist(start, end > list.length ? list.length : end);
   }
 
-
-
-
+  // ---------------------------------------------------------------------------
+  // CREATE EXPENSE HEAD
+  // ---------------------------------------------------------------------------
   Future<void> _onCreateExpenseHead(
       AddExpenseHead event, Emitter<ExpenseHeadState> emit) async {
-
     emit(ExpenseHeadAddLoading());
 
     try {
-      final res  = await postResponse(url: AppUrls.expenseHead,payload: event.body); // Use the correct API URL
+      final res = await postResponse(url: AppUrls.expenseHead, payload: event.body);
 
-      ApiResponse response = appParseJson(
+      ApiResponse<ExpenseHeadModel> response = appParseJson(
         res,
-            (data) => List<ExpenseHeadModel>.from(data.map((x) => ExpenseHeadModel.fromJson(x))),
+            (data) => ExpenseHeadModel.fromJson(data),
       );
+
       if (response.success == false) {
-        emit(ExpenseHeadAddFailed(title: '', content: response.message??""));
+        emit(ExpenseHeadAddFailed(title: '', content: response.message ?? ""));
         return;
       }
-      // clearData();
-      emit(ExpenseHeadAddSuccess(
 
-      ));
+      emit(ExpenseHeadAddSuccess());
     } catch (error) {
-      // clearData();
-      emit(ExpenseHeadAddFailed(title: "Error",content: error.toString()));
-
+      emit(ExpenseHeadAddFailed(title: "Error", content: error.toString()));
     }
   }
 
+  // ---------------------------------------------------------------------------
+  // UPDATE EXPENSE HEAD
+  // ---------------------------------------------------------------------------
   Future<void> _onUpdateExpenseHead(
       UpdateExpenseHead event, Emitter<ExpenseHeadState> emit) async {
-
     emit(ExpenseHeadAddLoading());
 
     try {
-      final res  = await patchResponse(url: AppUrls.expenseHead+event.id.toString(),payload: event.body!); // Use the correct API URL
-
-      ApiResponse response = appParseJson(
-        res,
-            (data) => List<ExpenseHeadModel>.from(data.map((x) => ExpenseHeadModel.fromJson(x))),
+      final res = await patchResponse(
+        url: "${AppUrls.expenseHead + event.id.toString()}/",
+        payload: event.body!,
       );
+
+      ApiResponse<ExpenseHeadModel> response = appParseJson(
+        res,
+            (data) => ExpenseHeadModel.fromJson(data),
+      );
+
       if (response.success == false) {
-        emit(ExpenseHeadAddFailed(title: '', content: response.message??""));
+        emit(ExpenseHeadAddFailed(title: '', content: response.message ?? ""));
         return;
       }
-      // clearData();
-      emit(ExpenseHeadAddSuccess(
 
-      ));
+      emit(ExpenseHeadAddSuccess());
     } catch (error) {
-      // clearData();
-      emit(ExpenseHeadAddFailed(title: "Error",content: error.toString()));
-
+      emit(ExpenseHeadAddFailed(title: "Error", content: error.toString()));
     }
   }
 
-
-
-  Future<void> _onDeleteExpenseHeadScreen(
+  // ---------------------------------------------------------------------------
+  // DELETE EXPENSE HEAD
+  // ---------------------------------------------------------------------------
+  Future<void> _onDeleteExpenseHead(
       DeleteExpenseHead event, Emitter<ExpenseHeadState> emit) async {
-
     emit(ExpenseHeadAddLoading());
 
     try {
-      final res  = await deleteResponse(url: AppUrls.expenseHead+event.id.toString()); // Use the correct API URL
+      final res = await deleteResponse(url: "${AppUrls.expenseHead + event.id.toString()}/");
 
       ApiResponse response = appParseJson(
         res,
-            (data) => List<ExpenseHeadModel>.from(data.map((x) => ExpenseHeadModel.fromJson(x))),
+            (data) => data, // Delete API তে data: null থাকলে handle করবে
       );
+
+      print("responseresponse");
+      print(response.message);
       if (response.success == false) {
-        emit(ExpenseHeadAddFailed(title: 'Json', content: response.message??""));
+
+        emit(ExpenseHeadAddFailed(title: '', content: response.message ?? ""));
         return;
       }
-    //  clearData();
-      emit(ExpenseHeadAddSuccess(
 
-      ));
+      emit(ExpenseHeadAddSuccess());
+      // add(FetchExpenseHeadList( ));
+
     } catch (error) {
-     // clearData();
-      emit(ExpenseHeadAddFailed(title: "Error",content: error.toString()));
-
+      emit(ExpenseHeadAddFailed(title: "Error", content: error.toString()));
     }
   }
 }

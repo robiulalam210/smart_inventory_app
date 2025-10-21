@@ -13,19 +13,18 @@ Future<String> patchResponse(
 
   Uri uriUrl = Uri.parse(url);
   final token = await LocalDB.getLoginInfo();
+  logger.i("patchResponse uriUrl: $uriUrl");
 
   final Map<String, String> header = {
     "Content-Type": "application/json",
     'Authorization': 'Bearer ${token?['token']}',
-    "branch-id": " ${token?['branchId']}",
-    "branch-name": " ${token?['branchName']}",
-    "bs-type": " ${token?['bsType']}",
-    "user-id": " ${token?['userId']}",
-    "is-super-admin": "false",  };
+
+  };
   try {
     final response = await http
         .patch(uriUrl, body: jsonEncode(payload), headers: header)
-        .timeout(const Duration(seconds: 15));
+        .timeout(const Duration(seconds: 60));
+    logger.i("patchResponse statusCode: ${response.statusCode}");
     logger.i("patchResponse body: ${response.body}");
     return response.body;
   } on TimeoutException {

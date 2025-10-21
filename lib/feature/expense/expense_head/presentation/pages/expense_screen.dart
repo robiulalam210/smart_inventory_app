@@ -1,5 +1,7 @@
 
 
+import 'package:smart_inventory/core/core.dart';
+
 import '../../../../../core/configs/configs.dart';
 import '../../../../../core/shared/widgets/sideMenu/sidebar.dart';
 import '../../../../../core/widgets/app_alert_dialog.dart';
@@ -7,6 +9,7 @@ import '../../../../../core/widgets/app_loader.dart';
 import '../../../../../core/widgets/coustom_search_text_field.dart';
 import '../bloc/expense_head/expense_head_bloc.dart';
 import '../widget/widget.dart';
+import 'expense_head_create.dart';
 
 class ExpenseHeadScreen extends StatefulWidget {
   const ExpenseHeadScreen({super.key});
@@ -156,7 +159,20 @@ class _ExpenseHeadScreenState extends State<ExpenseHeadScreen> {
                           hintText:
                               "Search Name", // Pass dynamic hintText if needed
                         ),
-                      ),
+                      ),gapW16,
+                      AppButton(name: "Create Expanse Head", onPressed: (){
+                        showDialog(
+                          context: context,
+                          builder: (context) {
+                            return Dialog(
+                              child: ExpenseHeadCreate(
+
+                              ),
+                            );
+                          },
+                        );
+
+                      })
                     ],
                   ),
                   SizedBox(

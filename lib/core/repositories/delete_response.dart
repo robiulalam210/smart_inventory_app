@@ -4,7 +4,6 @@ import 'package:http/http.dart' as http;
 
 import '../configs/app_constants.dart';
 import '../database/login.dart';
-
 Future<String> deleteResponse({
   required String url,
 }) async {
@@ -14,17 +13,40 @@ Future<String> deleteResponse({
   final Map<String, String> header = {
     "Content-Type": "application/json",
     'Authorization': 'Bearer ${token?['token']}',
-    "branch-id": " ${token?['branchId']}",
-    "branch-name": "${token?['branchName']}",
-    "bs-type": " ${token?['bsType']}",
-    "user-id": " ${token?['userId']}",
-    "is-super-admin": "false",  };
+  };
+
+  logger.i("deleteResponse uriUrl: $uriUrl");
+
   try {
     final response = await http
         .delete(uriUrl, headers: header)
-        .timeout(const Duration(seconds: 15));
+        .timeout(const Duration(seconds: 60));
+
+    logger.i("deleteResponse statusCode: ${response.statusCode}");
     logger.i("deleteResponse body: ${response.body}");
-    return response.body;
+
+    // ✅ যদি statusCode 204 হয়, body খালি থাকে → valid JSON return করা
+    if (response.statusCode == 204) {
+      return '''
+{
+  "success": true,
+  "title": "Deleted",
+  "message": "Deleted successfully",
+  "data": null
+}
+''';
+    }
+
+    return response.body.isEmpty
+        ? '''
+{
+  "success": false,
+  "title": "Empty Response",
+  "message": "Server returned empty response",
+  "data": null
+}
+'''
+        : response.body;
   } on TimeoutException {
     return '''
 {

@@ -19,7 +19,7 @@ class SupplierPaymentModel {
   final bool? specificBill;
   final int? purchase;
   final String? purchaseInvoiceNo;
-  final dynamic? amount;
+  final dynamic amount;
   final String? paymentMethod;
   final DateTime? paymentDate;
   final String? remark;
@@ -150,7 +150,7 @@ class PaymentSummary {
 
 class AffectedInvoice {
   final String? invoiceNo;
-  final dynamic? amountApplied;
+  final dynamic amountApplied;
 
   AffectedInvoice({
     this.invoiceNo,
@@ -169,10 +169,10 @@ class AffectedInvoice {
 }
 
 class AfterPayment {
-  final dynamic? totalDue;
-  final dynamic? paymentApplied;
-  final dynamic? currentPaid;
-  final dynamic? currentDue;
+  final dynamic totalDue;
+  final dynamic paymentApplied;
+  final dynamic currentPaid;
+  final dynamic currentDue;
 
   AfterPayment({
     this.totalDue,
@@ -197,10 +197,10 @@ class AfterPayment {
 }
 
 class BeforePayment {
-  final dynamic? totalDue;
-  final dynamic? invoiceTotal;
-  final dynamic? previousPaid;
-  final dynamic? previousDue;
+  final dynamic totalDue;
+  final dynamic invoiceTotal;
+  final dynamic previousPaid;
+  final dynamic previousDue;
 
   BeforePayment({
     this.totalDue,

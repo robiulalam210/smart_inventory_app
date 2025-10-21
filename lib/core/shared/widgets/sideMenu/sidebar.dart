@@ -309,9 +309,9 @@ class _SidebarState extends State<Sidebar> {
                         ),
                         ExpansionTile(
                           initiallyExpanded:
-                              currentIndex == 13 ||
-                              currentIndex == 14 ||
-                              currentIndex == 15 ,
+                              currentIndex == 17 ||
+                              currentIndex == 18 ||
+                              currentIndex == 19 ,
 
                           title: Text(
                             "Expense ",
@@ -326,24 +326,24 @@ class _SidebarState extends State<Sidebar> {
                             MenuTile(
                               isSubmenu: true,
                               title: "Expense  List",
-                              isSelected: currentIndex == 13,
+                              isSelected: currentIndex == 17,
                               onPressed: () {
-                                bloc.add(ChangeDashboardScreen(index: 13));
+                                bloc.add(ChangeDashboardScreen(index: 17));
                               },
                             ),
                             MenuTile(
                               isSubmenu: true,
                               title: 'Expense Head',
-                              isSelected: currentIndex == 14,
+                              isSelected: currentIndex == 18,
                               onPressed: () {
-                                bloc.add(ChangeDashboardScreen(index: 14));
+                                bloc.add(ChangeDashboardScreen(index: 18));
                               },
                             ),  MenuTile(
                               isSubmenu: true,
                               title: 'Expense Sub Head',
-                              isSelected: currentIndex == 15,
+                              isSelected: currentIndex == 19,
                               onPressed: () {
-                                bloc.add(ChangeDashboardScreen(index: 15));
+                                bloc.add(ChangeDashboardScreen(index: 19));
                               },
                             ),
                           ],

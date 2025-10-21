@@ -1,9 +1,12 @@
 import 'package:hugeicons/hugeicons.dart';
 
 import '../../../../../core/configs/configs.dart';
+import '../../../../../core/widgets/app_button.dart';
 import '../../../../../core/widgets/delete_dialog.dart';
 import '../../data/model/expense_head_model.dart';
 import '../bloc/expense_head/expense_head_bloc.dart';
+import '../pages/expense_head_create.dart';
+import '../pages/expense_screen.dart';
 
 
 class ExpenseHeadCard extends StatefulWidget {
@@ -18,6 +21,31 @@ class ExpenseHeadCard extends StatefulWidget {
 }
 
 class _ExpenseHeadCardState extends State<ExpenseHeadCard> {
+  // Add this method to your state class
+  void showLoadingDialog(BuildContext context, {String message = 'Loading...'}) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16.0),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(width: 20),
+                Text(message),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -47,8 +75,22 @@ class _ExpenseHeadCardState extends State<ExpenseHeadCard> {
             children: [
               IconButton(
                 onPressed: () {
+                  // Bloc এর টেক্সট কন্ট্রোলারে আগের নাম সেট করা
                   context.read<ExpenseHeadBloc>().name.text =
                       widget.expenseHead.name ?? "";
+
+                  // ডায়ালগ দেখানো
+                  showDialog(
+                    context: context,
+                    builder: (context) {
+                      return Dialog(
+                        child: ExpenseHeadCreate(
+                          id: widget.expenseHead.id.toString(),
+                          name: widget.expenseHead.name,
+                        ),
+                      );
+                    },
+                  );
 
 
                 },
@@ -59,14 +101,19 @@ class _ExpenseHeadCardState extends State<ExpenseHeadCard> {
               ),
               IconButton(
                 onPressed: () async {
-                  bool shouldDelete =
-                      await showDeleteConfirmationDialog(context);
-                  if (shouldDelete) {
-                    context.read<ExpenseHeadBloc>().add(DeleteExpenseHead(
-                        id: widget.expenseHead.id.toString()));
-                  }
+                  // ✅ Show confirmation dialog
+                  bool shouldDelete = await showDeleteConfirmationDialog(context);
+                  if (!shouldDelete) return;
+
+                  // ✅ Show loading dialog
+                  showLoadingDialog(context, message: 'Deleting...');
+
+                  // ✅ Send delete event
+                  context.read<ExpenseHeadBloc>().add(
+                    DeleteExpenseHead(id: widget.expenseHead.id.toString()),
+                  );
                 },
-                icon:  const HugeIcon(
+                icon: const HugeIcon(
                   icon: HugeIcons.strokeRoundedDeleteThrow,
                   color: Colors.black,
                   size: 24.0,
