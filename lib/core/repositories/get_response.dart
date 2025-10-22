@@ -5,12 +5,19 @@ import 'package:http/http.dart' as http;
 
 import '../../feature/auth/presentation/pages/login_scr.dart';
 import '../configs/configs.dart';
-
 Future<String> getResponse({
   required BuildContext context,
   required String url,
+  Map<String, String>? queryParams, // Add this parameter
 }) async {
-  Uri uriUrl = Uri.parse(url);
+  // Build URI with query parameters
+  Uri uriUrl;
+  if (queryParams != null && queryParams.isNotEmpty) {
+    uriUrl = Uri.parse(url).replace(queryParameters: queryParams);
+  } else {
+    uriUrl = Uri.parse(url);
+  }
+
   final token = await LocalDB.getLoginInfo();
   if (kDebugMode) {
     print(uriUrl);
@@ -19,7 +26,6 @@ Future<String> getResponse({
   final Map<String, String> header = {
     "Content-Type": "application/json",
     'Authorization': 'Bearer ${token?['token']}',
-
   };
   logger.i("getResponse header: $header");
 
@@ -28,16 +34,12 @@ Future<String> getResponse({
         .get(uriUrl, headers: header)
         .timeout(const Duration(seconds: 80));
 
-    // logger.i("getResponse body: ${response.body}");
     logger.i("getResponse statusCode: ${response.statusCode}");
-    logger.i("getResponse statusCode: ${response.body}");
+    logger.i("getResponse body: ${response.body}");
 
     // Check for 401 Unauthorized error
     if (response.statusCode == 401) {
-      // Log out the user and redirect to login screen
-      await LocalDB
-          .delLoginInfo(); // Assuming a method to clear stored login info
-      // Redirect to login screen
+      await LocalDB.delLoginInfo();
       AppRoutes.pushAndRemoveUntil(context, const LogInScreen());
       return '''
       {

@@ -3,17 +3,26 @@ part of 'expense_bloc.dart';
 sealed class ExpenseEvent {}
 
 
-class FetchExpenseList extends ExpenseEvent{
-  BuildContext context;
+// In expense_event.dart
 
+class FetchExpenseList extends ExpenseEvent {
+  final BuildContext context;
+  final int pageNumber;
+  final int pageSize;
   final String filterText;
-  final String filterApiURL;
   final DateTime? startDate;
   final DateTime? endDate;
-  final int pageNumber;
+  final String? headId;
 
-  FetchExpenseList(this.context,{this.filterText = '',this.filterApiURL='',this.startDate,this.endDate, this.pageNumber = 0});
-
+  FetchExpenseList(
+      this.context, {
+        this.pageNumber = 1, // Change to 1-based for API
+        this.pageSize = 10,
+        this.filterText = "",
+        this.startDate,
+        this.endDate,
+        this.headId,
+      });
 }
 
 

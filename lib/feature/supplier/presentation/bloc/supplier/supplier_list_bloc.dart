@@ -1,5 +1,3 @@
-
-
 import '../../../../../core/configs/configs.dart';
 import '../../../../../core/repositories/get_response.dart';
 import '../../../../../core/repositories/patch_response.dart';
@@ -13,61 +11,49 @@ part 'supplier_list_event.dart';
 part 'supplier_list_state.dart';
 
 class SupplierListBloc extends Bloc<SupplierListEvent, SupplierListState> {
-
   List<SupplierListModel> supplierListModel = [];
   final int _itemsPerPage = 10;
   String selectedState = "";
   TextEditingController filterTextController = TextEditingController();
   List<String> statesList = ["Active", "Inactive"];
 
-
-
   String selectedStateBalanceType = "";
-  List<String> statusBalanceType = [
-    "Due",
-    "Advance",
-  ];
+  List<String> statusBalanceType = ["Due", "Advance"];
 
   SourceModel? sourceModel;
-
 
   TextEditingController customerNameController = TextEditingController();
   TextEditingController customerNumberController = TextEditingController();
   TextEditingController customerEmailController = TextEditingController();
-
-  TextEditingController customerOpeningBalanceController =
-  TextEditingController();
-  TextEditingController customerAdditionalNumberController =
-  TextEditingController();
-  TextEditingController customerAdditionalEmailController =
-  TextEditingController();
+  TextEditingController customerOpeningBalanceController = TextEditingController();
+  TextEditingController customerAdditionalNumberController = TextEditingController();
+  TextEditingController customerAdditionalEmailController = TextEditingController();
   TextEditingController addressController = TextEditingController();
-  clearData(){
+
+  void clearData() {
     addressController.clear();
     customerAdditionalEmailController.clear();
     customerAdditionalNumberController.clear();
     customerEmailController.clear();
     customerOpeningBalanceController.clear();
-   selectedStateBalanceType="";
-    selectedState="";
+    customerNameController.clear();
+    customerNumberController.clear();
+    selectedStateBalanceType = "";
+    selectedState = "";
   }
+
   SupplierListBloc() : super(SupplierListInitial()) {
-    on<FetchSupplierList>(_onFetchWarehouseList);
-    on<AddSupplierList>(_onCreateWarehouseList);
-    on<UpdateSupplierList>(_onUpdateBranchList);
+    on<FetchSupplierList>(_onFetchSupplierList);
+    on<AddSupplierList>(_onCreateSupplier);
+    on<UpdateSupplierList>(_onUpdateSupplier);
   }
 
-
-
-  Future<void> _onFetchWarehouseList(
+  Future<void> _onFetchSupplierList(
       FetchSupplierList event, Emitter<SupplierListState> emit) async {
-
     emit(SupplierListLoading());
 
     try {
-      final res  = await getResponse(url: AppUrls.supplierList, context: event.context); // Use the correct API URL
-
-      // final response=warehouseBranchModelFromJson(res);
+      final res = await getResponse(url: AppUrls.supplierList, context: event.context);
 
       ApiResponse<List<SupplierListModel>> response = appParseJson<List<SupplierListModel>>(
         res,
@@ -76,99 +62,110 @@ class SupplierListBloc extends Bloc<SupplierListEvent, SupplierListState> {
       final data = response.data;
 
       if (data == null || data.isEmpty) {
-        emit(SupplierListFailed(title: "Error",content: "No Data"));
-
+        emit(SupplierListSuccess(
+          list: [],
+          totalPages: 0,
+          currentPage: event.pageNumber,
+        ));
         return;
       }
-      // Store all warehouses for filtering and pagination
+
       supplierListModel = data;
-
-      // Apply filtering and pagination
-      final filteredWarehouses = _filterData(supplierListModel, event.state, event.filterText);
-      final paginatedWarehouses = __paginatePage(filteredWarehouses, event.pageNumber);
-
-      final totalPages = (filteredWarehouses.length / _itemsPerPage).ceil();
+      final filteredSuppliers = _filterData(supplierListModel, event.state, event.filterText);
+      final paginatedSuppliers = _paginatePage(filteredSuppliers, event.pageNumber);
+      final totalPages = (filteredSuppliers.length / _itemsPerPage).ceil();
 
       emit(SupplierListSuccess(
-        list: paginatedWarehouses,
+        list: paginatedSuppliers,
         totalPages: totalPages,
         currentPage: event.pageNumber,
       ));
     } catch (error) {
-      emit(SupplierListFailed(title: "Error",content: error.toString()));
+      emit(SupplierListFailed(title: "Error", content: error.toString()));
     }
   }
 
   List<SupplierListModel> _filterData(
-      List<SupplierListModel> warehouses, String state, String filterText) {
-    return warehouses.where((warehouse) {
-      final matchesState = state.isEmpty || warehouse.status.toString() == (state == 'Active' ? '1' : '0');
-      final matchesText = filterText.isEmpty || warehouse.name!.toLowerCase().contains(filterText.toLowerCase());
+      List<SupplierListModel> suppliers, String state, String filterText) {
+    return suppliers.where((supplier) {
+      final matchesState = state.isEmpty ||
+          supplier.status.toString() == (state == 'Active' ? '1' : '0');
+      final matchesText = filterText.isEmpty ||
+          supplier.name!.toLowerCase().contains(filterText.toLowerCase()) ||
+          (supplier.email?.toLowerCase().contains(filterText.toLowerCase()) ?? false) ||
+          (supplier.phone?.toLowerCase().contains(filterText.toLowerCase()) ?? false);
       return matchesState && matchesText;
     }).toList();
   }
 
-  List<SupplierListModel> __paginatePage(List<SupplierListModel> warehouses, int pageNumber) {
+  List<SupplierListModel> _paginatePage(List<SupplierListModel> suppliers, int pageNumber) {
     final start = pageNumber * _itemsPerPage;
     final end = start + _itemsPerPage;
-    if (start >= warehouses.length) return [];
-    return warehouses.sublist(start, end > warehouses.length ? warehouses.length : end);
+    if (start >= suppliers.length) return [];
+    return suppliers.sublist(
+        start, end > suppliers.length ? suppliers.length : end);
   }
 
-
-  Future<void> _onCreateWarehouseList(
+  Future<void> _onCreateSupplier(
       AddSupplierList event, Emitter<SupplierListState> emit) async {
-
     emit(SupplierAddLoading());
 
     try {
-      final res  = await postResponse(url: AppUrls.supplierList,payload: event.body); // Use the correct API URL
+      print('Creating supplier with body: ${event.body}'); // Debug log
 
-      ApiResponse response = appParseJson(
+      final res = await postResponse(url: AppUrls.supplierList, payload: event.body);
+
+      // FIX: Parse as single object, not list
+      ApiResponse<SupplierListModel> response = appParseJson<SupplierListModel>(
         res,
-            (data) => List<SupplierListModel>.from(data.map((x) => SupplierListModel.fromJson(x))),
+            (data) => SupplierListModel.fromJson(data), // Single object, not list
       );
+
       if (response.success == false) {
-        emit(SupplierAddFailed(title: '', content: response.message??""));
+        emit(SupplierAddFailed(
+            title: 'Error',
+            content: response.message ?? "Failed to create supplier"
+        ));
         return;
       }
-      clearData();
-      emit(SupplierAddSuccess(
 
-      ));
+      clearData();
+      emit(SupplierAddSuccess());
     } catch (error) {
       clearData();
-      emit(SupplierAddFailed(title: "Error",content: error.toString()));
-
+      emit(SupplierAddFailed(title: "Error", content: error.toString()));
     }
   }
 
-  Future<void> _onUpdateBranchList(
+  Future<void> _onUpdateSupplier(
       UpdateSupplierList event, Emitter<SupplierListState> emit) async {
-
     emit(SupplierAddLoading());
 
     try {
-      final res  = await patchResponse(url: AppUrls.supplierList+event.branchId.toString(),payload: event.body!); // Use the correct API URL
-
-      ApiResponse response = appParseJson(
-        res,
-            (data) => List<SupplierListModel>.from(data.map((x) => SupplierListModel.fromJson(x))),
+      final res = await patchResponse(
+          url: '${AppUrls.supplierList}${event.branchId}/', // Add trailing slash
+          payload: event.body!
       );
+
+      // FIX: Parse as single object, not list
+      ApiResponse<SupplierListModel> response = appParseJson<SupplierListModel>(
+        res,
+            (data) => SupplierListModel.fromJson(data), // Single object, not list
+      );
+
       if (response.success == false) {
-        emit(SupplierAddFailed(title: '', content: response.message??""));
+        emit(SupplierAddFailed(
+            title: 'Error',
+            content: response.message ?? "Failed to update supplier"
+        ));
         return;
       }
-      clearData();
-      emit(SupplierAddSuccess(
 
-      ));
+      clearData();
+      emit(SupplierAddSuccess());
     } catch (error) {
       clearData();
-      emit(SupplierAddFailed(title: "Error",content: error.toString()));
-
+      emit(SupplierAddFailed(title: "Error", content: error.toString()));
     }
   }
-
-
 }

@@ -33,7 +33,7 @@ class _CreateSupplierScreenState extends State<CreateSupplierScreen> {
           spacing: 0,
           runSpacing: 0,
           children: [
-            if (isBigScreen) _buildSidebar(),
+            // if (isBigScreen) _buildSidebar(),
             _buildContentArea(isBigScreen),
           ],
         ),
@@ -111,7 +111,7 @@ class _CreateSupplierScreenState extends State<CreateSupplierScreen> {
                     textInputAction: TextInputAction.next,
                     controller: context.read<SupplierListBloc>().customerNumberController,
                     hintText: 'Phone Number',
-                    maxLength: 14,
+                    maxLength: 11,
                     fillColor: const Color.fromARGB(255, 255, 255, 255),
                     keyboardType: TextInputType.phone,
                     validator: (value) {

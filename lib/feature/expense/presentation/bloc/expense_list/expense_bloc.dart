@@ -12,7 +12,8 @@ part 'expense_event.dart';
 part 'expense_state.dart';
 
 class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
-  List<ExpenseModel> allWarehouses = [];
+  List<ExpenseModel> allExpenses = [];
+  final int _defaultPageSize = 10;
   final int _itemsPerPage = 5;
   String selectedState = "";
   TextEditingController filterTextController = TextEditingController();
@@ -43,77 +44,134 @@ class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
     selectedAccount = "";
     selectedAccountId = "";
   }
-
   Future<void> _onFetchExpenseList(
       FetchExpenseList event, Emitter<ExpenseState> emit) async {
     emit(ExpenseListLoading());
 
     try {
-      final res = await getResponse(url: AppUrls.expense, context: event.context);
+      // Build query parameters
+      Map<String, String> queryParams = {
+        'page': event.pageNumber.toString(),
+        'page_size': event.pageSize.toString(),
+      };
 
-      ApiResponse<List<ExpenseModel>> response = appParseJson<List<ExpenseModel>>(
-        res,
-            (data) => List<ExpenseModel>.from(data.map((x) => ExpenseModel.fromJson(x))),
+      // Add filters
+      if (event.filterText.isNotEmpty) {
+        queryParams['search'] = event.filterText;
+      }
+      if (event.startDate != null && event.endDate != null) {
+        queryParams['start_date'] = event.startDate!.toIso8601String().split('T')[0];
+        queryParams['end_date'] = event.endDate!.toIso8601String().split('T')[0];
+      }
+
+      final res = await getResponse(
+        url: AppUrls.expense,
+        context: event.context,
+        queryParams: queryParams,
       );
-      final data = response.data;
 
-      if (data == null || data.isEmpty) {
-        emit(ExpenseListSuccess(
-          list: [],
-          totalPages: 0,
-          currentPage: event.pageNumber,
+      // Parse the response
+      ApiResponse<Map<String, dynamic>> response = appParseJson<Map<String, dynamic>>(
+        res,
+            (data) => data,
+      );
+
+      if (response.success == false) {
+        emit(ExpenseListFailed(
+            title: "Error",
+            content: response.message ?? "Failed to fetch expenses"
         ));
         return;
       }
 
-      // Store all expenses for filtering and pagination
-      allWarehouses = data;
+      final responseData = response.data;
 
-      // Apply filtering and pagination
-      final filteredExpenses = _filterData(
-          allWarehouses, event.filterText, event.startDate, event.endDate);
-      final paginatedExpenses = _paginatePage(filteredExpenses, event.pageNumber);
 
-      final totalPages = (filteredExpenses.length / _itemsPerPage).ceil();
+      if (responseData == null) {
+        emit(ExpenseListSuccess(
+          list: [],
+          totalPages: 0,
+          currentPage: event.pageNumber,
+          count: 0,
+          pageSize: event.pageSize,
+          from: 0,
+          to: 0,
+        ));
+        return;
+      }
+      print('Full response data1: ${responseData}');
+
+      // Extract data from the nested structure
+      final data = responseData['results'];
+      print('Full response data2: $data');
+
+      if (data == null) {
+        emit(ExpenseListSuccess(
+          list: [],
+          totalPages: 0,
+          currentPage: event.pageNumber,
+          count: 0,
+          pageSize: event.pageSize,
+          from: 0,
+          to: 0,
+        ));
+        return;
+      }
+
+      // Debug: Print the actual response structure
+      print('Full response data: $data');
+
+      // Extract with safe parsing
+      final results = data ?? [];
+      final count = _safeParseInt(responseData['count'], 0);
+      final currentPage = _safeParseInt(responseData['current_page'], event.pageNumber);
+      final pageSize = _safeParseInt(responseData['page_size'], event.pageSize);
+      final totalPages = _safeParseInt(responseData['total_pages'], (count / pageSize).ceil());
+
+      // Calculate from and to
+      final from = ((currentPage - 1) * pageSize) + 1;
+      final to = from + (results.isNotEmpty ? results.length - 1 : 0);
+
+      // Parse expense list
+      List<ExpenseModel> expenses = [];
+      if (results is List) {
+        expenses = List<ExpenseModel>.from(
+            results.map((x) => ExpenseModel.fromJson(x))
+        );
+      }
+
+      // Debug: Print what we're emitting
+      print('Emitting ExpenseListSuccess with:');
+      print('  - count: $count');
+      print('  - currentPage: $currentPage');
+      print('  - pageSize: $pageSize');
+      print('  - totalPages: $totalPages');
+      print('  - from: $from');
+      print('  - to: $to');
+      print('  - expenses count: ${expenses.length}');
 
       emit(ExpenseListSuccess(
-        list: paginatedExpenses,
+        list: expenses,
         totalPages: totalPages,
-        currentPage: event.pageNumber,
+        currentPage: currentPage,
+        count: count,
+        pageSize: pageSize,
+        from: from,
+        to: to.toInt(),
       ));
-    } catch (error) {
+    } catch (error,st) {
+      print('Error in _onFetchExpenseList: $st');
       emit(ExpenseListFailed(title: "Error", content: error.toString()));
     }
   }
 
-  List<ExpenseModel> _filterData(List<ExpenseModel> expenses,
-      String filterText, DateTime? startDate, DateTime? endDate) {
-    return expenses.where((expense) {
-      // Check if the expense's expenseDate is not null and falls within the given date range
-      final matchesDate = (startDate == null || endDate == null) ||
-          (expense.expenseDate != null &&
-              ((expense.expenseDate!.isAfter(startDate) &&
-                  expense.expenseDate!.isBefore(endDate)) ||
-                  expense.expenseDate!.isAtSameMomentAs(startDate) ||
-                  expense.expenseDate!.isAtSameMomentAs(endDate)));
-
-      // Check if the expense matches the filter text
-      final matchesText = filterText.isEmpty ||
-          (expense.headName?.toLowerCase().contains(filterText.toLowerCase()) ?? false) ||
-          (expense.description?.toLowerCase().contains(filterText.toLowerCase()) ?? false) ||
-          (expense.paymentMethod?.toLowerCase().contains(filterText.toLowerCase()) ?? false);
-
-      // Return true only if both conditions match
-      return matchesDate && matchesText;
-    }).toList();
-  }
-
-  List<ExpenseModel> _paginatePage(List<ExpenseModel> expenses, int pageNumber) {
-    final start = pageNumber * _itemsPerPage;
-    final end = start + _itemsPerPage;
-    if (start >= expenses.length) return [];
-    return expenses.sublist(
-        start, end > expenses.length ? expenses.length : end);
+// Safe parsing helper
+  int _safeParseInt(dynamic value, int defaultValue) {
+    if (value == null) return defaultValue;
+    if (value is int) return value;
+    if (value is String) return int.tryParse(value) ?? defaultValue;
+    if (value is double) return value.toInt();
+    return defaultValue;
   }
 
   Future<void> _onCreateExpense(

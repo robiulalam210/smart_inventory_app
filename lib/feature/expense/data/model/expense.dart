@@ -12,16 +12,19 @@ class ExpenseModel {
   final int? id;
   final int? company;
   final int? head;
-  final dynamic subhead;
+  final int? subhead;
   final String? headName;
-  final dynamic subheadName;
-  final String? description;
+  final String? subheadName;
   final String? amount;
   final String? paymentMethod;
-  final dynamic account;
+  final int? account;
+  final dynamic accountName;
   final DateTime? expenseDate;
   final dynamic note;
   final DateTime? createdAt;
+  final int? createdBy;
+  final DateTime? dateCreated;
+  final String? invoiceNumber;
 
   ExpenseModel({
     this.id,
@@ -30,13 +33,16 @@ class ExpenseModel {
     this.subhead,
     this.headName,
     this.subheadName,
-    this.description,
     this.amount,
     this.paymentMethod,
     this.account,
+    this.accountName,
     this.expenseDate,
     this.note,
     this.createdAt,
+    this.createdBy,
+    this.dateCreated,
+    this.invoiceNumber,
   });
 
   factory ExpenseModel.fromJson(Map<String, dynamic> json) => ExpenseModel(
@@ -46,13 +52,16 @@ class ExpenseModel {
     subhead: json["subhead"],
     headName: json["head_name"],
     subheadName: json["subhead_name"],
-    description: json["description"],
     amount: json["amount"],
     paymentMethod: json["payment_method"],
     account: json["account"],
+    accountName: json["account_name"],
     expenseDate: json["expense_date"] == null ? null : DateTime.parse(json["expense_date"]),
     note: json["note"],
     createdAt: json["created_at"] == null ? null : DateTime.parse(json["created_at"]),
+    createdBy: json["created_by"],
+    dateCreated: json["date_created"] == null ? null : DateTime.parse(json["date_created"]),
+    invoiceNumber: json["invoice_number"],
   );
 
   Map<String, dynamic> toJson() => {
@@ -62,12 +71,15 @@ class ExpenseModel {
     "subhead": subhead,
     "head_name": headName,
     "subhead_name": subheadName,
-    "description": description,
     "amount": amount,
     "payment_method": paymentMethod,
     "account": account,
+    "account_name": accountName,
     "expense_date": "${expenseDate!.year.toString().padLeft(4, '0')}-${expenseDate!.month.toString().padLeft(2, '0')}-${expenseDate!.day.toString().padLeft(2, '0')}",
     "note": note,
     "created_at": createdAt?.toIso8601String(),
+    "created_by": createdBy,
+    "date_created": dateCreated?.toIso8601String(),
+    "invoice_number": invoiceNumber,
   };
 }

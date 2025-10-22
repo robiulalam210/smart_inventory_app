@@ -37,7 +37,7 @@ class _ExpenseCardState extends State<ExpenseCard> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  widget.expense.description?.capitalize() ?? "N/A",
+                  widget.expense.invoiceNumber?.capitalize() ?? "N/A",
                   style: AppTextStyle.cardLevelHead(context),
                 ),
                 const SizedBox(
@@ -54,7 +54,7 @@ class _ExpenseCardState extends State<ExpenseCard> {
                 const SizedBox(
                   height: 2,
                 ),
-                Text("Note : ${widget.expense.description ?? "N/A"}",
+                Text("Note : ${widget.expense.note ?? "N/A"}",
                     style: AppTextStyle.cardLevelText(context)),
                 const SizedBox(
                   height: 2,
@@ -123,7 +123,7 @@ class _ExpenseCardState extends State<ExpenseCard> {
                               width: AppSizes.width(context)*0.50,
                               child: ExpenseCreateScreen(
                                 id: widget.expense.id.toString(),
-                                name: widget.expense.description,
+                                name: "Update",
                                 selectedExpenseHead: ExpenseHeadModel(
                                     id: widget.expense.head
                                     ,name: widget.expense.headName

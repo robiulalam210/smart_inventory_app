@@ -7,20 +7,26 @@ final class ExpenseInitial extends ExpenseState {}
 
 
 final class ExpenseListLoading extends ExpenseState {}
-
 final class ExpenseListSuccess extends ExpenseState {
-  String selectedState = "";
-
   final List<ExpenseModel> list;
   final int totalPages;
   final int currentPage;
+  final int count;
+  final int pageSize;
+  final int from;
+  final int to;
 
   ExpenseListSuccess({
     required this.list,
     required this.totalPages,
     required this.currentPage,
+    required this.count,
+    required this.pageSize,
+    required this.from,
+    required this.to,
   });
 }
+
 
 
 final class ExpenseListFailed extends ExpenseState {

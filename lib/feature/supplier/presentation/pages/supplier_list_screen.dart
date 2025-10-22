@@ -4,6 +4,7 @@
 import '../../../../core/configs/configs.dart';
 import '../../../../core/shared/widgets/sideMenu/sidebar.dart';
 import '../../../../core/widgets/app_alert_dialog.dart';
+import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_dropdown.dart';
 import '../../../../core/widgets/app_loader.dart';
 import '../../../../core/widgets/coustom_search_text_field.dart';
@@ -11,6 +12,7 @@ import '../../../../core/widgets/custom_filter_ui.dart';
 import '../../../products/soruce/presentation/bloc/source/source_bloc.dart';
 import '../bloc/supplier/supplier_list_bloc.dart';
 import '../widget/widget.dart';
+import 'create_supplierr_screen.dart';
 
 class SupplierScreen extends StatefulWidget {
   const SupplierScreen({super.key});
@@ -146,6 +148,25 @@ class _SupplierScreenState extends State<SupplierScreen> {
                           },
                           hintText: "Search Name", // Pass dynamic hintText if needed
                         )),
+
+                    gapW16,
+                    AppButton(
+                      name: "Create Expanse",
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) {
+                            return Dialog(
+                              child: SizedBox(
+                                width: AppSizes.width(context) * 0.50,
+                                // height: AppSizes.height(context) * 0.50,
+                                child: CreateSupplierScreen(),
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    ),
                     CustomFilterBox(
                       onTapDown: (TapDownDetails details) {
                         _showFilterMenu(context, details.globalPosition);
