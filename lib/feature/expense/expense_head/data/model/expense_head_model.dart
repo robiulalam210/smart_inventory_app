@@ -19,6 +19,11 @@ class ExpenseHeadModel {
     this.company,
   });
 
+  @override
+  String toString() {
+    // TODO: implement toString
+    return name??"";
+  }
   factory ExpenseHeadModel.fromJson(Map<String, dynamic> json) => ExpenseHeadModel(
     id: json["id"],
     name: json["name"],

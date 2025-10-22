@@ -19,13 +19,13 @@ class FetchExpenseList extends ExpenseEvent{
 
 
 class AddExpense extends ExpenseEvent {
-  final Map<String,String>? body;
+  final Map<String,dynamic>? body;
 
   AddExpense({this.body});
 }
 
 class UpdateExpense extends ExpenseEvent {
-  final Map<String,String>? body;
+  final Map<String,dynamic>? body;
   final String? id;
 
 

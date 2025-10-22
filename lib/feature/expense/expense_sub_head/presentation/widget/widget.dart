@@ -88,7 +88,7 @@ class _ExpenseHeadCardState extends State<ExpenseSubHeadCard> {
                       return Dialog(
                         child: SizedBox(
                           width: AppSizes.width(context)*0.50,
-                          child: ExpenseSubHeadCreate(
+                          child: ExpenseSubCreateScreen(
                             id: widget.expenseHead.id.toString(),
                             name: widget.expenseHead.name,
                             selectedHead: ExpenseHeadModel(

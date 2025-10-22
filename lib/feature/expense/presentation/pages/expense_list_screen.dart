@@ -1,15 +1,19 @@
 
 
 
+import 'package:smart_inventory/feature/expense/expense_sub_head/presentation/pages/expense_sub_head_create.dart';
+
 import '../../../../core/configs/configs.dart';
 import '../../../../core/shared/widgets/sideMenu/sidebar.dart';
 import '../../../../core/widgets/app_alert_dialog.dart';
+import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_loader.dart';
 import '../../../../core/widgets/coustom_search_text_field.dart';
 import '../../../../core/widgets/custom_filter_ui.dart';
 import '../../expense_head/presentation/bloc/expense_head/expense_head_bloc.dart';
 import '../bloc/expense_list/expense_bloc.dart';
 import '../widget/widget.dart';
+import 'expense_create.dart';
 
 class ExpenseListScreen extends StatefulWidget {
   const ExpenseListScreen({super.key});
@@ -179,6 +183,26 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
                           },
                           hintText: "Search Name",
                         )),
+                    gapW16,
+                    AppButton(
+                      name: "Create Expanse",
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) {
+                            return Dialog(
+                              child: SizedBox(
+                                width: AppSizes.width(context) * 0.50,
+                                // height: AppSizes.height(context) * 0.50,
+                                child: ExpenseCreateScreen(),
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    ),
+                    gapW16,
+
                     CustomFilterBox(onTapDown: (TapDownDetails details) {
                       _showFilterMenu(context, details.globalPosition);
                     })

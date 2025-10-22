@@ -12,13 +12,15 @@ class ExpenseModel {
   final int? id;
   final int? company;
   final int? head;
-  final int? subhead;
+  final dynamic subhead;
+  final String? headName;
+  final dynamic subheadName;
   final String? description;
   final String? amount;
   final String? paymentMethod;
-  final int? account;
+  final dynamic account;
   final DateTime? expenseDate;
-  final String? note;
+  final dynamic note;
   final DateTime? createdAt;
 
   ExpenseModel({
@@ -26,6 +28,8 @@ class ExpenseModel {
     this.company,
     this.head,
     this.subhead,
+    this.headName,
+    this.subheadName,
     this.description,
     this.amount,
     this.paymentMethod,
@@ -40,6 +44,8 @@ class ExpenseModel {
     company: json["company"],
     head: json["head"],
     subhead: json["subhead"],
+    headName: json["head_name"],
+    subheadName: json["subhead_name"],
     description: json["description"],
     amount: json["amount"],
     paymentMethod: json["payment_method"],
@@ -54,6 +60,8 @@ class ExpenseModel {
     "company": company,
     "head": head,
     "subhead": subhead,
+    "head_name": headName,
+    "subhead_name": subheadName,
     "description": description,
     "amount": amount,
     "payment_method": paymentMethod,

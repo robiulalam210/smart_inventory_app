@@ -1,9 +1,12 @@
 import 'package:hugeicons/hugeicons.dart';
+import 'package:smart_inventory/feature/expense/expense_sub_head/data/model/expense_sub_head_model.dart';
 
 import '../../../../core/configs/configs.dart';
 import '../../../../core/widgets/delete_dialog.dart';
 import '../../data/model/expense.dart';
+import '../../expense_head/data/model/expense_head_model.dart';
 import '../bloc/expense_list/expense_bloc.dart';
+import '../pages/expense_create.dart';
 
 
 class ExpenseCard extends StatefulWidget {
@@ -40,7 +43,7 @@ class _ExpenseCardState extends State<ExpenseCard> {
                 const SizedBox(
                   height: 2,
                 ),
-                Text("Expense Head : ${widget.expense.subhead ?? "N/A"}",
+                Text("Expense Head : ${widget.expense.headName ?? "N/A"}",
                     style: AppTextStyle.cardLevelText(context)),
                 const SizedBox(
                   height: 2,
@@ -51,7 +54,7 @@ class _ExpenseCardState extends State<ExpenseCard> {
                 const SizedBox(
                   height: 2,
                 ),
-                Text("Note : ${widget.expense.note ?? "N/A"}",
+                Text("Note : ${widget.expense.description ?? "N/A"}",
                     style: AppTextStyle.cardLevelText(context)),
                 const SizedBox(
                   height: 2,
@@ -61,7 +64,7 @@ class _ExpenseCardState extends State<ExpenseCard> {
                   children: [
                     Column(
                       children: [
-                        Text(widget.expense.subhead.toString() ?? "N/A",
+                        Text(widget.expense.subheadName ?? "N/A",
                             style: AppTextStyle.cardLevelText(context)),
                         const SizedBox(
                           height: 5,
@@ -111,17 +114,40 @@ class _ExpenseCardState extends State<ExpenseCard> {
                     icon: const Icon(Iconsax.edit)),
                 IconButton(
                     onPressed: () async {
-
+                      // ডায়ালগ দেখানো
+                      showDialog(
+                        context: context,
+                        builder: (context) {
+                          return Dialog(
+                            child: SizedBox(
+                              width: AppSizes.width(context)*0.50,
+                              child: ExpenseCreateScreen(
+                                id: widget.expense.id.toString(),
+                                name: widget.expense.description,
+                                selectedExpenseHead: ExpenseHeadModel(
+                                    id: widget.expense.head
+                                    ,name: widget.expense.headName
+                                ),
+                                selectedExpenseSubHead: ExpenseSubHeadModel(
+                                    id: widget.expense.subhead
+                                    ,name: widget.expense.subheadName
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      );
                     },
                     icon: const Icon(HugeIcons.strokeRoundedView)),
                 IconButton(
                     onPressed: () async {
-                      bool shouldDelete =
-                      await showDeleteConfirmationDialog(context);
-                      if (shouldDelete) {
-                        context.read<ExpenseBloc>().add(
-                            DeleteExpense(id: widget.expense.id.toString()));
-                      }
+                      bool shouldDelete = await showDeleteConfirmationDialog(context);
+                      if (!shouldDelete) return;
+
+                      // ✅ Show loading dialog
+                      showLoadingDialog(context, message: 'Deleting...');
+                      context.read<ExpenseBloc>().add(
+                          DeleteExpense(id: widget.expense.id.toString()));
                     },
                     icon: const Icon(
                       HugeIcons.strokeRoundedDeleteThrow,
@@ -130,6 +156,30 @@ class _ExpenseCardState extends State<ExpenseCard> {
             )
           ],
         ));
+  }
+  void showLoadingDialog(BuildContext context, {String message = 'Loading...'}) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16.0),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(width: 20),
+                Text(message),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
 

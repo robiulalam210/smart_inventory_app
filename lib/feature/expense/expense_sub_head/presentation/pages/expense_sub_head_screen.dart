@@ -167,7 +167,7 @@ class _ExpenseHeadScreenState extends State<ExpenseSubHeadScreen> {
                               return Dialog(
                                 child: SizedBox(
                                   width: AppSizes.width(context) * 0.50,
-                                  child: ExpenseSubHeadCreate(),
+                                  child: ExpenseSubCreateScreen(),
                                 ),
                               );
                             },
