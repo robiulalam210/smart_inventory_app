@@ -7,16 +7,23 @@ final class PurchaseInitial extends PurchaseState {}
 
 
 final class PurchaseListLoading extends PurchaseState {}
-
 final class PurchaseListSuccess extends PurchaseState {
-  String selectedState = "";
-
   final List<PurchaseModel> list;
-
+  final int count;
+  final int totalPages;
+  final int currentPage;
+  final int pageSize;
+  final int from;
+  final int to;
 
   PurchaseListSuccess({
     required this.list,
-
+    required this.count,
+    required this.totalPages,
+    required this.currentPage,
+    required this.pageSize,
+    required this.from,
+    required this.to,
   });
 }
 

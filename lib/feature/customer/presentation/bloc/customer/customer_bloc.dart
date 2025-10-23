@@ -53,7 +53,54 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
     on<UpdateSwitchCustomer>(_onUpdateSwitchCustomerList);
     on<DeleteCustomer >(_onDeleteCustomer);
   }
-
+  //
+  // Future<void> _onFetchCustomerList(
+  //     FetchCustomerList event,
+  //     Emitter<CustomerState> emit,
+  //     ) async {
+  //   emit(CustomerListLoading());
+  //
+  //   try {
+  //     final res = await getResponse(url: AppUrls.customer, context: event.context);
+  //
+  //     ApiResponse response = appParseJson(
+  //       res,
+  //           (data) => List<CustomerModel>.from(
+  //         data.map((x) => CustomerModel.fromJson(x)),
+  //       ),
+  //     );
+  //
+  //     // Check if API response is successful
+  //     if (response.success == true) {
+  //       final List<CustomerModel> customerList = response.data ?? [];
+  //
+  //       if (customerList.isEmpty) {
+  //         emit(CustomerSuccess(list: []));
+  //         return;
+  //       }
+  //
+  //       // Filter customers
+  //       final filteredCustomers = await _filterCustomers(
+  //         customerList,
+  //         event.filterText,
+  //         event.status,
+  //       );
+  //       list=filteredCustomers;
+  //
+  //       emit(CustomerSuccess(list: filteredCustomers));
+  //     } else {
+  //       emit(CustomerListFailed(
+  //         title: "Error",
+  //         content: response.message ?? "Unknown Error",
+  //       ));
+  //     }
+  //   } catch (error) {
+  //     emit(CustomerListFailed(
+  //       title: "Error",
+  //       content: error.toString(),
+  //     ));
+  //   }
+  // }
   Future<void> _onFetchCustomerList(
       FetchCustomerList event,
       Emitter<CustomerState> emit,
@@ -61,76 +108,95 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
     emit(CustomerListLoading());
 
     try {
-      final res = await getResponse(url: AppUrls.customer, context: event.context);
+      // Build query parameters with pagination and filters
+      Map<String, dynamic> queryParams = {
+        'page': event.pageNumber.toString(),
+        'page_size': event.pageSize.toString(),
+      };
 
-      ApiResponse response = appParseJson(
-        res,
-            (data) => List<CustomerModel>.from(
-          data.map((x) => CustomerModel.fromJson(x)),
-        ),
+      // Add filters if provided
+      if (event.filterText.isNotEmpty) {
+        queryParams['search'] = event.filterText;
+      }
+      if (event.status.isNotEmpty) {
+        queryParams['status'] = event.status;
+      }
+      if (event.dropdownFilter.isNotEmpty) {
+        // Parse existing dropdown filter and merge with new params
+        final existingParams = Uri.parse(event.dropdownFilter).queryParameters;
+        queryParams.addAll(existingParams);
+      }
+
+      // Build the complete URL with query parameters
+      Uri uri = Uri.parse(AppUrls.customer).replace(
+        queryParameters: queryParams,
       );
 
-      // Check if API response is successful
-      if (response.success == true) {
-        final List<CustomerModel> customerList = response.data ?? [];
+      final res = await getResponse(
+        url: uri.toString(),
+        context: event.context,
+      );
 
-        if (customerList.isEmpty) {
-          emit(CustomerSuccess(list: []));
-          return;
-        }
+      // Parse the response
+      ApiResponse<Map<String, dynamic>> response = appParseJson<Map<String, dynamic>>(
+        res,
+            (data) => data,
+      );
 
-        // Filter customers
-        final filteredCustomers = await _filterCustomers(
-          customerList,
-          event.filterText,
-          event.status,
-        );
-        list=filteredCustomers;
+      final data = response.data;
 
-        emit(CustomerSuccess(list: filteredCustomers));
-      } else {
-        emit(CustomerListFailed(
-          title: "Error",
-          content: response.message ?? "Unknown Error",
+      if (data == null) {
+        emit(CustomerSuccess(
+          list: [],
+          count: 0,
+          totalPages: 0,
+          currentPage: 1,
+          pageSize: event.pageSize,
+          from: 0,
+          to: 0,
         ));
+        return;
       }
+
+      // Extract pagination info from response
+      final pagination = data['pagination'] ?? data;
+      final results = data['results'] ?? data['data'] ?? data;
+
+      // Parse the customer list
+      List<CustomerModel> customerList = [];
+      if (results is List) {
+        customerList = List<CustomerModel>.from(
+          results.map((x) => CustomerModel.fromJson(x)),
+        );
+      }
+
+      // Calculate pagination values
+      int count = pagination['count'] ?? pagination['total'] ?? customerList.length;
+      int totalPages = pagination['total_pages'] ?? pagination['last_page'] ??
+          ((count / event.pageSize).ceil());
+      int currentPage = pagination['current_page'] ?? pagination['page'] ?? event.pageNumber;
+      int pageSize = pagination['page_size'] ?? pagination['per_page'] ?? event.pageSize;
+      int from = ((currentPage - 1) * pageSize) + 1;
+      int to = from + customerList.length - 1;
+
+      // Update the list in bloc if needed
+      // list = customerList; // Remove this if it causes issues
+
+      emit(CustomerSuccess(
+        list: customerList,
+        count: count,
+        totalPages: totalPages,
+        currentPage: currentPage,
+        pageSize: pageSize,
+        from: from,
+        to: to,
+      ));
     } catch (error) {
       emit(CustomerListFailed(
         title: "Error",
         content: error.toString(),
       ));
     }
-  }
-
-  Future<List<CustomerModel>> _filterCustomers(
-      List<CustomerModel> customers,
-      String filterText,
-      String accountType,
-      ) async {
-    // Optional artificial delay
-    await Future.delayed(const Duration(milliseconds: 100));
-
-    // Apply filters
-    final filteredCustomers = customers.where((customer) {
-      final name = customer.name?.toLowerCase() ?? '';
-      final phone = customer.phone?.toLowerCase() ?? '';
-
-      final matchesText = filterText.isEmpty ||
-          name.contains(filterText.toLowerCase()) ||
-          phone.contains(filterText.toLowerCase());
-
-
-      return matchesText;
-    }).toList();
-
-    // Sort by clientNo safely (avoid null crash)
-    filteredCustomers.sort((a, b) {
-      final aNo = int.tryParse(a.name?.toString() ?? '0') ?? 0;
-      final bNo = int.tryParse(b.name?.toString() ?? '0') ?? 0;
-      return aNo.compareTo(bNo);
-    });
-
-    return filteredCustomers;
   }
 
 

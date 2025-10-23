@@ -1,8 +1,7 @@
-
+// Update your ApiResponse class to handle the new structure
 class ApiResponse<T> {
   bool? success;
   int? total;
-
   String? title;
   String? message;
   T? data;
@@ -11,7 +10,7 @@ class ApiResponse<T> {
 
   factory ApiResponse.fromJson(Map<String, dynamic> json, Function fromJsonT) {
     return ApiResponse(
-      success: json['status'] ?? false, // 👈 fix: map 'status' to 'success'
+      success: json['status'] ?? false,
       total: json['total'],
       title: json['title'],
       message: json['message'],

@@ -7,16 +7,22 @@ final class AccountInitial extends AccountState {}
 final class AccountListLoading extends AccountState {}
 
 final class AccountListSuccess extends AccountState {
-  String selectedState = "";
-
   final List<AccountModel> list;
+  final int count;
   final int totalPages;
   final int currentPage;
+  final int pageSize;
+  final int from;
+  final int to;
 
   AccountListSuccess({
     required this.list,
+    required this.count,
     required this.totalPages,
     required this.currentPage,
+    required this.pageSize,
+    required this.from,
+    required this.to,
   });
 }
 

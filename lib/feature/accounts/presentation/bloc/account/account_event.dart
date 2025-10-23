@@ -4,26 +4,23 @@ sealed class AccountEvent {}
 
 
 
-
-class FetchAccountList extends AccountEvent{
+class FetchAccountList extends AccountEvent {
   BuildContext context;
-
   final String filterText;
   final String filterApiURL;
   final String accountType;
   final int pageNumber;
+  final int pageSize; // Add pageSize
 
   FetchAccountList(
-
-      this.context,
-      {this.filterText = ''
-    ,
-    this.accountType='',
-    this.filterApiURL='',
-    this.pageNumber = 0});
-
+      this.context, {
+        this.filterText = '',
+        this.accountType = '',
+        this.filterApiURL = '',
+        this.pageNumber = 1, // Change from 0 to 1
+        this.pageSize = 10, // Add default page size
+      });
 }
-
 
 
 class AddAccount extends AccountEvent {

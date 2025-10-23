@@ -13,13 +13,22 @@ final class MoneyReceiptInitial extends MoneyReceiptState {}
 final class MoneyReceiptListLoading extends MoneyReceiptState {}
 
 final class MoneyReceiptListSuccess extends MoneyReceiptState {
-  String selectedState = "";
   final List<MoneyreceiptModel> list;
-
+  final int count;
+  final int totalPages;
+  final int currentPage;
+  final int pageSize;
+  final int from;
+  final int to;
 
   MoneyReceiptListSuccess({
     required this.list,
-
+    required this.count,
+    required this.totalPages,
+    required this.currentPage,
+    required this.pageSize,
+    required this.from,
+    required this.to,
   });
 }
 

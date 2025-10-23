@@ -1,10 +1,13 @@
 import '../../../../core/configs/configs.dart';
 import '../../../../core/shared/widgets/sideMenu/sidebar.dart';
 import '../../../../core/widgets/app_alert_dialog.dart';
+import '../../../../core/widgets/app_dropdown.dart';
 import '../../../../core/widgets/app_loader.dart';
 import '../../../../core/widgets/coustom_search_text_field.dart';
 import '../../../../core/widgets/custom_filter_ui.dart';
 import '../../../products/product/presentation/bloc/products/products_bloc.dart';
+import '../../../products/product/presentation/widget/pagination.dart';
+import '../../data/model/account_model.dart';
 import '../bloc/account/account_bloc.dart';
 import '../widget/widget.dart';
 
@@ -16,17 +19,21 @@ class AccountScreen extends StatefulWidget {
 }
 
 class _AccountScreenState extends State<AccountScreen> {
+  TextEditingController filterTextController = TextEditingController();
+  ValueNotifier<String?> selectedAccountTypeNotifier = ValueNotifier(null);
+
   @override
   void initState() {
     super.initState();
-
+    filterTextController.clear();
     _fetchApi();
   }
 
   void _fetchApi({
     String filterText = '',
     String accountType = '',
-    int pageNumber = 0,
+    int pageNumber = 1,
+    int pageSize = 10,
   }) {
     context.read<AccountBloc>().add(
       FetchAccountList(
@@ -34,7 +41,17 @@ class _AccountScreenState extends State<AccountScreen> {
         filterText: filterText,
         accountType: accountType,
         pageNumber: pageNumber,
+        pageSize: pageSize,
       ),
+    );
+  }
+
+  void _fetchAccountList({int pageNumber = 1, int pageSize = 10}) {
+    _fetchApi(
+      pageNumber: pageNumber,
+      pageSize: pageSize,
+      filterText: filterTextController.text,
+      accountType: selectedAccountTypeNotifier.value?.toString() ?? '',
     );
   }
 
@@ -78,180 +95,262 @@ class _AccountScreenState extends State<AccountScreen> {
       md: 12,
       lg: 10,
       xl: 10,
-      child: Container(
-        padding: AppTextStyle.getResponsivePaddingBody(context),
-        child: BlocListener<AccountBloc, AccountState>(
-          listener: (context, state) {
-            if (state is AccountAddLoading) {
-              appLoader(context, "Creating warehouse, please wait...");
-            } else if (state is AccountAddSuccess) {
-              Navigator.pop(context); // Close loader dialog
-              Navigator.pop(context); // Close loader dialog
-              _fetchApi(); // Reload warehouse list
-            } else if (state is AccountAddFailed) {
-              Navigator.pop(context); // Close loader dialog
-              Navigator.pop(context); // Close loader dialog
-              _fetchApi();
-              appAlertDialog(
-                context,
-                state.content,
-                title: state.title,
-                actions: [
-                  TextButton(
-                    onPressed: () => AppRoutes.pop(context),
-                    child: const Text("Dismiss"),
-                  ),
-                ],
-              );
-            }
-          },
-          child: Column(
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: CustomSearchTextFormField(
-                      controller: context
-                          .read<ProductsBloc>()
-                          .filterTextController,
-                      onClear: () {
-                        _fetchApi();
-                        context
-                            .read<ProductsBloc>()
-                            .filterTextController
-                            .clear();
-                      },
-                      onChanged: (value) {
-                        _fetchApi(filterText: value);
-                      },
-                      hintText:
-                          "Search Name", // Pass dynamic hintText if needed
+      child: RefreshIndicator(
+        color: AppColors.primaryColor,
+        onRefresh: () async {
+          _fetchApi();
+        },
+        child: Container(
+          padding: AppTextStyle.getResponsivePaddingBody(context),
+          child: BlocListener<AccountBloc, AccountState>(
+            listener: (context, state) {
+              if (state is AccountAddLoading) {
+                appLoader(context, "Creating account, please wait...");
+              } else if (state is AccountAddSuccess) {
+                Navigator.pop(context);
+                _fetchApi();
+              } else if (state is AccountAddFailed) {
+                Navigator.pop(context);
+                _fetchApi();
+                appAlertDialog(
+                  context,
+                  state.content,
+                  title: state.title,
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text("Dismiss"),
                     ),
-                  ),
-                  CustomFilterBox(
-                    onTapDown: (TapDownDetails details) {
-                      _showFilterMenu(context, details.globalPosition);
+                  ],
+                );
+              }
+            },
+            child: Column(
+              children: [
+                _buildFilterRow(),
+                const SizedBox(height: 16),
+                SizedBox(
+                  child: BlocBuilder<AccountBloc, AccountState>(
+                    builder: (context, state) {
+                      if (state is AccountListLoading) {
+                        return const Center(child: CircularProgressIndicator());
+                      } else if (state is AccountListSuccess) {
+                        if (state.list.isEmpty) {
+                          return Center(child: Lottie.asset(AppImages.noData));
+                        } else {
+                          return Column(
+                            children: [
+                              SizedBox(
+                                child: _buildAccountTable(state.list),
+                              ),
+                              PaginationBar(
+                                count: state.count,
+                                totalPages: state.totalPages,
+                                currentPage: state.currentPage,
+                                pageSize: state.pageSize,
+                                from: state.from,
+                                to: state.to,
+                                onPageChanged: (page) =>
+                                    _fetchAccountList(pageNumber: page, pageSize: state.pageSize),
+                                onPageSizeChanged: (newSize) =>
+                                    _fetchAccountList(pageNumber: 1, pageSize: newSize),
+                              ),
+                            ],
+                          );
+                        }
+                      } else if (state is AccountListFailed) {
+                        return Center(
+                          child: Text(
+                            'Failed to load account: ${state.content}',
+                          ),
+                        );
+                      } else {
+                        return Center(child: Lottie.asset(AppImages.noData));
+                      }
                     },
                   ),
-                ],
-              ),
-              SizedBox(
-                height: 500,
-                child: BlocBuilder<AccountBloc, AccountState>(
-                  builder: (context, state) {
-                    print(state);
-                    if (state is AccountListLoading) {
-                      return const Center(child: CircularProgressIndicator());
-                    } else if (state is AccountListSuccess) {
-                      if (state.list.isEmpty) {
-                        return Center(child: Lottie.asset(AppImages.noData));
-                      } else {
-                        return ListView.builder(
-                          shrinkWrap: true,
-                          itemCount: state.list.length,
-                          itemBuilder: (_, index) {
-                            final account = state.list[index];
-
-                            return InkWell(
-                              onTap: () {},
-                              child: AccountCard(
-                                account: account,
-                                index: index + 1,
-                              ),
-                            );
-                          },
-                        );
-                      }
-                    } else if (state is AccountListFailed) {
-                      return Center(
-                        child: Text(
-                          'Failed to load account: ${state.content}',
-                        ),
-                      );
-                    } else {
-                      return Center(child: Lottie.asset(AppImages.noData));
-                    }
-                  },
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  void _showFilterMenu(BuildContext context, Offset offset) async {
-    final screenSize = MediaQuery.of(context).size;
-    final left = offset.dx;
-    final top = offset.dy;
-    final right = screenSize.width - left;
-    final bottom = screenSize.height - top;
+  Widget _buildFilterRow() {
+    return Row(
+      children: [
+        // 🔍 Search Field
+        Expanded(
+          child: CustomSearchTextFormField(
+            controller: filterTextController,
+            onChanged: (value) => _fetchApi(filterText: value),
+            onClear: () {
+              filterTextController.clear();
+              _fetchApi();
+            },
+            hintText: "Search Account Name or Number",
+          ),
+        ),
+        const SizedBox(width: 10),
 
-    await showMenu(
-      color: const Color.fromARGB(255, 248, 248, 248),
-      context: context,
-      position: RelativeRect.fromLTRB(left, top, right, bottom),
-      items: [
-        PopupMenuItem(
-          padding: const EdgeInsets.all(0),
-          enabled: false,
-          child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-              return Column(
-                children: [
-                  Container(
-                    width: double.maxFinite,
-                    padding: const EdgeInsets.only(
-                      top: 5,
-                      bottom: 10,
-                      left: 10,
-                      right: 10,
-                    ),
-                    decoration: const BoxDecoration(
-                      // borderRadius: BorderRadius.all(Radius.circular(10)),
-                      color: Color.fromARGB(255, 248, 248, 248),
-                    ),
-                    child: Text(
-                      'Filter',
-                      style: AppTextStyle.cardLevelText(context),
-                    ),
-                  ),
-
-                  const SizedBox(height: 10),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 5.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        GestureDetector(
-                          onTap: () {
-                            setState(() {});
-                            Navigator.of(context).pop();
-                          },
-                          child: Text(
-                            'Clear',
-                            style: AppTextStyle.errorTextStyle(context),
-                          ),
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.of(context).pop();
-                          },
-                          child: Text(
-                            'Close',
-                            style: AppTextStyle.cardLevelText(context),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+        // 🏦 Account Type Dropdown
+        Expanded(
+          child: AppDropdown<String>(
+            label: "Account Type",
+            context: context,
+            hint: "Select Account Type",
+            isNeedAll: true,
+            isRequired: false,
+            value: selectedAccountTypeNotifier.value,
+            itemList: ['Cash', 'Bank', 'Credit Card', 'Loan', 'Investment', 'Other'],
+            onChanged: (newVal) {
+              selectedAccountTypeNotifier.value = newVal;
+              _fetchApi(
+                accountType: newVal?.toLowerCase() ?? '',
               );
             },
+            validator: (value) => null,
+            itemBuilder: (item) => DropdownMenuItem<String>(
+              value: item,
+              child: Text(
+                item,
+                style: const TextStyle(
+                  color: AppColors.blackColor,
+                  fontFamily: 'Quicksand',
+                  fontWeight: FontWeight.w300,
+                ),
+              ),
+            ),
           ),
+        ),
+        const SizedBox(width: 10),
+
+        // 🔄 Refresh Button
+        IconButton(
+          onPressed: () => _fetchApi(),
+          icon: const Icon(Icons.refresh),
+          tooltip: "Refresh",
         ),
       ],
     );
+  }
+
+  Widget _buildAccountTable(List<AccountModel> accounts) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: DataTable(
+          columnSpacing: 20,
+          horizontalMargin: 16,
+          headingRowColor: MaterialStateProperty.resolveWith<Color?>(
+                (Set<MaterialState> states) => AppColors.primaryColor.withOpacity(0.1),
+          ),
+          columns: const [
+            DataColumn(label: Text('#', style: TextStyle(fontWeight: FontWeight.bold))),
+            DataColumn(label: Text('Account Name', style: TextStyle(fontWeight: FontWeight.bold))),
+            DataColumn(label: Text('Account Number', style: TextStyle(fontWeight: FontWeight.bold))),
+            DataColumn(label: Text('Type', style: TextStyle(fontWeight: FontWeight.bold))),
+            DataColumn(label: Text('Balance', style: TextStyle(fontWeight: FontWeight.bold))),
+            DataColumn(label: Text('Status', style: TextStyle(fontWeight: FontWeight.bold))),
+            DataColumn(label: Text('Actions', style: TextStyle(fontWeight: FontWeight.bold))),
+          ],
+          rows: accounts.asMap().entries.map((entry) {
+            final account = entry.value;
+            final index = entry.key + 1;
+
+            return DataRow(
+              cells: [
+                DataCell(Text(index.toString())),
+                DataCell(Text(account.acName ?? 'N/A')),
+                DataCell(Text(account.acNumber ?? 'N/A')),
+                DataCell(
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: _getAccountTypeColor(account.acType),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      account.acType ?? 'N/A',
+                      style: const TextStyle(color: Colors.white, fontSize: 12),
+                    ),
+                  ),
+                ),
+                DataCell(
+                  Text(
+                    '\$${account.balance?.toString() ?? '0.00'}',
+                    style: TextStyle(
+                      color: (double.tryParse(account.balance.toString()) ?? 0) >= 0 ? Colors.green : Colors.red,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                DataCell(
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: (account.bankName == 'active') ? Colors.green : Colors.grey,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      account.bankName ?? 'inactive',
+                      style: const TextStyle(color: Colors.white, fontSize: 12),
+                    ),
+                  ),
+                ),
+                DataCell(
+                  Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.edit, size: 18),
+                        onPressed: () {
+                          // Edit account action
+                        },
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.delete, size: 18, color: Colors.red),
+                        onPressed: () {
+                          // Delete account action
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            );
+          }).toList(),
+        ),
+      ),
+    );
+  }
+
+  Color _getAccountTypeColor(String? type) {
+    switch (type?.toLowerCase()) {
+      case 'cash':
+        return Colors.green;
+      case 'bank':
+        return Colors.blue;
+      case 'credit card':
+        return Colors.orange;
+      case 'loan':
+        return Colors.red;
+      case 'investment':
+        return Colors.purple;
+      default:
+        return Colors.grey;
+    }
   }
 }

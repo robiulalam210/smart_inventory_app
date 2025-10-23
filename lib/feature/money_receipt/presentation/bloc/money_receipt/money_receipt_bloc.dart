@@ -28,11 +28,7 @@ class MoneyReceiptBloc extends Bloc<MoneyReceiptEvent, MoneyReceiptState> {
   TextEditingController amountController = TextEditingController();
   TextEditingController remarkController = TextEditingController();
 
-  // ValueNotifier<String> selectedPaymentToState = ValueNotifier<String>('Over All');
-  // ValueNotifier<PosSaleModel?> selectPosSaleModel = ValueNotifier<PosSaleModel?>(null);
-  // ValueNotifier<String?> selectedPaymentToNotifier = ValueNotifier(null);
-  // ValueNotifier<String?> selectedPaymentMethodNotifier = ValueNotifier(null);
-  // ValueNotifier<String?> selectedAccountNotifier = ValueNotifier(null);
+
   TextEditingController bankNameController = TextEditingController();
   TextEditingController chequeNumberController = TextEditingController();
   TextEditingController withdrawDateController = TextEditingController();
@@ -97,47 +93,93 @@ class MoneyReceiptBloc extends Bloc<MoneyReceiptEvent, MoneyReceiptState> {
       emit(MoneyReceiptDeleteFailed(title: "Error", content: error.toString()));
     }
   }
-
   Future<void> _onFetchMoneyReceiptList(
       FetchMoneyReceiptList event, Emitter<MoneyReceiptState> emit) async {
     emit(MoneyReceiptListLoading());
 
     try {
+      // Build query parameters with pagination
+      Map<String, dynamic> queryParams = {
+        'page': event.pageNumber.toString(),
+        'page_size': event.pageSize.toString(),
+      };
+
+      // Add filters if provided
+      if (event.filterText.isNotEmpty) {
+        queryParams['search'] = event.filterText;
+      }
+      if (event.customer.isNotEmpty) {
+        queryParams['customer'] = event.customer;
+      }
+      if (event.seller.isNotEmpty) {
+        queryParams['seller'] = event.seller;
+      }
+      if (event.paymentMethod.isNotEmpty) {
+        queryParams['payment_method'] = event.paymentMethod;
+      }
+      if (event.startDate != null && event.endDate != null) {
+        queryParams['start_date'] = event.startDate!.toIso8601String();
+        queryParams['end_date'] = event.endDate!.toIso8601String();
+      }
+
       final res = await getResponse(
-          url: AppUrls.moneyReceipt,
-
-          context: event.context); // Use the correct API URL
-
-      // final response=warehouseBranchModelFromJson(res);
-
-      ApiResponse<List<MoneyreceiptModel>> response =
-          appParseJson<List<MoneyreceiptModel>>(
-        res,
-        (data) => List<MoneyreceiptModel>.from(
-            data.map((x) => MoneyreceiptModel.fromJson(x))),
+        url: AppUrls.moneyReceipt,
+        queryParams: queryParams, // Pass query parameters
+        context: event.context,
       );
+
+      // Parse the response
+      ApiResponse<Map<String, dynamic>> response = appParseJson<Map<String, dynamic>>(
+        res,
+            (data) => data,
+      );
+
       final data = response.data;
 
-      if (data == null || data.isEmpty) {
+      if (data == null) {
         emit(MoneyReceiptListSuccess(
           list: [],
-
+          count: 0,
+          totalPages: 0,
+          currentPage: 1,
+          pageSize: event.pageSize,
+          from: 0,
+          to: 0,
         ));
-
         return;
       }
-      // Store all warehouses for filtering and pagination
-      moneyReceiptModel = data;
 
-      // Apply filtering and pagination
-      // final filteredWarehouses = _filterData(
-      //     moneyReceiptModel, event.filterText,event.customer,event.seller,event.paymentMethod, event.startDate, event.endDate);
+      // Extract pagination info from response
+      final pagination = data['pagination'] ?? {};
+      final results = data['results'] ?? [];
 
+      // Parse the money receipt list
+      List<MoneyreceiptModel> moneyReceiptList = [];
+      if (results is List) {
+        moneyReceiptList = List<MoneyreceiptModel>.from(
+          results.map((x) => MoneyreceiptModel.fromJson(x)),
+        );
+      }
 
+      // Calculate pagination values
+      int count = pagination['count'] ?? moneyReceiptList.length;
+      int totalPages = pagination['total_pages'] ?? 1;
+      int currentPage = pagination['current_page'] ?? event.pageNumber;
+      int pageSize = pagination['page_size'] ?? event.pageSize;
+      int from = ((currentPage - 1) * pageSize) + 1;
+      int to = from + moneyReceiptList.length - 1;
+
+      // Store all money receipts for filtering and pagination
+      moneyReceiptModel = moneyReceiptList;
 
       emit(MoneyReceiptListSuccess(
-        list: moneyReceiptModel,
-
+        list: moneyReceiptList,
+        count: count,
+        totalPages: totalPages,
+        currentPage: currentPage,
+        pageSize: pageSize,
+        from: from,
+        to: to,
       ));
     } catch (error) {
       emit(MoneyReceiptListFailed(title: "Error", content: error.toString()));

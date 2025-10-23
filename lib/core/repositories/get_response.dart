@@ -8,7 +8,7 @@ import '../configs/configs.dart';
 Future<String> getResponse({
   required BuildContext context,
   required String url,
-  Map<String, String>? queryParams, // Add this parameter
+  Map<String, dynamic>? queryParams, // Add this parameter
 }) async {
   // Build URI with query parameters
   Uri uriUrl;

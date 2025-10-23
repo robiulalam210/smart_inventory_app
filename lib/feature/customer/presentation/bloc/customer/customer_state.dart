@@ -8,12 +8,22 @@ final class CustomerInitial extends CustomerState {}
 final class CustomerListLoading extends CustomerState {}
 
 final class CustomerSuccess extends CustomerState {
-  String selectedState = "";
-
   final List<CustomerModel> list;
+  final int count;
+  final int totalPages;
+  final int currentPage;
+  final int pageSize;
+  final int from;
+  final int to;
 
   CustomerSuccess({
     required this.list,
+    required this.count,
+    required this.totalPages,
+    required this.currentPage,
+    required this.pageSize,
+    required this.from,
+    required this.to,
   });
 }
 

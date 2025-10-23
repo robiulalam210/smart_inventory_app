@@ -1,20 +1,24 @@
 import 'dart:async';
 
+import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:smart_inventory/feature/purchase/presentation/bloc/create_purchase/create_purchase_bloc.dart';
 import 'package:smart_inventory/feature/purchase/presentation/bloc/purchase_bloc.dart';
+import 'package:smart_inventory/feature/supplier/data/model/supplier_list_model.dart';
 import 'package:smart_inventory/feature/supplier/presentation/bloc/supplier/supplier_list_bloc.dart';
 
 import '../../../../core/configs/configs.dart';
 import '../../../../core/shared/widgets/sideMenu/sidebar.dart';
 import '../../../../core/widgets/app_alert_dialog.dart';
+import '../../../../core/widgets/app_dropdown.dart';
 import '../../../../core/widgets/app_loader.dart';
 import '../../../../core/widgets/coustom_search_text_field.dart';
 import '../../../../core/widgets/custom_filter_ui.dart';
+import '../../../../core/widgets/date_range.dart';
 import '../../../customer/presentation/bloc/customer/customer_bloc.dart';
+import '../../../products/product/presentation/widget/pagination.dart';
 import '../../../users_list/presentation/bloc/users/user_bloc.dart';
 import '../widget.dart';
-
 
 class PurchaseScreen extends StatefulWidget {
   const PurchaseScreen({super.key, this.posSale});
@@ -26,63 +30,69 @@ class PurchaseScreen extends StatefulWidget {
 }
 
 class _PurchaseScreenState extends State<PurchaseScreen> {
-  DateTime? startDate;
-  DateTime? endDate;
 
   DateTime now = DateTime.now();
+  DateRange? selectedDateRange;
+
+  TextEditingController filterTextController = TextEditingController();
+  String selectedQuickOption = "";
+  ValueNotifier<String?> selectedPaymentMethodNotifier = ValueNotifier(null);
+  ValueNotifier<String?> selectedSupplierNotifier = ValueNotifier(null);
 
   @override
   void initState() {
     super.initState();
     filterTextController.clear();
-    // Optionally listen for drawer state changes
 
-    filterTextController.clear();
-    startDate = DateTime(now.year, now.month - 1, now.day);
-    endDate = DateTime(now.year, now.month, now.day);
     context.read<UserBloc>().add(
       FetchUserList(context, dropdownFilter: "?status=1"),
     );
     context.read<SupplierListBloc>().add(
-      FetchSupplierList(context, ),
+      FetchSupplierList(context),
     );
-    _fetchApi(from: startDate, to: endDate);
+    _fetchApi( from: selectedDateRange?.start,
+      to: selectedDateRange?.end,);
   }
 
   void _fetchApi({
     String filterText = '',
-    String customer = '',
-    String seller = '',
-
+    String supplier = '',
+    String paymentStatus = '',
     DateTime? from,
     DateTime? to,
-    int pageNumber = 0,
+    int pageNumber = 1,
+    int pageSize = 10,
   }) {
     context.read<PurchaseBloc>().add(
       FetchPurchaseList(
         context,
         filterText: filterText,
-
-        startDate: startDate,
-        endDate: endDate,
+        supplier: supplier,
+        paymentStatus: paymentStatus,
+        startDate: from,
+        endDate: to,
         pageNumber: pageNumber,
+        pageSize: pageSize,
       ),
     );
   }
 
-  TextEditingController filterTextController = TextEditingController();
+  void _fetchPurchaseList({int pageNumber = 1, int pageSize = 10}) {
+    _fetchApi(
+      pageNumber: pageNumber,
+      pageSize: pageSize,
+      from: selectedDateRange?.start,
+      to: selectedDateRange?.end,
+      supplier: selectedSupplierNotifier.value?.toString() ?? '',
+      paymentStatus: selectedPaymentMethodNotifier.value?.toString() ?? '',
+    );
+  }
 
   @override
   void dispose() {
     filterTextController.dispose();
-    // TODO: implement dispose
     super.dispose();
   }
-
-  var purchaseList = "";
-
-  String selectedQuickOption = "";
-  ValueNotifier<String?> selectedPaymentMethodNotifier = ValueNotifier(null);
 
   @override
   Widget build(BuildContext context) {
@@ -136,12 +146,12 @@ class _PurchaseScreenState extends State<PurchaseScreen> {
               BlocListener<CreatePurchaseBloc, CreatePurchaseState>(
                 listener: (context, state) {
                   if (state is CreatePurchaseLoading) {
-                    appLoader(context, "Creating PosSale, please wait...");
+                    appLoader(context, "Creating Purchase, please wait...");
                   } else if (state is CreatePurchaseSuccess) {
-                    Navigator.pop(context); // Close loader dialog
-                    _fetchApi(); // Reload warehouse list
+                    Navigator.pop(context);
+                    _fetchApi();
                   } else if (state is CreatePurchaseFailed) {
-                    Navigator.pop(context); // Close loader dialog
+                    Navigator.pop(context);
                     _fetchApi();
                     appAlertDialog(
                       context,
@@ -149,7 +159,7 @@ class _PurchaseScreenState extends State<PurchaseScreen> {
                       title: state.title,
                       actions: [
                         TextButton(
-                          onPressed: () => AppRoutes.pop(context),
+                          onPressed: () => Navigator.pop(context),
                           child: const Text("Dismiss"),
                         ),
                       ],
@@ -160,26 +170,8 @@ class _PurchaseScreenState extends State<PurchaseScreen> {
             ],
             child: Column(
               children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: CustomSearchTextFormField(
-                        controller: filterTextController,
-                        onChanged: (value) {
-                          _fetchApi(filterText: filterTextController.text);
-                        },
-                        onClear: () {
-                          _fetchApi();
-
-                          filterTextController.clear();
-                        },
-                        hintText:
-                            "Search InvoiceNo Name & Phone ", // Pass dynamic hintText if needed
-                      ),
-                    ),
-                    CustomFilterBox(onTapDown: (TapDownDetails details) {}),
-                  ],
-                ),
+                _buildFilterRow(),
+                const SizedBox(height: 16),
                 SizedBox(
                   child: BlocBuilder<PurchaseBloc, PurchaseState>(
                     builder: (context, state) {
@@ -189,15 +181,29 @@ class _PurchaseScreenState extends State<PurchaseScreen> {
                         if (state.list.isEmpty) {
                           return Center(child: Lottie.asset(AppImages.noData));
                         } else {
-                          return PurchaseDataTableWidget(
-                            sales: state.list,
+                          return Column(
+                            children: [
+                              SizedBox(
+                                child: PurchaseDataTableWidget(sales: state.list),
+                              ),
+                              PaginationBar(
+                                count: state.count,
+                                totalPages: state.totalPages,
+                                currentPage: state.currentPage,
+                                pageSize: state.pageSize,
+                                from: state.from,
+                                to: state.to,
+                                onPageChanged: (page) =>
+                                    _fetchPurchaseList(pageNumber: page, pageSize: state.pageSize),
+                                onPageSizeChanged: (newSize) =>
+                                    _fetchPurchaseList(pageNumber: 1, pageSize: newSize),
+                              ),
+                            ],
                           );
                         }
                       } else if (state is PurchaseListFailed) {
                         return Center(
-                          child: Text(
-                            state.content,
-                          ),
+                          child: Text(state.content),
                         );
                       } else {
                         return Center(child: Lottie.asset(AppImages.noData));
@@ -210,6 +216,121 @@ class _PurchaseScreenState extends State<PurchaseScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildFilterRow() {
+    return Row(
+      children: [
+        // 🔍 Search Field
+        Expanded(
+          child: CustomSearchTextFormField(
+            controller: filterTextController,
+            onChanged: (value) => _fetchApi(filterText: value),
+            onClear: () {
+              filterTextController.clear();
+              _fetchApi();
+            },
+            hintText: "Search InvoiceNo, Supplier, or Phone",
+          ),
+        ),
+        const SizedBox(width: 10),
+
+        // 👤 Supplier Dropdown
+        Expanded(
+          child: BlocBuilder<SupplierListBloc, SupplierListState>(
+            builder: (context, state) {
+              return AppDropdown<SupplierListModel>(
+                label: "Supplier",
+                context: context,
+                isSearch: true,
+                hint: "Select Supplier",
+                isNeedAll: true,
+                isRequired: false,
+                value: null, // You can add supplier selection to your bloc if needed
+                itemList: context.read<SupplierListBloc>().supplierListModel ?? [],
+                onChanged: (newVal) {
+                  selectedSupplierNotifier.value = newVal?.id.toString();
+                  _fetchApi(
+                    supplier: newVal?.id.toString() ?? '',
+                  );
+                },
+                validator: (value) => null,
+                itemBuilder: (item) => DropdownMenuItem<SupplierListModel>(
+                  value: item,
+                  child: Text(
+                    item.name ?? 'Unknown Supplier',
+                    style: const TextStyle(
+                      color: AppColors.blackColor,
+                      fontFamily: 'Quicksand',
+                      fontWeight: FontWeight.w300,
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+        const SizedBox(width: 10),
+
+        // 💰 Payment Status Dropdown
+        Expanded(
+          child: AppDropdown<String>(
+            label: "Payment Status",
+            context: context,
+            hint: "Select Payment Status",
+            isNeedAll: true,
+            isRequired: false,
+            value: selectedPaymentMethodNotifier.value,
+            itemList: ['Paid', 'Unpaid', 'Partial'],
+            onChanged: (newVal) {
+              selectedPaymentMethodNotifier.value = newVal;
+              _fetchApi(
+                paymentStatus: newVal?.toLowerCase() ?? '',
+              );
+            },
+            validator: (value) => null,
+            itemBuilder: (item) => DropdownMenuItem<String>(
+              value: item,
+              child: Text(
+                item,
+                style: const TextStyle(
+                  color: AppColors.blackColor,
+                  fontFamily: 'Quicksand',
+                  fontWeight: FontWeight.w300,
+                ),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 10),
+
+        // 📅 Date Range Picker
+        SizedBox(
+          width: 280,
+          child: CustomDateRangeField(
+            selectedDateRange:selectedDateRange,
+            onDateRangeSelected: (value) {
+              setState(() {
+                selectedDateRange=value;
+
+              });
+              if (value != null) {
+                _fetchApi(from: value.start, to: value.end);
+              } else {
+                _fetchApi();
+              }
+            },
+          ),
+        ),
+        const SizedBox(width: 10),
+
+        IconButton(
+          onPressed: () => _fetchApi(),
+          icon: const Icon(Icons.refresh),
+          tooltip: "Refresh",
+        ),
+      ],
     );
   }
 }

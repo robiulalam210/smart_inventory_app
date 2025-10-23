@@ -127,12 +127,12 @@ class PosSaleDataTableWidget extends StatelessWidget {
         _buildDataCell(index.toString(), columnWidth),
         _buildDataCell(sale.invoiceNo.toString(), columnWidth),
         _buildDataCell(
-          sale.saleDate.toString().split('T').first,
+          appWidgets.convertDateTimeDDMMMYYYY(sale.saleDate),
           columnWidth,
         ),
         _buildDataCell(sale.customerName.toString(), columnWidth),
-        _buildDataCell(sale.customerName.toString(), columnWidth),
-        _buildDataCell(sale.customerName.toString(), columnWidth),
+        _buildDataCell(sale.saleByName.toString(), columnWidth),
+        _buildDataCell(sale.createdByName.toString(), columnWidth),
 
         _buildDataCell(sale.payableAmount.toString(), columnWidth),
 

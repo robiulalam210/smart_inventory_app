@@ -39,106 +39,94 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
     on<FetchAccountList>(_onFetchAccountList);
     on<AddAccount>(_onCreateAccountList);
   }
-
   Future<void> _onFetchAccountList(
-    FetchAccountList event,
-    Emitter<AccountState> emit,
-  ) async {
+      FetchAccountList event,
+      Emitter<AccountState> emit,
+      ) async {
     emit(AccountListLoading());
 
     try {
+      // Build query parameters with pagination and filters
+      Map<String, dynamic> queryParams = {
+        'page': event.pageNumber.toString(),
+        'page_size': event.pageSize.toString(),
+      };
+
+      // Add filters if provided
+      if (event.filterText.isNotEmpty) {
+        queryParams['search'] = event.filterText;
+      }
+      if (event.accountType.isNotEmpty) {
+        queryParams['account_type'] = event.accountType;
+      }
+
+      // Build the complete URL with query parameters
+      Uri uri = Uri.parse(AppUrls.account).replace(
+        queryParameters: queryParams,
+      );
+
       final res = await getResponse(
-        url: AppUrls.account,
+        url: uri.toString(),
         context: event.context,
       );
 
-      ApiResponse response = appParseJson(
+      // Parse the response
+      ApiResponse<Map<String, dynamic>> response = appParseJson<Map<String, dynamic>>(
         res,
-        (data) =>
-            List<AccountModel>.from(data.map((x) => AccountModel.fromJson(x))),
+            (data) => data,
       );
+
       final data = response.data;
 
-      if (response.success == true) {
-        final data = response.data;
-        if (data == null || data.isEmpty) {
-          emit(
-            AccountListSuccess(
-              list: [],
-              totalPages: 0,
-              currentPage: event.pageNumber,
-            ),
-          );
-          return;
-        }
+      if (data == null) {
+        emit(AccountListSuccess(
+          list: [],
+          count: 0,
+          totalPages: 0,
+          currentPage: 1,
+          pageSize: event.pageSize,
+          from: 0,
+          to: 0,
+        ));
+        return;
+      }
 
-        // Filter and paginate accounts
-        final filteredAccount = _filterData(
-          data,
-          event.filterText,
-          event.accountType,
-        );
+      // Extract pagination info from response
+      final pagination = data['pagination'] ?? data;
+      final results = data['results'] ?? data['data'] ?? data;
 
-        final paginatedAccounts = _paginatePage(
-          filteredAccount,
-          event.pageNumber,
-        );
-
-        final totalPages = (filteredAccount.length / _itemsPerPage)
-            .ceil()
-            .clamp(1, double.infinity)
-            .toInt();
-list=data;
-        emit(
-          AccountListSuccess(
-            list: paginatedAccounts,
-            totalPages: totalPages,
-            currentPage: event.pageNumber,
-          ),
-        );
-      } else {
-        emit(
-          AccountListFailed(
-            title: "Error",
-            content: response.message ?? "Unknown Error",
-          ),
+      // Parse the account list
+      List<AccountModel> accountList = [];
+      if (results is List) {
+        accountList = List<AccountModel>.from(
+          results.map((x) => AccountModel.fromJson(x)),
         );
       }
+
+      // Calculate pagination values
+      int count = pagination['count'] ?? pagination['total'] ?? accountList.length;
+      int totalPages = pagination['total_pages'] ?? pagination['last_page'] ??
+          ((count / event.pageSize).ceil());
+      int currentPage = pagination['current_page'] ?? pagination['page'] ?? event.pageNumber;
+      int pageSize = pagination['page_size'] ?? pagination['per_page'] ?? event.pageSize;
+      int from = ((currentPage - 1) * pageSize) + 1;
+      int to = from + accountList.length - 1;
+
+      emit(AccountListSuccess(
+        list: accountList,
+        count: count,
+        totalPages: totalPages,
+        currentPage: currentPage,
+        pageSize: pageSize,
+        from: from,
+        to: to,
+      ));
     } catch (error) {
       emit(AccountListFailed(title: "Error", content: error.toString()));
     }
   }
 
-  List<AccountModel> _filterData(
-    List<AccountModel> accounts,
-    String filterText,
-    String accountType,
-  ) {
-    return accounts.where((account) {
-      final matchesText =
-          filterText.isEmpty ||
-          (account.acName?.toLowerCase().contains(filterText.toLowerCase()) ??
-              false);
-      final matchesType =
-          accountType.isEmpty ||
-          (account.acType?.toString().toLowerCase() ==
-              accountType.toString().toLowerCase());
-      return matchesText && matchesType;
-    }).toList();
-  }
 
-  List<AccountModel> _paginatePage(
-    List<AccountModel> accounts,
-    int pageNumber,
-  ) {
-    final start = pageNumber * _itemsPerPage;
-    final end = start + _itemsPerPage;
-    if (start >= accounts.length) return [];
-    return accounts.sublist(
-      start,
-      end > accounts.length ? accounts.length : end,
-    );
-  }
 
   Future<void> _onCreateAccountList(
     AddAccount event,

@@ -15,11 +15,15 @@ class PosSaleModel {
   final String? customerName;
   final String? saleType;
   final DateTime? saleDate;
-  final dynamic grossTotal;
-  final dynamic netTotal;
-  final dynamic payableAmount;
-  final dynamic paidAmount;
-  final dynamic dueAmount;
+  final String? saleByName;
+  final String? createdByName;
+  final dynamic? grossTotal;
+  final dynamic? netTotal;
+  final dynamic? grandTotal;
+  final dynamic? payableAmount;
+  final dynamic? paidAmount;
+  final dynamic? dueAmount;
+  final dynamic? changeAmount;
   final String? overallDiscount;
   final String? overallDiscountType;
   final String? overallDeliveryCharge;
@@ -31,6 +35,9 @@ class PosSaleModel {
   final String? paymentMethod;
   final int? accountId;
   final String? accountName;
+  final String? customerType;
+  final String? withMoneyReceipt;
+  final String? remark;
   final List<Item>? items;
 
   PosSaleModel({
@@ -40,11 +47,15 @@ class PosSaleModel {
     this.customerName,
     this.saleType,
     this.saleDate,
+    this.saleByName,
+    this.createdByName,
     this.grossTotal,
     this.netTotal,
+    this.grandTotal,
     this.payableAmount,
     this.paidAmount,
     this.dueAmount,
+    this.changeAmount,
     this.overallDiscount,
     this.overallDiscountType,
     this.overallDeliveryCharge,
@@ -56,12 +67,12 @@ class PosSaleModel {
     this.paymentMethod,
     this.accountId,
     this.accountName,
+    this.customerType,
+    this.withMoneyReceipt,
+    this.remark,
     this.items,
   });
-  @override
-  String toString(){
-    return "$invoiceNo";
-  }
+
   factory PosSaleModel.fromJson(Map<String, dynamic> json) => PosSaleModel(
     id: json["id"],
     invoiceNo: json["invoice_no"],
@@ -69,11 +80,15 @@ class PosSaleModel {
     customerName: json["customer_name"],
     saleType: json["sale_type"],
     saleDate: json["sale_date"] == null ? null : DateTime.parse(json["sale_date"]),
+    saleByName: json["sale_by_name"],
+    createdByName: json["created_by_name"],
     grossTotal: json["gross_total"],
     netTotal: json["net_total"],
+    grandTotal: json["grand_total"],
     payableAmount: json["payable_amount"],
     paidAmount: json["paid_amount"],
     dueAmount: json["due_amount"],
+    changeAmount: json["change_amount"],
     overallDiscount: json["overall_discount"],
     overallDiscountType: json["overall_discount_type"],
     overallDeliveryCharge: json["overall_delivery_charge"],
@@ -85,6 +100,9 @@ class PosSaleModel {
     paymentMethod: json["payment_method"],
     accountId: json["account_id"],
     accountName: json["account_name"],
+    customerType: json["customer_type"],
+    withMoneyReceipt: json["with_money_receipt"],
+    remark: json["remark"],
     items: json["items"] == null ? [] : List<Item>.from(json["items"]!.map((x) => Item.fromJson(x))),
   );
 
@@ -95,11 +113,15 @@ class PosSaleModel {
     "customer_name": customerName,
     "sale_type": saleType,
     "sale_date": saleDate?.toIso8601String(),
+    "sale_by_name": saleByName,
+    "created_by_name": createdByName,
     "gross_total": grossTotal,
     "net_total": netTotal,
+    "grand_total": grandTotal,
     "payable_amount": payableAmount,
     "paid_amount": paidAmount,
     "due_amount": dueAmount,
+    "change_amount": changeAmount,
     "overall_discount": overallDiscount,
     "overall_discount_type": overallDiscountType,
     "overall_delivery_charge": overallDeliveryCharge,
@@ -111,6 +133,9 @@ class PosSaleModel {
     "payment_method": paymentMethod,
     "account_id": accountId,
     "account_name": accountName,
+    "customer_type": customerType,
+    "with_money_receipt": withMoneyReceipt,
+    "remark": remark,
     "items": items == null ? [] : List<dynamic>.from(items!.map((x) => x.toJson())),
   };
 }
@@ -120,10 +145,10 @@ class Item {
   final int? productId;
   final String? productName;
   final int? quantity;
-  final String? unitPrice;
+  final dynamic? unitPrice;
   final String? discount;
   final String? discountType;
-  final dynamic subtotal;
+  final dynamic? subtotal;
 
   Item({
     this.id,

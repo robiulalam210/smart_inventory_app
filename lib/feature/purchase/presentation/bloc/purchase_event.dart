@@ -4,25 +4,26 @@ sealed class PurchaseEvent {}
 
 class FetchPurchaseList extends PurchaseEvent {
   BuildContext context;
-
   final String filterText;
   final String filterApiURL;
   final String supplier;
   final String paymentStatus;
-
   DateTime? startDate;
   DateTime? endDate;
   final int pageNumber;
+  final int pageSize; // Add pageSize
 
   FetchPurchaseList(
-      this.context,
-      {this.filterText = '',
-      this.filterApiURL = '',
-      this.supplier = '',
-      this.paymentStatus = '',
-      this.startDate,
-      this.endDate,
-      this.pageNumber = 0});
+      this.context, {
+        this.filterText = '',
+        this.filterApiURL = '',
+        this.supplier = '',
+        this.paymentStatus = '',
+        this.startDate,
+        this.endDate,
+        this.pageNumber = 1, // Change from 0 to 1
+        this.pageSize = 10, // Add default page size
+      });
 }
 
 class UpdatePurchase extends PurchaseEvent {

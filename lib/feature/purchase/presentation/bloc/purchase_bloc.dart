@@ -27,78 +27,98 @@ class PurchaseBloc extends Bloc<PurchaseEvent, PurchaseState> {
   PurchaseBloc() : super(PurchaseInitial()) {
     on<FetchPurchaseList>(_onFetchPurchaseList);
   }
-
   Future<void> _onFetchPurchaseList(
       FetchPurchaseList event, Emitter<PurchaseState> emit) async {
     emit(PurchaseListLoading());
 
     try {
-      final res = await getResponse(url: AppUrls.purchase, context: event.context);
+      // Build query parameters with pagination and filters
+      Map<String, dynamic> queryParams = {
+        'page': event.pageNumber.toString(),
+        'page_size': event.pageSize.toString(),
+      };
 
-      // Decode JSON response
-      ApiResponse response = appParseJson(
-        res,
-            (data) =>
-        List<PurchaseModel>.from(data.map((x) => PurchaseModel.fromJson(x))),
+      // Add filters if provided
+      if (event.filterText.isNotEmpty) {
+        queryParams['search'] = event.filterText;
+      }
+      if (event.supplier.isNotEmpty) {
+        queryParams['supplier'] = event.supplier;
+      }
+      if (event.paymentStatus.isNotEmpty) {
+        queryParams['payment_status'] = event.paymentStatus;
+      }
+      if (event.startDate != null && event.endDate != null) {
+        queryParams['start_date'] = event.startDate!.toIso8601String().split('T')[0];
+        queryParams['end_date'] = event.endDate!.toIso8601String().split('T')[0];
+      }
+
+      // Build the complete URL with query parameters
+      Uri uri = Uri.parse(AppUrls.purchase).replace(
+        queryParameters: queryParams,
       );
 
-      if (response.success == true) {
-        final data = response.data ?? [];
+      final res = await getResponse(
+        url: uri.toString(),
+        context: event.context,
+      );
 
-        if (data.isEmpty) {
-          emit(PurchaseListSuccess(list: data));
-          return;
-        }
+      // Parse the response
+      ApiResponse<Map<String, dynamic>> response = appParseJson<Map<String, dynamic>>(
+        res,
+            (data) => data,
+      );
 
-        emit(PurchaseListSuccess(list: data));
-      } else {
-        emit(
-          PurchaseListFailed(
-            title: "Error",
-            content: response.message ?? "Unknown error occurred",
-          ),
+      final data = response.data;
+
+      if (data == null) {
+        emit(PurchaseListSuccess(
+          list: [],
+          count: 0,
+          totalPages: 0,
+          currentPage: 1,
+          pageSize: event.pageSize,
+          from: 0,
+          to: 0,
+        ));
+        return;
+      }
+
+      // Extract pagination info from response
+      final pagination = data['pagination'] ?? data;
+      final results = data['results'] ?? data['data'] ?? data;
+
+      // Parse the purchase list
+      List<PurchaseModel> purchaseList = [];
+      if (results is List) {
+        purchaseList = List<PurchaseModel>.from(
+          results.map((x) => PurchaseModel.fromJson(x)),
         );
       }
-      // Check if success is true
 
+      // Calculate pagination values
+      int count = pagination['count'] ?? pagination['total'] ?? purchaseList.length;
+      int totalPages = pagination['total_pages'] ?? pagination['last_page'] ??
+          ((count / event.pageSize).ceil());
+      int currentPage = pagination['current_page'] ?? pagination['page'] ?? event.pageNumber;
+      int pageSize = pagination['page_size'] ?? pagination['per_page'] ?? event.pageSize;
+      int from = ((currentPage - 1) * pageSize) + 1;
+      int to = from + purchaseList.length - 1;
+
+      emit(PurchaseListSuccess(
+        list: purchaseList,
+        count: count,
+        totalPages: totalPages,
+        currentPage: currentPage,
+        pageSize: pageSize,
+        from: from,
+        to: to,
+      ));
     } catch (error) {
       emit(PurchaseListFailed(title: "Error", content: error.toString()));
     }
   }
 
-  List<PurchaseModel> _filterData(
-    List<PurchaseModel> warehouses,
-    DateTime? startDate,
-    DateTime? endDate,
-    String supplierFilter,
-    String paymentStatusFilter,
-  ) {
-    return warehouses.where((purchase) {
-      // Debugging each condition
-      final matchesDate = (startDate == null || endDate == null) ||
-          (purchase.date != null &&
-              ((purchase.date!.isAfter(startDate) &&
-                      purchase.date!.isBefore(endDate)) ||
-                  purchase.date!.isAtSameMomentAs(startDate) ||
-                  purchase.date!.isAtSameMomentAs(endDate)));
-
-
-
-      final matchesSupplier = supplierFilter.isEmpty ||
-          (purchase.supplier != null &&
-              purchase.supplier!.toString().toLowerCase() ==
-                  (supplierFilter.toLowerCase()));
-
-      final matchesPaymentStatus = paymentStatusFilter.isEmpty ||
-          (purchase.paymentStatus != null &&
-              purchase.paymentStatus!.toLowerCase() ==
-                  paymentStatusFilter.toLowerCase());
-
-      return matchesDate &&
-          matchesSupplier &&
-          matchesPaymentStatus;
-    }).toList();
-  }
 
 
 }

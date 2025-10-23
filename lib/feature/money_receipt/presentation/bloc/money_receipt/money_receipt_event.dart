@@ -4,25 +4,26 @@ sealed class MoneyReceiptEvent {}
 
 class FetchMoneyReceiptList extends MoneyReceiptEvent {
   BuildContext context;
-
   final String filterText;
-  final String location;
   final String customer;
   final String seller;
   final String paymentMethod;
   final DateTime? startDate;
   final DateTime? endDate;
   final int pageNumber;
+  final int pageSize; // Add pageSize
 
-  FetchMoneyReceiptList(this.context,
-      {this.filterText = '',
-      this.location = '',
-      this.customer = '',
-      this.seller = '',
-      this.paymentMethod = '',
-      this.startDate,
-      this.endDate,
-      this.pageNumber = 0});
+  FetchMoneyReceiptList(
+      this.context, {
+        this.filterText = '',
+        this.customer = '',
+        this.seller = '',
+        this.paymentMethod = '',
+        this.startDate,
+        this.endDate,
+        this.pageNumber = 1, // Change default to 1
+        this.pageSize = 10, // Add default page size
+      });
 }
 
 class AddMoneyReceipt extends MoneyReceiptEvent {

@@ -7,16 +7,28 @@ final class PosSaleInitial extends PosSaleState {}
 
 final class PosSaleListLoading extends PosSaleState {}
 
-final class PosSaleListSuccess extends PosSaleState {
-  String selectedState = "";
-
+class PosSaleListSuccess extends PosSaleState {
   final List<PosSaleModel> list;
+  final int count;
+  final int totalPages;
+  final int currentPage;
+  final int pageSize;
+  final int from;
+  final int to;
 
-  PosSaleListSuccess({
+   PosSaleListSuccess({
     required this.list,
+    required this.count,
+    required this.totalPages,
+    required this.currentPage,
+    required this.pageSize,
+    required this.from,
+    required this.to,
   });
-}
 
+  @override
+  List<Object> get props => [list, count, totalPages, currentPage, pageSize, from, to];
+}
 class CartUpdateInProgress extends PosSaleState {}
 
 
