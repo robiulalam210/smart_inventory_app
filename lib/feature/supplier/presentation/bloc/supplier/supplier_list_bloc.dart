@@ -53,59 +53,100 @@ class SupplierListBloc extends Bloc<SupplierListEvent, SupplierListState> {
     emit(SupplierListLoading());
 
     try {
-      final res = await getResponse(url: AppUrls.supplierList, context: event.context);
+      // Build query parameters with pagination
+      Map<String, dynamic> queryParams = {
+        'page': event.pageNumber.toString(),
+        'page_size': event.pageSize.toString(),
+      };
 
-      ApiResponse<List<SupplierListModel>> response = appParseJson<List<SupplierListModel>>(
-        res,
-            (data) => List<SupplierListModel>.from(data.map((x) => SupplierListModel.fromJson(x))),
+      // Add search filter if provided
+      if (event.filterText.isNotEmpty) {
+        queryParams['search'] = event.filterText;
+      }
+
+      // Add status filter if provided
+      if (event.state.isNotEmpty) {
+        queryParams['status'] = event.state;
+      }
+
+      final res = await getResponse(
+        url: AppUrls.supplierList,
+        queryParams: queryParams,
+        context: event.context,
       );
+
+      // Parse the response
+      ApiResponse<Map<String, dynamic>> response = appParseJson<Map<String, dynamic>>(
+        res,
+            (data) => data,
+      );
+
       final data = response.data;
 
-      if (data == null || data.isEmpty) {
+      if (data == null) {
         emit(SupplierListSuccess(
           list: [],
+          count: 0,
           totalPages: 0,
           currentPage: event.pageNumber,
+          pageSize: event.pageSize,
+          from: 0,
+          to: 0,
         ));
         return;
       }
 
-      supplierListModel = data;
-      final filteredSuppliers = _filterData(supplierListModel, event.state, event.filterText);
-      final paginatedSuppliers = _paginatePage(filteredSuppliers, event.pageNumber);
-      final totalPages = (filteredSuppliers.length / _itemsPerPage).ceil();
+      // Extract pagination info from response
+      final pagination = data['pagination'] ?? {};
+      final results = data['results'] ?? [];
+
+      // Parse the supplier list
+      List<SupplierListModel> supplierList = [];
+      if (results is List) {
+        supplierList = List<SupplierListModel>.from(
+          results.map((x) => SupplierListModel.fromJson(x)),
+        );
+      }
+
+      // Calculate pagination values with null safety
+      int count = (pagination['count'] as int?) ?? supplierList.length;
+      int totalPages = (pagination['total_pages'] as int?) ?? 1;
+      int currentPage = (pagination['current_page'] as int?) ?? event.pageNumber;
+      int pageSize = (pagination['page_size'] as int?) ?? event.pageSize;
+
+      // Calculate from and to with bounds checking
+      int from = count > 0 ? ((currentPage - 1) * pageSize) + 1 : 0;
+      int to = count > 0 ? from + supplierList.length - 1 : 0;
+
+      // Ensure 'to' doesn't exceed total count
+      if (to > count) {
+        to = count;
+      }
+
+      // Store all suppliers for filtering and pagination
+      supplierListModel = supplierList;
 
       emit(SupplierListSuccess(
-        list: paginatedSuppliers,
+        list: supplierList,
+        count: count,
         totalPages: totalPages,
-        currentPage: event.pageNumber,
+        currentPage: currentPage,
+        pageSize: pageSize,
+        from: from,
+        to: to,
       ));
-    } catch (error) {
-      emit(SupplierListFailed(title: "Error", content: error.toString()));
+
+    } catch (error, stackTrace) {
+      // FIXED: Proper error handling with stack trace
+      debugPrint('Supplier List Error: $error');
+      debugPrint('Stack Trace: $stackTrace');
+
+      emit(SupplierListFailed(
+          title: "Error",
+          content: error.toString()
+      ));
     }
   }
-
-  List<SupplierListModel> _filterData(
-      List<SupplierListModel> suppliers, String state, String filterText) {
-    return suppliers.where((supplier) {
-      final matchesState = state.isEmpty ||
-          supplier.status.toString() == (state == 'Active' ? '1' : '0');
-      final matchesText = filterText.isEmpty ||
-          supplier.name!.toLowerCase().contains(filterText.toLowerCase()) ||
-          (supplier.email?.toLowerCase().contains(filterText.toLowerCase()) ?? false) ||
-          (supplier.phone?.toLowerCase().contains(filterText.toLowerCase()) ?? false);
-      return matchesState && matchesText;
-    }).toList();
-  }
-
-  List<SupplierListModel> _paginatePage(List<SupplierListModel> suppliers, int pageNumber) {
-    final start = pageNumber * _itemsPerPage;
-    final end = start + _itemsPerPage;
-    if (start >= suppliers.length) return [];
-    return suppliers.sublist(
-        start, end > suppliers.length ? suppliers.length : end);
-  }
-
   Future<void> _onCreateSupplier(
       AddSupplierList event, Emitter<SupplierListState> emit) async {
     emit(SupplierAddLoading());

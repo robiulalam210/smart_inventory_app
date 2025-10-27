@@ -5,19 +5,25 @@ sealed class SupplierListEvent {}
 
 
 class FetchSupplierList extends SupplierListEvent {
-  BuildContext context;
-
+  final BuildContext context;
   final String filterText;
   final String location;
   final String state;
   final int pageNumber;
+  final int pageSize;
 
-  FetchSupplierList(this.context,{this.filterText = '',
-    this.state = '',
-    this.location = '',
-    this.pageNumber = 0});
+  FetchSupplierList(
+      this.context, {
+        this.filterText = '',
+        this.state = '',
+        this.location = '',
+        this.pageNumber = 1, // Changed from 0 to 1
+        this.pageSize = 10, // Added pageSize
+      });
+
+  @override
+  List<Object> get props => [context, filterText, state, location, pageNumber, pageSize];
 }
-
 class AddSupplierList extends SupplierListEvent {
   final Map<String, dynamic>? body;
 

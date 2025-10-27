@@ -159,21 +159,8 @@ class _CustomerScreenState extends State<CustomerScreen> {
                           return Column(
                             children: [
                               SizedBox(
-                                child: ListView.builder(
-                                  shrinkWrap: true,
-                                  itemCount: state.list.length,
-                                  itemBuilder: (_, index) {
-                                    final customer = state.list[index];
-                                    return InkWell(
-                                      onTap: () {
-                                        // Handle customer tap
-                                      },
-                                      child: CustomerCard(
-                                        index: index,
-                                        customerData: customer,
-                                      ),
-                                    );
-                                  },
+                                child:  CustomerTableCard(customers: state.list,
+
                                 ),
                               ),
                               PaginationBar(

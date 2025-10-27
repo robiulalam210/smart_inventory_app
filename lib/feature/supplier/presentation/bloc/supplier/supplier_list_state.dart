@@ -16,12 +16,23 @@ final class SupplierListSuccess extends SupplierListState {
   final List<SupplierListModel> list;
   final int totalPages;
   final int currentPage;
+  final int count;
+  final int pageSize;
+  final int from;
+  final int to;
 
   SupplierListSuccess({
     required this.list,
     required this.totalPages,
     required this.currentPage,
+    required this.count,
+    required this.pageSize,
+    required this.from,
+    required this.to,
   });
+
+  @override
+  List<Object> get props => [list, totalPages, currentPage, count, pageSize, from, to];
 }
 final class SupplierListFailed extends SupplierListState {
   final String title, content;

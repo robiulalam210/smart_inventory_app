@@ -16,9 +16,9 @@ class SupplierListModel {
   final String? address;
   final String? status;
   final String? supplierNo;
-  final dynamic? totalDue;
-  final dynamic? totalPaid;
-  final dynamic? totalPurchases;
+  final dynamic totalDue;
+  final dynamic totalPaid;
+  final dynamic totalPurchases;
   final int? purchaseCount;
   final String? amountType;
   final int? company;
@@ -44,10 +44,6 @@ class SupplierListModel {
     this.createdAt,
     this.updatedAt,
   });
-  @override
-  String toString(){
-    return "[${supplierNo??""}]$name(Due: ${totalDue??"0"})";
-  }
 
   factory SupplierListModel.fromJson(Map<String, dynamic> json) => SupplierListModel(
     id: json["id"],
