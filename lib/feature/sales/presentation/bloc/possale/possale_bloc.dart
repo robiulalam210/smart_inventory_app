@@ -61,7 +61,17 @@ class PosSaleBloc extends Bloc<PosSaleEvent, PosSaleState> {
         final int to = ((currentPage - 1) * pageSize + list.length);
 
         if (list.isEmpty) {
-          emit(PosSaleListFailed(title: "Info", content: "No sales data found"));
+          emit(
+            PosSaleListSuccess(
+              list: list,
+              totalPages: totalPages < 1 ? 1 : totalPages,
+              currentPage: currentPage < 1 ? 1 : currentPage,
+              count: count,
+              pageSize: pageSize,
+              from: from,
+              to: to,
+            ),
+          );
           return;
         }
 

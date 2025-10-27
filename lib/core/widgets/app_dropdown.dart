@@ -40,7 +40,7 @@ class AppDropdown<T> extends FormField<T> {
         decoration: BoxDecoration(
             borderRadius: BorderRadius.all(Radius.circular(2))
         ),
-        height: isLabel == true ? 50 : 70,
+        height: isLabel == true ? 50 : 75,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -65,7 +65,7 @@ class AppDropdown<T> extends FormField<T> {
             if (!isLabel) const SizedBox(height: 2),
 
             SizedBox(
-              height: 30,
+              height: 35,
               child: Container(
                 padding: EdgeInsets.all(5),
                 decoration: BoxDecoration(
@@ -81,7 +81,7 @@ class AppDropdown<T> extends FormField<T> {
                 child: isSearch == false
                     ? CustomDropdown(
                   closedHeaderPadding: EdgeInsets.only(
-                      top: 6, left: 8, right: 6, bottom: 6),
+                      top: 6, left: 4, right: 4, bottom: 6),
                   listItemPadding: EdgeInsets.symmetric(
                       horizontal: 8, vertical: 8),
                   itemsListPadding: EdgeInsets.symmetric(
@@ -131,10 +131,10 @@ class AppDropdown<T> extends FormField<T> {
                 )
                     : CustomDropdown.search(
                   closedHeaderPadding: EdgeInsets.only(
-                      top: 6, left: 8, right: 6, bottom: 6),
+                      top: 6, left: 4, right: 4, bottom: 6),
                   closeDropDownOnClearFilterSearch: false,
                   listItemPadding: EdgeInsets.symmetric(
-                      horizontal: 8, vertical: 8),
+                      horizontal: 4, vertical: 4),
                   itemsListPadding: EdgeInsets.symmetric(
                       horizontal: 8, vertical: 4),
                   decoration: CustomDropdownDecoration(

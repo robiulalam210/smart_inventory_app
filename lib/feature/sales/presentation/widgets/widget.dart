@@ -1,11 +1,6 @@
-import 'package:google_fonts/google_fonts.dart';
-import 'package:hugeicons/hugeicons.dart';
 
 import '../../../../core/configs/configs.dart';
 import '../../data/models/pos_sale_model.dart';
-
-import 'package:flutter/material.dart';
-
 
 class PosSaleDataTableWidget extends StatelessWidget {
   final List<PosSaleModel> sales;

@@ -138,7 +138,7 @@ class _PosSaleScreenState extends State<PosSaleScreen> {
             child: Column(
               children: [
                 _buildFilterRow(),
-                const SizedBox(height: 16),
+
                 _buildDataTable(),
               ],
             ),
@@ -150,9 +150,12 @@ class _PosSaleScreenState extends State<PosSaleScreen> {
 
   Widget _buildFilterRow() {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
         // 🔍 Search Field
         Expanded(
+          flex: 2,
           child: CustomSearchTextFormField(
             controller: filterTextController,
             onChanged: (value) => _fetchApi(filterText: value),
@@ -160,13 +163,14 @@ class _PosSaleScreenState extends State<PosSaleScreen> {
               filterTextController.clear();
               _fetchApi();
             },
-            hintText: "Search InvoiceNo, Name, or Phone",
+            hintText: "InvoiceNo, Name, or Phone",
           ),
         ),
-        const SizedBox(width: 10),
+        const SizedBox(width: 5),
 
         // 👤 Customer Dropdown
         Expanded(
+          flex: 1,
           child: BlocBuilder<CustomerBloc, CustomerState>(
             builder: (context, state) {
               return AppDropdown<CustomerModel>(
@@ -219,10 +223,11 @@ class _PosSaleScreenState extends State<PosSaleScreen> {
             },
           ),
         ),
-        const SizedBox(width: 10),
+        const SizedBox(width: 5),
 
         // 🧑‍💼 Seller Dropdown
         Expanded(
+          flex: 1,
           child: BlocBuilder<UserBloc, UserState>(
             builder: (context, state) {
               return AppDropdown<UsersListModel>( // Use UserModel instead of UsersListModel

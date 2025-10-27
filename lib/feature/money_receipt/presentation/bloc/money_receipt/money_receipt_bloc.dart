@@ -117,14 +117,16 @@ class MoneyReceiptBloc extends Bloc<MoneyReceiptEvent, MoneyReceiptState> {
       if (event.paymentMethod.isNotEmpty) {
         queryParams['payment_method'] = event.paymentMethod;
       }
-      if (event.startDate != null && event.endDate != null) {
-        queryParams['start_date'] = event.startDate!.toIso8601String();
-        queryParams['end_date'] = event.endDate!.toIso8601String();
+      if (event.startDate != null) {
+        queryParams['start_date'] = event.startDate!.toIso8601String().split('T')[0];
+      }
+      if (event.endDate != null) {
+        queryParams['end_date'] = event.endDate!.toIso8601String().split('T')[0];
       }
 
       final res = await getResponse(
         url: AppUrls.moneyReceipt,
-        queryParams: queryParams, // Pass query parameters
+        queryParams: queryParams,
         context: event.context,
       );
 
@@ -168,9 +170,6 @@ class MoneyReceiptBloc extends Bloc<MoneyReceiptEvent, MoneyReceiptState> {
       int pageSize = pagination['page_size'] ?? event.pageSize;
       int from = ((currentPage - 1) * pageSize) + 1;
       int to = from + moneyReceiptList.length - 1;
-
-      // Store all money receipts for filtering and pagination
-      moneyReceiptModel = moneyReceiptList;
 
       emit(MoneyReceiptListSuccess(
         list: moneyReceiptList,

@@ -62,7 +62,6 @@ class _MoneyReceiptScreenState extends State<MoneyReceiptScreen> {
     String filterText = '',
     String customer = '',
     String seller = '',
-    String location = '',
     String paymentMethod = '',
     DateTime? from,
     DateTime? to,
@@ -213,7 +212,6 @@ class _MoneyReceiptScreenState extends State<MoneyReceiptScreen> {
             child: Column(
               children: [
                 _buildFilterRow(),
-                const SizedBox(height: 16),
                 SizedBox(
                   child: BlocBuilder<MoneyReceiptBloc, MoneyReceiptState>(
                     builder: (context, state) {
@@ -228,7 +226,7 @@ class _MoneyReceiptScreenState extends State<MoneyReceiptScreen> {
                           return Column(
                             children: [
                               SizedBox(
-                                child: MoneyReciptDataTableWidget(sales: state.list),
+                                child: MoneyReceiptDataTableWidget(sales: state.list),
                               ),
                               PaginationBar(
                                 count: state.count,
@@ -267,9 +265,12 @@ class _MoneyReceiptScreenState extends State<MoneyReceiptScreen> {
 
   Widget _buildFilterRow() {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
         // 🔍 Search Field
         Expanded(
+          flex: 2,
           child: CustomSearchTextFormField(
             controller: filterTextController,
             onChanged: (value) => _fetchApi(filterText: value),
@@ -277,37 +278,51 @@ class _MoneyReceiptScreenState extends State<MoneyReceiptScreen> {
               filterTextController.clear();
               _fetchApi();
             },
-            hintText: "Search InvoiceNo, Name, or Phone",
+            hintText: "InvoiceNo, Name, or Phone",
           ),
         ),
-        const SizedBox(width: 10),
+        const SizedBox(width: 5),
 
         // 👤 Customer Dropdown
         Expanded(
+          flex: 1,
           child: BlocBuilder<CustomerBloc, CustomerState>(
             builder: (context, state) {
               return AppDropdown<CustomerModel>(
                 label: "Customer",
                 context: context,
                 isSearch: true,
-                hint: context.read<MoneyReceiptBloc>().selectCustomerModel?.name?.toString() ?? "Select Customer",
+                hint: context
+                    .read<MoneyReceiptBloc>()
+                    .selectCustomerModel
+                    ?.name
+                    ?.toString() ??
+                    "Select Customer",
                 isNeedAll: true,
-                isRequired: false,
+                isRequired: true,
                 value: context.read<MoneyReceiptBloc>().selectCustomerModel,
-                itemList: context.read<CustomerBloc>().list ?? [],
+                itemList: context.read<CustomerBloc>().list,
                 onChanged: (newVal) {
                   print('Customer selected: ${newVal?.id} - ${newVal?.name}');
 
+                  // Update bloc state
                   context.read<MoneyReceiptBloc>().selectCustomerModel = newVal;
 
                   _fetchApi(
-                    from: selectedDateRange?.start ?? startDate,
-                    to: selectedDateRange?.end ?? endDate,
-                    customer: newVal?.id.toString() ?? '',
-                    seller: context.read<MoneyReceiptBloc>().selectUserModel?.id.toString() ?? '',
+                    from: selectedDateRange?.start,
+                    to: selectedDateRange?.end,
+                    customer: newVal?.id.toString() ?? '', // Use newVal
+                    seller: context
+                        .read<MoneyReceiptBloc>()
+                        .selectUserModel
+                        ?.id.toString() ?? '',
                   );
                 },
-                validator: (value) => null,
+                validator: (value) {
+                  return value == null
+                      ? 'Please select Customer'
+                      : null;
+                },
                 itemBuilder: (item) => DropdownMenuItem<CustomerModel>(
                   value: item,
                   child: Text(
@@ -323,38 +338,52 @@ class _MoneyReceiptScreenState extends State<MoneyReceiptScreen> {
             },
           ),
         ),
-        const SizedBox(width: 10),
+        const SizedBox(width: 5),
 
         // 🧑‍💼 Seller Dropdown
         Expanded(
+          flex: 1,
           child: BlocBuilder<UserBloc, UserState>(
             builder: (context, state) {
-              return AppDropdown<UsersListModel>(
+              return AppDropdown<UsersListModel>( // Use UserModel instead of UsersListModel
                 label: "Seller",
                 context: context,
-                hint: context.read<MoneyReceiptBloc>().selectUserModel?.username?.toString() ?? "Select Seller",
+                hint: context
+                    .read<MoneyReceiptBloc>()
+                    .selectUserModel
+                    ?.username
+                    ?.toString() ??
+                    "Select Seller",
                 isLabel: false,
-                isRequired: false,
+                isRequired: true,
                 isNeedAll: true,
                 value: context.read<MoneyReceiptBloc>().selectUserModel,
-                itemList: context.read<UserBloc>().list ?? [],
+                itemList: context.read<UserBloc>().list,
                 onChanged: (newVal) {
                   print('Seller selected: ${newVal?.id} - ${newVal?.username}');
 
+                  // Update bloc state - UNCOMMENT THIS
                   context.read<MoneyReceiptBloc>().selectUserModel = newVal;
 
                   _fetchApi(
-                    from: selectedDateRange?.start ?? startDate,
-                    to: selectedDateRange?.end ?? endDate,
-                    customer: context.read<MoneyReceiptBloc>().selectCustomerModel?.id.toString() ?? '',
-                    seller: newVal?.id.toString() ?? '',
+                    from: selectedDateRange?.start,
+                    to: selectedDateRange?.end,
+                    customer: context
+                        .read<MoneyReceiptBloc>()
+                        .selectCustomerModel
+                        ?.id.toString() ?? '',
+                    seller: newVal?.id.toString() ?? '', // Use newVal instead of old value
                   );
                 },
-                validator: (value) => null,
+                validator: (value) {
+                  return value == null
+                      ? 'Please select Collected By'
+                      : null;
+                },
                 itemBuilder: (item) => DropdownMenuItem<UsersListModel>(
                   value: item,
                   child: Text(
-                    item.username ?? 'Unknown Seller',
+                    item.username ?? 'Unknown Seller', // Use username instead of toString()
                     style: const TextStyle(
                       color: AppColors.blackColor,
                       fontFamily: 'Quicksand',
@@ -377,8 +406,6 @@ class _MoneyReceiptScreenState extends State<MoneyReceiptScreen> {
               setState(() => selectedDateRange = value);
               if (value != null) {
                 _fetchApi(from: value.start, to: value.end);
-              } else {
-                _fetchApi(from: startDate, to: endDate);
               }
             },
           ),
@@ -386,7 +413,7 @@ class _MoneyReceiptScreenState extends State<MoneyReceiptScreen> {
         const SizedBox(width: 10),
 
         IconButton(
-          onPressed: () => _fetchApi(),
+          onPressed: _fetchApi,
           icon: const Icon(Icons.refresh),
           tooltip: "Refresh",
         ),
