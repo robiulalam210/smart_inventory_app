@@ -5,7 +5,7 @@ import 'package:smart_inventory/feature/expense/presentation/pages/expense_list_
 import 'package:smart_inventory/feature/products/groups/presentation/pages/groups_screen.dart';
 import 'package:smart_inventory/feature/products/soruce/presentation/pages/source_screen.dart';
 import 'package:smart_inventory/feature/products/unit/presentation/pages/unit_screen.dart';
-import 'package:smart_inventory/feature/purchase/presentation/page/pos_sale_screen.dart';
+import 'package:smart_inventory/feature/purchase/presentation/page/purchase_screen.dart';
 import 'package:smart_inventory/feature/sales/presentation/pages/pos_sale_screen.dart';
 import 'package:smart_inventory/feature/supplier/presentation/pages/create_supplierr_screen.dart';
 

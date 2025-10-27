@@ -13,8 +13,12 @@ class PurchaseModel {
   final int? company;
   final int? supplier;
   final String? supplierName;
+  final DateTime? purchaseDate;
   final String? total;
-  final DateTime? date;
+  final String? grandTotal;
+  final String? paidAmount;
+  final String? dueAmount;
+  final String? changeAmount;
   final String? overallDiscount;
   final String? overallDiscountType;
   final String? overallDeliveryCharge;
@@ -26,18 +30,23 @@ class PurchaseModel {
   final String? invoiceNo;
   final String? paymentStatus;
   final String? returnAmount;
-  final int? accountId;
   final String? accountName;
   final String? paymentMethod;
+  final dynamic remark;
   final List<Item>? items;
+  final String? subTotal;
 
   PurchaseModel({
     this.id,
     this.company,
     this.supplier,
     this.supplierName,
+    this.purchaseDate,
     this.total,
-    this.date,
+    this.grandTotal,
+    this.paidAmount,
+    this.dueAmount,
+    this.changeAmount,
     this.overallDiscount,
     this.overallDiscountType,
     this.overallDeliveryCharge,
@@ -49,10 +58,11 @@ class PurchaseModel {
     this.invoiceNo,
     this.paymentStatus,
     this.returnAmount,
-    this.accountId,
     this.accountName,
     this.paymentMethod,
+    this.remark,
     this.items,
+    this.subTotal,
   });
 
   factory PurchaseModel.fromJson(Map<String, dynamic> json) => PurchaseModel(
@@ -60,8 +70,12 @@ class PurchaseModel {
     company: json["company"],
     supplier: json["supplier"],
     supplierName: json["supplier_name"],
+    purchaseDate: json["purchase_date"] == null ? null : DateTime.parse(json["purchase_date"]),
     total: json["total"],
-    date: json["date"] == null ? null : DateTime.parse(json["date"]),
+    grandTotal: json["grand_total"],
+    paidAmount: json["paid_amount"],
+    dueAmount: json["due_amount"],
+    changeAmount: json["change_amount"],
     overallDiscount: json["overall_discount"],
     overallDiscountType: json["overall_discount_type"],
     overallDeliveryCharge: json["overall_delivery_charge"],
@@ -73,10 +87,11 @@ class PurchaseModel {
     invoiceNo: json["invoice_no"],
     paymentStatus: json["payment_status"],
     returnAmount: json["return_amount"],
-    accountId: json["account_id"],
     accountName: json["account_name"],
     paymentMethod: json["payment_method"],
+    remark: json["remark"],
     items: json["items"] == null ? [] : List<Item>.from(json["items"]!.map((x) => Item.fromJson(x))),
+    subTotal: json["sub_total"],
   );
 
   Map<String, dynamic> toJson() => {
@@ -84,8 +99,12 @@ class PurchaseModel {
     "company": company,
     "supplier": supplier,
     "supplier_name": supplierName,
+    "purchase_date": "${purchaseDate!.year.toString().padLeft(4, '0')}-${purchaseDate!.month.toString().padLeft(2, '0')}-${purchaseDate!.day.toString().padLeft(2, '0')}",
     "total": total,
-    "date": "${date!.year.toString().padLeft(4, '0')}-${date!.month.toString().padLeft(2, '0')}-${date!.day.toString().padLeft(2, '0')}",
+    "grand_total": grandTotal,
+    "paid_amount": paidAmount,
+    "due_amount": dueAmount,
+    "change_amount": changeAmount,
     "overall_discount": overallDiscount,
     "overall_discount_type": overallDiscountType,
     "overall_delivery_charge": overallDeliveryCharge,
@@ -97,10 +116,11 @@ class PurchaseModel {
     "invoice_no": invoiceNo,
     "payment_status": paymentStatus,
     "return_amount": returnAmount,
-    "account_id": accountId,
     "account_name": accountName,
     "payment_method": paymentMethod,
+    "remark": remark,
     "items": items == null ? [] : List<dynamic>.from(items!.map((x) => x.toJson())),
+    "sub_total": subTotal,
   };
 }
 
@@ -111,6 +131,7 @@ class Item {
   final String? price;
   final String? discount;
   final String? discountType;
+  final String? productTotal;
 
   Item({
     this.id,
@@ -119,6 +140,7 @@ class Item {
     this.price,
     this.discount,
     this.discountType,
+    this.productTotal,
   });
 
   factory Item.fromJson(Map<String, dynamic> json) => Item(
@@ -128,6 +150,7 @@ class Item {
     price: json["price"],
     discount: json["discount"],
     discountType: json["discount_type"],
+    productTotal: json["product_total"],
   );
 
   Map<String, dynamic> toJson() => {
@@ -137,5 +160,6 @@ class Item {
     "price": price,
     "discount": discount,
     "discount_type": discountType,
+    "product_total": productTotal,
   };
 }

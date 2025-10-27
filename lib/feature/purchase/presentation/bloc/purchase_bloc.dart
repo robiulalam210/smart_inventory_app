@@ -3,6 +3,7 @@
 
 
 import 'package:meta/meta.dart';
+import 'package:smart_inventory/feature/users_list/data/model/user_model.dart';
 
 import '../../../../core/configs/configs.dart';
 import '../../../../core/repositories/delete_response.dart';
@@ -18,7 +19,7 @@ part 'purchase_state.dart';
 class PurchaseBloc extends Bloc<PurchaseEvent, PurchaseState> {
   List<PurchaseModel> list = [];
   String selectedStatus = "";
-  String selectedSupplier = "";
+  UsersListModel? selectedSupplier ;
   String selectedId = "";
   List<String> statesList = ["Paid", "Pending"];
 

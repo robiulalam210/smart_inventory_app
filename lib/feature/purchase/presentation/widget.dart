@@ -1,11 +1,8 @@
+import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hugeicons/hugeicons.dart';
-import 'package:smart_inventory/feature/purchase/data/model/purchase_sale_model.dart';
-
 import '../../../../core/configs/configs.dart';
-
-import 'package:flutter/material.dart';
-
+import '../data/model/purchase_sale_model.dart';
 
 class PurchaseDataTableWidget extends StatelessWidget {
   final List<PurchaseModel> sales;
@@ -20,7 +17,7 @@ class PurchaseDataTableWidget extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final totalWidth = constraints.maxWidth;
-        const numColumns = 12;
+        const numColumns = 9;
         const minColumnWidth = 100.0;
 
         final dynamicColumnWidth =
@@ -85,20 +82,18 @@ class PurchaseDataTableWidget extends StatelessWidget {
     );
   }
 
+  // --- Build Column Headers ---
   List<DataColumn> _buildColumns(double columnWidth) {
     const labels = [
       "SL",
       "Invoice No",
-      "Customer",
-      "Sale Type",
       "Date",
+      "Supplier",
       "Gross Total",
-      "Net Total",
-      "Payable",
+      "Payment Status",
       "Paid",
       "Due",
       "Payment Method",
-      "Account Name",
     ];
 
     return labels
@@ -124,32 +119,31 @@ class PurchaseDataTableWidget extends StatelessWidget {
         .toList();
   }
 
+  // --- Build Each Row ---
   DataRow _buildDataRow(int index, PurchaseModel sale, double columnWidth) {
     return DataRow(
       cells: [
         _buildDataCell(index.toString(), columnWidth),
-        _buildDataCell(sale.invoiceNo.toString(), columnWidth),
-        _buildDataCell(sale.supplierName.toString(), columnWidth),
-        _buildDataCell(sale.supplierName.toString(), columnWidth),
+        _buildDataCell(sale.invoiceNo ?? '-', columnWidth),
         _buildDataCell(
-          sale.date.toString().split('T').first,
+          sale.purchaseDate?.toString().split('T').first ?? '-',
           columnWidth,
         ),
-        _buildDataCell(sale.total.toString(), columnWidth),
-        _buildDataCell(sale.total.toString(), columnWidth),
-        _buildDataCell(sale.accountName.toString(), columnWidth),
-        _buildDataCell(sale.overallDeliveryCharge.toString(), columnWidth),
+        _buildDataCell(sale.supplierName ?? '-', columnWidth),
+        _buildDataCell(sale.total?.toString() ?? '0.00', columnWidth),
+        _buildDataCell(sale.paymentStatus ?? '-', columnWidth),
+        _buildDataCell(sale.paidAmount?.toString() ?? '0.00', columnWidth),
         _buildDataCell(
-          sale.accountId.toString(),
+          sale.dueAmount?.toString() ?? '0.00',
           columnWidth,
           isDue: true,
         ),
-        _buildDataCell(sale.paymentMethod.toString(), columnWidth),
-        _buildDataCell(sale.accountName.toString(), columnWidth),
+        _buildDataCell(sale.paymentMethod ?? '-', columnWidth),
       ],
     );
   }
 
+  // --- Custom Cell Builder ---
   DataCell _buildDataCell(String text, double width, {bool isDue = false}) {
     return DataCell(
       SizedBox(

@@ -189,7 +189,7 @@ class AfterPayment {
 }
 
 class BeforePayment {
-  final dynamic? totalDue;
+  final dynamic totalDue;
   final dynamic? invoiceTotal;
   final dynamic? previousPaid;
   final dynamic? previousDue;

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:smart_inventory/feature/accounts/data/model/create_account_model.dart';
 import 'package:smart_inventory/feature/purchase/presentation/bloc/create_purchase/create_purchase_bloc.dart';
 import 'package:smart_inventory/feature/purchase/presentation/bloc/purchase_bloc.dart';
 import 'package:smart_inventory/feature/supplier/data/model/supplier_list_model.dart';
@@ -17,6 +18,7 @@ import '../../../../core/widgets/custom_filter_ui.dart';
 import '../../../../core/widgets/date_range.dart';
 import '../../../customer/presentation/bloc/customer/customer_bloc.dart';
 import '../../../products/product/presentation/widget/pagination.dart';
+import '../../../users_list/data/model/user_model.dart';
 import '../../../users_list/presentation/bloc/users/user_bloc.dart';
 import '../widget.dart';
 
@@ -30,7 +32,6 @@ class PurchaseScreen extends StatefulWidget {
 }
 
 class _PurchaseScreenState extends State<PurchaseScreen> {
-
   DateTime now = DateTime.now();
   DateRange? selectedDateRange;
 
@@ -50,8 +51,10 @@ class _PurchaseScreenState extends State<PurchaseScreen> {
     context.read<SupplierListBloc>().add(
       FetchSupplierList(context),
     );
-    _fetchApi( from: selectedDateRange?.start,
-      to: selectedDateRange?.end,);
+    _fetchApi(
+      from: selectedDateRange?.start,
+      to: selectedDateRange?.end,
+    );
   }
 
   void _fetchApi({
@@ -171,7 +174,6 @@ class _PurchaseScreenState extends State<PurchaseScreen> {
             child: Column(
               children: [
                 _buildFilterRow(),
-                const SizedBox(height: 16),
                 SizedBox(
                   child: BlocBuilder<PurchaseBloc, PurchaseState>(
                     builder: (context, state) {
@@ -221,9 +223,11 @@ class _PurchaseScreenState extends State<PurchaseScreen> {
 
   Widget _buildFilterRow() {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,mainAxisAlignment: MainAxisAlignment.start,
       children: [
         // 🔍 Search Field
         Expanded(
+          flex: 2,
           child: CustomSearchTextFormField(
             controller: filterTextController,
             onChanged: (value) => _fetchApi(filterText: value),
@@ -231,28 +235,29 @@ class _PurchaseScreenState extends State<PurchaseScreen> {
               filterTextController.clear();
               _fetchApi();
             },
-            hintText: "Search InvoiceNo, Supplier, or Phone",
+            hintText: "InvoiceNo, Name, or Phone",
           ),
         ),
-        const SizedBox(width: 10),
+        const SizedBox(width: 5),
 
         // 👤 Supplier Dropdown
         Expanded(
+          flex: 1,
           child: BlocBuilder<SupplierListBloc, SupplierListState>(
             builder: (context, state) {
               return AppDropdown<SupplierListModel>(
                 label: "Supplier",
                 context: context,
-                isSearch: true,
                 hint: "Select Supplier",
-                isNeedAll: true,
+                isLabel: false,
                 isRequired: false,
-                value: null, // You can add supplier selection to your bloc if needed
-                itemList: context.read<SupplierListBloc>().supplierListModel ?? [],
+                isNeedAll: true,
+                value: null, // You might want to store selected supplier in a variable
+                itemList: context.read<SupplierListBloc>().supplierListModel,
                 onChanged: (newVal) {
-                  selectedSupplierNotifier.value = newVal?.id.toString();
+                  selectedSupplierNotifier.value = newVal?.id?.toString();
                   _fetchApi(
-                    supplier: newVal?.id.toString() ?? '',
+                    supplier: newVal?.id?.toString() ?? '',
                   );
                 },
                 validator: (value) => null,
@@ -271,7 +276,7 @@ class _PurchaseScreenState extends State<PurchaseScreen> {
             },
           ),
         ),
-        const SizedBox(width: 10),
+        const SizedBox(width: 5),
 
         // 💰 Payment Status Dropdown
         Expanded(
@@ -282,7 +287,7 @@ class _PurchaseScreenState extends State<PurchaseScreen> {
             isNeedAll: true,
             isRequired: false,
             value: selectedPaymentMethodNotifier.value,
-            itemList: ['Paid', 'Unpaid', 'Partial'],
+            itemList: ['Paid', 'Pending', 'Partial'],
             onChanged: (newVal) {
               selectedPaymentMethodNotifier.value = newVal;
               _fetchApi(
@@ -303,27 +308,22 @@ class _PurchaseScreenState extends State<PurchaseScreen> {
             ),
           ),
         ),
-        const SizedBox(width: 10),
+        const SizedBox(width: 5),
 
         // 📅 Date Range Picker
         SizedBox(
           width: 280,
           child: CustomDateRangeField(
-            selectedDateRange:selectedDateRange,
+            selectedDateRange: selectedDateRange,
             onDateRangeSelected: (value) {
-              setState(() {
-                selectedDateRange=value;
-
-              });
+              setState(() => selectedDateRange = value);
               if (value != null) {
                 _fetchApi(from: value.start, to: value.end);
-              } else {
-                _fetchApi();
               }
             },
           ),
         ),
-        const SizedBox(width: 10),
+        const SizedBox(width: 5),
 
         IconButton(
           onPressed: () => _fetchApi(),
