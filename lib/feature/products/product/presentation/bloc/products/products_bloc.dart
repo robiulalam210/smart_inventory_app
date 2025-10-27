@@ -6,6 +6,7 @@ import '../../../../../common/data/models/app_parse_json.dart';
 import '../../../../categories/presentation/bloc/categories/categories_bloc.dart';
 import '../../../../unit/presentation/bloc/unit/unti_bloc.dart';
 import '../../../data/model/product_model.dart';
+import '../../../data/model/product_stock_model.dart';
 
 part 'products_event.dart';
 
@@ -13,7 +14,7 @@ part 'products_state.dart';
 
 class ProductsBloc extends Bloc<ProductsEvent, ProductsState> {
   List<ProductModel> list = [];
-  final int _itemsPerPage = 15;
+  List<ProductModelStockModel> productList = [];
   String selectedState = "";
   List<String> statesList = ["Active", "Inactive"];
 
@@ -44,10 +45,13 @@ class ProductsBloc extends Bloc<ProductsEvent, ProductsState> {
 
   ProductsBloc() : super(ProductsInitial()) {
     on<FetchProductsList>(_onFetchProductList);
+    on<FetchProductsStockList>(_onFetchProductStockList);
     on<AddProducts>(_onCreateProductList);
     on<UpdateProducts>(_onUpdateProductList);
     on<DeleteProducts>(_onDeleteProductList);
   }
+
+
   Future<void> _onFetchProductList(
       FetchProductsList event,
       Emitter<ProductsState> emit,
@@ -109,37 +113,50 @@ class ProductsBloc extends Bloc<ProductsEvent, ProductsState> {
       emit(ProductsListFailed(title: "Error", content: error.toString()));
     }
   }
-  // ✅ Cleaner filter method
-  List<ProductModel> _filterProduct(
-    List<ProductModel> list,
-    String filterText,
-    String state,
-    String category,
-  ) {
-    return list.where((product) {
-      final matchesText =
-          filterText.isEmpty ||
-          (product.name?.toLowerCase().contains(filterText.toLowerCase()) ??
-              false);
+  Future<void> _onFetchProductStockList(
+      FetchProductsStockList event,
+      Emitter<ProductsState> emit,
+      ) async {
+    emit(ProductsListLoading());
 
-      final matchesCategory =
-          category.isEmpty ||
-          (product.name?.toLowerCase() == category.toLowerCase());
+    try {
+      final res = await getResponse(
+        url: AppUrls.productActive,
+        context: event.context,
+      );
 
-      final matchesState =
-          state.isEmpty ||
-          (product.name?.toString() == (state == 'Active' ? '1' : '0'));
+      final Map<String, dynamic> payload = res is String ? jsonDecode(res) : res;
+      final bool ok = (payload['status'] == true) || (payload['success'] == true);
 
-      return matchesText && matchesCategory && matchesState;
-    }).toList();
-  }
+      if (ok) {
+        // Data is directly the list of products
+        final List<dynamic> data = payload['data'];
+        List<ProductModelStockModel> list = data.map((item) {
+          try {
+            return ProductModelStockModel.fromJson(Map<String, dynamic>.from(item));
+          } catch (e) {
+            debugPrint('Error parsing product: $e');
+            debugPrint('Problematic item: $item');
+            rethrow;
+          }
+        }).toList();
+productList=list;
+        print(list.length);
+        print(productList.length);
 
-  // ✅ Pagination stays same
-  List<ProductModel> _paginatePage(List<ProductModel> list, int pageNumber) {
-    final start = pageNumber * _itemsPerPage;
-    final end = start + _itemsPerPage;
-    if (start >= list.length) return [];
-    return list.sublist(start, end > list.length ? list.length : end);
+        emit(ProductsListStockSuccess(list: list));
+      } else {
+        final message = payload['message'] ?? payload['error'] ?? 'Unknown Error';
+        emit(ProductsListFailed(title: "Error", content: message.toString()));
+      }
+    } catch (error, st) {
+      debugPrint('Error in _onFetchProductStockList: $error');
+      debugPrint('Stack trace: $st');
+      emit(ProductsListFailed(
+          title: "Error",
+          content: "Failed to load products: ${error.toString()}"
+      ));
+    }
   }
 
   Future<void> _onCreateProductList(

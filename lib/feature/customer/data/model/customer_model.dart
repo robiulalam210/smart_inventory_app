@@ -39,6 +39,12 @@ class CustomerModel {
     this.dateCreated,
   });
 
+  @override
+  String toString() {
+    // TODO: implement toString
+    return name??'';
+  }
+
   factory CustomerModel.fromJson(Map<String, dynamic> json) => CustomerModel(
     id: json["id"],
     name: json["name"],

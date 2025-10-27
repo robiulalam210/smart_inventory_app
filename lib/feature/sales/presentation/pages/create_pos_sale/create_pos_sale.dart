@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:smart_inventory/feature/products/product/data/model/product_model.dart';
+import 'package:smart_inventory/feature/products/product/data/model/product_stock_model.dart';
 import 'package:smart_inventory/feature/users_list/presentation/bloc/users/user_bloc.dart';
 import 'dart:developer';
 
@@ -35,9 +36,9 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
   void initState() {
     context.read<AccountBloc>().add(FetchAccountList(context));
 
-    context.read<ProductsBloc>().add(FetchProductsList(context));
     context.read<CustomerBloc>().add(FetchCustomerList(context));
     context.read<UserBloc>().add(FetchUserList(context));
+    context.read<ProductsBloc>().add(FetchProductsStockList(context,));
 
     super.initState();
 
@@ -326,7 +327,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
 
   bool _isChecked = false;
 
-  void onProductChanged(int index, ProductModel? newVal) {
+  void onProductChanged(int index, ProductModelStockModel? newVal) {
     if (newVal == null) return;
 
     setState(() {
@@ -653,7 +654,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                             child: BlocBuilder<ProductsBloc, ProductsState>(
                               builder: (context, state) {
                                 return SizedBox(
-                                  child: AppDropdown<ProductModel>(
+                                  child: AppDropdown<ProductModelStockModel>(
                                     context: context,
                                     isRequired: false,
                                     isLabel: true,
@@ -661,7 +662,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                                     label: "Product",
                                     hint: "Select Product",
                                     value: product["product"],
-                                    itemList: context.read<ProductsBloc>().list,
+                                    itemList: context.read<ProductsBloc>().productList,
                                     onChanged: (newVal) =>
                                         onProductChanged(index, newVal),
                                     validator: (value) => value == null
