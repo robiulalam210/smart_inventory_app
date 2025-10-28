@@ -119,10 +119,10 @@ class _LogInScreenState extends State<LogInScreen> {
                   children: [
                       SizedBox(
                         width: getImageWidth(screenWidth),
-                        child: Image.asset(
-                          AppImages.loginIcon,
-                          fit: BoxFit.contain,
-                        ),
+                        // child: Image.asset(
+                        //   AppImages.loginBg,
+                        //   fit: BoxFit.contain,
+                        // ),
                       ),
                     ClipRRect(
                       borderRadius: BorderRadius.circular(20),

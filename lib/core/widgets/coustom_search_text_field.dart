@@ -85,8 +85,8 @@ class CustomSearchTextFormField extends StatelessWidget {
                 errorMaxLines: 2,
                 suffixIcon: suffixIcon,
                 contentPadding: const EdgeInsets.only(
-                  top: 8.0,
-                  bottom: 8.0,
+                  top: 10.0,
+                  bottom: 10.0,
                   left: 6,
                 ),
                 errorBorder: OutlineInputBorder(

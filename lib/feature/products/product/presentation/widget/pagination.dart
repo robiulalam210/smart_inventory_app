@@ -79,7 +79,7 @@ class PaginationBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+      padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 12),
       color: Colors.white,
       child: Row(
         children: [
@@ -87,14 +87,14 @@ class PaginationBar extends StatelessWidget {
           Expanded(
             child: Text(
               'Showing $from to $to of $count entries',
-              style: const TextStyle(fontSize: 13),
+              style: const TextStyle(fontSize: 12),
             ),
           ),
 
           // Page size dropdown
           Row(
             children: [
-              const Text('Show', style: TextStyle(fontSize: 13)),
+              const Text('Show', style: TextStyle(fontSize: 12)),
               const SizedBox(width: 8),
               DropdownButton<int>(
                 value: pageSize,
@@ -110,7 +110,7 @@ class PaginationBar extends StatelessWidget {
                   }
                 },
                 underline: Container(),
-                style: const TextStyle(fontSize: 13, color: Colors.black),
+                style: const TextStyle(fontSize: 12, color: Colors.black),
               ),
               const SizedBox(width: 8),
             ],

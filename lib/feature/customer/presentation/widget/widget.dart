@@ -21,7 +21,7 @@ class CustomerTableCard extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final totalWidth = constraints.maxWidth;
+        final totalWidth = constraints.maxWidth-25;
         const numColumns = 5;
         const minColumnWidth = 100.0;
 

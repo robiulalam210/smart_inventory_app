@@ -144,7 +144,6 @@ class _CustomerScreenState extends State<CustomerScreen> {
             child: Column(
               children: [
                 _buildFilterRow(),
-                const SizedBox(height: 16),
                 SizedBox(
                   child: BlocBuilder<CustomerBloc, CustomerState>(
                     builder: (context, state) {
@@ -200,6 +199,8 @@ class _CustomerScreenState extends State<CustomerScreen> {
 
   Widget _buildFilterRow() {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.start,
       children: [
         // 🔍 Search Field
         Expanded(
@@ -211,7 +212,7 @@ class _CustomerScreenState extends State<CustomerScreen> {
               selectedStatusNotifier.value = null;
               _fetchApi();
             },
-            hintText: "Search Customer Name, Phone, or Email",
+            hintText: "Customer Name, Phone, or Email",
           ),
         ),
         const SizedBox(width: 10),
@@ -219,8 +220,8 @@ class _CustomerScreenState extends State<CustomerScreen> {
         // 📊 Status Dropdown
         Expanded(
           child: AppDropdown<String>(
-            label: "Status",
             context: context,
+            isLabel: false,
             hint: "Select Status",
             isNeedAll: true,
             isRequired: false,
@@ -243,7 +244,7 @@ class _CustomerScreenState extends State<CustomerScreen> {
                   fontWeight: FontWeight.w300,
                 ),
               ),
-            ),
+            ), label: '',
           ),
         ),
         const SizedBox(width: 10),

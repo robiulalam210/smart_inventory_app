@@ -53,7 +53,7 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
     on<UpdateSwitchCustomer>(_onUpdateSwitchCustomerList);
     on<DeleteCustomer >(_onDeleteCustomer);
   }
-  //
+
   // Future<void> _onFetchCustomerList(
   //     FetchCustomerList event,
   //     Emitter<CustomerState> emit,

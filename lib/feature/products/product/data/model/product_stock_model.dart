@@ -67,6 +67,11 @@ class ProductModelStockModel {
     this.stockStatus,
   });
 
+  @override
+  String toString() {
+    // TODO: implement toString
+    return name??"";
+  }
   factory ProductModelStockModel.fromJson(Map<String, dynamic> json) => ProductModelStockModel(
     id: json["id"],
     company: json["company"],

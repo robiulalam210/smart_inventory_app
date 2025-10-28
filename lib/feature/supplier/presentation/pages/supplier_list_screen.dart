@@ -131,11 +131,14 @@ class _SupplierScreenState extends State<SupplierScreen> {
           child: Column(
             children: [
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   Expanded(
                     child: CustomSearchTextFormField(
                       controller: filterTextController,
                       forSearch: true,
+                      isRequiredLabel: false,
 
                       onClear: () {
                         filterTextController.clear();
@@ -144,13 +147,12 @@ class _SupplierScreenState extends State<SupplierScreen> {
                       onChanged: (value) {
                         _fetchApi(filterText: value);
                       },
-                      hintText: "Search Name",
+                      hintText: " Name",
                     ),
                   ),
                   gapW16,
                   Expanded(
                     child:   AppDropdown(
-                      label: "Status",
                       context: context,
                       hint: "Select Status",
                       isLabel: true,
@@ -176,7 +178,7 @@ class _SupplierScreenState extends State<SupplierScreen> {
                             fontWeight: FontWeight.w600,
                           ),
                         ),
-                      ),
+                      ), label: '',
                     ),
                   ),
 
