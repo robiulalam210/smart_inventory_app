@@ -184,10 +184,12 @@ class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
       final res = await postResponse(
           url: AppUrls.expense, payload: event.body);
 
-      // FIX: Parse as single object, not list
-      ApiResponse<ExpenseModel> response = appParseJson<ExpenseModel>(
-        res,
-            (data) => ExpenseModel.fromJson(data), // Single object, not list
+
+      final jsonString = jsonEncode(res);
+
+      ApiResponse response = appParseJson(
+        jsonString,
+            (data) => ExpenseModel.fromJson(data),
       );
 
       if (response.success == false) {

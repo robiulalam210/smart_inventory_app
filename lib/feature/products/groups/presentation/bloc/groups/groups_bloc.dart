@@ -118,12 +118,14 @@ class GroupsBloc extends Bloc<GroupsEvent, GroupsState> {
         url: AppUrls.group,
         payload: event.body,
       ); // Use the correct API URL
+      final jsonString = jsonEncode(res);
 
       ApiResponse response = appParseJson(
-        res,
-        (data) =>
-            List<GroupsModel>.from(data.map((x) => GroupsModel.fromJson(x))),
+        jsonString,
+            (data) => GroupsModel.fromJson(data),
       );
+
+
       if (response.success == false) {
         emit(GroupsAddFailed(title: '', content: response.message ?? ""));
         return;

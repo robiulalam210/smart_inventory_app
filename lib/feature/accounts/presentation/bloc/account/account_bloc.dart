@@ -140,10 +140,15 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
         payload: event.body,
       ); // Use the correct API URL
 
+
+
+      final jsonString = jsonEncode(res);
+
       ApiResponse response = appParseJson(
-        res,
-            (data) => List<AccountModel>.from(data.map((x) => AccountModel.fromJson(x))),
+        jsonString,
+            (data) => AccountModel.fromJson(data),
       );
+
       if (response.success == false) {
         emit(AccountAddFailed(title: '', content: response.message ?? ""));
         return;

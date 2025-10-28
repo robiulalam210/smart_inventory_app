@@ -3,7 +3,7 @@ import '../../../../../core/repositories/delete_response.dart';
 import '../../../../../core/repositories/get_response.dart';
 import '../../../../common/data/models/api_response_mod.dart';
 import '../../../../common/data/models/app_parse_json.dart';
-import '../../../../customer/data/model/customer_model.dart';
+import '../../../../customer/data/model/customer_active_model.dart';
 import '../../../../users_list/data/model/user_model.dart';
 import '../../../data/models/pos_sale_model.dart';
 
@@ -14,7 +14,7 @@ part 'possale_state.dart';
 class PosSaleBloc extends Bloc<PosSaleEvent, PosSaleState> {
   List<String> posTypeList = ["Sale", "Pos Sale"];
   List<PosSaleModel> list = [];
-  CustomerModel? selectCustomerModel;
+  CustomerActiveModel? selectCustomerModel;
   UsersListModel? selectUserModel;
   PosSaleBloc() : super(PosSaleInitial()) {
     on<FetchPosSaleList>(_onFetchPosSaleList);

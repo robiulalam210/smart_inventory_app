@@ -10,6 +10,7 @@ import '../../../../core/widgets/app_dropdown.dart';
 import '../../../../core/widgets/app_loader.dart';
 import '../../../../core/widgets/coustom_search_text_field.dart';
 import '../../../../core/widgets/date_range.dart';
+import '../../../customer/data/model/customer_active_model.dart';
 import '../../../customer/data/model/customer_model.dart';
 import '../../../customer/presentation/bloc/customer/customer_bloc.dart';
 import '../../../products/product/presentation/widget/pagination.dart';
@@ -50,7 +51,7 @@ class _MoneyReceiptScreenState extends State<MoneyReceiptScreen> {
       FetchUserList(context, dropdownFilter: "?status=1"),
     );
     context.read<CustomerBloc>().add(
-      FetchCustomerList(context, dropdownFilter: "?status=1"),
+      FetchCustomerActiveList(context, ),
     );
     _fetchApi(from: startDate, to: endDate);
   }
@@ -288,7 +289,7 @@ class _MoneyReceiptScreenState extends State<MoneyReceiptScreen> {
           flex: 1,
           child: BlocBuilder<CustomerBloc, CustomerState>(
             builder: (context, state) {
-              return AppDropdown<CustomerModel>(
+              return AppDropdown<CustomerActiveModel>(
                 label: "Customer",
                 context: context,
                 isSearch: true,
@@ -301,7 +302,7 @@ class _MoneyReceiptScreenState extends State<MoneyReceiptScreen> {
                 isNeedAll: true,
                 isRequired: true,
                 value: context.read<MoneyReceiptBloc>().selectCustomerModel,
-                itemList: context.read<CustomerBloc>().list,
+                itemList: context.read<CustomerBloc>().activeCustomer,
                 onChanged: (newVal) {
                   print('Customer selected: ${newVal?.id} - ${newVal?.name}');
 
@@ -323,7 +324,7 @@ class _MoneyReceiptScreenState extends State<MoneyReceiptScreen> {
                       ? 'Please select Customer'
                       : null;
                 },
-                itemBuilder: (item) => DropdownMenuItem<CustomerModel>(
+                itemBuilder: (item) => DropdownMenuItem<CustomerActiveModel>(
                   value: item,
                   child: Text(
                     item.name ?? 'Unknown Customer',

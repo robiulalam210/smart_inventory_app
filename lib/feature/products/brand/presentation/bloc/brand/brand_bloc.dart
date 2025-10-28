@@ -103,18 +103,14 @@ class BrandBloc extends Bloc<BrandEvent, BrandState> {
       final res = await postResponse(url: AppUrls.brand, payload: event.body);
 
       // Log the response for debugging
+      final jsonString = jsonEncode(res);
 
-      ApiResponse response = appParseJson(res, (data) {
-        // Check if data is a Map (object)
-        if (data is Map<String, dynamic>) {
-          // Create a BrandModel from the single object
-          return BrandModel.fromJson(data);
-        } else {
-          throw Exception(
-            "Expected data to be an object but got ${data.runtimeType}",
-          );
-        }
-      });
+      ApiResponse response = appParseJson(
+        jsonString,
+            (data) => BrandModel.fromJson(data),
+      );
+
+
 
       if (response.success == false) {
         emit(BrandAddFailed(title: '', content: response.message ?? ""));

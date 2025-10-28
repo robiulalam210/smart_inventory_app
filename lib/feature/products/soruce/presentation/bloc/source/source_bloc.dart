@@ -99,11 +99,14 @@ class SourceBloc extends Bloc<SourceEvent, SourceState> {
 
     try {
       final res  = await postResponse(url: AppUrls.source,payload: event.body); // Use the correct API URL
+      final jsonString = jsonEncode(res);
 
       ApiResponse response = appParseJson(
-        res,
-            (data) => List<SourceModel>.from(data.map((x) => SourceModel.fromJson(x))),
+        jsonString,
+            (data) => SourceModel.fromJson(data),
       );
+
+
       if (response.success == false) {
         emit(SourceAddFailed(title: '', content: response.message??""));
         return;

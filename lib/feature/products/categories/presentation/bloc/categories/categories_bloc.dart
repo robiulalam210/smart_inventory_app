@@ -95,10 +95,14 @@ class CategoriesBloc extends Bloc<CategoriesEvent, CategoriesState> {
     try {
       final res  = await postResponse(url: AppUrls.category,payload: event.body); // Use the correct API URL
 
+
+      final jsonString = jsonEncode(res);
+
       ApiResponse response = appParseJson(
-        res,
-            (data) => List<CategoryModel>.from(data.map((x) => CategoryModel.fromJson(x))),
+        jsonString,
+            (data) => CategoryModel.fromJson(data),
       );
+
       if (response.success == false) {
         emit(CategoriesAddFailed(title: '', content: response.message??""));
         return;

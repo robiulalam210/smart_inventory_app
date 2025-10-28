@@ -33,6 +33,28 @@ final class CustomerListFailed extends CustomerState {
   CustomerListFailed({required this.title, required this.content});
 }
 
+
+
+
+final class CustomerActiveListLoading extends CustomerState {}
+
+final class CustomerActiveSuccess extends CustomerState {
+  final List<CustomerActiveModel> list;
+
+
+  CustomerActiveSuccess({
+    required this.list,
+
+  });
+}
+
+final class CustomerActiveListFailed extends CustomerState {
+  final String title, content;
+
+  CustomerActiveListFailed({required this.title, required this.content});
+}
+
+
 final class CustomerAddInitial extends CustomerState {}
 
 final class CustomerAddLoading extends CustomerState {}

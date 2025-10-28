@@ -5,6 +5,7 @@ import '../../../../../core/repositories/get_response.dart';
 import '../../../../../core/repositories/post_response.dart';
 import '../../../../common/data/models/api_response_mod.dart';
 import '../../../../common/data/models/app_parse_json.dart';
+import '../../../../customer/data/model/customer_active_model.dart';
 import '../../../../customer/data/model/customer_model.dart';
 import '../../../../sales/data/models/pos_sale_model.dart';
 import '../../../../users_list/data/model/user_model.dart';
@@ -33,7 +34,7 @@ class MoneyReceiptBloc extends Bloc<MoneyReceiptEvent, MoneyReceiptState> {
   TextEditingController chequeNumberController = TextEditingController();
   TextEditingController withdrawDateController = TextEditingController();
 
-  CustomerModel? selectCustomerModel;
+  CustomerActiveModel? selectCustomerModel;
   UsersListModel? selectUserModel;
 
   // PosSaleModel? selectPosSaleModel;
@@ -239,8 +240,12 @@ class MoneyReceiptBloc extends Bloc<MoneyReceiptEvent, MoneyReceiptState> {
       final res = await postResponse(
           url: AppUrls.moneyReceipt,
           payload: event.body); // Use the correct API URL
+
+
+      final jsonString = jsonEncode(res);
+
       ApiResponse response = appParseJson(
-        res,
+        jsonString,
             (data) => CreateMoneyReciptModel.fromJson(data),
       );
 

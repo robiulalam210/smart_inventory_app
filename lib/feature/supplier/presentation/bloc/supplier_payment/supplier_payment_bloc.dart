@@ -175,10 +175,13 @@ class SupplierPaymentBloc extends Bloc<SupplierPaymentEvent, SupplierPaymentStat
     try {
       final res  = await postResponse(url: AppUrls.supplierPayment,payload: event.body); // Use the correct API URL
 
+      final jsonString = jsonEncode(res);
+
       ApiResponse response = appParseJson(
-        res,
-            (data) => List<SupplierPaymentModel>.from(data.map((x) => SupplierPaymentModel.fromJson(x))),
+        jsonString,
+            (data) => SupplierPaymentModel.fromJson(data),
       );
+
       if (response.success == false) {
         emit(SupplierPaymentAddFailed(title: '', content: response.message??""));
         return;

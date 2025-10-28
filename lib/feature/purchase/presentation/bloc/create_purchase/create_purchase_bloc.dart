@@ -54,11 +54,14 @@ class CreatePurchaseBloc extends Bloc<CreatePurchaseEvent, CreatePurchaseState> 
     try {
       final res  = await postResponse(url: AppUrls.purchase,payload: event.body); // Use the correct API URL
 
+
+
+      final jsonString = jsonEncode(res);
+
       ApiResponse response = appParseJson(
-        res,
+        jsonString,
             (data) => CreatePurchaseModel.fromJson(data),
       );
-
 
 
 

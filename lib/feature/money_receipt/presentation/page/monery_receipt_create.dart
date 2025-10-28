@@ -30,7 +30,7 @@ class _MoneyReceiptListScreenState extends State<MoneyReceiptForm> {
       FetchUserList(context, dropdownFilter: "?status=1"),
     );
     context.read<CustomerBloc>().add(
-      FetchCustomerList(context, dropdownFilter: "?status=1"),
+      FetchCustomerActiveList(context, ),
     );
     context.read<AccountBloc>().add(FetchAccountList(context));
 
@@ -104,6 +104,7 @@ class _MoneyReceiptListScreenState extends State<MoneyReceiptForm> {
           child: Form(
             key: formKey,
             child: Container(
+              padding: EdgeInsets.all(10),
               color: AppColors.bg,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -117,7 +118,7 @@ class _MoneyReceiptListScreenState extends State<MoneyReceiptForm> {
                   const SizedBox(height: 18),
                   Container(
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF6F6F6),
+                      color: Colors.white,
                       borderRadius: BorderRadius.circular(6),
                     ),
                     padding: const EdgeInsets.all(20),
@@ -152,7 +153,7 @@ class _MoneyReceiptListScreenState extends State<MoneyReceiptForm> {
                                     value: context
                                         .read<MoneyReceiptBloc>()
                                         .selectCustomerModel,
-                                    itemList: context.read<CustomerBloc>().list,
+                                    itemList: context.read<CustomerBloc>().activeCustomer,
                                     onChanged: (newVal) {
                                       context
                                               .read<MoneyReceiptBloc>()
@@ -425,7 +426,7 @@ class _MoneyReceiptListScreenState extends State<MoneyReceiptForm> {
                   const SizedBox(height: 16),
                   Container(
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF6F6F6),
+                      color: Colors.white,
                       borderRadius: BorderRadius.circular(6),
                     ),
                     padding: const EdgeInsets.all(20),

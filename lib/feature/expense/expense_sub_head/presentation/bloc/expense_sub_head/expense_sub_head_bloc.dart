@@ -105,11 +105,14 @@ class ExpenseSubHeadBloc extends Bloc<ExpenseSubHeadEvent, ExpenseSubHeadState> 
           payload: event.body
       );
 
-      // FIX: Parse as single object instead of list
-      ApiResponse<ExpenseSubHeadModel> response = appParseJson<ExpenseSubHeadModel>(
-        res,
-            (data) => ExpenseSubHeadModel.fromJson(data), // Single object, not list
+
+      final jsonString = jsonEncode(res);
+
+      ApiResponse response = appParseJson(
+        jsonString,
+            (data) => ExpenseSubHeadModel.fromJson(data),
       );
+
 
       if (response.success == false) {
         emit(ExpenseSubHeadAddFailed(

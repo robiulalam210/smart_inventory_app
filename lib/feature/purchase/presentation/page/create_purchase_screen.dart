@@ -16,6 +16,7 @@ import '../../../../../core/widgets/app_dropdown.dart';
 import '../../../../../core/widgets/app_loader.dart';
 import '../../../../../core/widgets/input_field.dart';
 import '../../../accounts/presentation/bloc/account/account_bloc.dart';
+import '../../../lab_dashboard/presentation/bloc/dashboard/dashboard_bloc.dart';
 import '../../../supplier/data/model/supplier_list_model.dart';
 import '../../../supplier/presentation/bloc/supplier/supplier_list_bloc.dart';
 import '../bloc/create_purchase/create_purchase_bloc.dart';
@@ -314,6 +315,9 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
               appLoader(context, "Creating Purchase, please wait...");
             } else if (state is CreatePurchaseSuccess) {
               Navigator.pop(context);
+
+              context.read<DashboardBloc>().add(ChangeDashboardScreen(index: 6));
+
               // AppRoutes.pushReplacement(context, const PosSaleScreen());
             } else if (state is CreatePurchaseFailed) {
               Navigator.pop(context);

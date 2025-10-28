@@ -87,11 +87,14 @@ class ExpenseHeadBloc extends Bloc<ExpenseHeadEvent, ExpenseHeadState> {
 
     try {
       final res = await postResponse(url: AppUrls.expenseHead, payload: event.body);
+      final jsonString = jsonEncode(res);
 
-      ApiResponse<ExpenseHeadModel> response = appParseJson(
-        res,
+      ApiResponse response = appParseJson(
+        jsonString,
             (data) => ExpenseHeadModel.fromJson(data),
       );
+
+
 
       if (response.success == false) {
         emit(ExpenseHeadAddFailed(title: '', content: response.message ?? ""));

@@ -1,6 +1,7 @@
 part of 'customer_bloc.dart';
 
 sealed class CustomerEvent {}
+
 class FetchCustomerList extends CustomerEvent {
   BuildContext context;
   final String dropdownFilter;
@@ -11,15 +12,24 @@ class FetchCustomerList extends CustomerEvent {
   final int pageSize; // Add pageSize
 
   FetchCustomerList(
-      this.context, {
-        this.dropdownFilter = '',
-        this.filterText = '',
-        this.filterApiURL = '',
-        this.status = '',
-        this.pageNumber = 1, // Change from 0 to 1
-        this.pageSize = 10, // Add default page size
-      });
+    this.context, {
+    this.dropdownFilter = '',
+    this.filterText = '',
+    this.filterApiURL = '',
+    this.status = '',
+    this.pageNumber = 1, // Change from 0 to 1
+    this.pageSize = 10, // Add default page size
+  });
 }
+class FetchCustomerActiveList extends CustomerEvent {
+  BuildContext context;
+
+  FetchCustomerActiveList(
+    this.context
+
+  );
+}
+
 class AddCustomer extends CustomerEvent {
   final Map<String, dynamic>? body;
 

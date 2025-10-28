@@ -100,10 +100,15 @@ class UnitBloc extends Bloc<UnitEvent, UnitState> {
     try {
       final res  = await postResponse(url: AppUrls.unit,payload: event.body); // Use the correct API URL
 
+
+
+      final jsonString = jsonEncode(res);
+
       ApiResponse response = appParseJson(
-        res,
-            (data) => List<UnitsModel>.from(data.map((x) => UnitsModel.fromJson(x))),
+        jsonString,
+            (data) => UnitsModel.fromJson(data),
       );
+
       if (response.success == false) {
         emit(UnitAddFailed(title: '', content: response.message??""));
         return;

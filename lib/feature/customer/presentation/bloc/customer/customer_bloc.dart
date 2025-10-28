@@ -2,6 +2,8 @@
 
 
 
+import 'package:smart_inventory/feature/customer/data/model/customer_active_model.dart';
+
 import '../../../../../core/configs/configs.dart';
 import '../../../../../core/repositories/delete_response.dart';
 import '../../../../../core/repositories/get_response.dart';
@@ -18,6 +20,7 @@ part 'customer_state.dart';
 
 class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
   List<CustomerModel> list = [];
+  List<CustomerActiveModel> activeCustomer = [];
   String selectedState = "";
   CustomerModel? customerModel;
   List<String> status = [
@@ -47,6 +50,7 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
   TextEditingController addressController = TextEditingController();
 
   CustomerBloc() : super(CustomerInitial()) {
+    on<FetchCustomerActiveList>(_onFetchCustomerActiveList);
     on<FetchCustomerList>(_onFetchCustomerList);
     on<AddCustomer>(_onCreateCustomerList);
     on<UpdateCustomer>(_onUpdateCustomerList);
@@ -54,53 +58,48 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
     on<DeleteCustomer >(_onDeleteCustomer);
   }
 
-  // Future<void> _onFetchCustomerList(
-  //     FetchCustomerList event,
-  //     Emitter<CustomerState> emit,
-  //     ) async {
-  //   emit(CustomerListLoading());
-  //
-  //   try {
-  //     final res = await getResponse(url: AppUrls.customer, context: event.context);
-  //
-  //     ApiResponse response = appParseJson(
-  //       res,
-  //           (data) => List<CustomerModel>.from(
-  //         data.map((x) => CustomerModel.fromJson(x)),
-  //       ),
-  //     );
-  //
-  //     // Check if API response is successful
-  //     if (response.success == true) {
-  //       final List<CustomerModel> customerList = response.data ?? [];
-  //
-  //       if (customerList.isEmpty) {
-  //         emit(CustomerSuccess(list: []));
-  //         return;
-  //       }
-  //
-  //       // Filter customers
-  //       final filteredCustomers = await _filterCustomers(
-  //         customerList,
-  //         event.filterText,
-  //         event.status,
-  //       );
-  //       list=filteredCustomers;
-  //
-  //       emit(CustomerSuccess(list: filteredCustomers));
-  //     } else {
-  //       emit(CustomerListFailed(
-  //         title: "Error",
-  //         content: response.message ?? "Unknown Error",
-  //       ));
-  //     }
-  //   } catch (error) {
-  //     emit(CustomerListFailed(
-  //       title: "Error",
-  //       content: error.toString(),
-  //     ));
-  //   }
-  // }
+  Future<void> _onFetchCustomerActiveList(
+      FetchCustomerActiveList event,
+      Emitter<CustomerState> emit,
+      ) async {
+    emit(CustomerListLoading());
+
+    try {
+      final res = await getResponse(url: AppUrls.customerActive, context: event.context);
+
+      ApiResponse response = appParseJson(
+        res,
+            (data) => List<CustomerActiveModel>.from(
+          data.map((x) => CustomerActiveModel.fromJson(x)),
+        ),
+      );
+
+      // Check if API response is successful
+      if (response.success == true) {
+        final List<CustomerActiveModel> customerList = response.data ?? [];
+
+        if (customerList.isEmpty) {
+          emit(CustomerActiveSuccess(list: []));
+          return;
+        }
+
+
+        activeCustomer=customerList;
+
+        emit(CustomerActiveSuccess(list: activeCustomer));
+      } else {
+        emit(CustomerActiveListFailed(
+          title: "Error",
+          content: response.message ?? "Unknown Error",
+        ));
+      }
+    } catch (error) {
+      emit(CustomerActiveListFailed(
+        title: "Error",
+        content: error.toString(),
+      ));
+    }
+  }
   Future<void> _onFetchCustomerList(
       FetchCustomerList event,
       Emitter<CustomerState> emit,
@@ -240,12 +239,15 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
       final res = await postResponse(
           url: AppUrls.customer,
           payload: event.body); // Use the correct API URL
+      // Convert the Map to JSON string for appParseJson
+      final jsonString = jsonEncode(res);
 
       ApiResponse response = appParseJson(
-        res,
-        (data) =>
-            CustomerModel.fromJson(data), // Parse a single CustomerModel object
+        jsonString,
+            (data) => CustomerModel.fromJson(data),
       );
+
+
       if (response.success == false) {
         emit(CustomerAddFailed(title: '', content: response.message ?? ""));
         return;
