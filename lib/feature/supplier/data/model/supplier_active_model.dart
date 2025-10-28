@@ -1,14 +1,15 @@
+
 // To parse this JSON data, do
 //
-//     final supplierListModel = supplierListModelFromJson(jsonString);
+//     final supplierActiveModel = supplierActiveModelFromJson(jsonString);
 
 import 'dart:convert';
 
-List<SupplierListModel> supplierListModelFromJson(String str) => List<SupplierListModel>.from(json.decode(str).map((x) => SupplierListModel.fromJson(x)));
+List<SupplierActiveModel> supplierActiveModelFromJson(String str) => List<SupplierActiveModel>.from(json.decode(str).map((x) => SupplierActiveModel.fromJson(x)));
 
-String supplierListModelToJson(List<SupplierListModel> data) => json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
+String supplierActiveModelToJson(List<SupplierActiveModel> data) => json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
 
-class SupplierListModel {
+class SupplierActiveModel {
   final int? id;
   final String? name;
   final String? email;
@@ -26,7 +27,9 @@ class SupplierListModel {
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
-  SupplierListModel({
+
+
+  SupplierActiveModel({
     this.id,
     this.name,
     this.email,
@@ -48,9 +51,9 @@ class SupplierListModel {
   @override
   String toString() {
     // TODO: implement toString
-    return name??'';
+    return name??"";
   }
-  factory SupplierListModel.fromJson(Map<String, dynamic> json) => SupplierListModel(
+  factory SupplierActiveModel.fromJson(Map<String, dynamic> json) => SupplierActiveModel(
     id: json["id"],
     name: json["name"],
     email: json["email"],

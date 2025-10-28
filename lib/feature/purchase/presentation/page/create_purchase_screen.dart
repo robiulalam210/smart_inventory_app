@@ -5,6 +5,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:smart_inventory/feature/products/product/data/model/product_model.dart';
 import 'package:smart_inventory/feature/products/product/presentation/bloc/products/products_bloc.dart';
+import 'package:smart_inventory/feature/supplier/data/model/supplier_active_model.dart';
+import 'package:smart_inventory/feature/supplier/presentation/bloc/supplier_invoice/supplier_invoice_bloc.dart';
 
 import '../../../../../core/configs/configs.dart';
 import '../../../../../core/shared/widgets/sideMenu/sidebar.dart';
@@ -48,7 +50,7 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
   void initState() {
     context.read<AccountBloc>().add(FetchAccountList(context));
 
-    context.read<SupplierListBloc>().add(FetchSupplierList(context));
+    context.read<SupplierInvoiceBloc>().add(FetchSupplierActiveList(context));
 
     super.initState();
 
@@ -345,9 +347,9 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                         md: 3,
                         lg: 3,
                         xl: 3,
-                        child: BlocBuilder<SupplierListBloc, SupplierListState>(
+                        child: BlocBuilder<SupplierInvoiceBloc, SupplierInvoiceState>(
                           builder: (context, state) {
-                            return AppDropdown<SupplierListModel>(
+                            return AppDropdown<SupplierActiveModel>(
                               label: "Supplier",
                               context: context,
                               hint: "Select Supplier",
@@ -358,8 +360,8 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                                   .read<CreatePurchaseBloc>()
                                   .supplierListModel,
                               itemList: context
-                                  .read<SupplierListBloc>()
-                                  .supplierListModel,
+                                  .read<SupplierInvoiceBloc>()
+                                  .supplierActiveList,
                               onChanged: (newVal) {
                                 context
                                         .read<CreatePurchaseBloc>()

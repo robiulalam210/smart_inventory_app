@@ -5,8 +5,10 @@ import 'package:hugeicons/hugeicons.dart';
 import 'package:smart_inventory/feature/accounts/data/model/create_account_model.dart';
 import 'package:smart_inventory/feature/purchase/presentation/bloc/create_purchase/create_purchase_bloc.dart';
 import 'package:smart_inventory/feature/purchase/presentation/bloc/purchase_bloc.dart';
+import 'package:smart_inventory/feature/supplier/data/model/supplier_active_model.dart';
 import 'package:smart_inventory/feature/supplier/data/model/supplier_list_model.dart';
 import 'package:smart_inventory/feature/supplier/presentation/bloc/supplier/supplier_list_bloc.dart';
+import 'package:smart_inventory/feature/supplier/presentation/bloc/supplier_invoice/supplier_invoice_bloc.dart';
 
 import '../../../../core/configs/configs.dart';
 import '../../../../core/shared/widgets/sideMenu/sidebar.dart';
@@ -243,9 +245,9 @@ class _PurchaseScreenState extends State<PurchaseScreen> {
         // 👤 Supplier Dropdown
         Expanded(
           flex: 1,
-          child: BlocBuilder<SupplierListBloc, SupplierListState>(
+          child: BlocBuilder<SupplierInvoiceBloc, SupplierInvoiceState>(
             builder: (context, state) {
-              return AppDropdown<SupplierListModel>(
+              return AppDropdown<SupplierActiveModel>(
                 label: "Supplier",
                 context: context,
                 hint: "Select Supplier",
@@ -253,7 +255,7 @@ class _PurchaseScreenState extends State<PurchaseScreen> {
                 isRequired: false,
                 isNeedAll: true,
                 value: null, // You might want to store selected supplier in a variable
-                itemList: context.read<SupplierListBloc>().supplierListModel,
+                itemList: context.read<SupplierInvoiceBloc>().supplierActiveList,
                 onChanged: (newVal) {
                   selectedSupplierNotifier.value = newVal?.id?.toString();
                   _fetchApi(
@@ -261,7 +263,7 @@ class _PurchaseScreenState extends State<PurchaseScreen> {
                   );
                 },
                 validator: (value) => null,
-                itemBuilder: (item) => DropdownMenuItem<SupplierListModel>(
+                itemBuilder: (item) => DropdownMenuItem<SupplierActiveModel>(
                   value: item,
                   child: Text(
                     item.name ?? 'Unknown Supplier',

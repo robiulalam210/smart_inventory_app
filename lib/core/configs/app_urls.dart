@@ -45,6 +45,7 @@ class AppUrls {
   static final String moneyReceipt          = '$baseUrl/money-receipts/';
   static final String supplierPayment          = '$baseUrl/supplier-payments/';
   static final String supplierInvoiceList          = '$baseUrl/purchase-due/?supplier_id=';
+  static final String supplierActiveList          = '$baseUrl/suppliers-active';
 
 
 

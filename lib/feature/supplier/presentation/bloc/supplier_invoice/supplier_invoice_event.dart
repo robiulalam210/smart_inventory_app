@@ -15,6 +15,13 @@ class FetchSupplierInvoiceList extends SupplierInvoiceEvent {
   FetchSupplierInvoiceList(this.context,{this.filterText = '',this.dropdownFilter='', this.state = '', this.pageNumber = 0});
 }
 
+
+class FetchSupplierActiveList extends SupplierInvoiceEvent {
+  BuildContext context;
+
+  FetchSupplierActiveList(this.context);
+}
+
 class AddSupplierInvoiceList extends SupplierInvoiceEvent {
   final Map<String, String>? branch;
 

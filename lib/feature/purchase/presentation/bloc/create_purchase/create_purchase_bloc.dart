@@ -2,6 +2,8 @@
 
 
 
+import 'package:smart_inventory/feature/supplier/data/model/supplier_active_model.dart';
+
 import '../../../../../core/configs/configs.dart';
 import '../../../../../core/repositories/post_response.dart';
 import '../../../../common/data/models/api_response_mod.dart';
@@ -16,7 +18,7 @@ part 'create_purchase_state.dart';
 class CreatePurchaseBloc extends Bloc<CreatePurchaseEvent, CreatePurchaseState> {
 
 
-  SupplierListModel? supplierListModel;
+  SupplierActiveModel? supplierListModel;
   String selectedAccount = "";
 
   String selectedAccountId = "";
