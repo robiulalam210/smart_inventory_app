@@ -14,12 +14,20 @@ class UnitsModel {
   final String? name;
   final String? code;
 
+
+
   UnitsModel({
     this.id,
     this.company,
     this.name,
     this.code,
   });
+
+  @override
+  String toString() {
+    // TODO: implement toString
+    return name??"";
+  }
 
   factory UnitsModel.fromJson(Map<String, dynamic> json) => UnitsModel(
     id: json["id"],

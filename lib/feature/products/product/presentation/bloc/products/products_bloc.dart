@@ -1,3 +1,5 @@
+import 'package:smart_inventory/core/core.dart';
+
 import '../../../../../../core/configs/configs.dart';
 import '../../../../../../core/repositories/delete_response.dart';
 import '../../../../../../core/repositories/get_response.dart';
@@ -166,20 +168,22 @@ productList=list;
     emit(ProductsAddLoading());
 
     try {
-      // final res = await addProductService(
-      //   payload: event.body!, url: AppUrls.product, photoPath: event.photoPath,
-      //   // photoPath: event.photoPath!
-      // ); // Use the correct API URL
+      final res = await postResponse(
+        payload: event.body!, url: AppUrls.product,
 
-      // ApiResponse response = appParseJson(
-      //   res,
-      //   (data) =>
-      //       List<ProductModel>.from(data.map((x) => ProductModel.fromJson(x))),
-      // );
-      // if (response.success == false) {
-      //   emit(ProductsAddFailed(title: '', content: response.message ?? ""));
-      //   return;
-      // }
+      ); // Use the correct API URL
+      final jsonString = jsonEncode(res);
+
+      ApiResponse response = appParseJson(
+        jsonString,
+            (data) => ProductModel.fromJson(data),
+      );
+
+
+      if (response.success == false) {
+        emit(ProductsAddFailed(title: '', content: response.message ?? ""));
+        return;
+      }
       clearData();
       emit(ProductsAddSuccess());
     } catch (error) {

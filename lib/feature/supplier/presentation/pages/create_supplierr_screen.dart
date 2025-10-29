@@ -1,16 +1,8 @@
 import '../../../../core/configs/configs.dart';
 import '../../../../core/shared/widgets/sideMenu/sidebar.dart';
-import '../../../../core/widgets/app_alert_dialog.dart';
 import '../../../../core/widgets/app_button.dart';
-import '../../../../core/widgets/app_dropdown.dart';
-import '../../../../core/widgets/app_loader.dart';
-import '../../../../core/widgets/coustom_search_text_field.dart';
-import '../../../../core/widgets/custom_filter_ui.dart';
 import '../../../../core/widgets/input_field.dart';
-import '../../../customer/presentation/bloc/customer/customer_bloc.dart';
-import '../../../products/product/presentation/bloc/products/products_bloc.dart';
 import '../bloc/supplier/supplier_list_bloc.dart';
-import '../widget/widget.dart';
 
 class CreateSupplierScreen extends StatefulWidget {
   CreateSupplierScreen({super.key, this.submitText = '', this.id = ''});

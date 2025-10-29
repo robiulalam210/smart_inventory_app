@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'dart:developer' as d;
 import '../configs/app_constants.dart';
@@ -14,15 +15,13 @@ Future<Map<String, dynamic>> postResponse({
   logger.i("Uri : $uriUrl");
   final token = await LocalDB.getLoginInfo();
 
+  if (kDebugMode) {
+    print(uriUrl);
+  }
+
   final Map<String, String> header = {
-    "Accept": "application/json",
     "Content-Type": "application/json",
     'Authorization': 'Bearer ${token?['token']}',
-    "branch-id": "${token?['branchId']}".trim(), // Remove extra spaces
-    "branch-name": "${token?['branchName']}".trim(),
-    "bs-type": "${token?['bsType']}".trim(),
-    "user-id": "${token?['userId']}".trim(),
-    "is-super-admin": "false",
   };
 
   logger.i("header : $header");

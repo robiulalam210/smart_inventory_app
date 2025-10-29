@@ -4,6 +4,7 @@
 import '../../../../../core/configs/configs.dart';
 import '../../../../../core/shared/widgets/sideMenu/sidebar.dart';
 import '../../../../../core/widgets/app_alert_dialog.dart';
+import '../../../../../core/widgets/app_button.dart';
 import '../../../../../core/widgets/app_loader.dart';
 import '../../../../../core/widgets/coustom_search_text_field.dart';
 import '../../../../../core/widgets/custom_filter_ui.dart';
@@ -11,6 +12,7 @@ import '../../../categories/presentation/bloc/categories/categories_bloc.dart';
 import '../bloc/products/products_bloc.dart';
 import '../widget/pagination.dart';
 import '../widget/widget.dart';
+import 'product_create.dart';
 
 class ProductsScreen extends StatefulWidget {
   const ProductsScreen({super.key});
@@ -40,7 +42,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
     String state = '',
     String category = '',
     int pageNumber = 1,
-    int pageSize = 20,
+    int pageSize = 10,
   }) {
     context.read<ProductsBloc>().add(
       FetchProductsList(
@@ -130,6 +132,25 @@ class _ProductsScreenState extends State<ProductsScreen> {
                           },
                           hintText: "Search Name",
                         )),
+
+                    gapW16,
+                    AppButton(
+                      name: "Create Product",
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) {
+                            return Dialog(
+                              child: SizedBox(
+                                width: MediaQuery.of(context).size.width * 0.7,
+                                height: MediaQuery.of(context).size.height * 0.8,
+                                child: const ProductsForm(isDialog: true),
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    ),
                     CustomFilterBox(
                       onTapDown: (TapDownDetails details) {
                         _showFilterMenu(context, details.globalPosition);

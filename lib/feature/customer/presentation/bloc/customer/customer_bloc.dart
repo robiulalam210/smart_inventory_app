@@ -1,7 +1,3 @@
-
-
-
-
 import 'package:smart_inventory/feature/customer/data/model/customer_active_model.dart';
 
 import '../../../../../core/configs/configs.dart';
@@ -23,15 +19,9 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
   List<CustomerActiveModel> activeCustomer = [];
   String selectedState = "";
   CustomerModel? customerModel;
-  List<String> status = [
-    "Active",
-    "Inactive",
-  ];
+  List<String> status = ["Active", "Inactive"];
   String selectedStateBalanceType = "";
-  List<String> statusBalanceType = [
-    "Due",
-    "Advance",
-  ];
+  List<String> statusBalanceType = ["Due", "Advance"];
 
   SourceModel? sourceModel;
 
@@ -55,21 +45,24 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
     on<AddCustomer>(_onCreateCustomerList);
     on<UpdateCustomer>(_onUpdateCustomerList);
     on<UpdateSwitchCustomer>(_onUpdateSwitchCustomerList);
-    on<DeleteCustomer >(_onDeleteCustomer);
+    on<DeleteCustomer>(_onDeleteCustomer);
   }
 
   Future<void> _onFetchCustomerActiveList(
-      FetchCustomerActiveList event,
-      Emitter<CustomerState> emit,
-      ) async {
+    FetchCustomerActiveList event,
+    Emitter<CustomerState> emit,
+  ) async {
     emit(CustomerListLoading());
 
     try {
-      final res = await getResponse(url: AppUrls.customerActive, context: event.context);
+      final res = await getResponse(
+        url: AppUrls.customerActive,
+        context: event.context,
+      );
 
       ApiResponse response = appParseJson(
         res,
-            (data) => List<CustomerActiveModel>.from(
+        (data) => List<CustomerActiveModel>.from(
           data.map((x) => CustomerActiveModel.fromJson(x)),
         ),
       );
@@ -83,27 +76,26 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
           return;
         }
 
-
-        activeCustomer=customerList;
+        activeCustomer = customerList;
 
         emit(CustomerActiveSuccess(list: activeCustomer));
       } else {
-        emit(CustomerActiveListFailed(
-          title: "Error",
-          content: response.message ?? "Unknown Error",
-        ));
+        emit(
+          CustomerActiveListFailed(
+            title: "Error",
+            content: response.message ?? "Unknown Error",
+          ),
+        );
       }
     } catch (error) {
-      emit(CustomerActiveListFailed(
-        title: "Error",
-        content: error.toString(),
-      ));
+      emit(CustomerActiveListFailed(title: "Error", content: error.toString()));
     }
   }
+
   Future<void> _onFetchCustomerList(
-      FetchCustomerList event,
-      Emitter<CustomerState> emit,
-      ) async {
+    FetchCustomerList event,
+    Emitter<CustomerState> emit,
+  ) async {
     emit(CustomerListLoading());
 
     try {
@@ -127,9 +119,9 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
       }
 
       // Build the complete URL with query parameters
-      Uri uri = Uri.parse(AppUrls.customer).replace(
-        queryParameters: queryParams,
-      );
+      Uri uri = Uri.parse(
+        AppUrls.customer,
+      ).replace(queryParameters: queryParams);
 
       final res = await getResponse(
         url: uri.toString(),
@@ -137,23 +129,23 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
       );
 
       // Parse the response
-      ApiResponse<Map<String, dynamic>> response = appParseJson<Map<String, dynamic>>(
-        res,
-            (data) => data,
-      );
+      ApiResponse<Map<String, dynamic>> response =
+          appParseJson<Map<String, dynamic>>(res, (data) => data);
 
       final data = response.data;
 
       if (data == null) {
-        emit(CustomerSuccess(
-          list: [],
-          count: 0,
-          totalPages: 0,
-          currentPage: 1,
-          pageSize: event.pageSize,
-          from: 0,
-          to: 0,
-        ));
+        emit(
+          CustomerSuccess(
+            list: [],
+            count: 0,
+            totalPages: 0,
+            currentPage: 1,
+            pageSize: event.pageSize,
+            from: 0,
+            to: 0,
+          ),
+        );
         return;
       }
 
@@ -170,55 +162,59 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
       }
 
       // Calculate pagination values
-      int count = pagination['count'] ?? pagination['total'] ?? customerList.length;
-      int totalPages = pagination['total_pages'] ?? pagination['last_page'] ??
+      int count =
+          pagination['count'] ?? pagination['total'] ?? customerList.length;
+      int totalPages =
+          pagination['total_pages'] ??
+          pagination['last_page'] ??
           ((count / event.pageSize).ceil());
-      int currentPage = pagination['current_page'] ?? pagination['page'] ?? event.pageNumber;
-      int pageSize = pagination['page_size'] ?? pagination['per_page'] ?? event.pageSize;
+      int currentPage =
+          pagination['current_page'] ?? pagination['page'] ?? event.pageNumber;
+      int pageSize =
+          pagination['page_size'] ?? pagination['per_page'] ?? event.pageSize;
       int from = ((currentPage - 1) * pageSize) + 1;
       int to = from + customerList.length - 1;
 
       // Update the list in bloc if needed
       // list = customerList; // Remove this if it causes issues
 
-      emit(CustomerSuccess(
-        list: customerList,
-        count: count,
-        totalPages: totalPages,
-        currentPage: currentPage,
-        pageSize: pageSize,
-        from: from,
-        to: to,
-      ));
+      emit(
+        CustomerSuccess(
+          list: customerList,
+          count: count,
+          totalPages: totalPages,
+          currentPage: currentPage,
+          pageSize: pageSize,
+          from: from,
+          to: to,
+        ),
+      );
     } catch (error) {
-      emit(CustomerListFailed(
-        title: "Error",
-        content: error.toString(),
-      ));
+      emit(CustomerListFailed(title: "Error", content: error.toString()));
     }
   }
 
-
-
-
-
   Future<void> _onDeleteCustomer(
-      DeleteCustomer event, Emitter<CustomerState> emit) async {
+    DeleteCustomer event,
+    Emitter<CustomerState> emit,
+  ) async {
     emit(CustomerDeleteLoading());
 
     try {
       final res = await deleteResponse(
-          url:
-          "${AppUrls.customer}/${event.id.toString()}"); // Use the correct API URL
+        url: "${AppUrls.customer}/${event.id.toString()}",
+      ); // Use the correct API URL
 
       ApiResponse response = appParseJson(
         res,
-            (data) =>
-        List<CustomerModel>.from(data.map((x) => CustomerModel.fromJson(x))),
+        (data) => List<CustomerModel>.from(
+          data.map((x) => CustomerModel.fromJson(x)),
+        ),
       );
       if (response.success == false) {
-        emit(CustomerSwitchFailed(
-            title: 'Alert', content: response.message ?? ""));
+        emit(
+          CustomerSwitchFailed(title: 'Alert', content: response.message ?? ""),
+        );
         return;
       }
       //  clearData();
@@ -229,24 +225,24 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
     }
   }
 
-
-
   Future<void> _onCreateCustomerList(
-      AddCustomer event, Emitter<CustomerState> emit) async {
+    AddCustomer event,
+    Emitter<CustomerState> emit,
+  ) async {
     emit(CustomerAddLoading());
 
     try {
       final res = await postResponse(
-          url: AppUrls.customer,
-          payload: event.body); // Use the correct API URL
+        url: AppUrls.customer,
+        payload: event.body,
+      ); // Use the correct API URL
       // Convert the Map to JSON string for appParseJson
       final jsonString = jsonEncode(res);
 
       ApiResponse response = appParseJson(
         jsonString,
-            (data) => CustomerModel.fromJson(data),
+        (data) => CustomerModel.fromJson(data),
       );
-
 
       if (response.success == false) {
         emit(CustomerAddFailed(title: '', content: response.message ?? ""));
@@ -261,18 +257,22 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
   }
 
   Future<void> _onUpdateCustomerList(
-      UpdateCustomer event, Emitter<CustomerState> emit) async {
+    UpdateCustomer event,
+    Emitter<CustomerState> emit,
+  ) async {
     emit(CustomerSwitchLoading());
 
     try {
       final res = await patchResponse(
-          url: AppUrls.customer + event.id.toString(),
-          payload: event.body!); // Use the correct API URL
+        url: AppUrls.customer + event.id.toString(),
+        payload: event.body!,
+      ); // Use the correct API URL
 
       ApiResponse response = appParseJson(
         res,
         (data) => List<CustomerModel>.from(
-            data.map((x) => CustomerModel.fromJson(x))),
+          data.map((x) => CustomerModel.fromJson(x)),
+        ),
       );
       if (response.success == false) {
         emit(CustomerAddFailed(title: 'Json', content: response.message ?? ""));
@@ -287,22 +287,27 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
   }
 
   Future<void> _onUpdateSwitchCustomerList(
-      UpdateSwitchCustomer event, Emitter<CustomerState> emit) async {
+    UpdateSwitchCustomer event,
+    Emitter<CustomerState> emit,
+  ) async {
     emit(CustomerSwitchLoading());
 
     try {
       final res = await patchResponse(
-          url: AppUrls.customer + event.id.toString(),
-          payload: event.body!); // Use the correct API URL
+        url: AppUrls.customer + event.id.toString(),
+        payload: event.body!,
+      ); // Use the correct API URL
 
       ApiResponse response = appParseJson(
         res,
         (data) => List<CustomerModel>.from(
-            data.map((x) => CustomerModel.fromJson(x))),
+          data.map((x) => CustomerModel.fromJson(x)),
+        ),
       );
       if (response.success == false) {
-        emit(CustomerSwitchFailed(
-            title: 'Json', content: response.message ?? ""));
+        emit(
+          CustomerSwitchFailed(title: 'Json', content: response.message ?? ""),
+        );
         return;
       }
       clearData();
@@ -321,9 +326,8 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
     customerAdditionalNumberController.clear();
     customerOpeningBalanceController.clear();
     addressController.clear();
-    selectedState="";
-    selectedStateBalanceType="";
-    sourceModel==null;
-
+    selectedState = "";
+    selectedStateBalanceType = "";
+    sourceModel == null;
   }
 }

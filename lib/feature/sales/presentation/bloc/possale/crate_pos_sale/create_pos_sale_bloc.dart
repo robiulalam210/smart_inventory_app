@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dart:convert';
 import '../../../../../../core/configs/configs.dart';
 import '../../../../../../core/repositories/post_response.dart';
+import '../../../../../accounts/data/model/account_active_model.dart';
 import '../../../../../accounts/data/model/account_model.dart';
 import '../../../../../common/data/models/api_response_mod.dart';
 import '../../../../../common/data/models/app_parse_json.dart';
@@ -17,7 +18,7 @@ class CreatePosSaleBloc extends Bloc<CreatePosSaleEvent, CreatePosSaleState> {
   List customTypeList = ["Saved Customer", "Walk In Customer"];
   CustomerActiveModel? selectClintModel;
   UsersListModel? selectSalesModel;
-  AccountModel? accountModel;
+  AccountActiveModel? accountModel;
   String selectedAccount = "";
   String selectedAccountId = "";
   List paymentMethod = ["Bank", "Cash", "Mobile Banking"];

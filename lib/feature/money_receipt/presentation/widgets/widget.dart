@@ -139,7 +139,7 @@ class MoneyReceiptDataTableWidget extends StatelessWidget {
     }
 
     final summary = sale.paymentSummary;
-    final totalBefore = double.tryParse(summary?.beforePayment?.totalDue ?? "0");
+    final totalBefore = double.tryParse(summary?.beforePayment?.totalDue.toString() ?? "0");
     final amount = double.tryParse(sale.amount ?? '0') ?? 0;
     final status = summary?.status ?? '-';
 

@@ -36,9 +36,8 @@ class FetchProductsStockList extends ProductsEvent {
 
 class AddProducts extends ProductsEvent {
   final Map<String, String>? body;
-  String? photoPath;
 
-  AddProducts({this.body, this.photoPath});
+  AddProducts({this.body, });
 }
 
 class UpdateProducts extends ProductsEvent {

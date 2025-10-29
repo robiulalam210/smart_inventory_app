@@ -1,4 +1,6 @@
 
+import 'package:smart_inventory/feature/accounts/data/model/account_active_model.dart';
+
 import '../../../../../core/configs/configs.dart';
 import '../../../../../core/repositories/delete_response.dart';
 import '../../../../../core/repositories/get_response.dart';
@@ -19,7 +21,7 @@ part 'money_receipt_event.dart';
 class MoneyReceiptBloc extends Bloc<MoneyReceiptEvent, MoneyReceiptState> {
   List<MoneyreceiptModel> moneyReceiptModel = [];
 
-  List paymentTo = ["Over All", "Specific"];
+  List<String> paymentTo = ["Over All", "Specific"];
   List<String> paymentMethod = ["Bank", "Cash", "Mobile banking"];
   String selectedPayment = "";
   String? selectedPaymentToState;
@@ -35,6 +37,7 @@ class MoneyReceiptBloc extends Bloc<MoneyReceiptEvent, MoneyReceiptState> {
   TextEditingController withdrawDateController = TextEditingController();
 
   CustomerActiveModel? selectCustomerModel;
+  AccountActiveModel? accountModel;
   UsersListModel? selectUserModel;
 
   // PosSaleModel? selectPosSaleModel;

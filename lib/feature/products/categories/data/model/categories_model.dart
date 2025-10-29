@@ -21,6 +21,12 @@ class CategoryModel {
     this.description,
   });
 
+  @override
+  String toString() {
+    // TODO: implement toString
+    return name??"";
+  }
+
   factory CategoryModel.fromJson(Map<String, dynamic> json) => CategoryModel(
     id: json["id"],
     company: json["company"],

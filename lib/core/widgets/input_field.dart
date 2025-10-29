@@ -78,7 +78,7 @@ class CustomInputFieldState extends State<CustomInputField> {
       child: ConstrainedBox(
         constraints: BoxConstraints(
           maxHeight: 52, // Adjust max height as needed
-          minHeight: 32, // Adjust max height as needed
+          minHeight: 35, // Adjust max height as needed
         ),
         child: SingleChildScrollView(
           scrollDirection: Axis.vertical,
@@ -152,7 +152,7 @@ class CustomInputFieldState extends State<CustomInputField> {
                     suffixIcon: widget.suffixIcon,
 
                       contentPadding: const EdgeInsets.only(
-                          top: 8.0, bottom: 8.0, left: 6),
+                          top: 11.0, bottom: 11.0, left: 6),
                     errorBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(AppSizes.radius),
                         borderSide:  BorderSide(color: AppColors.error, )),

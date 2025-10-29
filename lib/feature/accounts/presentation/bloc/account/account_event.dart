@@ -21,6 +21,13 @@ class FetchAccountList extends AccountEvent {
         this.pageSize = 10, // Add default page size
       });
 }
+class FetchAccountActiveList extends AccountEvent {
+  BuildContext context;
+
+
+  FetchAccountActiveList(
+      this.context,);
+}
 
 
 class AddAccount extends AccountEvent {

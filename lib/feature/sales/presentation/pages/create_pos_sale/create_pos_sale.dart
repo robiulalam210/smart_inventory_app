@@ -15,6 +15,7 @@ import '../../../../../core/widgets/app_dropdown.dart';
 import '../../../../../core/widgets/app_loader.dart';
 import '../../../../../core/widgets/app_snack_bar.dart';
 import '../../../../../core/widgets/input_field.dart';
+import '../../../../accounts/data/model/account_active_model.dart';
 import '../../../../accounts/data/model/account_model.dart';
 import '../../../../accounts/presentation/bloc/account/account_bloc.dart';
 import '../../../../customer/data/model/customer_active_model.dart';
@@ -52,7 +53,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
 
   @override
   void initState() {
-    context.read<AccountBloc>().add(FetchAccountList(context));
+    context.read<AccountBloc>().add(FetchAccountActiveList(context));
     context.read<CustomerBloc>().add(FetchCustomerActiveList(context));
     context.read<UserBloc>().add(FetchUserList(context));
     context.read<ProductsBloc>().add(FetchProductsStockList(context));
@@ -867,9 +868,9 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
               Expanded(
                 child: BlocBuilder<AccountBloc, AccountState>(
                   builder: (context, state) {
-                    if (state is AccountListLoading) {
+                    if (state is AccountActiveListLoading) {
                       return const Center(child: CircularProgressIndicator());
-                    } else if (state is AccountListSuccess) {
+                    } else if (state is AccountActiveListSuccess) {
                       final filteredList = bloc.selectedPaymentMethod.isNotEmpty
                           ? state.list.where((item) {
                         return item.acType?.toLowerCase() == bloc.selectedPaymentMethod.toLowerCase();
@@ -879,7 +880,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                       final selectedAccount = bloc.accountModel ?? (filteredList.isNotEmpty ? filteredList.first : null);
                       bloc.accountModel = selectedAccount;
 
-                      return AppDropdown<AccountModel>(
+                      return AppDropdown<AccountActiveModel>(
                         context: context,
                         label: "Account",
                         hint: bloc.accountModel == null ? "Select Account" : bloc.accountModel!.acName.toString(),

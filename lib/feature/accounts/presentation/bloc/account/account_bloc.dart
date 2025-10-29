@@ -5,6 +5,7 @@ import '../../../../../core/repositories/get_response.dart';
 import '../../../../../core/repositories/post_response.dart';
 import '../../../../common/data/models/api_response_mod.dart';
 import '../../../../common/data/models/app_parse_json.dart';
+import '../../../data/model/account_active_model.dart';
 import '../../../data/model/account_model.dart';
 
 part 'account_event.dart';
@@ -12,10 +13,10 @@ part 'account_event.dart';
 part 'account_state.dart';
 
 class AccountBloc extends Bloc<AccountEvent, AccountState> {
-  AccountModel? selectedAccountFrom;
-  AccountModel? selectedAccountTo;
+  AccountActiveModel? selectedAccountFrom;
+  AccountActiveModel? selectedAccountTo;
   List<AccountModel> list = [];
-  final int _itemsPerPage = 15;
+  List<AccountActiveModel> activeAccount = [];
   String selectedState = "";
   String selectedStateId = "";
   String selectedGroups = "";
@@ -37,8 +38,58 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
 
   AccountBloc() : super(AccountInitial()) {
     on<FetchAccountList>(_onFetchAccountList);
+    on<FetchAccountActiveList>(_onFetchAccountActiveList);
     on<AddAccount>(_onCreateAccountList);
   }
+
+
+
+  Future<void> _onFetchAccountActiveList(
+      FetchAccountActiveList event,
+      Emitter<AccountState> emit,
+      ) async {
+    emit(AccountActiveListLoading());
+
+    try {
+      final res = await getResponse(
+        url: AppUrls.accountActive,
+        context: event.context,
+      );
+
+      ApiResponse response = appParseJson(
+        res,
+            (data) => List<AccountActiveModel>.from(
+          data.map((x) => AccountActiveModel.fromJson(x)),
+        ),
+      );
+
+      // Check if API response is successful
+      if (response.success == true) {
+        final List<AccountActiveModel> accountList = response.data ?? [];
+
+        if (accountList.isEmpty) {
+          emit(AccountActiveListSuccess(list: []));
+          return;
+        }
+
+        activeAccount = accountList;
+
+        print(accountList.length);
+        emit(AccountActiveListSuccess(list: accountList));
+      } else {
+        emit(
+          AccountActiveListFailed(
+            title: "Error",
+            content: response.message ?? "Unknown Error",
+          ),
+        );
+      }
+    } catch (error) {
+      emit(AccountActiveListFailed(title: "Error", content: error.toString()));
+    }
+  }
+
+
   Future<void> _onFetchAccountList(
       FetchAccountList event,
       Emitter<AccountState> emit,

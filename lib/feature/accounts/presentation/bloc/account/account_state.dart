@@ -34,6 +34,26 @@ final class AccountListFailed extends AccountState {
 }
 
 
+final class AccountActiveListLoading extends AccountState {}
+
+final class AccountActiveListSuccess extends AccountState {
+  final List<AccountActiveModel> list;
+
+
+  AccountActiveListSuccess({
+    required this.list,
+
+  });
+}
+
+
+final class AccountActiveListFailed extends AccountState {
+  final String title, content;
+
+  AccountActiveListFailed({required this.title, required this.content});
+}
+
+
 final class AccountAddInitial extends AccountState {}
 
 final class AccountAddLoading extends AccountState {}
