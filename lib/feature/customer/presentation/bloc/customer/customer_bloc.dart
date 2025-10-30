@@ -202,7 +202,7 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
 
     try {
       final res = await deleteResponse(
-        url: "${AppUrls.customer}/${event.id.toString()}",
+        url:"${ AppUrls.customer + event.id.toString()}/",
       ); // Use the correct API URL
 
       final jsonString = jsonEncode(res);
@@ -264,16 +264,16 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
 
     try {
       final res = await patchResponse(
-        url: AppUrls.customer + event.id.toString(),
+        url:"${ AppUrls.customer + event.id.toString()}/",
         payload: event.body!,
       ); // Use the correct API URL
 
+      // ✅ Parse the response correctly - it returns a single customer, not a list
       ApiResponse response = appParseJson(
         res,
-        (data) => List<CustomerModel>.from(
-          data.map((x) => CustomerModel.fromJson(x)),
-        ),
+            (data) => CustomerModel.fromJson(data), // Single object, not List
       );
+
       if (response.success == false) {
         emit(CustomerAddFailed(title: 'Json', content: response.message ?? ""));
         return;

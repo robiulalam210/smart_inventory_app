@@ -1,8 +1,12 @@
+import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hugeicons/hugeicons.dart';
 
 import '../../../../core/configs/configs.dart';
+import '../../../../core/widgets/delete_dialog.dart';
 import '../../data/model/customer_model.dart';
+import '../bloc/customer/customer_bloc.dart';
+import '../pages/create_customer_screen.dart';
 
 class CustomerTableCard extends StatelessWidget {
   final List<CustomerModel> customers;
@@ -21,8 +25,8 @@ class CustomerTableCard extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final totalWidth = constraints.maxWidth-25;
-        const numColumns = 5;
+        final totalWidth = constraints.maxWidth - 25;
+        const numColumns = 6; // Changed from 5 to 6 for Actions column
         const minColumnWidth = 100.0;
 
         final dynamicColumnWidth =
@@ -61,7 +65,7 @@ class CustomerTableCard extends StatelessWidget {
                         child: DataTable(
                           dataRowMinHeight: 50,
                           dataRowMaxHeight: 60,
-                          columnSpacing: 0,
+                          columnSpacing: 8,
                           horizontalMargin: 12,
                           dividerThickness: 0.5,
                           headingRowHeight: 50,
@@ -89,11 +93,12 @@ class CustomerTableCard extends StatelessWidget {
                             return DataRow(
                               onSelectChanged: onCustomerTap != null ? (_) => onCustomerTap!() : null,
                               cells: [
-                                _buildDataCell('${entry.key + 1}', dynamicColumnWidth),
+                                _buildDataCell('${entry.key + 1}', dynamicColumnWidth * 0.6),
                                 _buildDataCell(customer.name ?? "N/A", dynamicColumnWidth),
                                 _buildDataCell(customer.phone ?? "N/A", dynamicColumnWidth),
                                 _buildDataCell(customer.address ?? "N/A", dynamicColumnWidth),
-                                _buildBalanceCell(dueValue, dynamicColumnWidth), // Fixed: now passing the width
+                                _buildBalanceCell(dueValue, dynamicColumnWidth),
+                                _buildActionCell(customer, context, dynamicColumnWidth),
                               ],
                             );
                           }).toList(),
@@ -114,7 +119,7 @@ class CustomerTableCard extends StatelessWidget {
     return [
       DataColumn(
         label: SizedBox(
-          width: columnWidth,
+          width: columnWidth * 0.6,
           child: const Text('No.', textAlign: TextAlign.center),
         ),
       ),
@@ -140,6 +145,12 @@ class CustomerTableCard extends StatelessWidget {
         label: SizedBox(
           width: columnWidth,
           child: const Text('Balance', textAlign: TextAlign.center),
+        ),
+      ),
+      DataColumn(
+        label: SizedBox(
+          width: columnWidth,
+          child: const Text('Actions', textAlign: TextAlign.center),
         ),
       ),
     ];
@@ -192,6 +203,86 @@ class CustomerTableCard extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+
+  DataCell _buildActionCell(CustomerModel customer, BuildContext context, double width) {
+    return DataCell(
+      SizedBox(
+        width: width,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Edit Button
+            IconButton(
+              onPressed: () {
+                context.read<CustomerBloc>().customerNameController.text=customer.name??"";
+                context.read<CustomerBloc>().customerNumberController.text=customer.phone??"";
+                context.read<CustomerBloc>().addressController.text=customer.address??"";
+                context.read<CustomerBloc>().customerEmailController.text=customer.email??"";
+                context
+                    .read<CustomerBloc>()
+                    .selectedState =
+                customer.isActive
+                    == true
+                    ? "Active"
+                    : "Inactive";
+                _showEditDialog(context, customer);
+              },
+              icon: const Icon(
+                Icons.edit,
+                size: 18,
+                color: Colors.blue,
+              ),
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(
+                minWidth: 30,
+                minHeight: 30,
+              ),
+            ),
+
+            // Delete Button
+            IconButton(
+              onPressed: () async {
+                bool shouldDelete = await showDeleteConfirmationDialog(context);
+                if (!shouldDelete) return;
+
+                context.read<CustomerBloc>().add(DeleteCustomer(
+
+                   customer.id.toString()));
+              },
+              icon: const Icon(
+                HugeIcons.strokeRoundedDeleteThrow,
+                size: 18,
+                color: Colors.red,
+              ),
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(
+                minWidth: 30,
+                minHeight: 30,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showEditDialog(BuildContext context, CustomerModel customer) {
+    // Implement edit dialog logic
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          child: SizedBox(
+            width: AppSizes.width(context) * 0.50,
+            child: CreateCustomerScreen(
+              id: customer.id.toString(),
+              submitText: "Update Customer",
+            ),
+          ),
+        );
+      },
     );
   }
 }

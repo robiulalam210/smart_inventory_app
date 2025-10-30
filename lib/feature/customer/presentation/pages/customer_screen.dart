@@ -1,3 +1,5 @@
+import 'package:smart_inventory/feature/lab_dashboard/presentation/widgets/low_stock.dart';
+
 import '../../../../core/configs/configs.dart';
 import '../../../../core/shared/widgets/sideMenu/sidebar.dart';
 import '../../../../core/widgets/app_alert_dialog.dart';
@@ -123,24 +125,32 @@ class _CustomerScreenState extends State<CustomerScreen> {
               } else if (state is CustomerSwitchFailed) {
                 Navigator.pop(context);
                 _fetchApi();
-                appAlertDialog(context, state.content,
-                    title: state.title,
-                    actions: [
-                      TextButton(
-                          onPressed: () => Navigator.pop(context),
-                          child: const Text("Dismiss"))
-                    ]);
+                appAlertDialog(
+                  context,
+                  state.content,
+                  title: state.title,
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text("Dismiss"),
+                    ),
+                  ],
+                );
               } else if (state is CustomerAddFailed) {
                 Navigator.pop(context);
                 Navigator.pop(context);
                 _fetchApi();
-                appAlertDialog(context, state.content,
-                    title: state.title,
-                    actions: [
-                      TextButton(
-                          onPressed: () => Navigator.pop(context),
-                          child: const Text("Dismiss"))
-                    ]);
+                appAlertDialog(
+                  context,
+                  state.content,
+                  title: state.title,
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text("Dismiss"),
+                    ),
+                  ],
+                );
               }
             },
             child: Column(
@@ -153,14 +163,13 @@ class _CustomerScreenState extends State<CustomerScreen> {
                         return const Center(child: CircularProgressIndicator());
                       } else if (state is CustomerSuccess) {
                         if (state.list.isEmpty) {
-                          return Center(
-                            child: Lottie.asset(AppImages.noData),
-                          );
+                          return Center(child: Lottie.asset(AppImages.noData));
                         } else {
                           return Column(
                             children: [
                               SizedBox(
-                                child:  CustomerTableCard(customers: state.list,
+                                child: CustomerTableCard(
+                                  customers: state.list,
 
                                 ),
                               ),
@@ -171,22 +180,27 @@ class _CustomerScreenState extends State<CustomerScreen> {
                                 pageSize: state.pageSize,
                                 from: state.from,
                                 to: state.to,
-                                onPageChanged: (page) =>
-                                    _fetchCustomerList(pageNumber: page, pageSize: state.pageSize),
+                                onPageChanged: (page) => _fetchCustomerList(
+                                  pageNumber: page,
+                                  pageSize: state.pageSize,
+                                ),
                                 onPageSizeChanged: (newSize) =>
-                                    _fetchCustomerList(pageNumber: 1, pageSize: newSize),
+                                    _fetchCustomerList(
+                                      pageNumber: 1,
+                                      pageSize: newSize,
+                                    ),
                               ),
                             ],
                           );
                         }
                       } else if (state is CustomerListFailed) {
                         return Center(
-                          child: Text('Failed to load customer: ${state.content}'),
+                          child: Text(
+                            'Failed to load customer: ${state.content}',
+                          ),
                         );
                       } else {
-                        return Center(
-                          child: Lottie.asset(AppImages.noData),
-                        );
+                        return Center(child: Lottie.asset(AppImages.noData));
                       }
                     },
                   ),
@@ -235,9 +249,7 @@ class _CustomerScreenState extends State<CustomerScreen> {
             itemList: ['Active', 'Inactive', 'Blocked'],
             onChanged: (newVal) {
               selectedStatusNotifier.value = newVal;
-              _fetchApi(
-                status: newVal?.toLowerCase() ?? '',
-              );
+              _fetchApi(status: newVal?.toLowerCase() ?? '');
             },
             validator: (value) => null,
             itemBuilder: (item) => DropdownMenuItem<String>(

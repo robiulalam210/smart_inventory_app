@@ -163,7 +163,7 @@ class _CreateCustomerScreenState extends State<CreateCustomerScreen> {
                     ],
                   ),
 
-                  SizedBox(height: AppSizes.height(context) * 0.02),
+                  SizedBox(height: AppSizes.height(context) * 0.01),
 
                   // Address Field
                   ResponsiveRow(
@@ -194,7 +194,36 @@ class _CreateCustomerScreenState extends State<CreateCustomerScreen> {
                       ),
                     ],
                   ),
-
+                  widget.id.toString() == ""
+                      ? Container()
+                      : AppDropdown(
+                    label: "Status",context: context,
+                    hint:
+                    context.read<CustomerBloc>().selectedState.isEmpty
+                        ? "Select Status"
+                        : context.read<CustomerBloc>().selectedState,
+                    isLabel: false,
+                    value:
+                    context.read<CustomerBloc>().selectedState.isEmpty
+                        ? null
+                        : context.read<CustomerBloc>().selectedState,
+                    itemList: context.read<CustomerBloc>().status,
+                    onChanged: (newVal) {
+                      context.read<CustomerBloc>().selectedState =
+                          newVal.toString();
+                    },
+                    itemBuilder: (item) => DropdownMenuItem(
+                      value: item,
+                      child: Text(
+                        item.toString(),
+                        style: const TextStyle(
+                          color: AppColors.blackColor,
+                          fontFamily: 'Quicksand',
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
                   SizedBox(height: AppSizes.height(context) * 0.03),
 
                   // Submit Button
@@ -231,32 +260,22 @@ class _CreateCustomerScreenState extends State<CreateCustomerScreen> {
     if (customerBloc.addressController.text.trim().isNotEmpty) {
       body["address"] = customerBloc.addressController.text.trim();
     }
-
+    if (customerBloc.selectedState.trim().isNotEmpty) {
+      body["is_active"] = customerBloc.selectedState=="Active"?true:false;
+    }
     print("Sending customer payload: $body"); // For debugging
 
     if (widget.id.isEmpty) {
       // Create new customer
       customerBloc.add(AddCustomer(body: body));
     } else {
-      // Update existing customer
-      // Add any additional fields needed for update
+
       customerBloc.add(UpdateCustomer(body: body, id: widget.id));
     }
 
     // Show success message
-    _showSuccessMessage();
   }
 
-  void _showSuccessMessage() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(widget.id.isEmpty
-            ? 'Customer created successfully!'
-            : 'Customer updated successfully!'),
-        backgroundColor: Colors.green,
-      ),
-    );
-  }
 
   @override
   void dispose() {
