@@ -66,9 +66,11 @@ class SupplierPaymentBloc extends Bloc<SupplierPaymentEvent, SupplierPaymentStat
     try {
       final res  = await deleteResponse(url: "${AppUrls.supplierPayment}/${event.id.toString()}"); // Use the correct API URL
 
+      final jsonString = jsonEncode(res);
+
       ApiResponse response = appParseJson(
-        res,
-            (data) => List<SupplierPaymentModel>.from(data.map((x) => SupplierPaymentModel.fromJson(x))),
+        jsonString, // Now passing String instead of Map
+            (data) => data, // Just return data as-is for delete operations
       );
       if (response.success == false) {
         emit(SupplierPaymentDeleteFailed(title: 'Alert', content: response.message??""));

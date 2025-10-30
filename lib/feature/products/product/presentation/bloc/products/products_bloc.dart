@@ -245,10 +245,11 @@ productList=list;
         url: "${AppUrls.product}/${event.id.toString()}",
       ); // Use the correct API URL
 
+      final jsonString = jsonEncode(res);
+
       ApiResponse response = appParseJson(
-        res,
-        (data) =>
-            List<ProductModel>.from(data.map((x) => ProductModel.fromJson(x))),
+        jsonString, // Now passing String instead of Map
+            (data) => data, // Just return data as-is for delete operations
       );
       if (response.success == false) {
         emit(

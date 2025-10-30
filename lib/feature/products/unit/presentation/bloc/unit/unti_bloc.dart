@@ -159,10 +159,11 @@ class UnitBloc extends Bloc<UnitEvent, UnitState> {
 
     try {
       final res  = await deleteResponse(url: AppUrls.unit+event.id.toString()); // Use the correct API URL
+      final jsonString = jsonEncode(res);
 
       ApiResponse response = appParseJson(
-        res,
-            (data) => List<UnitsModel>.from(data.map((x) => UnitsModel.fromJson(x))),
+        jsonString, // Now passing String instead of Map
+            (data) => data, // Just return data as-is for delete operations
       );
       if (response.success == false) {
         emit(UnitDeleteFailed(title: 'Json', content: response.message??""));

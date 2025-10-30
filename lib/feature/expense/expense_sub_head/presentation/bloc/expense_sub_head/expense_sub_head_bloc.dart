@@ -173,13 +173,12 @@ class ExpenseSubHeadBloc extends Bloc<ExpenseSubHeadEvent, ExpenseSubHeadState> 
           url: "${AppUrls.expenseSubHead + event.id.toString()}/"
       );
 
-      // FIX: For delete, we don't need to parse the response as ExpenseSubHeadModel
-      // Just check if the operation was successful
-      ApiResponse<dynamic> response = appParseJson<dynamic>(
-        res,
-            (data) => data, // Just return the data as-is
-      );
+      final jsonString = jsonEncode(res);
 
+      ApiResponse response = appParseJson(
+        jsonString, // Now passing String instead of Map
+            (data) => data, // Just return data as-is for delete operations
+      );
       if (response.success == false) {
         emit(ExpenseSubHeadAddFailed(
             title: 'Error',

@@ -164,11 +164,11 @@ class BrandBloc extends Bloc<BrandEvent, BrandState> {
       final res = await deleteResponse(
         url: AppUrls.brand + event.id.toString(),
       ); // Use the correct API URL
+      final jsonString = jsonEncode(res);
 
       ApiResponse response = appParseJson(
-        res,
-        (data) =>
-            List<BrandModel>.from(data.map((x) => BrandModel.fromJson(x))),
+        jsonString, // Now passing String instead of Map
+            (data) => data, // Just return data as-is for delete operations
       );
       if (response.success == false) {
         emit(BrandDeleteFailed(title: 'Json', content: response.message ?? ""));

@@ -158,9 +158,11 @@ class SourceBloc extends Bloc<SourceEvent, SourceState> {
     try {
       final res  = await deleteResponse(url: AppUrls.source+event.id.toString()); // Use the correct API URL
 
+      final jsonString = jsonEncode(res);
+
       ApiResponse response = appParseJson(
-        res,
-            (data) => List<SourceModel>.from(data.map((x) => SourceModel.fromJson(x))),
+        jsonString, // Now passing String instead of Map
+            (data) => data, // Just return data as-is for delete operations
       );
       if (response.success == false) {
         emit(SourceDeleteFailed(title: 'Json', content: response.message??""));

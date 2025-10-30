@@ -12,14 +12,14 @@ class AccountModel {
   final int? acId;
   final String? acName;
   final String? acType;
-  final dynamic? acNumber;
+  final String? acNumber;
   final dynamic? balance;
   final String? bankName;
   final String? branch;
   final dynamic? openingBalance;
   final int? company;
-
-
+  final String? status;
+  final dynamic number;
 
   AccountModel({
     this.acId,
@@ -31,14 +31,10 @@ class AccountModel {
     this.branch,
     this.openingBalance,
     this.company,
+    this.status,
+    this.number,
   });
 
-
-// Add this toString method
-  @override
-  String toString() {
-    return '$acName-$acNumber${bankName != null ? '($bankName)' : ''}';
-  }
   factory AccountModel.fromJson(Map<String, dynamic> json) => AccountModel(
     acId: json["ac_id"],
     acName: json["ac_name"],
@@ -49,6 +45,8 @@ class AccountModel {
     branch: json["branch"],
     openingBalance: json["opening_balance"],
     company: json["company"],
+    status: json["status"],
+    number: json["number"],
   );
 
   Map<String, dynamic> toJson() => {
@@ -61,5 +59,7 @@ class AccountModel {
     "branch": branch,
     "opening_balance": openingBalance,
     "company": company,
+    "status": status,
+    "number": number,
   };
 }

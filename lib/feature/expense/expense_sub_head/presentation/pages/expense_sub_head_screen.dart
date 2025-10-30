@@ -125,9 +125,12 @@ class _ExpenseHeadScreenState extends State<ExpenseSubHeadScreen> {
               child: Column(
                 children: [
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Expanded(
                         child: CustomSearchTextFormField(
+                          isRequiredLabel: false,
                           controller: context
                               .read<ExpenseSubHeadBloc>()
                               .filterTextController,
@@ -177,7 +180,6 @@ class _ExpenseHeadScreenState extends State<ExpenseSubHeadScreen> {
                     ],
                   ),
                   SizedBox(
-                    height: 500,
                     child: BlocBuilder<ExpenseSubHeadBloc, ExpenseSubHeadState>(
                       builder: (context, state) {
                         if (state is ExpenseSubHeadListLoading) {

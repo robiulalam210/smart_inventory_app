@@ -146,13 +146,13 @@ class ExpenseHeadBloc extends Bloc<ExpenseHeadEvent, ExpenseHeadState> {
     try {
       final res = await deleteResponse(url: "${AppUrls.expenseHead + event.id.toString()}/");
 
+      final jsonString = jsonEncode(res);
+
       ApiResponse response = appParseJson(
-        res,
-            (data) => data, // Delete API তে data: null থাকলে handle করবে
+        jsonString, // Now passing String instead of Map
+            (data) => data, // Just return data as-is for delete operations
       );
 
-      print("responseresponse");
-      print(response.message);
       if (response.success == false) {
 
         emit(ExpenseHeadAddFailed(title: '', content: response.message ?? ""));

@@ -34,6 +34,7 @@ class _ExpenseHeadCardState extends State<ExpenseSubHeadCard> {
           child: Padding(
             padding: const EdgeInsets.all(20.0),
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
               children: [
                 CircularProgressIndicator(),
@@ -65,9 +66,21 @@ class _ExpenseHeadCardState extends State<ExpenseSubHeadCard> {
             style: AppTextStyle.cardTitle(context),
           ),
         ),
-        title: Text(
-          widget.expenseHead.name ?? "N/A",
-          style: AppTextStyle.cardTitle(context),
+        title: Row(
+          // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            SizedBox(
+              width: AppSizes.width(context)*0.30,
+              child: Text(
+                "Sub Head Name : ${widget.expenseHead.name ?? "N/A"}",
+                style: AppTextStyle.cardTitle(context),
+              ),
+            ),
+            Text(
+              "Head Name : ${widget.expenseHead.headName ?? "N/A"}",
+              style: AppTextStyle.cardTitle(context),
+            ),
+          ],
         ),
         trailing: FittedBox(
           child: Row(

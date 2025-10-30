@@ -181,9 +181,11 @@ class CategoriesBloc extends Bloc<CategoriesEvent, CategoriesState> {
     try {
       final res  = await deleteResponse(url: AppUrls.category+event.id.toString()); // Use the correct API URL
 
+      final jsonString = jsonEncode(res);
+
       ApiResponse response = appParseJson(
-        res,
-            (data) => List<CategoryModel>.from(data.map((x) => CategoryModel.fromJson(x))),
+        jsonString, // Now passing String instead of Map
+            (data) => data, // Just return data as-is for delete operations
       );
       if (response.success == false) {
         emit(CategoriesDeleteFailed(title: 'Alert', content: response.message??""));

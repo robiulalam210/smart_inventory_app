@@ -1,13 +1,10 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:lottie/lottie.dart';
+
 import 'package:smart_inventory/feature/expense/expense_head/data/model/expense_head_model.dart';
 
 import '../../../../core/configs/configs.dart';
 import '../../../../core/shared/widgets/sideMenu/sidebar.dart';
 import '../../../../core/widgets/app_alert_dialog.dart';
 import '../../../../core/widgets/app_button.dart';
-import '../../../../core/widgets/app_dropdown.dart';
 import '../../../../core/widgets/app_loader.dart';
 import '../../../../core/widgets/coustom_search_text_field.dart';
 import '../../../../core/widgets/custom_date_range.dart';
@@ -29,7 +26,6 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
   DateTime? startDate;
   DateTime? endDate;
   DateTime now = DateTime.now();
-  ExpenseHeadModel? _selectedExpenseHead;
 
   late var dataBloc = context.read<ExpenseBloc>();
 
@@ -109,7 +105,6 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
     setState(() {
       startDate = null;
       endDate = null;
-      _selectedExpenseHead = null;
     });
     _fetchApi();
   }
@@ -163,8 +158,27 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
               appLoader(context, "Expense, please wait...");
             } else if (state is ExpenseAddSuccess) {
               Navigator.pop(context); // Close loader dialog
+              Navigator.pop(context); // Close loader dialog
               _fetchApi(); // Reload expense list
             } else if (state is ExpenseAddFailed) {
+              Navigator.pop(context); // Close loader dialog
+              appAlertDialog(
+                context,
+                state.content,
+                title: state.title,
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text("Dismiss"),
+                  ),
+                ],
+              );
+            }  if (state is ExpenseDeleteLoading) {
+              appLoader(context, "Expense, please wait...");
+            } else if (state is ExpenseDeleteSuccess) {
+              Navigator.pop(context); // Close loader dialog
+              _fetchApi(); // Reload expense list
+            } else if (state is ExpenseDeleteFailed) {
               Navigator.pop(context); // Close loader dialog
               appAlertDialog(
                 context,
@@ -237,17 +251,10 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
                         return Column(
                           children: [
                             SizedBox(
-                              child: ListView.builder(
-                                shrinkWrap: true,
-                                itemCount: state.list.length,
-                                itemBuilder: (_, index) {
-                                  final expense = state.list[index];
-                                  return ExpenseCard(
-                                    expense: expense,
-                                    index: index,
-                                  );
-                                },
-                              ),
+                              child: ExpenseTableCard(
+
+                                 expenses: state.list,
+                              )
                             ),
                             const SizedBox(height: 10),
                             PaginationBar(

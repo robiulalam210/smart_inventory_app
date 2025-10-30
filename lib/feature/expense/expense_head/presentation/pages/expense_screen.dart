@@ -127,10 +127,12 @@ class _ExpenseHeadScreenState extends State<ExpenseHeadScreen> {
               },
               child: Column(
                 children: [
-                  Row(
+                  Row(mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Expanded(
                         child: CustomSearchTextFormField(
+                          isRequiredLabel: false,
                           controller: context
                               .read<ExpenseHeadBloc>()
                               .filterTextController,

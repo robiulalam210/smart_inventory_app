@@ -81,10 +81,11 @@ class MoneyReceiptBloc extends Bloc<MoneyReceiptEvent, MoneyReceiptState> {
           url:
               "${AppUrls.moneyReceipt}/${event.id.toString()}"); // Use the correct API URL
 
+      final jsonString = jsonEncode(res);
+
       ApiResponse response = appParseJson(
-        res,
-        (data) =>
-            List<PosSaleModel>.from(data.map((x) => PosSaleModel.fromJson(x))),
+        jsonString, // Now passing String instead of Map
+            (data) => data, // Just return data as-is for delete operations
       );
       if (response.success == false) {
         emit(MoneyReceiptDeleteFailed(

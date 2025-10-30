@@ -219,189 +219,69 @@ class _ExpenseCreateScreenState extends State<ExpenseCreateScreen> {
                   },
                   child: Column(
                     children: [
-                      // Expense Head Dropdown
-                      BlocBuilder<ExpenseHeadBloc, ExpenseHeadState>(
-                        builder: (context, state) {
-                          if (state is ExpenseHeadListLoading) {
-                            return const Center(child: CircularProgressIndicator());
-                          }
 
-                          return AppDropdown<ExpenseHeadModel>(
-                            context: context,
-                            label: "Expense Head",
-                            hint: _selectedExpenseHead?.name ?? "Select Expense Head",
-                            isNeedAll: false,
-                            isRequired: true,
-                            value: _selectedExpenseHead,
-                            itemList: context.read<ExpenseHeadBloc>().list,
-                            onChanged: _onExpenseHeadChanged,
-                            validator: (value) {
-                              return value == null
-                                  ? 'Please select Expense Head'
-                                  : null;
+                      Row(children: [
+                        // Expense Head Dropdown
+                        Expanded(
+                          child: BlocBuilder<ExpenseHeadBloc, ExpenseHeadState>(
+                            builder: (context, state) {
+                              if (state is ExpenseHeadListLoading) {
+                                return const Center(child: CircularProgressIndicator());
+                              }
+
+                              return AppDropdown<ExpenseHeadModel>(
+                                context: context,
+                                label: "Expense Head",
+                                hint: _selectedExpenseHead?.name ?? "Select Expense Head",
+                                isNeedAll: false,
+                                isRequired: true,
+                                value: _selectedExpenseHead,
+                                itemList: context.read<ExpenseHeadBloc>().list,
+                                onChanged: _onExpenseHeadChanged,
+                                validator: (value) {
+                                  return value == null
+                                      ? 'Please select Expense Head'
+                                      : null;
+                                },
+                                itemBuilder: (item) => DropdownMenuItem<ExpenseHeadModel>(
+                                  value: item,
+                                  child: Text(
+                                    item.name ?? 'Unnamed Head',
+                                    style: const TextStyle(
+                                      color: AppColors.blackColor,
+                                      fontFamily: 'Quicksand',
+                                      fontWeight: FontWeight.w300,
+                                    ),
+                                  ),
+                                ),
+                              );
                             },
-                            itemBuilder: (item) => DropdownMenuItem<ExpenseHeadModel>(
-                              value: item,
-                              child: Text(
-                                item.name ?? 'Unnamed Head',
-                                style: const TextStyle(
-                                  color: AppColors.blackColor,
-                                  fontFamily: 'Quicksand',
-                                  fontWeight: FontWeight.w300,
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      // Expense SubHead Dropdown
-                      BlocBuilder<ExpenseSubHeadBloc, ExpenseSubHeadState>(
-                        builder: (context, state) {
-                          final subHeads = _selectedExpenseHead != null
-                              ? (context.read<ExpenseSubHeadBloc>().list as List<ExpenseSubHeadModel>)
-                              .where((subHead) => subHead.head == _selectedExpenseHead!.id)
-                              .toList()
-                              : <ExpenseSubHeadModel>[];
-
-                          return AppDropdown<ExpenseSubHeadModel>(
-                            context: context,
-                            label: "Expense Sub Head (Optional)",
-                            hint: _selectedExpenseSubHead?.name ?? "Select Expense Sub Head",
-                            isNeedAll: false,
-                            isRequired: false,
-                            value: _selectedExpenseSubHead,
-                            itemList: subHeads,
-                            onChanged: _onExpenseSubHeadChanged,
-                            itemBuilder: (item) => DropdownMenuItem<ExpenseSubHeadModel>(
-                              value: item,
-                              child: Text(
-                                item.name ?? 'Unnamed Sub Head',
-                                style: const TextStyle(
-                                  color: AppColors.blackColor,
-                                  fontFamily: 'Quicksand',
-                                  fontWeight: FontWeight.w300,
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      // Amount Field
-                      CustomInputField(
-                        isRequiredLable: true,
-                        isRequired: true,
-                        controller: expenseBloc.amountTextController,
-                        hintText: 'Amount',
-                        fillColor: const Color.fromARGB(255, 255, 255, 255),
-                        keyboardType: TextInputType.number,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter amount';
-                          }
-                          if (double.tryParse(value) == null) {
-                            return 'Please enter a valid number';
-                          }
-                          return null;
-                        },
-                        onChanged: (value) {
-                          return null;
-                        },
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      // Payment Method (only for create)
-                      widget.id == null
-                          ? AppDropdown<String>(
-                        context: context,
-                        label: "Payment Method",
-                        hint: expenseBloc.selectedPayment.isEmpty
-                            ? "Select Payment Method"
-                            : expenseBloc.selectedPayment,
-                        isLabel: false,
-                        isRequired: true,
-                        isNeedAll: false,
-                        value: expenseBloc.selectedPayment.isEmpty
-                            ? null
-                            : expenseBloc.selectedPayment,
-                        itemList: expenseBloc.paymentMethod,
-                        onChanged: (newVal) {
-                          setState(() {
-                            expenseBloc.selectedPayment = newVal.toString();
-                          });
-                        },
-                        validator: (value) {
-                          return value == null
-                              ? 'Please select a payment method'
-                              : null;
-                        },
-                        itemBuilder: (item) => DropdownMenuItem<String>(
-                          value: item,
-                          child: Text(
-                            item.toString(),
-                            style: const TextStyle(
-                              color: AppColors.blackColor,
-                              fontFamily: 'Quicksand',
-                              fontWeight: FontWeight.w300,
-                            ),
                           ),
                         ),
-                      )
-                          : Container(),
+                        gapW16,
+                        // Expense SubHead Dropdown
+                        Expanded(child:
+                        BlocBuilder<ExpenseSubHeadBloc, ExpenseSubHeadState>(
+                          builder: (context, state) {
+                            final subHeads = _selectedExpenseHead != null
+                                ? (context.read<ExpenseSubHeadBloc>().list)
+                                .where((subHead) => subHead.head == _selectedExpenseHead!.id)
+                                .toList()
+                                : <ExpenseSubHeadModel>[];
 
-                      const SizedBox(height: 16),
-
-                      // Account Dropdown (only for create)
-                      widget.id == null
-                          ? BlocBuilder<AccountBloc, AccountState>(
-                        builder: (context, state) {
-                          if (state is AccountListLoading) {
-                            return const Center(child: CircularProgressIndicator());
-                          } else if (state is AccountListSuccess) {
-                            // Filter accounts based on selected payment method
-                            final filteredList = expenseBloc.selectedPayment.isNotEmpty
-                                ? state.list.where((item) {
-                              return item.acType?.toLowerCase() ==
-                                  expenseBloc.selectedPayment.toLowerCase();
-                            }).toList()
-                                : state.list;
-
-                            return AppDropdown<dynamic>(
+                            return AppDropdown<ExpenseSubHeadModel>(
                               context: context,
-                              label: "Account",
-                              hint: "Select Account",
-                              isLabel: false,
-                              isRequired: true,
+                              label: "Expense Sub Head (Optional)",
+                              hint: _selectedExpenseSubHead?.name ?? "Select Expense Sub Head",
                               isNeedAll: false,
-                              value: expenseBloc.selectedAccount.isEmpty
-                                  ? null
-                                  : expenseBloc.selectedAccount,
-                              itemList: filteredList,
-                              onChanged: (newVal) {
-                                final selectedAccount = filteredList.firstWhere(
-                                      (acc) => acc.toString() == newVal.toString(),
-                                );
-
-                                setState(() {
-                                  expenseBloc.selectedAccount = newVal.toString();
-                                  expenseBloc.selectedAccountId = selectedAccount.acId.toString();
-                                });
-                              },
-                              validator: (value) {
-                                return value == null
-                                    ? 'Please select an account'
-                                    : null;
-                              },
-                              itemBuilder: (item) => DropdownMenuItem(
+                              isRequired: false,
+                              value: _selectedExpenseSubHead,
+                              itemList: subHeads,
+                              onChanged: _onExpenseSubHeadChanged,
+                              itemBuilder: (item) => DropdownMenuItem<ExpenseSubHeadModel>(
                                 value: item,
                                 child: Text(
-                                  item.toString(),
+                                  item.name ?? 'Unnamed Sub Head',
                                   style: const TextStyle(
                                     color: AppColors.blackColor,
                                     fontFamily: 'Quicksand',
@@ -410,56 +290,195 @@ class _ExpenseCreateScreenState extends State<ExpenseCreateScreen> {
                                 ),
                               ),
                             );
-                          } else if (state is AccountListFailed) {
-                            return Center(
-                                child: Text('Failed to load accounts: ${state.content}'));
-                          } else {
-                            return Container();
-                          }
-                        },
-                      )
-                          : Container(),
+                          },
+                        ),)
+                      ],),
 
-                      const SizedBox(height: 16),
+
+
+
+
+
+
+                      // Amount Field
+
+
+
+
+                      Row(children: [
+                        Expanded(child:   widget.id == null
+                            ? AppDropdown<String>(
+                          context: context,
+                          label: "Payment Method",
+                          hint: expenseBloc.selectedPayment.isEmpty
+                              ? "Select Payment Method"
+                              : expenseBloc.selectedPayment,
+                          isLabel: false,
+                          isRequired: true,
+                          isNeedAll: false,
+                          value: expenseBloc.selectedPayment.isEmpty
+                              ? null
+                              : expenseBloc.selectedPayment,
+                          itemList: expenseBloc.paymentMethod,
+                          onChanged: (newVal) {
+                            setState(() {
+                              expenseBloc.selectedPayment = newVal.toString();
+                            });
+                          },
+                          validator: (value) {
+                            return value == null
+                                ? 'Please select a payment method'
+                                : null;
+                          },
+                          itemBuilder: (item) => DropdownMenuItem<String>(
+                            value: item,
+                            child: Text(
+                              item.toString(),
+                              style: const TextStyle(
+                                color: AppColors.blackColor,
+                                fontFamily: 'Quicksand',
+                                fontWeight: FontWeight.w300,
+                              ),
+                            ),
+                          ),
+                        )
+                            : Container(),),
+                        gapW16,
+                        Expanded(child:  widget.id == null
+                            ? BlocBuilder<AccountBloc, AccountState>(
+                          builder: (context, state) {
+                            if (state is AccountListLoading) {
+                              return const Center(child: CircularProgressIndicator());
+                            } else if (state is AccountListSuccess) {
+                              // Filter accounts based on selected payment method
+                              final filteredList = expenseBloc.selectedPayment.isNotEmpty
+                                  ? state.list.where((item) {
+                                return item.acType?.toLowerCase() ==
+                                    expenseBloc.selectedPayment.toLowerCase();
+                              }).toList()
+                                  : state.list;
+
+                              return AppDropdown<dynamic>(
+                                context: context,
+                                label: "Account",
+                                hint: "Select Account",
+                                isLabel: false,
+                                isRequired: true,
+                                isNeedAll: false,
+                                value: expenseBloc.selectedAccount.isEmpty
+                                    ? null
+                                    : expenseBloc.selectedAccount,
+                                itemList: filteredList,
+                                onChanged: (newVal) {
+                                  final selectedAccount = filteredList.firstWhere(
+                                        (acc) => acc.toString() == newVal.toString(),
+                                  );
+
+                                  setState(() {
+                                    expenseBloc.selectedAccount = newVal.toString();
+                                    expenseBloc.selectedAccountId = selectedAccount.acId.toString();
+                                  });
+                                },
+                                validator: (value) {
+                                  return value == null
+                                      ? 'Please select an account'
+                                      : null;
+                                },
+                                itemBuilder: (item) => DropdownMenuItem(
+                                  value: item,
+                                  child: Text(
+                                    item.toString(),
+                                    style: const TextStyle(
+                                      color: AppColors.blackColor,
+                                      fontFamily: 'Quicksand',
+                                      fontWeight: FontWeight.w300,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            } else if (state is AccountListFailed) {
+                              return Center(
+                                  child: Text('Failed to load accounts: ${state.content}'));
+                            } else {
+                              return Container();
+                            }
+                          },
+                        )
+                            : Container(),),
+                      ],),
+                      // Payment Method (only for create)
+
+
+                      Row(children: [
+                        Expanded(child:  CustomInputField(
+                          isRequiredLable: true,
+                          isRequired: true,
+                          controller: expenseBloc.amountTextController,
+                          hintText: 'Amount',
+                          fillColor: const Color.fromARGB(255, 255, 255, 255),
+                          keyboardType: TextInputType.number,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter amount';
+                            }
+                            if (double.tryParse(value) == null) {
+                              return 'Please enter a valid number';
+                            }
+                            return null;
+                          },
+                          onChanged: (value) {
+                            return null;
+                          },
+                        ),),
+                        gapW16,
+                        Expanded(child:    CustomInputField(
+                          isRequiredLable: true,
+                          isRequired: true,
+                          controller: expenseBloc.dateExpenseTextController,
+                          hintText: 'Expense Date',
+                          fillColor: const Color.fromARGB(255, 255, 255, 255),
+                          readOnly: true,
+                          keyboardType: TextInputType.text,
+                          validator: (value) {
+                            return value == null || value.isEmpty
+                                ? 'Please enter Expense Date'
+                                : null;
+                          },
+                          onTap: () async {
+                            FocusScope.of(context).requestFocus(FocusNode());
+                            DateTime? pickedDate = await showDatePicker(
+                              context: context,
+                              initialDate: DateTime.now(),
+                              firstDate: DateTime(1900),
+                              lastDate: DateTime.now(),
+                            );
+                            if (pickedDate != null) {
+                              expenseBloc.dateExpenseTextController.text =
+                              pickedDate.toLocal().toString().split(' ')[0];
+                            }
+                          },
+                          onChanged: (value) {
+                            return null;
+                          },
+                        ),),
+
+                      ],),
+
+
+                      // Account Dropdown (only for create)
+
+
+
 
                       // Date Field
-                      CustomInputField(
-                        isRequiredLable: true,
-                        isRequired: true,
-                        controller: expenseBloc.dateExpenseTextController,
-                        hintText: 'Expense Date',
-                        fillColor: const Color.fromARGB(255, 255, 255, 255),
-                        readOnly: true,
-                        keyboardType: TextInputType.text,
-                        validator: (value) {
-                          return value == null || value.isEmpty
-                              ? 'Please enter Expense Date'
-                              : null;
-                        },
-                        onTap: () async {
-                          FocusScope.of(context).requestFocus(FocusNode());
-                          DateTime? pickedDate = await showDatePicker(
-                            context: context,
-                            initialDate: DateTime.now(),
-                            firstDate: DateTime(1900),
-                            lastDate: DateTime.now(),
-                          );
-                          if (pickedDate != null) {
-                            expenseBloc.dateExpenseTextController.text =
-                            pickedDate.toLocal().toString().split(' ')[0];
-                          }
-                        },
-                        onChanged: (value) {
-                          return null;
-                        },
-                      ),
 
-                      const SizedBox(height: 16),
+
 
                       // Note Field
                       CustomInputField(
                         isRequiredLable: true,
                         isRequired: false,
+                        maxLine: 5,
                         controller: expenseBloc.noteTextController,
                         hintText: 'Note',
                         fillColor: const Color.fromARGB(255, 255, 255, 255),
@@ -469,7 +488,7 @@ class _ExpenseCreateScreenState extends State<ExpenseCreateScreen> {
                         },
                       ),
 
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 10),
 
                       // Submit Button
                       AppButton(

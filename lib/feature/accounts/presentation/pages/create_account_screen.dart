@@ -1,19 +1,12 @@
 import '../../../../core/configs/configs.dart';
 import '../../../../core/shared/widgets/sideMenu/sidebar.dart';
-import '../../../../core/widgets/app_alert_dialog.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_dropdown.dart';
-import '../../../../core/widgets/app_loader.dart';
-import '../../../../core/widgets/coustom_search_text_field.dart';
-import '../../../../core/widgets/custom_filter_ui.dart';
 import '../../../../core/widgets/input_field.dart';
-import '../../../customer/presentation/bloc/customer/customer_bloc.dart';
-import '../../../products/product/presentation/bloc/products/products_bloc.dart';
 import '../bloc/account/account_bloc.dart';
-import '../widget/widget.dart';
 
 class CreateAccountScreen extends StatefulWidget {
-  CreateAccountScreen({super.key, this.submitText = '', this.id = ''});
+  const CreateAccountScreen({super.key, this.submitText = '', this.id = ''});
   final String id;
   final String submitText;
 
@@ -23,6 +16,7 @@ class CreateAccountScreen extends StatefulWidget {
 
 class _CreateAccountScreenState extends State<CreateAccountScreen> {
   final ValueNotifier<String> selectedAccountType = ValueNotifier<String>('');
+  final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
@@ -56,7 +50,6 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
           spacing: 0,
           runSpacing: 0,
           children: [
-            if (isBigScreen) _buildSidebar(),
             _buildContentArea(isBigScreen),
           ],
         ),
@@ -64,23 +57,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
     );
   }
 
-  Widget _buildSidebar() {
-    return ResponsiveCol(
-      xs: 0,
-      sm: 1,
-      md: 1,
-      lg: 2,
-      xl: 2,
-      child: Container(
-        decoration: const BoxDecoration(color: Colors.white),
-        child: const Sidebar(),
-      ),
-    );
-  }
-
   Widget _buildContentArea(bool isBigScreen) {
-    final GlobalKey<FormState> formKey = GlobalKey<FormState>();
-
     return ResponsiveCol(
       xs: 12,
       sm: 12,
@@ -135,7 +112,10 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                                 setState(() {});
                               },
                               validator: (value) {
-                                return value == null ? 'Please select account type' : null;
+                                if (value == null || value.toString().isEmpty) {
+                                  return 'Please select account type';
+                                }
+                                return null;
                               },
                               itemBuilder: (item) => DropdownMenuItem(
                                 value: item,
@@ -169,9 +149,13 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                           fillColor: const Color.fromARGB(255, 255, 255, 255),
                           keyboardType: TextInputType.text,
                           validator: (value) {
-                            return value!.trim().isEmpty
-                                ? 'Please enter account name'
-                                : null;
+                            if (value == null || value.trim().isEmpty) {
+                              return 'Please enter account name';
+                            }
+                            if (value.trim().length < 2) {
+                              return 'Account name must be at least 2 characters';
+                            }
+                            return null;
                           },
                           onChanged: (value) {
                             return null;
@@ -189,21 +173,28 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                         child: ValueListenableBuilder<String>(
                           valueListenable: selectedAccountType,
                           builder: (context, selectedType, child) {
-                            final isCash = selectedType == "Cash";
-                            final isOther = selectedType == "Other";
-                            return (isCash || isOther)
-                                ? Container()
-                                : CustomInputField(
+                            final isBank = selectedType == "Bank";
+                            final isMobile = selectedType == "Mobile banking";
+                            final showField = isBank || isMobile;
+
+                            if (!showField) {
+                              return Container();
+                            }
+
+                            return CustomInputField(
                               isRequiredLable: true,
-                              isRequired: !isCash && !isOther,
+                              isRequired: true,
                               textInputAction: TextInputAction.next,
                               controller: context.read<AccountBloc>().accountNumberController,
-                              hintText: 'Account Number',
+                              hintText: isBank ? 'Bank Account Number' : 'Mobile Account Number',
                               fillColor: const Color.fromARGB(255, 255, 255, 255),
                               keyboardType: TextInputType.text,
                               validator: (value) {
-                                if (!isCash && !isOther && (value == null || value.trim().isEmpty)) {
+                                if (value == null || value.trim().isEmpty) {
                                   return 'Please enter account number';
+                                }
+                                if (value.trim().length < 5) {
+                                  return 'Account number must be at least 5 characters';
                                 }
                                 return null;
                               },
@@ -244,9 +235,13 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                               fillColor: const Color.fromARGB(255, 255, 255, 255),
                               keyboardType: TextInputType.text,
                               validator: (value) {
-                                return value!.trim().isEmpty
-                                    ? 'Please enter bank name'
-                                    : null;
+                                if (value == null || value.trim().isEmpty) {
+                                  return 'Please enter bank name';
+                                }
+                                if (value.trim().length < 2) {
+                                  return 'Bank name must be at least 2 characters';
+                                }
+                                return null;
                               },
                               onChanged: (value) {
                                 return null;
@@ -268,9 +263,13 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                               fillColor: const Color.fromARGB(255, 255, 255, 255),
                               keyboardType: TextInputType.text,
                               validator: (value) {
-                                return value!.trim().isEmpty
-                                    ? 'Please enter branch name'
-                                    : null;
+                                if (value == null || value.trim().isEmpty) {
+                                  return 'Please enter branch name';
+                                }
+                                if (value.trim().length < 2) {
+                                  return 'Branch name must be at least 2 characters';
+                                }
+                                return null;
                               },
                               onChanged: (value) {
                                 return null;
@@ -312,6 +311,9 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                             if (balance == null) {
                               return 'Please enter a valid number';
                             }
+                            if (balance < 0) {
+                              return 'Opening balance cannot be negative';
+                            }
                             return null;
                           },
                           onChanged: (value) {
@@ -346,26 +348,32 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
     final accountBloc = context.read<AccountBloc>();
     final selectedType = selectedAccountType.value;
 
+    // Clear previous validation
+    formKey.currentState?.save();
+
     Map<String, dynamic> body = {
-      "ac_name": accountBloc.accountNameController.text.trim(), // ✅ Matches Django model: name
-      "ac_type": selectedType, // ✅ Matches Django model: ac_type
-      "balance": accountBloc.accountOpeningBalanceController.text.trim(), // ✅ Matches Django model
-      "opening_balance": accountBloc.accountOpeningBalanceController.text.trim(), // ✅ Matches Django model
+      "ac_name": accountBloc.accountNameController.text.trim(),
+      "ac_type": selectedType,
+      "opening_balance": accountBloc.accountOpeningBalanceController.text.trim(),
     };
 
-    // Add account number for non-cash and non-other accounts
-    if (selectedType != "Cash" && selectedType != "Other") {
-      body["ac_number"] = accountBloc.accountNumberController.text.trim(); // ✅ Matches Django model: number
+    // Add account number for bank and mobile banking accounts
+    if (selectedType == "Bank" || selectedType == "Mobile banking") {
+      body["ac_number"] = accountBloc.accountNumberController.text.trim();
+    } else {
+      // For Cash and Other, explicitly set to null
+      body["ac_number"] = null;
     }
 
-    // Add bank details for bank accounts
+    // Add bank details only for bank accounts
     if (selectedType == "Bank") {
-      body["bank_name"] = accountBloc.bankNameController.text.trim(); // ✅ Matches Django model: bank_name
-      body["branch"] = accountBloc.branchNameController.text.trim(); // ✅ Matches Django model: branch
+      body["bank_name"] = accountBloc.bankNameController.text.trim();
+      body["branch"] = accountBloc.branchNameController.text.trim();
+    } else {
+      // For non-bank accounts, explicitly set to null
+      body["bank_name"] = null;
+      body["branch"] = null;
     }
-
-    // Balance will be auto-set by Django model to opening_balance
-    // No need to send balance separately
 
     print("Sending payload: $body"); // For debugging
 

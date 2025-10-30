@@ -1,15 +1,15 @@
 import '../../../../core/configs/configs.dart';
 import '../../../../core/shared/widgets/sideMenu/sidebar.dart';
 import '../../../../core/widgets/app_alert_dialog.dart';
+import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_dropdown.dart';
 import '../../../../core/widgets/app_loader.dart';
 import '../../../../core/widgets/coustom_search_text_field.dart';
-import '../../../../core/widgets/custom_filter_ui.dart';
-import '../../../products/product/presentation/bloc/products/products_bloc.dart';
 import '../../../products/product/presentation/widget/pagination.dart';
 import '../../data/model/account_model.dart';
 import '../bloc/account/account_bloc.dart';
 import '../widget/widget.dart';
+import 'create_account_screen.dart';
 
 class AccountScreen extends StatefulWidget {
   const AccountScreen({super.key});
@@ -108,6 +108,7 @@ class _AccountScreenState extends State<AccountScreen> {
                 appLoader(context, "Creating account, please wait...");
               } else if (state is AccountAddSuccess) {
                 Navigator.pop(context);
+                Navigator.pop(context);
                 _fetchApi();
               } else if (state is AccountAddFailed) {
                 Navigator.pop(context);
@@ -141,7 +142,7 @@ class _AccountScreenState extends State<AccountScreen> {
                           return Column(
                             children: [
                               SizedBox(
-                                child: _buildAccountTable(state.list),
+                                child: AccountCard( accounts: state.list,),
                               ),
                               PaginationBar(
                                 count: state.count,
@@ -180,10 +181,13 @@ class _AccountScreenState extends State<AccountScreen> {
 
   Widget _buildFilterRow() {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
         // 🔍 Search Field
         Expanded(
           child: CustomSearchTextFormField(
+            isRequiredLabel: false,
             controller: filterTextController,
             onChanged: (value) => _fetchApi(filterText: value),
             onClear: () {
@@ -198,10 +202,10 @@ class _AccountScreenState extends State<AccountScreen> {
         // 🏦 Account Type Dropdown
         Expanded(
           child: AppDropdown<String>(
-            label: "Account Type",
             context: context,
             hint: "Select Account Type",
             isNeedAll: true,
+            isLabel: false,
             isRequired: false,
             value: selectedAccountTypeNotifier.value,
             itemList: ['Cash', 'Bank', 'Credit Card', 'Loan', 'Investment', 'Other'],
@@ -222,11 +226,28 @@ class _AccountScreenState extends State<AccountScreen> {
                   fontWeight: FontWeight.w300,
                 ),
               ),
-            ),
+            ), label: '',
           ),
         ),
-        const SizedBox(width: 10),
+        gapW16,
+        AppButton(
+          name: "Create Account", // Fixed button text
+          onPressed: () {
+            showDialog(
+              context: context,
+              builder: (context) {
+                return Dialog(
+                  child: SizedBox(
+                    width: AppSizes.width(context) * 0.50,
+                    child: CreateAccountScreen(),
+                  ),
+                );
+              },
+            );
+          },
+        ),
 
+        gapW16,
         // 🔄 Refresh Button
         IconButton(
           onPressed: () => _fetchApi(),
@@ -237,120 +258,5 @@ class _AccountScreenState extends State<AccountScreen> {
     );
   }
 
-  Widget _buildAccountTable(List<AccountModel> accounts) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: DataTable(
-          columnSpacing: 20,
-          horizontalMargin: 16,
-          headingRowColor: MaterialStateProperty.resolveWith<Color?>(
-                (Set<MaterialState> states) => AppColors.primaryColor.withOpacity(0.1),
-          ),
-          columns: const [
-            DataColumn(label: Text('#', style: TextStyle(fontWeight: FontWeight.bold))),
-            DataColumn(label: Text('Account Name', style: TextStyle(fontWeight: FontWeight.bold))),
-            DataColumn(label: Text('Account Number', style: TextStyle(fontWeight: FontWeight.bold))),
-            DataColumn(label: Text('Type', style: TextStyle(fontWeight: FontWeight.bold))),
-            DataColumn(label: Text('Balance', style: TextStyle(fontWeight: FontWeight.bold))),
-            DataColumn(label: Text('Status', style: TextStyle(fontWeight: FontWeight.bold))),
-            DataColumn(label: Text('Actions', style: TextStyle(fontWeight: FontWeight.bold))),
-          ],
-          rows: accounts.asMap().entries.map((entry) {
-            final account = entry.value;
-            final index = entry.key + 1;
 
-            return DataRow(
-              cells: [
-                DataCell(Text(index.toString())),
-                DataCell(Text(account.acName ?? 'N/A')),
-                DataCell(Text(account.acNumber ?? 'N/A')),
-                DataCell(
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: _getAccountTypeColor(account.acType),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Text(
-                      account.acType ?? 'N/A',
-                      style: const TextStyle(color: Colors.white, fontSize: 12),
-                    ),
-                  ),
-                ),
-                DataCell(
-                  Text(
-                    '\$${account.balance?.toString() ?? '0.00'}',
-                    style: TextStyle(
-                      color: (double.tryParse(account.balance.toString()) ?? 0) >= 0 ? Colors.green : Colors.red,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                DataCell(
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: (account.bankName == 'active') ? Colors.green : Colors.grey,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Text(
-                      account.bankName ?? 'inactive',
-                      style: const TextStyle(color: Colors.white, fontSize: 12),
-                    ),
-                  ),
-                ),
-                DataCell(
-                  Row(
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.edit, size: 18),
-                        onPressed: () {
-                          // Edit account action
-                        },
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.delete, size: 18, color: Colors.red),
-                        onPressed: () {
-                          // Delete account action
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            );
-          }).toList(),
-        ),
-      ),
-    );
-  }
-
-  Color _getAccountTypeColor(String? type) {
-    switch (type?.toLowerCase()) {
-      case 'cash':
-        return Colors.green;
-      case 'bank':
-        return Colors.blue;
-      case 'credit card':
-        return Colors.orange;
-      case 'loan':
-        return Colors.red;
-      case 'investment':
-        return Colors.purple;
-      default:
-        return Colors.grey;
-    }
-  }
 }

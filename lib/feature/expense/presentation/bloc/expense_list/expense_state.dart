@@ -38,7 +38,6 @@ final class ExpenseListFailed extends ExpenseState {
 
 
 
-final class ExpenseAddInitial extends ExpenseState {}
 
 final class ExpenseAddLoading extends ExpenseState {}
 
@@ -52,5 +51,20 @@ final class ExpenseAddFailed extends ExpenseState {
   final String title, content;
 
   ExpenseAddFailed({required this.title, required this.content});
+}
+
+
+final class ExpenseDeleteLoading extends ExpenseState {}
+
+final class ExpenseDeleteSuccess extends ExpenseState {
+  ExpenseDeleteSuccess();
+}
+
+
+
+final class ExpenseDeleteFailed extends ExpenseState {
+  final String title, content;
+
+  ExpenseDeleteFailed({required this.title, required this.content});
 }
 

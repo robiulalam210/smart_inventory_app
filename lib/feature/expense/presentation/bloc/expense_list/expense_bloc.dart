@@ -13,8 +13,6 @@ part 'expense_state.dart';
 
 class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
   List<ExpenseModel> allExpenses = [];
-  final int _defaultPageSize = 10;
-  final int _itemsPerPage = 5;
   String selectedState = "";
   TextEditingController filterTextController = TextEditingController();
   TextEditingController amountTextController = TextEditingController();
@@ -239,29 +237,35 @@ class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
 
   Future<void> _onDeleteExpense(
       DeleteExpense event, Emitter<ExpenseState> emit) async {
-    emit(ExpenseAddLoading());
+    emit(ExpenseDeleteLoading());
 
     try {
       final res = await deleteResponse(
           url: '${AppUrls.expense}${event.id}/'); // Add trailing slash
 
-      // FIX: For delete, we don't need to parse as ExpenseModel
-      ApiResponse<dynamic> response = appParseJson<dynamic>(
-        res,
-            (data) => data, // Just return the data as-is
+      // ✅ Convert the Map to JSON string for appParseJson
+      final jsonString = jsonEncode(res);
+
+      ApiResponse response = appParseJson(
+        jsonString, // Now passing String instead of Map
+            (data) => data, // Just return data as-is for delete operations
       );
+      print(response);
+      print(response.success);
+      print(response.message);
+      print(response.data);
 
       if (response.success == false) {
-        emit(ExpenseAddFailed(
+        emit(ExpenseDeleteFailed(
             title: 'Error',
             content: response.message ?? "Failed to delete expense"
         ));
         return;
       }
 
-      emit(ExpenseAddSuccess());
+      emit(ExpenseDeleteSuccess() );
     } catch (error) {
-      emit(ExpenseAddFailed(title: "Error", content: error.toString()));
+      emit(ExpenseDeleteFailed(title: "Error", content: error.toString()));
     }
   }
 }
