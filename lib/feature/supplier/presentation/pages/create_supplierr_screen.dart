@@ -1,11 +1,10 @@
 import '../../../../core/configs/configs.dart';
-import '../../../../core/shared/widgets/sideMenu/sidebar.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/input_field.dart';
 import '../bloc/supplier/supplier_list_bloc.dart';
 
 class CreateSupplierScreen extends StatefulWidget {
-  CreateSupplierScreen({super.key, this.submitText = '', this.id = ''});
+  const CreateSupplierScreen({super.key, this.submitText = '', this.id = ''});
   final String id;
   final String submitText;
 
@@ -19,7 +18,12 @@ class _CreateSupplierScreenState extends State<CreateSupplierScreen> {
     final isBigScreen =
         Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
     return Container(
-      color: AppColors.bg,
+      decoration: BoxDecoration(
+        color: AppColors.bg,
+
+        borderRadius: BorderRadius.circular(AppSizes.bodyPadding),
+
+      ),
       child: SafeArea(
         child: ResponsiveRow(
           spacing: 0,
@@ -33,19 +37,6 @@ class _CreateSupplierScreenState extends State<CreateSupplierScreen> {
     );
   }
 
-  Widget _buildSidebar() {
-    return ResponsiveCol(
-      xs: 0,
-      sm: 1,
-      md: 1,
-      lg: 2,
-      xl: 2,
-      child: Container(
-        decoration: const BoxDecoration(color: Colors.white),
-        child: const Sidebar(),
-      ),
-    );
-  }
 
   Widget _buildContentArea(bool isBigScreen) {
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
@@ -103,7 +94,8 @@ class _CreateSupplierScreenState extends State<CreateSupplierScreen> {
                     textInputAction: TextInputAction.next,
                     controller: context.read<SupplierListBloc>().customerNumberController,
                     hintText: 'Phone Number',
-                    maxLength: 11,
+                    labelText: "Phone Number",
+                    // maxLength: 11,
                     fillColor: const Color.fromARGB(255, 255, 255, 255),
                     keyboardType: TextInputType.phone,
                     validator: (value) {
@@ -166,7 +158,7 @@ class _CreateSupplierScreenState extends State<CreateSupplierScreen> {
       "address": supplierBloc.addressController.text.trim(),
     };
 
-    print("Sending supplier payload: $body");
+    debugPrint("Sending supplier payload: $body");
 
     if (widget.id.isEmpty) {
       // Create new supplier
@@ -176,19 +168,9 @@ class _CreateSupplierScreenState extends State<CreateSupplierScreen> {
       supplierBloc.add(UpdateSupplierList(body: body, branchId: widget.id));
     }
 
-    _showSuccessMessage();
   }
 
-  void _showSuccessMessage() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(widget.id.isEmpty
-            ? 'Supplier created successfully!'
-            : 'Supplier updated successfully!'),
-        backgroundColor: Colors.green,
-      ),
-    );
-  }
+
 
   @override
   void dispose() {

@@ -31,7 +31,7 @@ class AppUrls {
   static final String productStock          = '$baseUrl/user/product/stock-info?status=1&total=true';
   static final String source          = '$baseUrl/sources/';
   static final String account          = '$baseUrl/accounts/';
-  static final String customer          = '$baseUrl/customers';
+  static final String customer          = '$baseUrl/customers/';
   static final String customerActive          = '$baseUrl/customers-active';
   static final String accountActive          = '$baseUrl/accounts-active';
   static final String administrationUser          = '$baseUrl/users/';

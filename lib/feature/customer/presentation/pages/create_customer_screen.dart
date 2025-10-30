@@ -26,13 +26,18 @@ class _CreateCustomerScreenState extends State<CreateCustomerScreen> {
     final isBigScreen =
         Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
     return Container(
-      color: AppColors.bg,
+      decoration: BoxDecoration(
+        color: AppColors.bg,
+
+        borderRadius: BorderRadius.circular(AppSizes.bodyPadding),
+
+      ),
       child: SafeArea(
         child: ResponsiveRow(
           spacing: 0,
           runSpacing: 0,
           children: [
-            if (isBigScreen) _buildSidebar(),
+
             _buildContentArea(isBigScreen),
           ],
         ),
@@ -40,19 +45,6 @@ class _CreateCustomerScreenState extends State<CreateCustomerScreen> {
     );
   }
 
-  Widget _buildSidebar() {
-    return ResponsiveCol(
-      xs: 0,
-      sm: 1,
-      md: 1,
-      lg: 2,
-      xl: 2,
-      child: Container(
-        decoration: const BoxDecoration(color: Colors.white),
-        child: const Sidebar(),
-      ),
-    );
-  }
 
   Widget _buildContentArea(bool isBigScreen) {
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
@@ -125,7 +117,6 @@ class _CreateCustomerScreenState extends State<CreateCustomerScreen> {
                           textInputAction: TextInputAction.next,
                           controller: context.read<CustomerBloc>().customerNumberController,
                           hintText: 'Phone Number',
-                          maxLength: AppConstants.appNumberLimit,
                           fillColor: const Color.fromARGB(255, 255, 255, 255),
                           keyboardType: TextInputType.phone,
                           validator: (value) {

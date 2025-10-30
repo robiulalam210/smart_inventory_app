@@ -6,6 +6,7 @@ import '../../../../core/widgets/app_dropdown.dart';
 import '../../../../core/widgets/app_loader.dart';
 import '../../../../core/widgets/coustom_search_text_field.dart';
 import '../../../../core/widgets/custom_filter_ui.dart';
+import '../../../lab_dashboard/presentation/bloc/dashboard/dashboard_bloc.dart';
 import '../../../products/product/presentation/widget/pagination.dart';
 import '../../../products/soruce/presentation/bloc/source/source_bloc.dart';
 import '../bloc/supplier/supplier_list_bloc.dart';
@@ -116,7 +117,13 @@ class _SupplierScreenState extends State<SupplierScreen> {
               appLoader(context, "Creating Supplier, please wait...");
             } else if (state is SupplierAddSuccess) {
               Navigator.pop(context); // Close loader dialog
+              Navigator.pop(context); // Close loader dialog
               _fetchApi(); // Reload supplier list
+
+              context.read<DashboardBloc>().add(ChangeDashboardScreen(index: 10));
+
+
+
             } else if (state is SupplierAddFailed) {
               Navigator.pop(context); // Close loader dialog
               appAlertDialog(context, state.content,

@@ -14,7 +14,7 @@ class SupplierListModel {
   final String? email;
   final String? phone;
   final String? address;
-  final String? status;
+  final dynamic status;
   final String? supplierNo;
   final dynamic totalDue;
   final dynamic totalPaid;

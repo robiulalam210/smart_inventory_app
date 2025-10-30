@@ -51,18 +51,18 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     AppWrapper(child: CreatePurchaseScreen()),
     AppWrapper(child: PurchaseScreen()),
 
-    AppWrapper(child: ProductsForm()),
+    // AppWrapper(child: ProductsForm()),
     AppWrapper(child: ProductsScreen()),
 
     AppWrapper(child: AccountScreen()),
-    AppWrapper(child: CreateAccountScreen(submitText: "Save",)),
+    // AppWrapper(child: CreateAccountScreen(submitText: "Save",)),
 
     AppWrapper(child: CustomerScreen()),
-    AppWrapper(child: CreateCustomerScreen()),
+    // AppWrapper(child: CreateCustomerScreen()),
 
     AppWrapper(child: SupplierScreen()),
-    AppWrapper(child: CreateSupplierScreen()),
-    AppWrapper(child: SupplierPaymentForm()),
+    // AppWrapper(child: CreateSupplierScreen()),
+    // AppWrapper(child: SupplierPaymentForm()),
     AppWrapper(child: SupplierPaymentScreen()),
 
 

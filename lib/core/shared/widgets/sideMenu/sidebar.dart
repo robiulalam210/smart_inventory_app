@@ -1,4 +1,3 @@
-
 import '../../../../feature/lab_dashboard/presentation/bloc/dashboard/dashboard_bloc.dart';
 import '../../../configs/configs.dart';
 import 'menu_tile.dart';
@@ -122,9 +121,7 @@ class _SidebarState extends State<Sidebar> {
                         ),
                         ExpansionTile(
                           initiallyExpanded:
-                          currentIndex == 5 ||
-                              currentIndex == 6 ,
-
+                              currentIndex == 5 || currentIndex == 6,
 
                           title: Text(
                             "Purchase ",
@@ -156,10 +153,7 @@ class _SidebarState extends State<Sidebar> {
                         ),
                         ExpansionTile(
                           initiallyExpanded:
-
-                              currentIndex == 7 ||
-                              currentIndex == 8 ,
-
+                              currentIndex == 7 ,
 
                           title: Text(
                             "Products ",
@@ -171,30 +165,27 @@ class _SidebarState extends State<Sidebar> {
                             ),
                           ),
                           children: [
+                            // MenuTile(
+                            //   isSubmenu: true,
+                            //   title: "Create Product ",
+                            //   isSelected: currentIndex == 7,
+                            //   onPressed: () {
+                            //     bloc.add(ChangeDashboardScreen(index: 7));
+                            //   },
+                            // ),
                             MenuTile(
                               isSubmenu: true,
-                              title: "Create Product ",
+                              title: "Product ",
                               isSelected: currentIndex == 7,
                               onPressed: () {
                                 bloc.add(ChangeDashboardScreen(index: 7));
                               },
                             ),
-                            MenuTile(
-                              isSubmenu: true,
-                              title: "Product ",
-                              isSelected: currentIndex == 8,
-                              onPressed: () {
-                                bloc.add(ChangeDashboardScreen(index: 8));
-                              },
-                            ),
-
-
-
                           ],
                         ),
                         ExpansionTile(
                           initiallyExpanded:
-                          currentIndex == 9 ||currentIndex==10 ,
+                              currentIndex == 8 ,
 
                           title: Text(
                             "Accounts ",
@@ -209,25 +200,24 @@ class _SidebarState extends State<Sidebar> {
                             MenuTile(
                               isSubmenu: true,
                               title: "Accounts ",
-                              isSelected: currentIndex == 9,
+                              isSelected: currentIndex == 8,
                               onPressed: () {
-                                bloc.add(ChangeDashboardScreen(index: 9));
-                              },
-                            ), MenuTile(
-                              isSubmenu: true,
-                              title: "Accounts ",
-                              isSelected: currentIndex == 10,
-                              onPressed: () {
-                                bloc.add(ChangeDashboardScreen(index: 10));
+                                bloc.add(ChangeDashboardScreen(index: 8));
                               },
                             ),
-
+                            // MenuTile(
+                            //   isSubmenu: true,
+                            //   title: "Accounts ",
+                            //   isSelected: currentIndex == 10,
+                            //   onPressed: () {
+                            //     bloc.add(ChangeDashboardScreen(index: 10));
+                            //   },
+                            // ),
                           ],
                         ),
                         ExpansionTile(
                           initiallyExpanded:
-                          currentIndex == 11  ||
-                          currentIndex == 12  ,
+                              currentIndex == 9 ,
 
                           title: Text(
                             "Customers ",
@@ -242,27 +232,28 @@ class _SidebarState extends State<Sidebar> {
                             MenuTile(
                               isSubmenu: true,
                               title: "Customer ",
-                              isSelected: currentIndex == 11,
+                              isSelected: currentIndex == 9,
                               onPressed: () {
-                                bloc.add(ChangeDashboardScreen(index: 11));
-                              },
-                            ),  MenuTile(
-                              isSubmenu: true,
-                              title: "Customer ",
-                              isSelected: currentIndex == 12,
-                              onPressed: () {
-                                bloc.add(ChangeDashboardScreen(index: 12));
+                                bloc.add(ChangeDashboardScreen(index: 9));
                               },
                             ),
-
+                            // MenuTile(
+                            //   isSubmenu: true,
+                            //   title: "Customer ",
+                            //   isSelected: currentIndex == 12,
+                            //   onPressed: () {
+                            //     bloc.add(ChangeDashboardScreen(index: 12));
+                            //   },
+                            // ),
                           ],
                         ),
                         ExpansionTile(
                           initiallyExpanded:
-                          currentIndex == 13 ||
-                              currentIndex == 14 ||
-                              currentIndex == 15 ||
-                              currentIndex == 16 ,
+                              currentIndex == 10 ||
+                              currentIndex == 11 ,
+                              //     ||
+                              // currentIndex == 15 ||
+                              // currentIndex == 16,
 
                           title: Text(
                             "Supplier ",
@@ -277,41 +268,42 @@ class _SidebarState extends State<Sidebar> {
                             MenuTile(
                               isSubmenu: true,
                               title: " Supplier  List",
-                              isSelected: currentIndex == 13,
+                              isSelected: currentIndex == 10,
                               onPressed: () {
-                                bloc.add(ChangeDashboardScreen(index: 13));
-                              },
-                            ),     MenuTile(
-                              isSubmenu: true,
-                              title: " Create Supplier  List",
-                              isSelected: currentIndex == 14,
-                              onPressed: () {
-                                bloc.add(ChangeDashboardScreen(index: 14));
+                                bloc.add(ChangeDashboardScreen(index: 10));
                               },
                             ),
-                            MenuTile(
-                              isSubmenu: true,
-                              title: 'Payment List',
-                              isSelected: currentIndex == 15,
-                              onPressed: () {
-                                bloc.add(ChangeDashboardScreen(index: 15));
-                              },
-                            ),
+                            // MenuTile(
+                            //   isSubmenu: true,
+                            //   title: " Create Supplier  List",
+                            //   isSelected: currentIndex == 11,
+                            //   onPressed: () {
+                            //     bloc.add(ChangeDashboardScreen(index: 11));
+                            //   },
+                            // ),
+                            // MenuTile(
+                            //   isSubmenu: true,
+                            //   title: 'Payment List',
+                            //   isSelected: currentIndex == 15,
+                            //   onPressed: () {
+                            //     bloc.add(ChangeDashboardScreen(index: 15));
+                            //   },
+                            // ),
                             MenuTile(
                               isSubmenu: true,
                               title: 'Supplier Payment',
-                              isSelected: currentIndex == 16,
+                              isSelected: currentIndex == 11,
                               onPressed: () {
-                                bloc.add(ChangeDashboardScreen(index: 16));
+                                bloc.add(ChangeDashboardScreen(index: 11));
                               },
                             ),
                           ],
                         ),
                         ExpansionTile(
                           initiallyExpanded:
-                              currentIndex == 17 ||
-                              currentIndex == 18 ||
-                              currentIndex == 19 ,
+                              currentIndex == 12 ||
+                              currentIndex == 13 ||
+                              currentIndex == 14,
 
                           title: Text(
                             "Expense ",
@@ -326,38 +318,33 @@ class _SidebarState extends State<Sidebar> {
                             MenuTile(
                               isSubmenu: true,
                               title: "Expense  List",
-                              isSelected: currentIndex == 17,
+                              isSelected: currentIndex == 12,
                               onPressed: () {
-                                bloc.add(ChangeDashboardScreen(index: 17));
+                                bloc.add(ChangeDashboardScreen(index: 12));
                               },
                             ),
                             MenuTile(
                               isSubmenu: true,
                               title: 'Expense Head',
-                              isSelected: currentIndex == 18,
+                              isSelected: currentIndex == 13,
                               onPressed: () {
-                                bloc.add(ChangeDashboardScreen(index: 18));
+                                bloc.add(ChangeDashboardScreen(index: 13));
                               },
-                            ),  MenuTile(
+                            ),
+                            MenuTile(
                               isSubmenu: true,
                               title: 'Expense Sub Head',
-                              isSelected: currentIndex == 19,
+                              isSelected: currentIndex == 14,
                               onPressed: () {
-                                bloc.add(ChangeDashboardScreen(index: 19));
+                                bloc.add(ChangeDashboardScreen(index: 14));
                               },
                             ),
                           ],
                         ),
 
-
-
-
                         ExpansionTile(
                           initiallyExpanded:
-
-                              currentIndex == 13 ||
-                              currentIndex == 4 ,
-
+                              currentIndex == 13 || currentIndex == 4,
 
                           title: Text(
                             "Return ",
@@ -395,11 +382,6 @@ class _SidebarState extends State<Sidebar> {
                             ),
                           ],
                         ),
-
-
-
-
-
 
                         ExpansionTile(
                           initiallyExpanded:
@@ -498,7 +480,7 @@ class _SidebarState extends State<Sidebar> {
                         ),
                         ExpansionTile(
                           initiallyExpanded:
-                          currentIndex == 0 ||
+                              currentIndex == 0 ||
                               currentIndex == 1 ||
                               currentIndex == 2 ||
                               currentIndex == 3 ||
@@ -517,9 +499,7 @@ class _SidebarState extends State<Sidebar> {
                           children: [
                             ExpansionTile(
                               initiallyExpanded:
-                              currentIndex == 16 ||
-                                  currentIndex == 17 ,
-
+                                  currentIndex == 16 || currentIndex == 17,
 
                               title: Text(
                                 "Staff ",

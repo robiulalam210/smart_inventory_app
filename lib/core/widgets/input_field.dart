@@ -152,7 +152,7 @@ class CustomInputFieldState extends State<CustomInputField> {
                     suffixIcon: widget.suffixIcon,
 
                       contentPadding: const EdgeInsets.only(
-                          top: 11.0, bottom: 11.0, left: 6),
+                          top: 10.0, bottom: 10.0, left: 6),
                     errorBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(AppSizes.radius),
                         borderSide:  BorderSide(color: AppColors.error, )),

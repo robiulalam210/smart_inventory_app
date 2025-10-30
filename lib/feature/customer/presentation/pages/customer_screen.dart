@@ -1,6 +1,7 @@
 import '../../../../core/configs/configs.dart';
 import '../../../../core/shared/widgets/sideMenu/sidebar.dart';
 import '../../../../core/widgets/app_alert_dialog.dart';
+import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_dropdown.dart';
 import '../../../../core/widgets/app_loader.dart';
 import '../../../../core/widgets/coustom_search_text_field.dart';
@@ -8,6 +9,7 @@ import '../../../../core/widgets/custom_filter_ui.dart';
 import '../../../products/product/presentation/widget/pagination.dart';
 import '../bloc/customer/customer_bloc.dart';
 import '../widget/widget.dart';
+import 'create_customer_screen.dart';
 
 class CustomerScreen extends StatefulWidget {
   const CustomerScreen({super.key});
@@ -199,8 +201,8 @@ class _CustomerScreenState extends State<CustomerScreen> {
 
   Widget _buildFilterRow() {
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
         // 🔍 Search Field
         Expanded(
@@ -212,7 +214,9 @@ class _CustomerScreenState extends State<CustomerScreen> {
               selectedStatusNotifier.value = null;
               _fetchApi();
             },
+            isRequiredLabel: false,
             hintText: "Customer Name, Phone, or Email",
+            // labelText: "Customer Name, Phone, or Email",
           ),
         ),
         const SizedBox(width: 10),
@@ -223,6 +227,8 @@ class _CustomerScreenState extends State<CustomerScreen> {
             context: context,
             isLabel: false,
             hint: "Select Status",
+            label: "",
+
             isNeedAll: true,
             isRequired: false,
             value: selectedStatusNotifier.value,
@@ -244,10 +250,28 @@ class _CustomerScreenState extends State<CustomerScreen> {
                   fontWeight: FontWeight.w300,
                 ),
               ),
-            ), label: '',
+            ),
           ),
         ),
-        const SizedBox(width: 10),
+        gapW16,
+        AppButton(
+          name: "Create Customer", // Fixed button text
+          onPressed: () {
+            showDialog(
+              context: context,
+              builder: (context) {
+                return Dialog(
+                  child: SizedBox(
+                    width: AppSizes.width(context) * 0.50,
+                    child: CreateCustomerScreen(),
+                  ),
+                );
+              },
+            );
+          },
+        ),
+
+        gapW16,
 
         // 🔄 Refresh Button
         IconButton(
