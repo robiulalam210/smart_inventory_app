@@ -6,9 +6,11 @@ import '../../../../core/widgets/app_dropdown.dart';
 import '../../../../core/widgets/app_loader.dart';
 import '../../../../core/widgets/coustom_search_text_field.dart';
 import '../../../../core/widgets/custom_filter_ui.dart';
+import '../../../../core/widgets/delete_dialog.dart';
 import '../../../lab_dashboard/presentation/bloc/dashboard/dashboard_bloc.dart';
 import '../../../products/product/presentation/widget/pagination.dart';
 import '../../../products/soruce/presentation/bloc/source/source_bloc.dart';
+import '../../data/model/supplier_list_model.dart';
 import '../bloc/supplier/supplier_list_bloc.dart';
 import '../widget/widget.dart';
 import 'create_supplierr_screen.dart';
@@ -30,9 +32,7 @@ class _SupplierScreenState extends State<SupplierScreen> {
     dataBloc = context.read<SupplierListBloc>();
 
     // Initialize source bloc
-    context.read<SourceBloc>().add(
-      FetchSourceList(context),
-    );
+    context.read<SourceBloc>().add(FetchSourceList(context));
 
     _fetchApi();
   }
@@ -120,19 +120,22 @@ class _SupplierScreenState extends State<SupplierScreen> {
               Navigator.pop(context); // Close loader dialog
               _fetchApi(); // Reload supplier list
 
-              context.read<DashboardBloc>().add(ChangeDashboardScreen(index: 10));
-
-
-
+              context.read<DashboardBloc>().add(
+                ChangeDashboardScreen(index: 10),
+              );
             } else if (state is SupplierAddFailed) {
               Navigator.pop(context); // Close loader dialog
-              appAlertDialog(context, state.content,
-                  title: state.title,
-                  actions: [
-                    TextButton(
-                        onPressed: () => AppRoutes.pop(context),
-                        child: const Text("Dismiss"))
-                  ]);
+              appAlertDialog(
+                context,
+                state.content,
+                title: state.title,
+                actions: [
+                  TextButton(
+                    onPressed: () => AppRoutes.pop(context),
+                    child: const Text("Dismiss"),
+                  ),
+                ],
+              );
             }
           },
           child: Column(
@@ -159,12 +162,14 @@ class _SupplierScreenState extends State<SupplierScreen> {
                   ),
                   gapW16,
                   Expanded(
-                    child:   AppDropdown(
+                    child: AppDropdown(
                       context: context,
                       hint: "Select Status",
                       isLabel: true,
                       isNeedAll: true,
-                      value: dataBloc.selectedState.isEmpty ? null : dataBloc.selectedState,
+                      value: dataBloc.selectedState.isEmpty
+                          ? null
+                          : dataBloc.selectedState,
                       itemList: dataBloc.statesList,
                       onChanged: (newVal) {
                         setState(() {
@@ -172,7 +177,9 @@ class _SupplierScreenState extends State<SupplierScreen> {
                         });
                         _fetchApi(
                           filterText: filterTextController.text,
-                          status: newVal.toString() == "All" ? "" : newVal.toString(),
+                          status: newVal.toString() == "All"
+                              ? ""
+                              : newVal.toString(),
                         );
                       },
                       itemBuilder: (item) => DropdownMenuItem(
@@ -185,7 +192,8 @@ class _SupplierScreenState extends State<SupplierScreen> {
                             fontWeight: FontWeight.w600,
                           ),
                         ),
-                      ), label: '',
+                      ),
+                      label: '',
                     ),
                   ),
 
@@ -206,7 +214,6 @@ class _SupplierScreenState extends State<SupplierScreen> {
                       );
                     },
                   ),
-
                 ],
               ),
               SizedBox(
@@ -216,14 +223,53 @@ class _SupplierScreenState extends State<SupplierScreen> {
                       return const Center(child: CircularProgressIndicator());
                     } else if (state is SupplierListSuccess) {
                       if (state.list.isEmpty) {
-                        return Center(
-                          child: Lottie.asset(AppImages.noData),
-                        );
+                        return Center(child: Lottie.asset(AppImages.noData));
                       } else {
                         return Column(
                           children: [
                             SizedBox(
-                              child: SupplierDataTableWidget(suppliers: state.list),
+                              child: SupplierDataTableWidget(
+                                suppliers: state.list,
+                                onEdit: (v) {
+                                  context
+                                          .read<SupplierListBloc>()
+                                          .customerNameController
+                                          .text =
+                                      v.name ?? "";
+                                  context
+                                          .read<SupplierListBloc>()
+                                          .customerNumberController
+                                          .text =
+                                      v.phone ?? "";
+                                  context
+                                          .read<SupplierListBloc>()
+                                          .addressController
+                                          .text =
+                                      v.address ?? "";
+                                  context
+                                          .read<SupplierListBloc>()
+                                          .customerEmailController
+                                          .text =
+                                      v.email ?? "";
+                                  context
+                                      .read<SupplierListBloc>()
+                                      .selectedState = v.isActive == true
+                                      ? "Active"
+                                      : "Inactive";
+                                  _showEditDialog(context, v);
+                                },
+                                onDelete: (v) async {
+                                  bool shouldDelete =
+                                      await showDeleteConfirmationDialog(
+                                        context,
+                                      );
+                                  if (!shouldDelete) return;
+
+                                  context.read<SupplierListBloc>().add(
+                                    DeleteSupplierList(v.id.toString()),
+                                  );
+                                },
+                              ),
                             ),
                             // Add pagination
                             PaginationBar(
@@ -233,20 +279,22 @@ class _SupplierScreenState extends State<SupplierScreen> {
                               pageSize: state.pageSize,
                               from: state.from,
                               to: state.to,
-                              onPageChanged: (page) => _fetchSupplierList(pageNumber: page),
-                              onPageSizeChanged: (newSize) => _fetchSupplierList(pageSize: newSize),
+                              onPageChanged: (page) =>
+                                  _fetchSupplierList(pageNumber: page),
+                              onPageSizeChanged: (newSize) =>
+                                  _fetchSupplierList(pageSize: newSize),
                             ),
                           ],
                         );
                       }
                     } else if (state is SupplierListFailed) {
                       return Center(
-                        child: Text('Failed to load suppliers: ${state.content}'),
+                        child: Text(
+                          'Failed to load suppliers: ${state.content}',
+                        ),
                       );
                     } else {
-                      return Center(
-                        child: Lottie.asset(AppImages.noData),
-                      );
+                      return Center(child: Lottie.asset(AppImages.noData));
                     }
                   },
                 ),
@@ -258,98 +306,22 @@ class _SupplierScreenState extends State<SupplierScreen> {
     );
   }
 
-  void _showFilterMenu(BuildContext context, Offset offset) async {
-    final screenSize = MediaQuery.of(context).size;
-    final left = offset.dx;
-    final top = offset.dy;
-    final right = screenSize.width - left;
-    final bottom = screenSize.height - top;
-
-    await showMenu(
-      color: const Color.fromARGB(255, 248, 248, 248),
+  void _showEditDialog(BuildContext context, SupplierListModel customer) {
+    // Implement edit dialog logic
+    showDialog(
       context: context,
-      position: RelativeRect.fromLTRB(left, top, right, bottom),
-      items: [
-        PopupMenuItem(
-          padding: const EdgeInsets.all(0),
-          enabled: false,
-          child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-              return Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  children: [
-                    Container(
-                      width: double.maxFinite,
-                      padding: const EdgeInsets.only(
-                          top: 5, bottom: 10, left: 10, right: 10),
-                      decoration: const BoxDecoration(
-                        color: Color.fromARGB(255, 248, 248, 248),
-                      ),
-                      child: Text('Filter', style: AppTextStyle.cardLevelText(context)),
-                    ),
-                    AppDropdown(
-                      label: "Status",
-                      context: context,
-                      hint: "Select Status",
-                      isLabel: true,
-                      isNeedAll: true,
-                      value: dataBloc.selectedState.isEmpty ? null : dataBloc.selectedState,
-                      itemList: dataBloc.statesList,
-                      onChanged: (newVal) {
-                        setState(() {
-                          dataBloc.selectedState = newVal.toString();
-                        });
-                        _fetchApi(
-                          filterText: filterTextController.text,
-                          status: newVal.toString() == "All" ? "" : newVal.toString(),
-                        );
-                      },
-                      itemBuilder: (item) => DropdownMenuItem(
-                        value: item,
-                        child: Text(
-                          item.toString(),
-                          style: const TextStyle(
-                            color: AppColors.blackColor,
-                            fontFamily: 'Quicksand',
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 5.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                dataBloc.selectedState = "";
-                                filterTextController.clear();
-                              });
-                              _fetchApi();
-                              Navigator.of(context).pop();
-                            },
-                            child: Text('Clear', style: AppTextStyle.errorTextStyle(context)),
-                          ),
-                          GestureDetector(
-                            onTap: () {
-                              Navigator.of(context).pop();
-                            },
-                            child: Text('Close', style: AppTextStyle.cardLevelText(context)),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            },
+      builder: (context) {
+        return Dialog(
+          child: SizedBox(
+            width: AppSizes.width(context) * 0.50,
+            child: CreateSupplierScreen(
+              id: customer.id.toString(),
+              submitText: "Update Supplier",
+            ),
           ),
-        ),
-      ],
+        );
+      },
     );
   }
+
 }

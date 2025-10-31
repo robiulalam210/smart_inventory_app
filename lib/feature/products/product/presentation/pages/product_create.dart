@@ -1,22 +1,34 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:smart_inventory/feature/products/brand/data/model/brand_model.dart';
+import 'package:smart_inventory/feature/products/brand/presentation/bloc/brand/brand_bloc.dart';
+import 'package:smart_inventory/feature/products/categories/data/model/categories_model.dart';
+import 'package:smart_inventory/feature/products/categories/presentation/bloc/categories/categories_bloc.dart';
 import 'package:smart_inventory/feature/products/unit/data/model/unit_model.dart';
-import '../../../../../core/configs/configs.dart';
-import '../../../../../core/shared/widgets/sideMenu/sidebar.dart';
-import '../../../../../core/widgets/app_alert_dialog.dart';
-import '../../../../../core/widgets/app_button.dart';
-import '../../../../../core/widgets/app_dropdown.dart';
-import '../../../../../core/widgets/app_loader.dart';
-import '../../../../../core/widgets/input_field.dart';
+import 'package:smart_inventory/feature/products/unit/presentation/bloc/unit/unti_bloc.dart';
+import '../../../../../../core/configs/configs.dart';
+import '../../../../../../core/shared/widgets/sideMenu/sidebar.dart';
+import '../../../../../../core/widgets/app_alert_dialog.dart';
+import '../../../../../../core/widgets/app_button.dart';
+import '../../../../../../core/widgets/app_dropdown.dart';
+import '../../../../../../core/widgets/app_loader.dart';
+import '../../../../../../core/widgets/input_field.dart';
 import '../../../../lab_dashboard/presentation/bloc/dashboard/dashboard_bloc.dart';
-import '../../../brand/data/model/brand_model.dart';
-import '../../../brand/presentation/bloc/brand/brand_bloc.dart';
-import '../../../categories/data/model/categories_model.dart';
-import '../../../categories/presentation/bloc/categories/categories_bloc.dart';
-import '../../../unit/presentation/bloc/unit/unti_bloc.dart';
+import '../../data/model/product_model.dart';
 import '../bloc/products/products_bloc.dart';
 
 class ProductsForm extends StatefulWidget {
   final bool isDialog;
-  const ProductsForm({super.key, this.isDialog = false});
+  final ProductModel? product;
+  final String? productId;
+
+  const ProductsForm({
+    super.key,
+    this.isDialog = false,
+    this.product,
+    this.productId,
+  });
 
   @override
   State<ProductsForm> createState() => _ProductsFormState();
@@ -30,10 +42,12 @@ class _ProductsFormState extends State<ProductsForm> {
   late BrandBloc brandBloc;
 
   bool _isInitialized = false;
+  bool _isEditMode = false;
 
   @override
   void initState() {
     super.initState();
+    _isEditMode = widget.product != null || widget.productId != null;
   }
 
   @override
@@ -41,7 +55,6 @@ class _ProductsFormState extends State<ProductsForm> {
     super.didChangeDependencies();
 
     if (!_isInitialized) {
-      // Initialize BLoCs here where context is available
       productsBloc = context.read<ProductsBloc>();
       categoriesBloc = context.read<CategoriesBloc>();
       unitBloc = context.read<UnitBloc>();
@@ -53,14 +66,12 @@ class _ProductsFormState extends State<ProductsForm> {
   }
 
   void _initializeData() {
-    // Initialize controllers with default values
-    productsBloc.productSellingPriceController = TextEditingController(text: "0");
-    productsBloc.productPurchasePriceController = TextEditingController(text: "0");
-    productsBloc.productOpeningStockController = TextEditingController(text: "0");
-    productsBloc.productAlertQuantityController = TextEditingController(text: "5");
-    productsBloc.productNameController = TextEditingController();
-    productsBloc.productBarCodeController = TextEditingController();
-    productsBloc.productDescriptionController = TextEditingController();
+    // Clear existing data first
+    _clearFormData();
+
+    if (_isEditMode && widget.product != null) {
+      _prefillFormData(widget.product!);
+    }
 
     // Fetch initial data
     categoriesBloc.add(FetchCategoriesList(context));
@@ -68,21 +79,51 @@ class _ProductsFormState extends State<ProductsForm> {
     unitBloc.add(FetchUnitList(context));
   }
 
-  @override
-  void dispose() {
-    productsBloc.productSellingPriceController.dispose();
-    productsBloc.productPurchasePriceController.dispose();
-    productsBloc.productAlertQuantityController.dispose();
-    productsBloc.productOpeningStockController.dispose();
-    productsBloc.productNameController.dispose();
-    productsBloc.productBarCodeController.dispose();
-    productsBloc.productDescriptionController.dispose();
-    super.dispose();
+  void _clearFormData() {
+    productsBloc.productNameController.clear();
+    productsBloc.productBarCodeController.clear();
+    productsBloc.productDescriptionController.clear();
+    productsBloc.productPurchasePriceController.text = "0";
+    productsBloc.productSellingPriceController.text = "0";
+    productsBloc.productOpeningStockController.text = "0";
+    productsBloc.productAlertQuantityController.text = "5";
+
+    categoriesBloc.selectedState = "";
+    categoriesBloc.selectedStateId = "";
+    unitBloc.selectedState = "";
+    unitBloc.selectedIdState = "";
+    brandBloc.selectedState = "";
+    brandBloc.selectedId = "";
+  }
+
+  void _prefillFormData(ProductModel product) {
+    productsBloc.productNameController.text = product.name ?? "";
+    // productsBloc.productBarCodeController.text = product.barCode ?? "";
+    productsBloc.productDescriptionController.text = product.description ?? "";
+    productsBloc.productPurchasePriceController.text = product.purchasePrice?.toString() ?? "0";
+    productsBloc.productSellingPriceController.text = product.sellingPrice?.toString() ?? "0";
+    productsBloc.productOpeningStockController.text = product.openingStock?.toString() ?? "0";
+    productsBloc.productAlertQuantityController.text = product.alertQuantity?.toString() ?? "5";
+
+    // Set selected category, unit, brand if available
+    if (product.categoryInfo?.name != null) {
+      categoriesBloc.selectedState = product.categoryInfo!.name!;
+      categoriesBloc.selectedStateId = product.categoryInfo!.id?.toString() ?? "";
+    }
+
+    if (product.unitInfo?.name != null) {
+      unitBloc.selectedState = product.unitInfo!.name!;
+      unitBloc.selectedIdState = product.unitInfo!.id?.toString() ?? "";
+    }
+
+    if (product.brandInfo?.name != null) {
+      brandBloc.selectedState = product.brandInfo!.name!;
+      brandBloc.selectedId = product.brandInfo!.id?.toString() ?? "";
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    // If not initialized yet, show loading
     if (!_isInitialized) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -100,13 +141,12 @@ class _ProductsFormState extends State<ProductsForm> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Header
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                "Create New Product",
-                style: TextStyle(
+              Text(
+                _isEditMode ? "Update Product" : "Create New Product",
+                style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
@@ -118,8 +158,6 @@ class _ProductsFormState extends State<ProductsForm> {
             ],
           ),
           const SizedBox(height: 20),
-
-          // Form Content
           Expanded(
             child: SingleChildScrollView(
               child: BlocListener<ProductsBloc, ProductsState>(
@@ -165,10 +203,20 @@ class _ProductsFormState extends State<ProductsForm> {
                       SizedBox(
                         width: double.infinity,
                         child: AppButton(
-                          name: "Create Product",
-                          onPressed: _createProduct,
+                          name: _isEditMode ? "Update Product" : "Create Product",
+                          onPressed: _submitProduct,
                         ),
                       ),
+                      const SizedBox(height: 10),
+                      if (widget.isDialog)
+                        SizedBox(
+                          width: double.infinity,
+                          child: AppButton(
+                            name: "Cancel",
+                            color: Colors.grey,
+                            onPressed: () => Navigator.pop(context),
+                          ),
+                        ),
                     ],
                   ),
                 ),
@@ -207,7 +255,6 @@ class _ProductsFormState extends State<ProductsForm> {
           xl: 10,
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(16),
-            physics: const AlwaysScrollableScrollPhysics(),
             child: BlocListener<ProductsBloc, ProductsState>(
               listener: (context, state) {
                 _handleProductState(state);
@@ -217,127 +264,60 @@ class _ProductsFormState extends State<ProductsForm> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      "Create New Product",
-                      style: TextStyle(
+                    Text(
+                      _isEditMode ? "Update Product" : "Create New Product",
+                      style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     const SizedBox(height: 20),
-
-                    // Main form fields in ResponsiveRow
                     ResponsiveRow(
                       spacing: 16,
                       runSpacing: 16,
                       children: [
-                        // Category Dropdown
                         ResponsiveCol(
-                          xs: 12,
-                          sm: 6,
-                          md: 6,
-                          lg: 6,
-                          xl: 6,
+                          xs: 12, sm: 6, md: 6, lg: 6, xl: 6,
                           child: _buildCategoryDropdown(),
                         ),
-
-                        // Product Name
                         ResponsiveCol(
-                          xs: 12,
-                          sm: 6,
-                          md: 6,
-                          lg: 6,
-                          xl: 6,
+                          xs: 12, sm: 6, md: 6, lg: 6, xl: 6,
                           child: _buildProductNameField(),
                         ),
-
-                        // Unit Dropdown
                         ResponsiveCol(
-                          xs: 12,
-                          sm: 6,
-                          md: 4,
-                          lg: 4,
-                          xl: 4,
+                          xs: 12, sm: 6, md: 4, lg: 4, xl: 4,
                           child: _buildUnitDropdown(),
                         ),
-
-                        // Brand Dropdown
                         ResponsiveCol(
-                          xs: 12,
-                          sm: 6,
-                          md: 4,
-                          lg: 4,
-                          xl: 4,
+                          xs: 12, sm: 6, md: 4, lg: 4, xl: 4,
                           child: _buildBrandDropdown(),
                         ),
-
-                        // Barcode Field
                         ResponsiveCol(
-                          xs: 12,
-                          sm: 6,
-                          md: 4,
-                          lg: 4,
-                          xl: 4,
+                          xs: 12, sm: 6, md: 4, lg: 4, xl: 4,
                           child: _buildBarcodeField(),
                         ),
-
-                        // Purchase Price
                         ResponsiveCol(
-                          xs: 12,
-                          sm: 6,
-                          md: 6,
-                          lg: 6,
-                          xl: 6,
+                          xs: 12, sm: 6, md: 6, lg: 6, xl: 6,
                           child: _buildPurchasePriceField(),
                         ),
-
-                        // Selling Price
                         ResponsiveCol(
-                          xs: 12,
-                          sm: 6,
-                          md: 6,
-                          lg: 6,
-                          xl: 6,
+                          xs: 12, sm: 6, md: 6, lg: 6, xl: 6,
                           child: _buildSellingPriceField(),
                         ),
-
-                        // Opening Stock
                         ResponsiveCol(
-                          xs: 12,
-                          sm: 6,
-                          md: 6,
-                          lg: 6,
-                          xl: 6,
+                          xs: 12, sm: 6, md: 6, lg: 6, xl: 6,
                           child: _buildOpeningStockField(),
                         ),
-
-                        // Alert Quantity
                         ResponsiveCol(
-                          xs: 12,
-                          sm: 6,
-                          md: 6,
-                          lg: 6,
-                          xl: 6,
+                          xs: 12, sm: 6, md: 6, lg: 6, xl: 6,
                           child: _buildAlertQuantityField(),
                         ),
-
-                        // Description Field (Full Width)
                         ResponsiveCol(
-                          xs: 12,
-                          sm: 12,
-                          md: 12,
-                          lg: 12,
-                          xl: 12,
+                          xs: 12, sm: 12, md: 12, lg: 12, xl: 12,
                           child: _buildDescriptionField(),
                         ),
-
-                        // Submit Button
                         ResponsiveCol(
-                          xs: 12,
-                          sm: 12,
-                          md: 12,
-                          lg: 12,
-                          xl: 12,
+                          xs: 12, sm: 12, md: 12, lg: 12, xl: 12,
                           child: _buildSubmitButton(),
                         ),
                       ],
@@ -354,39 +334,47 @@ class _ProductsFormState extends State<ProductsForm> {
 
   void _handleProductState(ProductsState state) {
     if (state is ProductsAddLoading) {
-      appLoader(context, "Creating Product, please wait...");
+      appLoader(context, _isEditMode ? "Updating Product..." : "Creating Product, please wait...");
     } else if (state is ProductsAddSuccess) {
       Navigator.pop(context); // Close loader dialog
 
+      // Refresh product list
       context.read<ProductsBloc>().add(
-          FetchProductsList(
-            context,
-
-            pageNumber: 1,
-            pageSize: 20,
-          ),);
-
-      context.read<DashboardBloc>().add(ChangeDashboardScreen(index: 7));
-
-      // Navigate back or show success message
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Product created successfully!')),
+        FetchProductsList(context, pageNumber: 1, pageSize: 20),
       );
+
+      // Show success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(_isEditMode ? 'Product updated successfully!' : 'Product created successfully!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+
       // Close dialog if in dialog mode
       if (widget.isDialog) {
         Navigator.pop(context);
+      } else {
+        context.read<DashboardBloc>().add(ChangeDashboardScreen(index: 7));
       }
     } else if (state is ProductsAddFailed) {
-      Navigator.pop(context); // Close loader dialog
-      appAlertDialog(context, state.content,
-          title: state.title,
-          actions: [
-            TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text("Dismiss"))
-          ]);
+      Navigator.pop(context);
+      appAlertDialog(
+        context,
+        state.content,
+        title: state.title,
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Dismiss"),
+          ),
+        ],
+      );
     }
   }
+
+  // ... (Keep all the _build methods as they are: _buildCategoryDropdown, _buildUnitDropdown, etc.)
+  // These methods remain the same as in your original code
 
   Widget _buildCategoryDropdown() {
     return BlocBuilder<CategoriesBloc, CategoriesState>(
@@ -403,11 +391,10 @@ class _ProductsFormState extends State<ProductsForm> {
           isRequired: true,
           isSearch: true,
           value: selectedCategory.isEmpty ? null : selectedCategory,
-          itemList: categoryList,
+          itemList: categoryList.map((e) => e.name ?? "").toList(),
           onChanged: (newVal) {
             setState(() {
               categoriesBloc.selectedState = newVal.toString();
-              // Find and set the category ID
               final matchingCategory = categoryList.firstWhere(
                     (category) => category.name.toString() == newVal.toString(),
                 orElse: () => CategoryModel(),
@@ -415,19 +402,10 @@ class _ProductsFormState extends State<ProductsForm> {
               categoriesBloc.selectedStateId = matchingCategory.id?.toString() ?? "";
             });
           },
-          validator: (value) {
-            return value == null ? 'Please select Category' : null;
-          },
+          validator: (value) => value == null ? 'Please select Category' : null,
           itemBuilder: (item) => DropdownMenuItem(
             value: item,
-            child: Text(
-              item.toString(),
-              style: const TextStyle(
-                color: AppColors.blackColor,
-                fontFamily: 'Quicksand',
-                fontWeight: FontWeight.w400,
-              ),
-            ),
+            child: Text(item.toString()),
           ),
         );
       },
@@ -448,11 +426,10 @@ class _ProductsFormState extends State<ProductsForm> {
           isSearch: true,
           isNeedAll: false,
           value: selectedUnit.isEmpty ? null : selectedUnit,
-          itemList: unitList,
+          itemList: unitList.map((e) => e.name ?? "").toList(),
           onChanged: (newVal) {
             setState(() {
               unitBloc.selectedState = newVal.toString();
-              // Find and set the unit ID
               final matchingUnit = unitList.firstWhere(
                     (unit) => unit.name.toString() == newVal.toString(),
                 orElse: () => UnitsModel(),
@@ -460,19 +437,10 @@ class _ProductsFormState extends State<ProductsForm> {
               unitBloc.selectedIdState = matchingUnit.id?.toString() ?? "";
             });
           },
-          validator: (value) {
-            return value == null ? 'Please select Unit' : null;
-          },
+          validator: (value) => value == null ? 'Please select Unit' : null,
           itemBuilder: (item) => DropdownMenuItem(
             value: item,
-            child: Text(
-              item.toString(),
-              style: const TextStyle(
-                color: AppColors.blackColor,
-                fontFamily: 'Quicksand',
-                fontWeight: FontWeight.w400,
-              ),
-            ),
+            child: Text(item.toString()),
           ),
         );
       },
@@ -494,11 +462,10 @@ class _ProductsFormState extends State<ProductsForm> {
           isSearch: true,
           isRequired: false,
           value: selectedBrand.isEmpty ? null : selectedBrand,
-          itemList: brandList,
+          itemList: brandList.map((e) => e.name ?? "").toList(),
           onChanged: (newVal) {
             setState(() {
               brandBloc.selectedState = newVal.toString();
-              // Find and set the brand ID
               final matchingBrand = brandList.firstWhere(
                     (brand) => brand.name.toString() == newVal.toString(),
                 orElse: () => BrandModel(),
@@ -508,14 +475,7 @@ class _ProductsFormState extends State<ProductsForm> {
           },
           itemBuilder: (item) => DropdownMenuItem(
             value: item,
-            child: Text(
-              item.toString(),
-              style: const TextStyle(
-                color: AppColors.blackColor,
-                fontFamily: 'Quicksand',
-                fontWeight: FontWeight.w400,
-              ),
-            ),
+            child: Text(item.toString()),
           ),
         );
       },
@@ -531,12 +491,7 @@ class _ProductsFormState extends State<ProductsForm> {
       labelText: 'Product Name *',
       fillColor: const Color.fromARGB(255, 255, 255, 255),
       keyboardType: TextInputType.text,
-      validator: (value) {
-        return value!.isEmpty ? 'Please enter Product Name' : null;
-      },
-      onChanged: (value) {
-        setState(() {});
-      },
+      validator: (value) => value!.isEmpty ? 'Please enter Product Name' : null,
     );
   }
 
@@ -546,15 +501,10 @@ class _ProductsFormState extends State<ProductsForm> {
       isRequired: false,
       controller: productsBloc.productPurchasePriceController,
       labelText: 'Purchase Price',
-      inputFormatters: [
-        FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
-      ],
+      inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*'))],
       keyboardType: TextInputType.number,
       hintText: '0.00',
       fillColor: const Color.fromARGB(255, 255, 255, 255),
-      onChanged: (value) {
-        setState(() {});
-      },
     );
   }
 
@@ -566,13 +516,8 @@ class _ProductsFormState extends State<ProductsForm> {
       labelText: 'Selling Price',
       hintText: '0.00',
       fillColor: const Color.fromARGB(255, 255, 255, 255),
-      inputFormatters: [
-        FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
-      ],
+      inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*'))],
       keyboardType: TextInputType.number,
-      onChanged: (value) {
-        setState(() {});
-      },
     );
   }
 
@@ -584,13 +529,8 @@ class _ProductsFormState extends State<ProductsForm> {
       labelText: 'Opening Stock',
       hintText: '0',
       fillColor: const Color.fromARGB(255, 255, 255, 255),
-      inputFormatters: [
-        FilteringTextInputFormatter.digitsOnly,
-      ],
+      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
       keyboardType: TextInputType.number,
-      onChanged: (value) {
-        setState(() {});
-      },
     );
   }
 
@@ -602,13 +542,8 @@ class _ProductsFormState extends State<ProductsForm> {
       labelText: 'Alert Quantity',
       hintText: '5',
       fillColor: const Color.fromARGB(255, 255, 255, 255),
-      inputFormatters: [
-        FilteringTextInputFormatter.digitsOnly,
-      ],
+      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
       keyboardType: TextInputType.number,
-      onChanged: (value) {
-        setState(() {});
-      },
     );
   }
 
@@ -621,9 +556,6 @@ class _ProductsFormState extends State<ProductsForm> {
       hintText: 'Product Barcode',
       fillColor: const Color.fromARGB(255, 255, 255, 255),
       keyboardType: TextInputType.text,
-      onChanged: (value) {
-        setState(() {});
-      },
     );
   }
 
@@ -636,9 +568,6 @@ class _ProductsFormState extends State<ProductsForm> {
       hintText: 'Product Description',
       fillColor: const Color.fromARGB(255, 255, 255, 255),
       keyboardType: TextInputType.multiline,
-      onChanged: (value) {
-        setState(() {});
-      },
     );
   }
 
@@ -646,16 +575,15 @@ class _ProductsFormState extends State<ProductsForm> {
     return Padding(
       padding: const EdgeInsets.only(top: 20),
       child: AppButton(
-        name: "Create Product",
-        onPressed: _createProduct,
+        name: _isEditMode ? "Update Product" : "Create Product",
+        onPressed: _submitProduct,
       ),
     );
   }
 
-  void _createProduct() {
+  void _submitProduct() {
     if (!formKey.currentState!.validate()) return;
 
-    // Validate required fields
     if (categoriesBloc.selectedStateId.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please select a category')),
@@ -670,55 +598,42 @@ class _ProductsFormState extends State<ProductsForm> {
       return;
     }
 
-    if (productsBloc.productNameController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter product name')),
-      );
-      return;
-    }
-
     Map<String, String> body = {
       "category": categoriesBloc.selectedStateId,
       "unit": unitBloc.selectedIdState,
       "name": productsBloc.productNameController.text,
     };
 
-    // Add optional fields if they have values
+    // Add optional fields
     if (brandBloc.selectedId.isNotEmpty) {
       body["brand"] = brandBloc.selectedId;
     }
-
-    if (productsBloc.productSellingPriceController.text.isNotEmpty &&
-        productsBloc.productSellingPriceController.text != "0") {
+    if (productsBloc.productSellingPriceController.text.isNotEmpty && productsBloc.productSellingPriceController.text != "0") {
       body["selling_price"] = productsBloc.productSellingPriceController.text;
     }
-
-    if (productsBloc.productPurchasePriceController.text.isNotEmpty &&
-        productsBloc.productPurchasePriceController.text != "0") {
+    if (productsBloc.productPurchasePriceController.text.isNotEmpty && productsBloc.productPurchasePriceController.text != "0") {
       body["purchase_price"] = productsBloc.productPurchasePriceController.text;
     }
-
     if (productsBloc.productDescriptionController.text.isNotEmpty) {
       body["description"] = productsBloc.productDescriptionController.text;
     }
-
-    if (productsBloc.productOpeningStockController.text.isNotEmpty &&
-        productsBloc.productOpeningStockController.text != "0") {
+    if (productsBloc.productOpeningStockController.text.isNotEmpty && productsBloc.productOpeningStockController.text != "0") {
       body["opening_stock"] = productsBloc.productOpeningStockController.text;
     }
-
-    if (productsBloc.productAlertQuantityController.text.isNotEmpty &&
-        productsBloc.productAlertQuantityController.text != "5") {
+    if (productsBloc.productAlertQuantityController.text.isNotEmpty && productsBloc.productAlertQuantityController.text != "5") {
       body["alert_quantity"] = productsBloc.productAlertQuantityController.text;
     }
-
     if (productsBloc.productBarCodeController.text.isNotEmpty) {
       body["bar_code"] = productsBloc.productBarCodeController.text;
     }
 
-    // Add product
-    productsBloc.add(AddProducts(
-      body: body,
-    ));
+    if (_isEditMode) {
+      final productId = widget.product?.id?.toString() ?? widget.productId;
+      if (productId != null) {
+        productsBloc.add(UpdateProducts(body: body, id: productId));
+      }
+    } else {
+      productsBloc.add(AddProducts(body: body));
+    }
   }
 }

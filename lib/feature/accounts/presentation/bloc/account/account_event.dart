@@ -37,7 +37,7 @@ class AddAccount extends AccountEvent {
 }
 
 class UpdateAccount extends AccountEvent {
-  final Map<String,String>? body;
+  final Map<String,dynamic>? body;
   final String? id;
 
 

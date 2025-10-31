@@ -18,7 +18,7 @@ class AccountModel {
   final String? branch;
   final dynamic? openingBalance;
   final int? company;
-  final String? status;
+  final dynamic? status;
   final dynamic number;
 
   AccountModel({

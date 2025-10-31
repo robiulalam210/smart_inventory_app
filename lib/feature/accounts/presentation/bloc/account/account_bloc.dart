@@ -1,15 +1,17 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:smart_inventory/feature/accounts/data/model/create_account_model.dart';
-
 import '../../../../../core/configs/configs.dart';
 import '../../../../../core/repositories/get_response.dart';
 import '../../../../../core/repositories/post_response.dart';
+import '../../../../../core/repositories/patch_response.dart';
+import '../../../../../core/repositories/delete_response.dart';
 import '../../../../common/data/models/api_response_mod.dart';
 import '../../../../common/data/models/app_parse_json.dart';
 import '../../../data/model/account_active_model.dart';
 import '../../../data/model/account_model.dart';
 
 part 'account_event.dart';
-
 part 'account_state.dart';
 
 class AccountBloc extends Bloc<AccountEvent, AccountState> {
@@ -26,23 +28,21 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
   List<String> accountType = ["Bank", "Cash", "Mobile Bank"];
 
   TextEditingController filterTextController = TextEditingController();
-
   TextEditingController accountNameController = TextEditingController();
   TextEditingController accountNumberController = TextEditingController();
   TextEditingController bankNameController = TextEditingController();
   TextEditingController branchNameController = TextEditingController();
   TextEditingController routingNameController = TextEditingController();
-  TextEditingController accountOpeningBalanceController =
-      TextEditingController();
+  TextEditingController accountOpeningBalanceController = TextEditingController();
   TextEditingController shortNameController = TextEditingController();
 
   AccountBloc() : super(AccountInitial()) {
     on<FetchAccountList>(_onFetchAccountList);
     on<FetchAccountActiveList>(_onFetchAccountActiveList);
     on<AddAccount>(_onCreateAccountList);
+    on<UpdateAccount>(_onUpdateAccountList);
+    on<DeleteAccount>(_onDeleteAccount);
   }
-
-
 
   Future<void> _onFetchAccountActiveList(
       FetchAccountActiveList event,
@@ -63,18 +63,9 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
         ),
       );
 
-      // Check if API response is successful
       if (response.success == true) {
         final List<AccountActiveModel> accountList = response.data ?? [];
-
-        if (accountList.isEmpty) {
-          emit(AccountActiveListSuccess(list: []));
-          return;
-        }
-
         activeAccount = accountList;
-
-        print(accountList.length);
         emit(AccountActiveListSuccess(list: accountList));
       } else {
         emit(
@@ -89,7 +80,6 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
     }
   }
 
-
   Future<void> _onFetchAccountList(
       FetchAccountList event,
       Emitter<AccountState> emit,
@@ -97,13 +87,11 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
     emit(AccountListLoading());
 
     try {
-      // Build query parameters with pagination and filters
       Map<String, dynamic> queryParams = {
         'page': event.pageNumber.toString(),
         'page_size': event.pageSize.toString(),
       };
 
-      // Add filters if provided
       if (event.filterText.isNotEmpty) {
         queryParams['search'] = event.filterText;
       }
@@ -111,7 +99,6 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
         queryParams['account_type'] = event.accountType;
       }
 
-      // Build the complete URL with query parameters
       Uri uri = Uri.parse(AppUrls.account).replace(
         queryParameters: queryParams,
       );
@@ -121,7 +108,6 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
         context: event.context,
       );
 
-      // Parse the response
       ApiResponse<Map<String, dynamic>> response = appParseJson<Map<String, dynamic>>(
         res,
             (data) => data,
@@ -142,11 +128,9 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
         return;
       }
 
-      // Extract pagination info from response
       final pagination = data['pagination'] ?? data;
       final results = data['results'] ?? data['data'] ?? data;
 
-      // Parse the account list
       List<AccountModel> accountList = [];
       if (results is List) {
         accountList = List<AccountModel>.from(
@@ -154,7 +138,6 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
         );
       }
 
-      // Calculate pagination values
       int count = pagination['count'] ?? pagination['total'] ?? accountList.length;
       int totalPages = pagination['total_pages'] ?? pagination['last_page'] ??
           ((count / event.pageSize).ceil());
@@ -177,22 +160,17 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
     }
   }
 
-
-
   Future<void> _onCreateAccountList(
-    AddAccount event,
-    Emitter<AccountState> emit,
-  ) async {
+      AddAccount event,
+      Emitter<AccountState> emit,
+      ) async {
     emit(AccountAddLoading());
 
     try {
       final res = await postResponse(
         url: AppUrls.account,
         payload: event.body,
-      ); // Use the correct API URL
-
-
-
+      );
       final jsonString = jsonEncode(res);
 
       ApiResponse response = appParseJson(
@@ -201,7 +179,7 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
       );
 
       if (response.success == false) {
-        emit(AccountAddFailed(title: '', content: response.message ?? ""));
+        emit(AccountAddFailed(title: 'Error', content: response.message ?? ""));
         return;
       }
       clearData();
@@ -212,39 +190,75 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
     }
   }
 
-  // Future<void> _onUpdateBranchList(
-  //     UpdateCategories event, Emitter<CategoriesState> emit) async {
-  //
-  //   emit(CategoriesAddLoading());
-  //
-  //   try {
-  //     final res  = await patchResponse(url: AppUrls.category+event.id.toString(),payload: event.body!); // Use the correct API URL
-  //
-  //     print(res);
-  //     ApiResponse response = appParseJson(
-  //       res,
-  //           (data) => List<CategoryModel>.from(data.map((x) => CategoryModel.fromJson(x))),
-  //     );
-  //     if (response.success == false) {
-  //       emit(CategoriesAddFailed(title: 'Json', content: response.message??""));
-  //       return;
-  //     }
-  //     clearData();
-  //     emit(CategoriesAddSuccess(
-  //
-  //     ));
-  //   } catch (error,stack) {
-  //     print(stack);
-  //     clearData();
-  //     emit(CategoriesAddFailed(title: "Error",content: error.toString()));
-  //
-  //   }
-  // }
+  Future<void> _onUpdateAccountList(
+      UpdateAccount event,
+      Emitter<AccountState> emit,
+      ) async {
+    emit(AccountAddLoading());
+
+    try {
+      final res = await patchResponse(
+        url: "${AppUrls.account}${event.id}/",
+        payload: event.body!,
+      );
+
+      ApiResponse response = appParseJson(
+        res,
+            (data) => AccountModel.fromJson(data),
+      );
+
+      if (response.success == false) {
+        emit(AccountAddFailed(title: 'Error', content: response.message ?? ""));
+        return;
+      }
+      clearData();
+      emit(AccountAddSuccess());
+    } catch (error) {
+      clearData();
+      emit(AccountAddFailed(title: "Error", content: error.toString()));
+    }
+  }
+
+  Future<void> _onDeleteAccount(
+      DeleteAccount event,
+      Emitter<AccountState> emit,
+      ) async {
+    emit(AccountAddLoading());
+
+    try {
+      final res = await deleteResponse(
+        url: "${AppUrls.account}${event.id}/",
+      );      final jsonString = jsonEncode(res);
+
+
+      // For delete operations, we don't need to parse the response data
+      ApiResponse response = appParseJson(
+        jsonString,
+            (data) => data, // Just return data as-is for delete operations
+      );
+
+      if (response.success == false) {
+        emit(AccountAddFailed(title: 'Error', content: response.message ?? ""));
+        return;
+      }
+      emit(AccountAddSuccess());
+    } catch (error) {
+      emit(AccountAddFailed(title: "Error", content: error.toString()));
+    }
+  }
 
   clearData() {
     accountOpeningBalanceController.clear();
     accountNumberController.clear();
     accountNameController.clear();
+    bankNameController.clear();
+    branchNameController.clear();
+    routingNameController.clear();
+    shortNameController.clear();
     selectedState = "";
+    selectedStateId = "";
+    selectedGroups = "";
+    selectedLocation = " ";
+    selectedId = "";
   }
 }

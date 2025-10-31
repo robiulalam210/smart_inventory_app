@@ -1,6 +1,8 @@
 
 
 
+import 'package:smart_inventory/feature/products/product/data/model/product_model.dart';
+
 import '../../../../../core/configs/configs.dart';
 import '../../../../../core/shared/widgets/sideMenu/sidebar.dart';
 import '../../../../../core/widgets/app_alert_dialog.dart';
@@ -8,6 +10,7 @@ import '../../../../../core/widgets/app_button.dart';
 import '../../../../../core/widgets/app_loader.dart';
 import '../../../../../core/widgets/coustom_search_text_field.dart';
 import '../../../../../core/widgets/custom_filter_ui.dart';
+import '../../../../../core/widgets/delete_dialog.dart';
 import '../../../categories/presentation/bloc/categories/categories_bloc.dart';
 import '../bloc/products/products_bloc.dart';
 import '../widget/pagination.dart';
@@ -172,7 +175,23 @@ class _ProductsScreenState extends State<ProductsScreen> {
                           // Show table + pagination bar
                           return Column(
                             children: [
-                              ProductDataTableWidget(products: state.list),
+                              ProductDataTableWidget(products: state.list,
+
+                                onEdit: (v) {
+                                  _showEditDialog(context, v);
+                                },
+                                onDelete: (v) async {
+                                  bool shouldDelete =
+                                  await showDeleteConfirmationDialog(
+                                    context,
+                                  );
+                                  if (!shouldDelete) return;
+
+                                  context.read<ProductsBloc>().add(
+                                    DeleteProducts(id: v.id.toString()),
+                                  );
+                                },
+                              ),
                               const SizedBox(height: 10),
                               PaginationBar(
                                 count: state.count,
@@ -211,6 +230,26 @@ class _ProductsScreenState extends State<ProductsScreen> {
       ),
     );
   }
+
+  void _showEditDialog(BuildContext context, ProductModel product) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          child: SizedBox(
+            width: MediaQuery.of(context).size.width * 0.7,
+            height: MediaQuery.of(context).size.height * 0.8,
+            child: ProductsForm(
+              productId: product.id.toString(),
+              product: product,
+              isDialog: true,
+            ),
+          ),
+        );
+      },
+    );
+  }
+
 
   void _showFilterMenu(BuildContext context, Offset offset) async {
     final screenSize = MediaQuery

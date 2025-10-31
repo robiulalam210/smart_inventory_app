@@ -44,7 +44,6 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
     on<FetchCustomerList>(_onFetchCustomerList);
     on<AddCustomer>(_onCreateCustomerList);
     on<UpdateCustomer>(_onUpdateCustomerList);
-    on<UpdateSwitchCustomer>(_onUpdateSwitchCustomerList);
     on<DeleteCustomer>(_onDeleteCustomer);
   }
 
@@ -286,37 +285,6 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
     }
   }
 
-  Future<void> _onUpdateSwitchCustomerList(
-    UpdateSwitchCustomer event,
-    Emitter<CustomerState> emit,
-  ) async {
-    emit(CustomerSwitchLoading());
-
-    try {
-      final res = await patchResponse(
-        url: AppUrls.customer + event.id.toString(),
-        payload: event.body!,
-      ); // Use the correct API URL
-
-      ApiResponse response = appParseJson(
-        res,
-        (data) => List<CustomerModel>.from(
-          data.map((x) => CustomerModel.fromJson(x)),
-        ),
-      );
-      if (response.success == false) {
-        emit(
-          CustomerSwitchFailed(title: 'Json', content: response.message ?? ""),
-        );
-        return;
-      }
-      clearData();
-      emit(CustomerSwitchSuccess());
-    } catch (error) {
-      clearData();
-      emit(CustomerSwitchFailed(title: "Error", content: error.toString()));
-    }
-  }
 
   clearData() {
     customerNameController.clear();

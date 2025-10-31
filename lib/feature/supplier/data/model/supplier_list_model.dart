@@ -14,11 +14,11 @@ class SupplierListModel {
   final String? email;
   final String? phone;
   final String? address;
-  final dynamic status;
+  final bool? isActive;
   final String? supplierNo;
-  final dynamic totalDue;
-  final dynamic totalPaid;
-  final dynamic totalPurchases;
+  final String? totalDue;
+  final String? totalPaid;
+  final String? totalPurchases;
   final int? purchaseCount;
   final String? amountType;
   final int? company;
@@ -32,7 +32,7 @@ class SupplierListModel {
     this.email,
     this.phone,
     this.address,
-    this.status,
+    this.isActive,
     this.supplierNo,
     this.totalDue,
     this.totalPaid,
@@ -45,18 +45,13 @@ class SupplierListModel {
     this.updatedAt,
   });
 
-  @override
-  String toString() {
-    // TODO: implement toString
-    return name??'';
-  }
   factory SupplierListModel.fromJson(Map<String, dynamic> json) => SupplierListModel(
     id: json["id"],
     name: json["name"],
     email: json["email"],
     phone: json["phone"],
     address: json["address"],
-    status: json["status"],
+    isActive: json["is_active"],
     supplierNo: json["supplier_no"],
     totalDue: json["total_due"],
     totalPaid: json["total_paid"],
@@ -75,7 +70,7 @@ class SupplierListModel {
     "email": email,
     "phone": phone,
     "address": address,
-    "status": status,
+    "is_active": isActive,
     "supplier_no": supplierNo,
     "total_due": totalDue,
     "total_paid": totalPaid,

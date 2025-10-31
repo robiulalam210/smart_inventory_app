@@ -7,11 +7,15 @@ import '../../../accounts/data/model/account_model.dart';
 class AccountCard extends StatelessWidget {
   final List<AccountModel> accounts;
   final VoidCallback? onAccountTap;
+  final Function(AccountModel)? onEdit;
+  final Function(AccountModel)? onDelete;
 
   const AccountCard({
     super.key,
     required this.accounts,
     this.onAccountTap,
+    this.onEdit,
+    this.onDelete,
   });
 
   @override
@@ -26,10 +30,10 @@ class AccountCard extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         // Calculate total width needed for all columns
-        const numColumns = 6;
+        const numColumns = 7; // Added one column for actions
         const columnSpacing = 10.0;
         const horizontalMargin = 12.0;
-        const minColumnWidth = 120.0; // Increased minimum width
+        const minColumnWidth = 120.0;
 
         // Calculate total table width
         final totalTableWidth = (minColumnWidth * numColumns) +
@@ -94,7 +98,6 @@ class AccountCard extends StatelessWidget {
                           return DataRow(
                             color: MaterialStateProperty.resolveWith<Color?>(
                                   (Set<MaterialState> states) {
-                                // Alternate row colors for better readability
                                 if (entry.key.isEven) {
                                   return Colors.grey.withOpacity(0.03);
                                 }
@@ -105,12 +108,13 @@ class AccountCard extends StatelessWidget {
                                 ? (_) => onAccountTap!()
                                 : null,
                             cells: [
-                              _buildDataCell('${entry.key + 1}', minColumnWidth),
-                              _buildDataCell(account.acName ?? "N/A", minColumnWidth),
+                              _buildDataCell('${entry.key + 1}', minColumnWidth * 0.6),
+                              _buildDataCell(account.acName ?? "N/A", minColumnWidth * 1.2),
                               _buildDataCell(account.acType ?? "N/A", minColumnWidth),
                               _buildDataCell(account.acNumber ?? "-", minColumnWidth),
-                              _buildBankCell(account.bankName, account.branch, minColumnWidth),
+                              _buildBankCell(account.bankName, account.branch, minColumnWidth * 1.3),
                               _buildBalanceCell(account.balance, minColumnWidth),
+                              _buildActionsCell(context,account, minColumnWidth * 0.8),
                             ],
                           );
                         }).toList(),
@@ -130,7 +134,7 @@ class AccountCard extends StatelessWidget {
     return [
       DataColumn(
         label: SizedBox(
-          width: columnWidth * 0.6, // Smaller for serial number
+          width: columnWidth * 0.6,
           child: const Text(
             'No.',
             textAlign: TextAlign.center,
@@ -140,7 +144,7 @@ class AccountCard extends StatelessWidget {
       ),
       DataColumn(
         label: SizedBox(
-          width: columnWidth * 1.2, // Wider for account name
+          width: columnWidth * 1.2,
           child: const Text(
             'Account Name',
             textAlign: TextAlign.center,
@@ -170,7 +174,7 @@ class AccountCard extends StatelessWidget {
       ),
       DataColumn(
         label: SizedBox(
-          width: columnWidth * 1.3, // Wider for bank info
+          width: columnWidth * 1.3,
           child: const Text(
             'Bank/Branch',
             textAlign: TextAlign.center,
@@ -183,6 +187,16 @@ class AccountCard extends StatelessWidget {
           width: columnWidth,
           child: const Text(
             'Balance',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Colors.white),
+          ),
+        ),
+      ),
+      DataColumn(
+        label: SizedBox(
+          width: columnWidth * 0.8,
+          child: const Text(
+            'Actions',
             textAlign: TextAlign.center,
             style: TextStyle(color: Colors.white),
           ),
@@ -299,9 +313,166 @@ class AccountCard extends StatelessWidget {
     );
   }
 
+  DataCell _buildActionsCell(BuildContext context,AccountModel account, double width) {
+    return DataCell(
+      Container(
+        width: width,
+        padding: const EdgeInsets.symmetric(horizontal: 4),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Edit Button
+            IconButton(
+              icon: Icon(
+                Icons.edit,
+                size: 18,
+                color: Colors.blue.shade600,
+              ),
+              onPressed: () => onEdit?.call(account),
+              padding: const EdgeInsets.all(4),
+              constraints: const BoxConstraints(),
+              tooltip: 'Edit Account',
+            ),
+
+            // Delete Button
+            IconButton(
+              icon: Icon(
+                Icons.delete,
+                size: 18,
+                color: Colors.red.shade600,
+              ),
+              onPressed: () => _showDeleteConfirmation(context, account),
+              padding: const EdgeInsets.all(4),
+              constraints: const BoxConstraints(),
+              tooltip: 'Delete Account',
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showDeleteConfirmation(BuildContext context, AccountModel account) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Row(
+            children: [
+              Icon(
+                Icons.warning_amber_rounded,
+                color: Colors.orange.shade600,
+                size: 24,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'Delete Account',
+                style: GoogleFonts.inter(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
+                ),
+              ),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Are you sure you want to delete this account?',
+                style: GoogleFonts.inter(
+                  fontSize: 14,
+                  color: Colors.grey.shade700,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.grey.shade200),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      account.acName ?? 'Unnamed Account',
+                      style: GoogleFonts.inter(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                      ),
+                    ),
+                    if (account.acNumber != null && account.acNumber!.isNotEmpty)
+                      Text(
+                        'Account: ${account.acNumber}',
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          color: Colors.grey.shade600,
+                        ),
+                      ),
+                    if (account.acType != null && account.acType!.isNotEmpty)
+                      Text(
+                        'Type: ${account.acType}',
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          color: Colors.grey.shade600,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'This action cannot be undone.',
+                style: GoogleFonts.inter(
+                  fontSize: 12,
+                  color: Colors.red.shade600,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(
+                'Cancel',
+                style: GoogleFonts.inter(
+                  color: Colors.grey.shade600,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                onDelete?.call(account);
+              },
+              style: TextButton.styleFrom(
+                backgroundColor: Colors.red.shade50,
+              ),
+              child: Text(
+                'Delete',
+                style: GoogleFonts.inter(
+                  color: Colors.red.shade700,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        );
+      },
+    );
+  }
+
   Widget _buildEmptyState() {
     return Container(
-      width: double.infinity, // Take full width
+      width: double.infinity,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
         color: Colors.white,

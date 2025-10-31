@@ -199,22 +199,22 @@ productList=list;
     emit(ProductsAddLoading());
 
     try {
-      // final res = await updateService(
-      //   payload: event.body!,
-      //   url: "${AppUrls.product}/${event.id}",
-      //   photoPath: event.photoPath,
-      //   // photoPath: event.photoPath!
-      // ); // Use the correct API URL
-      //
-      // ApiResponse response = appParseJson(
-      //   res,
-      //   (data) =>
-      //       List<ProductModel>.from(data.map((x) => ProductModel.fromJson(x))),
-      // );
-      // if (response.success == false) {
-      //   emit(ProductsAddFailed(title: '', content: response.message ?? ""));
-      //   return;
-      // }
+      final res = await patchResponse(
+        payload: event.body!,
+        url: "${AppUrls.product}${event.id}/",
+
+        // photoPath: event.photoPath!
+      ); // Use the correct API URL
+
+      ApiResponse response = appParseJson(
+        res,
+        (data) =>
+            List<ProductModel>.from(data.map((x) => ProductModel.fromJson(x))),
+      );
+      if (response.success == false) {
+        emit(ProductsAddFailed(title: '', content: response.message ?? ""));
+        return;
+      }
       clearData();
       emit(ProductsAddSuccess());
     } catch (error) {
@@ -242,7 +242,7 @@ productList=list;
 
     try {
       final res = await deleteResponse(
-        url: "${AppUrls.product}/${event.id.toString()}",
+        url: "${AppUrls.product}${event.id.toString()}/",
       ); // Use the correct API URL
 
       final jsonString = jsonEncode(res);

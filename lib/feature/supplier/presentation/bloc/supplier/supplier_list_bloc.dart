@@ -12,7 +12,6 @@ part 'supplier_list_state.dart';
 
 class SupplierListBloc extends Bloc<SupplierListEvent, SupplierListState> {
   List<SupplierListModel> supplierListModel = [];
-  final int _itemsPerPage = 10;
   String selectedState = "";
   TextEditingController filterTextController = TextEditingController();
   List<String> statesList = ["Active", "Inactive"];

@@ -1,3 +1,6 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:lottie/lottie.dart';
 import '../../../../core/configs/configs.dart';
 import '../../../../core/shared/widgets/sideMenu/sidebar.dart';
 import '../../../../core/widgets/app_alert_dialog.dart';
@@ -5,6 +8,7 @@ import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_dropdown.dart';
 import '../../../../core/widgets/app_loader.dart';
 import '../../../../core/widgets/coustom_search_text_field.dart';
+import '../../../../core/widgets/delete_dialog.dart';
 import '../../../products/product/presentation/widget/pagination.dart';
 import '../../data/model/account_model.dart';
 import '../bloc/account/account_bloc.dart';
@@ -105,14 +109,13 @@ class _AccountScreenState extends State<AccountScreen> {
           child: BlocListener<AccountBloc, AccountState>(
             listener: (context, state) {
               if (state is AccountAddLoading) {
-                appLoader(context, "Creating account, please wait...");
+                appLoader(context, "Processing account, please wait...");
               } else if (state is AccountAddSuccess) {
                 Navigator.pop(context);
-                Navigator.pop(context);
                 _fetchApi();
+
               } else if (state is AccountAddFailed) {
                 Navigator.pop(context);
-                _fetchApi();
                 appAlertDialog(
                   context,
                   state.content,
@@ -141,8 +144,27 @@ class _AccountScreenState extends State<AccountScreen> {
                         } else {
                           return Column(
                             children: [
-                              SizedBox(
-                                child: AccountCard( accounts: state.list,),
+                              AccountCard(
+                                accounts: state.list,
+                                onEdit: (account) {
+                                  _showEditDialog(context, account);
+                                },
+                                onDelete: (account) async {
+                                  bool shouldDelete = await showDeleteConfirmationDialog(context);
+                                  if (!shouldDelete) return;
+
+                                  context.read<AccountBloc>().add(
+                                    DeleteAccount(account.acId.toString()),
+                                  );
+
+                                  // Show success message after deletion
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('Account ${account.acName} deleted successfully'),
+                                      backgroundColor: Colors.green,
+                                    ),
+                                  );
+                                },
                               ),
                               PaginationBar(
                                 count: state.count,
@@ -162,7 +184,7 @@ class _AccountScreenState extends State<AccountScreen> {
                       } else if (state is AccountListFailed) {
                         return Center(
                           child: Text(
-                            'Failed to load account: ${state.content}',
+                            'Failed to load accounts: ${state.content}',
                           ),
                         );
                       } else {
@@ -177,6 +199,45 @@ class _AccountScreenState extends State<AccountScreen> {
         ),
       ),
     );
+  }
+
+  void _showEditDialog(BuildContext context, AccountModel account) {
+    // Clear existing data first
+    _clearAccountBlocData();
+
+    // Pre-fill the form with account data
+    final accountBloc = context.read<AccountBloc>();
+    accountBloc.accountNameController.text = account.acName ?? "";
+    accountBloc.accountNumberController.text = account.acNumber ?? "";
+    accountBloc.bankNameController.text = account.bankName ?? "";
+    accountBloc.branchNameController.text = account.branch ?? "";
+    accountBloc.accountOpeningBalanceController.text = account.balance?.toString() ?? "0.0";
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          child: SizedBox(
+            width: AppSizes.width(context) * 0.50,
+            child: CreateAccountScreen(
+              id: account.acId.toString(),
+              submitText: "Update Account",
+              account: account, // Pass the account for pre-filling
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _clearAccountBlocData() {
+    final accountBloc = context.read<AccountBloc>();
+    accountBloc.accountNameController.clear();
+    accountBloc.accountNumberController.clear();
+    accountBloc.bankNameController.clear();
+    accountBloc.branchNameController.clear();
+    accountBloc.accountOpeningBalanceController.clear();
+    accountBloc.selectedState = "";
   }
 
   Widget _buildFilterRow() {
@@ -208,7 +269,7 @@ class _AccountScreenState extends State<AccountScreen> {
             isLabel: false,
             isRequired: false,
             value: selectedAccountTypeNotifier.value,
-            itemList: ['Cash', 'Bank', 'Credit Card', 'Loan', 'Investment', 'Other'],
+            itemList: ['Cash', 'Bank', 'Mobile Banking', 'Credit Card', 'Loan', 'Investment', 'Other'],
             onChanged: (newVal) {
               selectedAccountTypeNotifier.value = newVal;
               _fetchApi(
@@ -226,20 +287,24 @@ class _AccountScreenState extends State<AccountScreen> {
                   fontWeight: FontWeight.w300,
                 ),
               ),
-            ), label: '',
+            ),
+            label: '',
           ),
         ),
         gapW16,
+
+        // ➕ Create Account Button
         AppButton(
-          name: "Create Account", // Fixed button text
+          name: "Create Account",
           onPressed: () {
+            _clearAccountBlocData(); // Clear any existing data
             showDialog(
               context: context,
               builder: (context) {
                 return Dialog(
                   child: SizedBox(
                     width: AppSizes.width(context) * 0.50,
-                    child: CreateAccountScreen(),
+                    child: const CreateAccountScreen(),
                   ),
                 );
               },
@@ -248,6 +313,7 @@ class _AccountScreenState extends State<AccountScreen> {
         ),
 
         gapW16,
+
         // 🔄 Refresh Button
         IconButton(
           onPressed: () => _fetchApi(),
@@ -257,6 +323,4 @@ class _AccountScreenState extends State<AccountScreen> {
       ],
     );
   }
-
-
 }

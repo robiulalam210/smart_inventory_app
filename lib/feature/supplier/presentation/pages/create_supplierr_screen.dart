@@ -1,5 +1,6 @@
 import '../../../../core/configs/configs.dart';
 import '../../../../core/widgets/app_button.dart';
+import '../../../../core/widgets/app_dropdown.dart';
 import '../../../../core/widgets/input_field.dart';
 import '../bloc/supplier/supplier_list_bloc.dart';
 
@@ -129,6 +130,36 @@ class _CreateSupplierScreenState extends State<CreateSupplierScreen> {
                     },
                   ),
 
+                  widget.id.toString() == ""
+                      ? Container()
+                      : AppDropdown(
+                    label: "Status",context: context,
+                    hint:
+                    context.read<SupplierListBloc>().selectedState.isEmpty
+                        ? "Select Status"
+                        : context.read<SupplierListBloc>().selectedState,
+                    isLabel: false,
+                    value:
+                    context.read<SupplierListBloc>().selectedState.isEmpty
+                        ? null
+                        : context.read<SupplierListBloc>().selectedState,
+                    itemList: context.read<SupplierListBloc>().statesList,
+                    onChanged: (newVal) {
+                      context.read<SupplierListBloc>().selectedState =
+                          newVal.toString();
+                    },
+                    itemBuilder: (item) => DropdownMenuItem(
+                      value: item,
+                      child: Text(
+                        item.toString(),
+                        style: const TextStyle(
+                          color: AppColors.blackColor,
+                          fontFamily: 'Quicksand',
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
                   SizedBox(height: AppSizes.height(context) * 0.04),
 
                   // Submit Button
@@ -164,6 +195,9 @@ class _CreateSupplierScreenState extends State<CreateSupplierScreen> {
       // Create new supplier
       supplierBloc.add(AddSupplierList(body: body));
     } else {
+      if (supplierBloc.selectedState.trim().isNotEmpty) {
+        body["is_active"] = supplierBloc.selectedState=="Active"?true:false;
+      }
       // Update existing supplier
       supplierBloc.add(UpdateSupplierList(body: body, branchId: widget.id));
     }
