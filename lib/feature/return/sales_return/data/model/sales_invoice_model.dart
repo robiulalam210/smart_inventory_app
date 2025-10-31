@@ -1,14 +1,14 @@
 // To parse this JSON data, do
 //
-//     final posSaleModel = posSaleModelFromJson(jsonString);
+//     final salesInvoiceModel = salesInvoiceModelFromJson(jsonString);
 
 import 'dart:convert';
 
-List<PosSaleModel> posSaleModelFromJson(String str) => List<PosSaleModel>.from(json.decode(str).map((x) => PosSaleModel.fromJson(x)));
+List<SalesInvoiceModel> salesInvoiceModelFromJson(String str) => List<SalesInvoiceModel>.from(json.decode(str).map((x) => SalesInvoiceModel.fromJson(x)));
 
-String posSaleModelToJson(List<PosSaleModel> data) => json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
+String salesInvoiceModelToJson(List<SalesInvoiceModel> data) => json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
 
-class PosSaleModel {
+class SalesInvoiceModel {
   final int? id;
   final String? invoiceNo;
   final int? customerId;
@@ -17,13 +17,13 @@ class PosSaleModel {
   final DateTime? saleDate;
   final String? saleByName;
   final String? createdByName;
-  final dynamic grossTotal;
-  final dynamic netTotal;
-  final dynamic grandTotal;
-  final dynamic payableAmount;
-  final dynamic paidAmount;
-  final dynamic dueAmount;
-  final dynamic changeAmount;
+  final dynamic? grossTotal;
+  final dynamic? netTotal;
+  final dynamic? grandTotal;
+  final dynamic? payableAmount;
+  final dynamic? paidAmount;
+  final dynamic? dueAmount;
+  final dynamic? changeAmount;
   final String? overallDiscount;
   final String? overallDiscountType;
   final String? overallDeliveryCharge;
@@ -40,7 +40,7 @@ class PosSaleModel {
   final String? remark;
   final List<Item>? items;
 
-  PosSaleModel({
+  SalesInvoiceModel({
     this.id,
     this.invoiceNo,
     this.customerId,
@@ -73,7 +73,13 @@ class PosSaleModel {
     this.items,
   });
 
-  factory PosSaleModel.fromJson(Map<String, dynamic> json) => PosSaleModel(
+  @override
+  String toString() {
+    // TODO: implement toString
+    return invoiceNo??'';
+  }
+
+  factory SalesInvoiceModel.fromJson(Map<String, dynamic> json) => SalesInvoiceModel(
     id: json["id"],
     invoiceNo: json["invoice_no"],
     customerId: json["customer_id"],
@@ -145,10 +151,10 @@ class Item {
   final int? productId;
   final String? productName;
   final int? quantity;
-  final dynamic unitPrice;
+  final dynamic? unitPrice;
   final String? discount;
   final String? discountType;
-  final dynamic subtotal;
+  final dynamic? subtotal;
 
   Item({
     this.id,

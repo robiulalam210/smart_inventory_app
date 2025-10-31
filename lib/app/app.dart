@@ -22,6 +22,7 @@ import '../feature/products/groups/presentation/bloc/groups/groups_bloc.dart';
 import '../feature/products/product/presentation/bloc/products/products_bloc.dart';
 import '../feature/products/soruce/presentation/bloc/source/source_bloc.dart';
 import '../feature/products/unit/presentation/bloc/unit/unti_bloc.dart';
+import '../feature/report/presentation/bloc/customer_due_advance_bloc/customer_due_advance_bloc.dart';
 import '../feature/report/presentation/bloc/customer_ledger_bloc/customer_ledger_bloc.dart';
 import '../feature/report/presentation/bloc/expense_report_bloc/expense_report_bloc.dart';
 import '../feature/report/presentation/bloc/profit_loss_bloc/profit_loss_bloc.dart';
@@ -30,6 +31,7 @@ import '../feature/report/presentation/bloc/stock_report_bloc/stock_report_bloc.
 import '../feature/report/presentation/bloc/supplier_due_advance_bloc/supplier_due_advance_bloc.dart';
 import '../feature/report/presentation/bloc/supplier_ledger_bloc/supplier_ledger_bloc.dart';
 import '../feature/report/presentation/bloc/top_products_bloc/top_products_bloc.dart';
+import '../feature/return/sales_return/presentation/sales_return_bloc/sales_return_bloc.dart';
 import '../feature/supplier/presentation/bloc/supplier_invoice/supplier_invoice_bloc.dart';
 import '../feature/supplier/presentation/bloc/supplier_payment/supplier_payment_bloc.dart';
 
@@ -89,9 +91,12 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (_) => LowStockBloc()),
         BlocProvider(create: (_) => StockReportBloc()),
         BlocProvider(create: (_) => CustomerLedgerBloc()),
-        BlocProvider(create: (_) => SupplierLedgerBloc()),
+        BlocProvider(create: (_) => CustomerLedgerBloc()),
+        BlocProvider(create: (_) => CustomerDueAdvanceBloc()),
         BlocProvider(create: (_) => SupplierDueAdvanceBloc()),
         BlocProvider(create: (_) => ExpenseReportBloc()),
+
+        BlocProvider(create: (_) => SalesReturnBloc()),
       ],
       child: Center(
         child: MaterialApp(

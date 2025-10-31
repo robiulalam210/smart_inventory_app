@@ -57,9 +57,14 @@ class AppUrls {
   static final String lowStock          = '$baseUrl/reports/low-stock/';
   static final String stockReport          = '$baseUrl/reports/stock/';
   static final String customerLedger          = '$baseUrl/reports/customer-ledger/';
+  static final String customerDueAdvance          = '$baseUrl/reports/customer-due-advance/';
   static final String supplierLedger          = '$baseUrl/reports/supplier-ledger/';
   static final String supplierDueAdvance          = '$baseUrl/reports/supplier-due-advance/';
   static final String expenseReport          = '$baseUrl/reports/expenses/';
+
+
+  static final String posSaleInvoice          = '$baseUrl/sale-invoice/';
+  static final String saleReturn          = '$baseUrl/sales-returns/';
 
 
 

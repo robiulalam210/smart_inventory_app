@@ -30,9 +30,11 @@ import '../../../../products/categories/presentation/pages/categories_screen.dar
 import '../../../../products/product/presentation/pages/product_screen.dart';
 import '../../../../purchase/presentation/page/create_purchase_screen.dart';
 
+import '../../../../report/presentation/page/customer_due_advance_screen/customer_due_advance_screen.dart';
 import '../../../../report/presentation/page/expense_report_screen/expense_report_screen.dart';
 import '../../../../report/presentation/page/supplier_due_advance_screen/supplier_due_advance_screen.dart';
 import '../../../../report/presentation/page/supplier_ledger_screen/supplier_ledger_screen.dart';
+import '../../../../return/sales_return/presentation/page/sales_return_page.dart';
 import '../../../../sales/presentation/pages/create_pos_sale/create_pos_sale.dart';
 
 import '../../../../supplier/presentation/pages/supplier_list_screen.dart';
@@ -81,7 +83,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     AppWrapper(child: ExpenseSubHeadScreen()),
 
 
-    AppWrapper(child: ExpenseListScreen()),
+    AppWrapper(child: SalesReturnScreen()),
     AppWrapper(child: ExpenseHeadScreen()),
     AppWrapper(child: ExpenseSubHeadScreen()),
 
@@ -93,7 +95,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     AppWrapper(child: LowStockScreen()),
     AppWrapper(child: StockReportScreen()),
     AppWrapper(child: CustomerLedgerScreen()),
-    AppWrapper(child: CustomerLedgerScreen()),
+    AppWrapper(child: CustomerDueAdvanceScreen()),
     AppWrapper(child: SupplierLedgerScreen()),
     AppWrapper(child: SupplierDueAdvanceScreen()),
     AppWrapper(child: ExpenseReportScreen()),
