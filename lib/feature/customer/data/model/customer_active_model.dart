@@ -17,11 +17,11 @@ class CustomerActiveModel {
   final bool? isActive;
   final String? statusDisplay;
   final String? clientNo;
-  final String? totalDue;
-  final String? totalPaid;
+  final dynamic? totalDue;
+  final dynamic? totalPaid;
   final String? amountType;
   final int? company;
-  final int? totalSales;
+  final dynamic? totalSales;
   final DateTime? dateCreated;
   final int? createdBy;
 

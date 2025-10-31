@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:flutter/cupertino.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:smart_inventory/feature/accounts/data/model/account_active_model.dart';
 import 'package:smart_inventory/feature/products/product/data/model/product_model.dart';
 import 'package:smart_inventory/feature/products/product/presentation/bloc/products/products_bloc.dart';
 import 'package:smart_inventory/feature/supplier/data/model/supplier_active_model.dart';
@@ -17,8 +18,6 @@ import '../../../../../core/widgets/app_loader.dart';
 import '../../../../../core/widgets/input_field.dart';
 import '../../../accounts/presentation/bloc/account/account_bloc.dart';
 import '../../../lab_dashboard/presentation/bloc/dashboard/dashboard_bloc.dart';
-import '../../../supplier/data/model/supplier_list_model.dart';
-import '../../../supplier/presentation/bloc/supplier/supplier_list_bloc.dart';
 import '../bloc/create_purchase/create_purchase_bloc.dart';
 
 class CreatePurchaseScreen extends StatefulWidget {
@@ -49,7 +48,7 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
 
   @override
   void initState() {
-    context.read<AccountBloc>().add(FetchAccountList(context));
+    context.read<AccountBloc>().add(FetchAccountActiveList(context));
 
     context.read<SupplierInvoiceBloc>().add(FetchSupplierActiveList(context));
 
@@ -60,8 +59,10 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
     );
 
     // Initialize date controller
+
+    // FIX: Use the same format as date picker (dd-MM-yyyy)
     context.read<CreatePurchaseBloc>().dateEditingController.text =
-        DateTime.now().toIso8601String().split('T')[0];
+        DateFormat('dd-MM-yyyy').format(DateTime.now()); // Changed from yyyy-MM-dd
 
     addProduct(); // Initialize with one product row
   }
@@ -195,10 +196,6 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
     return total;
   }
 
-  void _updateChangeAmount() {
-    // This method can be implemented based on your payment logic
-    setState(() {});
-  }
 
   void addProduct() {
     setState(() {
@@ -1465,102 +1462,73 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                                       Expanded(
                                         child: BlocBuilder<AccountBloc, AccountState>(
                                           builder: (context, state) {
-                                            if (state is AccountListLoading) {
+                                            if (state is AccountActiveListLoading) {
                                               return const Center(
-                                                child:
-                                                    CircularProgressIndicator(),
+                                                child: CircularProgressIndicator(),
                                               );
-                                            } else if (state
-                                                is AccountListSuccess) {
-                                              final filteredList =
-                                                  context
-                                                      .read<
-                                                        CreatePurchaseBloc
-                                                      >()
-                                                      .selectedPaymentMethod
-                                                      .isNotEmpty
+                                            } else if (state is AccountActiveListSuccess) {
+                                              final filteredList = context
+                                                  .read<CreatePurchaseBloc>()
+                                                  .selectedPaymentMethod
+                                                  .isNotEmpty
                                                   ? state.list.where((item) {
-                                                      return item.acType
-                                                              ?.toLowerCase() ==
-                                                          context
-                                                              .read<
-                                                                CreatePurchaseBloc
-                                                              >()
-                                                              .selectedPaymentMethod
-                                                              .toLowerCase();
-                                                    }).toList()
+                                                return item.acType?.toLowerCase() ==
+                                                    context
+                                                        .read<CreatePurchaseBloc>()
+                                                        .selectedPaymentMethod
+                                                        .toLowerCase();
+                                              }).toList()
                                                   : state.list;
 
-                                              return AppDropdown(
+                                              return AppDropdown<AccountActiveModel>( // Specify the type here
                                                 label: "Account",
                                                 context: context,
                                                 hint: "Select Account",
                                                 isLabel: false,
                                                 isRequired: true,
                                                 isNeedAll: false,
-                                                value:
-                                                    context
-                                                        .read<
-                                                          CreatePurchaseBloc
-                                                        >()
-                                                        .selectedAccount
-                                                        .isEmpty
-                                                    ? null
-                                                    : context
-                                                          .read<
-                                                            CreatePurchaseBloc
-                                                          >()
-                                                          .selectedAccount,
+                                                value: context.read<CreatePurchaseBloc>().accountActiveModel, // Store object, not string
                                                 itemList: filteredList,
                                                 onChanged: (newVal) {
-                                                  print(newVal);
-                                                  context.read<CreatePurchaseBloc>().selectedAccount = newVal.toString();
+                                                  print('Selected account: $newVal');
 
-                                                  try {
-                                                    // Extract account number from the selected value
-                                                    String selectedAccountNumber = newVal.toString().split("-").last.trim().split("(").first;
-                                                    print(selectedAccountNumber);
+                                                  if (newVal != null) {
+                                                    try {
+                                                      // Store the actual object, not just string representation
+                                                      context.read<CreatePurchaseBloc>().accountActiveModel = newVal;
+                                                      context.read<CreatePurchaseBloc>().selectedAccountId = newVal.acId?.toString() ?? "";
 
-                                                    // Find matching account safely
-                                                    var matchingAccount = filteredList.firstWhere(
-                                                          (acc) => acc.acNumber.toString().trim() == selectedAccountNumber,
-                                                    );
-
-                                                    if (matchingAccount.acNumber != null) {
-                                                      context.read<CreatePurchaseBloc>().selectedAccountId = matchingAccount.acId.toString();
-                                                      print("Selected Account ID: ${matchingAccount.acId}");
-                                                    } else {
-                                                      print("No matching account found for: $selectedAccountNumber");
-                                                      // context.read<CreatePurchaseBloc>().selectedAccountId = null;
-                                                      // You might want to show an error message to the user here
+                                                      print("Selected Account ID: ${newVal.acId}");
+                                                      print("Selected Account Number: ${newVal.acNumber}");
+                                                      print("Selected Account Name: ${newVal.acName}");
+                                                    } catch (e) {
+                                                      print("Error processing selected account: $e");
+                                                      context.read<CreatePurchaseBloc>().selectedAccountId = "";
+                                                      context.read<CreatePurchaseBloc>().selectedAccount = "";
                                                     }
-                                                  } catch (e) {
-                                                    print("Error finding account: $e");
-                                                    // context.read<CreatePurchaseBloc>().selectedAccountId = null;
+                                                  } else {
+                                                    // Handle null selection
+                                                    print("No account selected");
+                                                    context.read<CreatePurchaseBloc>().selectedAccount = "";
+                                                    context.read<CreatePurchaseBloc>().selectedAccountId = "";
                                                   }
-                                                },                                                validator: (value) {
-                                                  return value == null
-                                                      ? 'Please select an account'
-                                                      : null;
                                                 },
-                                                itemBuilder: (item) =>
-                                                    DropdownMenuItem(
-                                                      value: item.toString(),
-                                                      child: Text(
-                                                        item.toString(),
-                                                        style: const TextStyle(
-                                                          color: AppColors
-                                                              .blackColor,
-                                                          fontFamily:
-                                                              'Quicksand',
-                                                          fontWeight:
-                                                              FontWeight.w300,
-                                                        ),
-                                                      ),
+                                                validator: (value) {
+                                                  return value == null ? 'Please select an account' : null;
+                                                },
+                                                itemBuilder: (item) => DropdownMenuItem<AccountActiveModel>(
+                                                  value: item, // Store the object, not string
+                                                  child: Text(
+                                                    item.toString(), // This displays the string representation
+                                                    style: const TextStyle(
+                                                      color: AppColors.blackColor,
+                                                      fontFamily: 'Quicksand',
+                                                      fontWeight: FontWeight.w300,
                                                     ),
+                                                  ),
+                                                ),
                                               );
-                                            } else if (state
-                                                is AccountListFailed) {
+                                            } else if (state is AccountListFailed) {
                                               return Center(
                                                 child: Text(
                                                   'Failed to load accounts: ${state.content}',
@@ -1722,10 +1690,10 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
             .read<CreatePurchaseBloc>()
             .selectedPaymentMethod
             .toString();
-        body['account_id'] = context
+        body['account_id'] = int.tryParse(context
             .read<CreatePurchaseBloc>()
             .selectedAccountId
-            .toString();
+            .toString());
       }
 
       log(body.toString());

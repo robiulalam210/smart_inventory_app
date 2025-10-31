@@ -7,6 +7,13 @@ import 'package:smart_inventory/feature/products/product/presentation/pages/prod
 import 'package:smart_inventory/feature/products/soruce/presentation/pages/source_screen.dart';
 import 'package:smart_inventory/feature/products/unit/presentation/pages/unit_screen.dart';
 import 'package:smart_inventory/feature/purchase/presentation/page/purchase_screen.dart';
+import 'package:smart_inventory/feature/report/presentation/page/customer_ledger_screen/customer_ledger_screen.dart';
+import 'package:smart_inventory/feature/report/presentation/page/low_stock_screen/low_stock_screen.dart';
+import 'package:smart_inventory/feature/report/presentation/page/profit_loss_screen/profit_loss_screen.dart';
+import 'package:smart_inventory/feature/report/presentation/page/purchase_report_screen/purchase_report_screen.dart';
+import 'package:smart_inventory/feature/report/presentation/page/sales_report_page/sales_report_screen.dart';
+import 'package:smart_inventory/feature/report/presentation/page/stock_report_screen/stock_report_screen.dart';
+import 'package:smart_inventory/feature/report/presentation/page/top_products_screen/top_products_screen.dart';
 import 'package:smart_inventory/feature/sales/presentation/pages/pos_sale_screen.dart';
 import 'package:smart_inventory/feature/supplier/presentation/pages/create_supplierr_screen.dart';
 
@@ -23,6 +30,9 @@ import '../../../../products/categories/presentation/pages/categories_screen.dar
 import '../../../../products/product/presentation/pages/product_screen.dart';
 import '../../../../purchase/presentation/page/create_purchase_screen.dart';
 
+import '../../../../report/presentation/page/expense_report_screen/expense_report_screen.dart';
+import '../../../../report/presentation/page/supplier_due_advance_screen/supplier_due_advance_screen.dart';
+import '../../../../report/presentation/page/supplier_ledger_screen/supplier_ledger_screen.dart';
 import '../../../../sales/presentation/pages/create_pos_sale/create_pos_sale.dart';
 
 import '../../../../supplier/presentation/pages/supplier_list_screen.dart';
@@ -69,6 +79,24 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     AppWrapper(child: ExpenseListScreen()),
     AppWrapper(child: ExpenseHeadScreen()),
     AppWrapper(child: ExpenseSubHeadScreen()),
+
+
+    AppWrapper(child: ExpenseListScreen()),
+    AppWrapper(child: ExpenseHeadScreen()),
+    AppWrapper(child: ExpenseSubHeadScreen()),
+
+
+    AppWrapper(child: SaleReportScreen()),
+    AppWrapper(child: PurchaseReportScreen()),
+    AppWrapper(child: ProfitLossScreen()),
+    AppWrapper(child: TopProductsScreen()),
+    AppWrapper(child: LowStockScreen()),
+    AppWrapper(child: StockReportScreen()),
+    AppWrapper(child: CustomerLedgerScreen()),
+    AppWrapper(child: CustomerLedgerScreen()),
+    AppWrapper(child: SupplierLedgerScreen()),
+    AppWrapper(child: SupplierDueAdvanceScreen()),
+    AppWrapper(child: ExpenseReportScreen()),
 
     // AppWrapper(child: SourceScreen()),
     // AppWrapper(child: UnitScreen()),

@@ -20,7 +20,7 @@ class CustomerModel {
   final dynamic? totalPaid;
   final String? amountType;
   final int? company;
-  final dynamic? totalSales;
+  final dynamic totalSales;
   final DateTime? dateCreated;
   final int? createdBy;
 

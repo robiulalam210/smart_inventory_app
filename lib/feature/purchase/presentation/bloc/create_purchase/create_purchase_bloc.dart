@@ -6,6 +6,7 @@ import 'package:smart_inventory/feature/supplier/data/model/supplier_active_mode
 
 import '../../../../../core/configs/configs.dart';
 import '../../../../../core/repositories/post_response.dart';
+import '../../../../accounts/data/model/account_active_model.dart';
 import '../../../../common/data/models/api_response_mod.dart';
 import '../../../../common/data/models/app_parse_json.dart';
 import '../../../../supplier/data/model/supplier_list_model.dart';
@@ -19,6 +20,7 @@ class CreatePurchaseBloc extends Bloc<CreatePurchaseEvent, CreatePurchaseState> 
 
 
   SupplierActiveModel? supplierListModel;
+  AccountActiveModel? accountActiveModel;
   String selectedAccount = "";
 
   String selectedAccountId = "";

@@ -6,6 +6,8 @@ import 'package:smart_inventory/feature/expense/presentation/bloc/expense_list/e
 import 'package:smart_inventory/feature/money_receipt/presentation/bloc/money_receipt/money_receipt_bloc.dart';
 import 'package:smart_inventory/feature/purchase/presentation/bloc/create_purchase/create_purchase_bloc.dart';
 import 'package:smart_inventory/feature/purchase/presentation/bloc/purchase_bloc.dart';
+import 'package:smart_inventory/feature/report/presentation/bloc/low_stock_bloc/low_stock_bloc.dart';
+import 'package:smart_inventory/feature/report/presentation/bloc/sales_report_bloc/sales_report_bloc.dart';
 import 'package:smart_inventory/feature/sales/presentation/bloc/possale/crate_pos_sale/create_pos_sale_bloc.dart';
 import 'package:smart_inventory/feature/sales/presentation/bloc/possale/possale_bloc.dart';
 import 'package:smart_inventory/feature/supplier/presentation/bloc/supplier/supplier_list_bloc.dart';
@@ -20,6 +22,14 @@ import '../feature/products/groups/presentation/bloc/groups/groups_bloc.dart';
 import '../feature/products/product/presentation/bloc/products/products_bloc.dart';
 import '../feature/products/soruce/presentation/bloc/source/source_bloc.dart';
 import '../feature/products/unit/presentation/bloc/unit/unti_bloc.dart';
+import '../feature/report/presentation/bloc/customer_ledger_bloc/customer_ledger_bloc.dart';
+import '../feature/report/presentation/bloc/expense_report_bloc/expense_report_bloc.dart';
+import '../feature/report/presentation/bloc/profit_loss_bloc/profit_loss_bloc.dart';
+import '../feature/report/presentation/bloc/purchase_report/purchase_report_bloc.dart';
+import '../feature/report/presentation/bloc/stock_report_bloc/stock_report_bloc.dart';
+import '../feature/report/presentation/bloc/supplier_due_advance_bloc/supplier_due_advance_bloc.dart';
+import '../feature/report/presentation/bloc/supplier_ledger_bloc/supplier_ledger_bloc.dart';
+import '../feature/report/presentation/bloc/top_products_bloc/top_products_bloc.dart';
 import '../feature/supplier/presentation/bloc/supplier_invoice/supplier_invoice_bloc.dart';
 import '../feature/supplier/presentation/bloc/supplier_payment/supplier_payment_bloc.dart';
 
@@ -72,6 +82,16 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (_) => CreatePurchaseBloc()),
         BlocProvider(create: (_) => PurchaseBloc()),
         BlocProvider(create: (_) => MoneyReceiptBloc()),
+        BlocProvider(create: (_) => SalesReportBloc()),
+        BlocProvider(create: (_) => PurchaseReportBloc()),
+        BlocProvider(create: (_) => ProfitLossBloc()),
+        BlocProvider(create: (_) => TopProductsBloc()),
+        BlocProvider(create: (_) => LowStockBloc()),
+        BlocProvider(create: (_) => StockReportBloc()),
+        BlocProvider(create: (_) => CustomerLedgerBloc()),
+        BlocProvider(create: (_) => SupplierLedgerBloc()),
+        BlocProvider(create: (_) => SupplierDueAdvanceBloc()),
+        BlocProvider(create: (_) => ExpenseReportBloc()),
       ],
       child: Center(
         child: MaterialApp(

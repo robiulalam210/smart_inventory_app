@@ -35,8 +35,7 @@ class AccountActiveModel {
 
   @override
   String toString() {
-    // TODO: implement toString
-    return acName??"";
+    return "${acName ?? ""} (${(acNumber ?? "")})";
   }
 
   factory AccountActiveModel.fromJson(Map<String, dynamic> json) => AccountActiveModel(
