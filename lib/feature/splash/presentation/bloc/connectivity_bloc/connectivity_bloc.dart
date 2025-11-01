@@ -9,6 +9,9 @@ class ConnectivityBloc extends Bloc<ConnectivityEvent, ConnectivityState> {
   final Connectivity _connectivity = Connectivity();
   StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
 
+  Timer? _debounceTimer;
+  bool? _lastState; // Cache last connectivity state to prevent repeated events
+
   ConnectivityBloc() : super(ConnectivityConnecting()) {
     on<ConnectivityChanged>((event, emit) {
       if (event.isConnected) {
@@ -22,45 +25,60 @@ class ConnectivityBloc extends Bloc<ConnectivityEvent, ConnectivityState> {
     _monitorConnectivity();
   }
 
-  /// Check if internet is really reachable
+  /// Check if internet is actually reachable
   Future<bool> _hasInternet() async {
     try {
-      final result = await InternetAddress.lookup('example.com')
-          .timeout(const Duration(seconds: 2));
-      return result.isNotEmpty && result[0].rawAddress.isNotEmpty;
-    } catch (_) {
+      final result = await InternetAddress.lookup('google.com')
+          .timeout(const Duration(seconds: 5));
+      final hasInternet = result.isNotEmpty && result[0].rawAddress.isNotEmpty;
+      return hasInternet;
+    } catch (e) {
       return false;
     }
   }
 
+  /// Initial connectivity check
   void _initializeConnectivity() async {
-    // Start with "connecting"
-    add(ConnectivityChanged(false));
-
     final result = await _connectivity.checkConnectivity();
     final hasInterface = result == ConnectivityResult.mobile ||
         result == ConnectivityResult.wifi ||
         result == ConnectivityResult.ethernet;
 
     final isConnected = hasInterface && await _hasInternet();
-    add(ConnectivityChanged(isConnected));
+    _emitIfChanged(isConnected);
   }
 
+  /// Listen for connectivity changes and debounce
   void _monitorConnectivity() {
     _connectivitySubscription =
-        _connectivity.onConnectivityChanged.listen((results) async {
-          final hasInterface = results.any((r) =>
-          r == ConnectivityResult.mobile ||
-              r == ConnectivityResult.wifi ||
-              r == ConnectivityResult.ethernet);
+        _connectivity.onConnectivityChanged.listen((results) {
+          // Cancel previous timer if a new event comes quickly
+          _debounceTimer?.cancel();
+          _debounceTimer = Timer(const Duration(milliseconds: 500), () async {
 
-          final isConnected = hasInterface && await _hasInternet();
-          add(ConnectivityChanged(isConnected));
+            final hasInterface = results.any((result) =>
+            result == ConnectivityResult.mobile ||
+                result == ConnectivityResult.wifi ||
+                result == ConnectivityResult.ethernet);
+
+            final isConnected = hasInterface && await _hasInternet();
+            _emitIfChanged(isConnected);
+          });
         });
+  }
+
+  /// Emit event only if state changed
+  void _emitIfChanged(bool isConnected) {
+    if (_lastState != isConnected) {
+      _lastState = isConnected;
+      add(ConnectivityChanged(isConnected));
+    } else {
+    }
   }
 
   @override
   Future<void> close() {
+    _debounceTimer?.cancel();
     _connectivitySubscription?.cancel();
     return super.close();
   }
