@@ -34,6 +34,7 @@ import '../../../../report/presentation/page/customer_due_advance_screen/custome
 import '../../../../report/presentation/page/expense_report_screen/expense_report_screen.dart';
 import '../../../../report/presentation/page/supplier_due_advance_screen/supplier_due_advance_screen.dart';
 import '../../../../report/presentation/page/supplier_ledger_screen/supplier_ledger_screen.dart';
+import '../../../../return/purchase_return/presentation/purchase_return/purchase_return_screen.dart';
 import '../../../../return/sales_return/presentation/page/sales_return_page.dart';
 import '../../../../sales/presentation/pages/create_pos_sale/create_pos_sale.dart';
 
@@ -63,14 +64,11 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     AppWrapper(child: CreatePurchaseScreen()),
     AppWrapper(child: PurchaseScreen()),
 
-    // AppWrapper(child: ProductsForm()),
     AppWrapper(child: ProductsScreen()),
 
     AppWrapper(child: AccountScreen()),
-    // AppWrapper(child: CreateAccountScreen(submitText: "Save",)),
 
     AppWrapper(child: CustomerScreen()),
-    // AppWrapper(child: CreateCustomerScreen()),
 
     AppWrapper(child: SupplierScreen()),
     // AppWrapper(child: CreateSupplierScreen()),
@@ -84,8 +82,8 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
 
 
     AppWrapper(child: SalesReturnScreen()),
-    AppWrapper(child: ExpenseHeadScreen()),
     AppWrapper(child: ExpenseSubHeadScreen()),
+    AppWrapper(child: PurchaseReturnScreen()),
 
 
     AppWrapper(child: SaleReportScreen()),
@@ -100,12 +98,12 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     AppWrapper(child: SupplierDueAdvanceScreen()),
     AppWrapper(child: ExpenseReportScreen()),
 
-    // AppWrapper(child: SourceScreen()),
-    // AppWrapper(child: UnitScreen()),
-    // AppWrapper(child: BrandScreen()),
-    // AppWrapper(child: CategoriesScreen()),
-    // AppWrapper(child: GroupsScreen()),
-    // AppWrapper(child: UsersScreen()),
+    AppWrapper(child: UsersScreen()),
+    AppWrapper(child: SourceScreen()),
+    AppWrapper(child: UnitScreen()),
+    AppWrapper(child: BrandScreen()),
+    AppWrapper(child: CategoriesScreen()),
+    AppWrapper(child: GroupsScreen()),
 
 
 

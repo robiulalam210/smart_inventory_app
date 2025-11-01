@@ -1,11 +1,12 @@
 import '../../../../../core/configs/configs.dart';
 import '../../../../../core/shared/widgets/sideMenu/sidebar.dart';
-import '../../../../../core/widgets/app_alert_dialog.dart';
+import '../../../../../core/widgets/app_button.dart';
 import '../../../../../core/widgets/app_loader.dart';
 import '../../../../../core/widgets/coustom_search_text_field.dart';
 import '../../../../../core/widgets/custom_filter_ui.dart';
 import '../bloc/categories/categories_bloc.dart';
 import '../widget/widget.dart';
+import 'categories_create.dart';
 
 class CategoriesScreen extends StatefulWidget {
   const CategoriesScreen({super.key});
@@ -30,8 +31,11 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
     super.dispose();
   }
 
-  void _fetchApiData(
-      {String filterText = '', String state = '', int pageNumber = 0}) {
+  void _fetchApiData({
+    String filterText = '',
+    String state = '',
+    int pageNumber = 0,
+  }) {
     context.read<CategoriesBloc>().add(
       FetchCategoriesList(
         context,
@@ -86,98 +90,106 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
     );
   }
 
+  Widget buildContent() {
+    return Padding(
+      padding: AppTextStyle.getResponsivePaddingBody(context),
+      child: BlocListener<CategoriesBloc, CategoriesState>(
+        listener: (context, state) {
+          if (state is CategoriesAddLoading) {
+            appLoader(context, "Creating categories, please wait...");
+          } else if (state is CategoriesSwitchLoading) {
+            appLoader(context, "Updating categories, please wait...");
+          } else if (state is CategoriesDeleteLoading) {
+            // appLoader(context, "Deleting categories, please wait...");
+          } else if (state is CategoriesAddSuccess ||
+              state is CategoriesSwitchSuccess ||
+              state is CategoriesDeleteSuccess) {
+            // Navigator.pop(context);
+            if (state is CategoriesAddSuccess) Navigator.pop(context);
+            _fetchApiData();
+          } else if (state is CategoriesAddFailed ||
+              state is CategoriesDeleteFailed) {
+            Navigator.pop(context);
+            if (state is CategoriesAddFailed) Navigator.pop(context);
+            _fetchApiData();
+          }
+        },
+        child: Column(
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
 
-Widget buildContent() {
-  return Padding(
-    padding: AppTextStyle.getResponsivePaddingBody(context),
-    child: BlocListener<CategoriesBloc, CategoriesState>(
-      listener: (context, state) {
-        if (state is CategoriesAddLoading) {
-          appLoader(context, "Creating categories, please wait...");
-        } else if (state is CategoriesSwitchLoading) {
-          appLoader(context, "Updating categories, please wait...");
-        } else if (state is CategoriesDeleteLoading) {
-          appLoader(context, "Deleting categories, please wait...");
-        } else if (state is CategoriesAddSuccess ||
-            state is CategoriesSwitchSuccess ||
-            state is CategoriesDeleteSuccess) {
-          Navigator.pop(context);
-          if (state is CategoriesAddSuccess) Navigator.pop(context);
-          _fetchApiData();
-        } else if (state is CategoriesAddFailed ||
-            state is CategoriesDeleteFailed) {
-          Navigator.pop(context);
-          if (state is CategoriesAddFailed) Navigator.pop(context);
-          _fetchApiData();
-        }
-      },
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: CustomSearchTextFormField(
-                  controller: dataBloc.filterTextController,
-                  onChanged: (value) => _fetchApiData(filterText: value),
-                  onClear: () {
-                    dataBloc.filterTextController.clear();
-                    _fetchApiData();
-                  },
-                  hintText: "Search Name",
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Expanded(
+                  child: CustomSearchTextFormField(
+                    controller: dataBloc.filterTextController,
+                    onChanged: (value) => _fetchApiData(filterText: value),
+                    onClear: () {
+                      dataBloc.filterTextController.clear();
+                      _fetchApiData();
+                    },
+                    hintText: "Search Name",
+                    isRequiredLabel: true,
+                    labelText: "",
+                  ),
                 ),
-              ),
-              CustomFilterBox(
-                onTapDown: (TapDownDetails details) {
-                  _showFilterMenu(context, details.globalPosition);
-                },
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-
-          /// 👇 Expanded fixes layout overflow
-          SizedBox(
-            height: 400,
-            child: BlocBuilder<CategoriesBloc, CategoriesState>(
-              builder: (context, state) {
-                if (state is CategoriesListLoading) {
-                  return const Center(child: CircularProgressIndicator());
-                } else if (state is CategoriesListSuccess) {
-                  if (state.list.isEmpty) {
-                    return Center(
-                      child: Lottie.asset(AppImages.noData),
-                    );
-                  } else {
-                    return ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: state.list.length,
-                      itemBuilder: (_, index) {
-                        final category = state.list[index];
-                        return CategoriesCard(
-                          categories: category,
-                          index: index + 1,
-                        );
+                gapW16,
+                AppButton(
+                  name: "Create Categories ",
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return Dialog(child: CategoriesCreate());
                       },
                     );
-                  }
-                } else if (state is CategoriesListFailed) {
-                  return Center(
-                    child:
-                    Text('Failed to load categories: ${state.content}'),
-                  );
-                } else {
-                  return const SizedBox.shrink();
-                }
-              },
+
+                  },
+                ),
+              ],
             ),
-          ),
-        ],
+            const SizedBox(height: 10),
+
+            /// 👇 Expanded fixes layout overflow
+            SizedBox(
+              child: BlocBuilder<CategoriesBloc, CategoriesState>(
+                builder: (context, state) {
+                  if (state is CategoriesListLoading) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (state is CategoriesListSuccess) {
+                    if (state.list.isEmpty) {
+                      return Center(child: Lottie.asset(AppImages.noData));
+                    } else {
+                      return ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: state.list.length,
+                        itemBuilder: (_, index) {
+                          final category = state.list[index];
+                          return CategoriesCard(
+                            categories: category,
+                            index: index + 1,
+                          );
+                        },
+                      );
+                    }
+                  } else if (state is CategoriesListFailed) {
+                    return Center(
+                      child: Text(
+                        'Failed to load categories: ${state.content}',
+                      ),
+                    );
+                  } else {
+                    return const SizedBox.shrink();
+                  }
+                },
+              ),
+            ),
+          ],
+        ),
       ),
-    ),
-  );
-}
-
-
+    );
+  }
 
   void _showFilterMenu(BuildContext context, Offset offset) async {
     final screenSize = MediaQuery.of(context).size;
@@ -203,7 +215,11 @@ Widget buildContent() {
                     Container(
                       width: double.maxFinite,
                       padding: const EdgeInsets.only(
-                          top: 5, bottom: 10, left: 10, right: 10),
+                        top: 5,
+                        bottom: 10,
+                        left: 10,
+                        right: 10,
+                      ),
                       color: const Color.fromARGB(255, 248, 248, 248),
                       child: Text(
                         'Filter',

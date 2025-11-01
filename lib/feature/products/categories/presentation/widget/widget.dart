@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:smart_inventory/feature/products/categories/presentation/pages/categories_create.dart';
 
 import '../../../../../core/configs/app_colors.dart';
+import '../../../../../core/configs/app_sizes.dart';
 import '../../../../../core/configs/app_text.dart';
 import '../../../../../core/widgets/delete_dialog.dart';
 import '../../data/model/categories_model.dart';
@@ -52,6 +54,8 @@ class _CategoriesCardState extends State<CategoriesCard> {
         trailing: FittedBox(
           child: Row(
             children: [
+
+
               IconButton(
                 onPressed: () {
                   context.read<CategoriesBloc>().nameController.text =
@@ -59,6 +63,20 @@ class _CategoriesCardState extends State<CategoriesCard> {
 
                   // context.read<CategoriesBloc>().selectedState=  widget.categories.status.toString()=="1"?"Active":"Inactive";
 
+                  // ডায়ালগ দেখানো
+                  showDialog(
+                    context: context,
+                    builder: (context) {
+                      return Dialog(
+                        child: SizedBox(
+                          width: AppSizes.width(context)*0.50,
+                          child: CategoriesCreate(
+                            id: widget.categories.id.toString(),
+                          ),
+                        ),
+                      );
+                    },
+                  );
                   // setupCategories(context, "Update Categories", "Update",
                   //     id: widget.categories.id.toString());
                 },

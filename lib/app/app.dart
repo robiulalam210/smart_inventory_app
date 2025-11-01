@@ -8,6 +8,7 @@ import 'package:smart_inventory/feature/purchase/presentation/bloc/create_purcha
 import 'package:smart_inventory/feature/purchase/presentation/bloc/purchase_bloc.dart';
 import 'package:smart_inventory/feature/report/presentation/bloc/low_stock_bloc/low_stock_bloc.dart';
 import 'package:smart_inventory/feature/report/presentation/bloc/sales_report_bloc/sales_report_bloc.dart';
+import 'package:smart_inventory/feature/return/purchase_return/presentation/bloc/purchase_return/purchase_return_bloc.dart';
 import 'package:smart_inventory/feature/sales/presentation/bloc/possale/crate_pos_sale/create_pos_sale_bloc.dart';
 import 'package:smart_inventory/feature/sales/presentation/bloc/possale/possale_bloc.dart';
 import 'package:smart_inventory/feature/supplier/presentation/bloc/supplier/supplier_list_bloc.dart';
@@ -97,6 +98,7 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (_) => ExpenseReportBloc()),
 
         BlocProvider(create: (_) => SalesReturnBloc()),
+        BlocProvider(create: (_) => PurchaseReturnBloc()),
       ],
       child: Center(
         child: MaterialApp(

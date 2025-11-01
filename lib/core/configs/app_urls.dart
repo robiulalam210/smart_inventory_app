@@ -65,8 +65,9 @@ class AppUrls {
 
   static final String posSaleInvoice          = '$baseUrl/sale-invoice/';
   static final String saleReturn          = '$baseUrl/sales-returns/';
+  static final String purchaseReturn          = '$baseUrl/purchase-returns/';
 
-
+  static final String purchaseInvoice = '$baseUrl/purchases-invoice/supplier/';
 
 
 

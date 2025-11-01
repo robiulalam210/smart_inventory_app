@@ -124,7 +124,7 @@ class CategoriesBloc extends Bloc<CategoriesEvent, CategoriesState> {
     emit(CategoriesAddLoading());
 
     try {
-      final res  = await patchResponse(url: AppUrls.category+event.id.toString(),payload: event.body!); // Use the correct API URL
+      final res  = await patchResponse(url: "${AppUrls.category+event.id.toString()}/",payload: event.body!); // Use the correct API URL
 
       ApiResponse response = appParseJson(
         res,
@@ -152,7 +152,7 @@ class CategoriesBloc extends Bloc<CategoriesEvent, CategoriesState> {
     emit(CategoriesSwitchLoading());
 
     try {
-      final res  = await patchResponse(url: AppUrls.category+event.id.toString(),payload: event.body!); // Use the correct API URL
+      final res  = await patchResponse(url: "${AppUrls.category+event.id.toString()}/",payload: event.body!); // Use the correct API URL
 
       ApiResponse response = appParseJson(
         res,
@@ -179,7 +179,7 @@ class CategoriesBloc extends Bloc<CategoriesEvent, CategoriesState> {
     emit(CategoriesDeleteLoading());
 
     try {
-      final res  = await deleteResponse(url: AppUrls.category+event.id.toString()); // Use the correct API URL
+      final res  = await deleteResponse(url: "${AppUrls.category+event.id.toString()}/"); // Use the correct API URL
 
       final jsonString = jsonEncode(res);
 
