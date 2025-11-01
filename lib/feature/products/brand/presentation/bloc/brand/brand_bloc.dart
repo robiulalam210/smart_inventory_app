@@ -133,12 +133,13 @@ class BrandBloc extends Bloc<BrandEvent, BrandState> {
 
     try {
       final res = await patchResponse(
-        url: AppUrls.brand + event.id.toString(),
+        url: "${AppUrls.brand + event.id.toString()}/",
         payload: event.body!,
       ); // Use the correct API URL
+      final jsonString = jsonEncode(res);
 
       ApiResponse response = appParseJson(
-        res,
+        jsonString,
         (data) =>
             List<BrandModel>.from(data.map((x) => BrandModel.fromJson(x))),
       );
@@ -162,7 +163,7 @@ class BrandBloc extends Bloc<BrandEvent, BrandState> {
 
     try {
       final res = await deleteResponse(
-        url: AppUrls.brand + event.id.toString(),
+        url: "${AppUrls.brand + event.id.toString()}/",
       ); // Use the correct API URL
       final jsonString = jsonEncode(res);
 

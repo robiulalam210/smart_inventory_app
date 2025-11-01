@@ -140,10 +140,11 @@ class ExpenseSubHeadBloc extends Bloc<ExpenseSubHeadEvent, ExpenseSubHeadState> 
           url: "${AppUrls.expenseSubHead + event.id.toString()}/",
           payload: event.body!
       );
+      final jsonString = jsonEncode(res);
 
       // FIX: Parse as single object instead of list
       ApiResponse<ExpenseSubHeadModel> response = appParseJson<ExpenseSubHeadModel>(
-        res,
+        jsonString,
             (data) => ExpenseSubHeadModel.fromJson(data), // Single object, not list
       );
 

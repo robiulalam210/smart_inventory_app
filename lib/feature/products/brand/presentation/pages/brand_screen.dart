@@ -5,8 +5,10 @@ import '../../../../../core/configs/app_colors.dart';
 import '../../../../../core/configs/app_images.dart';
 import '../../../../../core/configs/app_routes.dart';
 import '../../../../../core/configs/app_text.dart';
+import '../../../../../core/configs/gaps.dart';
 import '../../../../../core/shared/widgets/sideMenu/sidebar.dart';
 import '../../../../../core/widgets/app_alert_dialog.dart';
+import '../../../../../core/widgets/app_button.dart';
 import '../../../../../core/widgets/app_loader.dart';
 import '../../../../../core/widgets/coustom_search_text_field.dart';
 import '../../../../../responsive.dart';
@@ -39,11 +41,7 @@ class _BrandScreenState extends State<BrandScreen> {
 
   void _fetchApi({String filterText = '', int pageNumber = 0}) {
     context.read<BrandBloc>().add(
-      FetchBrandList(
-        context,
-        filterText: filterText,
-        pageNumber: pageNumber,
-      ),
+      FetchBrandList(context, filterText: filterText, pageNumber: pageNumber),
     );
   }
 
@@ -87,7 +85,7 @@ class _BrandScreenState extends State<BrandScreen> {
       md: 12,
       lg: 10,
       xl: 10,
-      child:  Padding(
+      child: Padding(
         padding: AppTextStyle.getResponsivePaddingBody(context),
         child: BlocListener<BrandBloc, BrandState>(
           listener: (context, state) {
@@ -121,22 +119,41 @@ class _BrandScreenState extends State<BrandScreen> {
           },
           child: Column(
             children: [
-              CustomSearchTextFormField(
-                controller: dataBloc.filterTextController,
-                onClear: () {
-                  dataBloc.filterTextController.clear();
-                  _fetchApi();
-                },
-                onChanged: (value) {
-                  _fetchApi(filterText: value);
-                },
-                hintText: "Search Name",
+              Row(
+                children: [
+                  Expanded(
+                    child: CustomSearchTextFormField(
+                      controller: dataBloc.filterTextController,
+                      onClear: () {
+                        dataBloc.filterTextController.clear();
+                        _fetchApi();
+                      },
+                      onChanged: (value) {
+                        _fetchApi(filterText: value);
+                      },
+                      hintText: "Search Name",
+                    ),
+                  ),
+
+                  gapW16,
+                  AppButton(
+                    name: "Create Brand ",
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) {
+                          return Dialog(child: BrandCreate());
+                        },
+                      );
+                    },
+                  ),
+                ],
               ),
+
               const SizedBox(height: 10),
 
               /// 👇 Expanded fixes unbounded height issue
               SizedBox(
-
                 height: 500,
                 child: BlocBuilder<BrandBloc, BrandState>(
                   builder: (context, state) {
@@ -144,25 +161,21 @@ class _BrandScreenState extends State<BrandScreen> {
                       return const Center(child: CircularProgressIndicator());
                     } else if (state is BrandListSuccess) {
                       if (state.list.isEmpty) {
-                        return Center(
-                          child: Lottie.asset(AppImages.noData),
-                        );
+                        return Center(child: Lottie.asset(AppImages.noData));
                       } else {
                         return ListView.builder(
                           shrinkWrap: true,
                           itemCount: state.list.length,
                           itemBuilder: (_, index) {
                             final brand = state.list[index];
-                            return BrandCard(
-                              brand: brand,
-                              index: index + 1,
-                            );
+                            return BrandCard(brand: brand, index: index + 1);
                           },
                         );
                       }
                     } else if (state is BrandListFailed) {
                       return Center(
-                          child: Text('Failed to load: ${state.content}'));
+                        child: Text('Failed to load: ${state.content}'),
+                      );
                     } else {
                       return const SizedBox.shrink();
                     }
@@ -176,9 +189,3 @@ class _BrandScreenState extends State<BrandScreen> {
     );
   }
 }
-
-
-
-
-
-

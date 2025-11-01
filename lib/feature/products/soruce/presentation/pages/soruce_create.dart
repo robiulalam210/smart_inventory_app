@@ -1,23 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:smart_inventory/feature/products/brand/presentation/bloc/brand/brand_bloc.dart';
+import 'package:smart_inventory/feature/products/unit/presentation/bloc/unit/unti_bloc.dart';
+import '../../../../../core/configs/configs.dart';
+import '../../../../../core/widgets/app_button.dart';
+import '../../../../../core/widgets/input_field.dart';
+import '../../../../../core/widgets/show_custom_toast.dart';
+import '../bloc/source/source_bloc.dart';
 
-import '../../../../../../core/configs/configs.dart';
-import '../../../../../../core/widgets/app_button.dart';
-import '../../../../../../core/widgets/input_field.dart';
-import '../../../../../../core/widgets/show_custom_toast.dart';
-
-
-class BrandCreate extends StatefulWidget {
+class SourceCreate extends StatefulWidget {
   final String? id;
+  final bool isDialog;
 
-  const BrandCreate({super.key, this.id, });
+  const SourceCreate({super.key, this.id, this.isDialog = true});
 
   @override
-  State<BrandCreate> createState() => _BrandCreateState();
+  State<SourceCreate> createState() => _SourceCreateState();
 }
 
-class _BrandCreateState extends State<BrandCreate> {
+class _SourceCreateState extends State<SourceCreate> {
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   late TextEditingController nameController;
 
@@ -28,7 +28,9 @@ class _BrandCreateState extends State<BrandCreate> {
 
     // If updating, load existing data
     if (widget.id != null) {
-      final bloc = context.read<BrandBloc>();
+      // You might need to fetch existing source data here
+      // For now, we'll use the bloc's controller if it has data
+      final bloc = context.read<SourceBloc>();
       if (bloc.nameController.text.isNotEmpty) {
         nameController.text = bloc.nameController.text;
       }
@@ -49,8 +51,8 @@ class _BrandCreateState extends State<BrandCreate> {
           title: const Text('Confirm'),
           content: Text(
             widget.id == null
-                ? 'Are you sure you want to create this brand?'
-                : 'Are you sure you want to update this brand?',
+                ? 'Are you sure you want to create this source?'
+                : 'Are you sure you want to update this source?',
           ),
           actions: [
             TextButton(
@@ -79,12 +81,12 @@ class _BrandCreateState extends State<BrandCreate> {
       };
 
       if (widget.id == null) {
-        // Create new brand
-        context.read<BrandBloc>().add(AddBrand(body: body));
+        // Create new source
+        context.read<SourceBloc>().add(AddSource(body: body));
       } else {
-        // Update existing brand
-        context.read<BrandBloc>().add(
-          UpdateBrand(body: body, id: widget.id!),
+        // Update existing source
+        context.read<SourceBloc>().add(
+          UpdateSource(body: body, id: widget.id!),
         );
       }
     }
@@ -97,26 +99,27 @@ class _BrandCreateState extends State<BrandCreate> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<BrandBloc, BrandState>(
+    return BlocListener<SourceBloc, SourceState>(
       listener: (context, state) {
-        if (state is BrandAddSuccess) {
+        if (state is SourceAddSuccess) {
           showCustomToast(
             context: context,
             title: 'Success!',
             description: widget.id == null
-                ? 'Brand created successfully!'
-                : 'Brand updated successfully!',
+                ? 'Source created successfully!'
+                : 'Source updated successfully!',
             type: ToastificationType.success,
             icon: Icons.check_circle,
             primaryColor: Colors.green,
           );
 
+          // Clear form and close on success
           if (widget.id == null) {
             _clearForm();
           }
-          // Navigator.pop(context, true);
+          Navigator.pop(context, true); // Return success result
 
-        } else if (state is BrandAddFailed) {
+        } else if (state is SourceAddFailed) {
           showCustomToast(
             context: context,
             title: state.title,
@@ -127,7 +130,7 @@ class _BrandCreateState extends State<BrandCreate> {
           );
         }
       },
-      child:  _buildDialogContent() ,
+      child: widget.isDialog ? _buildDialogContent() : _buildFullScreenContent(),
     );
   }
 
@@ -146,7 +149,7 @@ class _BrandCreateState extends State<BrandCreate> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  widget.id == null ? 'Create Brand' : 'Update Brand',
+                  widget.id == null ? 'Create Source' : 'Update Source',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -173,19 +176,19 @@ class _BrandCreateState extends State<BrandCreate> {
               isRequiredLable: true,
               isRequired: true,
               controller: nameController,
-              hintText: 'Enter brand name',
-              labelText: 'Brand Name',
+              hintText: 'Enter source name',
+              labelText: 'Source Name',
               fillColor: Colors.grey[50],
               keyboardType: TextInputType.text,
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Please enter brand name';
+                  return 'Please enter source name';
                 }
                 if (value.length < 2) {
-                  return 'Brand name must be at least 2 characters long';
+                  return 'Source name must be at least 2 characters long';
                 }
                 if (value.length > 50) {
-                  return 'Brand name must be less than 50 characters';
+                  return 'Source name must be less than 50 characters';
                 }
                 return null;
               },
@@ -214,14 +217,13 @@ class _BrandCreateState extends State<BrandCreate> {
                 ),
                 SizedBox(width: 10),
                 Expanded(
-                  child: BlocBuilder<BrandBloc, BrandState>(
+                  child: BlocBuilder<SourceBloc, SourceState>(
                     builder: (context, state) {
                       return AppButton(
                         name: widget.id == null ? 'Create' : 'Update',
-                        onPressed: (state is BrandAddLoading)
+                        onPressed: (state is SourceAddLoading)
                             ? null
                             : _showConfirmationDialog,
-                        isLoading: state is BrandAddLoading,
                       );
                     },
                   ),
@@ -239,13 +241,9 @@ class _BrandCreateState extends State<BrandCreate> {
       child: Scaffold(
         backgroundColor: AppColors.bg,
         appBar: AppBar(
-          title: Text(widget.id == null ? 'Create Brand' : 'Update Brand'),
+          title: Text(widget.id == null ? 'Create Source' : 'Update Source'),
           backgroundColor: AppColors.primaryColor,
           foregroundColor: Colors.white,
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back),
-            onPressed: () => Navigator.pop(context),
-          ),
         ),
         body: Center(
           child: Container(
@@ -280,19 +278,19 @@ class _BrandCreateState extends State<BrandCreate> {
                         isRequiredLable: true,
                         isRequired: true,
                         controller: nameController,
-                        hintText: 'Enter brand name',
-                        labelText: 'Brand Name',
+                        hintText: 'Enter source name',
+                        labelText: 'Source Name',
                         fillColor: Colors.grey[50],
                         keyboardType: TextInputType.text,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Please enter brand name';
+                            return 'Please enter source name';
                           }
                           if (value.length < 2) {
-                            return 'Brand name must be at least 2 characters long';
+                            return 'Source name must be at least 2 characters long';
                           }
                           if (value.length > 50) {
-                            return 'Brand name must be less than 50 characters';
+                            return 'Source name must be less than 50 characters';
                           }
                           return null;
                         },
@@ -321,14 +319,13 @@ class _BrandCreateState extends State<BrandCreate> {
                           ),
                           SizedBox(width: 10),
                           Expanded(
-                            child: BlocBuilder<BrandBloc, BrandState>(
+                            child: BlocBuilder<SourceBloc, SourceState>(
                               builder: (context, state) {
                                 return AppButton(
-                                  name: widget.id == null ? 'Create Brand' : 'Update Brand',
-                                  onPressed: (state is BrandAddLoading)
+                                  name: widget.id == null ? 'Create Source' : 'Update Source',
+                                  onPressed: (state is SourceAddLoading)
                                       ? null
                                       : _showConfirmationDialog,
-                                  isLoading: state is BrandAddLoading,
                                 );
                               },
                             ),

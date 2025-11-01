@@ -1,6 +1,9 @@
+import 'package:smart_inventory/feature/products/soruce/presentation/pages/soruce_create.dart';
+
 import '../../../../../core/configs/configs.dart';
 import '../../../../../core/shared/widgets/sideMenu/sidebar.dart';
 import '../../../../../core/widgets/app_alert_dialog.dart';
+import '../../../../../core/widgets/app_button.dart';
 import '../../../../../core/widgets/app_loader.dart';
 import '../../../../../core/widgets/coustom_search_text_field.dart';
 import '../bloc/source/source_bloc.dart';
@@ -94,12 +97,12 @@ class _SourceScreenState extends State<SourceScreen> {
                   appLoader(context, "Creating Source, please wait...");
                 }
                 if (state is SourceUpdateLoading) {
-                  appLoader(context, "Update Source, please wait...");
+                  // appLoader(context, "Update Source, please wait...");
                 } else if (state is SourceDeleteLoading) {
                   appLoader(context, "Deleted Source, please wait...");
                 } else if (state is SourceAddSuccess) {
                   Navigator.pop(context); // Close loader dialog
-                  Navigator.pop(context); // Close loader dialog
+                  // Navigator.pop(context); // Close loader dialog
                   _fetchApiData(); // Reload warehouse list
                 } else if (state is SourceUpdateSuccess) {
                   Navigator.pop(context); // Close loader dialog
@@ -109,8 +112,8 @@ class _SourceScreenState extends State<SourceScreen> {
                   Navigator.pop(context); // Close loader dialog
                   _fetchApiData(); // Reload warehouse list
                 } else if (state is SourceAddFailed) {
-                  Navigator.pop(context); // Close loader dialog
-                  Navigator.pop(context); // Close loader dialog
+                  // Navigator.pop(context); // Close loader dialog
+                  // Navigator.pop(context); // Close loader dialog
                   _fetchApiData();
                   appAlertDialog(context, state.content,
                       title: state.title,
@@ -121,7 +124,7 @@ class _SourceScreenState extends State<SourceScreen> {
                       ]);
                 } else if (state is SourceUpdateFailed) {
                   Navigator.pop(context); // Close loader dialog
-                  Navigator.pop(context); // Close loader dialog
+                  // Navigator.pop(context); // Close loader dialog
                   _fetchApiData();
                   appAlertDialog(context, state.content,
                       title: state.title,
@@ -135,7 +138,11 @@ class _SourceScreenState extends State<SourceScreen> {
               child: Column(
                 children: [
 
-                  CustomSearchTextFormField(
+                  Row(
+                    children: [
+
+                Expanded(
+                  child:    CustomSearchTextFormField(
                     controller: context
                         .read<SourceBloc>()
                         .filterTextController, onClear: () {
@@ -153,6 +160,23 @@ class _SourceScreenState extends State<SourceScreen> {
                     },
                     hintText: "Search Name", // Pass dynamic hintText if needed
                   ),
+              ),
+                gapW16,
+                AppButton(
+                  name: "Create Source ",
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return Dialog(child: SourceCreate());
+                      },
+                    );
+
+                  })
+                    ],
+                  ),
+
+
 
 
                   SizedBox(

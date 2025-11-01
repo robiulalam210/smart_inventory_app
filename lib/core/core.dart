@@ -8,7 +8,6 @@ export 'repositories/patch_response.dart';
 export 'repositories/post_response.dart';
 export 'shared/widgets/header.dart';
 export 'shared/widgets/sideMenu/sidebar.dart';
-export 'shared/widgets/sideMenu/tab_sidebar.dart';
 export 'theme/app_theme.dart';
 export 'theme/widgets/app_text_form_field_theme.dart';
 export 'utilities/app_date_time.dart';

@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:smart_inventory/feature/products/groups/presentation/pages/create_groups.dart';
 
 import '../../../../../core/configs/app_colors.dart';
+import '../../../../../core/configs/app_sizes.dart';
 import '../../data/model/groups.dart';
+import '../bloc/groups/groups_bloc.dart';
 
 
 class GroupsCard extends StatefulWidget {
@@ -76,22 +79,33 @@ class _GroupsCardState extends State<GroupsCard> {
                 //   height: 30,
                 //   controller: _controller,
                 // ),
-                // IconButton(
-                //   onPressed: () {
-                //     context.read<GroupsBloc>().nameController.text =
-                //         widget.group.name ?? "";
-                //     context.read<GroupsBloc>().selectedState =
-                //         widget.group.status.toString() == "1"
-                //             ? "Active"
-                //             : "Inactive";
-                //     setupGroups(context, "Update Groups", "Update",
-                //         id: widget.group.id.toString());
-                //   },
-                //   icon: const Icon(
-                //     Iconsax.edit,
-                //     size: 25,
-                //   ),
-                // ),
+                IconButton(
+                  onPressed: () {
+                    context.read<GroupsBloc>().nameController.text =
+                        widget.group.name ?? "";
+                    // context.read<GroupsBloc>().selectedState =
+                    //     widget.group.status.toString() == "1"
+                    //         ? "Active"
+                    //         : "Inactive";
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return Dialog(
+                          child: SizedBox(
+                            width: AppSizes.width(context)*0.50,
+                            child: GroupsCreate(
+                              id: widget.group.id.toString(),
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                  icon: const Icon(
+                    Iconsax.edit,
+                    size: 25,
+                  ),
+                ),
               ],
             ),
           ),

@@ -201,9 +201,10 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
         url: "${AppUrls.account}${event.id}/",
         payload: event.body!,
       );
+      final jsonString = jsonEncode(res);
 
       ApiResponse response = appParseJson(
-        res,
+        jsonString,
             (data) => AccountModel.fromJson(data),
       );
 

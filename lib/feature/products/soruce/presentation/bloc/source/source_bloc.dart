@@ -124,28 +124,52 @@ class SourceBloc extends Bloc<SourceEvent, SourceState> {
 
   Future<void> _onUpdateSourceList(
       UpdateSource event, Emitter<SourceState> emit) async {
-
     emit(SourceUpdateLoading());
 
     try {
-      final res  = await patchResponse(url: AppUrls.source+event.id.toString(),payload: event.body!); // Use the correct API URL
-
-      ApiResponse response = appParseJson(
-        res,
-            (data) => List<SourceModel>.from(data.map((x) => SourceModel.fromJson(x))),
+      final res = await patchResponse(
+        url: "${AppUrls.source}${event.id.toString()}/",
+        payload: event.body!,
       );
+
+      final jsonString = jsonEncode(res);
+
+      // For single object response
+      ApiResponse response = appParseJson(
+        jsonString,
+            (data) => SourceModel.fromJson(data), // Single object, not list
+      );
+print(response.message);
+print(response.success);
       if (response.success == false) {
-        emit(SourceUpdateFailed(title: 'Update', content: response.message??""));
+        emit(SourceUpdateFailed(
+            title: 'Update Failed',
+            content: response.message ?? "Failed to update source"
+        ));
         return;
       }
-      clearData();
+
+      final updatedSource = response.data as SourceModel;
+
+      // Update the local list
+      final updatedList = list.map((source) {
+        if (source.id == event.id) {
+          return updatedSource;
+        }
+        return source;
+      }).toList();
+
+      list = updatedList;
+
       emit(SourceUpdateSuccess(
 
       ));
-    } catch (error) {
-      clearData();
-      emit(SourceUpdateFailed(title: "Error",content: error.toString()));
 
+    } catch (error) {
+      emit(SourceUpdateFailed(
+          title: "Error",
+          content: "Failed to update source: ${error.toString()}"
+      ));
     }
   }
 
@@ -156,7 +180,7 @@ class SourceBloc extends Bloc<SourceEvent, SourceState> {
     emit(SourceDeleteLoading());
 
     try {
-      final res  = await deleteResponse(url: AppUrls.source+event.id.toString()); // Use the correct API URL
+      final res  = await deleteResponse(url: "${AppUrls.source+event.id.toString()}/"); // Use the correct API URL
 
       final jsonString = jsonEncode(res);
 

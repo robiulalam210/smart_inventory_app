@@ -12,6 +12,7 @@ void main() async {
 
   final dbHelper = DatabaseHelper();
   await dbHelper.initDatabase();
+
   // 🖥️ Desktop window setup (dynamic sizing)
   if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
     await windowManager.ensureInitialized();
@@ -20,17 +21,23 @@ void main() async {
 
     Size windowSize;
     Size minSize;
+    bool shouldMaximize = false;
 
     if (width <= 1366) {
-      windowSize = const Size(1000, 650);
-      minSize = const Size(950, 600);
-      await windowManager.maximize();
+      // For small screens, maximize to use full available space
+      windowSize = const Size(1366, 768); // Set to common small screen resolution
+      minSize = const Size(920, 600);
+      shouldMaximize = true;
     } else if (width <= 1920) {
+      // For medium screens, use reasonable window size
       windowSize = const Size(1200, 750);
       minSize = const Size(1100, 700);
+      shouldMaximize = false;
     } else {
+      // For large screens, use larger window but don't maximize
       windowSize = const Size(1400, 850);
       minSize = const Size(1200, 750);
+      shouldMaximize = false;
     }
 
     final windowOptions = WindowOptions(
@@ -43,19 +50,22 @@ void main() async {
     await windowManager.waitUntilReadyToShow(windowOptions, () async {
       await windowManager.show();
       await windowManager.focus();
+
+      // Only maximize after the window is shown
+      if (shouldMaximize) {
+        await windowManager.maximize();
+      }
     });
   }
-
-
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(statusBarIconBrightness: Brightness.light),
   );
+
   runApp(
     ToastificationWrapper(
-      child: KeyboardGuard( // 👈 Add this wrapper
+      child: KeyboardGuard(
         child: MyApp(dbHelper: dbHelper),
       ),
     ),
   );
-
 }

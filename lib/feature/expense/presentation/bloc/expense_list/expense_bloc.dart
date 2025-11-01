@@ -214,10 +214,11 @@ class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
       final res = await patchResponse(
           url: '${AppUrls.expense}${event.id}/', // Add trailing slash
           payload: event.body!);
+      final jsonString = jsonEncode(res);
 
       // FIX: Parse as single object, not list
       ApiResponse<ExpenseModel> response = appParseJson<ExpenseModel>(
-        res,
+        jsonString,
             (data) => ExpenseModel.fromJson(data), // Single object, not list
       );
 

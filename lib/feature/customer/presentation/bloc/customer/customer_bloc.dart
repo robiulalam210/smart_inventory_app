@@ -266,10 +266,11 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
         url:"${ AppUrls.customer + event.id.toString()}/",
         payload: event.body!,
       ); // Use the correct API URL
+      final jsonString = jsonEncode(res);
 
       // ✅ Parse the response correctly - it returns a single customer, not a list
       ApiResponse response = appParseJson(
-        res,
+        jsonString,
             (data) => CustomerModel.fromJson(data), // Single object, not List
       );
 

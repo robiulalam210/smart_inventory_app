@@ -1,6 +1,9 @@
 import 'package:hugeicons/hugeicons.dart';
+import 'package:smart_inventory/feature/products/soruce/presentation/pages/soruce_create.dart';
+import 'package:smart_inventory/feature/products/unit/presentation/bloc/unit/unti_bloc.dart';
 
 import '../../../../../core/configs/configs.dart';
+import '../../../../../core/widgets/delete_dialog.dart';
 import '../../data/model/source_model.dart';
 import '../bloc/source/source_bloc.dart';
 
@@ -35,44 +38,56 @@ class SourceCard extends StatelessWidget {
           source.name ?? "N/A",
           style: AppTextStyle.cardTitle(context),
         ),
+        trailing: FittedBox(
+          child: Row(
+            children: [
 
-         // FittedBox(
-         //        child: Row(
-         //          children: [
-         //            IconButton(
-         //              onPressed: () {
-         //                context.read<SourceBloc>().nameController.text =
-         //                    source.name ?? "";
-         //                setupSource(
-         //                  context,
-         //                  "Update Source",
-         //                  "Update",
-         //                  id: source.id.toString(),
-         //                );
-         //              },
-         //              icon: const Icon (
-         //                Iconsax.edit,
-         //                size: 24,
-         //              ),
-         //            ),
-         //            IconButton(
-         //              onPressed: () async {
-         //                bool shouldDelete =
-         //                    await showDeleteConfirmationDialog(context);
-         //                if (shouldDelete) {
-         //               sourceBloc
-         //                      .add(DeleteSource(source.id.toString()));
-         //                }
-         //              },
-         //              icon:  const HugeIcon(
-         //                icon: HugeIcons.strokeRoundedDeleteThrow,
-         //                color: Colors.black,
-         //                size: 24.0,
-         //              ),
-         //            ),
-         //          ],
-         //        ),
-         //      )
+
+              IconButton(
+                onPressed: () {
+                  context.read<SourceBloc>().nameController.text =
+                      source.name ?? "";
+
+
+                  // ডায়ালগ দেখানো
+                  showDialog(
+                    context: context,
+                    builder: (context) {
+                      return Dialog(
+                        child: SizedBox(
+                          width: AppSizes.width(context)*0.50,
+                          child: SourceCreate(
+                            id: source.id.toString(),
+                          ),
+                        ),
+                      );
+                    },
+                  );
+
+                },
+                icon: const Icon(
+                  Iconsax.edit,
+                  size: 24,
+                ),
+              ),
+              IconButton(
+                  onPressed: () async {
+                    bool shouldDelete =
+                    await showDeleteConfirmationDialog(context);
+                    if (shouldDelete) {
+                      context.read<SourceBloc>().add(DeleteSource(
+                          source.id.toString()));
+                    }
+                  },
+                  icon: const HugeIcon(
+                    icon: HugeIcons.strokeRoundedDeleteThrow,
+                    color: Colors.black,
+                    size: 24.0,
+                  )),
+            ],
+          ),
+        ),
+
 
       ),
     );

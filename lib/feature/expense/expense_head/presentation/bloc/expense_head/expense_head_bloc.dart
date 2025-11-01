@@ -119,9 +119,10 @@ class ExpenseHeadBloc extends Bloc<ExpenseHeadEvent, ExpenseHeadState> {
         url: "${AppUrls.expenseHead + event.id.toString()}/",
         payload: event.body!,
       );
+      final jsonString = jsonEncode(res);
 
       ApiResponse<ExpenseHeadModel> response = appParseJson(
-        res,
+        jsonString,
             (data) => ExpenseHeadModel.fromJson(data),
       );
 

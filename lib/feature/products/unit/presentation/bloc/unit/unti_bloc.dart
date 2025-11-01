@@ -130,10 +130,11 @@ class UnitBloc extends Bloc<UnitEvent, UnitState> {
     emit(UnitUpdateLoading());
 
     try {
-      final res  = await patchResponse(url: AppUrls.unit+event.id.toString(),payload: event.body!); // Use the correct API URL
+      final res  = await patchResponse(url: "${AppUrls.unit+event.id.toString()}/",payload: event.body!); // Use the correct API URL
+      final jsonString = jsonEncode(res);
 
       ApiResponse response = appParseJson(
-        res,
+        jsonString,
             (data) => List<UnitsModel>.from(data.map((x) => UnitsModel.fromJson(x))),
       );
       if (response.data == false) {
@@ -158,7 +159,7 @@ class UnitBloc extends Bloc<UnitEvent, UnitState> {
     emit(UnitDeleteLoading());
 
     try {
-      final res  = await deleteResponse(url: AppUrls.unit+event.id.toString()); // Use the correct API URL
+      final res  = await deleteResponse(url:"${ AppUrls.unit+event.id.toString()}/"); // Use the correct API URL
       final jsonString = jsonEncode(res);
 
       ApiResponse response = appParseJson(

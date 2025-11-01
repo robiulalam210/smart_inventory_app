@@ -71,8 +71,6 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     AppWrapper(child: CustomerScreen()),
 
     AppWrapper(child: SupplierScreen()),
-    // AppWrapper(child: CreateSupplierScreen()),
-    // AppWrapper(child: SupplierPaymentForm()),
     AppWrapper(child: SupplierPaymentScreen()),
 
 
@@ -97,6 +95,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     AppWrapper(child: SupplierLedgerScreen()),
     AppWrapper(child: SupplierDueAdvanceScreen()),
     AppWrapper(child: ExpenseReportScreen()),
+    AppWrapper(child: ExpenseReportScreen()),
 
     AppWrapper(child: UsersScreen()),
     AppWrapper(child: SourceScreen()),
@@ -104,8 +103,6 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     AppWrapper(child: BrandScreen()),
     AppWrapper(child: CategoriesScreen()),
     AppWrapper(child: GroupsScreen()),
-
-
 
 
 

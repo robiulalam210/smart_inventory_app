@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lottie/lottie.dart';
+import 'package:smart_inventory/feature/products/groups/presentation/pages/create_groups.dart';
 
 import '../../../../../core/configs/app_colors.dart';
 import '../../../../../core/configs/app_images.dart';
 import '../../../../../core/configs/app_routes.dart';
 import '../../../../../core/configs/app_text.dart';
+import '../../../../../core/configs/gaps.dart';
 import '../../../../../core/shared/widgets/sideMenu/sidebar.dart';
 import '../../../../../core/widgets/app_alert_dialog.dart';
+import '../../../../../core/widgets/app_button.dart';
 import '../../../../../core/widgets/app_dropdown.dart';
 import '../../../../../core/widgets/app_loader.dart';
 import '../../../../../core/widgets/coustom_search_text_field.dart';
@@ -102,7 +105,7 @@ class _GroupsScreenState extends State<GroupsScreen> {
             } else if (state is GroupsSwitchLoading) {
               appLoader(context, "Update Group, please wait...");
             } else if (state is GroupsAddSuccess) {
-              Navigator.pop(context); // Close loader dialog
+              // Navigator.pop(context); // Close loader dialog
               Navigator.pop(context); // Close loader dialog
               _fetchApi(); // Reload warehouse list
             } else if (state is GroupsSwitchSuccess) {
@@ -135,9 +138,16 @@ class _GroupsScreenState extends State<GroupsScreen> {
                         },
                         hintText: "Search Name", // Pass dynamic hintText if needed
                       )),
-                  CustomFilterBox(
-                    onTapDown: (TapDownDetails details) {
-                      _showFilterMenu(context, details.globalPosition);
+                  gapW16,
+                  AppButton(
+                    name: "Create Groups ",
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) {
+                          return Dialog(child: GroupsCreate());
+                        },
+                      );
                     },
                   ),
                 ],

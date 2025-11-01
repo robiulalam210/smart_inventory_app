@@ -187,12 +187,13 @@ class SupplierListBloc extends Bloc<SupplierListEvent, SupplierListState> {
       final res = await patchResponse(
           url: '${AppUrls.supplierList}${event.branchId}/', // Add trailing slash
           payload: event.body!
-      );
+      );      final jsonString = jsonEncode(res);
+
 
       // FIX: Parse as single object, not list
-      ApiResponse<SupplierListModel> response = appParseJson<SupplierListModel>(
-        res,
-            (data) => SupplierListModel.fromJson(data), // Single object, not list
+      ApiResponse<Map<String, dynamic>> response = appParseJson<Map<String, dynamic>>(
+        jsonString,
+            (data) => data,
       );
 
       if (response.success == false) {

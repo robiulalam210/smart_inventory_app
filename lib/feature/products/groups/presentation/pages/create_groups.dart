@@ -1,23 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:smart_inventory/feature/products/brand/presentation/bloc/brand/brand_bloc.dart';
+import 'package:smart_inventory/feature/products/groups/presentation/bloc/groups/groups_bloc.dart';
+import '../../../../../core/configs/configs.dart';
+import '../../../../../core/widgets/app_button.dart';
+import '../../../../../core/widgets/input_field.dart';
+import '../../../../../core/widgets/show_custom_toast.dart';
 
-import '../../../../../../core/configs/configs.dart';
-import '../../../../../../core/widgets/app_button.dart';
-import '../../../../../../core/widgets/input_field.dart';
-import '../../../../../../core/widgets/show_custom_toast.dart';
-
-
-class BrandCreate extends StatefulWidget {
+class GroupsCreate extends StatefulWidget {
   final String? id;
+  final bool isDialog;
 
-  const BrandCreate({super.key, this.id, });
+  const GroupsCreate({super.key, this.id, this.isDialog = true});
 
   @override
-  State<BrandCreate> createState() => _BrandCreateState();
+  State<GroupsCreate> createState() => _GroupsCreateState();
 }
 
-class _BrandCreateState extends State<BrandCreate> {
+class _GroupsCreateState extends State<GroupsCreate> {
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   late TextEditingController nameController;
 
@@ -28,7 +27,7 @@ class _BrandCreateState extends State<BrandCreate> {
 
     // If updating, load existing data
     if (widget.id != null) {
-      final bloc = context.read<BrandBloc>();
+      final bloc = context.read<GroupsBloc>();
       if (bloc.nameController.text.isNotEmpty) {
         nameController.text = bloc.nameController.text;
       }
@@ -49,8 +48,8 @@ class _BrandCreateState extends State<BrandCreate> {
           title: const Text('Confirm'),
           content: Text(
             widget.id == null
-                ? 'Are you sure you want to create this brand?'
-                : 'Are you sure you want to update this brand?',
+                ? 'Are you sure you want to create this group?'
+                : 'Are you sure you want to update this group?',
           ),
           actions: [
             TextButton(
@@ -79,12 +78,12 @@ class _BrandCreateState extends State<BrandCreate> {
       };
 
       if (widget.id == null) {
-        // Create new brand
-        context.read<BrandBloc>().add(AddBrand(body: body));
+        // Create new group
+        context.read<GroupsBloc>().add(AddGroups(body: body));
       } else {
-        // Update existing brand
-        context.read<BrandBloc>().add(
-          UpdateBrand(body: body, id: widget.id!),
+        // Update existing group
+        context.read<GroupsBloc>().add(
+          UpdateGroups(body: body, id: widget.id!),
         );
       }
     }
@@ -97,15 +96,15 @@ class _BrandCreateState extends State<BrandCreate> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<BrandBloc, BrandState>(
+    return BlocListener<GroupsBloc, GroupsState>(
       listener: (context, state) {
-        if (state is BrandAddSuccess) {
+        if (state is GroupsAddSuccess) {
           showCustomToast(
             context: context,
             title: 'Success!',
             description: widget.id == null
-                ? 'Brand created successfully!'
-                : 'Brand updated successfully!',
+                ? 'Group created successfully!'
+                : 'Group updated successfully!',
             type: ToastificationType.success,
             icon: Icons.check_circle,
             primaryColor: Colors.green,
@@ -114,9 +113,9 @@ class _BrandCreateState extends State<BrandCreate> {
           if (widget.id == null) {
             _clearForm();
           }
-          // Navigator.pop(context, true);
+          Navigator.pop(context, true);
 
-        } else if (state is BrandAddFailed) {
+        } else if (state is GroupsAddFailed) {
           showCustomToast(
             context: context,
             title: state.title,
@@ -127,7 +126,7 @@ class _BrandCreateState extends State<BrandCreate> {
           );
         }
       },
-      child:  _buildDialogContent() ,
+      child: widget.isDialog ? _buildDialogContent() : _buildFullScreenContent(),
     );
   }
 
@@ -146,7 +145,7 @@ class _BrandCreateState extends State<BrandCreate> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  widget.id == null ? 'Create Brand' : 'Update Brand',
+                  widget.id == null ? 'Create Group' : 'Update Group',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -173,19 +172,19 @@ class _BrandCreateState extends State<BrandCreate> {
               isRequiredLable: true,
               isRequired: true,
               controller: nameController,
-              hintText: 'Enter brand name',
-              labelText: 'Brand Name',
+              hintText: 'Enter group name',
+              labelText: 'Group Name',
               fillColor: Colors.grey[50],
               keyboardType: TextInputType.text,
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Please enter brand name';
+                  return 'Please enter group name';
                 }
                 if (value.length < 2) {
-                  return 'Brand name must be at least 2 characters long';
+                  return 'Group name must be at least 2 characters long';
                 }
                 if (value.length > 50) {
-                  return 'Brand name must be less than 50 characters';
+                  return 'Group name must be less than 50 characters';
                 }
                 return null;
               },
@@ -214,14 +213,14 @@ class _BrandCreateState extends State<BrandCreate> {
                 ),
                 SizedBox(width: 10),
                 Expanded(
-                  child: BlocBuilder<BrandBloc, BrandState>(
+                  child: BlocBuilder<GroupsBloc, GroupsState>(
                     builder: (context, state) {
                       return AppButton(
                         name: widget.id == null ? 'Create' : 'Update',
-                        onPressed: (state is BrandAddLoading)
+                        onPressed: (state is GroupsAddLoading)
                             ? null
                             : _showConfirmationDialog,
-                        isLoading: state is BrandAddLoading,
+                        isLoading: state is GroupsAddLoading,
                       );
                     },
                   ),
@@ -239,7 +238,7 @@ class _BrandCreateState extends State<BrandCreate> {
       child: Scaffold(
         backgroundColor: AppColors.bg,
         appBar: AppBar(
-          title: Text(widget.id == null ? 'Create Brand' : 'Update Brand'),
+          title: Text(widget.id == null ? 'Create Group' : 'Update Group'),
           backgroundColor: AppColors.primaryColor,
           foregroundColor: Colors.white,
           leading: IconButton(
@@ -280,19 +279,19 @@ class _BrandCreateState extends State<BrandCreate> {
                         isRequiredLable: true,
                         isRequired: true,
                         controller: nameController,
-                        hintText: 'Enter brand name',
-                        labelText: 'Brand Name',
+                        hintText: 'Enter group name',
+                        labelText: 'Group Name',
                         fillColor: Colors.grey[50],
                         keyboardType: TextInputType.text,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Please enter brand name';
+                            return 'Please enter group name';
                           }
                           if (value.length < 2) {
-                            return 'Brand name must be at least 2 characters long';
+                            return 'Group name must be at least 2 characters long';
                           }
                           if (value.length > 50) {
-                            return 'Brand name must be less than 50 characters';
+                            return 'Group name must be less than 50 characters';
                           }
                           return null;
                         },
@@ -321,14 +320,14 @@ class _BrandCreateState extends State<BrandCreate> {
                           ),
                           SizedBox(width: 10),
                           Expanded(
-                            child: BlocBuilder<BrandBloc, BrandState>(
+                            child: BlocBuilder<GroupsBloc, GroupsState>(
                               builder: (context, state) {
                                 return AppButton(
-                                  name: widget.id == null ? 'Create Brand' : 'Update Brand',
-                                  onPressed: (state is BrandAddLoading)
+                                  name: widget.id == null ? 'Create Group' : 'Update Group',
+                                  onPressed: (state is GroupsAddLoading)
                                       ? null
                                       : _showConfirmationDialog,
-                                  isLoading: state is BrandAddLoading,
+                                  isLoading: state is GroupsAddLoading,
                                 );
                               },
                             ),

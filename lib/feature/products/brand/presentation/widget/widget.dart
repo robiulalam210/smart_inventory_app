@@ -4,6 +4,7 @@ import 'package:hugeicons/hugeicons.dart';
 import 'package:iconsax/iconsax.dart';
 
 import '../../../../../core/configs/app_colors.dart';
+import '../../../../../core/configs/app_sizes.dart';
 import '../../../../../core/configs/app_text.dart';
 import '../../../../../core/widgets/delete_dialog.dart';
 import '../../data/model/brand_model.dart';
@@ -60,9 +61,19 @@ class _BrandCardState extends State<BrandCard> {
                 onPressed: () {
                   context.read<BrandBloc>().nameController.text =
                           widget.brand.name ?? "";
-
-                      setupBrand(context, "Update Brand", "Update",
-                          id: widget. brand.id.toString());
+                  showDialog(
+                    context: context,
+                    builder: (context) {
+                      return Dialog(
+                        child: SizedBox(
+                          width: AppSizes.width(context)*0.50,
+                          child: BrandCreate(
+                            id: widget.brand.id.toString(),
+                          ),
+                        ),
+                      );
+                    },
+                  );
                 },
                 icon: const Icon(
                   Iconsax.edit,

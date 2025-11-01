@@ -125,9 +125,10 @@ class CategoriesBloc extends Bloc<CategoriesEvent, CategoriesState> {
 
     try {
       final res  = await patchResponse(url: "${AppUrls.category+event.id.toString()}/",payload: event.body!); // Use the correct API URL
+      final jsonString = jsonEncode(res);
 
       ApiResponse response = appParseJson(
-        res,
+        jsonString,
             (data) => List<CategoryModel>.from(data.map((x) => CategoryModel.fromJson(x))),
       );
       if (response.success == false) {
@@ -153,9 +154,10 @@ class CategoriesBloc extends Bloc<CategoriesEvent, CategoriesState> {
 
     try {
       final res  = await patchResponse(url: "${AppUrls.category+event.id.toString()}/",payload: event.body!); // Use the correct API URL
+      final jsonString = jsonEncode(res);
 
       ApiResponse response = appParseJson(
-        res,
+        jsonString,
             (data) => List<CategoryModel>.from(data.map((x) => CategoryModel.fromJson(x))),
       );
       if (response.success == false) {

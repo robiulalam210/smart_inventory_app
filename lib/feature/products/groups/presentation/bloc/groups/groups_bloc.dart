@@ -1,4 +1,5 @@
 import '../../../../../../core/configs/configs.dart';
+import '../../../../../../core/repositories/delete_response.dart';
 import '../../../../../../core/repositories/get_response.dart';
 import '../../../../../../core/repositories/patch_response.dart';
 import '../../../../../../core/repositories/post_response.dart';
@@ -27,7 +28,7 @@ class GroupsBloc extends Bloc<GroupsEvent, GroupsState> {
     on<AddGroups>(_onCreateWarehouseList);
     on<UpdateGroups>(_onUpdateGroupsList);
     on<UpdateSwitchGroups>(_onUpdateSwitchGroupsList);
-    // on<DeleteUnit>(_onDeleteBrandList);
+    on<DeleteGroups>(_onDeleteBrandList);
   }
 
   Future<void> _onFetchWarehouseList(
@@ -146,12 +147,13 @@ class GroupsBloc extends Bloc<GroupsEvent, GroupsState> {
 
     try {
       final res = await patchResponse(
-        url: AppUrls.group + event.id.toString(),
+        url: "${AppUrls.group + event.id.toString()}/",
         payload: event.body!,
       ); // Use the correct API URL
+      final jsonString = jsonEncode(res);
 
       ApiResponse response = appParseJson(
-        res,
+        jsonString,
         (data) =>
             List<GroupsModel>.from(data.map((x) => GroupsModel.fromJson(x))),
       );
@@ -178,9 +180,10 @@ class GroupsBloc extends Bloc<GroupsEvent, GroupsState> {
         url: AppUrls.group + event.id.toString(),
         payload: event.body!,
       ); // Use the correct API URL
+      final jsonString = jsonEncode(res);
 
       ApiResponse response = appParseJson(
-        res,
+        jsonString,
         (data) =>
             List<GroupsModel>.from(data.map((x) => GroupsModel.fromJson(x))),
       );
@@ -196,34 +199,34 @@ class GroupsBloc extends Bloc<GroupsEvent, GroupsState> {
     }
   }
 
-  // Future<void> _onDeleteBrandList(
-  //     DeleteUnit event, Emitter<UnitState> emit) async {
-  //
-  //   emit(UnitAddLoading());
-  //
-  //   try {
-  //     final res  = await deleteResponse(url: AppUrls.unit+event.id.toString()); // Use the correct API URL
-  //
-  //     print(res);
-  //     ApiResponse response = appParseJson(
-  //       res,
-  //           (data) => List<UnitsModel>.from(data.map((x) => UnitsModel.fromJson(x))),
-  //     );
-  //     if (response.success == false) {
-  //       emit(UnitAddFailed(title: 'Json', content: response.message??""));
-  //       return;
-  //     }
-  //     clearData();
-  //     emit(UnitAddSuccess(
-  //
-  //     ));
-  //   } catch (error,stack) {
-  //     print(stack);
-  //     clearData();
-  //     emit(UnitAddFailed(title: "Error",content: error.toString()));
-  //
-  //   }
-  // }
+  Future<void> _onDeleteBrandList(
+      DeleteGroups event, Emitter<GroupsState> emit) async {
+
+    emit(GroupsAddLoading());
+
+    try {
+      final res  = await deleteResponse(url: "${AppUrls.group+event.id.toString()}/"); // Use the correct API URL
+
+      final jsonString = jsonEncode(res);
+      ApiResponse response = appParseJson(
+        jsonString,
+            (data) => List<GroupsModel>.from(data.map((x) => GroupsModel.fromJson(x))),
+      );
+      if (response.success == false) {
+        emit(GroupsAddFailed(title: 'Json', content: response.message??""));
+        return;
+      }
+      clearData();
+      emit(GroupsAddSuccess(
+
+      ));
+    } catch (error,stack) {
+      print(stack);
+      clearData();
+      emit(GroupsAddFailed(title: "Error",content: error.toString()));
+
+    }
+  }
 
   clearData() {
     nameController.clear();

@@ -1,5 +1,8 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'core/core.dart';
+import 'core/shared/widgets/sideMenu/sidebar.dart';
+import 'core/shared/widgets/sideMenu/tab_sidebar.dart';
 import 'feature/feature.dart';
 import 'feature/splash/presentation/bloc/connectivity_bloc/connectivity_state.dart';
 
@@ -24,114 +27,146 @@ class _RootScreenState extends State<RootScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isSmallScreen =
-        Responsive.isMobile(context) ||
+    final isSmallScreen = Responsive.isMobile(context) ||
         Responsive.isTablet(context) ||
         Responsive.isSmallDesktop(context);
-    final isBigScreen =
-        Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
+    final isBigScreen = Responsive.isDesktop(context) ||
+        Responsive.isMaxDesktop(context);
+
     return SafeArea(
       child: Scaffold(
         key: _drawerKey,
 
-        /// Drawer for smaller screens
+        /// Drawer for different screen sizes
         drawer: isSmallScreen ? const Drawer(child: TabSidebar()) : null,
+        drawerEnableOpenDragGesture: isSmallScreen,
+
+        /// Sidebar for big screens (end drawer)
+        endDrawer: isBigScreen ? const Drawer(child: Sidebar()) : null,
+        endDrawerEnableOpenDragGesture: isBigScreen,
 
         /// AppBar only for smaller screens
-        appBar: isSmallScreen
-            ? AppBar(
-                backgroundColor: AppColors.bgSecondaryLight,
-                title: Row(
-                  children: [
-                    /// App title
-                    Expanded(
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: Responsive.isMobile(context) ? 8.0 : 16.0,
-                        ),
-                        child: Text(
-                          AppConstants.appName,
-                          style: Theme.of(context).textTheme.titleMedium
-                              ?.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.primaryColor,
-                              ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ),
-
-                    gapW8,
-                    BlocBuilder<ConnectivityBloc, ConnectivityState>(
-                      builder: (context, state) {
-                        String status;
-                        if (state is ConnectivityOnline) {
-                          status = "Online";
-                        } else if (state is ConnectivityConnecting) {
-                          status = "Connecting";
-                        } else {
-                          status = "Offline";
-                        }
-
-                        return AppButton(
-                          onPressed: () {},
-                          color: getConnectivityColor(state),
-                          name: status,
-                        );
-                      },
-                    ),
-
-                    gapW8,
-
-                    /// Sign out button
-                    AppButton(
-                      onPressed: () => _showLogoutConfirmation(context),
-                      name: "Sign Out",
-                      color: Colors.red,
-                    ),
-                    const SizedBox(width: 20),
-                  ],
-                ),
-              )
-            : null,
+        appBar: isSmallScreen ? _buildAppBar(context) : null,
 
         body: PopScope(
           canPop: false,
-          // ignore: deprecated_member_use
-          onPopInvoked: (v) async {
-            return;
+          onPopInvoked: (didPop) {
+            // Handle back button if needed
+            if (didPop) return;
+            // Prevent default back behavior
           },
           child: BlocBuilder<DashboardBloc, DashboardState>(
             builder: (context, state) {
-              int currentIndex = 0; // default fallback
+              int currentIndex = 0;
 
               if (state is DashboardScreenChanged) {
                 currentIndex = state.index;
               }
 
               final bloc = context.read<DashboardBloc>();
-              return RefreshIndicator(
-                onRefresh: () async {},
-                child: ListView(
-                  padding: EdgeInsets.zero,
-                  // physics: const ScrollPhysics(),
-                  children: [
-                    if (isBigScreen) Header(drawerKey: _drawerKey),
-                    Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal:
-                            AppSizes.bodyPadding *
-                            (Responsive.isMobile(context) ? 0.5 : 1.5),
-                      ),
-                      child: bloc.myScreens[currentIndex],
-                    ),
-                  ],
-                ),
-              );
+              return _buildBody(context, isBigScreen, bloc, currentIndex);
             },
           ),
         ),
+
+        /// Floating Action Button for drawer on big screens
+        floatingActionButton: isBigScreen ? _buildDrawerFAB() : null,
       ),
+    );
+  }
+
+  AppBar _buildAppBar(BuildContext context) {
+    return AppBar(
+      backgroundColor: AppColors.bgSecondaryLight,
+      leading: IconButton(
+        icon: const Icon(Icons.menu),
+        onPressed: () => _drawerKey.currentState?.openDrawer(),
+      ),
+      title: Row(
+        children: [
+          /// App title
+          Expanded(
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: Responsive.isMobile(context) ? 8.0 : 16.0,
+              ),
+              child: Text(
+                AppConstants.appName,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.primaryColor,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ),
+
+          gapW8,
+
+          /// Connectivity Status
+          BlocBuilder<ConnectivityBloc, ConnectivityState>(
+            builder: (context, state) {
+              String status;
+              if (state is ConnectivityOnline) {
+                status = "Online";
+              } else if (state is ConnectivityConnecting) {
+                status = "Connecting";
+              } else {
+                status = "Offline";
+              }
+
+              return AppButton(
+                onPressed: () {},
+                color: getConnectivityColor(state),
+                name: status,
+                size: 100,
+              );
+            },
+          ),
+
+          gapW8,
+
+          /// Sign out button
+          AppButton(
+            onPressed: () => _showLogoutConfirmation(context),
+            name: "Sign Out",
+            color: Colors.red,
+            size: 80,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBody(BuildContext context, bool isBigScreen, DashboardBloc bloc, int currentIndex) {
+    return RefreshIndicator(
+      onRefresh: () async {
+        // Add refresh logic here if needed
+        context.read<DashboardBloc>().add(ChangeDashboardScreen(index: currentIndex));
+      },
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          if (isBigScreen) Header(drawerKey: _drawerKey),
+          Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: AppSizes.bodyPadding *
+                  (Responsive.isMobile(context) ? 0.5 : 1.5),
+            ),
+            child: bloc.myScreens[currentIndex],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDrawerFAB() {
+    return FloatingActionButton(
+      onPressed: () => _drawerKey.currentState?.openEndDrawer(),
+      backgroundColor: AppColors.primaryColor,
+      foregroundColor: Colors.white,
+      child: const Icon(Icons.menu),
+      mini: true,
     );
   }
 }
@@ -148,7 +183,7 @@ void _showLogoutConfirmation(BuildContext context) {
     context: context,
     builder: (context) => CupertinoAlertDialog(
       title: const Text("Sign Out"),
-      content: const Text("Are you sure you want to sign out ?"),
+      content: const Text("Are you sure you want to sign out?"),
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
@@ -157,10 +192,16 @@ void _showLogoutConfirmation(BuildContext context) {
         TextButton(
           onPressed: () async {
             await LocalDB.delLoginInfo();
-
-            AppRoutes.pushAndRemoveUntil(context, LogInScreen());
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => LogInScreen()),
+                  (route) => false,
+            );
           },
-          child: const Text("Sign Out", style: TextStyle(color: Colors.red)),
+          child: const Text(
+              "Sign Out",
+              style: TextStyle(color: Colors.red)
+          ),
         ),
       ],
     ),

@@ -205,9 +205,10 @@ productList=list;
 
         // photoPath: event.photoPath!
       ); // Use the correct API URL
+      final jsonString = jsonEncode(res);
 
       ApiResponse response = appParseJson(
-        res,
+        jsonString,
         (data) =>
             List<ProductModel>.from(data.map((x) => ProductModel.fromJson(x))),
       );
