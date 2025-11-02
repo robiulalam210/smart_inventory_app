@@ -8,11 +8,13 @@ import '../configs/app_text.dart';
 class CustomDateRangeField extends StatefulWidget {
   final DateRange? selectedDateRange;
   final void Function(DateRange?) onDateRangeSelected;
+  final bool isLabel; // New parameter to control label visibility
 
   const CustomDateRangeField({
     super.key,
     required this.selectedDateRange,
     required this.onDateRangeSelected,
+    this.isLabel = true, // Default to true for backward compatibility
   });
 
   @override
@@ -26,6 +28,16 @@ class _CustomDateRangeFieldState extends State<CustomDateRangeField> {
   void initState() {
     super.initState();
     selectedDateRange = widget.selectedDateRange;
+  }
+
+  @override
+  void didUpdateWidget(covariant CustomDateRangeField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.selectedDateRange != oldWidget.selectedDateRange) {
+      setState(() {
+        selectedDateRange = widget.selectedDateRange;
+      });
+    }
   }
 
   Widget datePickerBuilder(
@@ -90,7 +102,6 @@ class _CustomDateRangeFieldState extends State<CustomDateRangeField> {
       maxDate: DateTime.now().add(const Duration(days: 365*2)),
       initialDisplayedDate: selectedDateRange?.start ?? DateTime.now(),
       onDateRangeChanged: onDateRangeChanged,
-      // height: 350,
       theme: const CalendarTheme(
         selectedColor: Colors.blue,
         dayNameTextStyle: TextStyle(color: Colors.black45, fontSize: 10),
@@ -113,8 +124,12 @@ class _CustomDateRangeFieldState extends State<CustomDateRangeField> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("Date Filter", style: AppTextStyle.labelDropdownTextStyle(context)),
-        const SizedBox(height: 2),
+        // Conditionally show the label based on isLabel parameter
+        if (widget.isLabel) ...[
+          Text("Date Filter", style: AppTextStyle.labelDropdownTextStyle(context)),
+          const SizedBox(height: 2),
+        ],
+
         GestureDetector(
           onTap: () async {
             final result = await _showCustomDateRangePicker(context);
