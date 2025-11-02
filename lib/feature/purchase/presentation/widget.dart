@@ -1,6 +1,3 @@
-import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:hugeicons/hugeicons.dart';
 import '../../../../core/configs/configs.dart';
 import '../data/model/purchase_sale_model.dart';
 
@@ -54,7 +51,7 @@ class PurchaseDataTableWidget extends StatelessWidget {
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
                           ),
-                          headingRowColor: MaterialStateProperty.all(
+                          headingRowColor: WidgetStateProperty.all(
                             const Color(0xFF6AB129),
                           ),
                           columns: _buildColumns(dynamicColumnWidth),
@@ -126,7 +123,7 @@ class PurchaseDataTableWidget extends StatelessWidget {
         _buildDataCell(index.toString(), columnWidth),
         _buildDataCell(sale.invoiceNo ?? '-', columnWidth),
         _buildDataCell(
-          sale.purchaseDate?.toString().split('T').first ?? '-',
+         AppWidgets().convertDateTimeDDMMYYYY(sale.purchaseDate),
           columnWidth,
         ),
         _buildDataCell(sale.supplierName ?? '-', columnWidth),

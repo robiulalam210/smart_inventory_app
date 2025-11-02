@@ -140,8 +140,8 @@ class _SupplierScreenState extends State<SupplierScreen> {
           child: Column(
             children: [
               Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Expanded(
                     child: CustomSearchTextFormField(
@@ -164,7 +164,7 @@ class _SupplierScreenState extends State<SupplierScreen> {
                     child: AppDropdown(
                       context: context,
                       hint: "Select Status",
-                      isLabel: true,
+                      isLabel: false,
                       isNeedAll: true,
                       value: dataBloc.selectedState.isEmpty
                           ? null

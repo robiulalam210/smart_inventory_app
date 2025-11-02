@@ -241,10 +241,10 @@ class _PurchaseScreenState extends State<PurchaseScreen> {
           child: BlocBuilder<SupplierInvoiceBloc, SupplierInvoiceState>(
             builder: (context, state) {
               return AppDropdown<SupplierActiveModel>(
-                label: "Supplier",
+                label: "",
                 context: context,
                 hint: "Select Supplier",
-                isLabel: false,
+                isLabel: true,
                 isRequired: false,
                 isNeedAll: true,
                 value: null, // You might want to store selected supplier in a variable
@@ -281,6 +281,7 @@ class _PurchaseScreenState extends State<PurchaseScreen> {
             hint: "Select Payment Status",
             isNeedAll: true,
             isRequired: false,
+            isLabel: true,
             value: selectedPaymentMethodNotifier.value,
             itemList: ['Paid', 'Pending', 'Partial'],
             onChanged: (newVal) {
@@ -309,6 +310,8 @@ class _PurchaseScreenState extends State<PurchaseScreen> {
         SizedBox(
           width: 280,
           child: CustomDateRangeField(
+            isLabel: false
+            ,
             selectedDateRange: selectedDateRange,
             onDateRangeSelected: (value) {
               setState(() => selectedDateRange = value);
