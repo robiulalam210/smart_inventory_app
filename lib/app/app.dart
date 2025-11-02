@@ -95,6 +95,7 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (_) => CustomerLedgerBloc()),
         BlocProvider(create: (_) => CustomerDueAdvanceBloc()),
         BlocProvider(create: (_) => SupplierDueAdvanceBloc()),
+        BlocProvider(create: (_) => SupplierLedgerBloc()),
         BlocProvider(create: (_) => ExpenseReportBloc()),
 
         BlocProvider(create: (_) => SalesReturnBloc()),

@@ -1,10 +1,8 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_quill/flutter_quill.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:smart_inventory/feature/products/product/data/model/product_stock_model.dart';
 import 'package:smart_inventory/feature/users_list/presentation/bloc/users/user_bloc.dart';
-import 'package:smart_inventory/root.dart';
 import 'dart:developer';
 
 import '../../../../../core/configs/configs.dart';
@@ -16,7 +14,6 @@ import '../../../../../core/widgets/app_loader.dart';
 import '../../../../../core/widgets/app_snack_bar.dart';
 import '../../../../../core/widgets/input_field.dart';
 import '../../../../accounts/data/model/account_active_model.dart';
-import '../../../../accounts/data/model/account_model.dart';
 import '../../../../accounts/presentation/bloc/account/account_bloc.dart';
 import '../../../../customer/data/model/customer_active_model.dart';
 import '../../../../customer/presentation/bloc/customer/customer_bloc.dart';
@@ -1042,11 +1039,11 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
         body['payment_method'] = bloc.selectedPaymentMethod;
         body['account_id'] = bloc.accountModel?.acId.toString() ?? '';
 
-        if (calculateAllFinalTotal() <= double.parse(bloc.payableAmount.text)) {
+        // if (calculateAllFinalTotal() <= double.parse(bloc.payableAmount.text)) {
           bloc.add(AddPosSale(body: body));
-        } else {
-          appSnackBar(context, "Payable amount must be greater than or equal to net total", color: Colors.redAccent);
-        }
+        // } else {
+        //   appSnackBar(context, "Payable amount must be greater than or equal to net total", color: Colors.redAccent);
+        // }
       } else {
         bloc.add(AddPosSale(body: body));
       }
