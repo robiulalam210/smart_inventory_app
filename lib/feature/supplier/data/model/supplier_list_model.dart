@@ -45,6 +45,11 @@ class SupplierListModel {
     this.updatedAt,
   });
 
+  @override
+  String toString() {
+    // TODO: implement toString
+    return name??"";
+  }
   factory SupplierListModel.fromJson(Map<String, dynamic> json) => SupplierListModel(
     id: json["id"],
     name: json["name"],

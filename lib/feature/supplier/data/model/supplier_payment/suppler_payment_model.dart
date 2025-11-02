@@ -17,12 +17,12 @@ class SupplierPaymentModel {
   final String? supplierPhone;
   final String? paymentType;
   final bool? specificBill;
-  final int? purchase;
-  final String? purchaseInvoiceNo;
-  final dynamic amount;
+  final dynamic purchase;
+  final dynamic purchaseInvoiceNo;
+  final String? amount;
   final String? paymentMethod;
   final DateTime? paymentDate;
-  final String? remark;
+  final dynamic remark;
   final int? account;
   final int? preparedBy;
   final String? preparedByName;
@@ -118,7 +118,6 @@ class PaymentSummary {
   final AfterPayment? afterPayment;
   final List<AffectedInvoice>? affectedInvoices;
   final String? status;
-  final String? invoiceNo;
 
   PaymentSummary({
     this.paymentType,
@@ -126,7 +125,6 @@ class PaymentSummary {
     this.afterPayment,
     this.affectedInvoices,
     this.status,
-    this.invoiceNo,
   });
 
   factory PaymentSummary.fromJson(Map<String, dynamic> json) => PaymentSummary(
@@ -135,7 +133,6 @@ class PaymentSummary {
     afterPayment: json["after_payment"] == null ? null : AfterPayment.fromJson(json["after_payment"]),
     affectedInvoices: json["affected_invoices"] == null ? [] : List<AffectedInvoice>.from(json["affected_invoices"]!.map((x) => AffectedInvoice.fromJson(x))),
     status: json["status"],
-    invoiceNo: json["invoice_no"],
   );
 
   Map<String, dynamic> toJson() => {
@@ -144,13 +141,12 @@ class PaymentSummary {
     "after_payment": afterPayment?.toJson(),
     "affected_invoices": affectedInvoices == null ? [] : List<dynamic>.from(affectedInvoices!.map((x) => x.toJson())),
     "status": status,
-    "invoice_no": invoiceNo,
   };
 }
 
 class AffectedInvoice {
   final String? invoiceNo;
-  final dynamic amountApplied;
+  final int? amountApplied;
 
   AffectedInvoice({
     this.invoiceNo,
@@ -169,57 +165,37 @@ class AffectedInvoice {
 }
 
 class AfterPayment {
-  final dynamic totalDue;
-  final dynamic paymentApplied;
-  final dynamic currentPaid;
-  final dynamic currentDue;
+  final int? totalDue;
+  final int? paymentApplied;
 
   AfterPayment({
     this.totalDue,
     this.paymentApplied,
-    this.currentPaid,
-    this.currentDue,
   });
 
   factory AfterPayment.fromJson(Map<String, dynamic> json) => AfterPayment(
     totalDue: json["total_due"],
     paymentApplied: json["payment_applied"],
-    currentPaid: json["current_paid"],
-    currentDue: json["current_due"],
   );
 
   Map<String, dynamic> toJson() => {
     "total_due": totalDue,
     "payment_applied": paymentApplied,
-    "current_paid": currentPaid,
-    "current_due": currentDue,
   };
 }
 
 class BeforePayment {
-  final dynamic totalDue;
-  final dynamic invoiceTotal;
-  final dynamic previousPaid;
-  final dynamic previousDue;
+  final int? totalDue;
 
   BeforePayment({
     this.totalDue,
-    this.invoiceTotal,
-    this.previousPaid,
-    this.previousDue,
   });
 
   factory BeforePayment.fromJson(Map<String, dynamic> json) => BeforePayment(
     totalDue: json["total_due"],
-    invoiceTotal: json["invoice_total"],
-    previousPaid: json["previous_paid"],
-    previousDue: json["previous_due"],
   );
 
   Map<String, dynamic> toJson() => {
     "total_due": totalDue,
-    "invoice_total": invoiceTotal,
-    "previous_paid": previousPaid,
-    "previous_due": previousDue,
   };
 }

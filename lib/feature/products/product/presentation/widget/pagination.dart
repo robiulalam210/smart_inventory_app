@@ -1,18 +1,16 @@
 import 'package:flutter/material.dart';
 
-typedef PageChangedCallback = void Function(int page);
-typedef PageSizeChangedCallback = void Function(int pageSize);
-
+import '../../../../../core/configs/app_colors.dart';
+// In your pagination.dart file
 class PaginationBar extends StatelessWidget {
-  final int count; // total items
+  final int count;
   final int totalPages;
-  final int currentPage; // 1-based
+  final int currentPage;
   final int pageSize;
   final int from;
   final int to;
-  final List<int> pageSizeOptions;
-  final PageChangedCallback onPageChanged;
-  final PageSizeChangedCallback onPageSizeChanged;
+  final Function(int) onPageChanged;
+  final Function(int) onPageSizeChanged;
 
   const PaginationBar({
     super.key,
@@ -24,116 +22,130 @@ class PaginationBar extends StatelessWidget {
     required this.to,
     required this.onPageChanged,
     required this.onPageSizeChanged,
-    this.pageSizeOptions = const [10, 20, 50, 100],
   });
-
-  Widget _buildPageButton(BuildContext context, int page, bool isActive) {
-    return SizedBox(
-      width: 36,
-      height: 36,
-      child: TextButton(
-        style: TextButton.styleFrom(
-          backgroundColor: isActive ? Colors.grey.shade200 : Colors.transparent,
-          minimumSize: Size.zero,
-          padding: EdgeInsets.zero,
-        ),
-        onPressed: isActive ? null : () => onPageChanged(page),
-        child: Text(
-          page.toString(),
-          style: TextStyle(
-            color: isActive ? Colors.black : Theme.of(context).primaryColor,
-            fontSize: 12,
-          ),
-        ),
-      ),
-    );
-  }
-
-  List<Widget> _buildPageNumbers(BuildContext context) {
-    // Build a compact windowed page list: show first, last, and neighbors
-    const int window = 2; // show +/-2 pages around current
-    final List<int> pages = [];
-
-    for (int i = 1; i <= totalPages; i++) {
-      if (i == 1 ||
-          i == totalPages ||
-          (i >= currentPage - window && i <= currentPage + window)) {
-        pages.add(i);
-      } else if (pages.isNotEmpty && pages.last != -1) {
-        // placeholder for ellipsis, represented by -1
-        pages.add(-1);
-      }
-    }
-
-    return pages.map<Widget>((p) {
-      if (p == -1) {
-        return const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 6),
-          child: Text('...', style: TextStyle(fontSize: 12)),
-        );
-      }
-      return _buildPageButton(context, p, p == currentPage);
-    }).toList();
-  }
 
   @override
   Widget build(BuildContext context) {
+    // Define page sizes with unique values
+    final List<int> pageSizes = [10, 20, 30, 50, 100]; // Ensure all values are unique
+
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 12),
-      color: Colors.white,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // Showing X to Y of Z entries
-          Expanded(
-            child: Text(
-              'Showing $from to $to of $count entries',
-              style: const TextStyle(fontSize: 12),
+          // Results count
+          Text(
+            'Showing $from to $to of $count results',
+            style: const TextStyle(
+              fontSize: 14,
+              color: Colors.grey,
             ),
           ),
 
-          // Page size dropdown
           Row(
             children: [
-              const Text('Show', style: TextStyle(fontSize: 12)),
-              const SizedBox(width: 8),
-              DropdownButton<int>(
-                value: pageSize,
-                items: pageSizeOptions
-                    .map((s) => DropdownMenuItem<int>(
-                  value: s,
-                  child: Text(s.toString()),
-                ))
-                    .toList(),
-                onChanged: (value) {
-                  if (value != null && value != pageSize) {
-                    onPageSizeChanged(value);
-                  }
-                },
-                underline: Container(),
-                style: const TextStyle(fontSize: 12, color: Colors.black),
+              // Page size dropdown
+              const Text(
+                'Show:',
+                style: TextStyle(fontSize: 14, color: Colors.grey),
               ),
               const SizedBox(width: 8),
+              Container(
+                height: 35,
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey.shade300),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: DropdownButton<int>(
+                  value: pageSize,
+                  underline: const SizedBox(), // Remove default underline
+                  icon: const Icon(Icons.arrow_drop_down, size: 20),
+                  style: const TextStyle(fontSize: 14, color: Colors.black),
+                  onChanged: (int? newValue) {
+                    if (newValue != null) {
+                      onPageSizeChanged(newValue);
+                    }
+                  },
+                  items: pageSizes.map<DropdownMenuItem<int>>((int value) {
+                    return DropdownMenuItem<int>(
+                      value: value,
+                      child: Text(value.toString()),
+                    );
+                  }).toList(),
+                ),
+              ),
+              const SizedBox(width: 16),
+
+              // Previous button
+              IconButton(
+                icon: const Icon(Icons.chevron_left),
+                onPressed: currentPage > 0
+                    ? () => onPageChanged(currentPage - 1)
+                    : null,
+              ),
+
+              // Page numbers
+              ..._buildPageNumbers(),
+
+              // Next button
+              IconButton(
+                icon: const Icon(Icons.chevron_right),
+                onPressed: currentPage < totalPages - 1
+                    ? () => onPageChanged(currentPage + 1)
+                    : null,
+              ),
             ],
-          ),
-
-          // Prev button
-          IconButton(
-            onPressed: currentPage > 1 ? () => onPageChanged(currentPage - 1) : null,
-            icon: const Icon(Icons.chevron_left),
-            tooltip: 'Previous',
-          ),
-
-          // Page numbers
-          ..._buildPageNumbers(context),
-
-          // Next button
-          IconButton(
-            onPressed: currentPage < totalPages ? () => onPageChanged(currentPage + 1) : null,
-            icon: const Icon(Icons.chevron_right),
-            tooltip: 'Next',
           ),
         ],
       ),
     );
+  }
+
+  List<Widget> _buildPageNumbers() {
+    List<Widget> pages = [];
+    int startPage = (currentPage - 1).clamp(0, totalPages - 1);
+    int endPage = (currentPage + 2).clamp(0, totalPages);
+
+    for (int i = startPage; i < endPage; i++) {
+      pages.add(
+        Container(
+          margin: const EdgeInsets.symmetric(horizontal: 4),
+          child: TextButton(
+            onPressed: () => onPageChanged(i),
+            style: TextButton.styleFrom(
+              backgroundColor: i == currentPage
+                  ? AppColors.primaryColor
+                  : Colors.transparent,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
+            child: Text(
+              (i + 1).toString(),
+              style: TextStyle(
+                color: i == currentPage ? Colors.white : Colors.black,
+                fontWeight:
+                i == currentPage ? FontWeight.bold : FontWeight.normal,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return pages;
   }
 }

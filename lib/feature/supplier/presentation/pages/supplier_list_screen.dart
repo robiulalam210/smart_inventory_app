@@ -141,7 +141,7 @@ class _SupplierScreenState extends State<SupplierScreen> {
             children: [
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   Expanded(
                     child: CustomSearchTextFormField(
@@ -164,7 +164,7 @@ class _SupplierScreenState extends State<SupplierScreen> {
                     child: AppDropdown(
                       context: context,
                       hint: "Select Status",
-                      isLabel: false,
+                      isLabel: true,
                       isNeedAll: true,
                       value: dataBloc.selectedState.isEmpty
                           ? null
@@ -228,6 +228,7 @@ class _SupplierScreenState extends State<SupplierScreen> {
                           children: [
                             SizedBox(
                               child: SupplierDataTableWidget(
+
                                 suppliers: state.list,
                                 onEdit: (v) {
                                   context
