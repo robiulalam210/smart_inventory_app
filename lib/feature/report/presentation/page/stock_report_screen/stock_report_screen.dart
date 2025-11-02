@@ -1,18 +1,9 @@
 // lib/feature/report/presentation/screens/stock_report_screen.dart
-import 'dart:async';
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
-import 'package:lottie/lottie.dart';
-import 'package:smart_inventory/core/configs/app_colors.dart';
-import 'package:smart_inventory/core/configs/app_images.dart';
-import 'package:smart_inventory/core/configs/app_text.dart';
 import 'package:smart_inventory/core/core.dart';
-import 'package:smart_inventory/core/shared/widgets/sideMenu/sidebar.dart';
 import 'package:smart_inventory/core/widgets/date_range.dart';
 import 'package:smart_inventory/feature/report/presentation/bloc/stock_report_bloc/stock_report_bloc.dart';
 
-import '../../../../../responsive.dart';
 import '../../../data/model/stock_report_model.dart';
 
 class StockReportScreen extends StatefulWidget {
@@ -26,7 +17,6 @@ class _StockReportScreenState extends State<StockReportScreen> {
   DateRange? selectedDateRange;
   String _sortBy = 'value'; // Default sort by value
   bool _sortAscending = false;
-  final List<StockProduct> _allProducts = [];
 
   @override
   void initState() {
@@ -82,7 +72,6 @@ class _StockReportScreenState extends State<StockReportScreen> {
 
     return _sortAscending ? sorted : sorted.reversed.toList();
   }
-  final ScrollController _verticalScrollController = ScrollController();
   final ScrollController _horizontalScrollController = ScrollController();
   @override
   Widget build(BuildContext context) {
@@ -132,104 +121,6 @@ class _StockReportScreenState extends State<StockReportScreen> {
     );
   }
 
-  Widget _buildFilterRow() {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        // 📅 Date Range Picker
-        SizedBox(
-          width: 260,
-          child: CustomDateRangeField(
-            selectedDateRange: selectedDateRange,
-            onDateRangeSelected: (value) {
-              setState(() => selectedDateRange = value);
-              if (value != null) {
-                _fetchStockReport(from: value.start, to: value.end);
-              }
-            },
-          ),
-        ),
-
-        // Sort Options
-        BlocBuilder<StockReportBloc, StockReportState>(
-          builder: (context, state) {
-            if (state is! StockReportSuccess) return const SizedBox();
-
-            return Container(
-              height: 30,
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.grey.shade300),
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.sort, size: 16, color: Colors.grey),
-                  const SizedBox(width: 8),
-                  const Text('Sort by:', style: TextStyle(fontSize: 12)),
-                  const SizedBox(width: 8),
-                  DropdownButton<String>(
-                    value: _sortBy,
-                    icon: const Icon(Icons.arrow_drop_down, size: 16),
-                    elevation: 16,
-                    style: const TextStyle(fontSize: 12, color: Colors.black),
-                    underline: const SizedBox(),
-                    onChanged: (String? newValue) {
-                      if (newValue != null) {
-                        _sortStock(state.response.report, newValue, _sortAscending);
-                      }
-                    },
-                    items: const [
-                      DropdownMenuItem(value: 'name', child: Text('Name')),
-                      DropdownMenuItem(value: 'category', child: Text('Category')),
-                      DropdownMenuItem(value: 'stock', child: Text('Stock')),
-                      DropdownMenuItem(value: 'value', child: Text('Value')),
-                      DropdownMenuItem(value: 'profit_margin', child: Text('Margin')),
-                    ],
-                  ),
-                  IconButton(
-                    icon: Icon(
-                      _sortAscending ? Icons.arrow_upward : Icons.arrow_downward,
-                      size: 16,
-                    ),
-                    onPressed: () {
-                      setState(() => _sortAscending = !_sortAscending);
-                      if (state is StockReportSuccess) {
-                        _sortStock(state.response.report, _sortBy, _sortAscending);
-                      }
-                    },
-                  ),
-                ],
-              ),
-            );
-          },
-        ),
-
-        // Action Buttons
-        Row(
-          children: [
-            AppButton(
-                color: AppColors.grey,
-                textColor: AppColors.blackColor,
-                name: "Clear", onPressed: (){
-                  setState(() => selectedDateRange = null);
-                  context.read<StockReportBloc>().add(ClearStockReportFilters());
-                  _fetchStockReport();
-            }),
-
-            const SizedBox(width: 5),
-            IconButton(
-              onPressed: () => _fetchStockReport(),
-              icon: const Icon(Icons.refresh),
-              tooltip: "Refresh",
-            ),
-          ],
-        ),
-      ],
-    );
-  }
 
   Widget _buildSummaryCards() {
     return BlocBuilder<StockReportBloc, StockReportState>(
@@ -489,7 +380,7 @@ class _StockReportScreenState extends State<StockReportScreen> {
                 borderRadius: BorderRadius.circular(8),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.grey.withOpacity(0.2),
+                    color: Colors.grey.withValues(alpha: 0.2),
                     blurRadius: 4,
                     offset: const Offset(0, 2),
                   ),
@@ -499,7 +390,7 @@ class _StockReportScreenState extends State<StockReportScreen> {
                 sortColumnIndex: _getSortColumnIndex(sortBy),
                 sortAscending: sortAscending,
                 headingRowColor: WidgetStateProperty.resolveWith<Color>(
-                      (Set<WidgetState> states) => AppColors.primaryColor.withOpacity(0.1),
+                      (Set<WidgetState> states) => AppColors.primaryColor,
                 ),
                 dataRowMinHeight: 50,
                 dataRowMaxHeight: 60,
@@ -512,7 +403,7 @@ class _StockReportScreenState extends State<StockReportScreen> {
                   return DataRow(
                     color: WidgetStateProperty.resolveWith<Color?>(
                           (Set<WidgetState> states) {
-                        return index % 2 == 0 ? Colors.grey.withOpacity(0.05) : null;
+                        return index % 2 == 0 ? Colors.grey.withValues(alpha: 0.05) : null;
                       },
                     ),
                     cells: _buildDataCells(product, index, dynamicColumnWidth),
@@ -554,7 +445,7 @@ class _StockReportScreenState extends State<StockReportScreen> {
         width: width,
         child: Text(
           label,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12,color: AppColors.white),
           textAlign: TextAlign.center,
         ),
       ),
@@ -646,7 +537,7 @@ class _StockReportScreenState extends State<StockReportScreen> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: product.stockStatusColor.withOpacity(0.1),
+              color: product.stockStatusColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(4),
               border: Border.all(color: product.stockStatusColor),
             ),
@@ -703,7 +594,7 @@ class _StockReportScreenState extends State<StockReportScreen> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: product.profitabilityColor.withOpacity(0.1),
+              color: product.profitabilityColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
@@ -727,7 +618,7 @@ class _StockReportScreenState extends State<StockReportScreen> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: product.stockStatusColor.withOpacity(0.1),
+              color: product.stockStatusColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
@@ -751,7 +642,7 @@ class _StockReportScreenState extends State<StockReportScreen> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: product.profitabilityColor.withOpacity(0.1),
+              color: product.profitabilityColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(

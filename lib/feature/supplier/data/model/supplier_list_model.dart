@@ -11,7 +11,7 @@ String supplierListModelToJson(List<SupplierListModel> data) => json.encode(List
 class SupplierListModel {
   final int? id;
   final String? name;
-  final String? email;
+  final dynamic email;
   final String? phone;
   final String? address;
   final bool? isActive;
