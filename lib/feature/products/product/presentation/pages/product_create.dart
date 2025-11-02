@@ -1,6 +1,3 @@
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:smart_inventory/feature/products/brand/data/model/brand_model.dart';
 import 'package:smart_inventory/feature/products/brand/presentation/bloc/brand/brand_bloc.dart';
 import 'package:smart_inventory/feature/products/categories/data/model/categories_model.dart';
@@ -136,7 +133,8 @@ class _ProductsFormState extends State<ProductsForm> {
   }
 
   Widget _buildDialogContent() {
-    return Padding(
+    return Container(
+      color: AppColors.bg,
       padding: const EdgeInsets.all(20),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -383,10 +381,11 @@ class _ProductsFormState extends State<ProductsForm> {
         final categoryList = categoriesBloc.list;
 
         return AppDropdown(
-          label: "Category *",
+          label: "Category",
+
           context: context,
           hint: selectedCategory.isEmpty ? "Select Category" : selectedCategory,
-          isLabel: true,
+          isLabel: false,
           isNeedAll: false,
           isRequired: true,
           isSearch: true,
@@ -420,11 +419,12 @@ class _ProductsFormState extends State<ProductsForm> {
 
         return AppDropdown(
           context: context,
-          label: "Unit *",
+          label: "Unit ",
           hint: selectedUnit.isEmpty ? "Select Unit" : selectedUnit,
+          isLabel: false,
+          isNeedAll: false,
           isRequired: true,
           isSearch: true,
-          isNeedAll: false,
           value: selectedUnit.isEmpty ? null : selectedUnit,
           itemList: unitList.map((e) => e.name ?? "").toList(),
           onChanged: (newVal) {
@@ -457,7 +457,7 @@ class _ProductsFormState extends State<ProductsForm> {
           label: "Brand",
           context: context,
           hint: selectedBrand.isEmpty ? "Select Brand" : selectedBrand,
-          isLabel: true,
+          isLabel: false,
           isNeedAll: false,
           isSearch: true,
           isRequired: false,
@@ -488,7 +488,7 @@ class _ProductsFormState extends State<ProductsForm> {
       isRequired: true,
       controller: productsBloc.productNameController,
       hintText: 'Product Name',
-      labelText: 'Product Name *',
+      labelText: 'Product Name ',
       fillColor: const Color.fromARGB(255, 255, 255, 255),
       keyboardType: TextInputType.text,
       validator: (value) => value!.isEmpty ? 'Please enter Product Name' : null,

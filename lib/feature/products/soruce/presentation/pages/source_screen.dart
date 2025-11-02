@@ -113,7 +113,7 @@ class _SourceScreenState extends State<SourceScreen> {
                   _fetchApiData(); // Reload warehouse list
                 } else if (state is SourceAddFailed) {
                   // Navigator.pop(context); // Close loader dialog
-                  // Navigator.pop(context); // Close loader dialog
+                  Navigator.pop(context); // Close loader dialog
                   _fetchApiData();
                   appAlertDialog(context, state.content,
                       title: state.title,
@@ -139,6 +139,8 @@ class _SourceScreenState extends State<SourceScreen> {
                 children: [
 
                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
 
                 Expanded(
@@ -158,7 +160,8 @@ class _SourceScreenState extends State<SourceScreen> {
 
                       );
                     },
-                    hintText: "Search Name", // Pass dynamic hintText if needed
+                    isRequiredLabel: false,
+                    hintText: "Name", // Pass dynamic hintText if needed
                   ),
               ),
                 gapW16,

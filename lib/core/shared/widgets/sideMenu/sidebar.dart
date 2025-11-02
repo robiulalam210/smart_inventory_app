@@ -124,6 +124,7 @@ class _SidebarState extends State<Sidebar> {
         return ConstrainedBox(
           constraints: BoxConstraints(
             maxHeight: MediaQuery.of(context).size.height,
+            maxWidth: MediaQuery.of(context).size.width*030,
           ),
           child: Drawer(
             child: SafeArea(

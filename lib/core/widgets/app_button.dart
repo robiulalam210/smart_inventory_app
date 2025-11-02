@@ -124,13 +124,13 @@ class AppButton extends StatelessWidget {
               borderRadius: BorderRadius.circular(borderRadius ?? 8),
               boxShadow: elevation != null ? [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
+                  color: Colors.black.withValues(alpha: 0.1),
                   blurRadius: elevation!,
                   offset: const Offset(0, 2),
                 )
               ] : null,
             ),
-            padding: padding ?? const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+            padding: padding ?? const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
             child: Center(
               child: _buildButtonContent(context),
             ),

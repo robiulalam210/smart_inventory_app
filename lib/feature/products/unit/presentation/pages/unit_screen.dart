@@ -150,7 +150,8 @@ class _UnitScreenState extends State<UnitScreen> {
                         context.read<UnitBloc>().filterTextController.clear();
                         _fetchApiData();
                       },
-                      hintText: "Search Name", // Pass dynamic hintText if needed
+                      isRequiredLabel: false,
+                      hintText: "Name", // Pass dynamic hintText if needed
                     ),
                   ),
 

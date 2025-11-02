@@ -129,8 +129,8 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                       dataBloc.filterTextController.clear();
                       _fetchApiData();
                     },
-                    hintText: "Search Name",
-                    isRequiredLabel: true,
+                    hintText: "Name",
+                    isRequiredLabel: false,
                     labelText: "",
                   ),
                 ),

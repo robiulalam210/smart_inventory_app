@@ -131,7 +131,8 @@ class _BrandScreenState extends State<BrandScreen> {
                       onChanged: (value) {
                         _fetchApi(filterText: value);
                       },
-                      hintText: "Search Name",
+                      hintText: "Name",
+                      isRequiredLabel: false,
                     ),
                   ),
 

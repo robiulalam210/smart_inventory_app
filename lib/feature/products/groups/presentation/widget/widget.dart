@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:smart_inventory/feature/products/groups/presentation/pages/create_groups.dart';
 
 import '../../../../../core/configs/app_colors.dart';
 import '../../../../../core/configs/app_sizes.dart';
+import '../../../../../core/widgets/delete_dialog.dart';
 import '../../data/model/groups.dart';
 import '../bloc/groups/groups_bloc.dart';
 
@@ -106,6 +108,20 @@ class _GroupsCardState extends State<GroupsCard> {
                     size: 25,
                   ),
                 ),
+                IconButton(
+                    onPressed: () async {
+                      bool shouldDelete =
+                      await showDeleteConfirmationDialog(context);
+                      if (shouldDelete) {
+                        context.read<GroupsBloc>().add(DeleteGroups(
+                            widget.group.id.toString()));
+                      }
+                    },
+                    icon: const HugeIcon(
+                      icon: HugeIcons.strokeRoundedDeleteThrow,
+                      color: Colors.black,
+                      size: 24.0,
+                    )),
               ],
             ),
           ),

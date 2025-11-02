@@ -88,6 +88,7 @@ class _CategoriesCreateState extends State<CategoriesCreate> {
             icon: Icons.check_circle,
             primaryColor: Colors.green,
           );
+          context.read<CategoriesBloc>().nameController.clear();
 
           // Clear form and close on success
           if (widget.id == null) {

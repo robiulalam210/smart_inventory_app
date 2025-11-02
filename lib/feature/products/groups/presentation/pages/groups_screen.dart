@@ -136,7 +136,8 @@ class _GroupsScreenState extends State<GroupsScreen> {
                             filterText: value,
                           );
                         },
-                        hintText: "Search Name", // Pass dynamic hintText if needed
+                        isRequiredLabel: false,
+                        hintText: "Name", // Pass dynamic hintText if needed
                       )),
                   gapW16,
                   AppButton(

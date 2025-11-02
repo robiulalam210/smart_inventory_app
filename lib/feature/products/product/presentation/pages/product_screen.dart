@@ -126,6 +126,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
                               filterText: value,
                             );
                           },
+                          isRequiredLabel: false,
                           onClear: () {
                             context
                                 .read<ProductsBloc>()
@@ -133,7 +134,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
                                 .clear();
                             _fetchProductList();
                           },
-                          hintText: "Search Name",
+                          hintText: "Name",
                         )),
 
                     gapW16,

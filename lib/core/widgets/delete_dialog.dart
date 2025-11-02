@@ -10,7 +10,7 @@ Future<bool> showDeleteConfirmationDialog(BuildContext context) async {
           style: AppTextStyle.cardTitle(context),
         ),
         content: Text(
-          'Are you sure you want to delete this expense head?',
+          'Are you sure you want to delete this ?',
           style: AppTextStyle.cardLevelText(context),
         ),
         actions: <Widget>[
