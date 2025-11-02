@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:smart_inventory/feature/supplier/data/model/supplier_list_model.dart';
-import 'package:smart_inventory/feature/supplier/presentation/pages/create_supplierr_screen.dart';
 
-import '../../../../core/configs/app_sizes.dart';
 
 class SupplierDataTableWidget extends StatelessWidget {
   final List<SupplierListModel> suppliers;
@@ -117,11 +115,7 @@ class SupplierDataTableWidget extends StatelessWidget {
   }
 
   DataRow _buildRow(int index, SupplierListModel supplier) {
-    String formatCurrency(dynamic value) {
-      if (value == null) return '0.00';
-      final numValue = value is int ? value.toDouble() : (value is double ? value : 0.0);
-      return '\$${numValue.toStringAsFixed(2)}';
-    }
+
 
     Color getStatusColor(bool isActive) {
       return isActive ? Colors.green : Colors.orange;
@@ -143,9 +137,9 @@ class SupplierDataTableWidget extends StatelessWidget {
       _buildDataCell(supplier.name ?? '-', TextAlign.left),
       _buildDataCell(supplier.phone ?? '-', TextAlign.left),
       _buildDataCell(supplier.address ?? '-', TextAlign.left),
-      _buildDataCell(formatCurrency(supplier.totalPurchases), TextAlign.right),
-      _buildDataCell(formatCurrency(supplier.totalPaid), TextAlign.right),
-      _buildDataCell(formatCurrency(supplier.totalDue), TextAlign.right),
+      _buildDataCell(supplier.totalPurchases.toString(), TextAlign.right),
+      _buildDataCell(supplier.totalPaid.toString(), TextAlign.right),
+      _buildDataCell(supplier.totalDue.toString(), TextAlign.right),
       DataCell(
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
