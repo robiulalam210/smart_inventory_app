@@ -18,8 +18,11 @@ import 'package:smart_inventory/feature/sales/presentation/pages/pos_sale_screen
 import 'package:smart_inventory/feature/supplier/presentation/pages/create_supplierr_screen.dart';
 
 import '../../../../../core/configs/configs.dart';
+import '../../../../../core/repositories/get_response.dart';
 import '../../../../../enery_screen.dart';
 import '../../../../accounts/presentation/pages/create_account_screen.dart';
+import '../../../../common/data/models/api_response_mod.dart';
+import '../../../../common/data/models/app_parse_json.dart';
 import '../../../../customer/presentation/pages/customer_screen.dart';
 import '../../../../expense/expense_sub_head/presentation/pages/expense_sub_head_screen.dart';
 import '../../../../money_receipt/presentation/page/monery_receipt_create.dart';
@@ -43,7 +46,6 @@ import '../../../../supplier/presentation/pages/supplier_payment_create.dart';
 import '../../../../supplier/presentation/pages/supplier_payment_list_screen.dart';
 import '../../../../users_list/presentation/pages/users_screen.dart';
 import '../../../data/models/dashboard/dashboard_model.dart';
-import '../../../data/repositories/dashboard_repo_db/dashboard_repo_db.dart';
 import '../../pages/lab_dashboard_screen.dart';
 
 part 'dashboard_event.dart';
@@ -110,20 +112,47 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
   ];
 
   DashboardBloc(this.dbHelper) : super(DashboardScreenChanged(0)) {
+    // Register event handlers
     on<ChangeDashboardScreen>((event, emit) {
       emit(DashboardScreenChanged(event.index));
     });
 
-    on<LoadDashboardData>((event, emit) async {
-      emit(DashboardLoading());
-      try {
-        final dashboardData = await fetchDashboardData(filter: event.filter);
-        emit(DashboardLoaded(dashboardData));
-      } catch (e,k) {
-        debugPrint("error $e stack $k");
-        emit(DashboardError("Failed to load dashboard data"));
+    on<FetchDashboardData>(_onFetchDashboardData);
+  }
+
+  Future<void> _onFetchDashboardData(
+      FetchDashboardData event,
+      Emitter<DashboardState> emit,
+      ) async {
+    emit(DashboardLoading());
+    try {
+      final res = await getResponse(
+        url: AppUrls.dashboard,
+        context: event.context,
+      );
+
+      ApiResponse response = appParseJson(
+        res,
+            (data) => DashboardData.fromJson(data),
+      );
+
+      // Check if API response is successful
+      if (response.success == true) {
+        final DashboardData? dashboardData = response.data;
+
+        if (dashboardData != null) {
+          emit(DashboardLoaded(dashboardData));
+        } else {
+          emit(DashboardError("Dashboard data is null"));
+        }
+      } else {
+        emit(DashboardError(
+          response.message ?? "Failed to fetch dashboard data",
+        ));
       }
-    });
+    } catch (error) {
+      emit(DashboardError(error.toString()));
+    }
   }
 }
 
