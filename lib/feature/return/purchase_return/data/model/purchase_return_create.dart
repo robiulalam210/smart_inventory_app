@@ -11,7 +11,7 @@ class PurchaseReturnCreatedModel {
   final String? returnChargeType;
   final String? returnAmount;
   final String? reason;
-  final String? status;
+  final dynamic? status;
   final int? companyId;
   final List<PurchaseReturnItem>? items;
 

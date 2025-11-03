@@ -70,7 +70,9 @@ class PurchaseReturnBloc extends Bloc<PurchaseReturnEvent, PurchaseReturnState> 
           content: res['message'] ?? "Failed to create purchase return",
         ));
       }
-    } catch (error) {
+    } catch (error,s) {
+      print(error);
+      print(s);
       emit(PurchaseReturnError(
         title: "Error",
         content: "Failed to create purchase return: ${error.toString()}",

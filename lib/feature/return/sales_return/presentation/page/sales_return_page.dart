@@ -1,8 +1,5 @@
 import 'dart:async';
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
-import 'package:lottie/lottie.dart';
 import 'package:smart_inventory/core/configs/configs.dart';
 import 'package:smart_inventory/feature/customer/data/model/customer_active_model.dart';
 import 'package:smart_inventory/feature/return/sales_return/presentation/page/widget/widget.dart';
@@ -13,7 +10,6 @@ import '../../../../../core/widgets/app_dropdown.dart';
 import '../../../../../core/widgets/app_loader.dart';
 import '../../../../../core/widgets/coustom_search_text_field.dart';
 import '../../../../../core/widgets/date_range.dart';
-import '../../../../../responsive.dart';
 import '../../../../customer/presentation/bloc/customer/customer_bloc.dart';
 import '../../../../products/product/presentation/widget/pagination.dart';
 import '../sales_return_bloc/sales_return_bloc.dart';

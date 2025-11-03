@@ -36,6 +36,8 @@ class PurchaseInvoiceModel {
   final List<Item>? items;
   final String? subTotal;
 
+
+
   PurchaseInvoiceModel({
     this.id,
     this.company,
@@ -65,6 +67,11 @@ class PurchaseInvoiceModel {
     this.subTotal,
   });
 
+  @override
+  String toString() {
+    // TODO: implement toString
+    return invoiceNo??"";
+  }
   factory PurchaseInvoiceModel.fromJson(Map<String, dynamic> json) => PurchaseInvoiceModel(
     id: json["id"],
     company: json["company"],

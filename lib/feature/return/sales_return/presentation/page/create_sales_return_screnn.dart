@@ -105,55 +105,50 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.bg,
-      appBar: AppBar(
-        title: Text("Create Return Product"),
-        backgroundColor: AppColors.primaryColor,
-        foregroundColor: Colors.white,
-      ),
-      body: Container(
-        padding: AppTextStyle.getResponsivePaddingBody(context),
-        child: RefreshIndicator(
-          color: AppColors.primaryColor,
-          onRefresh: () async {
-            context.read<AccountBloc>().add(FetchAccountList(context));
-            context.read<SalesReturnBloc>().add(FetchInvoiceList(context));
-          },
-          child: BlocListener<SalesReturnBloc, SalesReturnState>(
-            listener: (context, state) {
-              if (state is InvoiceListLoading) {
-                appLoader(context, "Loading invoices...");
-              } else if (state is InvoiceListSuccess) {
-                Navigator.pop(context); // Close loader
-              } else if (state is InvoiceError) {
-                Navigator.pop(context); // Close loader
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(state.content),
-                    backgroundColor: Colors.red,
-                  ),
-                );
-              }
-            },
-            child: SingleChildScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              child: Form(
-                key: formKey,
-                child: Column(
-                  children: [
-                    _buildReceiptNumberDropdown(),
-                    const SizedBox(height: 12),
-                    _buildCustomerNameField(),
-                    const SizedBox(height: 12),
-                    if (products.isNotEmpty) _buildProductsList(),
-                    if (products.isNotEmpty) _buildTotalAmount(),
-                    const SizedBox(height: 12),
-                    _buildAdditionalFields(),
-                    const SizedBox(height: 20),
-                    _buildSubmitButton(),
-                  ],
+    return Container(
+      color: AppColors.bg,
+
+      padding: AppTextStyle.getResponsivePaddingBody(context),
+      child: RefreshIndicator(
+        color: AppColors.primaryColor,
+        onRefresh: () async {
+          context.read<AccountBloc>().add(FetchAccountList(context));
+          context.read<SalesReturnBloc>().add(FetchInvoiceList(context));
+        },
+        child: BlocListener<SalesReturnBloc, SalesReturnState>(
+          listener: (context, state) {
+            if (state is InvoiceListLoading) {
+              appLoader(context, "Loading invoices...");
+            } else if (state is InvoiceListSuccess) {
+              Navigator.pop(context); // Close loader
+              Navigator.pop(context); // Close loader
+            } else if (state is InvoiceError) {
+              Navigator.pop(context); // Close loader
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.content),
+                  backgroundColor: Colors.red,
                 ),
+              );
+            }
+          },
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: Form(
+              key: formKey,
+              child: Column(
+                children: [
+                  _buildReceiptNumberDropdown(),
+                  const SizedBox(height: 12),
+                  _buildCustomerNameField(),
+                  const SizedBox(height: 12),
+                  if (products.isNotEmpty) _buildProductsList(),
+                  if (products.isNotEmpty) _buildTotalAmount(),
+                  const SizedBox(height: 12),
+                  _buildAdditionalFields(),
+                  const SizedBox(height: 20),
+                  _buildSubmitButton(),
+                ],
               ),
             ),
           ),
