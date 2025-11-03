@@ -144,7 +144,6 @@ class _SalesReturnScreenState extends State<SalesReturnScreen> {
             child: Column(
               children: [
                 _buildFilterRow(),
-                const SizedBox(height: 16),
                 SizedBox(child: _buildDataTable()),
               ],
             ),
@@ -164,12 +163,13 @@ class _SalesReturnScreenState extends State<SalesReturnScreen> {
           flex: 2,
           child: CustomSearchTextFormField(
             controller: filterTextController,
+            isRequiredLabel: false,
             onChanged: (value) => _fetchSalesReturnList(filterText: value),
             onClear: () {
               filterTextController.clear();
               _fetchSalesReturnList();
             },
-            hintText: "Search by Receipt No, Customer, or Reason",
+            hintText: "by Receipt No, Customer, or Reason",
           ),
         ),
         const SizedBox(width: 12),
@@ -186,6 +186,7 @@ class _SalesReturnScreenState extends State<SalesReturnScreen> {
                 hint: _selectedCustomer?.name ?? "Select Customer",
                 isNeedAll: true,
                 isRequired: false,
+                isLabel: true,
                 value: _selectedCustomer,
                 itemList: context.read<CustomerBloc>().activeCustomer,
                 onChanged: (newVal) {
@@ -221,6 +222,7 @@ class _SalesReturnScreenState extends State<SalesReturnScreen> {
         SizedBox(
           width: 260,
           child: CustomDateRangeField(
+            isLabel: false,
             selectedDateRange: selectedDateRange,
             onDateRangeSelected: (value) {
               setState(() => selectedDateRange = value);
@@ -260,7 +262,14 @@ class _SalesReturnScreenState extends State<SalesReturnScreen> {
 
   Widget _buildDataTable() {
     return BlocBuilder<SalesReturnBloc, SalesReturnState>(
-      builder: (context, state) {
+
+      buildWhen: (previous, current) {
+        return current is SalesReturnLoading ||
+            current is SalesReturnSuccess ||
+            current is SalesReturnError;
+      },
+
+         builder: (context, state) {
         if (state is SalesReturnLoading) {
           return const Center(
             child: Column(

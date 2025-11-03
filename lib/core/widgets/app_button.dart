@@ -145,11 +145,7 @@ class AppButton extends StatelessWidget {
     if (gradient != null) return gradient;
     if (color != null) return null;
 
-    return const LinearGradient(
-      begin: Alignment.topCenter,
-      end: Alignment.bottomCenter,
-      colors: [Color(0xFF33E547), Color(0xFF2A9136)],
-    );
+    return  AppColors.primaryGradient;
   }
 
   Color? _getBackgroundColor(BuildContext context) {

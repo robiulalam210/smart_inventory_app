@@ -37,6 +37,7 @@ import '../../../../report/presentation/page/customer_due_advance_screen/custome
 import '../../../../report/presentation/page/expense_report_screen/expense_report_screen.dart';
 import '../../../../report/presentation/page/supplier_due_advance_screen/supplier_due_advance_screen.dart';
 import '../../../../report/presentation/page/supplier_ledger_screen/supplier_ledger_screen.dart';
+import '../../../../return/bad_stock/bad_stock_screen.dart';
 import '../../../../return/purchase_return/presentation/purchase_return/purchase_return_screen.dart';
 import '../../../../return/sales_return/presentation/page/sales_return_page.dart';
 import '../../../../sales/presentation/pages/create_pos_sale/create_pos_sale.dart';
@@ -82,7 +83,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
 
 
     AppWrapper(child: SalesReturnScreen()),
-    AppWrapper(child: ExpenseSubHeadScreen()),
+    AppWrapper(child: BadStockScreen()),
     AppWrapper(child: PurchaseReturnScreen()),
 
 

@@ -157,19 +157,20 @@ class _PurchaseReturnScreenState extends State<PurchaseReturnScreen> {
   Widget _buildFilterRow() {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.start,
       children: [
         // 🔍 Search Field
         Expanded(
           flex: 2,
           child: CustomSearchTextFormField(
+            isRequiredLabel: false,
             controller: filterTextController,
             onChanged: (value) => _fetchPurchaseReturnList(filterText: value),
             onClear: () {
               filterTextController.clear();
               _fetchPurchaseReturnList();
             },
-            hintText: "Search by Receipt No, Supplier, or Reason",
+            hintText: "by Receipt No, Supplier, or Reason",
           ),
         ),
         const SizedBox(width: 12),
@@ -186,6 +187,7 @@ class _PurchaseReturnScreenState extends State<PurchaseReturnScreen> {
                 hint: _selectedSupplier?.name ?? "Select Supplier",
                 isNeedAll: true,
                 isRequired: false,
+                isLabel: true,
                 value: _selectedSupplier,
                 itemList: context.read<SupplierInvoiceBloc>().supplierActiveList,
                 onChanged: (newVal) {
@@ -221,6 +223,7 @@ class _PurchaseReturnScreenState extends State<PurchaseReturnScreen> {
         SizedBox(
           width: 260,
           child: CustomDateRangeField(
+            isLabel: false,
             selectedDateRange: selectedDateRange,
             onDateRangeSelected: (value) {
               setState(() => selectedDateRange = value);
