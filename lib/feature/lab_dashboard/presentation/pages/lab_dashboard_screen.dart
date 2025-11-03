@@ -20,7 +20,7 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   int selectedIndex = 1;
-  String selectedSalesOverviewType = 'current_day';
+  // String selectedSalesOverviewType = 'current_day';
   String selectedPurchaseOverviewType = 'current_day';
   final GlobalKey<ScaffoldState> drawerKey = GlobalKey<ScaffoldState>();
 
@@ -40,9 +40,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return BlocConsumer<DashboardBloc, DashboardState>(
       listener: (context, state) {
         if (state is DashboardError) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(state.message)));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(state.message)),
+          );
         }
       },
       builder: (context, state) {
@@ -67,7 +67,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         decoration: BoxDecoration(
                           color: Colors.white,
                           border: Border.all(
-                            color: AppColors.border.withValues(alpha: 0.7),
+                            color: AppColors.border.withAlpha(128), // Fixed: changed withValues to withAlpha
                             width: 0.5,
                           ),
                         ),
@@ -93,8 +93,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             children: [
                               // ==== HEADER AND FILTER ====
                               Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
                                   const Text(
                                     "Dashboard",
@@ -116,12 +115,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                           child: Text(
                                             'Today',
                                             style: TextStyle(
-                                              fontFamily:
-                                                  GoogleFonts.playfairDisplay()
-                                                      .fontFamily,
-                                              color:
-                                                  selectedPurchaseOverviewType ==
-                                                      'current_day'
+                                              fontFamily: GoogleFonts.playfairDisplay().fontFamily,
+                                              color: selectedPurchaseOverviewType == 'current_day'
                                                   ? Colors.white
                                                   : Colors.black,
                                             ),
@@ -133,16 +128,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                             horizontal: 1.0,
                                           ),
                                           child: Text(
-                                            DateFormat(
-                                              'MMMM',
-                                            ).format(DateTime.now()),
+                                            DateFormat('MMMM').format(DateTime.now()),
                                             style: TextStyle(
-                                              fontFamily:
-                                                  GoogleFonts.playfairDisplay()
-                                                      .fontFamily,
-                                              color:
-                                                  selectedPurchaseOverviewType ==
-                                                      'this_month'
+                                              fontFamily: GoogleFonts.playfairDisplay().fontFamily,
+                                              color: selectedPurchaseOverviewType == 'this_month'
                                                   ? Colors.white
                                                   : Colors.black,
                                             ),
@@ -156,12 +145,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                           child: Text(
                                             'Life Time',
                                             style: TextStyle(
-                                              fontFamily:
-                                                  GoogleFonts.playfairDisplay()
-                                                      .fontFamily,
-                                              color:
-                                                  selectedPurchaseOverviewType ==
-                                                      'lifeTime'
+                                              fontFamily: GoogleFonts.playfairDisplay().fontFamily,
+                                              color: selectedPurchaseOverviewType == 'lifeTime'
                                                   ? Colors.white
                                                   : Colors.black,
                                             ),
@@ -201,9 +186,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 const SizedBox(height: 24),
 
                                 // ==== SALES & PURCHASE OVERVIEW ====
-                                _buildSalesPurchaseOverview(
-                                  state.dashboardData,
-                                ),
+                                _buildSalesPurchaseOverview(state.dashboardData),
                                 const SizedBox(height: 16),
 
                                 // ==== RECENT ACTIVITIES ====
@@ -219,9 +202,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                       ElevatedButton(
                                         onPressed: () {
                                           context.read<DashboardBloc>().add(
-                                            FetchDashboardData(
-                                              context: context,
-                                            ),
+                                            FetchDashboardData(context: context),
                                           );
                                         },
                                         child: const Text('Retry'),
@@ -251,35 +232,35 @@ class _DashboardScreenState extends State<DashboardScreen> {
       children: [
         dashboardCardItem(
           title: "Total Sales",
-          value: data.todayMetrics.sales.total,
+          value: data.todayMetrics?.sales?.total?.toDouble() ?? 0.0, // Fixed: null check and type conversion
           icon: Icons.shopping_cart,
           color: Colors.green,
           isCurrency: true,
         ),
         dashboardCardItem(
           title: "Total Purchases",
-          value: data.todayMetrics.purchases.total,
+          value: data.todayMetrics?.purchases?.total?.toDouble() ?? 0.0, // Fixed: null check and type conversion
           icon: Icons.inventory_2,
           color: Colors.blue,
           isCurrency: true,
         ),
         dashboardCardItem(
           title: "Total Expenses",
-          value: data.todayMetrics.expenses.total,
+          value: data.todayMetrics?.expenses?.total?.toDouble() ?? 0.0, // Fixed: null check and type conversion
           icon: Icons.money_off,
           color: Colors.red,
           isCurrency: true,
         ),
         dashboardCardItem(
           title: "Net Profit",
-          value: data.profitLoss.netProfit,
+          value: data.profitLoss?.netProfit?.toDouble() ?? 0.0, // Fixed: null check and type conversion
           icon: Icons.trending_up,
-          color: data.profitLoss.netProfit >= 0 ? Colors.green : Colors.red,
+          color: (data.profitLoss?.netProfit ?? 0) >= 0 ? Colors.green : Colors.red, // Fixed: null check
           isCurrency: true,
         ),
         dashboardCardItem(
           title: "Stock Alerts",
-          value: data.stockAlerts.lowStock + data.stockAlerts.outOfStock,
+          value: ((data.stockAlerts?.lowStock ?? 0) + (data.stockAlerts?.outOfStock ?? 0)).toDouble(), // Fixed: null check
           icon: Icons.warning,
           color: Colors.orange,
         ),
@@ -326,14 +307,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
             children: [
               StatsCardMonthly(
                 title: "Total Sold Quantity\n",
-                count: data.todayMetrics.sales.totalQuantity.toString(),
+                count: data.todayMetrics?.sales?.totalQuantity?.toString() ?? "0", // Fixed: null check
                 color: Colors.pink,
                 icon: "assets/images/sold.png",
               ),
               SizedBox(width: Responsive.isMobile(context) ? 5 : 10),
               StatsCardMonthly(
                 title: "Total Amount",
-                count: data.todayMetrics.sales.total.toStringAsFixed(2),
+                count: (data.todayMetrics?.sales?.total ?? 0).toStringAsFixed(2), // Fixed: null check
                 color: Colors.purple,
                 icon: "assets/images/gross.png",
               ),
@@ -345,17 +326,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
             children: [
               StatsCardMonthly(
                 title: "Total Due",
-                count: data.todayMetrics.sales.totalDue.toStringAsFixed(2),
+                count: (data.todayMetrics?.sales?.totalDue ?? 0).toStringAsFixed(2), // Fixed: null check
                 color: Colors.redAccent,
                 icon: "assets/images/cancel.png",
               ),
               SizedBox(width: Responsive.isMobile(context) ? 5 : 20),
               StatsCardMonthly(
                 title: "Profit / Loss",
-                count: data.profitLoss.netProfit.toStringAsFixed(2),
-                color: data.profitLoss.netProfit >= 0
-                    ? Colors.green
-                    : Colors.red,
+                count: (data.profitLoss?.netProfit ?? 0).toStringAsFixed(2), // Fixed: null check
+                color: (data.profitLoss?.netProfit ?? 0) >= 0 ? Colors.green : Colors.red, // Fixed: null check
                 icon: "assets/images/expenses.png",
               ),
             ],
@@ -394,14 +373,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
             children: [
               StatsCardMonthly(
                 title: "Total Purchase \nQuantity",
-                count: data.todayMetrics.purchases.totalQuantity.toString(),
+                count: data.todayMetrics?.purchases?.totalQuantity?.toString() ?? "0", // Fixed: null check
                 color: Colors.blue,
                 icon: "assets/images/buy.png",
               ),
               SizedBox(width: Responsive.isMobile(context) ? 5 : 20),
               StatsCardMonthly(
                 title: "Total Amount \n",
-                count: data.todayMetrics.purchases.total.toStringAsFixed(2),
+                count: (data.todayMetrics?.purchases?.total ?? 0).toStringAsFixed(2), // Fixed: null check
                 color: Colors.green,
                 icon: "assets/images/gross.png",
               ),
@@ -413,15 +392,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
             children: [
               StatsCardMonthly(
                 title: "Total Due",
-                count: data.todayMetrics.purchases.totalDue.toStringAsFixed(2),
+                count: (data.todayMetrics?.purchases?.totalDue ?? 0).toStringAsFixed(2), // Fixed: null check
                 color: Colors.redAccent,
                 icon: "assets/images/cancel.png",
               ),
               SizedBox(width: Responsive.isMobile(context) ? 5 : 20),
               StatsCardMonthly(
                 title: "Total Returns",
-                count: data.todayMetrics.purchaseReturns.totalAmount
-                    .toStringAsFixed(2),
+                count: (data.todayMetrics?.purchaseReturns?.totalAmount ?? 0).toStringAsFixed(2), // Fixed: null check
                 color: Colors.black,
                 icon: "assets/images/product_return.png",
               ),
@@ -444,11 +422,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               'Today',
               style: TextStyle(
                 fontFamily: GoogleFonts.playfairDisplay().fontFamily,
-                color:
-                    (type == 'sales'
-                            ? selectedSalesOverviewType
-                            : selectedPurchaseOverviewType) ==
-                        'current_day'
+                color: (type == 'sales' ? selectedPurchaseOverviewType : selectedPurchaseOverviewType) == 'current_day'
                     ? Colors.white
                     : Colors.black,
               ),
@@ -460,11 +434,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               DateFormat('MMMM').format(DateTime.now()),
               style: TextStyle(
                 fontFamily: GoogleFonts.playfairDisplay().fontFamily,
-                color:
-                    (type == 'sales'
-                            ? selectedSalesOverviewType
-                            : selectedPurchaseOverviewType) ==
-                        'this_month'
+                color: (type == 'sales' ? selectedPurchaseOverviewType : selectedPurchaseOverviewType) == 'this_month'
                     ? Colors.white
                     : Colors.black,
               ),
@@ -476,11 +446,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               'Life Time',
               style: TextStyle(
                 fontFamily: GoogleFonts.playfairDisplay().fontFamily,
-                color:
-                    (type == 'sales'
-                            ? selectedSalesOverviewType
-                            : selectedPurchaseOverviewType) ==
-                        'lifeTime'
+                color: (type == 'sales' ? selectedPurchaseOverviewType : selectedPurchaseOverviewType) == 'lifeTime'
                     ? Colors.white
                     : Colors.black,
               ),
@@ -490,18 +456,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
         onValueChanged: (value) {
           setState(() {
             if (type == 'sales') {
-              selectedSalesOverviewType = value;
+              selectedPurchaseOverviewType = value;
             } else {
               selectedPurchaseOverviewType = value;
             }
             context.read<DashboardBloc>().add(
-              FetchDashboardData(dateFilter: value,context: context),
+              FetchDashboardData(dateFilter: value, context: context),
             );
           });
         },
-        groupValue: type == 'sales'
-            ? selectedSalesOverviewType
-            : selectedPurchaseOverviewType,
+        groupValue: type == 'sales' ? selectedPurchaseOverviewType : selectedPurchaseOverviewType,
         unselectedColor: Colors.white54,
         selectedColor: AppColors.primaryColor,
         borderColor: AppColors.primaryColor,
@@ -531,11 +495,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(child: _buildRecentSales(data.recentActivities.sales)),
+              Expanded(child: _buildRecentSales(data.recentActivities?.sales ?? [])), // Fixed: null check
               const SizedBox(width: 16),
-              Expanded(
-                child: _buildRecentPurchases(data.recentActivities.purchases),
-              ),
+              Expanded(child: _buildRecentPurchases(data.recentActivities?.purchases ?? [])), // Fixed: null check
             ],
           ),
         ],
@@ -543,7 +505,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildRecentSales(List<RecentSale> sales) {
+  Widget _buildRecentSales(List<Purchase> sales) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -556,23 +518,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         ),
         const SizedBox(height: 8),
-        ...sales
-            .map(
-              (sale) => _buildActivityItem(
-                icon: Icons.shopping_cart,
-                title: sale.invoiceNo,
-                subtitle: sale.customer,
-                amount: sale.amount,
-                date: sale.date,
-                color: Colors.green,
-              ),
-            )
-            .toList(),
+        ...sales.map((sale) => _buildActivityItem(
+          icon: Icons.shopping_cart,
+          title: sale.invoiceNo ?? 'N/A', // Fixed: null check
+          subtitle: sale?.customer ?? 'N/A', // Fixed: null check
+          amount: sale.amount?.toDouble() ?? 0.0, // Fixed: null check and type conversion
+          date: sale.date != null ? DateFormat('MMM dd, yyyy').format(sale.date!) : 'N/A', // Fixed: null check
+          color: Colors.green,
+        )).toList(),
       ],
     );
   }
 
-  Widget _buildRecentPurchases(List<RecentPurchase> purchases) {
+  Widget _buildRecentPurchases(List<Purchase> purchases) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -585,18 +543,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         ),
         const SizedBox(height: 8),
-        ...purchases
-            .map(
-              (purchase) => _buildActivityItem(
-                icon: Icons.inventory_2,
-                title: purchase.invoiceNo,
-                subtitle: purchase.supplier,
-                amount: purchase.amount,
-                date: purchase.date,
-                color: Colors.blue,
-              ),
-            )
-            .toList(),
+        ...purchases.map((purchase) => _buildActivityItem(
+          icon: Icons.inventory_2,
+          title: purchase.invoiceNo ?? 'N/A', // Fixed: null check
+          subtitle: purchase.supplier ?? 'N/A', // Fixed: null check
+          amount: purchase.amount?.toDouble() ?? 0.0, // Fixed: null check and type conversion
+          date: purchase.date != null ? DateFormat('MMM dd, yyyy').format(purchase.date!) : 'N/A', // Fixed: null check
+          color: Colors.blue,
+        )).toList(),
       ],
     );
   }
@@ -650,7 +604,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 }
 
-// Keep your existing StatsCardMonthly and dashboardCardItem widgets...
 class StatsCardMonthly extends StatelessWidget {
   final String title;
   final String count;
@@ -675,15 +628,14 @@ class StatsCardMonthly extends StatelessWidget {
           borderRadius: BorderRadius.circular(10),
           boxShadow: const [
             // BoxShadow(
-            //   // color: Color.fromARGB(17, 0, 0, 0),
-            //   // spreadRadius: 5,
-            //   // blurRadius: 5,
+            //   color: Color.fromARGB(17, 0, 0, 0),
+            //   spreadRadius: 5,
+            //   blurRadius: 5,
             // ),
           ],
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(10),
-          // Clip contents to the same radius as the container
           child: Stack(
             children: [
               Container(
@@ -695,7 +647,7 @@ class StatsCardMonthly extends StatelessWidget {
                       title,
                       style: TextStyle(
                         color: color,
-                        fontSize:  Responsive.isMobile(context)?14:18,
+                        fontSize: Responsive.isMobile(context) ? 14 : 18,
                         fontFamily: GoogleFonts.playfairDisplay().fontFamily,
                         fontWeight: FontWeight.w600,
                       ),
@@ -708,27 +660,24 @@ class StatsCardMonthly extends StatelessWidget {
                           width: 30,
                           height: 30,
                           decoration: BoxDecoration(
-                            color: color.withValues(alpha: 0.5),
+                            color: color.withAlpha(128), // Fixed: changed withValues to withAlpha
                             shape: BoxShape.circle,
                           ),
                           child: Image.asset(
                             icon,
                             color: Colors.white,
-                            width:
-                           30, // Replace with your AppColors.whiteColor if defined
+                            width: 30,
                           ),
                         ),
                         const SizedBox(width: 3),
                         SizedBox(
-                          // width: AppSizes.width(context) * 0.25,
                           child: Text(
                             count.toString(),
                             maxLines: 2,
                             style: TextStyle(
                               color: color,
-                              fontFamily:
-                              GoogleFonts.playfairDisplay().fontFamily,
-                              fontSize:  18,
+                              fontFamily: GoogleFonts.playfairDisplay().fontFamily,
+                              fontSize: 18,
                               fontWeight: FontWeight.w400,
                             ),
                           ),
@@ -740,16 +689,14 @@ class StatsCardMonthly extends StatelessWidget {
               ),
               Positioned(
                 bottom: -40,
-                // Adjust as needed to control circle's vertical position
                 right: -40,
-                // Adjust as needed to control circle's horizontal position
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(10),
                   child: Container(
                     width: 120,
                     height: 120,
                     decoration: BoxDecoration(
-                      color: color.withValues(alpha: 0.1),
+                      color: color.withAlpha(25), // Fixed: changed withValues to withAlpha
                       shape: BoxShape.circle,
                     ),
                   ),

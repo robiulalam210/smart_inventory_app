@@ -1,6 +1,49 @@
 import 'configs.dart';
 
-class AppColors{
+class AppColors {
+  // Defuel Color Use
+  // static const Color primary = Color(0xff56E197);
+  // static const Color secondary = Color(0xffDCF7E9);
+  // static const Color background = Color(0xffEFF9FF);
+  /// App Accent Gradient
+  // static const LinearGradient primaryGradient = LinearGradient(
+  //   begin: Alignment.topLeft,
+  //   end: Alignment.bottomRight,
+  //   transform: GradientRotation(238 * 3.1416 / 180), // 238° to radians
+  //   colors: [
+  //     Color(0xFF57EB9C),
+  //     Color(0xFF52C387),
+  //   ],
+  //   stops: [0.0541, 1.6604], // same as 5.41% and 166.04%
+  // );
+
+  static const Color error = Color(0xffE53935);
+  static const Color grey = Color.fromARGB(255, 159, 159, 159);
+  static const Color lightGrey = Color.fromARGB(255, 231, 231, 231);
+  static const Color white = Color(0xffffffff);
+  static const Color black = Colors.black;
+
+  static const Color lightBg = Color.fromARGB(255, 239, 249, 255);
+  static const Color lightBgBottomNav = Color.fromARGB(255, 246, 252, 255);
+  static const Color lightText = Color(0xff000000);
+
+  static const Color primaryColor = Color(0xff6EC5EF);
+
+  static Color get secondary => _soften(primaryColor, 0.4);
+
+  // --- Derived Colors ---
+  static Color get primaryLight => _lighten(primaryColor, 0.25);
+
+  static Color get primaryDark => _darken(primaryColor, 0.15);
+
+  /// 🌈 Background based on primary color (blends with white)
+  static Color get background => _mixWithWhite(primaryColor, 0.9);
+
+  // Try 0.85–0.9 for more or less intensity
+
+  // Gradient based on primary shades
+  static LinearGradient get primaryGradient => buildGradient(primaryColor);
+
 
   static const Color matteBlack = Color(0xff28282B);
   // static const Color seed = Colors.redAccent;
@@ -9,18 +52,14 @@ class AppColors{
   static const Color text = matteBlack;
   static const Color subText = Colors.blueGrey;
   static const Color disable = Colors.grey;
-  static const Color grey = Colors.grey;
   static const Color green = Colors.greenAccent;
   static const Color orange = Colors.orangeAccent;
   static Color border = Colors.grey.shade400;
-  static const Color white = Colors.white;
   static const Color red = Colors.red;
   static const Color redAccent = Colors.redAccent;
-  static const Color error = Color(0xffb00020);
   static const Color pay = Colors.deepOrange;
 
-
-  static const Color primaryColor             = Color(0xFF6ab129);
+  // static const Color              = Color(0xFF6ab129);
   static const Color primaryColorBg             = Color(0xFFCEE2CE);
   static const Color bg               = Color(0xffEFF9FF);
   static const Color lightGreen               = Color(0xFFFCFCFC);
@@ -60,9 +99,7 @@ class AppColors{
 
   static Color onSurfaceVariant(BuildContext context) => Theme.of(context).colorScheme.onSurfaceVariant;
 
-  static Color secondary(BuildContext context) => Theme.of(context).colorScheme.secondary;
 
-  static Color primary(BuildContext context) => Theme.of(context).colorScheme.primary;
 
   static Color inversePrimary(BuildContext context) => Theme.of(context).colorScheme.inversePrimary;
 
@@ -115,4 +152,45 @@ class AppColors{
 
 
 
+  static LinearGradient buildGradient(Color base) => LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [
+      _lighten(base, 0.15),
+      _darken(base, 0.05),
+    ],
+  );
+
+  // --- Utility helpers ---
+  static Color _lighten(Color color, [double amount = .1]) {
+    final hsl = HSLColor.fromColor(color);
+    final hslLight =
+    hsl.withLightness((hsl.lightness + amount).clamp(0.0, 1.0));
+    return hslLight.toColor();
+  }
+
+  static Color _darken(Color color, [double amount = .1]) {
+    final hsl = HSLColor.fromColor(color);
+    final hslDark = hsl.withLightness((hsl.lightness - amount).clamp(0.0, 1.0));
+    return hslDark.toColor();
+  }
+
+  /// Lightens and slightly desaturates a color for secondary tone
+  static Color _soften(Color color, [double amount = .3]) {
+    final hsl = HSLColor.fromColor(color);
+    final hslSoft = hsl
+        .withSaturation((hsl.saturation * (1 - amount)).clamp(0.0, 1.0))
+        .withLightness((hsl.lightness + amount * 0.4).clamp(0.0, 1.0));
+    return hslSoft.toColor();
+  }
+
+  /// Mixes color with white to create soft pastel background
+  static Color _mixWithWhite(Color color, double amount) {
+    return Color.lerp(color, Colors.white, amount)!;
+  }
 }
+
+// class AppColors{
+//
+//
+// }

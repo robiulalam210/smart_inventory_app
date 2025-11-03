@@ -126,31 +126,33 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
       ) async {
     emit(DashboardLoading());
     try {
+      // Build URL with date filter parameter BEFORE making the request
+      String url = AppUrls.dashboard;
+      if (event.dateFilter != null) {
+        url += '?dateFilter=${event.dateFilter}';
+      }
+
+      print("Fetching dashboard data from: $url"); // Debug print
+
       final res = await getResponse(
-        url: AppUrls.dashboard,
+        url: url, // Use the constructed URL
         context: event.context,
       );
 
-      ApiResponse response = appParseJson(
-        res,
-            (data) => DashboardData.fromJson(data),
-      );
+      // Parse manually to handle the nested structure
+      final Map<String, dynamic> responseData = json.decode(res);
 
-      // Check if API response is successful
-      if (response.success == true) {
-        final DashboardData? dashboardData = response.data;
-
-        if (dashboardData != null) {
-          emit(DashboardLoaded(dashboardData));
-        } else {
-          emit(DashboardError("Dashboard data is null"));
-        }
+      if (responseData['status'] == true) {
+        final dashboardData = DashboardData.fromJson(responseData['data']);
+        emit(DashboardLoaded(dashboardData));
       } else {
         emit(DashboardError(
-          response.message ?? "Failed to fetch dashboard data",
+          responseData['message'] ?? "Failed to fetch dashboard data",
         ));
       }
-    } catch (error) {
+    } catch (error,st) {
+      print(error);
+      print(st);
       emit(DashboardError(error.toString()));
     }
   }

@@ -440,12 +440,12 @@ class _AppSheetContentState<T> extends State<_AppSheetContent<T>> {
               title: Text(
                 widget.getLabel(item),
                 style: TextStyle(
-                  color: isSelected ? AppColors.primary(context) : null,
+                  color: isSelected ? AppColors.primaryColor : null,
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                 ),
               ),
               leading: isSelected
-                  ? Icon(Icons.check, color: AppColors.primary(context))
+                  ? Icon(Icons.check, color: AppColors.primaryColor)
                   : const SizedBox(width: 24),
               onTap: () {
                 widget.onChanged(item);
