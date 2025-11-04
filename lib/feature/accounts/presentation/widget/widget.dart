@@ -36,7 +36,7 @@ class AccountCard extends StatelessWidget {
         const minColumnWidth = 120.0;
 
         // Calculate total table width
-        final totalTableWidth = (minColumnWidth * numColumns) +
+        final totalTableWidth = (constraints.maxWidth-100) +
             (columnSpacing * (numColumns - 1)) +
             (horizontalMargin * 2);
 

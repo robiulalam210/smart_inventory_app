@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 
-import '../../feature/lab_dashboard/data/models/all_setup_model/all_setup_model.dart';
 
 String formatTime(String? time) {
   if (time == null || time.isEmpty) return "";
@@ -209,8 +208,4 @@ String calculateAgeDB(String? dobString) {
     debugPrint('Error parsing date "$dobString": $e');
     return 'Unknown';
   }
-}
-String getHighestDegreeDB(List<Academic>? academics) {
-  if (academics == null || academics.isEmpty) return 'Not specified';
-  return academics.first.degreeId ?? 'MD';
 }

@@ -10,11 +10,13 @@ class ChangeDashboardScreen extends DashboardEvent {
   ChangeDashboardScreen({this.index=0});
 }
 
-// Add optional filter parameter here
-class LoadDashboardData extends DashboardEvent {
-  final DateRangeFilter filter;
 
-   LoadDashboardData({this.filter = DateRangeFilter.all});
+class FetchDashboardData extends DashboardEvent {
+  final String? dateFilter;
+  final BuildContext context;
 
-  List<Object?> get props => [filter];
+   FetchDashboardData({this.dateFilter,required this.context});
+
+  @override
+  List<Object> get props => [dateFilter ?? ''];
 }

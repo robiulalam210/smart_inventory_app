@@ -159,7 +159,7 @@ class _ExpenseHeadScreenState extends State<ExpenseHeadScreen> {
                             _fetchApiData();
                           },
                           hintText:
-                              "Search Name", // Pass dynamic hintText if needed
+                              "Name", // Pass dynamic hintText if needed
                         ),
                       )
 

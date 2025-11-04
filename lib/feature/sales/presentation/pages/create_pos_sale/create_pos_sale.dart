@@ -1,10 +1,9 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_quill/flutter_quill.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:smart_inventory/core/core.dart';
 import 'package:smart_inventory/feature/products/product/data/model/product_stock_model.dart';
 import 'package:smart_inventory/feature/users_list/presentation/bloc/users/user_bloc.dart';
-import 'package:smart_inventory/root.dart';
 import 'dart:developer';
 
 import '../../../../../core/configs/configs.dart';
@@ -16,7 +15,6 @@ import '../../../../../core/widgets/app_loader.dart';
 import '../../../../../core/widgets/app_snack_bar.dart';
 import '../../../../../core/widgets/input_field.dart';
 import '../../../../accounts/data/model/account_active_model.dart';
-import '../../../../accounts/data/model/account_model.dart';
 import '../../../../accounts/presentation/bloc/account/account_bloc.dart';
 import '../../../../customer/data/model/customer_active_model.dart';
 import '../../../../customer/presentation/bloc/customer/customer_bloc.dart';
@@ -540,7 +538,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                         width: 0.5,
                       ),
                     ),
-                    contentPadding: const EdgeInsets.only(top: 10.0, bottom: 10.0, left: 12),
+                    contentPadding: const EdgeInsets.only(top: 13.0, bottom: 13.0, left: 12),
                     isDense: true,
                     hintText: "price",
                   ),
@@ -556,7 +554,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                   padding: EdgeInsets.zero,
                   children: {
                     'fixed': Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                      padding: const EdgeInsets.symmetric(horizontal: 2.0,vertical: 7),
                       child: Text('TK', style: TextStyle(
                         fontFamily: GoogleFonts.playfairDisplay().fontFamily,
                         color: product["discount_type"] == 'fixed' ? Colors.white : Colors.black,
@@ -592,7 +590,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                     isCollapsed: true,
                     enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(5)),
                     focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(5)),
-                    contentPadding: const EdgeInsets.only(top: 10.0, bottom: 10.0, left: 10),
+                    contentPadding: const EdgeInsets.only(top: 13.0, bottom: 13.0, left: 10),
                     isDense: true,
                     hintText: "Discount",
                   ),
@@ -644,7 +642,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                     isCollapsed: true,
                     enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(5)),
                     focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(5)),
-                    contentPadding: const EdgeInsets.only(top: 10.0, bottom: 10.0, left: 12),
+                    contentPadding: const EdgeInsets.only(top: 13.0, bottom: 13.0, left: 12),
                     isDense: true,
                     hintText: "ticket total",
                   ),
@@ -663,7 +661,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                     isCollapsed: true,
                     enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(5)),
                     focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(5)),
-                    contentPadding: const EdgeInsets.only(top: 10.0, bottom: 10.0, left: 12),
+                    contentPadding: const EdgeInsets.only(top: 13.0, bottom: 13.0, left: 12),
                     isDense: true,
                     hintText: "total",
                   ),
@@ -907,16 +905,16 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
               ),
             ],
           ),
-          const SizedBox(height: 10),
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
                 flex: 2,
-                child: CustomInputField(
-                  isRequiredLable: false,
+                child: AppTextField(
+                  // isRequiredLable: false,
                   controller: changeAmountController,
                   hintText: 'Change Amount',
-                  fillColor: Colors.white,
+                  // fillColor: Colors.white,
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
                   readOnly: true,
                 ),
@@ -924,11 +922,11 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
               const SizedBox(width: 5),
               Expanded(
                 flex: 2,
-                child: CustomInputField(
-                  isRequiredLable: false,
+                child: AppTextField(
+                  // isRequiredLable: false,
                   controller: bloc.payableAmount,
                   hintText: 'Payable Amount',
-                  fillColor: Colors.white,
+                  // fillColor: Colors.white,
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
                   validator: (value) => value!.isEmpty ? 'Please enter Payable Amount' : null,
                   onChanged: (value) {
@@ -1042,11 +1040,11 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
         body['payment_method'] = bloc.selectedPaymentMethod;
         body['account_id'] = bloc.accountModel?.acId.toString() ?? '';
 
-        if (calculateAllFinalTotal() <= double.parse(bloc.payableAmount.text)) {
+        // if (calculateAllFinalTotal() <= double.parse(bloc.payableAmount.text)) {
           bloc.add(AddPosSale(body: body));
-        } else {
-          appSnackBar(context, "Payable amount must be greater than or equal to net total", color: Colors.redAccent);
-        }
+        // } else {
+        //   appSnackBar(context, "Payable amount must be greater than or equal to net total", color: Colors.redAccent);
+        // }
       } else {
         bloc.add(AddPosSale(body: body));
       }

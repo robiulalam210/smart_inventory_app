@@ -252,7 +252,7 @@ class TabSidebar extends StatelessWidget {
 
     // Handle special cases
     if (index == 0) {
-      bloc.add(LoadDashboardData(filter: DateRangeFilter.last7Days));
+      bloc.add(FetchDashboardData( context: context));
     }
 
     // Close drawer on tablet/mobile

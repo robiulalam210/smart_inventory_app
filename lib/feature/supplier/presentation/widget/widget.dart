@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:smart_inventory/feature/supplier/data/model/supplier_list_model.dart';
-import 'package:smart_inventory/feature/supplier/presentation/pages/create_supplierr_screen.dart';
-
-import '../../../../core/configs/app_sizes.dart';
 
 class SupplierDataTableWidget extends StatelessWidget {
   final List<SupplierListModel> suppliers;
@@ -27,8 +24,10 @@ class SupplierDataTableWidget extends StatelessWidget {
         const numColumns = 9; // Added one column for actions
         const minColumnWidth = 100.0;
 
-        final dynamicColumnWidth =
-        (totalWidth / numColumns).clamp(minColumnWidth, double.infinity);
+        final dynamicColumnWidth = (totalWidth / numColumns).clamp(
+          minColumnWidth,
+          double.infinity,
+        );
 
         return Container(
           decoration: BoxDecoration(
@@ -36,7 +35,7 @@ class SupplierDataTableWidget extends StatelessWidget {
             color: Colors.white,
             boxShadow: [
               BoxShadow(
-                color: Colors.grey.withOpacity(0.1),
+                color: Colors.grey.withValues(alpha: 0.1),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -54,23 +53,25 @@ class SupplierDataTableWidget extends StatelessWidget {
                   controller: horizontalController,
                   scrollDirection: Axis.horizontal,
                   child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      minWidth: totalWidth,
-                    ),
+                    constraints: BoxConstraints(minWidth: totalWidth),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(12),
                       child: DataTable(
                         columns: _buildColumns(dynamicColumnWidth),
-                        rows: suppliers.asMap().entries
+                        rows: suppliers
+                            .asMap()
+                            .entries
                             .map((e) => _buildRow(e.key + 1, e.value))
                             .toList(),
-                        headingRowColor: MaterialStateProperty.all(const Color(0xFF6AB129)),
+                        headingRowColor: WidgetStateProperty.all(
+                          const Color(0xFF6AB129),
+                        ),
                         headingTextStyle: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
                           fontSize: 12,
                         ),
-                        dataRowMinHeight: 40,
+                        dataRowMinHeight: 35,
                         columnSpacing: 10,
                         dataTextStyle: const TextStyle(fontSize: 12),
                       ),
@@ -99,30 +100,28 @@ class SupplierDataTableWidget extends StatelessWidget {
       _DataColumnConfig("Actions", columnWidth * 1.0),
     ];
 
-    return columns.map((col) => DataColumn(
-      label: Container(
-        width: col.width,
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        child: Text(
-          col.label,
-          textAlign: TextAlign.center,
-          style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            fontSize: 12,
+    return columns
+        .map(
+          (col) => DataColumn(
+            label: Container(
+              width: col.width,
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Text(
+                col.label,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                ),
+              ),
+            ),
           ),
-        ),
-      ),
-    )).toList();
+        )
+        .toList();
   }
 
   DataRow _buildRow(int index, SupplierListModel supplier) {
-    String formatCurrency(dynamic value) {
-      if (value == null) return '0.00';
-      final numValue = value is int ? value.toDouble() : (value is double ? value : 0.0);
-      return '\$${numValue.toStringAsFixed(2)}';
-    }
-
     Color getStatusColor(bool isActive) {
       return isActive ? Colors.green : Colors.orange;
     }
@@ -131,58 +130,58 @@ class SupplierDataTableWidget extends StatelessWidget {
       return isActive ? 'Active' : 'Inactive';
     }
 
-    Color getStatusBackgroundColor(bool isActive) {
-      return isActive ? Colors.green.withOpacity(0.1) : Colors.orange.withOpacity(0.1);
-    }
-
-
-
-    return DataRow(cells: [
-      _buildDataCell(index.toString(), TextAlign.center),
-      _buildDataCell(supplier.supplierNo ?? '-', TextAlign.left),
-      _buildDataCell(supplier.name ?? '-', TextAlign.left),
-      _buildDataCell(supplier.phone ?? '-', TextAlign.left),
-      _buildDataCell(supplier.address ?? '-', TextAlign.left),
-      _buildDataCell(formatCurrency(supplier.totalPurchases), TextAlign.right),
-      _buildDataCell(formatCurrency(supplier.totalPaid), TextAlign.right),
-      _buildDataCell(formatCurrency(supplier.totalDue), TextAlign.right),
-      DataCell(
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          decoration: BoxDecoration(
-            color: getStatusColor(supplier.isActive??false).withOpacity(0.1),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: getStatusColor(supplier.isActive??false)),
-          ),
-          child: Text(
-            getStatusText(supplier.isActive??false),
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: getStatusColor(supplier.isActive??false),
-              fontWeight: FontWeight.w500,
-              fontSize: 11,
+    return DataRow(
+      cells: [
+        _buildDataCell(index.toString(), TextAlign.center),
+        _buildDataCell(supplier.supplierNo ?? '-', TextAlign.left),
+        _buildDataCell(supplier.name ?? '-', TextAlign.left),
+        _buildDataCell(supplier.phone ?? '-', TextAlign.left),
+        _buildDataCell(supplier.address ?? '-', TextAlign.left),
+        _buildDataCell(supplier.totalPurchases.toString(), TextAlign.right),
+        _buildDataCell(supplier.totalPaid.toString(), TextAlign.right),
+        _buildDataCell(supplier.totalDue.toString(), TextAlign.right),
+        DataCell(
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: getStatusColor(
+                supplier.isActive ?? false,
+              ).withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: getStatusColor(supplier.isActive ?? false),
+              ),
+            ),
+            child: Text(
+              getStatusText(supplier.isActive ?? false),
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: getStatusColor(supplier.isActive ?? false),
+                fontWeight: FontWeight.w500,
+                fontSize: 11,
+              ),
             ),
           ),
         ),
-      ),
-      DataCell(
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            IconButton(
-              icon: const Icon(Icons.edit, size: 18),
-              color: Colors.blue,
-              onPressed: () => onEdit?.call(supplier),
-            ),
-            // IconButton(
-            //   icon: const Icon(Icons.delete, size: 18),
-            //   color: Colors.red,
-            //   onPressed: () => onDelete?.call(supplier),
-            // ),
-          ],
+        DataCell(
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.edit, size: 18),
+                color: Colors.blue,
+                onPressed: () => onEdit?.call(supplier),
+              ),
+              // IconButton(
+              //   icon: const Icon(Icons.delete, size: 18),
+              //   color: Colors.red,
+              //   onPressed: () => onDelete?.call(supplier),
+              // ),
+            ],
+          ),
         ),
-      ),
-    ]);
+      ],
+    );
   }
 
   DataCell _buildDataCell(String text, TextAlign align) {
@@ -198,8 +197,6 @@ class SupplierDataTableWidget extends StatelessWidget {
       ),
     );
   }
-
-
 }
 
 class _DataColumnConfig {

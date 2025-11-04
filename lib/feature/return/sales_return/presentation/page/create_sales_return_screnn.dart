@@ -1,8 +1,10 @@
+import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:intl/intl.dart';
 import 'package:smart_inventory/feature/accounts/data/model/account_active_model.dart';
 import 'package:smart_inventory/feature/return/sales_return/data/model/sales_invoice_model.dart';
 
+import '../../../../../core/configs/app_constants.dart';
 import '../../../../../core/configs/configs.dart';
 import '../../../../../core/widgets/app_button.dart';
 import '../../../../../core/widgets/app_dropdown.dart';
@@ -12,6 +14,8 @@ import '../../../../accounts/presentation/bloc/account/account_bloc.dart';
 import '../../../../expense/presentation/bloc/expense_list/expense_bloc.dart';
 import '../../../../money_receipt/presentation/bloc/money_receipt/money_receipt_bloc.dart';
 import '../sales_return_bloc/sales_return_bloc.dart';
+
+// Your other imports...
 
 class CreateSalesReturnScreen extends StatefulWidget {
   const CreateSalesReturnScreen({super.key});
@@ -30,8 +34,6 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
   void initState() {
     super.initState();
     context.read<AccountBloc>().add(FetchAccountActiveList(context));
-
-    // Fetch invoice list when screen loads
     context.read<SalesReturnBloc>().add(FetchInvoiceList(context));
 
     // Setting initial return date
@@ -59,7 +61,7 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
             quantity: item.quantity ?? 1,
             discount: double.tryParse(item.discount.toString()) ?? 0.0,
             discountType: item.discountType,
-            originalQuantity: item.quantity ?? 1, // Store original quantity
+            originalQuantity: item.quantity ?? 1,
           ));
         }
       }
@@ -73,11 +75,8 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
       final item = products[index];
       final originalMaxQuantity = item.originalQuantity ?? item.quantity ?? 1;
 
-      // Don't allow returning more than original quantity
       if (newQuantity > originalMaxQuantity) {
         newQuantity = originalMaxQuantity;
-
-        // Show warning message
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Cannot return more than $originalMaxQuantity items'),
@@ -103,57 +102,106 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
     return products.fold(0.0, (sum, item) => sum + (item.totalPrice ?? 0));
   }
 
+  // Add these missing methods
+  Widget _errorWidget(String message) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.error_outline,
+              color: Colors.red,
+              size: 48,
+            ),
+            SizedBox(height: 16),
+            Text(
+              message,
+              style: TextStyle(color: Colors.red),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _noDataWidget(String message) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.inventory_2_outlined,
+              color: Colors.grey,
+              size: 48,
+            ),
+            SizedBox(height: 16),
+            Text(
+              message,
+              style: TextStyle(color: Colors.grey),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.bg,
-      appBar: AppBar(
-        title: Text("Create Return Product"),
-        backgroundColor: AppColors.primaryColor,
-        foregroundColor: Colors.white,
-      ),
-      body: Container(
-        padding: AppTextStyle.getResponsivePaddingBody(context),
-        child: RefreshIndicator(
-          color: AppColors.primaryColor,
-          onRefresh: () async {
-            context.read<AccountBloc>().add(FetchAccountList(context));
-            context.read<SalesReturnBloc>().add(FetchInvoiceList(context));
-          },
-          child: BlocListener<SalesReturnBloc, SalesReturnState>(
-            listener: (context, state) {
-              if (state is InvoiceListLoading) {
-                appLoader(context, "Loading invoices...");
-              } else if (state is InvoiceListSuccess) {
-                Navigator.pop(context); // Close loader
-              } else if (state is InvoiceError) {
-                Navigator.pop(context); // Close loader
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(state.content),
-                    backgroundColor: Colors.red,
-                  ),
-                );
-              }
-            },
-            child: SingleChildScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              child: Form(
-                key: formKey,
-                child: Column(
-                  children: [
-                    _buildReceiptNumberDropdown(),
-                    const SizedBox(height: 12),
-                    _buildCustomerNameField(),
-                    const SizedBox(height: 12),
-                    if (products.isNotEmpty) _buildProductsList(),
-                    if (products.isNotEmpty) _buildTotalAmount(),
-                    const SizedBox(height: 12),
-                    _buildAdditionalFields(),
-                    const SizedBox(height: 20),
-                    _buildSubmitButton(),
-                  ],
+    return Container(
+      color: AppColors.bg,
+      padding: AppTextStyle.getResponsivePaddingBody(context),
+      child: RefreshIndicator(
+        color: AppColors.primaryColor,
+        onRefresh: () async {
+          context.read<AccountBloc>().add(FetchAccountList(context));
+          context.read<SalesReturnBloc>().add(FetchInvoiceList(context));
+        },
+        child: BlocListener<SalesReturnBloc, SalesReturnState>(
+          listener: (context, state) {
+            if (state is InvoiceListLoading) {
+              appLoader(context, "Loading invoices...");
+            } else if (state is InvoiceListSuccess) {
+              Navigator.pop(context); // Close loader - REMOVED DUPLICATE
+            } else if (state is InvoiceError) {
+              Navigator.pop(context); // Close loader
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.content),
+                  backgroundColor: Colors.red,
                 ),
+              );
+            }
+          },
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: Form(
+              key: formKey,
+              child: Column(
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                    Expanded(child:  _buildReceiptNumberDropdown(),),
+                    const SizedBox(width: 12),
+                    Expanded(child:  _buildCustomerNameField(),),
+                  ],),
+
+
+
+                  if (products.isNotEmpty) _buildProductsList(),
+                  if (products.isNotEmpty) _buildTotalAmount(),
+                  const SizedBox(height: 12),
+                  _buildAdditionalFields(),
+                  const SizedBox(height: 20),
+                  _buildSubmitButton(),
+                ],
               ),
             ),
           ),
@@ -164,10 +212,15 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
 
   Widget _buildReceiptNumberDropdown() {
     return BlocBuilder<SalesReturnBloc, SalesReturnState>(
+      buildWhen: (previous, current) {
+        // Rebuild only when invoice list states change
+        return current is InvoiceListLoading ||
+            current is InvoiceListSuccess ||
+            current is InvoiceError;
+      },
       builder: (context, state) {
         final bloc = context.read<SalesReturnBloc>();
 
-        // Show loading state
         if (state is InvoiceListLoading) {
           return Container(
             padding: const EdgeInsets.all(16),
@@ -193,7 +246,6 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
             if (newVal != null) {
               setState(() {
                 bloc.selectedInvoice = newVal;
-                // Call onProductChanged to update the products list
                 onProductChanged(newVal);
               });
             }
@@ -265,7 +317,7 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           itemCount: products.length,
-          separatorBuilder: (context, index) => const SizedBox(height: 8),
+          separatorBuilder: (context, index) => const SizedBox(height: 4),
           itemBuilder: (context, index) => _buildProductItem(index),
         ),
       ],
@@ -280,12 +332,12 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
       elevation: 2,
       margin: EdgeInsets.zero,
       child: Container(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Product Name and Remove Button
-            Row(
+            Row(          crossAxisAlignment: CrossAxisAlignment.start,
+
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
@@ -299,6 +351,69 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
+
+                Row(
+                  children: [
+                    Text(
+                      'Quantity:',
+                      style: AppTextStyle.cardLevelText(context).copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(color: AppColors.grey),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.remove, size: 18),
+                            onPressed: () {
+                              if (item.quantity! > 0) {
+                                _updateProductQuantity(index, item.quantity! - 1);
+                              }
+                            },
+                            padding: const EdgeInsets.all(4),
+                            constraints: const BoxConstraints(),
+                          ),
+                          Container(
+                            width: 40,
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            child: Text(
+                              item.quantity.toString(),
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.add, size: 18),
+                            onPressed: () {
+                              if (item.quantity! < originalMaxQuantity) {
+                                _updateProductQuantity(index, item.quantity! + 1);
+                              }
+                            },
+                            padding: const EdgeInsets.all(4),
+                            constraints: const BoxConstraints(),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Max: $originalMaxQuantity',
+                      style: AppTextStyle.cardLevelText(context).copyWith(
+                        fontSize: 12,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ],
+                ),                    const SizedBox(width: 8),
+
                 if (products.length > 1)
                   IconButton(
                     onPressed: () => _removeProduct(index),
@@ -314,71 +429,6 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
             ),
             const SizedBox(height: 8),
 
-            // Quantity Controls
-            Row(
-              children: [
-                Text(
-                  'Quantity:',
-                  style: AppTextStyle.cardLevelText(context).copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(color: AppColors.grey),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.remove, size: 18),
-                        onPressed: () {
-                          if (item.quantity! > 0) {
-                            _updateProductQuantity(index, item.quantity! - 1);
-                          }
-                        },
-                        padding: const EdgeInsets.all(4),
-                        constraints: const BoxConstraints(),
-                      ),
-                      Container(
-                        width: 40,
-                        padding: const EdgeInsets.symmetric(horizontal: 8),
-                        child: Text(
-                          item.quantity.toString(),
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.add, size: 18),
-                        onPressed: () {
-                          if (item.quantity! < originalMaxQuantity) {
-                            _updateProductQuantity(index, item.quantity! + 1);
-                          }
-                        },
-                        padding: const EdgeInsets.all(4),
-                        constraints: const BoxConstraints(),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  'Max: $originalMaxQuantity',
-                  style: AppTextStyle.cardLevelText(context).copyWith(
-                    fontSize: 12,
-                    color: Colors.grey,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-
-            // Price Information
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -446,30 +496,28 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
   }
 
   Widget _buildTotalAmount() {
-    return Card(
-      color: AppColors.primaryColor.withOpacity(0.1),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Total Return Amount:',
-              style: AppTextStyle.cardTitle(context).copyWith(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
+    return Container(      color: AppColors.background,
+
+      padding: const EdgeInsets.all(8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            'Total Return Amount:',
+            style: AppTextStyle.cardTitle(context).copyWith(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
             ),
-            Text(
-              '৳${_totalReturnAmount.toStringAsFixed(2)}',
-              style: AppTextStyle.cardTitle(context).copyWith(
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-                color: AppColors.primaryColor,
-              ),
+          ),
+          Text(
+            '৳${_totalReturnAmount.toStringAsFixed(2)}',
+            style: AppTextStyle.cardTitle(context).copyWith(
+              fontWeight: FontWeight.bold,
+              fontSize: 18,
+              color: AppColors.primaryColor,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -477,14 +525,24 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
   Widget _buildAdditionalFields() {
     return Column(
       children: [
-        const SizedBox(height: 12),
-        _buildReturnDateField(),
-        const SizedBox(height: 12),
-        _buildPaymentMethodDropdown(),
-        const SizedBox(height: 12),
-        _buildAccountDropdown(),
-        const SizedBox(height: 12),
-        _buildRemarkField(),
+
+        Row(children: [
+          Expanded(child:  _buildPaymentMethodDropdown(),),
+          const SizedBox(width: 8),
+          Expanded(child:  _buildAccountDropdown(),),
+
+        ],),
+
+
+        Row(children: [
+          Expanded(child:    _buildReturnDateField(),),
+          const SizedBox(width: 8),
+          Expanded(child:  _buildRemarkField(),),
+
+        ],),
+
+
+
       ],
     );
   }
@@ -554,7 +612,6 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
         final salesReturnBloc = context.read<SalesReturnBloc>();
         final moneyReceiptBloc = context.read<MoneyReceiptBloc>();
 
-        // Filter accounts based on selected payment method
         final filteredList = moneyReceiptBloc.selectedPaymentMethod.isNotEmpty
             ? context.read<AccountBloc>().activeAccount.where((item) {
           return item.acType?.toLowerCase() ==
@@ -574,10 +631,7 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
           onChanged: (newVal) {
             if (newVal != null) {
               setState(() {
-                // Update in SalesReturnBloc
                 salesReturnBloc.selectedAccount = newVal;
-
-                // Also update in MoneyReceiptBloc for consistency
                 moneyReceiptBloc.selectedAccount = newVal.acName ?? "";
                 moneyReceiptBloc.selectedAccountId = newVal.acId?.toString() ?? "";
               });
@@ -613,6 +667,7 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
       },
     );
   }
+
   Widget _buildRemarkField() {
     return CustomInputField(
       isRequiredLable: true,
@@ -712,7 +767,7 @@ class Item {
   double? totalPrice;
   double? discount;
   String? discountType;
-  int? originalQuantity; // Store original purchase quantity
+  int? originalQuantity;
 
   Item({
     this.productId,

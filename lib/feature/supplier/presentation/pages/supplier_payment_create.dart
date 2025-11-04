@@ -8,7 +8,6 @@ import '../../../../core/widgets/app_dropdown.dart';
 import '../../../../core/widgets/app_loader.dart';
 import '../../../../core/widgets/input_field.dart';
 import '../../../accounts/presentation/bloc/account/account_bloc.dart';
-import '../../../money_receipt/presentation/bloc/money_receipt/money_receipt_bloc.dart';
 import '../../../users_list/presentation/bloc/users/user_bloc.dart';
 import '../bloc/supplier/supplier_list_bloc.dart';
 import '../bloc/supplier_invoice/supplier_invoice_bloc.dart';
@@ -33,7 +32,7 @@ class _MoneyReceiptListScreenState extends State<SupplierPaymentForm> {
         context,
       ),
     );
-    context.read<AccountBloc>().add(FetchAccountList(context));
+    context.read<AccountBloc>().add(FetchAccountActiveList(context));
 
     context.read<SupplierPaymentBloc>().dateController.text = appWidgets
         .convertDateTimeDDMMYYYY(DateTime.now());
@@ -399,163 +398,168 @@ class _MoneyReceiptListScreenState extends State<SupplierPaymentForm> {
                             style: AppTextStyle.headerTitle(context),
                           ),
                           const SizedBox(height: 10),
-                          AppDropdown(
-                            label: "Payment Method",
-                            context: context,
-                            hint:
-                            context
-                                .read<SupplierPaymentBloc>()
-                                .selectedPaymentMethod
-                                .isEmpty
-                                ? "Select Payment Method"
-                                : context
-                                .read<SupplierPaymentBloc>()
-                                .selectedPaymentMethod,
-                            isLabel: false,
-                            isRequired: true,
-                            isNeedAll: false,
-                            value:
-                            context
-                                .read<SupplierPaymentBloc>()
-                                .selectedPaymentMethod
-                                .isEmpty
-                                ? null
-                                : context
-                                .read<SupplierPaymentBloc>()
-                                .selectedPaymentMethod,
-                            itemList: context
-                                .read<SupplierPaymentBloc>()
-                                .paymentMethod,
-                            onChanged: (newVal) {
-                              // Update the selected payment method in the bloc
+                          Row(children: [
+                            Expanded(child:                           AppDropdown(
+                              label: "Payment Method",
+                              context: context,
+                              hint:
                               context
                                   .read<SupplierPaymentBloc>()
-                                  .selectedPaymentMethod = newVal
-                                  .toString();
-
-                              setState(() {
+                                  .selectedPaymentMethod
+                                  .isEmpty
+                                  ? "Select Payment Method"
+                                  : context
+                                  .read<SupplierPaymentBloc>()
+                                  .selectedPaymentMethod,
+                              isLabel: false,
+                              isRequired: true,
+                              isNeedAll: false,
+                              value:
+                              context
+                                  .read<SupplierPaymentBloc>()
+                                  .selectedPaymentMethod
+                                  .isEmpty
+                                  ? null
+                                  : context
+                                  .read<SupplierPaymentBloc>()
+                                  .selectedPaymentMethod,
+                              itemList: context
+                                  .read<SupplierPaymentBloc>()
+                                  .paymentMethod,
+                              onChanged: (newVal) {
+                                // Update the selected payment method in the bloc
                                 context
                                     .read<SupplierPaymentBloc>()
                                     .selectedPaymentMethod = newVal
                                     .toString();
-                                // Clear selected account when payment method changes
-                                context
-                                    .read<SupplierPaymentBloc>()
-                                    .selectedAccount = "";
-                                context
-                                    .read<SupplierPaymentBloc>()
-                                    .selectedAccountId = "";
-                              });
-                            },
-                            validator: (value) {
-                              return value == null
-                                  ? 'Please select a payment method'
-                                  : null;
-                            },
-                            itemBuilder: (item) => DropdownMenuItem(
-                              value: item,
-                              child: Text(
-                                item.toString(),
-                                style: const TextStyle(
-                                  color: AppColors.blackColor,
-                                  fontFamily: 'Quicksand',
-                                  fontWeight: FontWeight.w300,
+
+                                setState(() {
+                                  context
+                                      .read<SupplierPaymentBloc>()
+                                      .selectedPaymentMethod = newVal
+                                      .toString();
+                                  // Clear selected account when payment method changes
+                                  context
+                                      .read<SupplierPaymentBloc>()
+                                      .selectedAccount = "";
+                                  context
+                                      .read<SupplierPaymentBloc>()
+                                      .selectedAccountId = "";
+                                });
+                              },
+                              validator: (value) {
+                                return value == null
+                                    ? 'Please select a payment method'
+                                    : null;
+                              },
+                              itemBuilder: (item) => DropdownMenuItem(
+                                value: item,
+                                child: Text(
+                                  item.toString(),
+                                  style: const TextStyle(
+                                    color: AppColors.blackColor,
+                                    fontFamily: 'Quicksand',
+                                    fontWeight: FontWeight.w300,
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                          BlocBuilder<AccountBloc, AccountState>(
-                            builder: (context, state) {
-                              // Filter the accounts list based on selected payment method (ac_type)
-                              final filteredList =
-                              context
-                                  .read<SupplierPaymentBloc>()
-                                  .selectedPaymentMethod
-                                  .isNotEmpty
-                                  ? context.read<AccountBloc>().list.where((
-                                  item,
-                                  ) {
-                                // Handle null acType safely
-                                final itemAcType = item.acType?.toLowerCase() ?? '';
-                                final selectedMethod = context
-                                    .read<SupplierPaymentBloc>()
-                                    .selectedPaymentMethod
-                                    .toLowerCase();
-
-                                return itemAcType == selectedMethod;
-                              }).toList()
-                                  : context.read<AccountBloc>().list;
-
-                              // Debug: Check the size of the filtered list
-                              print("Filtered accounts count: ${filteredList.length}");
-                              print("Selected payment method: ${context.read<SupplierPaymentBloc>().selectedPaymentMethod}");
-
-                              return AppDropdown(
-                                label: "Account",
-                                hint: filteredList.isEmpty
-                                    ? "No accounts available for selected payment method"
-                                    : "Select Account",
-                                context: context,
-                                isLabel: false,
-                                isRequired: true,
-                                isNeedAll: false,
-                                value:
+                            ),
+                            gapW16,
+                            Expanded(child:   BlocBuilder<AccountBloc, AccountState>(
+                              builder: (context, state) {
+                                // Filter the accounts list based on selected payment method (ac_type)
+                                final filteredList =
                                 context
                                     .read<SupplierPaymentBloc>()
-                                    .selectedAccount
-                                    .isEmpty
-                                    ? null
-                                    : context
-                                    .read<SupplierPaymentBloc>()
-                                    .selectedAccount,
-                                itemList: filteredList,
-                                onChanged: (newVal) {
-                                  if (newVal != null) {
-                                    // Update the selected account in the bloc
-                                    context
-                                        .read<SupplierPaymentBloc>()
-                                        .selectedAccount = newVal
-                                        .toString();
+                                    .selectedPaymentMethod
+                                    .isNotEmpty
+                                    ? context.read<AccountBloc>().activeAccount.where((
+                                    item,
+                                    ) {
+                                  // Handle null acType safely
+                                  final itemAcType = item.acType?.toLowerCase() ?? '';
+                                  final selectedMethod = context
+                                      .read<SupplierPaymentBloc>()
+                                      .selectedPaymentMethod
+                                      .toLowerCase();
 
-                                    // Find the matching account to get the ID
-                                    try {
-                                      var matchingAccount = filteredList.firstWhere(
-                                            (acc) =>
-                                        acc.toString() == newVal.toString(),
-                                      );
+                                  return itemAcType == selectedMethod;
+                                }).toList()
+                                    : context.read<AccountBloc>().activeAccount;
 
+                                // Debug: Check the size of the filtered list
+                                print("Filtered accounts count: ${filteredList.length}");
+                                print("Selected payment method: ${context.read<SupplierPaymentBloc>().selectedPaymentMethod}");
+
+                                return AppDropdown(
+                                  label: "Account",
+                                  hint: filteredList.isEmpty
+                                      ? "No accounts available for selected payment method"
+                                      : "Select Account",
+                                  context: context,
+                                  isLabel: false,
+                                  isRequired: true,
+                                  isNeedAll: false,
+                                  value:
+                                  context
+                                      .read<SupplierPaymentBloc>()
+                                      .selectedAccount
+                                      .isEmpty
+                                      ? null
+                                      : context
+                                      .read<SupplierPaymentBloc>()
+                                      .selectedAccount,
+                                  itemList: filteredList,
+                                  onChanged: (newVal) {
+                                    if (newVal != null) {
+                                      // Update the selected account in the bloc
                                       context
                                           .read<SupplierPaymentBloc>()
-                                          .selectedAccountId = matchingAccount.acId
+                                          .selectedAccount = newVal
                                           .toString();
-                                    } catch (e) {
-                                      print("Error finding account: $e");
-                                      context
-                                          .read<SupplierPaymentBloc>()
-                                          .selectedAccountId = "";
+
+                                      // Find the matching account to get the ID
+                                      try {
+                                        var matchingAccount = filteredList.firstWhere(
+                                              (acc) =>
+                                          acc.toString() == newVal.toString(),
+                                        );
+
+                                        context
+                                            .read<SupplierPaymentBloc>()
+                                            .selectedAccountId = matchingAccount.acId
+                                            .toString();
+                                      } catch (e) {
+                                        print("Error finding account: $e");
+                                        context
+                                            .read<SupplierPaymentBloc>()
+                                            .selectedAccountId = "";
+                                      }
                                     }
-                                  }
-                                },
-                                validator: (value) {
-                                  if (value == null) {
-                                    return 'Please select an account';
-                                  }
-                                  return null;
-                                },
-                                itemBuilder: (item) => DropdownMenuItem(
-                                  value: item.toString(),
-                                  child: Text(
-                                    item.toString(),
-                                    style: const TextStyle(
-                                      color: AppColors.blackColor,
-                                      fontFamily: 'Quicksand',
-                                      fontWeight: FontWeight.w300,
+                                  },
+                                  validator: (value) {
+                                    if (value == null) {
+                                      return 'Please select an account';
+                                    }
+                                    return null;
+                                  },
+                                  itemBuilder: (item) => DropdownMenuItem(
+                                    value: item.toString(),
+                                    child: Text(
+                                      item.toString(),
+                                      style: const TextStyle(
+                                        color: AppColors.blackColor,
+                                        fontFamily: 'Quicksand',
+                                        fontWeight: FontWeight.w300,
+                                      ),
                                     ),
                                   ),
-                                ),
-                              );
-                            },
-                          ),
+                                );
+                              },
+                            ),)
+                          ],),
+                        
                           CustomInputField(
                             isRequiredLable: true,
                             isRequired: true,

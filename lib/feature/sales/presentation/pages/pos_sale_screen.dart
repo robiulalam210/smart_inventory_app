@@ -1,8 +1,4 @@
-import 'dart:async';
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
-import 'package:lottie/lottie.dart';
 import 'package:smart_inventory/feature/products/product/presentation/bloc/products/products_bloc.dart';
 import 'package:smart_inventory/feature/users_list/data/model/user_model.dart';
 
@@ -14,11 +10,9 @@ import '../../../../core/widgets/app_loader.dart';
 import '../../../../core/widgets/coustom_search_text_field.dart';
 import '../../../../core/widgets/date_range.dart';
 import '../../../customer/data/model/customer_active_model.dart';
-import '../../../customer/data/model/customer_model.dart';
 import '../../../customer/presentation/bloc/customer/customer_bloc.dart';
 import '../../../products/product/presentation/widget/pagination.dart';
 import '../../../users_list/presentation/bloc/users/user_bloc.dart';
-import '../../data/models/pos_sale_model.dart';
 import '../bloc/possale/crate_pos_sale/create_pos_sale_bloc.dart';
 import '../bloc/possale/possale_bloc.dart';
 import '../widgets/widget.dart';
@@ -188,6 +182,7 @@ class _PosSaleScreenState extends State<PosSaleScreen> {
                     "Select Customer",
                 isNeedAll: true,
                 isRequired: true,
+                isLabel: true,
                 value: context.read<PosSaleBloc>().selectCustomerModel,
                 itemList: context.read<CustomerBloc>().activeCustomer,
                 onChanged: (newVal) {
@@ -242,7 +237,7 @@ class _PosSaleScreenState extends State<PosSaleScreen> {
                     ?.username
                     ?.toString() ??
                     "Select Seller",
-                isLabel: false,
+                isLabel: true,
                 isRequired: true,
                 isNeedAll: true,
                 value: context.read<PosSaleBloc>().selectUserModel,
@@ -289,6 +284,7 @@ class _PosSaleScreenState extends State<PosSaleScreen> {
         SizedBox(
           width: 260,
           child: CustomDateRangeField(
+            isLabel: false,
             selectedDateRange: selectedDateRange,
             onDateRangeSelected: (value) {
               setState(() => selectedDateRange = value);

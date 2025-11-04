@@ -11,7 +11,7 @@ String supplierListModelToJson(List<SupplierListModel> data) => json.encode(List
 class SupplierListModel {
   final int? id;
   final String? name;
-  final String? email;
+  final dynamic email;
   final String? phone;
   final String? address;
   final bool? isActive;
@@ -45,6 +45,11 @@ class SupplierListModel {
     this.updatedAt,
   });
 
+  @override
+  String toString() {
+    // TODO: implement toString
+    return name??"";
+  }
   factory SupplierListModel.fromJson(Map<String, dynamic> json) => SupplierListModel(
     id: json["id"],
     name: json["name"],

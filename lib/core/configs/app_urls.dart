@@ -27,13 +27,13 @@ class AppUrls {
   static final String category          = '$baseUrl/categories/';
   static final String group          = '$baseUrl/groups/';
   static final String product          = '$baseUrl/products/';
-  static final String productActive          = '$baseUrl/product-active';
-  static final String productStock          = '$baseUrl/user/product/stock-info?status=1&total=true';
+  static final String productActive          = '$baseUrl/products?no_pagination=true&is_active=true';
+  // static final String productStock          = '$baseUrl/user/product/stock-info?status=1&total=true';
   static final String source          = '$baseUrl/sources/';
   static final String account          = '$baseUrl/accounts/';
   static final String customer          = '$baseUrl/customers/';
   static final String customerActive          = '$baseUrl/customers-active';
-  static final String accountActive          = '$baseUrl/accounts-active';
+  static final String accountActive          = '$baseUrl/accounts/?is_active=true';
   static final String administrationUser          = '$baseUrl/users/';
 
 
@@ -66,8 +66,10 @@ class AppUrls {
   static final String posSaleInvoice          = '$baseUrl/sale-invoice/';
   static final String saleReturn          = '$baseUrl/sales-returns/';
   static final String purchaseReturn          = '$baseUrl/purchase-returns/';
+  static final String badStock          = '$baseUrl/bad-stocks/';
 
   static final String purchaseInvoice = '$baseUrl/purchases-invoice/supplier/';
+  static final String dashboard = '$baseUrl/reports/dashboard/';
 
 
 

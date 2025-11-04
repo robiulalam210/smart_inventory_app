@@ -199,7 +199,7 @@ class _SidebarState extends State<Sidebar> {
     // Handle special cases
     if (index == 0) {
       // Dashboard - load data
-      bloc.add(LoadDashboardData(filter: DateRangeFilter.last7Days));
+      bloc.add(FetchDashboardData(context: context));
     }
 
     // Close drawer on mobile

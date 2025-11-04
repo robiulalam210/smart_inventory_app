@@ -32,6 +32,7 @@ import '../feature/report/presentation/bloc/stock_report_bloc/stock_report_bloc.
 import '../feature/report/presentation/bloc/supplier_due_advance_bloc/supplier_due_advance_bloc.dart';
 import '../feature/report/presentation/bloc/supplier_ledger_bloc/supplier_ledger_bloc.dart';
 import '../feature/report/presentation/bloc/top_products_bloc/top_products_bloc.dart';
+import '../feature/return/bad_stock/bad_stock_list/bad_stock_list_bloc.dart';
 import '../feature/return/sales_return/presentation/sales_return_bloc/sales_return_bloc.dart';
 import '../feature/supplier/presentation/bloc/supplier_invoice/supplier_invoice_bloc.dart';
 import '../feature/supplier/presentation/bloc/supplier_payment/supplier_payment_bloc.dart';
@@ -95,10 +96,12 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (_) => CustomerLedgerBloc()),
         BlocProvider(create: (_) => CustomerDueAdvanceBloc()),
         BlocProvider(create: (_) => SupplierDueAdvanceBloc()),
+        BlocProvider(create: (_) => SupplierLedgerBloc()),
         BlocProvider(create: (_) => ExpenseReportBloc()),
 
         BlocProvider(create: (_) => SalesReturnBloc()),
         BlocProvider(create: (_) => PurchaseReturnBloc()),
+        BlocProvider(create: (_) => BadStockListBloc()),
       ],
       child: Center(
         child: MaterialApp(

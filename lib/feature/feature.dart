@@ -16,14 +16,9 @@ export 'auth/presentation/pages/login_scr.dart';
 
 //!-----Lab Dashboard -----------
 
-export 'lab_dashboard/data/models/all_setup_model/all_invoice_setup_model.dart';
-export 'lab_dashboard/data/models/all_setup_model/all_setup_model.dart';
+
 export 'lab_dashboard/data/models/dashboard/dashboard_model.dart';
-export 'lab_dashboard/data/models/invoice_server_response_model.dart';
-export 'lab_dashboard/data/models/invoice_un_sync_model.dart';
-export 'lab_dashboard/data/repositories/dashboard_repo_db/dashboard_repo_db.dart';
-export 'lab_dashboard/data/repositories/setup_repo_sync_all/setup_repo_db_sync.dart';
-export 'lab_dashboard/data/repositories/unsync_update_invoice_db/unsync_update_invoice_db.dart';
+
 
 export 'lab_dashboard/presentation/bloc/dashboard/dashboard_bloc.dart';
 export 'lab_dashboard/presentation/pages/lab_dashboard_screen.dart';

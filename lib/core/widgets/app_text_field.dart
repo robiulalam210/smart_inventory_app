@@ -2,7 +2,7 @@ import '../core.dart';
 
 class AppTextField extends StatelessWidget {
   const AppTextField(
-      {required this.textInputAction,
+      { this.textInputAction,
       this.labelText,
       required this.hintText,
       required this.keyboardType,
@@ -23,7 +23,7 @@ class AppTextField extends StatelessWidget {
 
   final void Function(String)? onChanged;
   final String? Function(String?)? validator;
-  final TextInputAction textInputAction;
+  final TextInputAction? textInputAction;
   final TextInputType keyboardType;
   final TextEditingController controller;
   final bool? obscureText;

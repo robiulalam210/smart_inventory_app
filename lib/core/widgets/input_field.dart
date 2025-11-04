@@ -78,7 +78,7 @@ class CustomInputFieldState extends State<CustomInputField> {
       child: ConstrainedBox(
         constraints: BoxConstraints(
           maxHeight: 52, // Adjust max height as needed
-          minHeight: 35, // Adjust max height as needed
+          minHeight: 40, // Adjust max height as needed
         ),
         child: SingleChildScrollView(
           scrollDirection: Axis.vertical,

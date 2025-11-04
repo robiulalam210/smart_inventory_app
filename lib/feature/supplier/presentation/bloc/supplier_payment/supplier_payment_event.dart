@@ -3,23 +3,23 @@ part of 'supplier_payment_bloc.dart';
 sealed class SupplierPaymentEvent {}
 
 class FetchSupplierPaymentList extends SupplierPaymentEvent {
-  BuildContext context;
-
+  final BuildContext context;
   final String filterText;
-  final String location;
   final DateTime? startDate;
   final DateTime? endDate;
   final int pageNumber;
 
-  FetchSupplierPaymentList(
-      this.context,
-      {this.filterText = '',
-      this.location = '',
-      this.startDate,
-      this.endDate,
-      this.pageNumber = 0});
-}
+   FetchSupplierPaymentList({
+    required this.context,
+    this.filterText = '',
+    this.startDate,
+    this.endDate,
+    this.pageNumber = 0,
+  });
 
+  @override
+  List<Object?> get props => [context, filterText, startDate, endDate, pageNumber];
+}
 class AddSupplierPayment extends SupplierPaymentEvent {
   final Map<String, dynamic>? body;
 

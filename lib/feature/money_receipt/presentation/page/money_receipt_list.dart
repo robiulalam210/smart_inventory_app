@@ -1,7 +1,4 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
-import 'package:lottie/lottie.dart';
 
 import '../../../../core/configs/configs.dart';
 import '../../../../core/shared/widgets/sideMenu/sidebar.dart';
@@ -11,7 +8,6 @@ import '../../../../core/widgets/app_loader.dart';
 import '../../../../core/widgets/coustom_search_text_field.dart';
 import '../../../../core/widgets/date_range.dart';
 import '../../../customer/data/model/customer_active_model.dart';
-import '../../../customer/data/model/customer_model.dart';
 import '../../../customer/presentation/bloc/customer/customer_bloc.dart';
 import '../../../products/product/presentation/widget/pagination.dart';
 import '../../../users_list/data/model/user_model.dart';
@@ -32,16 +28,12 @@ class _MoneyReceiptScreenState extends State<MoneyReceiptScreen> {
   DateRange? selectedDateRange;
 
   // Add missing variables
-  late DateTime now;
-  late DateTime startDate;
-  late DateTime endDate;
+
 
   @override
   void initState() {
     super.initState();
-    now = DateTime.now();
-    startDate = DateTime(now.year, now.month - 1, now.day);
-    endDate = DateTime(now.year, now.month, now.day);
+
 
     filterTextController.clear();
     context.read<MoneyReceiptBloc>().selectUserModel = null;
@@ -53,7 +45,7 @@ class _MoneyReceiptScreenState extends State<MoneyReceiptScreen> {
     context.read<CustomerBloc>().add(
       FetchCustomerActiveList(context, ),
     );
-    _fetchApi(from: startDate, to: endDate);
+    _fetchApi();
   }
 
   String selectedQuickOption = "";
@@ -89,8 +81,8 @@ class _MoneyReceiptScreenState extends State<MoneyReceiptScreen> {
     _fetchApi(
       pageNumber: pageNumber,
       pageSize: pageSize,
-      from: selectedDateRange?.start ?? startDate,
-      to: selectedDateRange?.end ?? endDate,
+      from: selectedDateRange?.start ,
+      to: selectedDateRange?.end,
       customer: context.read<MoneyReceiptBloc>().selectCustomerModel?.id.toString() ?? '',
       seller: context.read<MoneyReceiptBloc>().selectUserModel?.id.toString() ?? '',
       paymentMethod: selectedPaymentMethodNotifier.value?.toString() ?? '',
@@ -141,8 +133,7 @@ class _MoneyReceiptScreenState extends State<MoneyReceiptScreen> {
         color: AppColors.primaryColor,
         onRefresh: () async {
           _fetchApi(
-            from: startDate,
-            to: endDate,
+
             customer: context.read<MoneyReceiptBloc>().selectCustomerModel?.id.toString() ?? '',
             seller: context.read<MoneyReceiptBloc>().selectUserModel?.id.toString() ?? '',
             paymentMethod: selectedPaymentMethodNotifier.value?.toString() ?? '',
@@ -157,8 +148,7 @@ class _MoneyReceiptScreenState extends State<MoneyReceiptScreen> {
               } else if (state is MoneyReceiptAddSuccess) {
                 Navigator.pop(context); // Close loader dialog
                 _fetchApi(
-                  from: startDate,
-                  to: endDate,
+
                   customer: context.read<MoneyReceiptBloc>().selectCustomerModel?.id.toString() ?? '',
                   seller: context.read<MoneyReceiptBloc>().selectUserModel?.id.toString() ?? '',
                   paymentMethod: selectedPaymentMethodNotifier.value?.toString() ?? '',
@@ -168,8 +158,7 @@ class _MoneyReceiptScreenState extends State<MoneyReceiptScreen> {
               } else if (state is MoneyReceiptAddFailed) {
                 Navigator.pop(context); // Close loader dialog
                 _fetchApi(
-                  from: startDate,
-                  to: endDate,
+
                   customer: context.read<MoneyReceiptBloc>().selectCustomerModel?.id.toString() ?? '',
                   seller: context.read<MoneyReceiptBloc>().selectUserModel?.id.toString() ?? '',
                   paymentMethod: selectedPaymentMethodNotifier.value?.toString() ?? '',
@@ -186,8 +175,7 @@ class _MoneyReceiptScreenState extends State<MoneyReceiptScreen> {
               } else if (state is MoneyReceiptDeleteSuccess) {
                 Navigator.pop(context); // Close loader dialog
                 _fetchApi(
-                  from: startDate,
-                  to: endDate,
+
                   customer: context.read<MoneyReceiptBloc>().selectCustomerModel?.id.toString() ?? '',
                   seller: context.read<MoneyReceiptBloc>().selectUserModel?.id.toString() ?? '',
                   paymentMethod: selectedPaymentMethodNotifier.value?.toString() ?? '',
@@ -195,8 +183,7 @@ class _MoneyReceiptScreenState extends State<MoneyReceiptScreen> {
               } else if (state is MoneyReceiptDeleteFailed) {
                 Navigator.pop(context); // Close loader dialog
                 _fetchApi(
-                  from: startDate,
-                  to: endDate,
+
                   customer: context.read<MoneyReceiptBloc>().selectCustomerModel?.id.toString() ?? '',
                   seller: context.read<MoneyReceiptBloc>().selectUserModel?.id.toString() ?? '',
                   paymentMethod: selectedPaymentMethodNotifier.value?.toString() ?? '',
@@ -293,6 +280,7 @@ class _MoneyReceiptScreenState extends State<MoneyReceiptScreen> {
                 label: "Customer",
                 context: context,
                 isSearch: true,
+                isLabel: true,
                 hint: context
                     .read<MoneyReceiptBloc>()
                     .selectCustomerModel
@@ -304,7 +292,6 @@ class _MoneyReceiptScreenState extends State<MoneyReceiptScreen> {
                 value: context.read<MoneyReceiptBloc>().selectCustomerModel,
                 itemList: context.read<CustomerBloc>().activeCustomer,
                 onChanged: (newVal) {
-                  print('Customer selected: ${newVal?.id} - ${newVal?.name}');
 
                   // Update bloc state
                   context.read<MoneyReceiptBloc>().selectCustomerModel = newVal;
@@ -355,13 +342,12 @@ class _MoneyReceiptScreenState extends State<MoneyReceiptScreen> {
                     ?.username
                     ?.toString() ??
                     "Select Seller",
-                isLabel: false,
+                isLabel: true,
                 isRequired: true,
                 isNeedAll: true,
                 value: context.read<MoneyReceiptBloc>().selectUserModel,
                 itemList: context.read<UserBloc>().list,
                 onChanged: (newVal) {
-                  print('Seller selected: ${newVal?.id} - ${newVal?.username}');
 
                   // Update bloc state - UNCOMMENT THIS
                   context.read<MoneyReceiptBloc>().selectUserModel = newVal;
@@ -402,6 +388,7 @@ class _MoneyReceiptScreenState extends State<MoneyReceiptScreen> {
         SizedBox(
           width: 280,
           child: CustomDateRangeField(
+            isLabel: false,
             selectedDateRange: selectedDateRange,
             onDateRangeSelected: (value) {
               setState(() => selectedDateRange = value);

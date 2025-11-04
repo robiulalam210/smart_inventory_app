@@ -1,9 +1,7 @@
 import 'package:smart_inventory/feature/accounts/presentation/pages/account_screen.dart';
-import 'package:smart_inventory/feature/customer/presentation/pages/create_customer_screen.dart';
 import 'package:smart_inventory/feature/expense/expense_head/presentation/pages/expense_screen.dart';
 import 'package:smart_inventory/feature/expense/presentation/pages/expense_list_screen.dart';
 import 'package:smart_inventory/feature/products/groups/presentation/pages/groups_screen.dart';
-import 'package:smart_inventory/feature/products/product/presentation/pages/product_create.dart';
 import 'package:smart_inventory/feature/products/soruce/presentation/pages/source_screen.dart';
 import 'package:smart_inventory/feature/products/unit/presentation/pages/unit_screen.dart';
 import 'package:smart_inventory/feature/purchase/presentation/page/purchase_screen.dart';
@@ -15,11 +13,10 @@ import 'package:smart_inventory/feature/report/presentation/page/sales_report_pa
 import 'package:smart_inventory/feature/report/presentation/page/stock_report_screen/stock_report_screen.dart';
 import 'package:smart_inventory/feature/report/presentation/page/top_products_screen/top_products_screen.dart';
 import 'package:smart_inventory/feature/sales/presentation/pages/pos_sale_screen.dart';
-import 'package:smart_inventory/feature/supplier/presentation/pages/create_supplierr_screen.dart';
 
 import '../../../../../core/configs/configs.dart';
+import '../../../../../core/repositories/get_response.dart';
 import '../../../../../enery_screen.dart';
-import '../../../../accounts/presentation/pages/create_account_screen.dart';
 import '../../../../customer/presentation/pages/customer_screen.dart';
 import '../../../../expense/expense_sub_head/presentation/pages/expense_sub_head_screen.dart';
 import '../../../../money_receipt/presentation/page/monery_receipt_create.dart';
@@ -34,16 +31,15 @@ import '../../../../report/presentation/page/customer_due_advance_screen/custome
 import '../../../../report/presentation/page/expense_report_screen/expense_report_screen.dart';
 import '../../../../report/presentation/page/supplier_due_advance_screen/supplier_due_advance_screen.dart';
 import '../../../../report/presentation/page/supplier_ledger_screen/supplier_ledger_screen.dart';
+import '../../../../return/bad_stock/bad_stock_screen.dart';
 import '../../../../return/purchase_return/presentation/purchase_return/purchase_return_screen.dart';
 import '../../../../return/sales_return/presentation/page/sales_return_page.dart';
 import '../../../../sales/presentation/pages/create_pos_sale/create_pos_sale.dart';
 
 import '../../../../supplier/presentation/pages/supplier_list_screen.dart';
-import '../../../../supplier/presentation/pages/supplier_payment_create.dart';
 import '../../../../supplier/presentation/pages/supplier_payment_list_screen.dart';
 import '../../../../users_list/presentation/pages/users_screen.dart';
 import '../../../data/models/dashboard/dashboard_model.dart';
-import '../../../data/repositories/dashboard_repo_db/dashboard_repo_db.dart';
 import '../../pages/lab_dashboard_screen.dart';
 
 part 'dashboard_event.dart';
@@ -80,7 +76,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
 
 
     AppWrapper(child: SalesReturnScreen()),
-    AppWrapper(child: ExpenseSubHeadScreen()),
+    AppWrapper(child: BadStockScreen()),
     AppWrapper(child: PurchaseReturnScreen()),
 
 
@@ -110,20 +106,47 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
   ];
 
   DashboardBloc(this.dbHelper) : super(DashboardScreenChanged(0)) {
+    // Register event handlers
     on<ChangeDashboardScreen>((event, emit) {
       emit(DashboardScreenChanged(event.index));
     });
 
-    on<LoadDashboardData>((event, emit) async {
-      emit(DashboardLoading());
-      try {
-        final dashboardData = await fetchDashboardData(filter: event.filter);
-        emit(DashboardLoaded(dashboardData));
-      } catch (e,k) {
-        debugPrint("error $e stack $k");
-        emit(DashboardError("Failed to load dashboard data"));
+    on<FetchDashboardData>(_onFetchDashboardData);
+  }
+
+  Future<void> _onFetchDashboardData(
+      FetchDashboardData event,
+      Emitter<DashboardState> emit,
+      ) async {
+    emit(DashboardLoading());
+    try {
+      // Build URL with date filter parameter BEFORE making the request
+      String url = AppUrls.dashboard;
+      if (event.dateFilter != null) {
+        url += '?dateFilter=${event.dateFilter}';
       }
-    });
+
+      // Debug print
+
+      final res = await getResponse(
+        url: url, // Use the constructed URL
+        context: event.context,
+      );
+
+      // Parse manually to handle the nested structure
+      final Map<String, dynamic> responseData = json.decode(res);
+
+      if (responseData['status'] == true) {
+        final dashboardData = DashboardData.fromJson(responseData['data']);
+        emit(DashboardLoaded(dashboardData));
+      } else {
+        emit(DashboardError(
+          responseData['message'] ?? "Failed to fetch dashboard data",
+        ));
+      }
+    } catch (error) {
+      emit(DashboardError(error.toString()));
+    }
   }
 }
 

@@ -1,8 +1,5 @@
 import 'dart:async';
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
-import 'package:lottie/lottie.dart';
 import 'package:smart_inventory/core/configs/configs.dart';
 import 'package:smart_inventory/feature/customer/data/model/customer_active_model.dart';
 import 'package:smart_inventory/feature/return/sales_return/presentation/page/widget/widget.dart';
@@ -13,7 +10,6 @@ import '../../../../../core/widgets/app_dropdown.dart';
 import '../../../../../core/widgets/app_loader.dart';
 import '../../../../../core/widgets/coustom_search_text_field.dart';
 import '../../../../../core/widgets/date_range.dart';
-import '../../../../../responsive.dart';
 import '../../../../customer/presentation/bloc/customer/customer_bloc.dart';
 import '../../../../products/product/presentation/widget/pagination.dart';
 import '../sales_return_bloc/sales_return_bloc.dart';
@@ -148,7 +144,6 @@ class _SalesReturnScreenState extends State<SalesReturnScreen> {
             child: Column(
               children: [
                 _buildFilterRow(),
-                const SizedBox(height: 16),
                 SizedBox(child: _buildDataTable()),
               ],
             ),
@@ -168,12 +163,13 @@ class _SalesReturnScreenState extends State<SalesReturnScreen> {
           flex: 2,
           child: CustomSearchTextFormField(
             controller: filterTextController,
+            isRequiredLabel: false,
             onChanged: (value) => _fetchSalesReturnList(filterText: value),
             onClear: () {
               filterTextController.clear();
               _fetchSalesReturnList();
             },
-            hintText: "Search by Receipt No, Customer, or Reason",
+            hintText: "by Receipt No, Customer, or Reason",
           ),
         ),
         const SizedBox(width: 12),
@@ -190,6 +186,7 @@ class _SalesReturnScreenState extends State<SalesReturnScreen> {
                 hint: _selectedCustomer?.name ?? "Select Customer",
                 isNeedAll: true,
                 isRequired: false,
+                isLabel: true,
                 value: _selectedCustomer,
                 itemList: context.read<CustomerBloc>().activeCustomer,
                 onChanged: (newVal) {
@@ -225,6 +222,7 @@ class _SalesReturnScreenState extends State<SalesReturnScreen> {
         SizedBox(
           width: 260,
           child: CustomDateRangeField(
+            isLabel: false,
             selectedDateRange: selectedDateRange,
             onDateRangeSelected: (value) {
               setState(() => selectedDateRange = value);
@@ -264,7 +262,14 @@ class _SalesReturnScreenState extends State<SalesReturnScreen> {
 
   Widget _buildDataTable() {
     return BlocBuilder<SalesReturnBloc, SalesReturnState>(
-      builder: (context, state) {
+
+      buildWhen: (previous, current) {
+        return current is SalesReturnLoading ||
+            current is SalesReturnSuccess ||
+            current is SalesReturnError;
+      },
+
+         builder: (context, state) {
         if (state is SalesReturnLoading) {
           return const Center(
             child: Column(

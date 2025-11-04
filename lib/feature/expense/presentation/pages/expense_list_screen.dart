@@ -207,7 +207,7 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
                         context.read<ExpenseBloc>().filterTextController.clear();
                         _fetchApi(from: startDate, to: endDate, );
                       },
-                      hintText: "Search by description, amount, etc.",
+                      hintText: "by description, amount, etc.",
                     ),
                   ),
                   gapW16,

@@ -157,7 +157,7 @@ class _ExpenseHeadScreenState extends State<ExpenseSubHeadScreen> {
                             _fetchApiData();
                           },
                           hintText:
-                              "Search Name", // Pass dynamic hintText if needed
+                              "Name", // Pass dynamic hintText if needed
                         ),
                       ),
                       gapW16,
