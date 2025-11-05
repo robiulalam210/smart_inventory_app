@@ -146,7 +146,7 @@ class PaymentSummary {
 
 class AffectedInvoice {
   final String? invoiceNo;
-  final int? amountApplied;
+  final dynamic? amountApplied;
 
   AffectedInvoice({
     this.invoiceNo,
@@ -165,8 +165,8 @@ class AffectedInvoice {
 }
 
 class AfterPayment {
-  final int? totalDue;
-  final int? paymentApplied;
+  final dynamic? totalDue;
+  final dynamic? paymentApplied;
 
   AfterPayment({
     this.totalDue,
@@ -185,7 +185,7 @@ class AfterPayment {
 }
 
 class BeforePayment {
-  final int? totalDue;
+  final dynamic? totalDue;
 
   BeforePayment({
     this.totalDue,

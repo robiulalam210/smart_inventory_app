@@ -9,11 +9,8 @@ import '../../../../core/configs/configs.dart';
 import '../../../../core/shared/widgets/sideMenu/sidebar.dart';
 import '../../../../core/widgets/app_alert_dialog.dart';
 import '../../../../core/widgets/app_button.dart';
-import '../../../../core/widgets/app_dropdown.dart';
 import '../../../../core/widgets/app_loader.dart';
 import '../../../../core/widgets/coustom_search_text_field.dart';
-import '../../../../core/widgets/custom_filter_ui.dart';
-import '../../../../responsive.dart';
 import '../../../products/product/presentation/widget/pagination.dart';
 import '../bloc/supplier_payment/supplier_payment_bloc.dart';
 import '../widget/supplier_payment_widget.dart';
@@ -120,7 +117,6 @@ class _SupplierPaymentScreenState extends State<SupplierPaymentScreen> {
         child: Column(
           children: [
             _buildFilterSection(),
-            const SizedBox(height: 16),
             _buildSupplierPaymentList(),
           ],
         ),
@@ -130,7 +126,7 @@ class _SupplierPaymentScreenState extends State<SupplierPaymentScreen> {
 
   Widget _buildFilterSection() {
     return Padding(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(4),
       child: Column(
         children: [
           Row(
@@ -271,7 +267,6 @@ class _SupplierPaymentScreenState extends State<SupplierPaymentScreen> {
                   SizedBox(
                     child: SupplierPaymentWidget(suppliers: state.list),
                   ),
-                  const SizedBox(height: 16),
                   _buildPagination(state),
                 ],
               );

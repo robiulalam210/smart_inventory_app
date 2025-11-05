@@ -11,35 +11,35 @@ String unitsModelToJson(List<UnitsModel> data) => json.encode(List<dynamic>.from
 class UnitsModel {
   final int? id;
   final int? company;
+  final int? createdBy;
   final String? name;
   final String? code;
-
-
+  final bool? isActive;
 
   UnitsModel({
     this.id,
     this.company,
+    this.createdBy,
     this.name,
     this.code,
+    this.isActive,
   });
-
-  @override
-  String toString() {
-    // TODO: implement toString
-    return name??"";
-  }
 
   factory UnitsModel.fromJson(Map<String, dynamic> json) => UnitsModel(
     id: json["id"],
     company: json["company"],
+    createdBy: json["created_by"],
     name: json["name"],
     code: json["code"],
+    isActive: json["is_active"],
   );
 
   Map<String, dynamic> toJson() => {
     "id": id,
     "company": company,
+    "created_by": createdBy,
     "name": name,
     "code": code,
+    "is_active": isActive,
   };
 }

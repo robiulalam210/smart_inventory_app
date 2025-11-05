@@ -1,6 +1,4 @@
-import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:hugeicons/hugeicons.dart';
 import 'package:smart_inventory/feature/expense/expense_sub_head/data/model/expense_sub_head_model.dart';
 
 import '../../../../core/configs/configs.dart';
@@ -31,7 +29,7 @@ class ExpenseTableCard extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final totalWidth = constraints.maxWidth - 25;
+        final totalWidth = constraints.maxWidth ;
         const numColumns = 9; // Adjusted for expense fields
         const minColumnWidth = 120.0;
 
@@ -65,16 +63,14 @@ class ExpenseTableCard extends StatelessWidget {
                     controller: horizontalScrollController,
                     scrollDirection: Axis.horizontal,
                     child: Padding(
-                      padding: const EdgeInsets.only(bottom: 10),
+                      padding: const EdgeInsets.only(bottom: 5),
                       child: ConstrainedBox(
                         constraints: BoxConstraints(minWidth: totalWidth),
                         child: DataTable(
-                          dataRowMinHeight: 50,
-                          dataRowMaxHeight: 60,
-                          columnSpacing: 8,
-                          horizontalMargin: 12,
+                          dataRowMinHeight: 35,
+                          dataRowMaxHeight: 35,
                           dividerThickness: 0.5,
-                          headingRowHeight: 50,
+                          headingRowHeight: 40,
                           headingTextStyle: TextStyle(
                             color: Colors.white,
                             fontSize: 12,

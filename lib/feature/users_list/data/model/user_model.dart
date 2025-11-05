@@ -27,11 +27,6 @@ class UsersListModel {
     this.isStaff,
   });
 
-  @override
-  String toString() {
-    // TODO: implement toString
-    return username??"";
-  }
   factory UsersListModel.fromJson(Map<String, dynamic> json) => UsersListModel(
     id: json["id"],
     username: json["username"],
@@ -58,7 +53,7 @@ class Company {
   final String? name;
   final String? address;
   final String? phone;
-  final String? logo;
+  final dynamic logo;
   final bool? isActive;
   final DateTime? startDate;
   final DateTime? expiryDate;

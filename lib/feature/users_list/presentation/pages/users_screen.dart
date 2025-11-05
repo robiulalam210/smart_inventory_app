@@ -217,15 +217,8 @@ class _UsersScreenState extends State<UsersScreen> {
                         child: Lottie.asset(AppImages.noData),
                       );
                     } else {
-                      return ListView.builder(
-                        shrinkWrap: true,
-                        itemCount: state.list.length,
-                        itemBuilder: (_, index) {
-                          final staffModel = state.list[index];
-                          return UserCard(
-                              staffData: staffModel, index: index);
-                        },
-                      );
+                      return UserTableCard(users: state.list,);
+
                     }
                   } else if (state is UserListFailed) {
                     return Center(

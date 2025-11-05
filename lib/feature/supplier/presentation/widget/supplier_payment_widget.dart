@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:smart_inventory/core/configs/app_colors.dart';
 import 'package:smart_inventory/feature/supplier/data/model/supplier_payment/suppler_payment_model.dart';
 
 class SupplierPaymentWidget extends StatelessWidget {
@@ -22,7 +23,7 @@ class SupplierPaymentWidget extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final totalWidth = constraints.maxWidth - 70;
+        final totalWidth = constraints.maxWidth;
         const numColumns = 10; // Added one column for actions
         const minColumnWidth = 100.0;
 
@@ -60,16 +61,29 @@ class SupplierPaymentWidget extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                       child: DataTable(
                         columns: _buildColumns(dynamicColumnWidth),
-                        rows: suppliers.asMap().entries.map((e) => _buildRow(e.key + 1, e.value, dynamicColumnWidth)).toList(),
-                        headingRowColor: MaterialStateProperty.all(const Color(0xFF6AB129)),
+                        rows: suppliers
+                            .asMap()
+                            .entries
+                            .map(
+                              (e) => _buildRow(
+                                e.key + 1,
+                                e.value,
+                                dynamicColumnWidth,
+                              ),
+                            )
+                            .toList(),
+                        headingRowColor: WidgetStateProperty.all(
+                         AppColors.primaryColor
+                        ),
+                        headingRowHeight: 40,
                         headingTextStyle: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
                           fontSize: 12,
                         ),
-                        dataRowMinHeight: 45,
-                        columnSpacing: 8,
-                        horizontalMargin: 12,
+                        dataRowMinHeight: 35,
+                        columnSpacing: 0,
+                        horizontalMargin: 0,
                         dataTextStyle: const TextStyle(fontSize: 11),
                       ),
                     ),
@@ -115,14 +129,20 @@ class SupplierPaymentWidget extends StatelessWidget {
     );
   }
 
-  DataRow _buildRow(int index, SupplierPaymentModel supplier, double columnWidth) {
+  DataRow _buildRow(
+    int index,
+    SupplierPaymentModel supplier,
+    double columnWidth,
+  ) {
     String formatCurrency(dynamic value) {
       if (value == null) return '0.00';
       if (value is String) {
         final numValue = double.tryParse(value) ?? 0.0;
         return numValue.toStringAsFixed(2);
       }
-      final numValue = value is int ? value.toDouble() : (value is double ? value : 0.0);
+      final numValue = value is int
+          ? value.toDouble()
+          : (value is double ? value : 0.0);
       return numValue.toStringAsFixed(2);
     }
 
@@ -142,7 +162,8 @@ class SupplierPaymentWidget extends StatelessWidget {
         _buildDataCell(supplier.spNo ?? '-', columnWidth * 0.8),
         _buildDataCell(supplier.supplierName ?? '-', columnWidth * 1.2),
         _buildDataCell(supplier.supplierPhone ?? '-', columnWidth * 0.9),
-        _buildAmountCell(supplier.amount, columnWidth), // Fixed: Use _buildAmountCell instead of _buildDataCell
+        _buildAmountCell(supplier.amount, columnWidth),
+        // Fixed: Use _buildAmountCell instead of _buildDataCell
         _buildDataCell(supplier.paymentMethod ?? '-', columnWidth),
         _buildDataCell(formatDate(supplier.paymentDate), columnWidth),
         _buildDataCell(supplier.preparedByName ?? '-', columnWidth),
@@ -189,10 +210,7 @@ class SupplierPaymentWidget extends StatelessWidget {
           child: Text(
             index.toString(),
             textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w500,
-            ),
+            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500),
           ),
         ),
       ),
@@ -206,9 +224,7 @@ class SupplierPaymentWidget extends StatelessWidget {
         child: Text(
           text,
           textAlign: TextAlign.center,
-          style: const TextStyle(
-            fontSize: 11,
-          ),
+          style: const TextStyle(fontSize: 11),
           overflow: TextOverflow.ellipsis,
           maxLines: 2,
         ),
@@ -223,7 +239,9 @@ class SupplierPaymentWidget extends StatelessWidget {
         final numValue = double.tryParse(value) ?? 0.0;
         return numValue.toStringAsFixed(2);
       }
-      final numValue = value is int ? value.toDouble() : (value is double ? value : 0.0);
+      final numValue = value is int
+          ? value.toDouble()
+          : (value is double ? value : 0.0);
       return numValue.toStringAsFixed(2);
     }
 
@@ -261,9 +279,7 @@ class SupplierPaymentWidget extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: color.withOpacity(0.3)),
             ),
-            constraints: const BoxConstraints(
-              minWidth: 70,
-            ),
+            constraints: const BoxConstraints(minWidth: 70),
             child: Text(
               _formatStatusText(status),
               style: TextStyle(

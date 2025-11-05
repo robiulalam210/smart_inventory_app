@@ -161,17 +161,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                     if (state.list.isEmpty) {
                       return Center(child: Lottie.asset(AppImages.noData));
                     } else {
-                      return ListView.builder(
-                        shrinkWrap: true,
-                        itemCount: state.list.length,
-                        itemBuilder: (_, index) {
-                          final category = state.list[index];
-                          return CategoriesCard(
-                            categories: category,
-                            index: index + 1,
-                          );
-                        },
-                      );
+                      return CategoriesTableCard(categories: state.list,);
                     }
                   } else if (state is CategoriesListFailed) {
                     return Center(

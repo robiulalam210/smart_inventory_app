@@ -165,15 +165,13 @@ class _GroupsScreenState extends State<GroupsScreen> {
                           child: Lottie.asset(AppImages.noData),
                         );
                       } else {
-                        return ListView.builder(
-                          shrinkWrap: true,
-                          itemCount: state.list.length,
-                          itemBuilder: (_, index) {
-                            final warehouse = state.list[index];
-                            return GroupsCard(
-                                group: warehouse, index: index + 1);
-                          },
-                        );
+                        return // In your parent widget
+                          GroupsTableCard(
+                            groups: state.list,
+                            onGroupTap: () {
+                              // Handle row tap if needed
+                            },
+                          );
                       }
                     } else if (state is GroupsListFailed) {
                       return Center(
