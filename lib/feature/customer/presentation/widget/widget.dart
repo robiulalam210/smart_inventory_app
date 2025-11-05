@@ -25,7 +25,7 @@ class CustomerTableCard extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final totalWidth = constraints.maxWidth - 25;
+        final totalWidth = constraints.maxWidth ;
         const numColumns = 6; // Changed from 5 to 6 for Actions column
         const minColumnWidth = 100.0;
 
@@ -59,16 +59,16 @@ class CustomerTableCard extends StatelessWidget {
                     controller: horizontalScrollController,
                     scrollDirection: Axis.horizontal,
                     child: Padding(
-                      padding: const EdgeInsets.only(bottom: 10),
+                      padding: const EdgeInsets.only(bottom: 5),
                       child: ConstrainedBox(
                         constraints: BoxConstraints(minWidth: totalWidth),
                         child: DataTable(
-                          dataRowMinHeight: 50,
-                          dataRowMaxHeight: 60,
+                          dataRowMinHeight: 40,
+                          dataRowMaxHeight: 40,
                           columnSpacing: 8,
                           horizontalMargin: 12,
                           dividerThickness: 0.5,
-                          headingRowHeight: 50,
+                          headingRowHeight: 40,
                           headingTextStyle: TextStyle(
                             color: Colors.white,
                             fontSize: 12,

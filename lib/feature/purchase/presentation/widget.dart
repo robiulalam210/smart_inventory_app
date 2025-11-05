@@ -45,6 +45,7 @@ class PurchaseDataTableWidget extends StatelessWidget {
                         constraints: BoxConstraints(minWidth: totalWidth),
                         child: DataTable(
                           dataRowMinHeight: 40,
+                          headingRowHeight: 40,
                           columnSpacing: 0,
                           headingTextStyle: const TextStyle(
                             color: Colors.white,
@@ -52,7 +53,8 @@ class PurchaseDataTableWidget extends StatelessWidget {
                             fontWeight: FontWeight.bold,
                           ),
                           headingRowColor: WidgetStateProperty.all(
-                            const Color(0xFF6AB129),
+                              AppColors.primaryColor
+
                           ),
                           columns: _buildColumns(dynamicColumnWidth),
                           rows: sales
@@ -99,7 +101,7 @@ class PurchaseDataTableWidget extends StatelessWidget {
         label: SizedBox(
           width: columnWidth,
           child: Padding(
-            padding: const EdgeInsets.all(4),
+            padding: const EdgeInsets.all(0),
             child: Text(
               label,
               textAlign: TextAlign.center,
@@ -146,7 +148,7 @@ class PurchaseDataTableWidget extends StatelessWidget {
       SizedBox(
         width: width,
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
+          padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 2),
           child: SelectableText(
             text,
             style: TextStyle(

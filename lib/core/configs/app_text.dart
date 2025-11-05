@@ -209,7 +209,7 @@ class AppTextStyle {
   static EdgeInsets getResponsivePaddingBody(BuildContext context) {
     return Responsive.isMobile(context)
         ? const EdgeInsets.symmetric(vertical: 6, horizontal: 10)
-        : const EdgeInsets.symmetric(vertical: 15, horizontal: 35);
+        : const EdgeInsets.symmetric(vertical: 15, horizontal: 15);
   }
 
   static EdgeInsets getResponsivePaddingBodyNotMobile(BuildContext context) {

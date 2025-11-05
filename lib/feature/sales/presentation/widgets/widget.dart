@@ -41,20 +41,21 @@ class PosSaleDataTableWidget extends StatelessWidget {
                     controller: horizontalScrollController,
                     scrollDirection: Axis.horizontal,
                     child: Padding(
-                      padding: const EdgeInsets.only(bottom: 10),
+                      padding: const EdgeInsets.only(bottom: 5),
                       child: ConstrainedBox(
                         constraints: BoxConstraints(minWidth: totalWidth),
                         child: DataTable(
-                          dataRowMinHeight: 40,
+                          dataRowMinHeight: 30,
                           columnSpacing: 0,
                           headingTextStyle: const TextStyle(
                             color: Colors.white,
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
                           ),
-                          headingRowColor: MaterialStateProperty.all(
-                            const Color(0xFF6AB129),
+                          headingRowColor: WidgetStateProperty.all(
+                              AppColors.primaryColor
                           ),
+                          headingRowHeight: 40,
                           columns: _buildColumns(dynamicColumnWidth),
                           rows: sales
                               .asMap()
@@ -145,19 +146,16 @@ class PosSaleDataTableWidget extends StatelessWidget {
     return DataCell(
       SizedBox(
         width: width,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
-          child: SelectableText(
-            text,
-            style: TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.w500,
-              color: isDue && (double.tryParse(text) ?? 0) > 0
-                  ? Colors.red
-                  : Colors.black,
-            ),
-            textAlign: TextAlign.center,
+        child: SelectableText(
+          text,
+          style: TextStyle(
+            fontSize: 10,
+            fontWeight: FontWeight.w500,
+            color: isDue && (double.tryParse(text) ?? 0) > 0
+                ? Colors.red
+                : Colors.black,
           ),
+          textAlign: TextAlign.center,
         ),
       ),
     );

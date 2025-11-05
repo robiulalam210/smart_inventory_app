@@ -30,10 +30,10 @@ class PaginationBar extends StatelessWidget {
     final List<int> pageSizes = [10, 20, 30, 50, 100]; // Ensure all values are unique
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.only(bottomRight: Radius.circular(8),bottomLeft: Radius.circular(8)),
         boxShadow: [
           BoxShadow(
             color: Colors.grey.withOpacity(0.1),
@@ -66,13 +66,14 @@ class PaginationBar extends StatelessWidget {
                 height: 35,
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 decoration: BoxDecoration(
+                  color: AppColors.bg,
                   border: Border.all(color: Colors.grey.shade300),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: DropdownButton<int>(
                   value: pageSize,
                   underline: const SizedBox(), // Remove default underline
-                  icon: const Icon(Icons.arrow_drop_down, size: 20),
+                  icon: const Icon(Icons.arrow_drop_down, size: 20,color:  AppColors.primaryColor),
                   style: const TextStyle(fontSize: 14, color: Colors.black),
                   onChanged: (int? newValue) {
                     if (newValue != null) {
@@ -82,7 +83,7 @@ class PaginationBar extends StatelessWidget {
                   items: pageSizes.map<DropdownMenuItem<int>>((int value) {
                     return DropdownMenuItem<int>(
                       value: value,
-                      child: Text(value.toString()),
+                      child: Text(value.toString(),style: TextStyle(color: AppColors.primaryColor),),
                     );
                   }).toList(),
                 ),

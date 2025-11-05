@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:smart_inventory/feature/supplier/data/model/supplier_list_model.dart';
 
+import '../../../../core/configs/app_colors.dart';
+
 class SupplierDataTableWidget extends StatelessWidget {
   final List<SupplierListModel> suppliers;
   final Function(SupplierListModel)? onEdit;
@@ -20,8 +22,8 @@ class SupplierDataTableWidget extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final totalWidth = constraints.maxWidth - 70;
-        const numColumns = 9; // Added one column for actions
+        final totalWidth = constraints.maxWidth ;
+        const numColumns = 11; // Added one column for actions
         const minColumnWidth = 100.0;
 
         final dynamicColumnWidth = (totalWidth / numColumns).clamp(
@@ -64,15 +66,17 @@ class SupplierDataTableWidget extends StatelessWidget {
                             .map((e) => _buildRow(e.key + 1, e.value))
                             .toList(),
                         headingRowColor: WidgetStateProperty.all(
-                          const Color(0xFF6AB129),
+                            AppColors.primaryColor
+
                         ),
                         headingTextStyle: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
                           fontSize: 12,
                         ),
-                        dataRowMinHeight: 35,
-                        columnSpacing: 10,
+                        dataRowMinHeight: 40,
+                        headingRowHeight: 40,
+                        columnSpacing: 0,
                         dataTextStyle: const TextStyle(fontSize: 12),
                       ),
                     ),
@@ -88,16 +92,16 @@ class SupplierDataTableWidget extends StatelessWidget {
 
   List<DataColumn> _buildColumns(double columnWidth) {
     final columns = [
-      _DataColumnConfig("SL", columnWidth * 0.5),
-      _DataColumnConfig("Supplier No", columnWidth * 0.8),
-      _DataColumnConfig("Name", columnWidth * 1.2),
+      _DataColumnConfig("SL", columnWidth ),
+      _DataColumnConfig("Supplier No", columnWidth ),
+      _DataColumnConfig("Name", columnWidth ),
       _DataColumnConfig("Phone", columnWidth),
-      _DataColumnConfig("Address", columnWidth * 1.3),
-      _DataColumnConfig("Total Purchases", columnWidth * 1.1),
-      _DataColumnConfig("Total Paid", columnWidth * 1.1),
-      _DataColumnConfig("Total Due", columnWidth * 1.1),
-      _DataColumnConfig("Status", columnWidth * 0.8),
-      _DataColumnConfig("Actions", columnWidth * 1.0),
+      _DataColumnConfig("Address", columnWidth ),
+      _DataColumnConfig("Total Purchases", columnWidth ),
+      _DataColumnConfig("Total Paid", columnWidth ),
+      _DataColumnConfig("Total Due", columnWidth ),
+      _DataColumnConfig("Status", columnWidth ),
+      _DataColumnConfig("Actions", columnWidth),
     ];
 
     return columns
