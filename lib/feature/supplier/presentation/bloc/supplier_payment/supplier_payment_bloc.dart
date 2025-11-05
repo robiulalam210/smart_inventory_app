@@ -126,7 +126,9 @@ class SupplierPaymentBloc extends Bloc<SupplierPaymentEvent, SupplierPaymentStat
         totalPages: totalPages,
         currentPage: event.pageNumber,
       ));
-    } catch (error) {
+    } catch (error,st) {
+      print(error);
+      print(st);
       emit(SupplierPaymentListFailed(title: "Error", content: error.toString()));
     }
   }

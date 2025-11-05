@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
@@ -48,7 +47,6 @@ class _SaleReportScreenState extends State<SaleReportScreen> {
     DateTime? from,
     DateTime? to,
   }) {
-    print("object");
     context.read<SalesReportBloc>().add(FetchSalesReport(
       context: context,
       customer: customer,
@@ -101,9 +99,7 @@ class _SaleReportScreenState extends State<SaleReportScreen> {
           child: Column(
             children: [
               _buildFilterRow(),
-              const SizedBox(height: 16),
               _buildSummaryCards(),
-              const SizedBox(height: 16),
               _buildDataTable(),
             ],
           ),
@@ -248,8 +244,8 @@ class _SaleReportScreenState extends State<SaleReportScreen> {
         final summary = state.response.summary;
 
         return Wrap(
-          spacing: 16,
-          runSpacing: 16,
+          spacing: 8,
+          runSpacing: 8,
           children: [
             _buildSummaryCard(
               "Total Sales",

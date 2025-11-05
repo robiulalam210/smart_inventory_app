@@ -1,12 +1,10 @@
 import 'package:hugeicons/hugeicons.dart';
 
 import '../../../../../core/configs/configs.dart';
-import '../../../../../core/widgets/app_button.dart';
 import '../../../../../core/widgets/delete_dialog.dart';
 import '../../data/model/expense_head_model.dart';
 import '../bloc/expense_head/expense_head_bloc.dart';
 import '../pages/expense_head_create.dart';
-import '../pages/expense_screen.dart';
 
 
 class ExpenseHeadCard extends StatefulWidget {
@@ -32,7 +30,7 @@ class _ExpenseHeadCardState extends State<ExpenseHeadCard> {
             borderRadius: BorderRadius.circular(16.0),
           ),
           child: Padding(
-            padding: const EdgeInsets.all(20.0),
+            padding: const EdgeInsets.all(10.0),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [

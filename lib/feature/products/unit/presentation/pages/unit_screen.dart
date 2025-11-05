@@ -180,17 +180,7 @@ class _UnitScreenState extends State<UnitScreen> {
                         if (state.list.isEmpty) {
                           return Center(child: Lottie.asset(AppImages.noData));
                         } else {
-                          return ListView.builder(
-                            itemCount: state.list.length,
-                            shrinkWrap: true,
-                            itemBuilder: (_, index) {
-                              final warehouse = state.list[index];
-                              return UnitCard(
-                                units: warehouse,
-                                index: index + 1,
-                              );
-                            },
-                          );
+                          return UnitTableCard(units: state.list,);
                         }
                       } else if (state is UnitListFailed) {
                         return Center(

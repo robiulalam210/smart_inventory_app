@@ -155,7 +155,6 @@ class _BrandScreenState extends State<BrandScreen> {
 
               /// 👇 Expanded fixes unbounded height issue
               SizedBox(
-                height: 500,
                 child: BlocBuilder<BrandBloc, BrandState>(
                   builder: (context, state) {
                     if (state is BrandListLoading) {
@@ -164,14 +163,7 @@ class _BrandScreenState extends State<BrandScreen> {
                       if (state.list.isEmpty) {
                         return Center(child: Lottie.asset(AppImages.noData));
                       } else {
-                        return ListView.builder(
-                          shrinkWrap: true,
-                          itemCount: state.list.length,
-                          itemBuilder: (_, index) {
-                            final brand = state.list[index];
-                            return BrandCard(brand: brand, index: index + 1);
-                          },
-                        );
+                        return BrandTableCard(brands: state.list,);
                       }
                     } else if (state is BrandListFailed) {
                       return Center(
