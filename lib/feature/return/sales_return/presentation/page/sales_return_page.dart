@@ -288,7 +288,7 @@ class _SalesReturnScreenState extends State<SalesReturnScreen> {
           return Column(
             children: [
               SizedBox(
-                child: SalesReturnDataTableWidget(salesReturns: state.list),
+                child: SalesReturnTableCard(salesReturns: state.list),
               ),
               const SizedBox(height: 16),
               PaginationBar(

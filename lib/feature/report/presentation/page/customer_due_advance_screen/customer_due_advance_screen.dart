@@ -2,6 +2,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:hugeicons/hugeicons.dart';
+import 'package:iconsax/iconsax.dart';
 import 'package:lottie/lottie.dart';
 import 'package:smart_inventory/core/configs/app_colors.dart';
 import 'package:smart_inventory/core/configs/app_images.dart';
@@ -10,13 +13,11 @@ import 'package:smart_inventory/core/shared/widgets/sideMenu/sidebar.dart';
 import 'package:smart_inventory/core/widgets/app_dropdown.dart';
 import 'package:smart_inventory/core/widgets/date_range.dart';
 import 'package:smart_inventory/feature/customer/data/model/customer_active_model.dart';
-import 'package:smart_inventory/feature/customer/data/model/customer_model.dart';
 import 'package:smart_inventory/feature/customer/presentation/bloc/customer/customer_bloc.dart';
 
 import '../../../../../responsive.dart';
 import '../../../data/model/customer_due_advance_report_model.dart';
 import '../../bloc/customer_due_advance_bloc/customer_due_advance_bloc.dart';
-
 
 class CustomerDueAdvanceScreen extends StatefulWidget {
   const CustomerDueAdvanceScreen({super.key});
@@ -41,7 +42,6 @@ class _CustomerDueAdvanceScreenState extends State<CustomerDueAdvanceScreen> {
   @override
   void initState() {
     super.initState();
-    // Load customers list
     context.read<CustomerBloc>().add(FetchCustomerActiveList(context));
     _fetchApi();
   }
@@ -122,12 +122,10 @@ class _CustomerDueAdvanceScreenState extends State<CustomerDueAdvanceScreen> {
           child: Column(
             children: [
               _buildHeader(),
-              const SizedBox(height: 16),
+              const SizedBox(height: 6),
               _buildFilterRow(),
-              const SizedBox(height: 16),
               _buildSummaryCards(),
-              const SizedBox(height: 16),
-              _buildCustomerTable(),
+              SizedBox(child: _buildCustomerTable()),
             ],
           ),
         ),
@@ -139,12 +137,25 @@ class _CustomerDueAdvanceScreenState extends State<CustomerDueAdvanceScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          "Customer Due & Advance Report",
-          style: AppTextStyle.cardTitle(context).copyWith(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-          ),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Customer Due & Advance Report",
+              style: AppTextStyle.cardTitle(context).copyWith(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              "Monitor customer balances and payment status",
+              style: GoogleFonts.inter(
+                fontSize: 14,
+                color: Colors.grey,
+              ),
+            ),
+          ],
         ),
         IconButton(
           onPressed: () => _fetchApi(),
@@ -161,24 +172,21 @@ class _CustomerDueAdvanceScreenState extends State<CustomerDueAdvanceScreen> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         // 📅 Date Range Picker
-        Expanded(
-          flex: 1,
-          child: SizedBox(
-            width: 260,
-            child: CustomDateRangeField(
-              selectedDateRange: selectedDateRange,
-              onDateRangeSelected: (value) {
-                setState(() => selectedDateRange = value);
-                if (value != null) {
-                  _fetchApi(
-                    from: value.start,
-                    to: value.end,
-                    customerId: _selectedCustomer?.id,
-                    status: _selectedStatus,
-                  );
-                }
-              },
-            ),
+        SizedBox(
+          width: 260,
+          child: CustomDateRangeField(
+            selectedDateRange: selectedDateRange,
+            onDateRangeSelected: (value) {
+              setState(() => selectedDateRange = value);
+              if (value != null) {
+                _fetchApi(
+                  from: value.start,
+                  to: value.end,
+                  customerId: _selectedCustomer?.id,
+                  status: _selectedStatus,
+                );
+              }
+            },
           ),
         ),
         const SizedBox(width: 12),
@@ -261,24 +269,21 @@ class _CustomerDueAdvanceScreenState extends State<CustomerDueAdvanceScreen> {
         const SizedBox(width: 12),
 
         // 🧹 Clear Filters Button
-        Expanded(
-          flex: 0,
-          child: ElevatedButton.icon(
-            onPressed: () {
-              setState(() {
-                selectedDateRange = null;
-                _selectedCustomer = null;
-                _selectedStatus = null;
-              });
-              context.read<CustomerDueAdvanceBloc>().add(ClearCustomerDueAdvanceFilters());
-              _fetchApi();
-            },
-            icon: const Icon(Icons.clear_all),
-            label: const Text("Clear"),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.grey,
-              foregroundColor: AppColors.blackColor,
-            ),
+        ElevatedButton.icon(
+          onPressed: () {
+            setState(() {
+              selectedDateRange = null;
+              _selectedCustomer = null;
+              _selectedStatus = null;
+            });
+            context.read<CustomerDueAdvanceBloc>().add(ClearCustomerDueAdvanceFilters());
+            _fetchApi();
+          },
+          icon: const Icon(Icons.clear_all),
+          label: const Text("Clear"),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.grey,
+            foregroundColor: AppColors.blackColor,
           ),
         ),
       ],
@@ -299,8 +304,8 @@ class _CustomerDueAdvanceScreenState extends State<CustomerDueAdvanceScreen> {
         final settledCustomers = customers.where((c) => c.presentDue == 0 && c.presentAdvance == 0).length;
 
         return Wrap(
-          spacing: 16,
-          runSpacing: 16,
+          spacing: 12,
+          runSpacing: 12,
           children: [
             _buildSummaryCard(
               "Total Customers",
@@ -360,7 +365,7 @@ class _CustomerDueAdvanceScreenState extends State<CustomerDueAdvanceScreen> {
         borderRadius: BorderRadius.circular(8),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.2),
+            color: Colors.grey.withOpacity(0.1),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -429,160 +434,597 @@ class _CustomerDueAdvanceScreenState extends State<CustomerDueAdvanceScreen> {
           );
         } else if (state is CustomerDueAdvanceSuccess) {
           if (state.response.report.isEmpty) {
-            return _noDataWidget("No customer due & advance data found");
+            return _buildEmptyState();
           }
-          return CustomerDueAdvanceDataTableWidget(customers: state.response.report);
+          return CustomerDueAdvanceTableCard(customers: state.response.report);
         } else if (state is CustomerDueAdvanceFailed) {
-          return _errorWidget(state.content);
+          return _buildErrorState(state.content);
         }
-        return _noDataWidget("No data available");
+        return _buildEmptyState();
       },
     );
   }
 
-  Widget CustomerDueAdvanceDataTableWidget({required List<CustomerDueAdvance> customers}) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(8),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.2),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Lottie.asset(AppImages.noData, width: 200, height: 200),
+          const SizedBox(height: 16),
+          Text(
+            "No Customer Due & Advance Data Found",
+            style: GoogleFonts.inter(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey,
             ),
-          ],
-        ),
-        child: DataTable(
-          headingRowColor: MaterialStateProperty.resolveWith<Color>(
-                (Set<MaterialState> states) => AppColors.primaryColor.withOpacity(0.1),
           ),
-          columns: const [
-            DataColumn(label: Text('#', style: TextStyle(fontWeight: FontWeight.bold))),
-            DataColumn(label: Text('Customer Name', style: TextStyle(fontWeight: FontWeight.bold))),
-            DataColumn(label: Text('Phone', style: TextStyle(fontWeight: FontWeight.bold))),
-            DataColumn(label: Text('Email', style: TextStyle(fontWeight: FontWeight.bold))),
-            DataColumn(label: Text('Due Amount', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
-            DataColumn(label: Text('Advance Amount', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
-            DataColumn(label: Text('Net Balance', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
-            DataColumn(label: Text('Status', style: TextStyle(fontWeight: FontWeight.bold))),
-          ],
-          rows: customers.asMap().entries.map((entry) {
-            final index = entry.key;
-            final customer = entry.value;
+          const SizedBox(height: 8),
+          Text(
+            "Customer due and advance data will appear here when available",
+            style: GoogleFonts.inter(
+              fontSize: 12,
+              fontWeight: FontWeight.w400,
+              color: Colors.grey,
+            ),
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: _fetchApi,
+            child: const Text("Refresh"),
+          ),
+        ],
+      ),
+    );
+  }
 
-            return DataRow(
-              color: MaterialStateProperty.resolveWith<Color>(
-                    (Set<MaterialState> states) {
-                  return index % 2 == 0 ? Colors.grey.withOpacity(0.05) : Colors.transparent;
-                },
+  Widget _buildErrorState(String error) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.error_outline, size: 60, color: Colors.red),
+          const SizedBox(height: 16),
+          Text(
+            "Error Loading Customer Due & Advance Report",
+            style: GoogleFonts.inter(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            error,
+            style: const TextStyle(fontSize: 14, color: Colors.red),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: _fetchApi,
+            child: const Text("Retry"),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class CustomerDueAdvanceTableCard extends StatelessWidget {
+  final List<CustomerDueAdvance> customers;
+  final VoidCallback? onCustomerTap;
+
+  const CustomerDueAdvanceTableCard({
+    super.key,
+    required this.customers,
+    this.onCustomerTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final verticalScrollController = ScrollController();
+    final horizontalScrollController = ScrollController();
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final totalWidth = constraints.maxWidth;
+        const numColumns = 9; // #, Customer Name, Phone, Email, Due Amount, Advance Amount, Net Balance, Status, Actions
+        const minColumnWidth = 120.0;
+
+        final dynamicColumnWidth =
+        (totalWidth / numColumns).clamp(minColumnWidth, double.infinity);
+
+        return Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.1),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
               ),
-              cells: [
-                DataCell(Text('${index + 1}')),
-                DataCell(
-                  Text(
-                    customer.customerName,
-                    style: const TextStyle(fontWeight: FontWeight.w500),
-                  ),
-                ),
-                DataCell(Text(customer.phone)),
-                DataCell(Text(customer.email)),
-                DataCell(
-                  customer.presentDue > 0
-                      ? Text(
-                    customer.formattedDue,
-                    style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
-                  )
-                      : const Text('-'),
-                ),
-                DataCell(
-                  customer.presentAdvance > 0
-                      ? Text(
-                    customer.formattedAdvance,
-                    style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
-                  )
-                      : const Text('-'),
-                ),
-                DataCell(
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: customer.balanceStatusColor.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(4),
-                      border: Border.all(color: customer.balanceStatusColor),
-                    ),
-                    child: Text(
-                      '\$${customer.netBalance.abs().toStringAsFixed(2)}',
-                      style: TextStyle(
-                        color: customer.balanceStatusColor,
-                        fontWeight: FontWeight.bold,
+            ],
+          ),
+          child: Scrollbar(
+            controller: verticalScrollController,
+            thumbVisibility: true,
+            child: SingleChildScrollView(
+              controller: verticalScrollController,
+              scrollDirection: Axis.vertical,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Scrollbar(
+                  controller: horizontalScrollController,
+                  thumbVisibility: true,
+                  child: SingleChildScrollView(
+                    controller: horizontalScrollController,
+                    scrollDirection: Axis.horizontal,
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 5),
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(minWidth: totalWidth),
+                        child: DataTable(
+                          dataRowMinHeight: 40,
+                          dataRowMaxHeight: 40,
+                          columnSpacing: 8,
+                          horizontalMargin: 12,
+                          dividerThickness: 0.5,
+                          headingRowHeight: 40,
+                          headingTextStyle: TextStyle(
+                            color: Colors.white,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            fontFamily: GoogleFonts.inter().fontFamily,
+                          ),
+                          headingRowColor: MaterialStateProperty.all(
+                            AppColors.primaryColor,
+                          ),
+                          dataTextStyle: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w500,
+                            fontFamily: GoogleFonts.inter().fontFamily,
+                          ),
+                          columns: _buildColumns(dynamicColumnWidth),
+                          rows: customers.asMap().entries.map((entry) {
+                            final customer = entry.value;
+                            return DataRow(
+                              onSelectChanged: onCustomerTap != null
+                                  ? (_) => onCustomerTap!()
+                                  : null,
+                              cells: [
+                                _buildIndexCell(entry.key + 1, dynamicColumnWidth * 0.6),
+                                _buildCustomerNameCell(customer.customerName, dynamicColumnWidth),
+                                _buildPhoneCell(customer.phone, dynamicColumnWidth),
+                                _buildEmailCell(customer.email, dynamicColumnWidth),
+                                _buildDueAmountCell(customer, dynamicColumnWidth),
+                                _buildAdvanceAmountCell(customer, dynamicColumnWidth),
+                                _buildNetBalanceCell(customer, dynamicColumnWidth),
+                                _buildStatusCell(customer, dynamicColumnWidth),
+                                _buildActionCell(customer, context, dynamicColumnWidth),
+                              ],
+                            );
+                          }).toList(),
+                        ),
                       ),
                     ),
                   ),
                 ),
-                DataCell(
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: customer.balanceStatusColor.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(customer.balanceStatusIcon, size: 14, color: customer.balanceStatusColor),
-                        const SizedBox(width: 4),
-                        Text(
-                          customer.balanceStatus,
-                          style: TextStyle(
-                            color: customer.balanceStatusColor,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            );
-          }).toList(),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  List<DataColumn> _buildColumns(double columnWidth) {
+    return [
+      DataColumn(
+        label: SizedBox(
+          width: columnWidth * 0.6,
+          child: const Text('#', textAlign: TextAlign.center),
+        ),
+      ),
+      DataColumn(
+        label: SizedBox(
+          width: columnWidth,
+          child: const Text('Customer Name', textAlign: TextAlign.center),
+        ),
+      ),
+      DataColumn(
+        label: SizedBox(
+          width: columnWidth,
+          child: const Text('Phone', textAlign: TextAlign.center),
+        ),
+      ),
+      DataColumn(
+        label: SizedBox(
+          width: columnWidth,
+          child: const Text('Email', textAlign: TextAlign.center),
+        ),
+      ),
+      DataColumn(
+        label: SizedBox(
+          width: columnWidth,
+          child: const Text('Due Amount', textAlign: TextAlign.center),
+        ),
+      ),
+      DataColumn(
+        label: SizedBox(
+          width: columnWidth,
+          child: const Text('Advance Amount', textAlign: TextAlign.center),
+        ),
+      ),
+      DataColumn(
+        label: SizedBox(
+          width: columnWidth,
+          child: const Text('Net Balance', textAlign: TextAlign.center),
+        ),
+      ),
+      DataColumn(
+        label: SizedBox(
+          width: columnWidth,
+          child: const Text('Status', textAlign: TextAlign.center),
+        ),
+      ),
+      DataColumn(
+        label: SizedBox(
+          width: columnWidth,
+          child: const Text('Actions', textAlign: TextAlign.center),
+        ),
+      ),
+    ];
+  }
+
+  DataCell _buildIndexCell(int index, double width) {
+    return DataCell(
+      SizedBox(
+        width: width,
+        child: Center(
+          child: Text(
+            index.toString(),
+            style: const TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+              color: Colors.black87,
+            ),
+          ),
         ),
       ),
     );
   }
 
-  Widget _noDataWidget(String message) => Center(
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Lottie.asset(AppImages.noData, width: 200, height: 200),
-        const SizedBox(height: 12),
-        Text(message),
-        const SizedBox(height: 8),
-        ElevatedButton(
-            onPressed: _fetchApi,
-            child: const Text("Refresh")
+  DataCell _buildCustomerNameCell(String customerName, double width) {
+    return DataCell(
+      SizedBox(
+        width: width,
+        child: Tooltip(
+          message: customerName,
+          child: Text(
+            customerName,
+            style: const TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+              color: Colors.black87,
+            ),
+            textAlign: TextAlign.center,
+            overflow: TextOverflow.ellipsis,
+            maxLines: 2,
+          ),
         ),
-      ],
-    ),
-  );
+      ),
+    );
+  }
 
-  Widget _errorWidget(String error) => Center(
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const Icon(Icons.error_outline, size: 60, color: Colors.red),
-        const SizedBox(height: 16),
-        Text("Error: $error"),
-        const SizedBox(height: 8),
-        ElevatedButton(
-            onPressed: _fetchApi,
-            child: const Text("Retry")
+  DataCell _buildPhoneCell(String phone, double width) {
+    return DataCell(
+      SizedBox(
+        width: width,
+        child: Text(
+          phone,
+          style: const TextStyle(
+            fontSize: 10,
+            fontWeight: FontWeight.w500,
+            color: Colors.black87,
+          ),
+          textAlign: TextAlign.center,
+          overflow: TextOverflow.ellipsis,
         ),
-      ],
-    ),
-  );
+      ),
+    );
+  }
+
+  DataCell _buildEmailCell(String email, double width) {
+    return DataCell(
+      SizedBox(
+        width: width,
+        child: Text(
+          email,
+          style: const TextStyle(
+            fontSize: 10,
+            fontWeight: FontWeight.w500,
+            color: Colors.black87,
+          ),
+          textAlign: TextAlign.center,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ),
+    );
+  }
+
+  DataCell _buildDueAmountCell(CustomerDueAdvance customer, double width) {
+    return DataCell(
+      SizedBox(
+        width: width,
+        child: Center(
+          child: customer.presentDue > 0
+              ? Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: Colors.red.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Text(
+              '\$${customer.presentDue.toStringAsFixed(2)}',
+              style: const TextStyle(
+                color: Colors.red,
+                fontWeight: FontWeight.w600,
+                fontSize: 10,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          )
+              : const Text(
+            '-',
+            style: TextStyle(
+              fontSize: 10,
+              color: Colors.grey,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ),
+      ),
+    );
+  }
+
+  DataCell _buildAdvanceAmountCell(CustomerDueAdvance customer, double width) {
+    return DataCell(
+      SizedBox(
+        width: width,
+        child: Center(
+          child: customer.presentAdvance > 0
+              ? Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: Colors.green.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Text(
+              '\$${customer.presentAdvance.toStringAsFixed(2)}',
+              style: const TextStyle(
+                color: Colors.green,
+                fontWeight: FontWeight.w600,
+                fontSize: 10,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          )
+              : const Text(
+            '-',
+            style: TextStyle(
+              fontSize: 10,
+              color: Colors.grey,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ),
+      ),
+    );
+  }
+
+  DataCell _buildNetBalanceCell(CustomerDueAdvance customer, double width) {
+    final isPositive = customer.netBalance >= 0;
+
+    return DataCell(
+      SizedBox(
+        width: width,
+        child: Center(
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: customer.balanceStatusColor.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(4),
+              border: Border.all(color: customer.balanceStatusColor),
+            ),
+            child: Text(
+              '\$${customer.netBalance.abs().toStringAsFixed(2)}',
+              style: TextStyle(
+                color: customer.balanceStatusColor,
+                fontWeight: FontWeight.w600,
+                fontSize: 10,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  DataCell _buildStatusCell(CustomerDueAdvance customer, double width) {
+    return DataCell(
+      SizedBox(
+        width: width,
+        child: Center(
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: customer.balanceStatusColor.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(customer.balanceStatusIcon, size: 12, color: customer.balanceStatusColor),
+                const SizedBox(width: 4),
+                Text(
+                  customer.balanceStatus,
+                  style: TextStyle(
+                    color: customer.balanceStatusColor,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 9,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  DataCell _buildActionCell(CustomerDueAdvance customer, BuildContext context, double width) {
+    return DataCell(
+      SizedBox(
+        width: width,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // View Details Button
+            _buildActionButton(
+              icon: HugeIcons.strokeRoundedView,
+              color: Colors.blue,
+              tooltip: 'View customer details',
+              onPressed: () => _showCustomerDetails(context, customer),
+            ),
+
+            // Ledger Button
+            _buildActionButton(
+              icon: Iconsax.book,
+              color: Colors.green,
+              tooltip: 'View customer ledger',
+              onPressed: () => _viewCustomerLedger(context, customer),
+            ),
+
+            // Payment Button (if due exists)
+            if (customer.presentDue > 0)
+              _buildActionButton(
+                icon: Iconsax.money_recive,
+                color: Colors.orange,
+                tooltip: 'Record payment',
+                onPressed: () => _recordPayment(context, customer),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActionButton({
+    required IconData icon,
+    required Color color,
+    required String tooltip,
+    required VoidCallback onPressed,
+  }) {
+    return IconButton(
+      onPressed: onPressed,
+      icon: Icon(icon, size: 16, color: color),
+      tooltip: tooltip,
+      padding: EdgeInsets.zero,
+      constraints: const BoxConstraints(minWidth: 25, minHeight: 25),
+    );
+  }
+
+  void _showCustomerDetails(BuildContext context, CustomerDueAdvance customer) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          child: Container(
+            width: MediaQuery.of(context).size.width * 0.40,
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  customer.customerName,
+                  style: AppTextStyle.cardLevelHead(context),
+                ),
+                const SizedBox(height: 16),
+                _buildDetailRow('Phone:', customer.phone),
+                _buildDetailRow('Email:', customer.email),
+                _buildDetailRow('Due Amount:', '\$${customer.presentDue.toStringAsFixed(2)}'),
+                _buildDetailRow('Advance Amount:', '\$${customer.presentAdvance.toStringAsFixed(2)}'),
+                _buildDetailRow('Net Balance:', '\$${customer.netBalance.abs().toStringAsFixed(2)}'),
+                _buildDetailRow('Status:', customer.balanceStatus),
+
+                const SizedBox(height: 20),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text('Close'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildDetailRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 120,
+            child: Text(
+              label,
+              style: const TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 12,
+                color: Colors.grey,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              value,
+              style: const TextStyle(
+                fontSize: 12,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _viewCustomerLedger(BuildContext context, CustomerDueAdvance customer) {
+    // Implement navigation to customer ledger
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Opening ledger for ${customer.customerName}'),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  void _recordPayment(BuildContext context, CustomerDueAdvance customer) {
+    // Implement payment recording
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Recording payment for ${customer.customerName}'),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
 }

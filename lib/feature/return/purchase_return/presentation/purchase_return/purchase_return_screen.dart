@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
 import 'package:smart_inventory/core/configs/configs.dart';
 import 'package:smart_inventory/feature/supplier/data/model/supplier_active_model.dart';
@@ -282,7 +281,7 @@ class _PurchaseReturnScreenState extends State<PurchaseReturnScreen> {
           return Column(
             children: [
               SizedBox(
-                child: PurchaseReturnDataTableWidget(purchaseReturns: state.list),
+                child: PurchaseReturnTableCard(purchaseReturns: state.list),
               ),
               const SizedBox(height: 16),
               PaginationBar(

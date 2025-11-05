@@ -3,6 +3,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:hugeicons/hugeicons.dart';
+import 'package:iconsax/iconsax.dart';
 import 'package:lottie/lottie.dart';
 import 'package:smart_inventory/core/configs/app_colors.dart';
 import 'package:smart_inventory/core/configs/app_images.dart';
@@ -11,6 +14,7 @@ import 'package:smart_inventory/core/shared/widgets/sideMenu/sidebar.dart';
 import 'package:smart_inventory/core/widgets/date_range.dart';
 import 'package:smart_inventory/feature/report/presentation/bloc/top_products_bloc/top_products_bloc.dart';
 
+import '../../../../../core/configs/app_sizes.dart';
 import '../../../../../responsive.dart';
 import '../../../data/model/top_products_model.dart';
 
@@ -81,7 +85,7 @@ class _TopProductsScreenState extends State<TopProductsScreen> {
               const SizedBox(height: 16),
               _buildSummaryCards(),
               const SizedBox(height: 16),
-              _buildTopProductsTable(),
+              SizedBox(child: _buildTopProductsTable()),
             ],
           ),
         ),
@@ -107,7 +111,7 @@ class _TopProductsScreenState extends State<TopProductsScreen> {
             },
           ),
         ),
-        const SizedBox(width: 5),
+        const SizedBox(width: 12),
 
         // Clear Filters Button
         ElevatedButton.icon(
@@ -123,7 +127,7 @@ class _TopProductsScreenState extends State<TopProductsScreen> {
             foregroundColor: AppColors.blackColor,
           ),
         ),
-        const SizedBox(width: 5),
+        const SizedBox(width: 12),
 
         IconButton(
           onPressed: () => _fetchTopProductsReport(),
@@ -142,8 +146,8 @@ class _TopProductsScreenState extends State<TopProductsScreen> {
         final summary = state.response.summary;
 
         return Wrap(
-          spacing: 16,
-          runSpacing: 16,
+          spacing: 12,
+          runSpacing: 12,
           children: [
             _buildSummaryCard(
               "Total Products",
@@ -238,148 +242,538 @@ class _TopProductsScreenState extends State<TopProductsScreen> {
           );
         } else if (state is TopProductsSuccess) {
           if (state.response.report.isEmpty) {
-            return _noDataWidget("No top products data found");
+            return _buildEmptyState();
           }
-          return TopProductsDataTableWidget(products: state.response.report);
+          return TopProductsTableCard(products: state.response.report);
         } else if (state is TopProductsFailed) {
-          return _errorWidget(state.content);
+          return _buildErrorState(state.content);
         }
-        return _noDataWidget("No data available");
+        return _buildEmptyState();
       },
     );
   }
 
-  Widget TopProductsDataTableWidget({required List<TopProductModel> products}) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(8),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.2),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Lottie.asset(AppImages.noData, width: 200, height: 200),
+          const SizedBox(height: 16),
+          Text(
+            "No Top Products Data Found",
+            style: GoogleFonts.inter(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey,
             ),
-          ],
-        ),
-        child: DataTable(
-          headingRowColor: MaterialStateProperty.resolveWith<Color>(
-                (Set<MaterialState> states) => AppColors.primaryColor.withOpacity(0.1),
           ),
-          columns: const [
-            DataColumn(label: Text('#', style: TextStyle(fontWeight: FontWeight.bold))),
-            DataColumn(label: Text('Product Name', style: TextStyle(fontWeight: FontWeight.bold))),
-            DataColumn(label: Text('Price', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
-            DataColumn(label: Text('Quantity Sold', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
-            DataColumn(label: Text('Total Revenue', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
-            DataColumn(label: Text('Performance', style: TextStyle(fontWeight: FontWeight.bold))),
-          ],
-          rows: products.asMap().entries.map((entry) {
-            final index = entry.key;
-            final product = entry.value;
+          const SizedBox(height: 8),
+          Text(
+            "Top products data will appear here when available",
+            style: GoogleFonts.inter(
+              fontSize: 12,
+              fontWeight: FontWeight.w400,
+              color: Colors.grey,
+            ),
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: _fetchTopProductsReport,
+            child: const Text("Refresh"),
+          ),
+        ],
+      ),
+    );
+  }
 
-            // Calculate performance indicator
-            final totalRevenue = products.fold(0.0, (sum, p) => sum + p.totalSoldPrice);
-            final percentage = (product.totalSoldPrice / totalRevenue * 100);
+  Widget _buildErrorState(String error) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.error_outline, size: 60, color: Colors.red),
+          const SizedBox(height: 16),
+          Text(
+            "Error Loading Top Products Report",
+            style: GoogleFonts.inter(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            error,
+            style: const TextStyle(fontSize: 14, color: Colors.red),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: _fetchTopProductsReport,
+            child: const Text("Retry"),
+          ),
+        ],
+      ),
+    );
+  }
+}
 
-            return DataRow(
-              color: MaterialStateProperty.resolveWith<Color>(
-                    (Set<MaterialState> states) {
-                  return index % 2 == 0 ? Colors.grey.withOpacity(0.05) : Colors.transparent;
-                },
+class TopProductsTableCard extends StatelessWidget {
+  final List<TopProductModel> products;
+  final VoidCallback? onProductTap;
+
+  const TopProductsTableCard({
+    super.key,
+    required this.products,
+    this.onProductTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final verticalScrollController = ScrollController();
+    final horizontalScrollController = ScrollController();
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final totalWidth = constraints.maxWidth;
+        const numColumns = 7; // #, Product Name, Price, Quantity Sold, Total Revenue, Performance, Actions
+        const minColumnWidth = 120.0;
+
+        final dynamicColumnWidth =
+        (totalWidth / numColumns).clamp(minColumnWidth, double.infinity);
+
+        return Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.1),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
               ),
-              cells: [
-                DataCell(Text('${index + 1}')),
-                DataCell(
-                  Text(
-                    product.productName,
-                    style: const TextStyle(fontWeight: FontWeight.w500),
-                  ),
-                ),
-                DataCell(Text('\$${product.sellingPrice.toStringAsFixed(2)}')),
-                DataCell(
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.blue.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Text(
-                      product.totalSoldQuantity.toString(),
-                      style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.blue),
-                    ),
-                  ),
-                ),
-                DataCell(
-                  Text(
-                    '\$${product.totalSoldPrice.toStringAsFixed(2)}',
-                    style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.green),
-                  ),
-                ),
-                DataCell(
-                  Row(
-                    children: [
-                      Expanded(
-                        child: LinearProgressIndicator(
-                          value: percentage / 100,
-                          backgroundColor: Colors.grey[300],
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            percentage > 50 ? Colors.green :
-                            percentage > 25 ? Colors.orange : Colors.red,
+            ],
+          ),
+          child: Scrollbar(
+            controller: verticalScrollController,
+            thumbVisibility: true,
+            child: SingleChildScrollView(
+              controller: verticalScrollController,
+              scrollDirection: Axis.vertical,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Scrollbar(
+                  controller: horizontalScrollController,
+                  thumbVisibility: true,
+                  child: SingleChildScrollView(
+                    controller: horizontalScrollController,
+                    scrollDirection: Axis.horizontal,
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 5),
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(minWidth: totalWidth),
+                        child: DataTable(
+                          dataRowMinHeight: 40,
+                          dataRowMaxHeight: 40,
+                          columnSpacing: 8,
+                          horizontalMargin: 12,
+                          dividerThickness: 0.5,
+                          headingRowHeight: 40,
+                          headingTextStyle: TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            fontFamily: GoogleFonts.inter().fontFamily,
                           ),
+                          headingRowColor: MaterialStateProperty.all(
+                            AppColors.primaryColor,
+                          ),
+                          dataTextStyle: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w500,
+                            fontFamily: GoogleFonts.inter().fontFamily,
+                          ),
+                          columns: _buildColumns(dynamicColumnWidth),
+                          rows: products.asMap().entries.map((entry) {
+                            final product = entry.value;
+                            return DataRow(
+                              onSelectChanged: onProductTap != null
+                                  ? (_) => onProductTap!()
+                                  : null,
+                              cells: [
+                                _buildRankCell(entry.key + 1, dynamicColumnWidth * 0.6),
+                                _buildProductNameCell(product.productName, dynamicColumnWidth),
+                                _buildPriceCell(product.sellingPrice, dynamicColumnWidth),
+                                _buildQuantityCell(product.totalSoldQuantity, dynamicColumnWidth),
+                                _buildRevenueCell(product.totalSoldPrice, dynamicColumnWidth),
+                                _buildPerformanceCell(product, products, dynamicColumnWidth),
+                                _buildActionCell(product, context, dynamicColumnWidth),
+                              ],
+                            );
+                          }).toList(),
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      Text(
-                        '${percentage.toStringAsFixed(1)}%',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey[700],
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
-              ],
-            );
-          }).toList(),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  List<DataColumn> _buildColumns(double columnWidth) {
+    return [
+      DataColumn(
+        label: SizedBox(
+          width: columnWidth * 0.6,
+          child: const Text('#', textAlign: TextAlign.center),
+        ),
+      ),
+      DataColumn(
+        label: SizedBox(
+          width: columnWidth,
+          child: const Text('Product Name', textAlign: TextAlign.center),
+        ),
+      ),
+      DataColumn(
+        label: SizedBox(
+          width: columnWidth,
+          child: const Text('Price', textAlign: TextAlign.center),
+        ),
+      ),
+      DataColumn(
+        label: SizedBox(
+          width: columnWidth,
+          child: const Text('Quantity Sold', textAlign: TextAlign.center),
+        ),
+      ),
+      DataColumn(
+        label: SizedBox(
+          width: columnWidth,
+          child: const Text('Total Revenue', textAlign: TextAlign.center),
+        ),
+      ),
+      DataColumn(
+        label: SizedBox(
+          width: columnWidth,
+          child: const Text('Performance', textAlign: TextAlign.center),
+        ),
+      ),
+      DataColumn(
+        label: SizedBox(
+          width: columnWidth,
+          child: const Text('Actions', textAlign: TextAlign.center),
+        ),
+      ),
+    ];
+  }
+
+  DataCell _buildRankCell(int rank, double width) {
+    Color getRankColor() {
+      switch (rank) {
+        case 1: return Colors.amber;
+        case 2: return Colors.grey;
+        case 3: return Colors.orange;
+        default: return Colors.blue;
+      }
+    }
+
+    return DataCell(
+      SizedBox(
+        width: width,
+        child: Center(
+          child: Container(
+            width: 28,
+            height: 28,
+            decoration: BoxDecoration(
+              color: getRankColor().withOpacity(0.1),
+              shape: BoxShape.circle,
+              border: Border.all(color: getRankColor(), width: 2),
+            ),
+            child: Center(
+              child: Text(
+                rank.toString(),
+                style: TextStyle(
+                  color: getRankColor(),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                ),
+              ),
+            ),
+          ),
         ),
       ),
     );
   }
 
-  Widget _noDataWidget(String message) => Center(
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Lottie.asset(AppImages.noData, width: 200, height: 200),
-        const SizedBox(height: 12),
-        Text(message),
-        const SizedBox(height: 8),
-        ElevatedButton(
-            onPressed: _fetchTopProductsReport,
-            child: const Text("Refresh")
+  DataCell _buildProductNameCell(String productName, double width) {
+    return DataCell(
+      SizedBox(
+        width: width,
+        child: Text(
+          productName,
+          style: const TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w500,
+            color: Colors.black87,
+          ),
+          textAlign: TextAlign.center,
+          overflow: TextOverflow.ellipsis,
         ),
-      ],
-    ),
-  );
+      ),
+    );
+  }
 
-  Widget _errorWidget(String error) => Center(
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const Icon(Icons.error_outline, size: 60, color: Colors.red),
-        const SizedBox(height: 16),
-        Text("Error: $error"),
-        const SizedBox(height: 8),
-        ElevatedButton(
-            onPressed: _fetchTopProductsReport,
-            child: const Text("Retry")
+  DataCell _buildPriceCell(double price, double width) {
+    return DataCell(
+      SizedBox(
+        width: width,
+        child: Center(
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: Colors.blue.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Text(
+              '\$${price.toStringAsFixed(2)}',
+              style: const TextStyle(
+                color: Colors.blue,
+                fontWeight: FontWeight.w600,
+                fontSize: 11,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
         ),
-      ],
-    ),
-  );
+      ),
+    );
+  }
+
+  DataCell _buildQuantityCell(int quantity, double width) {
+    return DataCell(
+      SizedBox(
+        width: width,
+        child: Center(
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: Colors.green.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Text(
+              quantity.toString(),
+              style: const TextStyle(
+                color: Colors.green,
+                fontWeight: FontWeight.w600,
+                fontSize: 11,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  DataCell _buildRevenueCell(double revenue, double width) {
+    return DataCell(
+      SizedBox(
+        width: width,
+        child: Center(
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: Colors.purple.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Text(
+              '\$${revenue.toStringAsFixed(2)}',
+              style: const TextStyle(
+                color: Colors.purple,
+                fontWeight: FontWeight.w600,
+                fontSize: 11,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  DataCell _buildPerformanceCell(TopProductModel product, List<TopProductModel> allProducts, double width) {
+    final totalRevenue = allProducts.fold(0.0, (sum, p) => sum + p.totalSoldPrice);
+    final percentage = (product.totalSoldPrice / totalRevenue * 100);
+
+    Color getPerformanceColor() {
+      if (percentage > 50) return Colors.green;
+      if (percentage > 25) return Colors.orange;
+      return Colors.red;
+    }
+
+    return DataCell(
+      SizedBox(
+        width: width,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Progress bar
+            Container(
+              height: 6,
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(3),
+              ),
+              child: FractionallySizedBox(
+                alignment: Alignment.centerLeft,
+                widthFactor: percentage / 100,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: getPerformanceColor(),
+                    borderRadius: BorderRadius.circular(3),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              '${percentage.toStringAsFixed(1)}%',
+              style: TextStyle(
+                fontSize: 10,
+                color: getPerformanceColor(),
+                fontWeight: FontWeight.w600,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  DataCell _buildActionCell(TopProductModel product, BuildContext context, double width) {
+    return DataCell(
+      SizedBox(
+        width: width,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // View Button
+            _buildActionButton(
+              icon: HugeIcons.strokeRoundedView,
+              color: Colors.green,
+              tooltip: 'View product details',
+              onPressed: () => _showProductDetails(context, product),
+            ),
+
+            // Analytics Button
+            _buildActionButton(
+              icon: Iconsax.chart,
+              color: Colors.blue,
+              tooltip: 'View sales analytics',
+              onPressed: () => _showSalesAnalytics(context, product),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActionButton({
+    required IconData icon,
+    required Color color,
+    required String tooltip,
+    required VoidCallback onPressed,
+  }) {
+    return IconButton(
+      onPressed: onPressed,
+      icon: Icon(icon, size: 18, color: color),
+      tooltip: tooltip,
+      padding: EdgeInsets.zero,
+      constraints: const BoxConstraints(minWidth: 30, minHeight: 30),
+    );
+  }
+
+  void _showProductDetails(BuildContext context, TopProductModel product) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          child: Container(
+            width: AppSizes.width(context) * 0.40,
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Product Performance - ${product.productName}',
+                  style: AppTextStyle.cardLevelHead(context),
+                ),
+                const SizedBox(height: 16),
+                _buildDetailRow('Product Name:', product.productName),
+                _buildDetailRow('Selling Price:', '\$${product.sellingPrice.toStringAsFixed(2)}'),
+                _buildDetailRow('Quantity Sold:', product.totalSoldQuantity.toString()),
+                _buildDetailRow('Total Revenue:', '\$${product.totalSoldPrice.toStringAsFixed(2)}'),
+
+                const SizedBox(height: 20),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text('Close'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _showSalesAnalytics(BuildContext context, TopProductModel product) {
+    // Implement sales analytics view
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Opening sales analytics for ${product.productName}'),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  Widget _buildDetailRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 120,
+            child: Text(
+              label,
+              style: const TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 12,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              value,
+              style: const TextStyle(
+                fontSize: 12,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }

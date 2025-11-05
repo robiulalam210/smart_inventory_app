@@ -1,5 +1,11 @@
 // lib/feature/report/presentation/screens/stock_report_screen.dart
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:hugeicons/hugeicons.dart';
+import 'package:iconsax/iconsax.dart';
+import 'package:lottie/lottie.dart';
 import 'package:smart_inventory/core/core.dart';
 import 'package:smart_inventory/core/widgets/date_range.dart';
 import 'package:smart_inventory/feature/report/presentation/bloc/stock_report_bloc/stock_report_bloc.dart';
@@ -15,8 +21,10 @@ class StockReportScreen extends StatefulWidget {
 
 class _StockReportScreenState extends State<StockReportScreen> {
   DateRange? selectedDateRange;
-  String _sortBy = 'value'; // Default sort by value
+  String _sortBy = 'value';
   bool _sortAscending = false;
+  final ScrollController _horizontalScrollController = ScrollController();
+  final ScrollController _verticalScrollController = ScrollController();
 
   @override
   void initState() {
@@ -36,13 +44,6 @@ class _StockReportScreenState extends State<StockReportScreen> {
   }
 
   void _handleSort(String column, bool ascending) {
-    setState(() {
-      _sortBy = column;
-      _sortAscending = ascending;
-    });
-  }
-
-  void _sortStock(List<StockProduct> products, String column, bool ascending) {
     setState(() {
       _sortBy = column;
       _sortAscending = ascending;
@@ -72,7 +73,7 @@ class _StockReportScreenState extends State<StockReportScreen> {
 
     return _sortAscending ? sorted : sorted.reversed.toList();
   }
-  final ScrollController _horizontalScrollController = ScrollController();
+
   @override
   Widget build(BuildContext context) {
     final isBigScreen = Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
@@ -109,18 +110,15 @@ class _StockReportScreenState extends State<StockReportScreen> {
           padding: AppTextStyle.getResponsivePaddingBody(context),
           child: Column(
             children: [
-              // _buildFilterRow(),
-              // const SizedBox(height: 8),
               _buildSummaryCards(),
-              const SizedBox(height: 8),
-              _buildStockTable(),
+              const SizedBox(height: 16),
+              SizedBox(child: _buildStockTable()),
             ],
           ),
         ),
       ),
     );
   }
-
 
   Widget _buildSummaryCards() {
     return BlocBuilder<StockReportBloc, StockReportState>(
@@ -136,8 +134,8 @@ class _StockReportScreenState extends State<StockReportScreen> {
         final highValueProducts = products.where((p) => p.value > 1000).length;
 
         return Wrap(
-          spacing: 6,
-          runSpacing: 6,
+          spacing: 8,
+          runSpacing: 8,
           children: [
             _buildSummaryCard(
               "Total Products",
@@ -147,7 +145,7 @@ class _StockReportScreenState extends State<StockReportScreen> {
             ),
             _buildSummaryCard(
               "Total Stock Value",
-              summary.totalStockValue.toStringAsFixed(2),
+              "\$${summary.totalStockValue.toStringAsFixed(2)}",
               Icons.attach_money,
               Colors.green,
             ),
@@ -182,11 +180,11 @@ class _StockReportScreenState extends State<StockReportScreen> {
               Colors.purple,
             ),
 
+            // Date Range Picker
             SizedBox(
               width: 260,
               child: CustomDateRangeField(
                 isLabel: false,
-
                 selectedDateRange: selectedDateRange,
                 onDateRangeSelected: (value) {
                   setState(() => selectedDateRange = value);
@@ -225,7 +223,7 @@ class _StockReportScreenState extends State<StockReportScreen> {
                         underline: const SizedBox(),
                         onChanged: (String? newValue) {
                           if (newValue != null) {
-                            _sortStock(state.response.report, newValue, _sortAscending);
+                            _handleSort(newValue, _sortAscending);
                           }
                         },
                         items: const [
@@ -242,9 +240,8 @@ class _StockReportScreenState extends State<StockReportScreen> {
                           size: 16,
                         ),
                         onPressed: () {
-                          setState(() => _sortAscending = !_sortAscending);
-                          _sortStock(state.response.report, _sortBy, _sortAscending);
-                                                },
+                          _handleSort(_sortBy, !_sortAscending);
+                        },
                       ),
                     ],
                   ),
@@ -252,22 +249,25 @@ class _StockReportScreenState extends State<StockReportScreen> {
               },
             ),
 
+            // Clear Filters Button
             AppButton(
               size: 100,
-                color: AppColors.grey,
-                textColor: AppColors.blackColor,
-                name: "Clear", onPressed: (){
-              setState(() => selectedDateRange = null);
-              context.read<StockReportBloc>().add(ClearStockReportFilters());
-              _fetchStockReport();
-            }),
+              color: AppColors.grey,
+              textColor: AppColors.blackColor,
+              name: "Clear",
+              onPressed: () {
+                setState(() => selectedDateRange = null);
+                context.read<StockReportBloc>().add(ClearStockReportFilters());
+                _fetchStockReport();
+              },
+            ),
 
+            // Refresh Button
             IconButton(
               onPressed: () => _fetchStockReport(),
               icon: const Icon(Icons.refresh),
               tooltip: "Refresh",
             ),
-
           ],
         );
       },
@@ -276,14 +276,14 @@ class _StockReportScreenState extends State<StockReportScreen> {
 
   Widget _buildSummaryCard(String title, String value, IconData icon, Color color) {
     return Container(
-      width: 140,
-      padding: const EdgeInsets.all(6),
+      width: 160,
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(8),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.2),
+            color: Colors.grey.withOpacity(0.1),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -291,8 +291,8 @@ class _StockReportScreenState extends State<StockReportScreen> {
       ),
       child: Row(
         children: [
-          Icon(icon, color: color, size: 25),
-          const SizedBox(width: 4),
+          Icon(icon, color: color, size: 28),
+          const SizedBox(width: 8),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -300,7 +300,7 @@ class _StockReportScreenState extends State<StockReportScreen> {
                 Text(
                   title,
                   style: const TextStyle(
-                    fontSize: 10,
+                    fontSize: 11,
                     color: Colors.grey,
                     fontWeight: FontWeight.w500,
                   ),
@@ -330,85 +330,202 @@ class _StockReportScreenState extends State<StockReportScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 CircularProgressIndicator(),
-                SizedBox(height: 8),
+                SizedBox(height: 16),
                 Text("Loading stock report..."),
               ],
             ),
           );
         } else if (state is StockReportSuccess) {
           if (state.response.report.isEmpty) {
-            return _noDataWidget("No stock data found");
+            return _buildEmptyState();
           }
           final sortedProducts = _getSortedProducts(state.response.report);
-          return stockDataTableWidget(
+          return StockReportTableCard(
             products: sortedProducts,
             sortBy: _sortBy,
             sortAscending: _sortAscending,
+            onSort: _handleSort,
           );
         } else if (state is StockReportFailed) {
-          return _errorWidget(state.content);
+          return _buildErrorState(state.content);
         }
-        return _noDataWidget("No data available");
+        return _buildEmptyState();
       },
     );
   }
 
-  Widget stockDataTableWidget({
-    required List<StockProduct> products,
-    required String sortBy,
-    required bool sortAscending,
-  }) {
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Lottie.asset(AppImages.noData, width: 200, height: 200),
+          const SizedBox(height: 16),
+          Text(
+            "No Stock Data Found",
+            style: GoogleFonts.inter(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            "Stock data will appear here when available",
+            style: GoogleFonts.inter(
+              fontSize: 12,
+              fontWeight: FontWeight.w400,
+              color: Colors.grey,
+            ),
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: _fetchStockReport,
+            child: const Text("Refresh"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildErrorState(String error) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.error_outline, size: 60, color: Colors.red),
+          const SizedBox(height: 16),
+          Text(
+            "Error Loading Stock Report",
+            style: GoogleFonts.inter(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            error,
+            style: const TextStyle(fontSize: 14, color: Colors.red),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: _fetchStockReport,
+            child: const Text("Retry"),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class StockReportTableCard extends StatelessWidget {
+  final List<StockProduct> products;
+  final String sortBy;
+  final bool sortAscending;
+  final Function(String, bool) onSort;
+
+  const StockReportTableCard({
+    super.key,
+    required this.products,
+    required this.sortBy,
+    required this.sortAscending,
+    required this.onSort,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final verticalScrollController = ScrollController();
+    final horizontalScrollController = ScrollController();
+
     return LayoutBuilder(
       builder: (context, constraints) {
-        final double totalWidth = constraints.maxWidth;
-        const int numColumns = 12;
-        const double minColumnWidth = 80.0;
+        final totalWidth = constraints.maxWidth;
+        const numColumns = 12; // SL, Product Name, Category, Brand, Avg Cost, Selling Price, Current Stock, Stock Value, Potential Value, Profit Margin, Stock Status, Profitability
+        const minColumnWidth = 100.0;
 
-        final double dynamicColumnWidth =
+        final dynamicColumnWidth =
         (totalWidth / numColumns).clamp(minColumnWidth, double.infinity);
 
-        return Scrollbar(
-          trackVisibility: true,
-          controller: _horizontalScrollController,
-          child: SingleChildScrollView(
-            controller: _horizontalScrollController,
-            scrollDirection: Axis.horizontal,
-            child: Container(
-              constraints: BoxConstraints(minWidth: totalWidth),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withValues(alpha: 0.2),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
+        return Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.1),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
               ),
-              child: DataTable(
-                sortColumnIndex: _getSortColumnIndex(sortBy),
-                sortAscending: sortAscending,
-                headingRowColor: WidgetStateProperty.resolveWith<Color>(
-                      (Set<WidgetState> states) => AppColors.primaryColor,
-                ),
-                dataRowMinHeight: 50,
-                dataRowMaxHeight: 60,
-                columnSpacing: 8,
-                horizontalMargin: 12,
-                columns: _buildDataColumns(dynamicColumnWidth),
-                rows: products.asMap().entries.map((entry) {
-                  final index = entry.key;
-                  final product = entry.value;
-                  return DataRow(
-                    color: WidgetStateProperty.resolveWith<Color?>(
-                          (Set<WidgetState> states) {
-                        return index % 2 == 0 ? Colors.grey.withValues(alpha: 0.05) : null;
-                      },
+            ],
+          ),
+          child: Scrollbar(
+            controller: verticalScrollController,
+            thumbVisibility: true,
+            child: SingleChildScrollView(
+              controller: verticalScrollController,
+              scrollDirection: Axis.vertical,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Scrollbar(
+                  controller: horizontalScrollController,
+                  thumbVisibility: true,
+                  child: SingleChildScrollView(
+                    controller: horizontalScrollController,
+                    scrollDirection: Axis.horizontal,
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 5),
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(minWidth: totalWidth),
+                        child: DataTable(
+                          dataRowMinHeight: 40,
+                          dataRowMaxHeight: 40,
+                          columnSpacing: 8,
+                          horizontalMargin: 12,
+                          dividerThickness: 0.5,
+                          headingRowHeight: 40,
+                          headingTextStyle: TextStyle(
+                            color: Colors.white,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            fontFamily: GoogleFonts.inter().fontFamily,
+                          ),
+                          headingRowColor: MaterialStateProperty.all(
+                            AppColors.primaryColor,
+                          ),
+                          dataTextStyle: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w500,
+                            fontFamily: GoogleFonts.inter().fontFamily,
+                          ),
+                          sortColumnIndex: _getSortColumnIndex(sortBy),
+                          sortAscending: sortAscending,
+                          columns: _buildColumns(dynamicColumnWidth),
+                          rows: products.asMap().entries.map((entry) {
+                            final product = entry.value;
+                            return DataRow(
+                              cells: [
+                                _buildIndexCell(entry.key + 1, dynamicColumnWidth * 0.6),
+                                _buildProductNameCell(product, dynamicColumnWidth * 1.5),
+                                _buildCategoryCell(product.category, dynamicColumnWidth),
+                                _buildBrandCell(product.brand, dynamicColumnWidth * 1.2),
+                                _buildPriceCell(product.avgPurchasePrice, dynamicColumnWidth, isCost: true),
+                                _buildPriceCell(product.sellingPrice, dynamicColumnWidth, isSelling: true),
+                                _buildStockCell(product, dynamicColumnWidth),
+                                _buildValueCell(product.value, dynamicColumnWidth),
+                                _buildPotentialValueCell(product, dynamicColumnWidth),
+                                _buildProfitMarginCell(product, dynamicColumnWidth),
+                                _buildStockStatusCell(product, dynamicColumnWidth),
+                                _buildProfitabilityCell(product, dynamicColumnWidth),
+                              ],
+                            );
+                          }).toList(),
+                        ),
+                      ),
                     ),
-                    cells: _buildDataCells(product, index, dynamicColumnWidth),
-                  );
-                }).toList(),
+                  ),
+                ),
               ),
             ),
           ),
@@ -417,59 +534,71 @@ class _StockReportScreenState extends State<StockReportScreen> {
     );
   }
 
-  List<DataColumn> _buildDataColumns(double columnWidth) {
+  List<DataColumn> _buildColumns(double columnWidth) {
     return [
-      _buildDataColumn('SL', 'sl', columnWidth * 0.3),
-      _buildDataColumn('Product Name', 'name', columnWidth * 1.5),
-      _buildDataColumn('Category', 'category', columnWidth ),
-      _buildDataColumn('Brand', 'brand', columnWidth * 1.2),
-      _buildDataColumn('Avg Cost', 'cost', columnWidth),
-      _buildDataColumn('Selling Price', 'price', columnWidth),
-      _buildDataColumn('Current Stock', 'stock', columnWidth),
-      _buildDataColumn('Stock Value', 'value', columnWidth),
-      _buildDataColumn('Potential Value', 'potential', columnWidth),
-      _buildDataColumn('Profit Margin', 'profit_margin', columnWidth),
-      _buildDataColumn('Stock Status', 'status', columnWidth),
-      _buildDataColumn('Profitability', 'profitability', columnWidth),
+      DataColumn(
+        label: SizedBox(
+          width: columnWidth * 0.6,
+          child: const Text('SL', textAlign: TextAlign.center),
+        ),
+      ),
+      _buildSortableColumn('Product Name', 'name', columnWidth * 1.5),
+      _buildSortableColumn('Category', 'category', columnWidth),
+      DataColumn(
+        label: SizedBox(
+          width: columnWidth * 1.2,
+          child: const Text('Brand', textAlign: TextAlign.center),
+        ),
+      ),
+      DataColumn(
+        label: SizedBox(
+          width: columnWidth,
+          child: const Text('Avg Cost', textAlign: TextAlign.center),
+        ),
+      ),
+      DataColumn(
+        label: SizedBox(
+          width: columnWidth,
+          child: const Text('Selling Price', textAlign: TextAlign.center),
+        ),
+      ),
+      _buildSortableColumn('Current Stock', 'stock', columnWidth),
+      _buildSortableColumn('Stock Value', 'value', columnWidth),
+      DataColumn(
+        label: SizedBox(
+          width: columnWidth,
+          child: const Text('Potential Value', textAlign: TextAlign.center),
+        ),
+      ),
+      _buildSortableColumn('Profit Margin', 'profit_margin', columnWidth),
+      DataColumn(
+        label: SizedBox(
+          width: columnWidth,
+          child: const Text('Stock Status', textAlign: TextAlign.center),
+        ),
+      ),
+      DataColumn(
+        label: SizedBox(
+          width: columnWidth,
+          child: const Text('Profitability', textAlign: TextAlign.center),
+        ),
+      ),
     ];
   }
 
-  DataColumn _buildDataColumn(String label, String columnId, double width) {
-    final isSortable = columnId != 'sl' &&
-        columnId != 'brand' &&
-        columnId != 'cost' &&
-        columnId != 'price';
-
+  DataColumn _buildSortableColumn(String label, String columnId, double width) {
     return DataColumn(
       label: SizedBox(
         width: width,
         child: Text(
           label,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12,color: AppColors.white),
           textAlign: TextAlign.center,
         ),
       ),
-      onSort: isSortable ? (columnIndex, ascending) {
-        _handleSort(columnId, ascending); // Fixed: Use _handleSort instead of onSort
-      } : null,
+      onSort: (columnIndex, ascending) {
+        onSort(columnId, ascending);
+      },
     );
-  }
-
-  List<DataCell> _buildDataCells(StockProduct product, int index, double columnWidth) {
-    return [
-      _buildIndexCell(index, columnWidth * 0.3),
-      _buildProductNameCell(product, columnWidth * 1.5),
-      _buildTextCell(product.category, columnWidth ),
-      _buildTextCell(product.brand, columnWidth * 1.2),
-      _buildPriceCell(product.avgPurchasePrice, columnWidth),
-      _buildPriceCell(product.sellingPrice, columnWidth),
-      _buildStockCell(product, columnWidth),
-      _buildValueCell(product.value, columnWidth),
-      _buildPotentialValueCell(product, columnWidth),
-      _buildProfitMarginCell(product, columnWidth),
-      _buildStockStatusCell(product, columnWidth),
-      _buildProfitabilityCell(product, columnWidth),
-    ];
   }
 
   DataCell _buildIndexCell(int index, double width) {
@@ -478,8 +607,12 @@ class _StockReportScreenState extends State<StockReportScreen> {
         width: width,
         child: Center(
           child: Text(
-            '${index + 1}',
-            style: const TextStyle(fontWeight: FontWeight.w500),
+            index.toString(),
+            style: const TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+              color: Colors.black87,
+            ),
           ),
         ),
       ),
@@ -494,7 +627,12 @@ class _StockReportScreenState extends State<StockReportScreen> {
           message: product.productName,
           child: Text(
             product.productName,
-            style: const TextStyle(fontWeight: FontWeight.w500),
+            style: const TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w500,
+              color: Colors.black87,
+            ),
+            textAlign: TextAlign.center,
             overflow: TextOverflow.ellipsis,
             maxLines: 2,
           ),
@@ -503,27 +641,69 @@ class _StockReportScreenState extends State<StockReportScreen> {
     );
   }
 
-  DataCell _buildTextCell(String text, double width) {
+  DataCell _buildCategoryCell(String category, double width) {
     return DataCell(
       SizedBox(
         width: width,
         child: Text(
-          text,
+          category,
+          style: const TextStyle(
+            fontSize: 10,
+            fontWeight: FontWeight.w500,
+            color: Colors.black87,
+          ),
+          textAlign: TextAlign.center,
           overflow: TextOverflow.ellipsis,
-          maxLines: 2,
         ),
       ),
     );
   }
 
-  DataCell _buildPriceCell(double price, double width) {
+  DataCell _buildBrandCell(String brand, double width) {
     return DataCell(
       SizedBox(
         width: width,
         child: Text(
-          price.toStringAsFixed(2),
-          style: const TextStyle(fontWeight: FontWeight.w500),
+          brand,
+          style: const TextStyle(
+            fontSize: 10,
+            fontWeight: FontWeight.w500,
+            color: Colors.black87,
+          ),
           textAlign: TextAlign.center,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ),
+    );
+  }
+
+  DataCell _buildPriceCell(double price, double width, {bool isCost = false, bool isSelling = false}) {
+    Color getPriceColor() {
+      if (isCost) return Colors.orange;
+      if (isSelling) return Colors.blue;
+      return Colors.grey;
+    }
+
+    return DataCell(
+      SizedBox(
+        width: width,
+        child: Center(
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+            decoration: BoxDecoration(
+              color: getPriceColor().withOpacity(0.1),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Text(
+              '\$${price.toStringAsFixed(2)}',
+              style: TextStyle(
+                color: getPriceColor(),
+                fontWeight: FontWeight.w600,
+                fontSize: 10,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
         ),
       ),
     );
@@ -537,16 +717,18 @@ class _StockReportScreenState extends State<StockReportScreen> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: product.stockStatusColor.withValues(alpha: 0.1),
+              color: product.stockStatusColor.withOpacity(0.1),
               borderRadius: BorderRadius.circular(4),
               border: Border.all(color: product.stockStatusColor),
             ),
             child: Text(
               product.currentStock.toString(),
               style: TextStyle(
-                fontWeight: FontWeight.bold,
                 color: product.stockStatusColor,
+                fontWeight: FontWeight.w600,
+                fontSize: 10,
               ),
+              textAlign: TextAlign.center,
             ),
           ),
         ),
@@ -558,13 +740,23 @@ class _StockReportScreenState extends State<StockReportScreen> {
     return DataCell(
       SizedBox(
         width: width,
-        child: Text(
-          value.toStringAsFixed(2),
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Colors.green,
+        child: Center(
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+            decoration: BoxDecoration(
+              color: Colors.green.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Text(
+              '\$${value.toStringAsFixed(2)}',
+              style: const TextStyle(
+                color: Colors.green,
+                fontWeight: FontWeight.w600,
+                fontSize: 10,
+              ),
+              textAlign: TextAlign.center,
+            ),
           ),
-          textAlign: TextAlign.center,
         ),
       ),
     );
@@ -574,13 +766,16 @@ class _StockReportScreenState extends State<StockReportScreen> {
     return DataCell(
       SizedBox(
         width: width,
-        child: Text(
-          product.potentialValue.toStringAsFixed(2),
-          style: TextStyle(
-            color: product.potentialValue > product.value ? Colors.blue : Colors.grey,
-            fontWeight: FontWeight.w500,
+        child: Center(
+          child: Text(
+            '\$${product.potentialValue.toStringAsFixed(2)}',
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w500,
+              color: product.potentialValue > product.value ? Colors.blue : Colors.grey,
+            ),
+            textAlign: TextAlign.center,
           ),
-          textAlign: TextAlign.center,
         ),
       ),
     );
@@ -592,17 +787,19 @@ class _StockReportScreenState extends State<StockReportScreen> {
         width: width,
         child: Center(
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
             decoration: BoxDecoration(
-              color: product.profitabilityColor.withValues(alpha: 0.1),
+              color: product.profitabilityColor.withOpacity(0.1),
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
               '${product.profitMargin.toStringAsFixed(1)}%',
               style: TextStyle(
                 color: product.profitabilityColor,
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w600,
+                fontSize: 10,
               ),
+              textAlign: TextAlign.center,
             ),
           ),
         ),
@@ -616,17 +813,19 @@ class _StockReportScreenState extends State<StockReportScreen> {
         width: width,
         child: Center(
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
             decoration: BoxDecoration(
-              color: product.stockStatusColor.withValues(alpha: 0.1),
+              color: product.stockStatusColor.withOpacity(0.1),
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
               product.stockStatus,
               style: TextStyle(
                 color: product.stockStatusColor,
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w600,
+                fontSize: 9,
               ),
+              textAlign: TextAlign.center,
             ),
           ),
         ),
@@ -640,17 +839,19 @@ class _StockReportScreenState extends State<StockReportScreen> {
         width: width,
         child: Center(
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
             decoration: BoxDecoration(
-              color: product.profitabilityColor.withValues(alpha: 0.1),
+              color: product.profitabilityColor.withOpacity(0.1),
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
               product.profitability,
               style: TextStyle(
                 color: product.profitabilityColor,
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w600,
+                fontSize: 9,
               ),
+              textAlign: TextAlign.center,
             ),
           ),
         ),
@@ -665,39 +866,7 @@ class _StockReportScreenState extends State<StockReportScreen> {
       case 'stock': return 6;
       case 'value': return 7;
       case 'profit_margin': return 9;
-      default: return 7; // Default to value
+      default: return 7;
     }
   }
-
-  Widget _noDataWidget(String message) => Center(
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Lottie.asset(AppImages.noData, width: 200, height: 200),
-        const SizedBox(height: 12),
-        Text(message),
-        const SizedBox(height: 8),
-        ElevatedButton(
-            onPressed: _fetchStockReport,
-            child: const Text("Refresh")
-        ),
-      ],
-    ),
-  );
-
-  Widget _errorWidget(String error) => Center(
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const Icon(Icons.error_outline, size: 60, color: Colors.red),
-        const SizedBox(height: 16),
-        Text("Error: $error"),
-        const SizedBox(height: 8),
-        ElevatedButton(
-            onPressed: _fetchStockReport,
-            child: const Text("Retry")
-        ),
-      ],
-    ),
-  );
 }

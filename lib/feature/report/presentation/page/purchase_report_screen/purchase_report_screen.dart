@@ -3,6 +3,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:hugeicons/hugeicons.dart';
+import 'package:iconsax/iconsax.dart';
 import 'package:lottie/lottie.dart';
 import 'package:smart_inventory/core/configs/app_colors.dart';
 import 'package:smart_inventory/core/configs/app_images.dart';
@@ -13,6 +16,7 @@ import 'package:smart_inventory/core/widgets/date_range.dart';
 import 'package:smart_inventory/feature/supplier/data/model/supplier_active_model.dart';
 import 'package:smart_inventory/feature/supplier/presentation/bloc/supplier_invoice/supplier_invoice_bloc.dart';
 
+import '../../../../../core/configs/app_sizes.dart';
 import '../../../../../responsive.dart';
 import '../../../data/model/purchase_report_model.dart';
 import '../../bloc/purchase_report/purchase_report_bloc.dart';
@@ -95,7 +99,7 @@ class _PurchaseReportScreenState extends State<PurchaseReportScreen> {
               const SizedBox(height: 16),
               _buildSummaryCards(),
               const SizedBox(height: 16),
-              _buildDataTable(),
+              SizedBox(child: _buildDataTable()),
             ],
           ),
         ),
@@ -144,7 +148,7 @@ class _PurchaseReportScreenState extends State<PurchaseReportScreen> {
             },
           ),
         ),
-        const SizedBox(width: 5),
+        const SizedBox(width: 12),
 
         // 📅 Date Range Picker
         SizedBox(
@@ -159,7 +163,7 @@ class _PurchaseReportScreenState extends State<PurchaseReportScreen> {
             },
           ),
         ),
-        const SizedBox(width: 5),
+        const SizedBox(width: 12),
 
         // Clear Filters Button
         ElevatedButton.icon(
@@ -175,7 +179,7 @@ class _PurchaseReportScreenState extends State<PurchaseReportScreen> {
             foregroundColor: AppColors.blackColor,
           ),
         ),
-        const SizedBox(width: 5),
+        const SizedBox(width: 12),
 
         IconButton(
           onPressed: () => _fetchPurchaseReport(),
@@ -194,8 +198,8 @@ class _PurchaseReportScreenState extends State<PurchaseReportScreen> {
         final summary = state.response.summary;
 
         return Wrap(
-          spacing: 16,
-          runSpacing: 16,
+          spacing: 12,
+          runSpacing: 12,
           children: [
             _buildSummaryCard(
               "Total Purchases",
@@ -288,84 +292,481 @@ class _PurchaseReportScreenState extends State<PurchaseReportScreen> {
           );
         } else if (state is PurchaseReportSuccess) {
           if (state.response.report.isEmpty) {
-            return _noDataWidget("No purchase report data found");
+            return _buildEmptyState();
           }
-          return PurchaseReportDataTableWidget(reports: state.response.report);
+          return PurchaseReportTableCard(reports: state.response.report);
         } else if (state is PurchaseReportFailed) {
-          return _errorWidget(state.content);
+          return _buildErrorState(state.content);
         }
-        return _noDataWidget("No data available");
+        return _buildEmptyState();
       },
     );
   }
 
-  Widget PurchaseReportDataTableWidget({required List<PurchaseReportModel> reports}) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: DataTable(
-        columns: const [
-          DataColumn(label: Text('Invoice No')),
-          DataColumn(label: Text('Date')),
-          DataColumn(label: Text('Supplier')),
-          DataColumn(label: Text('Net Total')),
-          DataColumn(label: Text('Paid')),
-          DataColumn(label: Text('Due')),
-          DataColumn(label: Text('Status')),
-        ],
-        rows: reports.map((report) => DataRow(cells: [
-          DataCell(Text(report.invoiceNo)),
-          DataCell(Text(report.purchaseDate.toString().split(' ')[0])),
-          DataCell(Text(report.supplier)),
-          DataCell(Text('\$${report.netTotal.toStringAsFixed(2)}')),
-          DataCell(Text('\$${report.paidTotal.toStringAsFixed(2)}')),
-          DataCell(Text('\$${report.dueTotal.toStringAsFixed(2)}')),
-          DataCell(
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: report.paymentStatus == 'paid' ? Colors.green : Colors.orange,
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Text(
-                report.paymentStatus.toUpperCase(),
-                style: const TextStyle(color: Colors.white, fontSize: 12),
-              ),
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Lottie.asset(AppImages.noData, width: 200, height: 200),
+          const SizedBox(height: 16),
+          Text(
+            "No Purchase Report Data Found",
+            style: GoogleFonts.inter(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey,
             ),
           ),
-        ])).toList(),
+          const SizedBox(height: 8),
+          Text(
+            "Purchase report data will appear here when available",
+            style: GoogleFonts.inter(
+              fontSize: 12,
+              fontWeight: FontWeight.w400,
+              color: Colors.grey,
+            ),
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: _fetchPurchaseReport,
+            child: const Text("Refresh"),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _noDataWidget(String message) => Center(
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Lottie.asset(AppImages.noData, width: 200, height: 200),
-        const SizedBox(height: 12),
-        Text(message),
-        const SizedBox(height: 8),
-        ElevatedButton(
+  Widget _buildErrorState(String error) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.error_outline, size: 60, color: Colors.red),
+          const SizedBox(height: 16),
+          Text(
+            "Error Loading Purchase Report",
+            style: GoogleFonts.inter(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            error,
+            style: const TextStyle(fontSize: 14, color: Colors.red),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton(
             onPressed: _fetchPurchaseReport,
-            child: const Text("Refresh")
-        ),
-      ],
-    ),
-  );
+            child: const Text("Retry"),
+          ),
+        ],
+      ),
+    );
+  }
+}
 
-  Widget _errorWidget(String error) => Center(
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const Icon(Icons.error_outline, size: 60, color: Colors.red),
-        const SizedBox(height: 16),
-        Text("Error: $error"),
-        const SizedBox(height: 8),
-        ElevatedButton(
-            onPressed: _fetchPurchaseReport,
-            child: const Text("Retry")
+class PurchaseReportTableCard extends StatelessWidget {
+  final List<PurchaseReportModel> reports;
+  final VoidCallback? onReportTap;
+
+  const PurchaseReportTableCard({
+    super.key,
+    required this.reports,
+    this.onReportTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final verticalScrollController = ScrollController();
+    final horizontalScrollController = ScrollController();
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final totalWidth = constraints.maxWidth;
+        const numColumns = 8; // Invoice No, Date, Supplier, Net Total, Paid, Due, Status, Actions
+        const minColumnWidth = 120.0;
+
+        final dynamicColumnWidth =
+        (totalWidth / numColumns).clamp(minColumnWidth, double.infinity);
+
+        return Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.1),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Scrollbar(
+            controller: verticalScrollController,
+            thumbVisibility: true,
+            child: SingleChildScrollView(
+              controller: verticalScrollController,
+              scrollDirection: Axis.vertical,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Scrollbar(
+                  controller: horizontalScrollController,
+                  thumbVisibility: true,
+                  child: SingleChildScrollView(
+                    controller: horizontalScrollController,
+                    scrollDirection: Axis.horizontal,
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 5),
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(minWidth: totalWidth),
+                        child: DataTable(
+                          dataRowMinHeight: 40,
+                          dataRowMaxHeight: 40,
+                          columnSpacing: 8,
+                          horizontalMargin: 12,
+                          dividerThickness: 0.5,
+                          headingRowHeight: 40,
+                          headingTextStyle: TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            fontFamily: GoogleFonts.inter().fontFamily,
+                          ),
+                          headingRowColor: MaterialStateProperty.all(
+                            AppColors.primaryColor,
+                          ),
+                          dataTextStyle: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w500,
+                            fontFamily: GoogleFonts.inter().fontFamily,
+                          ),
+                          columns: _buildColumns(dynamicColumnWidth),
+                          rows: reports.asMap().entries.map((entry) {
+                            final report = entry.value;
+                            return DataRow(
+                              onSelectChanged: onReportTap != null
+                                  ? (_) => onReportTap!()
+                                  : null,
+                              cells: [
+                                _buildDataCell(report.invoiceNo, dynamicColumnWidth),
+                                _buildDateCell(report.purchaseDate, dynamicColumnWidth),
+                                _buildDataCell(report.supplier, dynamicColumnWidth),
+                                _buildAmountCell(report.netTotal, dynamicColumnWidth, isTotal: true),
+                                _buildAmountCell(report.paidTotal, dynamicColumnWidth, isPaid: true),
+                                _buildAmountCell(report.dueTotal, dynamicColumnWidth, isDue: true),
+                                _buildStatusCell(report.paymentStatus, dynamicColumnWidth),
+                                _buildActionCell(report, context, dynamicColumnWidth),
+                              ],
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  List<DataColumn> _buildColumns(double columnWidth) {
+    return [
+      DataColumn(
+        label: SizedBox(
+          width: columnWidth,
+          child: const Text('Invoice No', textAlign: TextAlign.center),
         ),
-      ],
-    ),
-  );
+      ),
+      DataColumn(
+        label: SizedBox(
+          width: columnWidth,
+          child: const Text('Date', textAlign: TextAlign.center),
+        ),
+      ),
+      DataColumn(
+        label: SizedBox(
+          width: columnWidth,
+          child: const Text('Supplier', textAlign: TextAlign.center),
+        ),
+      ),
+      DataColumn(
+        label: SizedBox(
+          width: columnWidth,
+          child: const Text('Net Total', textAlign: TextAlign.center),
+        ),
+      ),
+      DataColumn(
+        label: SizedBox(
+          width: columnWidth,
+          child: const Text('Paid', textAlign: TextAlign.center),
+        ),
+      ),
+      DataColumn(
+        label: SizedBox(
+          width: columnWidth,
+          child: const Text('Due', textAlign: TextAlign.center),
+        ),
+      ),
+      DataColumn(
+        label: SizedBox(
+          width: columnWidth,
+          child: const Text('Status', textAlign: TextAlign.center),
+        ),
+      ),
+      DataColumn(
+        label: SizedBox(
+          width: columnWidth,
+          child: const Text('Actions', textAlign: TextAlign.center),
+        ),
+      ),
+    ];
+  }
+
+  DataCell _buildDataCell(String text, double width) {
+    return DataCell(
+      SizedBox(
+        width: width,
+        child: Text(
+          text,
+          style: const TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w500,
+            color: Colors.black87,
+          ),
+          textAlign: TextAlign.center,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ),
+    );
+  }
+
+  DataCell _buildDateCell(DateTime date, double width) {
+    return DataCell(
+      SizedBox(
+        width: width,
+        child: Text(
+          _formatDate(date),
+          style: const TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w500,
+            color: Colors.black87,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ),
+    );
+  }
+
+  DataCell _buildAmountCell(double amount, double width, {bool isTotal = false, bool isPaid = false, bool isDue = false}) {
+    Color getAmountColor() {
+      if (isPaid) return Colors.green;
+      if (isDue) return Colors.orange;
+      if (isTotal) return Colors.blue;
+      return Colors.grey;
+    }
+
+    return DataCell(
+      SizedBox(
+        width: width,
+        child: Center(
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: getAmountColor().withOpacity(0.1),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Text(
+              '\$${amount.toStringAsFixed(2)}',
+              style: TextStyle(
+                color: getAmountColor(),
+                fontWeight: FontWeight.w600,
+                fontSize: 11,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  DataCell _buildStatusCell(String status, double width) {
+    final statusColor = _getStatusColor(status);
+
+    return DataCell(
+      SizedBox(
+        width: width,
+        child: Center(
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: statusColor.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Text(
+              status.toUpperCase(),
+              style: TextStyle(
+                color: statusColor,
+                fontWeight: FontWeight.w600,
+                fontSize: 10,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  DataCell _buildActionCell(PurchaseReportModel report, BuildContext context, double width) {
+    return DataCell(
+      SizedBox(
+        width: width,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // View Button
+            _buildActionButton(
+              icon: HugeIcons.strokeRoundedView,
+              color: Colors.green,
+              tooltip: 'View purchase details',
+              onPressed: () => _showViewDialog(context, report),
+            ),
+
+            // Print/Export Button
+            _buildActionButton(
+              icon: Iconsax.printer,
+              color: Colors.blue,
+              tooltip: 'Print report',
+              onPressed: () => _printReport(context, report),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActionButton({
+    required IconData icon,
+    required Color color,
+    required String tooltip,
+    required VoidCallback onPressed,
+  }) {
+    return IconButton(
+      onPressed: onPressed,
+      icon: Icon(icon, size: 18, color: color),
+      tooltip: tooltip,
+      padding: EdgeInsets.zero,
+      constraints: const BoxConstraints(minWidth: 30, minHeight: 30),
+    );
+  }
+
+  Color _getStatusColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'paid':
+      case 'completed':
+        return Colors.green;
+      case 'pending':
+        return Colors.orange;
+      case 'due':
+      case 'overdue':
+        return Colors.red;
+      case 'partial':
+        return Colors.blue;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+  }
+
+  void _showViewDialog(BuildContext context, PurchaseReportModel report) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          child: Container(
+            width: AppSizes.width(context) * 0.50,
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Purchase Report Details - ${report.invoiceNo}',
+                  style: AppTextStyle.cardLevelHead(context),
+                ),
+                const SizedBox(height: 16),
+                _buildDetailRow('Invoice No:', report.invoiceNo),
+                _buildDetailRow('Date:', _formatDate(report.purchaseDate)),
+                _buildDetailRow('Supplier:', report.supplier),
+                _buildDetailRow('Net Total:', '\$${report.netTotal.toStringAsFixed(2)}'),
+                _buildDetailRow('Paid Amount:', '\$${report.paidTotal.toStringAsFixed(2)}'),
+                _buildDetailRow('Due Amount:', '\$${report.dueTotal.toStringAsFixed(2)}'),
+                _buildDetailRow('Status:', report.paymentStatus.toUpperCase()),
+
+                const SizedBox(height: 20),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text('Close'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _printReport(BuildContext context, PurchaseReportModel report) {
+    // Implement print/export functionality
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Printing report for ${report.invoiceNo}'),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  Widget _buildDetailRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 120,
+            child: Text(
+              label,
+              style: const TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 12,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              value,
+              style: const TextStyle(
+                fontSize: 12,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }

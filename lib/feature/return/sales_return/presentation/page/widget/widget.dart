@@ -1,140 +1,362 @@
+
+import 'package:google_fonts/google_fonts.dart';
+
+
 import '../../../../../../core/configs/configs.dart';
+import '../../../../../../core/widgets/delete_dialog.dart';
 import '../../../data/model/sales_return_model.dart';
 import '../../sales_return_bloc/sales_return_bloc.dart';
 
-class SalesReturnDataTableWidget extends StatelessWidget {
+class SalesReturnTableCard extends StatelessWidget {
   final List<SalesReturnModel> salesReturns;
+  final VoidCallback? onSalesReturnTap;
 
-  const SalesReturnDataTableWidget({super.key, required this.salesReturns});
+  const SalesReturnTableCard({
+    super.key,
+    required this.salesReturns,
+    this.onSalesReturnTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(8),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.2),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: DataTable(
-          headingRowColor: MaterialStateProperty.resolveWith<Color>(
-                (Set<MaterialState> states) => AppColors.primaryColor.withOpacity(0.1),
-          ),
-          columns: const [
-            DataColumn(label: Text('#', style: TextStyle(fontWeight: FontWeight.bold))),
-            DataColumn(label: Text('Receipt No', style: TextStyle(fontWeight: FontWeight.bold))),
-            DataColumn(label: Text('Customer', style: TextStyle(fontWeight: FontWeight.bold))),
-            DataColumn(label: Text('Return Date', style: TextStyle(fontWeight: FontWeight.bold))),
-            DataColumn(label: Text('Return Amount', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
-            DataColumn(label: Text('Status', style: TextStyle(fontWeight: FontWeight.bold))),
-            DataColumn(label: Text('Payment Method', style: TextStyle(fontWeight: FontWeight.bold))),
-            DataColumn(label: Text('Reason', style: TextStyle(fontWeight: FontWeight.bold))),
-            DataColumn(label: Text('Items', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
-            DataColumn(label: Text('Actions', style: TextStyle(fontWeight: FontWeight.bold))),
-          ],
-          rows: salesReturns.asMap().entries.map((entry) {
-            final index = entry.key;
-            final salesReturn = entry.value;
+    if (salesReturns.isEmpty) {
+      return _buildEmptyState();
+    }
 
-            return DataRow(
-              color: MaterialStateProperty.resolveWith<Color>(
-                    (Set<MaterialState> states) {
-                  return index % 2 == 0 ? Colors.grey.withOpacity(0.05) : Colors.transparent;
-                },
+    final verticalScrollController = ScrollController();
+    final horizontalScrollController = ScrollController();
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final totalWidth = constraints.maxWidth;
+        const numColumns = 11; // #, Receipt No, Customer, Return Date, Return Amount, Status, Payment Method, Reason, Items, Actions
+        const minColumnWidth = 100.0;
+
+        final dynamicColumnWidth =
+        (totalWidth / numColumns).clamp(minColumnWidth, double.infinity);
+
+        return Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.1),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
               ),
-              cells: [
-                DataCell(Text('${index + 1}')),
-                DataCell(
-                  Text(
-                    salesReturn .receiptNo?? 'N/A',
-                    style: const TextStyle(fontWeight: FontWeight.w500),
-                  ),
-                ),
-                DataCell(Text(salesReturn.customerName ?? 'N/A')),
-                DataCell(Text(_formatDate(salesReturn.returnDate??DateTime.now()))),
-                DataCell(
-                  Text(
-                    '\$${salesReturn.returnAmount.toString()}',
-                    style: const TextStyle(
-                      color: Colors.red,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                DataCell(
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: _getStatusColor(salesReturn.status.toString()),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Text(
-                      salesReturn.status.toString().toUpperCase(),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
+            ],
+          ),
+          child: Scrollbar(
+            controller: verticalScrollController,
+            thumbVisibility: true,
+            child: SingleChildScrollView(
+              controller: verticalScrollController,
+              scrollDirection: Axis.vertical,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Scrollbar(
+                  controller: horizontalScrollController,
+                  thumbVisibility: true,
+                  child: SingleChildScrollView(
+                    controller: horizontalScrollController,
+                    scrollDirection: Axis.horizontal,
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 5),
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(minWidth: totalWidth),
+                        child: DataTable(
+                          dataRowMinHeight: 40,
+                          dataRowMaxHeight: 40,
+                          columnSpacing: 8,
+                          horizontalMargin: 12,
+                          dividerThickness: 0.5,
+                          headingRowHeight: 40,
+                          headingTextStyle: TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            fontFamily: GoogleFonts.inter().fontFamily,
+                          ),
+                          headingRowColor: MaterialStateProperty.all(
+                            AppColors.primaryColor,
+                          ),
+                          dataTextStyle: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w500,
+                            fontFamily: GoogleFonts.inter().fontFamily,
+                          ),
+                          rows: _buildTableRows(context, dynamicColumnWidth),
+                          columns: _buildColumns(dynamicColumnWidth),
+                        ),
                       ),
                     ),
                   ),
                 ),
-                DataCell(Text(salesReturn.paymentMethod ?? 'N/A')),
-                DataCell(
-                  SizedBox(
-                    width: 150,
-                    child: Text(
-                      salesReturn.reason ?? 'No reason provided',
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 2,
-                    ),
-                  ),
-                ),
-                DataCell(
-                  Text(
-                    '${salesReturn.items?.length}',
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-                DataCell(
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.visibility, size: 18),
-                        onPressed: () {
-                          // View details action
-                          _viewSalesReturnDetails(context, salesReturn);
-                        },
-                        tooltip: "View Details",
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.delete, size: 18, color: Colors.red),
-                        onPressed: () {
-                          // Delete action
-                          _deleteSalesReturn(context, salesReturn);
-                        },
-                        tooltip: "Delete",
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            );
-          }).toList(),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  List<DataColumn> _buildColumns(double columnWidth) {
+    return [
+      DataColumn(
+        label: SizedBox(
+          width: columnWidth * 0.6,
+          child: const Text('#', textAlign: TextAlign.center),
+        ),
+      ),
+      DataColumn(
+        label: SizedBox(
+          width: columnWidth,
+          child: const Text('Receipt No', textAlign: TextAlign.center),
+        ),
+      ),
+      DataColumn(
+        label: SizedBox(
+          width: columnWidth,
+          child: const Text('Customer', textAlign: TextAlign.center),
+        ),
+      ),
+      DataColumn(
+        label: SizedBox(
+          width: columnWidth,
+          child: const Text('Return Date', textAlign: TextAlign.center),
+        ),
+      ),
+      DataColumn(
+        label: SizedBox(
+          width: columnWidth,
+          child: const Text('Return Amount', textAlign: TextAlign.center),
+        ),
+      ),
+      DataColumn(
+        label: SizedBox(
+          width: columnWidth,
+          child: const Text('Status', textAlign: TextAlign.center),
+        ),
+      ),
+      DataColumn(
+        label: SizedBox(
+          width: columnWidth,
+          child: const Text('Payment Method', textAlign: TextAlign.center),
+        ),
+      ),
+      DataColumn(
+        label: SizedBox(
+          width: columnWidth * 1.2,
+          child: const Text('Reason', textAlign: TextAlign.center),
+        ),
+      ),
+      DataColumn(
+        label: SizedBox(
+          width: columnWidth * 0.8,
+          child: const Text('Items', textAlign: TextAlign.center),
+        ),
+      ),
+      DataColumn(
+        label: SizedBox(
+          width: columnWidth * 1.2,
+          child: const Text('Actions', textAlign: TextAlign.center),
+        ),
+      ),
+    ];
+  }
+
+  List<DataRow> _buildTableRows(BuildContext context, double columnWidth) {
+    return salesReturns.asMap().entries.map((entry) {
+      final index = entry.key;
+      final salesReturn = entry.value;
+
+      return DataRow(
+        color: MaterialStateProperty.resolveWith<Color>(
+              (Set<MaterialState> states) {
+            return index % 2 == 0 ? Colors.grey.withOpacity(0.03) : Colors.transparent;
+          },
+        ),
+        onSelectChanged: onSalesReturnTap != null ? (_) => onSalesReturnTap!() : null,
+        cells: [
+          _buildDataCell('${index + 1}', columnWidth * 0.6),
+          _buildDataCell(salesReturn.receiptNo ?? 'N/A', columnWidth),
+          _buildDataCell(salesReturn.customerName ?? 'N/A', columnWidth),
+          _buildDataCell(_formatDate(salesReturn.returnDate), columnWidth),
+          _buildAmountCell(double.tryParse(salesReturn.returnAmount.toString()), columnWidth),
+          _buildStatusCell(salesReturn.status, columnWidth),
+          _buildDataCell(salesReturn.paymentMethod ?? 'N/A', columnWidth),
+          _buildReasonCell(salesReturn.reason, columnWidth * 1.2),
+          _buildItemsCell(salesReturn.items, columnWidth * 0.8),
+          _buildActionCell(salesReturn, context, columnWidth * 1.2),
+        ],
+      );
+    }).toList();
+  }
+
+  DataCell _buildDataCell(String text, double width) {
+    return DataCell(
+      SizedBox(
+        width: width,
+        child: Text(
+          text,
+          style: const TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w500,
+            color: Colors.black87,
+          ),
+          textAlign: TextAlign.center,
+          overflow: TextOverflow.ellipsis,
         ),
       ),
     );
   }
 
-  String _formatDate(DateTime date) {
-    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+  DataCell _buildAmountCell(double? amount, double width) {
+    final amountText = amount != null ? '\$${amount.toStringAsFixed(2)}' : 'N/A';
+
+    return DataCell(
+      SizedBox(
+        width: width,
+        child: Center(
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: Colors.red.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Text(
+              amountText,
+              style: const TextStyle(
+                color: Colors.red,
+                fontWeight: FontWeight.w600,
+                fontSize: 11,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  DataCell _buildStatusCell(String? status, double width) {
+    final statusText = status ?? 'N/A';
+    final statusColor = _getStatusColor(statusText);
+
+    return DataCell(
+      SizedBox(
+        width: width,
+        child: Center(
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: statusColor.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Text(
+              statusText.toUpperCase(),
+              style: TextStyle(
+                color: statusColor,
+                fontWeight: FontWeight.w600,
+                fontSize: 10,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  DataCell _buildReasonCell(String? reason, double width) {
+    return DataCell(
+      SizedBox(
+        width: width,
+        child: Text(
+          reason ?? 'No reason provided',
+          style: const TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w500,
+            color: Colors.black87,
+          ),
+          textAlign: TextAlign.center,
+          overflow: TextOverflow.ellipsis,
+          maxLines: 2,
+        ),
+      ),
+    );
+  }
+
+  DataCell _buildItemsCell(List<SalesReturnItem>? items, double width) {
+    final itemsCount = items?.length ?? 0;
+
+    return DataCell(
+      SizedBox(
+        width: width,
+        child: Center(
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: Colors.blue.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Text(
+              itemsCount.toString(),
+              style: const TextStyle(
+                color: Colors.blue,
+                fontWeight: FontWeight.w600,
+                fontSize: 11,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  DataCell _buildActionCell(SalesReturnModel salesReturn, BuildContext context, double width) {
+    return DataCell(
+      SizedBox(
+        width: width,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // View Button
+            _buildActionButton(
+              icon: HugeIcons.strokeRoundedView,
+              color: Colors.green,
+              tooltip: 'View sales return details',
+              onPressed: () => _showViewDialog(context, salesReturn),
+            ),
+
+            // Delete Button
+            _buildActionButton(
+              icon: HugeIcons.strokeRoundedDeleteThrow,
+              color: Colors.red,
+              tooltip: 'Delete sales return',
+              onPressed: () => _confirmDelete(context, salesReturn),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActionButton({
+    required IconData icon,
+    required Color color,
+    required String tooltip,
+    required VoidCallback onPressed,
+  }) {
+    return IconButton(
+      onPressed: onPressed,
+      icon: Icon(icon, size: 18, color: color),
+      tooltip: tooltip,
+      padding: EdgeInsets.zero,
+      constraints: const BoxConstraints(minWidth: 30, minHeight: 30),
+    );
   }
 
   Color _getStatusColor(String status) {
@@ -152,41 +374,98 @@ class SalesReturnDataTableWidget extends StatelessWidget {
     }
   }
 
-  void _viewSalesReturnDetails(BuildContext context, SalesReturnModel salesReturn) {
+  String _formatDate(DateTime? date) {
+    if (date == null) return 'N/A';
+    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+  }
+
+  Future<void> _confirmDelete(BuildContext context, SalesReturnModel salesReturn) async {
+    final shouldDelete = await showDeleteConfirmationDialog(context);
+    if (shouldDelete && context.mounted) {
+      context.read<SalesReturnBloc>().add(
+          DeleteSalesReturn(context,salesReturn.id.toString())
+      );
+    }
+  }
+
+  void _showViewDialog(BuildContext context, SalesReturnModel salesReturn) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Sales Return - ${salesReturn.receiptNo}'),
-        content: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _buildDetailRow('Customer:', salesReturn.customerName ?? 'N/A'),
-              _buildDetailRow('Return Date:', _formatDate(salesReturn.returnDate??DateTime.now())),
-              _buildDetailRow('Return Amount:', '\$${salesReturn.returnAmount.toString()}'),
-              _buildDetailRow('Status:', salesReturn.status.toString().toUpperCase()),
-              _buildDetailRow('Payment Method:', salesReturn.paymentMethod ?? 'N/A'),
-              _buildDetailRow('Reason:', salesReturn.reason ?? 'No reason provided'),
+      builder: (context) {
+        return Dialog(
+          child: Container(
+            width: AppSizes.width(context) * 0.50,
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Sales Return Details - ${salesReturn.receiptNo ?? "N/A"}',
+                  style: AppTextStyle.cardLevelHead(context),
+                ),
+                const SizedBox(height: 16),
+                _buildDetailRow('Customer:', salesReturn.customerName ?? 'N/A'),
+                _buildDetailRow('Return Date:', _formatDate(salesReturn.returnDate)),
+                _buildDetailRow('Return Amount:', '${salesReturn.returnAmount?.toString() ?? "N/A"}'),
+                _buildDetailRow('Status:', salesReturn.status?.toUpperCase() ?? 'N/A'),
+                _buildDetailRow('Payment Method:', salesReturn.paymentMethod ?? 'N/A'),
+                _buildDetailRow('Reason:', salesReturn.reason ?? 'No reason provided'),
 
-              const SizedBox(height: 16),
-              const Text('Items:', style: TextStyle(fontWeight: FontWeight.bold)),
-              ...?salesReturn.items?.map((item) =>
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4),
-                    child: Text('• ${item.productName} (Qty: ${item.quantity}) - \$${item.total.toString()}'),
-                  )
-              ).toList(),
-            ],
+                if (salesReturn.items?.isNotEmpty ?? false) ...[
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Returned Items:',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  ...salesReturn.items!.map((item) =>
+                      Container(
+                        margin: const EdgeInsets.only(bottom: 8),
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.withOpacity(0.05),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                item.productName ?? 'Unknown Product',
+                                style: const TextStyle(fontWeight: FontWeight.w500),
+                              ),
+                            ),
+                            Text('Qty: ${item.quantity ?? 0}'),
+                            const SizedBox(width: 16),
+                            Text(
+                              '${item.total?.toString() ?? "0.00"}',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                                color: Colors.red,
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                  ).toList(),
+                ],
+
+                const SizedBox(height: 20),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text('Close'),
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -200,35 +479,66 @@ class SalesReturnDataTableWidget extends StatelessWidget {
             width: 120,
             child: Text(
               label,
-              style: const TextStyle(fontWeight: FontWeight.bold),
+              style: const TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 12,
+              ),
             ),
           ),
-          Expanded(child: Text(value)),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              value,
+              style: const TextStyle(
+                fontSize: 12,
+              ),
+            ),
+          ),
         ],
       ),
     );
   }
 
-  void _deleteSalesReturn(BuildContext context, SalesReturnModel salesReturn) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete Sales Return'),
-        content: Text('Are you sure you want to delete sales return ${salesReturn.receiptNo}?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+  Widget _buildEmptyState() {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              context.read<SalesReturnBloc>().add(
-                  DeleteSalesReturn(context, salesReturn.id.toString())
-              );
-            },
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Delete'),
+        ],
+      ),
+      padding: const EdgeInsets.all(40),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.assignment_return_outlined,
+            size: 48,
+            color: Colors.grey.withOpacity(0.5),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'No Sales Returns Found',
+            style: GoogleFonts.inter(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Sales returns will appear here when created',
+            style: GoogleFonts.inter(
+              fontSize: 12,
+              fontWeight: FontWeight.w400,
+              color: Colors.grey,
+            ),
+            textAlign: TextAlign.center,
           ),
         ],
       ),

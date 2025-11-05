@@ -1,14 +1,20 @@
-import 'package:smart_inventory/core/configs/configs.dart';
-
-import '../../products/product/presentation/widget/pagination.dart';
-import 'bad_stock_list/bad_stock_list_bloc.dart';
-import 'data/model/bad_stock_return/bad_stock_return_model.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:hugeicons/hugeicons.dart';
+import 'package:iconsax/iconsax.dart';
+import 'package:lottie/lottie.dart';
+
+import '../../../../../core/configs/configs.dart';
 import '../../../../../core/shared/widgets/sideMenu/sidebar.dart';
 import '../../../../../core/widgets/app_dropdown.dart';
 import '../../../../../core/widgets/coustom_search_text_field.dart';
 import '../../../../../core/widgets/date_range.dart';
-
+import '../../../../../core/widgets/delete_dialog.dart';
+import '../../products/product/presentation/widget/pagination.dart';
+import 'bad_stock_list/bad_stock_list_bloc.dart';
+import 'data/model/bad_stock_return/bad_stock_return_model.dart';
 
 class BadStockScreen extends StatefulWidget {
   const BadStockScreen({super.key});
@@ -118,9 +124,6 @@ class _BadStockScreenState extends State<BadStockScreen> {
         ),
         const SizedBox(width: 12),
 
-        // 🏢 Location Dropdown (if you have locations)
-
-
         // 📅 Date Range Picker
         SizedBox(
           width: 260,
@@ -136,8 +139,6 @@ class _BadStockScreenState extends State<BadStockScreen> {
           ),
         ),
         const SizedBox(width: 12),
-
-
 
         // 🔄 Refresh Button
         IconButton(
@@ -170,12 +171,12 @@ class _BadStockScreenState extends State<BadStockScreen> {
           );
         } else if (state is BadStockListSuccess) {
           if (state.list.isEmpty) {
-            return _noDataWidget("No bad stock records found");
+            return _buildEmptyState();
           }
           return Column(
             children: [
               SizedBox(
-                child: BadStockDataTableWidget(badStocks: state.list),
+                child: BadStockTableCard(badStocks: state.list),
               ),
               const SizedBox(height: 16),
               PaginationBar(
@@ -199,151 +200,429 @@ class _BadStockScreenState extends State<BadStockScreen> {
             ],
           );
         } else if (state is BadStockListFailed) {
-          return _errorWidget(state.content);
+          return _buildErrorState(state.content);
         }
-        return _noDataWidget("No data available");
+        return _buildEmptyState();
       },
     );
   }
 
-  Widget _noDataWidget(String message) => Center(
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Lottie.asset(AppImages.noData, width: 200, height: 200),
-        const SizedBox(height: 16),
-        Text(
-          message,
-          style: const TextStyle(fontSize: 16, color: Colors.grey),
-        ),
-        const SizedBox(height: 12),
-        ElevatedButton(
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Lottie.asset(AppImages.noData, width: 200, height: 200),
+          const SizedBox(height: 16),
+          Text(
+            "No bad stock records found",
+            style: GoogleFonts.inter(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            "Bad stock records will appear here when created",
+            style: GoogleFonts.inter(
+              fontSize: 12,
+              fontWeight: FontWeight.w400,
+              color: Colors.grey,
+            ),
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton(
             onPressed: () => _fetchBadStockList(),
-            child: const Text("Refresh")
-        ),
-      ],
-    ),
-  );
-
-  Widget _errorWidget(String error) => Center(
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const Icon(Icons.error_outline, size: 60, color: Colors.red),
-        const SizedBox(height: 16),
-        Text(
-          "Error: $error",
-          style: const TextStyle(fontSize: 16, color: Colors.red),
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: 12),
-        ElevatedButton(
-            onPressed: () => _fetchBadStockList(),
-            child: const Text("Retry")
-        ),
-      ],
-    ),
-  );
-}
-class BadStockDataTableWidget extends StatelessWidget {
-  final List<BadStockReturnModel> badStocks;
-
-  const BadStockDataTableWidget({super.key, required this.badStocks});
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      elevation: 2,
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Container(
-          constraints: BoxConstraints(
-            minWidth: MediaQuery.of(context).size.width * 0.9,
-          ),
-          child: DataTable(
-            headingRowColor: MaterialStateProperty.all(AppColors.primaryColor.withOpacity(0.1)),
-            columns: const [
-              DataColumn(label: Text('Product', style: TextStyle(fontWeight: FontWeight.bold))),
-              DataColumn(label: Text('Quantity', style: TextStyle(fontWeight: FontWeight.bold))),
-              DataColumn(label: Text('Reason', style: TextStyle(fontWeight: FontWeight.bold))),
-              DataColumn(label: Text('Date', style: TextStyle(fontWeight: FontWeight.bold))),
-              DataColumn(label: Text('Reference', style: TextStyle(fontWeight: FontWeight.bold))),
-              DataColumn(label: Text('Actions', style: TextStyle(fontWeight: FontWeight.bold))),
-            ],
-            rows: badStocks.map((badStock) {
-              return DataRow(cells: [
-                DataCell(Text(badStock.productName ?? 'Unknown')),
-                DataCell(Text(badStock.quantity?.toString() ?? '0')),
-                DataCell(
-                  Tooltip(
-                    message: badStock.reason ?? '',
-                    child: Text(
-                      badStock.reason ?? 'No reason',
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ),
-                DataCell(Text(badStock.date.toString() ?? 'Unknown date')),
-                DataCell(Text('${badStock.referenceType} #${badStock.referenceId}')),
-                DataCell(
-                  Row(
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.visibility, size: 20),
-                        onPressed: () {
-                          // View details
-                          _showBadStockDetails(context, badStock);
-                        },
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.delete, size: 20, color: Colors.red),
-                        onPressed: () {
-                          // Delete bad stock
-                          _deleteBadStock(context, badStock);
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-              ]);
-            }).toList(),
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _showBadStockDetails(BuildContext context, BadStockReturnModel badStock) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Bad Stock Details'),
-        content: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _buildDetailRow('Product:', badStock.productName),
-              _buildDetailRow('Quantity:', badStock.quantity?.toString()),
-              _buildDetailRow('Reason:', badStock.reason),
-              _buildDetailRow('Date:', badStock.date.toString()),
-              _buildDetailRow('Reference Type:', badStock.referenceType),
-              _buildDetailRow('Reference ID:', badStock.referenceId?.toString()),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
+            child: const Text("Refresh"),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildDetailRow(String label, String? value) {
+  Widget _buildErrorState(String error) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.error_outline, size: 60, color: Colors.red),
+          const SizedBox(height: 16),
+          Text(
+            "Error loading bad stock records",
+            style: GoogleFonts.inter(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            error,
+            style: const TextStyle(fontSize: 14, color: Colors.red),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: () => _fetchBadStockList(),
+            child: const Text("Retry"),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class BadStockTableCard extends StatelessWidget {
+  final List<BadStockReturnModel> badStocks;
+  final VoidCallback? onBadStockTap;
+
+  const BadStockTableCard({
+    super.key,
+    required this.badStocks,
+    this.onBadStockTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (badStocks.isEmpty) {
+      return _buildEmptyState();
+    }
+
+    final verticalScrollController = ScrollController();
+    final horizontalScrollController = ScrollController();
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final totalWidth = constraints.maxWidth;
+        const numColumns = 6; // Product, Quantity, Reason, Date, Reference, Actions
+        const minColumnWidth = 120.0;
+
+        final dynamicColumnWidth =
+        (totalWidth / numColumns).clamp(minColumnWidth, double.infinity);
+
+        return Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.1),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Scrollbar(
+            controller: verticalScrollController,
+            thumbVisibility: true,
+            child: SingleChildScrollView(
+              controller: verticalScrollController,
+              scrollDirection: Axis.vertical,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Scrollbar(
+                  controller: horizontalScrollController,
+                  thumbVisibility: true,
+                  child: SingleChildScrollView(
+                    controller: horizontalScrollController,
+                    scrollDirection: Axis.horizontal,
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 5),
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(minWidth: totalWidth),
+                        child: DataTable(
+                          dataRowMinHeight: 40,
+                          dataRowMaxHeight: 40,
+                          columnSpacing: 8,
+                          horizontalMargin: 12,
+                          dividerThickness: 0.5,
+                          headingRowHeight: 40,
+                          headingTextStyle: TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            fontFamily: GoogleFonts.inter().fontFamily,
+                          ),
+                          headingRowColor: MaterialStateProperty.all(
+                            AppColors.primaryColor,
+                          ),
+                          dataTextStyle: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w500,
+                            fontFamily: GoogleFonts.inter().fontFamily,
+                          ),
+                          columns: _buildColumns(dynamicColumnWidth),
+                          rows: badStocks.asMap().entries.map((entry) {
+                            final badStock = entry.value;
+                            return DataRow(
+                              onSelectChanged: onBadStockTap != null
+                                  ? (_) => onBadStockTap!()
+                                  : null,
+                              cells: [
+                                _buildDataCell(badStock.productName ?? 'Unknown', dynamicColumnWidth),
+                                _buildDataCell(badStock.quantity.toString(), dynamicColumnWidth),
+                                _buildReasonCell(badStock.reason, dynamicColumnWidth),
+                                _buildDateCell(badStock.date, dynamicColumnWidth),
+                                _buildReferenceCell(badStock, dynamicColumnWidth),
+                                _buildActionCell(badStock, context, dynamicColumnWidth),
+                              ],
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  List<DataColumn> _buildColumns(double columnWidth) {
+    return [
+      DataColumn(
+        label: SizedBox(
+          width: columnWidth,
+          child: const Text('Product', textAlign: TextAlign.center),
+        ),
+      ),
+      DataColumn(
+        label: SizedBox(
+          width: columnWidth,
+          child: const Text('Quantity', textAlign: TextAlign.center),
+        ),
+      ),
+      DataColumn(
+        label: SizedBox(
+          width: columnWidth,
+          child: const Text('Reason', textAlign: TextAlign.center),
+        ),
+      ),
+      DataColumn(
+        label: SizedBox(
+          width: columnWidth,
+          child: const Text('Date', textAlign: TextAlign.center),
+        ),
+      ),
+      DataColumn(
+        label: SizedBox(
+          width: columnWidth,
+          child: const Text('Reference', textAlign: TextAlign.center),
+        ),
+      ),
+      DataColumn(
+        label: SizedBox(
+          width: columnWidth,
+          child: const Text('Actions', textAlign: TextAlign.center),
+        ),
+      ),
+    ];
+  }
+
+  DataCell _buildDataCell(String text, double width) {
+    return DataCell(
+      SizedBox(
+        width: width,
+        child: Text(
+          text,
+          style: const TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w500,
+            color: Colors.black87,
+          ),
+          textAlign: TextAlign.center,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ),
+    );
+  }
+
+  DataCell _buildQuantityCell(double? quantity, double width) {
+    return DataCell(
+      SizedBox(
+        width: width,
+        child: Center(
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: Colors.orange.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Text(
+              quantity?.toString() ?? '0',
+              style: const TextStyle(
+                color: Colors.orange,
+                fontWeight: FontWeight.w600,
+                fontSize: 11,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  DataCell _buildReasonCell(String? reason, double width) {
+    return DataCell(
+      Tooltip(
+        message: reason ?? 'No reason provided',
+        child: SizedBox(
+          width: width,
+          child: Text(
+            reason ?? 'No reason',
+            style: const TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w500,
+              color: Colors.black87,
+            ),
+            textAlign: TextAlign.center,
+            overflow: TextOverflow.ellipsis,
+            maxLines: 2,
+          ),
+        ),
+      ),
+    );
+  }
+
+  DataCell _buildDateCell(DateTime? date, double width) {
+    return DataCell(
+      SizedBox(
+        width: width,
+        child: Text(
+          _formatDate(date),
+          style: const TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w500,
+            color: Colors.black87,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ),
+    );
+  }
+
+  DataCell _buildReferenceCell(BadStockReturnModel badStock, double width) {
+    final referenceText = '${badStock.referenceType} #${badStock.referenceId}';
+
+    return DataCell(
+      SizedBox(
+        width: width,
+        child: Text(
+          referenceText,
+          style: const TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w500,
+            color: Colors.black87,
+          ),
+          textAlign: TextAlign.center,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ),
+    );
+  }
+
+  DataCell _buildActionCell(BadStockReturnModel badStock, BuildContext context, double width) {
+    return DataCell(
+      SizedBox(
+        width: width,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // View Button
+            _buildActionButton(
+              icon: HugeIcons.strokeRoundedView,
+              color: Colors.green,
+              tooltip: 'View bad stock details',
+              onPressed: () => _showViewDialog(context, badStock),
+            ),
+
+            // Delete Button
+            _buildActionButton(
+              icon: HugeIcons.strokeRoundedDeleteThrow,
+              color: Colors.red,
+              tooltip: 'Delete bad stock',
+              onPressed: () => _confirmDelete(context, badStock),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActionButton({
+    required IconData icon,
+    required Color color,
+    required String tooltip,
+    required VoidCallback onPressed,
+  }) {
+    return IconButton(
+      onPressed: onPressed,
+      icon: Icon(icon, size: 18, color: color),
+      tooltip: tooltip,
+      padding: EdgeInsets.zero,
+      constraints: const BoxConstraints(minWidth: 30, minHeight: 30),
+    );
+  }
+
+  String _formatDate(DateTime? date) {
+    if (date == null) return 'N/A';
+    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+  }
+
+  Future<void> _confirmDelete(BuildContext context, BadStockReturnModel badStock) async {
+    final shouldDelete = await showDeleteConfirmationDialog(context);
+    if (shouldDelete && context.mounted) {
+      // Adjust based on your BLoC implementation
+      // context.read<BadStockListBloc>().add(DeleteBadStock(id: badStock.id.toString()));
+    }
+  }
+
+  void _showViewDialog(BuildContext context, BadStockReturnModel badStock) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          child: Container(
+            width: AppSizes.width(context) * 0.40,
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Bad Stock Details',
+                  style: AppTextStyle.cardLevelHead(context),
+                ),
+                const SizedBox(height: 16),
+                _buildDetailRow('Product:', badStock.productName ?? 'N/A'),
+                _buildDetailRow('Quantity:', badStock.quantity?.toString() ?? '0'),
+                _buildDetailRow('Reason:', badStock.reason ?? 'No reason provided'),
+                _buildDetailRow('Date:', _formatDate(badStock.date)),
+                _buildDetailRow('Reference Type:', badStock.referenceType ?? 'N/A'),
+                _buildDetailRow('Reference ID:', badStock.referenceId?.toString() ?? 'N/A'),
+
+                const SizedBox(height: 20),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text('Close'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildDetailRow(String label, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
@@ -353,35 +632,66 @@ class BadStockDataTableWidget extends StatelessWidget {
             width: 120,
             child: Text(
               label,
-              style: const TextStyle(fontWeight: FontWeight.bold),
+              style: const TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 12,
+              ),
             ),
           ),
           const SizedBox(width: 8),
           Expanded(
-            child: Text(value ?? 'Not available'),
+            child: Text(
+              value,
+              style: const TextStyle(
+                fontSize: 12,
+              ),
+            ),
           ),
         ],
       ),
     );
   }
 
-  void _deleteBadStock(BuildContext context, BadStockReturnModel badStock) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete Bad Stock'),
-        content: Text('Are you sure you want to delete bad stock record for ${badStock.productName}?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+  Widget _buildEmptyState() {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              // context.read<BadStockListBloc>().add(DeleteBadStock(badStock.id!, context));
-            },
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+        ],
+      ),
+      padding: const EdgeInsets.all(40),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.inventory_2_outlined,
+            size: 48,
+            color: Colors.grey.withOpacity(0.5),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'No Bad Stock Records',
+            style: GoogleFonts.inter(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Bad stock records will appear here when created',
+            style: GoogleFonts.inter(
+              fontSize: 12,
+              fontWeight: FontWeight.w400,
+              color: Colors.grey,
+            ),
+            textAlign: TextAlign.center,
           ),
         ],
       ),
