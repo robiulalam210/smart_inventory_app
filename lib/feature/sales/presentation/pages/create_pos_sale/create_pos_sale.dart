@@ -357,21 +357,24 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
 
             return Form(
               key: formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 10),
-                  _buildTopFormSection(bloc),
-                  const SizedBox(height: 10),
-                  _buildProductListSection(bloc),
-                  const SizedBox(height: 10),
-                  _buildChargesSection(bloc),
-                  const SizedBox(height: 10),
-                  _buildSummarySection(bloc),
-                  const SizedBox(height: 10),
-                  gapH20,
-                  _buildActionButtons(),
-                ],
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 10),
+                    _buildTopFormSection(bloc),
+                    const SizedBox(height: 10),
+                    _buildProductListSection(bloc),
+                    const SizedBox(height: 10),
+                    _buildChargesSection(bloc),
+                    const SizedBox(height: 10),
+                    _buildSummarySection(bloc),
+                    const SizedBox(height: 10),
+                    gapH20,
+                    _buildActionButtons(),
+                  ],
+                ),
               ),
             );
           },

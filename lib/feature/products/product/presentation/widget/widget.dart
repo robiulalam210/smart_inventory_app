@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../../core/configs/app_colors.dart';
 import '../../data/model/product_model.dart';
 
 class ProductDataTableWidget extends StatelessWidget {
@@ -48,11 +49,12 @@ class ProductDataTableWidget extends StatelessWidget {
                     controller: horizontalScrollController,
                     scrollDirection: Axis.horizontal,
                     child: Padding(
-                      padding: const EdgeInsets.only(bottom: 10),
+                      padding: const EdgeInsets.only(bottom: 5),
                       child: ConstrainedBox(
                         constraints: BoxConstraints(minWidth: totalWidth),
                         child: DataTable(
                           dataRowMinHeight: 40,
+                          headingRowHeight: 40,
                           columnSpacing: 0,
                           headingTextStyle: const TextStyle(
                             color: Colors.white,
@@ -60,7 +62,9 @@ class ProductDataTableWidget extends StatelessWidget {
                             fontWeight: FontWeight.bold,
                           ),
                           headingRowColor:
-                          MaterialStateProperty.all(const Color(0xFF6ab129)),
+                          MaterialStateProperty.all(
+                              AppColors.primaryColor
+                          ),
                           columns: _buildColumns(dynamicColumnWidth),
                           rows: products
                               .asMap()

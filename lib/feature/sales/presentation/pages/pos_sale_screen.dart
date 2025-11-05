@@ -101,7 +101,8 @@ class _PosSaleScreenState extends State<PosSaleScreen> {
   Widget _buildContentArea(bool isBigScreen) {
     return ResponsiveCol(
       xs: 12,
-      lg: 10,
+      lg: 12,
+
       child: RefreshIndicator(
         onRefresh: () async => _fetchApi(),
         child: Container(

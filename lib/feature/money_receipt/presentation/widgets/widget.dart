@@ -14,13 +14,12 @@ class MoneyReceiptDataTableWidget extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final totalWidth = constraints.maxWidth-300;
+        final totalWidth = constraints.maxWidth;
         const numColumns = 10;
         const minColumnWidth = 100.0;
 
         final dynamicColumnWidth =
         (totalWidth / numColumns).clamp(minColumnWidth, double.infinity);
-        print(dynamicColumnWidth);
 
 
         return Container(
@@ -43,7 +42,7 @@ class MoneyReceiptDataTableWidget extends StatelessWidget {
                     controller: horizontalController,
                     scrollDirection: Axis.horizontal,
                     child: Padding(
-                      padding: const EdgeInsets.only(bottom: 10),
+                      padding: const EdgeInsets.only(bottom: 5),
                       child: ConstrainedBox(
                         constraints: BoxConstraints(minWidth: totalWidth),
                         child: DataTable(
@@ -60,7 +59,7 @@ class MoneyReceiptDataTableWidget extends StatelessWidget {
                           )
                               .toList(),
                           headingRowColor: MaterialStateProperty.all(
-                            const Color(0xFF6AB129),
+                            AppColors.primaryColor
                           ),
                           headingTextStyle: const TextStyle(
                             color: Colors.white,
@@ -68,6 +67,7 @@ class MoneyReceiptDataTableWidget extends StatelessWidget {
                             fontSize: 12,
                           ),
                           dataRowMinHeight: 40,
+                          headingRowHeight: 40,
                           columnSpacing: 0,
                         ),
                       ),
