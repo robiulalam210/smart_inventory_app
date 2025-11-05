@@ -2,6 +2,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:hugeicons/hugeicons.dart';
+import 'package:iconsax/iconsax.dart';
 import 'package:lottie/lottie.dart';
 import 'package:smart_inventory/core/configs/app_colors.dart';
 import 'package:smart_inventory/core/configs/app_images.dart';
@@ -30,20 +33,15 @@ class _CustomerLedgerScreenState extends State<CustomerLedgerScreen> {
   void initState() {
     super.initState();
     context.read<CustomerBloc>().add(FetchCustomerActiveList(context));
-    // Don't fetch ledger initially - wait for customer selection
   }
 
   void _fetchCustomerLedger({
-    required String customer, // Make customer required
+    required String customer,
     DateTime? from,
     DateTime? to,
   }) {
-    if (customer.isEmpty) {
-      print('⚠️ No customer selected for ledger report');
-      return;
-    }
+    if (customer.isEmpty) return;
 
-    print('🔍 Fetching ledger for customer: $customer');
     context.read<CustomerLedgerBloc>().add(FetchCustomerLedger(
       context: context,
       customer: customer,
@@ -97,7 +95,7 @@ class _CustomerLedgerScreenState extends State<CustomerLedgerScreen> {
               const SizedBox(height: 16),
               _buildCustomerSummary(),
               const SizedBox(height: 16),
-              _buildLedgerTable(),
+              SizedBox(child: _buildLedgerTable()),
             ],
           ),
         ),
@@ -125,15 +123,10 @@ class _CustomerLedgerScreenState extends State<CustomerLedgerScreen> {
                 value: context.read<CustomerLedgerBloc>().selectedCustomer,
                 itemList: context.read<CustomerBloc>().activeCustomer,
                 onChanged: (newVal) {
-                  print('Customer selected for ledger: ${newVal?.id} - ${newVal?.name}');
-
                   if (newVal != null) {
-                    // Update CustomerLedgerBloc state
                     context.read<CustomerLedgerBloc>().selectedCustomer = newVal;
-
-                    // Fetch customer ledger with the selected customer
                     _fetchCustomerLedger(
-                      customer: newVal.id.toString(), // This is now required
+                      customer: newVal.id.toString(),
                       from: selectedDateRange?.start,
                       to: selectedDateRange?.end,
                     );
@@ -157,7 +150,7 @@ class _CustomerLedgerScreenState extends State<CustomerLedgerScreen> {
             },
           ),
         ),
-        const SizedBox(width: 5),
+        const SizedBox(width: 12),
 
         // 📅 Date Range Picker
         SizedBox(
@@ -177,14 +170,13 @@ class _CustomerLedgerScreenState extends State<CustomerLedgerScreen> {
             },
           ),
         ),
-        const SizedBox(width: 5),
+        const SizedBox(width: 12),
 
         // Clear Filters Button
         ElevatedButton.icon(
           onPressed: () {
             setState(() => selectedDateRange = null);
             context.read<CustomerLedgerBloc>().add(ClearCustomerLedgerFilters());
-            // Don't fetch after clear - wait for customer selection
           },
           icon: const Icon(Icons.clear_all),
           label: const Text("Clear"),
@@ -193,7 +185,7 @@ class _CustomerLedgerScreenState extends State<CustomerLedgerScreen> {
             foregroundColor: AppColors.blackColor,
           ),
         ),
-        const SizedBox(width: 5),
+        const SizedBox(width: 12),
 
         // Refresh Button
         BlocBuilder<CustomerLedgerBloc, CustomerLedgerState>(
@@ -217,24 +209,47 @@ class _CustomerLedgerScreenState extends State<CustomerLedgerScreen> {
       builder: (context, state) {
         if (state is! CustomerLedgerSuccess) {
           return Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(8),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.grey.withOpacity(0.2),
+                  color: Colors.grey.withOpacity(0.1),
                   blurRadius: 4,
                   offset: const Offset(0, 2),
                 ),
               ],
             ),
             child: Center(
-              child: Text(
-                "Select a customer to view ledger",
-                style: AppTextStyle.cardTitle(context).copyWith(
-                  color: Colors.grey,
-                ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.people_outline,
+                    size: 48,
+                    color: Colors.grey.withOpacity(0.5),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    "Select a Customer to View Ledger",
+                    style: GoogleFonts.inter(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    "Choose a customer from the dropdown above to see their transaction history",
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w400,
+                      color: Colors.grey,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
               ),
             ),
           );
@@ -251,13 +266,13 @@ class _CustomerLedgerScreenState extends State<CustomerLedgerScreen> {
         final paymentsCount = transactions.where((t) => t.type.toLowerCase() == 'payment').length;
 
         return Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(8),
             boxShadow: [
               BoxShadow(
-                color: Colors.grey.withOpacity(0.2),
+                color: Colors.grey.withOpacity(0.1),
                 blurRadius: 4,
                 offset: const Offset(0, 2),
               ),
@@ -273,21 +288,23 @@ class _CustomerLedgerScreenState extends State<CustomerLedgerScreen> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 16),
               Wrap(
-                spacing: 16,
+                spacing: 12,
                 runSpacing: 12,
                 children: [
-                  _buildSummaryItem("Opening Balance", "\$${openingBalance.toStringAsFixed(2)}", Icons.account_balance_wallet),
-                  _buildSummaryItem("Closing Balance", "\$${summary.closingBalance.toStringAsFixed(2)}",
+                  _buildSummaryItem("Opening Balance", "\$${openingBalance.toStringAsFixed(2)}", Icons.account_balance_wallet, Colors.blue),
+                  _buildSummaryItem(
+                      "Closing Balance",
+                      "\$${summary.closingBalance.toStringAsFixed(2)}",
                       summary.closingBalance >= 0 ? Icons.arrow_upward : Icons.arrow_downward,
-                      color: summary.closingBalance >= 0 ? Colors.green : Colors.red
+                      summary.closingBalance >= 0 ? Colors.green : Colors.red
                   ),
-                  _buildSummaryItem("Total Debit", "\$${totalDebit.toStringAsFixed(2)}", Icons.arrow_downward, color: Colors.red),
-                  _buildSummaryItem("Total Credit", "\$${totalCredit.toStringAsFixed(2)}", Icons.arrow_upward, color: Colors.green),
-                  _buildSummaryItem("Sales Transactions", salesCount.toString(), Icons.shopping_cart),
-                  _buildSummaryItem("Payment Transactions", paymentsCount.toString(), Icons.payment),
-                  _buildSummaryItem("Total Transactions", summary.totalTransactions.toString(), Icons.receipt),
+                  _buildSummaryItem("Total Debit", "\$${totalDebit.toStringAsFixed(2)}", Icons.arrow_downward, Colors.red),
+                  _buildSummaryItem("Total Credit", "\$${totalCredit.toStringAsFixed(2)}", Icons.arrow_upward, Colors.green),
+                  _buildSummaryItem("Sales Transactions", salesCount.toString(), Icons.shopping_cart, Colors.orange),
+                  _buildSummaryItem("Payment Transactions", paymentsCount.toString(), Icons.payment, Colors.purple),
+                  _buildSummaryItem("Total Transactions", summary.totalTransactions.toString(), Icons.receipt, AppColors.primaryColor),
                 ],
               ),
             ],
@@ -303,25 +320,25 @@ class _CustomerLedgerScreenState extends State<CustomerLedgerScreen> {
     return firstTransaction.due - (firstTransaction.debit - firstTransaction.credit);
   }
 
-  Widget _buildSummaryItem(String label, String value, IconData icon, {Color color = AppColors.primaryColor}) {
+  Widget _buildSummaryItem(String label, String value, IconData icon, Color color) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(6),
+        borderRadius: BorderRadius.circular(8),
         border: Border.all(color: color.withOpacity(0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 16, color: color),
-          const SizedBox(width: 6),
+          Icon(icon, size: 20, color: color),
+          const SizedBox(width: 8),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 label,
-                style: const TextStyle(fontSize: 10, color: Colors.grey),
+                style: const TextStyle(fontSize: 11, color: Colors.grey, fontWeight: FontWeight.w500),
               ),
               Text(
                 value,
@@ -354,196 +371,507 @@ class _CustomerLedgerScreenState extends State<CustomerLedgerScreen> {
           );
         } else if (state is CustomerLedgerSuccess) {
           if (state.response.report.isEmpty) {
-            return _noDataWidget("No ledger transactions found for the selected period");
+            return _buildEmptyState("No ledger transactions found for the selected period");
           }
-          return CustomerLedgerDataTableWidget(transactions: state.response.report);
+          return CustomerLedgerTableCard(transactions: state.response.report);
         } else if (state is CustomerLedgerFailed) {
-          return _errorWidget(state.content);
+          return _buildErrorState(state.content);
         }
-        return _noDataWidget("Select a customer to view ledger transactions");
+        return _buildEmptyState("Select a customer to view ledger transactions");
       },
     );
   }
 
-  Widget CustomerLedgerDataTableWidget({required List<CustomerLedgerTransaction> transactions}) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(8),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.2),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
+  Widget _buildEmptyState(String message) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Lottie.asset(AppImages.noData, width: 200, height: 200),
+          const SizedBox(height: 16),
+          Text(
+            message,
+            style: GoogleFonts.inter(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey,
             ),
-          ],
-        ),
-        child: DataTable(
-          headingRowColor: MaterialStateProperty.resolveWith<Color>(
-                (Set<MaterialState> states) => AppColors.primaryColor.withOpacity(0.1),
+            textAlign: TextAlign.center,
           ),
-          columns: const [
-            DataColumn(label: Text('#', style: TextStyle(fontWeight: FontWeight.bold))),
-            DataColumn(label: Text('Date', style: TextStyle(fontWeight: FontWeight.bold))),
-            DataColumn(label: Text('Voucher No', style: TextStyle(fontWeight: FontWeight.bold))),
-            DataColumn(label: Text('Type', style: TextStyle(fontWeight: FontWeight.bold))),
-            DataColumn(label: Text('Particular', style: TextStyle(fontWeight: FontWeight.bold))),
-            DataColumn(label: Text('Details', style: TextStyle(fontWeight: FontWeight.bold))),
-            DataColumn(label: Text('Method', style: TextStyle(fontWeight: FontWeight.bold))),
-            DataColumn(label: Text('Debit', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
-            DataColumn(label: Text('Credit', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
-            DataColumn(label: Text('Balance', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
-          ],
-          rows: transactions.asMap().entries.map((entry) {
-            final index = entry.key;
-            final transaction = entry.value;
+          const SizedBox(height: 8),
+          BlocBuilder<CustomerLedgerBloc, CustomerLedgerState>(
+            builder: (context, state) {
+              final customer = context.read<CustomerLedgerBloc>().selectedCustomer;
+              return ElevatedButton(
+                onPressed: customer != null
+                    ? () => _fetchCustomerLedger(customer: customer.id.toString())
+                    : null,
+                child: const Text("Refresh"),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
 
-            return DataRow(
-              color: MaterialStateProperty.resolveWith<Color>(
-                    (Set<MaterialState> states) {
-                  return index % 2 == 0 ? Colors.grey.withOpacity(0.05) : Colors.transparent;
-                },
+  Widget _buildErrorState(String error) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.error_outline, size: 60, color: Colors.red),
+          const SizedBox(height: 16),
+          Text(
+            "Error Loading Customer Ledger",
+            style: GoogleFonts.inter(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            error,
+            style: const TextStyle(fontSize: 14, color: Colors.red),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 16),
+          BlocBuilder<CustomerLedgerBloc, CustomerLedgerState>(
+            builder: (context, state) {
+              final customer = context.read<CustomerLedgerBloc>().selectedCustomer;
+              return ElevatedButton(
+                onPressed: customer != null
+                    ? () => _fetchCustomerLedger(customer: customer.id.toString())
+                    : null,
+                child: const Text("Retry"),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class CustomerLedgerTableCard extends StatelessWidget {
+  final List<CustomerLedgerTransaction> transactions;
+  final VoidCallback? onTransactionTap;
+
+  const CustomerLedgerTableCard({
+    super.key,
+    required this.transactions,
+    this.onTransactionTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final verticalScrollController = ScrollController();
+    final horizontalScrollController = ScrollController();
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final totalWidth = constraints.maxWidth;
+        const numColumns = 10; // #, Date, Voucher No, Type, Particular, Details, Method, Debit, Credit, Balance
+        const minColumnWidth = 100.0;
+
+        final dynamicColumnWidth =
+        (totalWidth / numColumns).clamp(minColumnWidth, double.infinity);
+
+        return Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.1),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
               ),
-              cells: [
-                DataCell(Text('${index + 1}')),
-                DataCell(Text(transaction.date.toString().split(' ')[0])),
-                DataCell(
-                  Text(
-                    transaction.voucherNo,
-                    style: const TextStyle(fontWeight: FontWeight.w500),
-                  ),
-                ),
-                DataCell(
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: transaction.typeColor.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(transaction.typeIcon, size: 14, color: transaction.typeColor),
-                        const SizedBox(width: 4),
-                        Text(
-                          transaction.type,
-                          style: TextStyle(
-                            color: transaction.typeColor,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12,
+            ],
+          ),
+          child: Scrollbar(
+            controller: verticalScrollController,
+            thumbVisibility: true,
+            child: SingleChildScrollView(
+              controller: verticalScrollController,
+              scrollDirection: Axis.vertical,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Scrollbar(
+                  controller: horizontalScrollController,
+                  thumbVisibility: true,
+                  child: SingleChildScrollView(
+                    controller: horizontalScrollController,
+                    scrollDirection: Axis.horizontal,
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 5),
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(minWidth: totalWidth),
+                        child: DataTable(
+                          dataRowMinHeight: 40,
+                          dataRowMaxHeight: 40,
+                          columnSpacing: 8,
+                          horizontalMargin: 12,
+                          dividerThickness: 0.5,
+                          headingRowHeight: 40,
+                          headingTextStyle: TextStyle(
+                            color: Colors.white,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            fontFamily: GoogleFonts.inter().fontFamily,
                           ),
+                          headingRowColor: MaterialStateProperty.all(
+                            AppColors.primaryColor,
+                          ),
+                          dataTextStyle: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w500,
+                            fontFamily: GoogleFonts.inter().fontFamily,
+                          ),
+                          columns: _buildColumns(dynamicColumnWidth),
+                          rows: transactions.asMap().entries.map((entry) {
+                            final transaction = entry.value;
+                            return DataRow(
+                              onSelectChanged: onTransactionTap != null
+                                  ? (_) => onTransactionTap!()
+                                  : null,
+                              cells: [
+                                _buildIndexCell(entry.key + 1, dynamicColumnWidth * 0.6),
+                                _buildDateCell(transaction.date, dynamicColumnWidth),
+                                _buildVoucherCell(transaction.voucherNo, dynamicColumnWidth),
+                                _buildTypeCell(transaction, dynamicColumnWidth),
+                                _buildParticularCell(transaction.particular, dynamicColumnWidth),
+                                _buildDetailsCell(transaction.details, dynamicColumnWidth),
+                                _buildMethodCell(transaction.method, dynamicColumnWidth),
+                                _buildDebitCell(transaction.debit, dynamicColumnWidth),
+                                _buildCreditCell(transaction.credit, dynamicColumnWidth),
+                                _buildBalanceCell(transaction.due, dynamicColumnWidth),
+                              ],
+                            );
+                          }).toList(),
                         ),
-                      ],
-                    ),
-                  ),
-                ),
-                DataCell(Text(transaction.particular)),
-                DataCell(
-                  Tooltip(
-                    message: transaction.details,
-                    child: Text(
-                      transaction.details.length > 30
-                          ? '${transaction.details.substring(0, 30)}...'
-                          : transaction.details,
-                    ),
-                  ),
-                ),
-                DataCell(Text(transaction.method)),
-                DataCell(
-                  transaction.debit > 0
-                      ? Text(
-                    '\$${transaction.debit.toStringAsFixed(2)}',
-                    style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
-                  )
-                      : const Text('-'),
-                ),
-                DataCell(
-                  transaction.credit > 0
-                      ? Text(
-                    '\$${transaction.credit.toStringAsFixed(2)}',
-                    style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
-                  )
-                      : const Text('-'),
-                ),
-                DataCell(
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: transaction.due >= 0 ? Colors.red.withOpacity(0.1) : Colors.green.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(4),
-                      border: Border.all(
-                        color: transaction.due >= 0 ? Colors.red : Colors.green,
-                      ),
-                    ),
-                    child: Text(
-                      '\$${transaction.due.toStringAsFixed(2)}',
-                      style: TextStyle(
-                        color: transaction.due >= 0 ? Colors.red : Colors.green,
-                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
                 ),
-              ],
-            );
-          }).toList(),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  List<DataColumn> _buildColumns(double columnWidth) {
+    return [
+      DataColumn(
+        label: SizedBox(
+          width: columnWidth * 0.6,
+          child: const Text('#', textAlign: TextAlign.center),
+        ),
+      ),
+      DataColumn(
+        label: SizedBox(
+          width: columnWidth,
+          child: const Text('Date', textAlign: TextAlign.center),
+        ),
+      ),
+      DataColumn(
+        label: SizedBox(
+          width: columnWidth,
+          child: const Text('Voucher No', textAlign: TextAlign.center),
+        ),
+      ),
+      DataColumn(
+        label: SizedBox(
+          width: columnWidth,
+          child: const Text('Type', textAlign: TextAlign.center),
+        ),
+      ),
+      DataColumn(
+        label: SizedBox(
+          width: columnWidth,
+          child: const Text('Particular', textAlign: TextAlign.center),
+        ),
+      ),
+      DataColumn(
+        label: SizedBox(
+          width: columnWidth * 1.2,
+          child: const Text('Details', textAlign: TextAlign.center),
+        ),
+      ),
+      DataColumn(
+        label: SizedBox(
+          width: columnWidth,
+          child: const Text('Method', textAlign: TextAlign.center),
+        ),
+      ),
+      DataColumn(
+        label: SizedBox(
+          width: columnWidth,
+          child: const Text('Debit', textAlign: TextAlign.center),
+        ),
+      ),
+      DataColumn(
+        label: SizedBox(
+          width: columnWidth,
+          child: const Text('Credit', textAlign: TextAlign.center),
+        ),
+      ),
+      DataColumn(
+        label: SizedBox(
+          width: columnWidth,
+          child: const Text('Balance', textAlign: TextAlign.center),
+        ),
+      ),
+    ];
+  }
+
+  DataCell _buildIndexCell(int index, double width) {
+    return DataCell(
+      SizedBox(
+        width: width,
+        child: Center(
+          child: Text(
+            index.toString(),
+            style: const TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+              color: Colors.black87,
+            ),
+          ),
         ),
       ),
     );
   }
 
-  Widget _noDataWidget(String message) => Center(
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Lottie.asset(AppImages.noData, width: 200, height: 200),
-        const SizedBox(height: 12),
-        Text(
-          message,
+  DataCell _buildDateCell(DateTime date, double width) {
+    return DataCell(
+      SizedBox(
+        width: width,
+        child: Text(
+          _formatDate(date),
+          style: const TextStyle(
+            fontSize: 10,
+            fontWeight: FontWeight.w500,
+            color: Colors.black87,
+          ),
           textAlign: TextAlign.center,
-          style: const TextStyle(fontSize: 16),
         ),
-        const SizedBox(height: 8),
-        BlocBuilder<CustomerLedgerBloc, CustomerLedgerState>(
-          builder: (context, state) {
-            final customer = context.read<CustomerLedgerBloc>().selectedCustomer;
-            return ElevatedButton(
-              onPressed: customer != null
-                  ? () => _fetchCustomerLedger(customer: customer.id.toString())
-                  : null,
-              child: const Text("Refresh"),
-            );
-          },
-        ),
-      ],
-    ),
-  );
+      ),
+    );
+  }
 
-  Widget _errorWidget(String error) => Center(
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const Icon(Icons.error_outline, size: 60, color: Colors.red),
-        const SizedBox(height: 16),
-        Text(
-          "Error: $error",
+  DataCell _buildVoucherCell(String voucherNo, double width) {
+    return DataCell(
+      SizedBox(
+        width: width,
+        child: Text(
+          voucherNo,
+          style: const TextStyle(
+            fontSize: 10,
+            fontWeight: FontWeight.w600,
+            color: Colors.black87,
+          ),
           textAlign: TextAlign.center,
+          overflow: TextOverflow.ellipsis,
         ),
-        const SizedBox(height: 8),
-        BlocBuilder<CustomerLedgerBloc, CustomerLedgerState>(
-          builder: (context, state) {
-            final customer = context.read<CustomerLedgerBloc>().selectedCustomer;
-            return ElevatedButton(
-              onPressed: customer != null
-                  ? () => _fetchCustomerLedger(customer: customer.id.toString())
-                  : null,
-              child: const Text("Retry"),
-            );
-          },
+      ),
+    );
+  }
+
+  DataCell _buildTypeCell(CustomerLedgerTransaction transaction, double width) {
+    return DataCell(
+      SizedBox(
+        width: width,
+        child: Center(
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+            decoration: BoxDecoration(
+              color: transaction.typeColor.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(transaction.typeIcon, size: 12, color: transaction.typeColor),
+                const SizedBox(width: 4),
+                Text(
+                  transaction.type,
+                  style: TextStyle(
+                    color: transaction.typeColor,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 9,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
-      ],
-    ),
-  );
+      ),
+    );
+  }
+
+  DataCell _buildParticularCell(String particular, double width) {
+    return DataCell(
+      SizedBox(
+        width: width,
+        child: Text(
+          particular,
+          style: const TextStyle(
+            fontSize: 10,
+            fontWeight: FontWeight.w500,
+            color: Colors.black87,
+          ),
+          textAlign: TextAlign.center,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ),
+    );
+  }
+
+  DataCell _buildDetailsCell(String details, double width) {
+    return DataCell(
+      Tooltip(
+        message: details,
+        child: SizedBox(
+          width: width,
+          child: Text(
+            details.length > 30 ? '${details.substring(0, 30)}...' : details,
+            style: const TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w500,
+              color: Colors.black87,
+            ),
+            textAlign: TextAlign.center,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ),
+    );
+  }
+
+  DataCell _buildMethodCell(String method, double width) {
+    return DataCell(
+      SizedBox(
+        width: width,
+        child: Text(
+          method,
+          style: const TextStyle(
+            fontSize: 10,
+            fontWeight: FontWeight.w500,
+            color: Colors.black87,
+          ),
+          textAlign: TextAlign.center,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ),
+    );
+  }
+
+  DataCell _buildDebitCell(double debit, double width) {
+    return DataCell(
+      SizedBox(
+        width: width,
+        child: Center(
+          child: debit > 0
+              ? Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+            decoration: BoxDecoration(
+              color: Colors.red.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Text(
+              '\$${debit.toStringAsFixed(2)}',
+              style: const TextStyle(
+                color: Colors.red,
+                fontWeight: FontWeight.w600,
+                fontSize: 10,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          )
+              : const Text(
+            '-',
+            style: TextStyle(
+              fontSize: 10,
+              color: Colors.grey,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ),
+      ),
+    );
+  }
+
+  DataCell _buildCreditCell(double credit, double width) {
+    return DataCell(
+      SizedBox(
+        width: width,
+        child: Center(
+          child: credit > 0
+              ? Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+            decoration: BoxDecoration(
+              color: Colors.green.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Text(
+              '\$${credit.toStringAsFixed(2)}',
+              style: const TextStyle(
+                color: Colors.green,
+                fontWeight: FontWeight.w600,
+                fontSize: 10,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          )
+              : const Text(
+            '-',
+            style: TextStyle(
+              fontSize: 10,
+              color: Colors.grey,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ),
+      ),
+    );
+  }
+
+  DataCell _buildBalanceCell(double balance, double width) {
+    final isPositive = balance >= 0;
+
+    return DataCell(
+      SizedBox(
+        width: width,
+        child: Center(
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+            decoration: BoxDecoration(
+              color: isPositive ? Colors.red.withOpacity(0.1) : Colors.green.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(4),
+              border: Border.all(
+                color: isPositive ? Colors.red : Colors.green,
+              ),
+            ),
+            child: Text(
+              '\$${balance.abs().toStringAsFixed(2)}',
+              style: TextStyle(
+                color: isPositive ? Colors.red : Colors.green,
+                fontWeight: FontWeight.w600,
+                fontSize: 10,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+  }
 }

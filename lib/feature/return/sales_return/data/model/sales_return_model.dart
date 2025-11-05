@@ -21,7 +21,7 @@ class SalesReturnModel {
   final String? returnAmount;
   final String? status;
   final int? companyId;
-  final List<Item>? items;
+  final List<SalesReturnItem>? items;
 
   SalesReturnModel({
     this.id,
@@ -52,7 +52,7 @@ class SalesReturnModel {
     returnAmount: json["return_amount"],
     status: json["status"],
     companyId: json["company_id"],
-    items: json["items"] == null ? [] : List<Item>.from(json["items"]!.map((x) => Item.fromJson(x))),
+    items: json["items"] == null ? [] : List<SalesReturnItem>.from(json["items"]!.map((x) => SalesReturnItem.fromJson(x))),
   );
 
   Map<String, dynamic> toJson() => {
@@ -72,7 +72,7 @@ class SalesReturnModel {
   };
 }
 
-class Item {
+class SalesReturnItem {
   final int? id;
   final String? productName;
   final int? quantity;
@@ -82,7 +82,7 @@ class Item {
   final dynamic discountType;
   final String? total;
 
-  Item({
+  SalesReturnItem({
     this.id,
     this.productName,
     this.quantity,
@@ -93,7 +93,7 @@ class Item {
     this.total,
   });
 
-  factory Item.fromJson(Map<String, dynamic> json) => Item(
+  factory SalesReturnItem.fromJson(Map<String, dynamic> json) => SalesReturnItem(
     id: json["id"],
     productName: json["product_name"],
     quantity: json["quantity"],
