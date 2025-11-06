@@ -27,6 +27,11 @@ class UsersListModel {
     this.isStaff,
   });
 
+  @override
+  String toString() {
+    // TODO: implement toString
+    return username??"";
+  }
   factory UsersListModel.fromJson(Map<String, dynamic> json) => UsersListModel(
     id: json["id"],
     username: json["username"],

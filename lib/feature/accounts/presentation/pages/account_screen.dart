@@ -132,7 +132,6 @@ class _AccountScreenState extends State<AccountScreen> {
             child: Column(
               children: [
                 _buildFilterRow(),
-                const SizedBox(height: 16),
                 SizedBox(
                   child: BlocBuilder<AccountBloc, AccountState>(
                     builder: (context, state) {

@@ -127,10 +127,11 @@ class _ExpenseHeadScreenState extends State<ExpenseHeadScreen> {
               },
               child: Column(
                 children: [
-                  Row(mainAxisAlignment: MainAxisAlignment.center,
+                  Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Expanded(
+                      SizedBox(
+                        width: 350,
                         child: CustomSearchTextFormField(
                           isRequiredLabel: false,
                           controller: context
@@ -182,8 +183,8 @@ class _ExpenseHeadScreenState extends State<ExpenseHeadScreen> {
                       })
                     ],
                   ),
+                  gapH8,
                   SizedBox(
-                    height: 500,
                     child: BlocBuilder<ExpenseHeadBloc, ExpenseHeadState>(
                       builder: (context, state) {
                         if (state is ExpenseHeadListLoading) {
@@ -196,17 +197,7 @@ class _ExpenseHeadScreenState extends State<ExpenseHeadScreen> {
                               child: Lottie.asset(AppImages.noData),
                             );
                           } else {
-                            return ListView.builder(
-                              shrinkWrap: true,
-                              itemCount: state.list.length,
-                              itemBuilder: (_, index) {
-                                final warehouse = state.list[index];
-                                return ExpenseHeadCard(
-                                  expenseHead: warehouse,
-                                  index: index + 1,
-                                );
-                              },
-                            );
+                            return ExpenseHeadTableCard(expenseHeads: state.list,);
                           }
                         } else if (state is ExpenseHeadListFailed) {
                           return Center(

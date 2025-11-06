@@ -193,8 +193,8 @@ class CustomSearchTextFormField extends StatelessWidget {
   Widget _buildTextField(BuildContext context) {
     return ConstrainedBox(
       constraints: const BoxConstraints(
-        maxHeight: 52,
-        minHeight: 40,
+        maxHeight: 38,
+        minHeight: 35,
       ),
       child: TextFormField(
         controller: controller,
@@ -223,7 +223,7 @@ class CustomSearchTextFormField extends StatelessWidget {
           suffixIcon:  _buildClearButton(),
           counterText: "", // Hide counter text when maxLength is set
           contentPadding: const EdgeInsets.symmetric(
-            vertical: 12.0,
+            vertical: 8.0,
             horizontal: 12.0,
           ),
           filled: !enabled,

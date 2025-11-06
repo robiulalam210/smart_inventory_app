@@ -127,8 +127,10 @@ class _GroupsScreenState extends State<GroupsScreen> {
           child: Column(
             children: [
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Expanded(
+                  SizedBox(
+                    width: 350,
                       child: CustomSearchTextFormField(
                         controller: context.read<GroupsBloc>().filterTextController,
                         onChanged: (value) {
@@ -153,6 +155,7 @@ class _GroupsScreenState extends State<GroupsScreen> {
                   ),
                 ],
               ),
+              gapH8,
               SizedBox(
                 height: 500,
                 child: BlocBuilder<GroupsBloc, GroupsState>(

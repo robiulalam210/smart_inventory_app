@@ -14,6 +14,7 @@ class ExpenseSubHeadModel {
   final int? head;
   final String? headName;
   final int? company;
+  final bool? isActive;
 
   ExpenseSubHeadModel({
     this.id,
@@ -21,6 +22,7 @@ class ExpenseSubHeadModel {
     this.head,
     this.headName,
     this.company,
+    this.isActive,
   });
 
 
@@ -29,12 +31,14 @@ class ExpenseSubHeadModel {
     // TODO: implement toString
     return name??'';
   }
+
   factory ExpenseSubHeadModel.fromJson(Map<String, dynamic> json) => ExpenseSubHeadModel(
     id: json["id"],
     name: json["name"],
     head: json["head"],
     headName: json["head_name"],
     company: json["company"],
+    isActive: json["is_active"],
   );
 
   Map<String, dynamic> toJson() => {
@@ -43,5 +47,6 @@ class ExpenseSubHeadModel {
     "head": head,
     "head_name": headName,
     "company": company,
+    "is_active": isActive,
   };
 }

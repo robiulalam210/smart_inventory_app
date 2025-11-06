@@ -139,8 +139,11 @@ class _UnitScreenState extends State<UnitScreen> {
             },
             child: Column(
               children: [
-                Row(children: [
-                  Expanded(
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                  SizedBox(
+                    width: 350,
                     child:  CustomSearchTextFormField(
                       controller: context.read<UnitBloc>().filterTextController,
                       onChanged: (value) {
@@ -169,6 +172,7 @@ class _UnitScreenState extends State<UnitScreen> {
                     },
                   ),
                 ],),
+                gapH8,
 
 
                 SizedBox(

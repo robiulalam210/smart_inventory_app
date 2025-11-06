@@ -87,9 +87,12 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
     emit(AccountListLoading());
 
     try {
-      Map<String, dynamic> queryParams = {
-        'page': event.pageNumber.toString(),
-        'page_size': event.pageSize.toString(),
+      // Build base URL without pagination parameters since API has no_pagination=true
+      String baseUrl = AppUrls.account;
+
+      // Add filter parameters only
+      Map<String, String> queryParams = {
+        "no_pagination": "true"  // Fixed syntax - use colon and string value
       };
 
       if (event.filterText.isNotEmpty) {
@@ -99,7 +102,7 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
         queryParams['account_type'] = event.accountType;
       }
 
-      Uri uri = Uri.parse(AppUrls.account).replace(
+      Uri uri = Uri.parse(baseUrl).replace(
         queryParameters: queryParams,
       );
 
@@ -119,7 +122,7 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
         emit(AccountListSuccess(
           list: [],
           count: 0,
-          totalPages: 0,
+          totalPages: 1,
           currentPage: 1,
           pageSize: event.pageSize,
           from: 0,
@@ -128,8 +131,9 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
         return;
       }
 
-      final pagination = data['pagination'] ?? data;
-      final results = data['results'] ?? data['data'] ?? data;
+      // Extract data from response structure
+      final responseData = data['data'] ?? data;
+      final results = responseData['results'] ?? [];
 
       List<AccountModel> accountList = [];
       if (results is List) {
@@ -138,17 +142,19 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
         );
       }
 
-      int count = pagination['count'] ?? pagination['total'] ?? accountList.length;
-      int totalPages = pagination['total_pages'] ?? pagination['last_page'] ??
-          ((count / event.pageSize).ceil());
-      int currentPage = pagination['current_page'] ?? pagination['page'] ?? event.pageNumber;
-      int pageSize = pagination['page_size'] ?? pagination['per_page'] ?? event.pageSize;
-      int from = ((currentPage - 1) * pageSize) + 1;
-      int to = from + accountList.length - 1;
+      // Since no_pagination=true, handle as single page with all results
+      int totalCount = accountList.length;
+      int totalPages = 1;
+      int currentPage = 1;
+      int pageSize = totalCount; // Show all items on one page
+
+      // Calculate from/to for display (always show 1 to totalCount)
+      int from = totalCount > 0 ? 1 : 0;
+      int to = totalCount;
 
       emit(AccountListSuccess(
         list: accountList,
-        count: count,
+        count: totalCount,
         totalPages: totalPages,
         currentPage: currentPage,
         pageSize: pageSize,
@@ -159,7 +165,6 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
       emit(AccountListFailed(title: "Error", content: error.toString()));
     }
   }
-
   Future<void> _onCreateAccountList(
       AddAccount event,
       Emitter<AccountState> emit,

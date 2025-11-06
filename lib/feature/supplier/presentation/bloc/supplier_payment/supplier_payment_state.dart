@@ -14,14 +14,33 @@ final class SupplierPaymentListSuccess extends SupplierPaymentState {
   final List<SupplierPaymentModel> list;
   final int totalPages;
   final int currentPage;
+  final int count;
+  final int pageSize;
+  final int from;
+  final int to;
 
   SupplierPaymentListSuccess({
     required this.list,
     required this.totalPages,
     required this.currentPage,
+    required this.count,
+    required this.pageSize,
+    required this.from,
+    required this.to,
   });
-}
 
+  @override
+  List<Object?> get props => [
+    list,
+    totalPages,
+    currentPage,
+    count,
+    pageSize,
+    from,
+    to,
+    selectedState,
+  ];
+}
 final class SupplierPaymentListFailed extends SupplierPaymentState {
   final String title, content;
 

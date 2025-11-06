@@ -1,16 +1,21 @@
-
-import 'package:smart_inventory/feature/expense/expense_head/data/model/expense_head_model.dart';
-
+import 'package:flutter/material.dart';
+import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
+import 'package:lottie/lottie.dart';
 import '../../../../core/configs/configs.dart';
 import '../../../../core/shared/widgets/sideMenu/sidebar.dart';
 import '../../../../core/widgets/app_alert_dialog.dart';
 import '../../../../core/widgets/app_button.dart';
+import '../../../../core/widgets/app_dropdown.dart';
 import '../../../../core/widgets/app_loader.dart';
 import '../../../../core/widgets/coustom_search_text_field.dart';
 import '../../../../core/widgets/custom_date_range.dart';
 import '../../../../core/widgets/custom_filter_ui.dart';
+import '../../../../core/widgets/date_range.dart';
 import '../../../products/product/presentation/widget/pagination.dart';
+import '../../expense_head/data/model/expense_head_model.dart';
 import '../../expense_head/presentation/bloc/expense_head/expense_head_bloc.dart';
+import '../../expense_sub_head/data/model/expense_sub_head_model.dart';
+import '../../expense_sub_head/presentation/bloc/expense_sub_head/expense_sub_head_bloc.dart';
 import '../bloc/expense_list/expense_bloc.dart';
 import '../widget/widget.dart';
 import 'expense_create.dart';
@@ -23,17 +28,30 @@ class ExpenseListScreen extends StatefulWidget {
 }
 
 class _ExpenseListScreenState extends State<ExpenseListScreen> {
-  DateTime? startDate;
-  DateTime? endDate;
+  DateRange? selectedDateRange;
   DateTime now = DateTime.now();
 
-  late var dataBloc = context.read<ExpenseBloc>();
+  // Add missing variables
+  ExpenseHeadModel? _selectedExpenseHead;
+  ExpenseSubHeadModel? _selectedExpenseSubHead;
+
+  late var dataBloc;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    dataBloc = context.read<ExpenseBloc>();
     dataBloc.filterTextController = TextEditingController();
-    _fetchApi(from: startDate, to: endDate);
+
+    // Initialize selectedDateRange if not set
+    if (selectedDateRange == null) {
+      selectedDateRange = DateRange(
+       DateTime(now.year, now.month - 1, now.day),
+       DateTime(now.year, now.month, now.day),
+      );
+    }
+
+    _fetchApi(from: selectedDateRange?.start, to: selectedDateRange?.end);
   }
 
   @override
@@ -45,29 +63,49 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
   @override
   void initState() {
     super.initState();
-    startDate = DateTime(now.year, now.month - 1, now.day);
-    endDate = DateTime(now.year, now.month, now.day);
+
+    // Initialize with default date range
+    selectedDateRange = DateRange(
+       DateTime(now.year, now.month - 1, now.day),
+      DateTime(now.year, now.month, now.day),
+    );
 
     context.read<ExpenseHeadBloc>().add(FetchExpenseHeadList(context));
-    _fetchApi(from: startDate, to: endDate);
+    context.read<ExpenseSubHeadBloc>().add(FetchSubExpenseHeadList(context));
+    _fetchApi(from: selectedDateRange?.start, to: selectedDateRange?.end);
+  }
+
+  // Add missing methods
+  void _onExpenseHeadChanged(ExpenseHeadModel? value) {
+    setState(() {
+      _selectedExpenseHead = value;
+      _selectedExpenseSubHead = null; // Reset subhead when head changes
+    });
+    _fetchApi(); // Refresh data with new head filter
+  }
+
+  void _onExpenseSubHeadChanged(ExpenseSubHeadModel? value) {
+    setState(() {
+      _selectedExpenseSubHead = value;
+    });
+    _fetchApi(); // Refresh data with new subhead filter
   }
 
   Future<void> _selectDateRange(StateSetter setState) async {
     DateTimeRange? picked = await showDateRangePicker(
       context: context,
       initialDateRange: DateTimeRange(
-        start: startDate ?? DateTime.now().subtract(const Duration(days: 7)),
-        end: endDate ?? DateTime.now(),
+        start: selectedDateRange?.start ?? DateTime.now().subtract(const Duration(days: 7)),
+        end: selectedDateRange?.end ?? DateTime.now(),
       ),
       firstDate: DateTime(2020),
       lastDate: DateTime(2100),
     );
     if (picked != null) {
       setState(() {
-        startDate = picked.start;
-        endDate = picked.end;
+        selectedDateRange = DateRange( picked.start, picked.end);
       });
-      _fetchApi(from: startDate, to: endDate, );
+      _fetchApi(from: selectedDateRange?.start, to: selectedDateRange?.end);
     }
   }
 
@@ -75,7 +113,7 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
     String filterText = '',
     DateTime? from,
     DateTime? to,
-    int pageNumber = 1, // Changed to 1-based for pagination
+    int pageNumber = 1,
     int pageSize = 10,
   }) {
     context.read<ExpenseBloc>().add(
@@ -86,6 +124,8 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
         endDate: to,
         pageNumber: pageNumber,
         pageSize: pageSize,
+        headId: _selectedExpenseHead?.id?.toString(),
+        subHeadId: _selectedExpenseSubHead?.id?.toString(),
       ),
     );
   }
@@ -95,20 +135,23 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
       pageNumber: pageNumber,
       pageSize: pageSize,
       filterText: context.read<ExpenseBloc>().filterTextController.text,
-      from: startDate,
-      to: endDate,
+      from: selectedDateRange?.start,
+      to: selectedDateRange?.end,
     );
   }
 
-
   void _clearFilters() {
     setState(() {
-      startDate = null;
-      endDate = null;
+      selectedDateRange = DateRange(
+       DateTime(now.year, now.month - 1, now.day),
+         DateTime(now.year, now.month, now.day),
+      );
+      _selectedExpenseHead = null;
+      _selectedExpenseSubHead = null;
     });
+    context.read<ExpenseBloc>().filterTextController.clear();
     _fetchApi();
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -158,7 +201,7 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
               appLoader(context, "Expense, please wait...");
             } else if (state is ExpenseAddSuccess) {
               Navigator.pop(context); // Close loader dialog
-              Navigator.pop(context); // Close loader dialog
+              Navigator.pop(context); // Close create dialog
               _fetchApi(); // Reload expense list
             } else if (state is ExpenseAddFailed) {
               Navigator.pop(context); // Close loader dialog
@@ -173,7 +216,8 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
                   ),
                 ],
               );
-            }  if (state is ExpenseDeleteLoading) {
+            }
+            if (state is ExpenseDeleteLoading) {
               appLoader(context, "Expense, please wait...");
             } else if (state is ExpenseDeleteSuccess) {
               Navigator.pop(context); // Close loader dialog
@@ -201,16 +245,125 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
                     child: CustomSearchTextFormField(
                       controller: context.read<ExpenseBloc>().filterTextController,
                       onChanged: (value) {
-                        _fetchApi(filterText: value, );
+                        _fetchApi(filterText: value);
                       },
                       onClear: () {
                         context.read<ExpenseBloc>().filterTextController.clear();
-                        _fetchApi(from: startDate, to: endDate, );
+                        _fetchApi(from: selectedDateRange?.start, to: selectedDateRange?.end);
                       },
                       hintText: "by description, amount, etc.",
                     ),
                   ),
-                  gapW16,
+                  const SizedBox(width: 16),
+
+                  // Expense Head Dropdown
+                  Expanded(
+                    child: BlocBuilder<ExpenseHeadBloc, ExpenseHeadState>(
+                      builder: (context, state) {
+                        if (state is ExpenseHeadListLoading) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        }
+
+                        return AppDropdown<ExpenseHeadModel>(
+                          context: context,
+                          label: "Expense Head",
+                          hint: _selectedExpenseHead?.name ?? "Select Expense Head",
+                          isNeedAll: true,
+                          isRequired: false,
+                          value: _selectedExpenseHead,
+                          itemList: context.read<ExpenseHeadBloc>().list,
+                          onChanged: _onExpenseHeadChanged,
+                          validator: (value) => null,
+                          itemBuilder: (item) => DropdownMenuItem<ExpenseHeadModel>(
+                            value: item,
+                            child: Text(
+                              item.name ?? 'Unnamed Head',
+                              style: const TextStyle(
+                                color: AppColors.blackColor,
+                                fontFamily: 'Quicksand',
+                                fontWeight: FontWeight.w300,
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+
+                  // Expense SubHead Dropdown
+                  Expanded(
+                    child: BlocBuilder<ExpenseSubHeadBloc, ExpenseSubHeadState>(
+                      builder: (context, state) {
+                        final subHeads = _selectedExpenseHead != null
+                            ? (context.read<ExpenseSubHeadBloc>().list)
+                            .where((subHead) => subHead.head == _selectedExpenseHead!.id)
+                            .toList()
+                            : <ExpenseSubHeadModel>[];
+
+                        return AppDropdown<ExpenseSubHeadModel>(
+                          context: context,
+                          label: "Expense Sub Head (Optional)",
+                          hint: _selectedExpenseSubHead?.name ?? "Select Expense Sub Head",
+                          isNeedAll: true,
+                          isRequired: false,
+                          value: _selectedExpenseSubHead,
+                          itemList: subHeads,
+                          onChanged: _onExpenseSubHeadChanged,
+                          itemBuilder: (item) => DropdownMenuItem<ExpenseSubHeadModel>(
+                            value: item,
+                            child: Text(
+                              item.name ?? 'Unnamed Sub Head',
+                              style: const TextStyle(
+                                color: AppColors.blackColor,
+                                fontFamily: 'Quicksand',
+                                fontWeight: FontWeight.w300,
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  // 📅 Date Range Picker
+                  SizedBox(
+                    width: 260,
+                    child: CustomDateRangeField(
+                      isLabel: false,
+                      selectedDateRange: selectedDateRange,
+                      onDateRangeSelected: (value) {
+                        setState(() => selectedDateRange = value);
+                        if (value != null) {
+                          _fetchApi(from: value.start, to: value.end);
+                        } else {
+                          _fetchApi(); // Fetch without date filter
+                        }
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 5.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            _clearFilters();
+                            Navigator.of(context).pop();
+                          },
+                          child: Text(
+                            'Clear All',
+                            style: AppTextStyle.cardLevelText(context).copyWith(color: Colors.red),
+                          ),
+                        ),
+
+
+                      ],
+                    ),
+                  ),
                   AppButton(
                     name: "Create Expense",
                     onPressed: () {
@@ -227,17 +380,9 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
                       );
                     },
                   ),
-                  gapW16,
-                  CustomFilterBox(
-                    onTapDown: (TapDownDetails details) {
-                      _showFilterMenu(context, details.globalPosition);
-                    },
-                  ),
                 ],
               ),
               const SizedBox(height: 16),
-
-
 
               SizedBox(
                 child: BlocBuilder<ExpenseBloc, ExpenseState>(
@@ -246,15 +391,32 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
                       return const Center(child: CircularProgressIndicator());
                     } else if (state is ExpenseListSuccess) {
                       if (state.list.isEmpty) {
-                        return Center(child: Lottie.asset(AppImages.noData));
+                        return Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Lottie.asset(AppImages.noData, width: 200, height: 200),
+                              const SizedBox(height: 16),
+                              const Text(
+                                'No expenses found',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              AppButton(
+                                name: "Refresh",
+                                onPressed: () => _fetchApi(),
+                              ),
+                            ],
+                          ),
+                        );
                       } else {
                         return Column(
                           children: [
                             SizedBox(
-                              child: ExpenseTableCard(
-
-                                 expenses: state.list,
-                              )
+                              child: ExpenseTableCard(expenses: state.list),
                             ),
                             const SizedBox(height: 10),
                             PaginationBar(
@@ -275,15 +437,53 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
                         );
                       }
                     } else if (state is ExpenseListFailed) {
-                      if (state.content.toString() == "No Data") {
-                        return Center(child: Lottie.asset(AppImages.noData));
+                      if (state.content.toString().toLowerCase().contains("no data")) {
+                        return Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Lottie.asset(AppImages.noData, width: 200, height: 200),
+                              const SizedBox(height: 16),
+                              const Text(
+                                'No expenses found',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              AppButton(
+                                name: "Refresh",
+                                onPressed: () => _fetchApi(),
+                              ),
+                            ],
+                          ),
+                        );
                       } else {
                         return Center(
-                          child: Text('Failed to load data: ${state.content}'),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(Icons.error_outline, size: 60, color: Colors.red),
+                              const SizedBox(height: 16),
+                              Text(
+                                'Failed to load expenses: ${state.content}',
+                                style: const TextStyle(fontSize: 16),
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 16),
+                              AppButton(
+                                name: "Retry",
+                                onPressed: () => _fetchApi(),
+                              ),
+                            ],
+                          ),
                         );
                       }
                     } else {
-                      return Center(child: Lottie.asset(AppImages.noData));
+                      return Center(
+                        child: Lottie.asset(AppImages.noData),
+                      );
                     }
                   },
                 ),
@@ -295,122 +495,4 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
     );
   }
 
-  void _showFilterMenu(BuildContext context, Offset offset) async {
-    final screenSize = MediaQuery.of(context).size;
-    final left = offset.dx;
-    final top = offset.dy;
-    final right = screenSize.width - left;
-    final bottom = screenSize.height - top;
-
-    await showMenu(
-      color: const Color.fromARGB(255, 248, 248, 248),
-      context: context,
-      position: RelativeRect.fromLTRB(left, top, right, bottom),
-      items: [
-        PopupMenuItem(
-          padding: const EdgeInsets.all(0),
-          enabled: false,
-          child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-              return Column(
-                children: [
-                  Container(
-                    width: double.maxFinite,
-                    padding: const EdgeInsets.only(
-                      top: 5,
-                      bottom: 10,
-                      left: 10,
-                      right: 10,
-                    ),
-                    decoration: const BoxDecoration(
-                      color: Color.fromARGB(255, 248, 248, 248),
-                    ),
-                    child: Text(
-                      'Filter',
-                      style: AppTextStyle.cardLevelText(context),
-                    ),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    color: Colors.white,
-                    child: Column(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(10),
-                          color: Colors.white,
-                          child: Column(
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Expanded(
-                                    child: CustomDateRange(
-                                      label: "Start Date",
-                                      date: startDate,
-                                      onTap: () => _selectDateRange(setState),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 10),
-                                  Expanded(
-                                    child: CustomDateRange(
-                                      label: "End Date",
-                                      date: endDate,
-                                      onTap: () => _selectDateRange(setState),
-                                    ),
-                                  ),
-                                ],
-                              ),
-
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 5.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        GestureDetector(
-                          onTap: () {
-                            _clearFilters();
-                            Navigator.of(context).pop();
-                          },
-                          child: Text(
-                            'Clear All',
-                            style: AppTextStyle.cardLevelText(context).copyWith(color: Colors.red),
-                          ),
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            _fetchApi(from: startDate, to: endDate, );
-                            Navigator.of(context).pop();
-                          },
-                          child: Text(
-                            'Apply',
-                            style: AppTextStyle.cardLevelText(context).copyWith(color: Colors.green),
-                          ),
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.of(context).pop();
-                          },
-                          child: Text(
-                            'Close',
-                            style: AppTextStyle.cardLevelText(context),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
 }
