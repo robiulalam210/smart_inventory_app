@@ -106,11 +106,12 @@ class _BadStockScreenState extends State<BadStockScreen> {
   Widget _buildFilterRow() {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         // 🔍 Search Field
-        Expanded(
-          flex: 2,
+        SizedBox(
+          width: 350,
+
           child: CustomSearchTextFormField(
             isRequiredLabel: false,
             controller: filterTextController,
