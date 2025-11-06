@@ -1,8 +1,5 @@
 import 'package:smart_inventory/core/core.dart';
 
-import '../../../../../../core/configs/configs.dart';
-import '../../../../../../core/repositories/delete_response.dart';
-import '../../../../../../core/repositories/get_response.dart';
 import '../../../../../common/data/models/api_response_mod.dart';
 import '../../../../../common/data/models/app_parse_json.dart';
 import '../../../../categories/presentation/bloc/categories/categories_bloc.dart';
@@ -53,7 +50,6 @@ class ProductsBloc extends Bloc<ProductsEvent, ProductsState> {
     on<DeleteProducts>(_onDeleteProductList);
   }
 
-
   Future<void> _onFetchProductList(
       FetchProductsList event,
       Emitter<ProductsState> emit,
@@ -61,16 +57,41 @@ class ProductsBloc extends Bloc<ProductsEvent, ProductsState> {
     emit(ProductsListLoading());
 
     try {
+      // Build query parameters that match Django backend
+      Map<String, dynamic> queryParams = {
+        'page': event.pageNumber.toString(),
+        'page_size': event.pageSize.toString(),
+      };
+
+      // Add search parameter (Django uses 'search' for the search_fields)
+      if (event.filterText.isNotEmpty) {
+        queryParams['search'] = event.filterText;
+      }
+
+      // Add category filter
+      if (event.category.isNotEmpty) {
+        queryParams['category_id'] = event.category;
+      }
+
+      // Add status filter (Django uses 'is_active' for status)
+      if (event.state.isNotEmpty) {
+        if (event.state.toLowerCase() == 'active') {
+          queryParams['is_active'] = 'true';
+        } else if (event.state.toLowerCase() == 'inactive') {
+          queryParams['is_active'] = 'false';
+        }
+      }
+
       final res = await getResponse(
         url: AppUrls.product,
+        queryParams: queryParams, // Add query parameters here
         context: event.context,
-        // Consider attaching query params such as page & page_size & filters to the request
       );
 
-      // res could be a JSON string or already decoded Map
+      // Rest of your parsing code remains the same...
       final Map<String, dynamic> payload;
       payload = jsonDecode(res) as Map<String, dynamic>;
-          // Support both "status" and "success" naming
+
       final bool ok = (payload['status'] == true) || (payload['success'] == true);
 
       if (ok) {
@@ -78,7 +99,7 @@ class ProductsBloc extends Bloc<ProductsEvent, ProductsState> {
         final List<dynamic> results = (data['results'] is List) ? List<dynamic>.from(data['results']) : [];
 
         // Parse product list
-        list = results.map((x) => ProductModel.fromJson(Map<String, dynamic>.from(x))).toList();
+        final list = results.map((x) => ProductModel.fromJson(Map<String, dynamic>.from(x))).toList();
 
         // Pagination info
         final Map<String, dynamic> pagination = Map<String, dynamic>.from(data['pagination'] ?? {});

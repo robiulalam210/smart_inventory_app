@@ -13,18 +13,31 @@ class FetchExpenseList extends ExpenseEvent {
   final DateTime? startDate;
   final DateTime? endDate;
   final String? headId;
+  final String? subHeadId; // Add this missing field
 
   FetchExpenseList(
       this.context, {
-        this.pageNumber = 1, // Change to 1-based for API
+        this.pageNumber = 1,
         this.pageSize = 10,
         this.filterText = "",
         this.startDate,
         this.endDate,
         this.headId,
+        this.subHeadId, // Add this parameter
       });
-}
 
+  @override
+  List<Object?> get props => [
+    context,
+    pageNumber,
+    pageSize,
+    filterText,
+    startDate,
+    endDate,
+    headId,
+    subHeadId, // Add to props
+  ];
+}
 
 
 class AddExpense extends ExpenseEvent {

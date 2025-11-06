@@ -125,10 +125,10 @@ class _ExpenseHeadScreenState extends State<ExpenseSubHeadScreen> {
               child: Column(
                 children: [
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Expanded(
+                      SizedBox(width: 350,
                         child: CustomSearchTextFormField(
                           isRequiredLabel: false,
                           controller: context

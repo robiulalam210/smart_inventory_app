@@ -3,7 +3,6 @@ import '../../../../../core/shared/widgets/sideMenu/sidebar.dart';
 import '../../../../../core/widgets/app_button.dart';
 import '../../../../../core/widgets/app_loader.dart';
 import '../../../../../core/widgets/coustom_search_text_field.dart';
-import '../../../../../core/widgets/custom_filter_ui.dart';
 import '../bloc/categories/categories_bloc.dart';
 import '../widget/widget.dart';
 import 'categories_create.dart';
@@ -119,9 +118,10 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
             Row(
               crossAxisAlignment: CrossAxisAlignment.center,
 
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Expanded(
+                SizedBox(
+                  width: 350,
                   child: CustomSearchTextFormField(
                     controller: dataBloc.filterTextController,
                     onChanged: (value) => _fetchApiData(filterText: value),

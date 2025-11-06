@@ -36,14 +36,9 @@ class _SourceScreenState extends State<SourceScreen> {
     super.dispose();
   }
 
-
   void _fetchApiData({String filterText = '', int pageNumber = 0}) {
     context.read<SourceBloc>().add(
-      FetchSourceList(context,
-        filterText: filterText,
-
-        pageNumber: pageNumber,
-      ),
+      FetchSourceList(context, filterText: filterText, pageNumber: pageNumber),
     );
   }
 
@@ -82,139 +77,134 @@ class _SourceScreenState extends State<SourceScreen> {
 
   Widget _buildContentArea(bool isBigScreen) {
     return ResponsiveCol(
-        xs: 12,
-        sm: 12,
-        md: 12,
-        lg: 10,
-        xl: 10,
-        child: SizedBox(
-
-          child: Container(
-            padding: AppTextStyle.getResponsivePaddingBody(context),
-            child: BlocListener<SourceBloc, SourceState>(
-              listener: (context, state) {
-                if (state is SourceAddLoading) {
-                  appLoader(context, "Creating Source, please wait...");
-                }
-                if (state is SourceUpdateLoading) {
-                  // appLoader(context, "Update Source, please wait...");
-                } else if (state is SourceDeleteLoading) {
-                  appLoader(context, "Deleted Source, please wait...");
-                } else if (state is SourceAddSuccess) {
-                  Navigator.pop(context); // Close loader dialog
-                  // Navigator.pop(context); // Close loader dialog
-                  _fetchApiData(); // Reload warehouse list
-                } else if (state is SourceUpdateSuccess) {
-                  Navigator.pop(context); // Close loader dialog
-                  Navigator.pop(context); // Close loader dialog
-                  _fetchApiData(); // Reload warehouse list
-                } else if (state is SourceDeleteSuccess) {
-                  Navigator.pop(context); // Close loader dialog
-                  _fetchApiData(); // Reload warehouse list
-                } else if (state is SourceAddFailed) {
-                  // Navigator.pop(context); // Close loader dialog
-                  Navigator.pop(context); // Close loader dialog
-                  _fetchApiData();
-                  appAlertDialog(context, state.content,
-                      title: state.title,
-                      actions: [
-                        TextButton(
-                            onPressed: () => AppRoutes.pop(context),
-                            child: const Text("Dismiss"))
-                      ]);
-                } else if (state is SourceUpdateFailed) {
-                  Navigator.pop(context); // Close loader dialog
-                  // Navigator.pop(context); // Close loader dialog
-                  _fetchApiData();
-                  appAlertDialog(context, state.content,
-                      title: state.title,
-                      actions: [
-                        TextButton(
-                            onPressed: () => AppRoutes.pop(context),
-                            child: const Text("Dismiss"))
-                      ]);
-                }
-              },
-              child: Column(
-                children: [
-
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-
-                Expanded(
-                  child:    CustomSearchTextFormField(
-                    controller: context
-                        .read<SourceBloc>()
-                        .filterTextController, onClear: () {
-                    context
-                        .read<SourceBloc>()
-                        .filterTextController
-                        .clear();
-                    _fetchApiData();
-                  },
-                    onChanged: (value) {
-                      _fetchApiData(
-                        filterText: value,
-
-                      );
-                    },
-                    isRequiredLabel: false,
-                    hintText: "Name", // Pass dynamic hintText if needed
-                  ),
-              ),
-                gapW16,
-                AppButton(
-                  name: "Create Source ",
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: (context) {
-                        return Dialog(child: SourceCreate());
-                      },
-                    );
-
-                  })
-                    ],
-                  ),
-
-
-
-
-                  SizedBox(
-                    height: 500,
-                    child: BlocBuilder<SourceBloc, SourceState>(
-                      builder: (context, state) {
-                        if (state is SourceListLoading) {
-                          return const Center(
-                              child: CircularProgressIndicator());
-                        } else if (state is SourceListSuccess) {
-                          if (state.list.isEmpty) {
-                            return Center(
-                              child: Lottie.asset(AppImages.noData),
-                            );
-                          } else {
-                            return SourceTableCard(sources: state.list,
-                            );
-                          }
-                        } else if (state is SourceListFailed) {
-                          return Center(
-                              child: Text('Failed to load : ${state.content}'));
-                        } else {
-                          return Container();
-                        }
+      xs: 12,
+      sm: 12,
+      md: 12,
+      lg: 10,
+      xl: 10,
+      child: SizedBox(
+        child: Container(
+          padding: AppTextStyle.getResponsivePaddingBody(context),
+          child: BlocListener<SourceBloc, SourceState>(
+            listener: (context, state) {
+              if (state is SourceAddLoading) {
+                appLoader(context, "Creating Source, please wait...");
+              }
+              if (state is SourceUpdateLoading) {
+                // appLoader(context, "Update Source, please wait...");
+              } else if (state is SourceDeleteLoading) {
+                appLoader(context, "Deleted Source, please wait...");
+              } else if (state is SourceAddSuccess) {
+                Navigator.pop(context); // Close loader dialog
+                // Navigator.pop(context); // Close loader dialog
+                _fetchApiData(); // Reload warehouse list
+              } else if (state is SourceUpdateSuccess) {
+                Navigator.pop(context); // Close loader dialog
+                Navigator.pop(context); // Close loader dialog
+                _fetchApiData(); // Reload warehouse list
+              } else if (state is SourceDeleteSuccess) {
+                Navigator.pop(context); // Close loader dialog
+                _fetchApiData(); // Reload warehouse list
+              } else if (state is SourceAddFailed) {
+                // Navigator.pop(context); // Close loader dialog
+                Navigator.pop(context); // Close loader dialog
+                _fetchApiData();
+                appAlertDialog(
+                  context,
+                  state.content,
+                  title: state.title,
+                  actions: [
+                    TextButton(
+                      onPressed: () => AppRoutes.pop(context),
+                      child: const Text("Dismiss"),
+                    ),
+                  ],
+                );
+              } else if (state is SourceUpdateFailed) {
+                Navigator.pop(context); // Close loader dialog
+                // Navigator.pop(context); // Close loader dialog
+                _fetchApiData();
+                appAlertDialog(
+                  context,
+                  state.content,
+                  title: state.title,
+                  actions: [
+                    TextButton(
+                      onPressed: () => AppRoutes.pop(context),
+                      child: const Text("Dismiss"),
+                    ),
+                  ],
+                );
+              }
+            },
+            child: Column(
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    SizedBox(
+                      width: 350,
+                      child: CustomSearchTextFormField(
+                        controller: context
+                            .read<SourceBloc>()
+                            .filterTextController,
+                        onClear: () {
+                          context
+                              .read<SourceBloc>()
+                              .filterTextController
+                              .clear();
+                          _fetchApiData();
+                        },
+                        onChanged: (value) {
+                          _fetchApiData(filterText: value);
+                        },
+                        isRequiredLabel: false,
+                        hintText: "Name", // Pass dynamic hintText if needed
+                      ),
+                    ),
+                    gapW16,
+                    AppButton(
+                      name: "Create Source ",
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) {
+                            return Dialog(child: SourceCreate());
+                          },
+                        );
                       },
                     ),
+                  ],
+                ),
+
+                gapH8,
+                SizedBox(
+                  child: BlocBuilder<SourceBloc, SourceState>(
+                    builder: (context, state) {
+                      if (state is SourceListLoading) {
+                        return const Center(child: CircularProgressIndicator());
+                      } else if (state is SourceListSuccess) {
+                        if (state.list.isEmpty) {
+                          return Center(child: Lottie.asset(AppImages.noData));
+                        } else {
+                          return SourceTableCard(sources: state.list);
+                        }
+                      } else if (state is SourceListFailed) {
+                        return Center(
+                          child: Text('Failed to load : ${state.content}'),
+                        );
+                      } else {
+                        return Container();
+                      }
+                    },
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
-        )
+        ),
+      ),
     );
   }
-
 }
-
-

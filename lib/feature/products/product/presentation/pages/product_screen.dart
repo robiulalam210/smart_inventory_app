@@ -114,8 +114,10 @@ class _ProductsScreenState extends State<ProductsScreen> {
             child: Column(
               children: [
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Expanded(
+                    SizedBox(
+                      width: 400,
                         child: CustomSearchTextFormField(
                           controller:
                           context
@@ -155,13 +157,10 @@ class _ProductsScreenState extends State<ProductsScreen> {
                         );
                       },
                     ),
-                    CustomFilterBox(
-                      onTapDown: (TapDownDetails details) {
-                        _showFilterMenu(context, details.globalPosition);
-                      },
-                    ),
+
                   ],
                 ),
+                gapH8,
                 SizedBox(
                   child: BlocBuilder<ProductsBloc, ProductsState>(
                     builder: (context, state) {

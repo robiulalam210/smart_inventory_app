@@ -127,10 +127,11 @@ class _ExpenseHeadScreenState extends State<ExpenseHeadScreen> {
               },
               child: Column(
                 children: [
-                  Row(mainAxisAlignment: MainAxisAlignment.center,
+                  Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Expanded(
+                      SizedBox(
+                        width: 350,
                         child: CustomSearchTextFormField(
                           isRequiredLabel: false,
                           controller: context
@@ -182,8 +183,8 @@ class _ExpenseHeadScreenState extends State<ExpenseHeadScreen> {
                       })
                     ],
                   ),
+                  gapH8,
                   SizedBox(
-                    height: 500,
                     child: BlocBuilder<ExpenseHeadBloc, ExpenseHeadState>(
                       builder: (context, state) {
                         if (state is ExpenseHeadListLoading) {

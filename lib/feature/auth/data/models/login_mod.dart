@@ -98,6 +98,8 @@ class Company {
   final dynamic phone;
   final dynamic logo;
   final bool? isActive;
+  final String? startDate;  // Added this field
+  final String? expiryDate; // Added this field
 
   Company({
     this.id,
@@ -106,6 +108,8 @@ class Company {
     this.phone,
     this.logo,
     this.isActive,
+    this.startDate,
+    this.expiryDate,
   });
 
   factory Company.fromJson(Map<String, dynamic> json) => Company(
@@ -115,6 +119,8 @@ class Company {
     phone: json["phone"],
     logo: json["logo"],
     isActive: json["is_active"],
+    startDate: json["start_date"],  // Added this line
+    expiryDate: json["expiry_date"], // Added this line
   );
 
   Map<String, dynamic> toJson() => {
@@ -124,6 +130,8 @@ class Company {
     "phone": phone,
     "logo": logo,
     "is_active": isActive,
+    "start_date": startDate,  // Added this line
+    "expiry_date": expiryDate, // Added this line
   };
 }
 

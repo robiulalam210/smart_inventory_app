@@ -51,7 +51,7 @@ class SupplierPaymentBloc extends Bloc<SupplierPaymentEvent, SupplierPaymentStat
   }
 
   SupplierPaymentBloc() : super(SupplierPaymentInitial()) {
-    on<FetchSupplierPaymentList>(_onFetchSupplierReceiptList);
+    on<FetchSupplierPaymentList>(_onFetchSupplierPaymentList);
     on<AddSupplierPayment>(_onCreateWarehouseList);
     on<SupplierPaymentDetailsList>(_onFetchAccountDetails);
     on<SupplierPaymentDelete>(_onDeleteSupplierPayment);
@@ -82,114 +82,103 @@ class SupplierPaymentBloc extends Bloc<SupplierPaymentEvent, SupplierPaymentStat
     }
   }
 
-  Future<void> _onFetchSupplierReceiptList(
-      FetchSupplierPaymentList event, Emitter<SupplierPaymentState> emit) async {
+  Future<void> _onFetchSupplierPaymentList(
+      FetchSupplierPaymentList event,
+      Emitter<SupplierPaymentState> emit,
+      ) async {
     emit(SupplierPaymentListLoading());
 
     try {
-      final res = await getResponse(
-          url: AppUrls.supplierPayment, context: event.context);
+      // Build query parameters
+      Map<String, dynamic> queryParams = {
+        'page': (event.pageNumber + 1).toString(), // Django uses 1-based pagination
+        'page_size': event.pageSize.toString(),
+      };
 
-      // Parse the API response - it has a paginated structure
-      ApiResponse<Map<String, dynamic>> response =
-      appParseJson<Map<String, dynamic>>(
-        res,
-            (data) => data as Map<String, dynamic>,
-      );
-
-      if (response.success == false || response.data == null) {
-        emit(SupplierPaymentListFailed(title: "Error", content: response.message ?? "No Data"));
-        return;
-      }
-
-      // Extract the results from the paginated response
-      final results = response.data!['results'] as List<dynamic>?;
-
-      if (results == null || results.isEmpty) {
-        emit(SupplierPaymentListFailed(title: "Error", content: "No Data"));
-        return;
-      }
-
-      // Convert the results to SupplierPaymentModel list
-      allWarehouses = results.map((item) => SupplierPaymentModel.fromJson(item)).toList();
-
-      // Apply filtering and pagination
-      final filteredWarehouses = _filterData(
-          allWarehouses, event.filterText, event.startDate, event.endDate);
-      final paginatedWarehouses =
-      _paginateData(filteredWarehouses, event.pageNumber);
-
-      final totalPages = (filteredWarehouses.length / _itemsPerPage).ceil();
-
-      emit(SupplierPaymentListSuccess(
-        list: paginatedWarehouses,
-        totalPages: totalPages,
-        currentPage: event.pageNumber,
-      ));
-    } catch (error,st) {
-      print(error);
-      print(st);
-      emit(SupplierPaymentListFailed(title: "Error", content: error.toString()));
-    }
-  }
-
-  // Alternative method if you want to use the API's built-in pagination
-  Future<void> _onFetchSupplierReceiptListWithApiPagination(
-      FetchSupplierPaymentList event, Emitter<SupplierPaymentState> emit) async {
-    emit(SupplierPaymentListLoading());
-
-    try {
-      // Build URL with pagination parameters
-      String url = '${AppUrls.supplierPayment}?page=${event.pageNumber + 1}&page_size=$_itemsPerPage';
-
-      // Add filter parameters if provided
+      // Add search parameter
       if (event.filterText.isNotEmpty) {
-        url += '&search=${Uri.encodeComponent(event.filterText)}';
-      }
-      if (event.startDate != null && event.endDate != null) {
-        url += '&start_date=${_formatDate(event.startDate!)}&end_date=${_formatDate(event.endDate!)}';
+        queryParams['search'] = event.filterText;
       }
 
-      final res = await getResponse(url: url, context: event.context);
+      // Add date filters
+      if (event.startDate != null) {
+        queryParams['start_date'] = _formatDate(event.startDate!);
+      }
+      if (event.endDate != null) {
+        queryParams['end_date'] = _formatDate(event.endDate!);
+      }
 
-      // Parse the paginated API response
-      ApiResponse<Map<String, dynamic>> response =
-      appParseJson<Map<String, dynamic>>(
-        res,
-            (data) => data as Map<String, dynamic>,
+      final res = await getResponse(
+        url: AppUrls.supplierPayment,
+        queryParams: queryParams,
+        context: event.context,
       );
 
-      if (response.success == false || response.data == null) {
-        emit(SupplierPaymentListFailed(title: "Error", content: response.message ?? "No Data"));
-        return;
+      // Parse response
+      final Map<String, dynamic> payload = jsonDecode(res) as Map<String, dynamic>;
+      final bool ok = (payload['status'] == true) || (payload['success'] == true);
+
+      if (ok) {
+        final data = payload['data'] ?? {};
+        final List<dynamic> results = (data['results'] is List)
+            ? List<dynamic>.from(data['results'])
+            : [];
+
+        // Parse supplier payment list
+        final list = results.map((x) => SupplierPaymentModel.fromJson(Map<String, dynamic>.from(x))).toList();
+
+        // Extract pagination info from API response
+        final Map<String, dynamic> pagination = Map<String, dynamic>.from(data['pagination'] ?? {});
+
+        final int totalPages = (pagination['total_pages'] is int)
+            ? pagination['total_pages'] as int
+            : 1;
+
+        final int currentPage = (pagination['current_page'] is int)
+            ? pagination['current_page'] as int
+            : (event.pageNumber + 1);
+
+        final int count = (pagination['count'] is int)
+            ? pagination['count'] as int
+            : list.length;
+
+        final int pageSize = (pagination['page_size'] is int)
+            ? pagination['page_size'] as int
+            : event.pageSize;
+
+        // Calculate from and to values
+        final int from = (pagination['from'] is int)
+            ? pagination['from'] as int
+            : ((currentPage - 1) * pageSize + 1);
+
+        final int to = (pagination['to'] is int)
+            ? pagination['to'] as int
+            : (from + list.length - 1);
+
+        emit(
+          SupplierPaymentListSuccess(
+            list: list,
+            totalPages: totalPages,
+            currentPage: currentPage - 1, // Convert to 0-based for Flutter
+            count: count,
+            pageSize: pageSize,
+            from: from,
+            to: to,
+          ),
+        );
+      } else {
+        final message = payload['message'] ?? payload['error'] ?? 'Unknown error occurred';
+        emit(SupplierPaymentListFailed(title: "Error", content: message));
       }
-
-      // Extract pagination info from API response
-      final results = response.data!['results'] as List<dynamic>?;
-      final totalCount = response.data!['count'] as int? ?? 0;
-      final totalPages = response.data!['total_pages'] as int? ?? 1;
-      final currentPage = response.data!['current_page'] as int? ?? 1;
-
-      if (results == null || results.isEmpty) {
-        emit(SupplierPaymentListFailed(title: "Error", content: "No Data"));
-        return;
-      }
-
-      // Convert results to SupplierPaymentModel list
-      final paginatedWarehouses = results.map((item) => SupplierPaymentModel.fromJson(item)).toList();
-
-      emit(SupplierPaymentListSuccess(
-        list: paginatedWarehouses,
-        totalPages: totalPages,
-        currentPage: currentPage - 1, // Convert to zero-based index
-      ));
-    } catch (error) {
+    } catch (error, st) {
+      debugPrint('Supplier Payment List Error: $error');
+      debugPrint(st.toString());
       emit(SupplierPaymentListFailed(title: "Error", content: error.toString()));
     }
   }
 
   String _formatDate(DateTime date) {
-    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+    return "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
   }
 
   List<SupplierPaymentModel> _filterData(

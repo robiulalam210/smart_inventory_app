@@ -1,6 +1,4 @@
-import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:hugeicons/hugeicons.dart';
 
 import '../../../../core/configs/configs.dart';
 import '../../../../core/widgets/delete_dialog.dart';
@@ -25,9 +23,9 @@ class CustomerTableCard extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final totalWidth = constraints.maxWidth ;
-        const numColumns = 6; // Changed from 5 to 6 for Actions column
-        const minColumnWidth = 100.0;
+        final totalWidth = constraints.maxWidth;
+        const numColumns = 7; // Changed from 6 to 7 to include Status column
+        const minColumnWidth = 90.0; // Slightly smaller to accommodate extra column
 
         final dynamicColumnWidth =
         (totalWidth / numColumns).clamp(minColumnWidth, double.infinity);
@@ -97,6 +95,7 @@ class CustomerTableCard extends StatelessWidget {
                                 _buildDataCell(customer.name ?? "N/A", dynamicColumnWidth),
                                 _buildDataCell(customer.phone ?? "N/A", dynamicColumnWidth),
                                 _buildDataCell(customer.address ?? "N/A", dynamicColumnWidth),
+                                _buildStatusCell(customer.isActive ?? false, dynamicColumnWidth),
                                 _buildBalanceCell(dueValue, dynamicColumnWidth),
                                 _buildActionCell(customer, context, dynamicColumnWidth),
                               ],
@@ -144,6 +143,12 @@ class CustomerTableCard extends StatelessWidget {
       DataColumn(
         label: SizedBox(
           width: columnWidth,
+          child: const Text('Status', textAlign: TextAlign.center),
+        ),
+      ),
+      DataColumn(
+        label: SizedBox(
+          width: columnWidth,
           child: const Text('Balance', textAlign: TextAlign.center),
         ),
       ),
@@ -162,9 +167,39 @@ class CustomerTableCard extends StatelessWidget {
         width: width,
         child: Text(
           text,
-          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500),
+          style: const TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w500,
+            color: Colors.black87,
+          ),
           textAlign: TextAlign.center,
           overflow: TextOverflow.ellipsis,
+        ),
+      ),
+    );
+  }
+
+  DataCell _buildStatusCell(bool isActive, double width) {
+    return DataCell(
+      SizedBox(
+        width: width,
+        child: Center(
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: isActive ? Colors.green.withOpacity(0.1) : Colors.red.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Text(
+              isActive ? 'Active' : 'Inactive',
+              style: TextStyle(
+                color: isActive ? Colors.green : Colors.red,
+                fontWeight: FontWeight.w600,
+                fontSize: 11,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
         ),
       ),
     );
@@ -183,24 +218,38 @@ class CustomerTableCard extends StatelessWidget {
       return dueValue.abs().toStringAsFixed(2);
     }
 
+    String getAmountLabel() {
+      if (dueValue == null) return "N/A";
+      if (dueValue < 0) return "Advance";
+      if (dueValue > 0) return "Due";
+      return "Paid";
+    }
+
     return DataCell(
       SizedBox(
         width: width,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          decoration: BoxDecoration(
-            color: getAmountColor().withOpacity(0.1),
-            borderRadius: BorderRadius.circular(4),
-          ),
-          child: Text(
-            getAmountText(),
-            style: TextStyle(
-              color: getAmountColor(),
-              fontWeight: FontWeight.w600,
-              fontSize: 11,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              getAmountText(),
+              style: TextStyle(
+                color: getAmountColor(),
+                fontWeight: FontWeight.w600,
+                fontSize: 11,
+              ),
+              textAlign: TextAlign.center,
             ),
-            textAlign: TextAlign.center,
-          ),
+            Text(
+              getAmountLabel(),
+              style: TextStyle(
+                color: getAmountColor(),
+                fontWeight: FontWeight.w400,
+                fontSize: 9,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
         ),
       ),
     );
@@ -216,17 +265,11 @@ class CustomerTableCard extends StatelessWidget {
             // Edit Button
             IconButton(
               onPressed: () {
-                context.read<CustomerBloc>().customerNameController.text=customer.name??"";
-                context.read<CustomerBloc>().customerNumberController.text=customer.phone??"";
-                context.read<CustomerBloc>().addressController.text=customer.address??"";
-                context.read<CustomerBloc>().customerEmailController.text=customer.email??"";
-                context
-                    .read<CustomerBloc>()
-                    .selectedState =
-                customer.isActive
-                    == true
-                    ? "Active"
-                    : "Inactive";
+                context.read<CustomerBloc>().customerNameController.text = customer.name ?? "";
+                context.read<CustomerBloc>().customerNumberController.text = customer.phone ?? "";
+                context.read<CustomerBloc>().addressController.text = customer.address ?? "";
+                context.read<CustomerBloc>().customerEmailController.text = customer.email?.toString() ?? "";
+                context.read<CustomerBloc>().selectedState = customer.isActive == true ? "Active" : "Inactive";
                 _showEditDialog(context, customer);
               },
               icon: const Icon(
@@ -247,9 +290,7 @@ class CustomerTableCard extends StatelessWidget {
                 bool shouldDelete = await showDeleteConfirmationDialog(context);
                 if (!shouldDelete) return;
 
-                context.read<CustomerBloc>().add(DeleteCustomer(
-
-                   customer.id.toString()));
+                context.read<CustomerBloc>().add(DeleteCustomer(customer.id.toString()));
               },
               icon: const Icon(
                 HugeIcons.strokeRoundedDeleteThrow,
@@ -269,7 +310,6 @@ class CustomerTableCard extends StatelessWidget {
   }
 
   void _showEditDialog(BuildContext context, CustomerModel customer) {
-    // Implement edit dialog logic
     showDialog(
       context: context,
       builder: (context) {

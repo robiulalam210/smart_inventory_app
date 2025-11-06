@@ -1,10 +1,3 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:lottie/lottie.dart';
-import '../../../../core/configs/app_colors.dart';
-import '../../../../core/configs/app_images.dart';
-import '../../../../core/configs/app_sizes.dart';
-import '../../../../core/configs/app_text.dart';
 import '../../../../core/configs/configs.dart';
 import '../../../../core/shared/widgets/sideMenu/sidebar.dart';
 import '../../../../core/widgets/app_alert_dialog.dart';
@@ -33,6 +26,7 @@ class _SupplierPaymentScreenState extends State<SupplierPaymentScreen> {
 
   ValueNotifier<String> selectedQuickOptionNotifier = ValueNotifier<String>("");
   final TextEditingController _searchController = TextEditingController();
+  final int _defaultPageSize = 30; // Define default page size
 
   @override
   void initState() {
@@ -51,6 +45,7 @@ class _SupplierPaymentScreenState extends State<SupplierPaymentScreen> {
     DateTime? from,
     DateTime? to,
     int pageNumber = 0,
+    int pageSize = 30, // Add pageSize parameter
   }) {
     context.read<SupplierPaymentBloc>().add(
       FetchSupplierPaymentList(
@@ -59,6 +54,7 @@ class _SupplierPaymentScreenState extends State<SupplierPaymentScreen> {
         startDate: from,
         endDate: to,
         pageNumber: pageNumber,
+        pageSize: pageSize, // Pass pageSize
       ),
     );
   }
@@ -69,6 +65,7 @@ class _SupplierPaymentScreenState extends State<SupplierPaymentScreen> {
       from: dateRange.value?.start,
       to: dateRange.value?.end,
       pageNumber: pageNumber,
+      pageSize: pageSize ?? _defaultPageSize, // Use provided pageSize or default
     );
   }
 
@@ -133,7 +130,8 @@ class _SupplierPaymentScreenState extends State<SupplierPaymentScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Expanded(
+              SizedBox(
+                width: 400,
                 child: CustomSearchTextFormField(
                   isRequiredLabel: false,
                   controller: _searchController,
@@ -303,22 +301,17 @@ class _SupplierPaymentScreenState extends State<SupplierPaymentScreen> {
 
   Widget _buildPagination(SupplierPaymentListSuccess state) {
     return PaginationBar(
-      count: state.list.length, // Use list length as count
+      count: state.count, // Use the actual count from state
       totalPages: state.totalPages,
       currentPage: state.currentPage,
-      pageSize: 30, // Use your _itemsPerPage value
-      from: (state.currentPage * 30) + 1, // Calculate from
-      to: ((state.currentPage + 1) * 30) > state.list.length
-          ? state.list.length
-          : ((state.currentPage + 1) * 30), // Calculate to
+      pageSize: state.pageSize,
+      from: state.from,
+      to: state.to,
       onPageChanged: (page) => _fetchSupplierList(pageNumber: page),
-      onPageSizeChanged: (newSize) {
-        // Handle page size change if needed
-        _fetchSupplierList();
+      onPageSizeChanged: (newPageSize) {
+        // Reset to page 0 when page size changes
+        _fetchSupplierList(pageNumber: 0, pageSize: newPageSize);
       },
     );
   }
 }
-
-// Add missing gap widget if not defined elsewhere
-const Widget gapW16 = SizedBox(width: 16);

@@ -120,8 +120,10 @@ class _BrandScreenState extends State<BrandScreen> {
           child: Column(
             children: [
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Expanded(
+                  SizedBox(
+                    width: 350,
                     child: CustomSearchTextFormField(
                       controller: dataBloc.filterTextController,
                       onClear: () {

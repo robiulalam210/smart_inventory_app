@@ -57,9 +57,18 @@ class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
       if (event.filterText.isNotEmpty) {
         queryParams['search'] = event.filterText;
       }
-      if (event.startDate != null && event.endDate != null) {
+      if (event.startDate != null) {
         queryParams['start_date'] = event.startDate!.toIso8601String().split('T')[0];
+      }
+      if (event.endDate != null) {
         queryParams['end_date'] = event.endDate!.toIso8601String().split('T')[0];
+      }
+      // Add head and subhead filters
+      if (event.headId != null && event.headId!.isNotEmpty) {
+        queryParams['head_id'] = event.headId!;
+      }
+      if (event.subHeadId != null && event.subHeadId!.isNotEmpty) {
+        queryParams['subhead_id'] = event.subHeadId!;
       }
 
       final res = await getResponse(
@@ -74,7 +83,7 @@ class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
             (data) => data,
       );
 
-      if (response.success == false) {
+      if (response.success == false || response.data == null) {
         emit(ExpenseListFailed(
             title: "Error",
             content: response.message ?? "Failed to fetch expenses"
@@ -82,49 +91,21 @@ class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
         return;
       }
 
-      final responseData = response.data;
+      final responseData = response.data!;
 
+      // Debug: Print the full response structure
+      print('Full API response: $responseData');
 
-      if (responseData == null) {
-        emit(ExpenseListSuccess(
-          list: [],
-          totalPages: 0,
-          currentPage: event.pageNumber,
-          count: 0,
-          pageSize: event.pageSize,
-          from: 0,
-          to: 0,
-        ));
-        return;
-      }
-      print('Full response data1: ${responseData}');
-
-      // Extract data from the nested structure
-      final data = responseData['results'];
-      print('Full response data2: $data');
-
-      if (data == null) {
-        emit(ExpenseListSuccess(
-          list: [],
-          totalPages: 0,
-          currentPage: event.pageNumber,
-          count: 0,
-          pageSize: event.pageSize,
-          from: 0,
-          to: 0,
-        ));
-        return;
-      }
-
-      // Debug: Print the actual response structure
-      print('Full response data: $data');
+      // Extract data from response - handle different response structures
+      final data = responseData['data'] ?? responseData;
+      final pagination = data['pagination'] ?? {};
+      final results = data['results'] ?? data['data'] ?? [];
 
       // Extract with safe parsing
-      final results = data ?? [];
-      final count = _safeParseInt(responseData['count'], 0);
-      final currentPage = _safeParseInt(responseData['current_page'], event.pageNumber);
-      final pageSize = _safeParseInt(responseData['page_size'], event.pageSize);
-      final totalPages = _safeParseInt(responseData['total_pages'], (count / pageSize).ceil());
+      final count = _safeParseInt(pagination['count'] ?? data['count'], 0);
+      final currentPage = _safeParseInt(pagination['current_page'] ?? data['current_page'], event.pageNumber);
+      final pageSize = _safeParseInt(pagination['page_size'] ?? data['page_size'], event.pageSize);
+      final totalPages = _safeParseInt(pagination['total_pages'] ?? data['total_pages'], (count / pageSize).ceil());
 
       // Calculate from and to
       final from = ((currentPage - 1) * pageSize) + 1;
@@ -134,7 +115,7 @@ class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
       List<ExpenseModel> expenses = [];
       if (results is List) {
         expenses = List<ExpenseModel>.from(
-            results.map((x) => ExpenseModel.fromJson(x))
+            results.map((x) => ExpenseModel.fromJson(Map<String, dynamic>.from(x)))
         );
       }
 
@@ -157,12 +138,12 @@ class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
         from: from,
         to: to.toInt(),
       ));
-    } catch (error,st) {
-      print('Error in _onFetchExpenseList: $st');
+    } catch (error, st) {
+      print('Error in _onFetchExpenseList: $error');
+      print('Stack trace: $st');
       emit(ExpenseListFailed(title: "Error", content: error.toString()));
     }
   }
-
 // Safe parsing helper
   int _safeParseInt(dynamic value, int defaultValue) {
     if (value == null) return defaultValue;
@@ -171,7 +152,6 @@ class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
     if (value is double) return value.toInt();
     return defaultValue;
   }
-
   Future<void> _onCreateExpense(
       AddExpense event, Emitter<ExpenseState> emit) async {
     emit(ExpenseAddLoading());
