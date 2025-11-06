@@ -14,7 +14,7 @@ class MoneyReceiptDataTableWidget extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final totalWidth = constraints.maxWidth;
+        final totalWidth = constraints.maxWidth-50;
         const numColumns = 10;
         const minColumnWidth = 100.0;
 

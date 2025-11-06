@@ -192,17 +192,7 @@ class _ExpenseHeadScreenState extends State<ExpenseSubHeadScreen> {
                               child: Lottie.asset(AppImages.noData),
                             );
                           } else {
-                            return ListView.builder(
-                              shrinkWrap: true,
-                              itemCount: state.list.length,
-                              itemBuilder: (_, index) {
-                                final warehouse = state.list[index];
-                                return ExpenseSubHeadCard(
-                                  expenseHead: warehouse,
-                                  index: index + 1,
-                                );
-                              },
-                            );
+                            return ExpenseSubHeadTableCard(expenseSubHeads: state.list,);
                           }
                         } else if (state is ExpenseSubHeadListFailed) {
                           return Center(

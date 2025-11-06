@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../core/configs/app_colors.dart';
-// In your pagination.dart file
+
 class PaginationBar extends StatelessWidget {
   final int count;
   final int totalPages;
@@ -26,14 +26,24 @@ class PaginationBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Define page sizes with unique values
-    final List<int> pageSizes = [10, 20, 30, 50, 100]; // Ensure all values are unique
+    // Define page sizes with unique values and include common values
+    final List<int> pageSizes = [5, 10, 20, 30, 50, 100];
+
+    // Ensure the current pageSize exists in the list, if not add it
+    final List<int> availablePageSizes = List.from(pageSizes);
+    if (!availablePageSizes.contains(pageSize)) {
+      availablePageSizes.add(pageSize);
+      availablePageSizes.sort();
+    }
 
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.only(bottomRight: Radius.circular(8),bottomLeft: Radius.circular(8)),
+        borderRadius: const BorderRadius.only(
+          bottomRight: Radius.circular(8),
+          bottomLeft: Radius.circular(8),
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.grey.withOpacity(0.1),
@@ -73,17 +83,20 @@ class PaginationBar extends StatelessWidget {
                 child: DropdownButton<int>(
                   value: pageSize,
                   underline: const SizedBox(), // Remove default underline
-                  icon: const Icon(Icons.arrow_drop_down, size: 20,color:  AppColors.primaryColor),
+                  icon: const Icon(Icons.arrow_drop_down, size: 20, color: AppColors.primaryColor),
                   style: const TextStyle(fontSize: 14, color: Colors.black),
                   onChanged: (int? newValue) {
                     if (newValue != null) {
                       onPageSizeChanged(newValue);
                     }
                   },
-                  items: pageSizes.map<DropdownMenuItem<int>>((int value) {
+                  items: availablePageSizes.map<DropdownMenuItem<int>>((int value) {
                     return DropdownMenuItem<int>(
                       value: value,
-                      child: Text(value.toString(),style: TextStyle(color: AppColors.primaryColor),),
+                      child: Text(
+                        value.toString(),
+                        style: TextStyle(color: AppColors.primaryColor),
+                      ),
                     );
                   }).toList(),
                 ),
@@ -117,8 +130,15 @@ class PaginationBar extends StatelessWidget {
 
   List<Widget> _buildPageNumbers() {
     List<Widget> pages = [];
+
+    // Calculate the range of pages to show
     int startPage = (currentPage - 1).clamp(0, totalPages - 1);
     int endPage = (currentPage + 2).clamp(0, totalPages);
+
+    // Adjust startPage if we're near the end
+    if (endPage - startPage < 3 && startPage > 0) {
+      startPage = (endPage - 3).clamp(0, totalPages - 1);
+    }
 
     for (int i = startPage; i < endPage; i++) {
       pages.add(
