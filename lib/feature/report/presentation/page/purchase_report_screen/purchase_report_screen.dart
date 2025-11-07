@@ -10,6 +10,7 @@ import 'package:lottie/lottie.dart';
 import 'package:smart_inventory/core/configs/app_colors.dart';
 import 'package:smart_inventory/core/configs/app_images.dart';
 import 'package:smart_inventory/core/configs/app_text.dart';
+import 'package:smart_inventory/core/core.dart';
 import 'package:smart_inventory/core/shared/widgets/sideMenu/sidebar.dart';
 import 'package:smart_inventory/core/widgets/app_dropdown.dart';
 import 'package:smart_inventory/core/widgets/date_range.dart';
@@ -96,9 +97,8 @@ class _PurchaseReportScreenState extends State<PurchaseReportScreen> {
           child: Column(
             children: [
               _buildFilterRow(),
-              const SizedBox(height: 16),
               _buildSummaryCards(),
-              const SizedBox(height: 16),
+              const SizedBox(height: 8),
               SizedBox(child: _buildDataTable()),
             ],
           ),
@@ -113,8 +113,9 @@ class _PurchaseReportScreenState extends State<PurchaseReportScreen> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         // 👤 Supplier Dropdown
-        Expanded(
-          flex: 1,
+        SizedBox(
+
+       width: 220,
           child: BlocBuilder<SupplierInvoiceBloc, SupplierInvoiceState>(
             builder: (context, state) {
               return AppDropdown<SupplierActiveModel>(
@@ -124,6 +125,7 @@ class _PurchaseReportScreenState extends State<PurchaseReportScreen> {
                 hint: "Select Supplier",
                 isNeedAll: true,
                 isRequired: false,
+                isLabel: true,
                 value: context.read<PurchaseReportBloc>().selectedSupplier,
                 itemList: context.read<SupplierInvoiceBloc>().supplierActiveList,
                 onChanged: (newVal) {
@@ -148,12 +150,13 @@ class _PurchaseReportScreenState extends State<PurchaseReportScreen> {
             },
           ),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: 6),
 
         // 📅 Date Range Picker
         SizedBox(
           width: 260,
           child: CustomDateRangeField(
+            isLabel: false,
             selectedDateRange: selectedDateRange,
             onDateRangeSelected: (value) {
               setState(() => selectedDateRange = value);
@@ -163,29 +166,15 @@ class _PurchaseReportScreenState extends State<PurchaseReportScreen> {
             },
           ),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: 6),
 
+        AppButton(name: "Clear", onPressed: (){
+          setState(() => selectedDateRange = null);
+          context.read<PurchaseReportBloc>().add(ClearPurchaseReportFilters());
+          _fetchPurchaseReport();
+        }),
         // Clear Filters Button
-        ElevatedButton.icon(
-          onPressed: () {
-            setState(() => selectedDateRange = null);
-            context.read<PurchaseReportBloc>().add(ClearPurchaseReportFilters());
-            _fetchPurchaseReport();
-          },
-          icon: const Icon(Icons.clear_all),
-          label: const Text("Clear"),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.grey,
-            foregroundColor: AppColors.blackColor,
-          ),
-        ),
-        const SizedBox(width: 12),
 
-        IconButton(
-          onPressed: () => _fetchPurchaseReport(),
-          icon: const Icon(Icons.refresh),
-          tooltip: "Refresh",
-        ),
       ],
     );
   }
@@ -198,8 +187,8 @@ class _PurchaseReportScreenState extends State<PurchaseReportScreen> {
         final summary = state.response.summary;
 
         return Wrap(
-          spacing: 12,
-          runSpacing: 12,
+          spacing: 8,
+          runSpacing: 8,
           children: [
             _buildSummaryCard(
               "Total Purchases",
@@ -233,8 +222,8 @@ class _PurchaseReportScreenState extends State<PurchaseReportScreen> {
 
   Widget _buildSummaryCard(String title, String value, IconData icon, Color color) {
     return Container(
-      width: 200,
-      padding: const EdgeInsets.all(16),
+      width: 180,
+      padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(8),
@@ -248,8 +237,8 @@ class _PurchaseReportScreenState extends State<PurchaseReportScreen> {
       ),
       child: Row(
         children: [
-          Icon(icon, color: color, size: 32),
-          const SizedBox(width: 12),
+          Icon(icon, color: color, size: 28),
+          const SizedBox(width: 6),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

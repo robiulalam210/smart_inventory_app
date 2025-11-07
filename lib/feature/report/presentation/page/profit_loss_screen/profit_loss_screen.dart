@@ -1,19 +1,16 @@
 // lib/feature/report/presentation/screens/profit_loss_screen.dart
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:hugeicons/hugeicons.dart';
 import 'package:iconsax/iconsax.dart';
-import 'package:lottie/lottie.dart';
 import 'package:smart_inventory/core/configs/app_colors.dart';
-import 'package:smart_inventory/core/configs/app_images.dart';
 import 'package:smart_inventory/core/configs/app_text.dart';
 import 'package:smart_inventory/core/shared/widgets/sideMenu/sidebar.dart';
 import 'package:smart_inventory/core/widgets/date_range.dart';
 import 'package:smart_inventory/feature/report/presentation/bloc/profit_loss_bloc/profit_loss_bloc.dart';
 
+import '../../../../../core/widgets/app_button.dart';
 import '../../../../../responsive.dart';
 import '../../../data/model/profit_loss_report_model.dart';
 
@@ -80,10 +77,9 @@ class _ProfitLossScreenState extends State<ProfitLossScreen> {
           padding: AppTextStyle.getResponsivePaddingBody(context),
           child: Column(
             children: [
-              _buildFilterRow(),
-              const SizedBox(height: 16),
+
               _buildProfitLossCards(),
-              const SizedBox(height: 16),
+              const SizedBox(height: 8),
               SizedBox(child: _buildReportContent()),
             ],
           ),
@@ -92,50 +88,7 @@ class _ProfitLossScreenState extends State<ProfitLossScreen> {
     );
   }
 
-  Widget _buildFilterRow() {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        // 📅 Date Range Picker
-        SizedBox(
-          width: 260,
-          child: CustomDateRangeField(
-            selectedDateRange: selectedDateRange,
-            onDateRangeSelected: (value) {
-              setState(() => selectedDateRange = value);
-              if (value != null) {
-                _fetchProfitLossReport(from: value.start, to: value.end);
-              }
-            },
-          ),
-        ),
-        const SizedBox(width: 12),
 
-        // Clear Filters Button
-        ElevatedButton.icon(
-          onPressed: () {
-            setState(() => selectedDateRange = null);
-            context.read<ProfitLossBloc>().add(ClearProfitLossFilters());
-            _fetchProfitLossReport();
-          },
-          icon: const Icon(Icons.clear_all),
-          label: const Text("Clear"),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.grey,
-            foregroundColor: AppColors.blackColor,
-          ),
-        ),
-        const SizedBox(width: 12),
-
-        IconButton(
-          onPressed: () => _fetchProfitLossReport(),
-          icon: const Icon(Icons.refresh),
-          tooltip: "Refresh",
-        ),
-      ],
-    );
-  }
 
   Widget _buildProfitLossCards() {
     return BlocBuilder<ProfitLossBloc, ProfitLossState>(
@@ -145,40 +98,61 @@ class _ProfitLossScreenState extends State<ProfitLossScreen> {
         final summary = state.response.summary;
 
         return Wrap(
-          spacing: 12,
-          runSpacing: 12,
+          spacing: 8,
+          runSpacing: 8,
           children: [
             _buildProfitLossCard(
               "Total Sales",
-              "\$${summary.totalSales.toStringAsFixed(2)}",
+              summary.totalSales.toStringAsFixed(2),
               Icons.trending_up,
               Colors.blue,
             ),
             _buildProfitLossCard(
               "Total Purchases",
-              "\$${summary.totalPurchase.toStringAsFixed(2)}",
+              summary.totalPurchase.toStringAsFixed(2),
               Icons.shopping_cart,
               Colors.orange,
             ),
             _buildProfitLossCard(
               "Total Expenses",
-              "\$${summary.totalExpenses.toStringAsFixed(2)}",
+              summary.totalExpenses.toStringAsFixed(2),
               Icons.money_off,
               Colors.red,
             ),
             _buildProfitLossCard(
               "Gross Profit",
-              "\$${summary.grossProfit.toStringAsFixed(2)}",
+              summary.grossProfit.toStringAsFixed(2),
               Icons.attach_money,
               Colors.green,
               isProfit: true,
             ),
             _buildProfitLossCard(
               "Net Profit",
-              "\$${summary.netProfit.toStringAsFixed(2)}",
+              summary.netProfit.toStringAsFixed(2),
               Icons.account_balance_wallet,
               summary.netProfit >= 0 ? Colors.green : Colors.red,
               isProfit: true,
+            ),       SizedBox(
+              width: 260,
+              child: CustomDateRangeField(
+                isLabel: false,
+                selectedDateRange: selectedDateRange,
+                onDateRangeSelected: (value) {
+                  setState(() => selectedDateRange = value);
+                  if (value != null) {
+                    _fetchProfitLossReport(from: value.start, to: value.end);
+                  }
+                },
+              ),
+            ),
+            const SizedBox(width: 4),
+            AppButton(
+              name: "Clear",size: 80,
+              onPressed: () {
+                setState(() => selectedDateRange = null);
+                context.read<ProfitLossBloc>().add(ClearProfitLossFilters());
+                _fetchProfitLossReport();
+              },
             ),
           ],
         );
@@ -188,19 +162,19 @@ class _ProfitLossScreenState extends State<ProfitLossScreen> {
 
   Widget _buildProfitLossCard(String title, String value, IconData icon, Color color, {bool isProfit = false}) {
     return Container(
-      width: 220,
-      padding: const EdgeInsets.all(16),
+      width: 200,
+      padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(8),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.2),
+            color: Colors.grey.withValues(alpha: 0.2),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
         ],
-        border: isProfit ? Border.all(color: color.withOpacity(0.3), width: 2) : null,
+        border: isProfit ? Border.all(color: color.withValues(alpha: 0.3), width: 2) : null,
       ),
       child: Row(
         children: [
@@ -252,27 +226,38 @@ class _ProfitLossScreenState extends State<ProfitLossScreen> {
           final summary = state.response.summary;
 
           return SingleChildScrollView(
-            child: Column(
+            child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 // Expense Breakdown Section
-                if (summary.expenseBreakdown.isNotEmpty) ...[
-                  _buildSectionTitle("Expense Breakdown"),
-                  const SizedBox(height: 16),
-                  ExpenseBreakdownTableCard(expenses: summary.expenseBreakdown),
-                  const SizedBox(height: 24),
-                ] else ...[
-                  _buildEmptyState("No expense breakdown available"),
-                ],
+                Column(children: [
+                  if (summary.expenseBreakdown.isNotEmpty) ...[
+                    _buildSectionTitle("Expense Breakdown"),
+                    const SizedBox(height: 8),
+                    SizedBox(
+
+                        width: 500,
+                        child: ExpenseBreakdownTableCard(expenses: summary.expenseBreakdown)),
+                    const SizedBox(height: 8),
+                  ] else ...[
+                    _buildEmptyState("No expense breakdown available"),
+                  ],
+                ],),
+                SizedBox(width: 10,),
 
                 // Profit & Loss Summary Section
-                _buildSectionTitle("Profit & Loss Summary"),
-                const SizedBox(height: 16),
-                ProfitLossSummaryCard(summary: summary),
+               Column(children: [
+                 _buildSectionTitle("Profit & Loss Summary"),
+                 const SizedBox(height: 8),
+                 SizedBox(
+                     width: 300,
+                     child: ProfitLossSummaryCard(summary: summary)),
+               ],)
 
                 // Export/Print Section
-                const SizedBox(height: 24),
-                _buildExportSection(),
+                // const SizedBox(height: 8),
+                // _buildExportSection(),
               ],
             ),
           );
@@ -296,13 +281,13 @@ class _ProfitLossScreenState extends State<ProfitLossScreen> {
 
   Widget _buildExportSection() {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(8),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.2),
+            color: Colors.grey.withValues(alpha: 0.2),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -333,13 +318,13 @@ class _ProfitLossScreenState extends State<ProfitLossScreen> {
 
   Widget _buildEmptyState(String message) {
     return Container(
-      padding: const EdgeInsets.all(40),
+      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(8),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -351,7 +336,7 @@ class _ProfitLossScreenState extends State<ProfitLossScreen> {
           Icon(
             Icons.bar_chart_outlined,
             size: 48,
-            color: Colors.grey.withOpacity(0.5),
+            color: Colors.grey.withValues(alpha: 0.5),
           ),
           const SizedBox(height: 16),
           Text(
@@ -433,7 +418,7 @@ class ExpenseBreakdownTableCard extends StatelessWidget {
             color: Colors.white,
             boxShadow: [
               BoxShadow(
-                color: Colors.grey.withOpacity(0.1),
+                color: Colors.grey.withValues(alpha: 0.1),
                 blurRadius: 4,
                 offset: const Offset(0, 2),
               ),
@@ -470,7 +455,7 @@ class ExpenseBreakdownTableCard extends StatelessWidget {
                             fontWeight: FontWeight.w700,
                             fontFamily: GoogleFonts.inter().fontFamily,
                           ),
-                          headingRowColor: MaterialStateProperty.all(
+                          headingRowColor: WidgetStateProperty.all(
                             AppColors.primaryColor,
                           ),
                           dataTextStyle: TextStyle(
@@ -551,7 +536,7 @@ class ExpenseBreakdownTableCard extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: Colors.red.withOpacity(0.1),
+              color: Colors.red.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
@@ -578,13 +563,13 @@ class ProfitLossSummaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(8),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.2),
+            color: Colors.grey.withValues(alpha: 0.2),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -616,7 +601,7 @@ class ProfitLossSummaryCard extends StatelessWidget {
     bool isNet = false,
     bool isPositive = true
   }) {
-    final amountText = '\$${amount.abs().toStringAsFixed(2)}';
+
     final isNegative = amount < 0;
 
     Color getAmountColor() {
@@ -633,7 +618,7 @@ class ProfitLossSummaryCard extends StatelessWidget {
     }
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12),
+      padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -643,7 +628,7 @@ class ProfitLossSummaryCard extends StatelessWidget {
               label,
               style: TextStyle(
                 fontWeight: isNet ? FontWeight.bold : FontWeight.w600,
-                fontSize: isNet ? 16 : 14,
+                fontSize: isNet ? 14 : 14,
                 color: isNet ? getAmountColor() : Colors.black87,
               ),
             ),
@@ -669,7 +654,7 @@ class ProfitLossSummaryCard extends StatelessWidget {
     return const Divider(
       color: Colors.grey,
       thickness: 1,
-      height: 20,
+      height: 10,
     );
   }
 }
