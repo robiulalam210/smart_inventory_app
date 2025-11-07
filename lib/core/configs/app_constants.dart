@@ -20,7 +20,7 @@ extension StringCasingExtension on String {
 }
 
 class AppConstants {
-  static const String appName = 'Great Clinic';
+  static const String appName = 'Mehreen Mart.';
   static const int appNumberLimit = 11;
 
   static final RegExp emailRegex = RegExp(
