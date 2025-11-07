@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:lottie/lottie.dart';
+import 'package:smart_inventory/core/core.dart';
 
 import '../../../../../core/configs/app_colors.dart';
 import '../../../../../core/configs/app_images.dart';
@@ -101,11 +102,11 @@ class _SaleReportScreenState extends State<SaleReportScreen> {
         child: Container(
           padding: AppTextStyle.getResponsivePaddingBody(context),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildFilterRow(),
-              const SizedBox(height: 16),
               _buildSummaryCards(),
-              const SizedBox(height: 16),
+              const SizedBox(height: 8),
               SizedBox(child: _buildDataTable()),
             ],
           ),
@@ -117,17 +118,19 @@ class _SaleReportScreenState extends State<SaleReportScreen> {
   Widget _buildFilterRow() {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.start,
       children: [
         // 👤 Customer Dropdown
-        Expanded(
-          flex: 1,
+        SizedBox(
+          width: 220,
+
           child: BlocBuilder<CustomerBloc, CustomerState>(
             builder: (context, state) {
               return AppDropdown<CustomerActiveModel>(
                 label: "Customer",
                 context: context,
                 isSearch: true,
+                isLabel: true,
                 hint: "Select Customer",
                 isNeedAll: true,
                 isRequired: false,
@@ -156,18 +159,18 @@ class _SaleReportScreenState extends State<SaleReportScreen> {
             },
           ),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: 6),
 
         // 🧑‍💼 Seller Dropdown
-        Expanded(
-          flex: 1,
+        SizedBox(
+         width: 200,
           child: BlocBuilder<UserBloc, UserState>(
             builder: (context, state) {
               return AppDropdown<UsersListModel>(
                 label: "Seller",
                 context: context,
                 hint: "Select Seller",
-                isLabel: false,
+                isLabel: true,
                 isRequired: false,
                 isNeedAll: true,
                 value: context.read<SalesReportBloc>().selectedSeller,
@@ -195,12 +198,13 @@ class _SaleReportScreenState extends State<SaleReportScreen> {
             },
           ),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: 6),
 
         // 📅 Date Range Picker
         SizedBox(
           width: 260,
           child: CustomDateRangeField(
+            isLabel: false,
             selectedDateRange: selectedDateRange,
             onDateRangeSelected: (value) {
               setState(() => selectedDateRange = value);
@@ -215,29 +219,18 @@ class _SaleReportScreenState extends State<SaleReportScreen> {
             },
           ),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: 6),
 
+        AppButton(name: "Clear",
+    onPressed: () {
+    setState(() => selectedDateRange = null);
+    context.read<SalesReportBloc>().add(ClearSalesReportFilters());
+    _fetchSalesReport();
+    },
+
+        ),
         // Clear Filters Button
-        ElevatedButton.icon(
-          onPressed: () {
-            setState(() => selectedDateRange = null);
-            context.read<SalesReportBloc>().add(ClearSalesReportFilters());
-            _fetchSalesReport();
-          },
-          icon: const Icon(Icons.clear_all),
-          label: const Text("Clear"),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.textLight,
-            foregroundColor: AppColors.blackColor,
-          ),
-        ),
-        const SizedBox(width: 12),
 
-        IconButton(
-          onPressed: () => _fetchSalesReport(),
-          icon: const Icon(Icons.refresh),
-          tooltip: "Refresh",
-        ),
       ],
     );
   }
@@ -250,8 +243,8 @@ class _SaleReportScreenState extends State<SaleReportScreen> {
         final summary = state.response.summary;
 
         return Wrap(
-          spacing: 12,
-          runSpacing: 12,
+          spacing: 8,
+          runSpacing: 8,
           children: [
             _buildSummaryCard(
               "Total Sales",
@@ -291,8 +284,8 @@ class _SaleReportScreenState extends State<SaleReportScreen> {
 
   Widget _buildSummaryCard(String title, String value, IconData icon, Color color) {
     return Container(
-      width: 200,
-      padding: const EdgeInsets.all(16),
+      width: 170,
+      padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(8),
@@ -306,8 +299,8 @@ class _SaleReportScreenState extends State<SaleReportScreen> {
       ),
       child: Row(
         children: [
-          Icon(icon, color: color, size: 32),
-          const SizedBox(width: 12),
+          Icon(icon, color: color, size: 28),
+          const SizedBox(width: 6),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
