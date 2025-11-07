@@ -10,6 +10,7 @@ import 'package:smart_inventory/core/configs/app_colors.dart';
 import 'package:smart_inventory/core/configs/app_images.dart';
 import 'package:smart_inventory/core/configs/app_text.dart';
 import 'package:smart_inventory/core/shared/widgets/sideMenu/sidebar.dart';
+import 'package:smart_inventory/core/widgets/app_button.dart';
 import 'package:smart_inventory/core/widgets/app_dropdown.dart';
 import 'package:smart_inventory/core/widgets/date_range.dart';
 import 'package:smart_inventory/feature/customer/data/model/customer_active_model.dart';
@@ -124,7 +125,8 @@ class _CustomerDueAdvanceScreenState extends State<CustomerDueAdvanceScreen> {
               _buildHeader(),
               const SizedBox(height: 6),
               _buildFilterRow(),
-              _buildSummaryCards(),
+              _buildSummaryCards(),              const SizedBox(height: 6),
+
               SizedBox(child: _buildCustomerTable()),
             ],
           ),
@@ -157,11 +159,7 @@ class _CustomerDueAdvanceScreenState extends State<CustomerDueAdvanceScreen> {
             ),
           ],
         ),
-        IconButton(
-          onPressed: () => _fetchApi(),
-          icon: const Icon(Icons.refresh),
-          tooltip: "Refresh",
-        ),
+
       ],
     );
   }
@@ -169,12 +167,13 @@ class _CustomerDueAdvanceScreenState extends State<CustomerDueAdvanceScreen> {
   Widget _buildFilterRow() {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.start,
       children: [
         // 📅 Date Range Picker
         SizedBox(
           width: 260,
           child: CustomDateRangeField(
+            isLabel: false,
             selectedDateRange: selectedDateRange,
             onDateRangeSelected: (value) {
               setState(() => selectedDateRange = value);
@@ -192,8 +191,8 @@ class _CustomerDueAdvanceScreenState extends State<CustomerDueAdvanceScreen> {
         const SizedBox(width: 12),
 
         // 👥 Customer Dropdown
-        Expanded(
-          flex: 1,
+        SizedBox(
+         width: 220,
           child: BlocBuilder<CustomerBloc, CustomerState>(
             builder: (context, state) {
               if (state is CustomerListLoading) {
@@ -203,6 +202,7 @@ class _CustomerDueAdvanceScreenState extends State<CustomerDueAdvanceScreen> {
                   hint: "Loading customers...",
                   isNeedAll: true,
                   isRequired: false,
+                  isLabel: false,
                   itemList: [],
                   onChanged: (v){},
                   itemBuilder: (item) => const DropdownMenuItem<CustomerActiveModel>(
@@ -214,7 +214,7 @@ class _CustomerDueAdvanceScreenState extends State<CustomerDueAdvanceScreen> {
 
               return AppDropdown<CustomerActiveModel>(
                 context: context,
-                label: "Customer",
+                label: "Customer", isLabel: true,
                 hint: "Select Customer",
                 isNeedAll: true,
                 isRequired: false,
@@ -242,14 +242,16 @@ class _CustomerDueAdvanceScreenState extends State<CustomerDueAdvanceScreen> {
         const SizedBox(width: 12),
 
         // 📊 Status Dropdown
-        Expanded(
-          flex: 1,
+        SizedBox(
+          width: 200,
+
           child: AppDropdown<String>(
             context: context,
             label: "Status",
             hint: "Select Status",
             isNeedAll: false,
             isRequired: false,
+            isLabel: true,
             value: _selectedStatus,
             itemList: statusOptions,
             onChanged: _onStatusChanged,
@@ -267,25 +269,17 @@ class _CustomerDueAdvanceScreenState extends State<CustomerDueAdvanceScreen> {
           ),
         ),
         const SizedBox(width: 12),
-
+AppButton(name: "Clear", onPressed: (){
+  setState(() {
+    selectedDateRange = null;
+    _selectedCustomer = null;
+    _selectedStatus = null;
+  });
+  context.read<CustomerDueAdvanceBloc>().add(ClearCustomerDueAdvanceFilters());
+  _fetchApi();
+})
         // 🧹 Clear Filters Button
-        ElevatedButton.icon(
-          onPressed: () {
-            setState(() {
-              selectedDateRange = null;
-              _selectedCustomer = null;
-              _selectedStatus = null;
-            });
-            context.read<CustomerDueAdvanceBloc>().add(ClearCustomerDueAdvanceFilters());
-            _fetchApi();
-          },
-          icon: const Icon(Icons.clear_all),
-          label: const Text("Clear"),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.grey,
-            foregroundColor: AppColors.blackColor,
-          ),
-        ),
+
       ],
     );
   }
@@ -304,8 +298,8 @@ class _CustomerDueAdvanceScreenState extends State<CustomerDueAdvanceScreen> {
         final settledCustomers = customers.where((c) => c.presentDue == 0 && c.presentAdvance == 0).length;
 
         return Wrap(
-          spacing: 12,
-          runSpacing: 12,
+          spacing: 8,
+          runSpacing: 8,
           children: [
             _buildSummaryCard(
               "Total Customers",
@@ -330,7 +324,7 @@ class _CustomerDueAdvanceScreenState extends State<CustomerDueAdvanceScreen> {
               "\$${summary.netBalance.abs().toStringAsFixed(2)}",
               summary.netBalance >= 0 ? Icons.arrow_upward : Icons.arrow_downward,
               summary.overallStatusColor,
-              subtitle: summary.overallStatus,
+              // subtitle: summary.overallStatus,
             ),
             _buildSummaryCard(
               "Customers with Due",
@@ -358,8 +352,8 @@ class _CustomerDueAdvanceScreenState extends State<CustomerDueAdvanceScreen> {
 
   Widget _buildSummaryCard(String title, String value, IconData icon, Color color, {String? subtitle}) {
     return Container(
-      width: 220,
-      padding: const EdgeInsets.all(16),
+      width: 210,
+      padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(8),

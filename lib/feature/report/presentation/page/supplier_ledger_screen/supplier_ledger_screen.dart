@@ -9,6 +9,7 @@ import 'package:smart_inventory/core/configs/app_colors.dart';
 import 'package:smart_inventory/core/configs/app_images.dart';
 import 'package:smart_inventory/core/configs/app_text.dart';
 import 'package:smart_inventory/core/shared/widgets/sideMenu/sidebar.dart';
+import 'package:smart_inventory/core/widgets/app_button.dart';
 import 'package:smart_inventory/core/widgets/app_dropdown.dart';
 import 'package:smart_inventory/core/widgets/date_range.dart';
 import 'package:smart_inventory/feature/supplier/presentation/bloc/supplier_invoice/supplier_invoice_bloc.dart';
@@ -84,11 +85,11 @@ class _SupplierLedgerScreenState extends State<SupplierLedgerScreen> {
         child: Container(
           padding: AppTextStyle.getResponsivePaddingBody(context),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildHeader(),
               const SizedBox(height: 4),
               _buildFilterRow(),
-              const SizedBox(height: 4),
               _buildSummaryCards(),
               const SizedBox(height: 4),
               SizedBox(child: _buildLedgerTable()),
@@ -123,11 +124,7 @@ class _SupplierLedgerScreenState extends State<SupplierLedgerScreen> {
             ),
           ],
         ),
-        IconButton(
-          onPressed: () => _fetchApi(),
-          icon: const Icon(Icons.refresh),
-          tooltip: "Refresh",
-        ),
+
       ],
     );
   }
@@ -135,12 +132,13 @@ class _SupplierLedgerScreenState extends State<SupplierLedgerScreen> {
   Widget _buildFilterRow() {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.start,
       children: [
         // 📅 Date Range Picker
         SizedBox(
           width: 260,
           child: CustomDateRangeField(
+            isLabel: false,
             selectedDateRange: selectedDateRange,
             onDateRangeSelected: (value) {
               setState(() => selectedDateRange = value);
@@ -157,8 +155,8 @@ class _SupplierLedgerScreenState extends State<SupplierLedgerScreen> {
         const SizedBox(width: 12),
 
         // 👥 Supplier Dropdown
-        Expanded(
-          flex: 1,
+        SizedBox(
+          width: 220,
           child: BlocBuilder<SupplierInvoiceBloc, SupplierInvoiceState>(
             builder: (context, state) {
               if (state is SupplierActiveListLoading) {
@@ -167,6 +165,7 @@ class _SupplierLedgerScreenState extends State<SupplierLedgerScreen> {
                   context: context,
                   hint: "Loading suppliers...",
                   isRequired: false,
+                  isLabel: true,
                   itemList: [],
                   onChanged: (v){},
                   itemBuilder: (item) => const DropdownMenuItem<SupplierActiveModel>(
@@ -181,7 +180,7 @@ class _SupplierLedgerScreenState extends State<SupplierLedgerScreen> {
                   label: "Supplier",
                   context: context,
                   hint: "Failed to load suppliers",
-                  isRequired: false,
+                  isRequired: false,   isLabel: true,
                   itemList: [],
                   onChanged: (v){},
                   itemBuilder: (item) => const DropdownMenuItem<SupplierActiveModel>(
@@ -195,14 +194,7 @@ class _SupplierLedgerScreenState extends State<SupplierLedgerScreen> {
                 final supplierList = context.read<SupplierInvoiceBloc>().supplierActiveList;
 
                 final List<SupplierActiveModel> options = [
-                  SupplierActiveModel(
-                    id: null,
-                    name: "All Suppliers",
-                    phone: "",
-                    email: "",
-                    address: "",
-                    status: "",
-                  ),
+
                   ...supplierList,
                 ];
 
@@ -210,7 +202,7 @@ class _SupplierLedgerScreenState extends State<SupplierLedgerScreen> {
                   label: "Supplier",
                   context: context,
                   hint: "Select Supplier",
-                  isRequired: false,
+                  isRequired: false,   isLabel: true,
                   value: _selectedSupplier,
                   itemList: options,
                   onChanged: (newVal) {
@@ -257,23 +249,16 @@ class _SupplierLedgerScreenState extends State<SupplierLedgerScreen> {
         ),
         const SizedBox(width: 12),
 
+        AppButton(name: "Clear", onPressed: (){
+          setState(() {
+            selectedDateRange = null;
+            _selectedSupplier = null;
+          });
+          context.read<SupplierLedgerBloc>().add(ClearSupplierLedgerFilters());
+          _fetchApi();
+        }),
         // 🧹 Clear Filters Button
-        ElevatedButton.icon(
-          onPressed: () {
-            setState(() {
-              selectedDateRange = null;
-              _selectedSupplier = null;
-            });
-            context.read<SupplierLedgerBloc>().add(ClearSupplierLedgerFilters());
-            _fetchApi();
-          },
-          icon: const Icon(Icons.clear_all),
-          label: const Text("Clear"),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.grey,
-            foregroundColor: AppColors.blackColor,
-          ),
-        ),
+
       ],
     );
   }
@@ -283,7 +268,7 @@ class _SupplierLedgerScreenState extends State<SupplierLedgerScreen> {
       builder: (context, state) {
         if (state is! SupplierLedgerSuccess) {
           return Container(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(8),
@@ -332,7 +317,7 @@ class _SupplierLedgerScreenState extends State<SupplierLedgerScreen> {
         final summary = state.response.summary;
 
         return Container(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(8),
@@ -354,7 +339,7 @@ class _SupplierLedgerScreenState extends State<SupplierLedgerScreen> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 8),
               Wrap(
                 spacing: 12,
                 runSpacing: 12,
@@ -365,7 +350,7 @@ class _SupplierLedgerScreenState extends State<SupplierLedgerScreen> {
                       "\$${summary.closingBalance.toStringAsFixed(2)}",
                       summary.closingBalance > 0 ? Icons.arrow_upward : Icons.arrow_downward,
                       summary.closingBalance > 0 ? Colors.red : Colors.green,
-                      subtitle: summary.closingBalance > 0 ? 'Due' : 'Advance'
+                      // subtitle: summary.closingBalance > 0 ? 'Due' : 'Advance'
                   ),
                   _buildSummaryItem("Total Debit", "\$${summary.totalDebit.toStringAsFixed(2)}", Icons.arrow_circle_up, Colors.red),
                   _buildSummaryItem("Total Credit", "\$${summary.totalCredit.toStringAsFixed(2)}", Icons.arrow_circle_down, Colors.green),

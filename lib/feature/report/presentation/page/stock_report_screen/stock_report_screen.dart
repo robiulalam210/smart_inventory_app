@@ -111,7 +111,7 @@ class _StockReportScreenState extends State<StockReportScreen> {
           child: Column(
             children: [
               _buildSummaryCards(),
-              const SizedBox(height: 16),
+              const SizedBox(height: 8),
               SizedBox(child: _buildStockTable()),
             ],
           ),
@@ -144,7 +144,7 @@ class _StockReportScreenState extends State<StockReportScreen> {
               AppColors.primaryColor,
             ),
             _buildSummaryCard(
-              "Total Stock Value",
+              "Total Stock ",
               "\$${summary.totalStockValue.toStringAsFixed(2)}",
               Icons.attach_money,
               Colors.green,
@@ -156,7 +156,7 @@ class _StockReportScreenState extends State<StockReportScreen> {
               Colors.blue,
             ),
             _buildSummaryCard(
-              "Avg Stock Value",
+              "Avg Stock ",
               "\$${summary.averageStockValue.toStringAsFixed(2)}",
               Icons.analytics,
               Colors.orange,
@@ -252,8 +252,6 @@ class _StockReportScreenState extends State<StockReportScreen> {
             // Clear Filters Button
             AppButton(
               size: 100,
-              color: AppColors.grey,
-              textColor: AppColors.blackColor,
               name: "Clear",
               onPressed: () {
                 setState(() => selectedDateRange = null);
@@ -262,12 +260,7 @@ class _StockReportScreenState extends State<StockReportScreen> {
               },
             ),
 
-            // Refresh Button
-            IconButton(
-              onPressed: () => _fetchStockReport(),
-              icon: const Icon(Icons.refresh),
-              tooltip: "Refresh",
-            ),
+
           ],
         );
       },
@@ -276,8 +269,8 @@ class _StockReportScreenState extends State<StockReportScreen> {
 
   Widget _buildSummaryCard(String title, String value, IconData icon, Color color) {
     return Container(
-      width: 160,
-      padding: const EdgeInsets.all(12),
+      width: 140,
+      padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(8),

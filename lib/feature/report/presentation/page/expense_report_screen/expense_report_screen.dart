@@ -8,6 +8,7 @@ import 'package:smart_inventory/core/configs/app_colors.dart';
 import 'package:smart_inventory/core/configs/app_images.dart';
 import 'package:smart_inventory/core/configs/app_text.dart';
 import 'package:smart_inventory/core/shared/widgets/sideMenu/sidebar.dart';
+import 'package:smart_inventory/core/widgets/app_button.dart';
 import 'package:smart_inventory/core/widgets/app_dropdown.dart';
 import 'package:smart_inventory/core/widgets/date_range.dart';
 
@@ -32,7 +33,12 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
   ExpenseSubHeadModel? _selectedExpenseSubHead;
   String? _selectedPaymentMethod;
 
-  final List<String> paymentMethods = ['Cash', 'Bank', 'Card', 'Mobile Banking'];
+  final List<String> paymentMethods = [
+    'Cash',
+    'Bank',
+    'Card',
+    'Mobile Banking',
+  ];
   Timer? _filterDebounceTimer;
 
   @override
@@ -51,14 +57,16 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
     String? subHead,
     String? paymentMethod,
   }) {
-    context.read<ExpenseReportBloc>().add(FetchExpenseReport(
-      context: context,
-      from: from,
-      to: to,
-      head: head,
-      subHead: subHead,
-      paymentMethod: paymentMethod,
-    ));
+    context.read<ExpenseReportBloc>().add(
+      FetchExpenseReport(
+        context: context,
+        from: from,
+        to: to,
+        head: head,
+        subHead: subHead,
+        paymentMethod: paymentMethod,
+      ),
+    );
   }
 
   void _fetchApiWithDebounce({
@@ -147,7 +155,8 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isBigScreen = Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
+    final isBigScreen =
+        Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
 
     return Container(
       color: AppColors.bg,
@@ -174,7 +183,7 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
   Widget _buildContentArea(bool isBigScreen) {
     return ResponsiveCol(
       xs: 12,
-      lg: 10,
+      lg: 12,
       child: RefreshIndicator(
         onRefresh: () async => _fetchApi(),
         child: Container(
@@ -182,11 +191,11 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
           child: Column(
             children: [
               _buildHeader(),
-              const SizedBox(height: 16),
+              const SizedBox(height: 6),
               _buildFilterRow(),
-              const SizedBox(height: 16),
+              const SizedBox(height: 0),
               _buildSummaryCards(),
-              const SizedBox(height: 16),
+              const SizedBox(height: 4),
               SizedBox(child: _buildExpenseTable()),
             ],
           ),
@@ -204,25 +213,16 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
           children: [
             Text(
               "Expense Report",
-              style: AppTextStyle.cardTitle(context).copyWith(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
+              style: AppTextStyle.cardTitle(
+                context,
+              ).copyWith(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 4),
             Text(
               "Track and analyze your business expenses",
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey.shade600,
-              ),
+              style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
             ),
           ],
-        ),
-        IconButton(
-          onPressed: () => _fetchApi(),
-          icon: const Icon(Icons.refresh),
-          tooltip: "Refresh",
         ),
       ],
     );
@@ -236,27 +236,26 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Date Range Picker
-            Expanded(
-              flex: 2,
-              child: SizedBox(
-                width: 260,
-                child: CustomDateRangeField(
-                  selectedDateRange: selectedDateRange,
-                  onDateRangeSelected: _onDateRangeSelected,
-                ),
+            SizedBox(
+              width: 260,
+              child: CustomDateRangeField(
+                isLabel: false,
+                selectedDateRange: selectedDateRange,
+                onDateRangeSelected: _onDateRangeSelected,
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 8),
 
             // Payment Method Dropdown
-            Expanded(
-              flex: 1,
+            SizedBox(
+              width: 240,
               child: AppDropdown<String>(
                 context: context,
                 label: "Payment Method",
                 hint: "Select Payment Method",
                 isNeedAll: true,
                 isRequired: false,
+                isLabel: true,
                 value: _selectedPaymentMethod,
                 itemList: paymentMethods,
                 onChanged: _onPaymentMethodChanged,
@@ -273,40 +272,9 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
                 ),
               ),
             ),
-            const SizedBox(width: 12),
-
-            // Clear Filters Button
-            Expanded(
-              flex: 0,
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  setState(() {
-                    selectedDateRange = null;
-                    _selectedExpenseHead = null;
-                    _selectedExpenseSubHead = null;
-                    _selectedPaymentMethod = null;
-                  });
-                  context.read<ExpenseReportBloc>().add(ClearExpenseReportFilters());
-                  _fetchApi();
-                },
-                icon: const Icon(Icons.clear_all),
-                label: const Text("Clear"),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.grey,
-                  foregroundColor: AppColors.blackColor,
-                ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-
-        // Second row: Expense Head and SubHead
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Expense Head Dropdown
-            Expanded(
+            const SizedBox(width: 4),
+            SizedBox(
+              width: 240,
               child: BlocBuilder<ExpenseHeadBloc, ExpenseHeadState>(
                 builder: (context, state) {
                   if (state is ExpenseHeadListLoading) {
@@ -316,13 +284,15 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
                       hint: "Loading expense heads...",
                       isNeedAll: true,
                       isRequired: false,
+                      isLabel: true,
                       value: null,
                       itemList: [],
                       onChanged: (v) {},
-                      itemBuilder: (item) => const DropdownMenuItem<ExpenseHeadModel>(
-                        value: null,
-                        child: Text('Loading...'),
-                      ),
+                      itemBuilder: (item) =>
+                          const DropdownMenuItem<ExpenseHeadModel>(
+                            value: null,
+                            child: Text('Loading...'),
+                          ),
                     );
                   }
 
@@ -334,12 +304,14 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
                       isNeedAll: true,
                       isRequired: false,
                       value: null,
+                      isLabel: true,
                       itemList: [],
                       onChanged: (v) {},
-                      itemBuilder: (item) => const DropdownMenuItem<ExpenseHeadModel>(
-                        value: null,
-                        child: Text('Error loading heads'),
-                      ),
+                      itemBuilder: (item) =>
+                          const DropdownMenuItem<ExpenseHeadModel>(
+                            value: null,
+                            child: Text('Error loading heads'),
+                          ),
                     );
                   }
 
@@ -349,6 +321,7 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
                     hint: "Select Expense Head",
                     isNeedAll: true,
                     isRequired: false,
+                    isLabel: true,
                     value: _selectedExpenseHead,
                     itemList: context.read<ExpenseHeadBloc>().list,
                     onChanged: _onExpenseHeadChanged,
@@ -367,70 +340,30 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
                 },
               ),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: 4),
 
-            // Expense SubHead Dropdown
-            Expanded(
-              child: BlocBuilder<ExpenseSubHeadBloc, ExpenseSubHeadState>(
-                builder: (context, state) {
-                  final subHeads = _getFilteredSubHeads(context);
-
-                  if (state is ExpenseSubHeadListLoading) {
-                    return AppDropdown<ExpenseSubHeadModel>(
-                      context: context,
-                      label: "Expense Sub Head",
-                      hint: "Loading sub heads...",
-                      isNeedAll: true,
-                      isRequired: false,
-                      value: null,
-                      itemList: [],
-                      onChanged: (v) {},
-                      itemBuilder: (item) => const DropdownMenuItem<ExpenseSubHeadModel>(
-                        value: null,
-                        child: Text('Loading...'),
-                      ),
-                    );
-                  }
-
-                  return AppDropdown<ExpenseSubHeadModel>(
-                    context: context,
-                    label: "Expense Sub Head (Optional)",
-                    hint: _selectedExpenseHead == null
-                        ? "Select Expense Head First"
-                        : "Select Expense Sub Head",
-                    isNeedAll: true,
-                    isRequired: false,
-                    value: _selectedExpenseSubHead,
-                    itemList: subHeads,
-                    // onChanged: _selectedExpenseHead == null ? null : _onExpenseSubHeadChanged,
-                    itemBuilder: (item) => DropdownMenuItem<ExpenseSubHeadModel>(
-                      value: item,
-                      child: Text(
-                        item.name ?? 'Unnamed Sub Head',
-                        style: TextStyle(
-                          color: _selectedExpenseHead == null
-                              ? Colors.grey
-                              : AppColors.blackColor,
-                          fontFamily: 'Quicksand',
-                          fontWeight: FontWeight.w300,
-                        ),
-                      ),
-                    ), onChanged: (ExpenseSubHeadModel? p1) {  },
-                  );
-                },
-              ),
+            AppButton(
+              name: "Clear",
+              color: AppColors.error,
+              onPressed: () {
+                setState(() {
+                  selectedDateRange = null;
+                  _selectedExpenseHead = null;
+                  _selectedExpenseSubHead = null;
+                  _selectedPaymentMethod = null;
+                });
+                context.read<ExpenseReportBloc>().add(
+                  ClearExpenseReportFilters(),
+                );
+                _fetchApi();
+              },
             ),
+
+            // Clear Filters Button
           ],
         ),
       ],
     );
-  }
-
-  List<ExpenseSubHeadModel> _getFilteredSubHeads(BuildContext context) {
-    return context.select((ExpenseSubHeadBloc bloc) {
-      if (_selectedExpenseHead == null) return <ExpenseSubHeadModel>[];
-      return bloc.list.where((subHead) => subHead.head == _selectedExpenseHead!.id).toList();
-    });
   }
 
   Widget _buildSummaryCards() {
@@ -438,7 +371,7 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
       builder: (context, state) {
         if (state is! ExpenseReportSuccess) {
           return Container(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(5),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(8),
@@ -487,8 +420,8 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
         final summary = state.response.summary;
 
         return Wrap(
-          spacing: 16,
-          runSpacing: 16,
+          spacing: 12,
+          runSpacing: 0,
           children: [
             _buildSummaryCard(
               "Total Expenses",
@@ -520,10 +453,15 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
     );
   }
 
-  Widget _buildSummaryCard(String title, String value, IconData icon, Color color) {
+  Widget _buildSummaryCard(
+    String title,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
     return Container(
-      width: 220,
-      padding: const EdgeInsets.all(16),
+      width: 250,
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(8),
@@ -538,14 +476,14 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(8),
+            padding: const EdgeInsets.all(4),
             decoration: BoxDecoration(
               color: color.withOpacity(0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(icon, color: color, size: 24),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 4),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -561,7 +499,7 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
                 Text(
                   value,
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 14,
                     fontWeight: FontWeight.bold,
                     color: color,
                   ),
@@ -626,10 +564,7 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
             ),
           ),
           const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: _fetchApi,
-            child: const Text("Refresh"),
-          ),
+          ElevatedButton(onPressed: _fetchApi, child: const Text("Refresh")),
         ],
       ),
     );
@@ -657,10 +592,7 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: _fetchApi,
-            child: const Text("Retry"),
-          ),
+          ElevatedButton(onPressed: _fetchApi, child: const Text("Retry")),
         ],
       ),
     );
@@ -678,21 +610,22 @@ class ExpenseReportDataTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final totalAmount = expenses.fold(0.0, (sum, expense) => sum + expense.amount);
+    final totalAmount = expenses.fold(
+      0.0,
+      (sum, expense) => sum + expense.amount,
+    );
 
     return Card(
       elevation: 2,
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(0),
         child: Column(
           children: [
             // Summary row
             _buildTableSummary(totalAmount),
-            const SizedBox(height: 16),
+            const SizedBox(height: 4),
             // Data table
-            SizedBox(
-              child: _buildDataTable(),
-            ),
+            SizedBox(child: _buildDataTable()),
           ],
         ),
       ),
@@ -711,10 +644,7 @@ class ExpenseReportDataTable extends StatelessWidget {
         children: [
           Text(
             'Total Expenses: ${expenses.length}',
-            style: const TextStyle(
-              fontWeight: FontWeight.w600,
-              fontSize: 14,
-            ),
+            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
           ),
           const Spacer(),
           Text(
@@ -722,7 +652,7 @@ class ExpenseReportDataTable extends StatelessWidget {
             style: const TextStyle(
               fontWeight: FontWeight.bold,
               color: Colors.red,
-              fontSize: 16,
+              fontSize: 14,
             ),
           ),
         ],
@@ -731,130 +661,271 @@ class ExpenseReportDataTable extends StatelessWidget {
   }
 
   Widget _buildDataTable() {
-    return Scrollbar(
-      child: SingleChildScrollView(
-        scrollDirection: Axis.vertical,
-        child: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: DataTable(
-            headingRowColor: MaterialStateProperty.resolveWith<Color>(
-                  (states) => AppColors.primaryColor.withOpacity(0.1),
-            ),
-            columnSpacing: 20,
-            dataRowMinHeight: 40,
-            dataRowMaxHeight: 60,
-            headingTextStyle: const TextStyle(
-              fontWeight: FontWeight.bold,
-              color: Colors.black87,
-            ),
-            dataTextStyle: const TextStyle(
-              fontSize: 12,
-              color: Colors.black87,
-            ),
-            columns: const [
-              DataColumn(
-                label: Text('#'),
-                numeric: true,
-              ),
-              DataColumn(label: Text('Date')),
-              DataColumn(label: Text('Head')),
-              DataColumn(label: Text('Sub Head')),
-              DataColumn(
-                label: Text('Amount'),
-                numeric: true,
-              ),
-              DataColumn(label: Text('Payment Method')),
-              DataColumn(
-                label: Text('Note'),
-                tooltip: 'Expense description or notes',
-              ),
-            ],
-            rows: expenses.map((expense) {
-              return DataRow(
-                cells: [
-                  DataCell(
-                    Text(
-                      '${expense.sl}',
-                      textAlign: TextAlign.center,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final totalWidth = constraints.maxWidth;
+        const numColumns =
+            8; // #, Date, Head, Sub Head, Amount, Payment Method, Note, Actions
+        const minColumnWidth = 100.0;
+
+        final dynamicColumnWidth = (totalWidth / numColumns).clamp(
+          minColumnWidth,
+          double.infinity,
+        );
+
+        return Scrollbar(
+          child: SingleChildScrollView(
+            scrollDirection: Axis.vertical,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: DataTable(
+                headingRowColor: MaterialStateProperty.resolveWith<Color>(
+                  (states) => AppColors.primaryColor,
+                ),
+                columnSpacing: 12,
+                dataRowMinHeight: 40,
+                dataRowMaxHeight: 40,
+                headingTextStyle: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  fontSize: 12,
+                ),
+                dataTextStyle: const TextStyle(
+                  fontSize: 11,
+                  color: Colors.black87,
+                ),
+                columns: [
+                  DataColumn(
+                    label: SizedBox(
+                      width: dynamicColumnWidth * 0.6,
+                      child: const Text('#', textAlign: TextAlign.center),
                     ),
                   ),
-                  DataCell(Text(_formatDate(expense.expenseDate))),
-                  DataCell(
-                    Tooltip(
-                      message: expense.head,
-                      child: Text(
-                        expense.head,
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 2,
-                      ),
+                  DataColumn(
+                    label: SizedBox(
+                      width: dynamicColumnWidth,
+                      child: const Text('Date', textAlign: TextAlign.center),
                     ),
                   ),
-                  DataCell(
-                    Text(
-                      expense.subhead ?? '-',
-                      style: TextStyle(
-                        color: expense.subhead == null ? Colors.grey : Colors.black87,
-                        fontStyle: expense.subhead == null ? FontStyle.italic : FontStyle.normal,
-                      ),
+                  DataColumn(
+                    label: SizedBox(
+                      width: dynamicColumnWidth,
+                      child: const Text('Head', textAlign: TextAlign.center),
                     ),
                   ),
-                  DataCell(
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.red.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(4),
-                        border: Border.all(color: Colors.red.withOpacity(0.3)),
-                      ),
-                      child: Text(
-                        '\$${expense.amount.toStringAsFixed(2)}',
-                        style: const TextStyle(
-                          color: Colors.red,
-                          fontWeight: FontWeight.bold,
-                        ),
+                  DataColumn(
+                    label: SizedBox(
+                      width: dynamicColumnWidth,
+                      child: const Text(
+                        'Sub Head',
                         textAlign: TextAlign.center,
                       ),
                     ),
                   ),
-                  DataCell(
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: _getPaymentMethodColor(expense.paymentMethod).withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text(
-                        expense.paymentMethod,
-                        style: TextStyle(
-                          color: _getPaymentMethodColor(expense.paymentMethod),
-                          fontWeight: FontWeight.w500,
-                          fontSize: 11,
-                        ),
+                  DataColumn(
+                    label: SizedBox(
+                      width: dynamicColumnWidth,
+                      child: const Text('Amount', textAlign: TextAlign.center),
+                    ),
+                    numeric: true,
+                  ),
+                  DataColumn(
+                    label: SizedBox(
+                      width: dynamicColumnWidth,
+                      child: const Text(
+                        'Payment Method',
+                        textAlign: TextAlign.center,
                       ),
                     ),
                   ),
-                  DataCell(
-                    SizedBox(
-                      width: 150,
-                      child: Tooltip(
-                        message: expense.note ?? 'No description',
-                        child: Text(
-                          expense.note ?? 'No note',
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            color: expense.note == null ? Colors.grey : Colors.black87,
-                            fontStyle: expense.note == null ? FontStyle.italic : FontStyle.normal,
-                          ),
-                        ),
+                  DataColumn(
+                    label: SizedBox(
+                      width: dynamicColumnWidth * 1.5,
+                      child: const Text(
+                        'Note',
+                        textAlign: TextAlign.center,
+                        overflow: TextOverflow.ellipsis,
                       ),
+                    ),
+                  ),
+                  DataColumn(
+                    label: SizedBox(
+                      width: dynamicColumnWidth * 0.8,
+                      child: const Text('Actions', textAlign: TextAlign.center),
                     ),
                   ),
                 ],
-              );
-            }).toList(),
+                rows: expenses.map((expense) {
+                  return DataRow(
+                    cells: [
+                      DataCell(
+                        SizedBox(
+                          width: dynamicColumnWidth * 0.6,
+                          child: Center(
+                            child: Text(
+                              '${expense.sl}',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      DataCell(
+                        SizedBox(
+                          width: dynamicColumnWidth,
+                          child: Center(
+                            child: Text(
+                              _formatDate(expense.expenseDate),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
+                      ),
+                      DataCell(
+                        SizedBox(
+                          width: dynamicColumnWidth,
+                          child: Tooltip(
+                            message: expense.head,
+                            child: Text(
+                              expense.head,
+                              overflow: TextOverflow.ellipsis,
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
+                      ),
+                      DataCell(
+                        SizedBox(
+                          width: dynamicColumnWidth,
+                          child: Center(
+                            child: Text(
+                              expense.subhead ?? '-',
+                              style: TextStyle(
+                                color: expense.subhead == null
+                                    ? Colors.grey
+                                    : Colors.black87,
+                                fontStyle: expense.subhead == null
+                                    ? FontStyle.italic
+                                    : FontStyle.normal,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
+                      ),
+                      DataCell(
+                        SizedBox(
+                          width: dynamicColumnWidth,
+                          child: Center(
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.red.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(4),
+                                border: Border.all(
+                                  color: Colors.red.withOpacity(0.3),
+                                ),
+                              ),
+                              child: Text(
+                                '${expense.amount.toStringAsFixed(2)}',
+                                style: const TextStyle(
+                                  color: Colors.red,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 11,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      DataCell(
+                        SizedBox(
+                          width: dynamicColumnWidth,
+                          child: Center(
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 3,
+                              ),
+                              decoration: BoxDecoration(
+                                color: _getPaymentMethodColor(
+                                  expense.paymentMethod,
+                                ).withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                expense.paymentMethod,
+                                style: TextStyle(
+                                  color: _getPaymentMethodColor(
+                                    expense.paymentMethod,
+                                  ),
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 10,
+                                ),
+                                textAlign: TextAlign.center,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      DataCell(
+                        SizedBox(
+                          width: dynamicColumnWidth * 1.5,
+                          child: Tooltip(
+                            message: expense.note ?? 'No description',
+                            child: Text(
+                              expense.note ?? 'No note',
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: expense.note == null
+                                    ? Colors.grey
+                                    : Colors.black87,
+                                fontStyle: expense.note == null
+                                    ? FontStyle.italic
+                                    : FontStyle.normal,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
+                      ),
+                      DataCell(
+                        SizedBox(
+                          width: dynamicColumnWidth * 0.8,
+                          child: Center(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.visibility, size: 16),
+                                  tooltip: 'View details',
+                                  padding: EdgeInsets.zero,
+                                  constraints: const BoxConstraints(
+                                    minWidth: 24,
+                                    minHeight: 24,
+                                  ),
+                                  onPressed: () {},
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                }).toList(),
+              ),
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 

@@ -5,6 +5,7 @@ import 'package:smart_inventory/feature/products/groups/presentation/pages/group
 import 'package:smart_inventory/feature/products/soruce/presentation/pages/source_screen.dart';
 import 'package:smart_inventory/feature/products/unit/presentation/pages/unit_screen.dart';
 import 'package:smart_inventory/feature/purchase/presentation/page/purchase_screen.dart';
+import 'package:smart_inventory/feature/report/data/model/bad_stock_report_model.dart';
 import 'package:smart_inventory/feature/report/presentation/page/customer_ledger_screen/customer_ledger_screen.dart';
 import 'package:smart_inventory/feature/report/presentation/page/low_stock_screen/low_stock_screen.dart';
 import 'package:smart_inventory/feature/report/presentation/page/profit_loss_screen/profit_loss_screen.dart';
@@ -91,7 +92,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     AppWrapper(child: SupplierLedgerScreen()),
     AppWrapper(child: SupplierDueAdvanceScreen()),
     AppWrapper(child: ExpenseReportScreen()),
-    AppWrapper(child: ExpenseReportScreen()),
+    AppWrapper(child: BadStockScreen()),
 
     AppWrapper(child: UsersScreen()),
     AppWrapper(child: SourceScreen()),
