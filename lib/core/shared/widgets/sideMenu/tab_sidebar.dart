@@ -2,13 +2,6 @@ import '../../../../feature/auth/presentation/pages/login_scr.dart';
 import '../../../../feature/lab_dashboard/presentation/bloc/dashboard/dashboard_bloc.dart';
 import '../../../configs/configs.dart';
 import 'menu_tile.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../feature/auth/presentation/pages/login_scr.dart';
-import '../../../../feature/lab_dashboard/presentation/bloc/dashboard/dashboard_bloc.dart';
-import '../../../configs/configs.dart';
-import '../../../database/login.dart';
-import 'menu_tile.dart';
 
 class TabSidebar extends StatelessWidget {
   const TabSidebar({super.key});
@@ -144,7 +137,7 @@ class TabSidebar extends StatelessWidget {
                   ),
                   child: Center(
                     child: Image.asset(
-                      "assets/images/logo_new.png",
+                      "assets/images/logo.png",
                       fit: BoxFit.contain,
                       height: 60,
                       errorBuilder: (context, error, stackTrace) {
