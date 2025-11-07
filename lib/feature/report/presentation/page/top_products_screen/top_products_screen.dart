@@ -10,6 +10,7 @@ import 'package:lottie/lottie.dart';
 import 'package:smart_inventory/core/configs/app_colors.dart';
 import 'package:smart_inventory/core/configs/app_images.dart';
 import 'package:smart_inventory/core/configs/app_text.dart';
+import 'package:smart_inventory/core/core.dart';
 import 'package:smart_inventory/core/shared/widgets/sideMenu/sidebar.dart';
 import 'package:smart_inventory/core/widgets/date_range.dart';
 import 'package:smart_inventory/feature/report/presentation/bloc/top_products_bloc/top_products_bloc.dart';
@@ -34,20 +35,16 @@ class _TopProductsScreenState extends State<TopProductsScreen> {
     _fetchTopProductsReport();
   }
 
-  void _fetchTopProductsReport({
-    DateTime? from,
-    DateTime? to,
-  }) {
-    context.read<TopProductsBloc>().add(FetchTopProductsReport(
-      context: context,
-      from: from,
-      to: to,
-    ));
+  void _fetchTopProductsReport({DateTime? from, DateTime? to}) {
+    context.read<TopProductsBloc>().add(
+      FetchTopProductsReport(context: context, from: from, to: to),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final isBigScreen = Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
+    final isBigScreen =
+        Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
 
     return Container(
       color: AppColors.bg,
@@ -82,9 +79,9 @@ class _TopProductsScreenState extends State<TopProductsScreen> {
           child: Column(
             children: [
               _buildFilterRow(),
-              const SizedBox(height: 16),
+              const SizedBox(height: 6),
               _buildSummaryCards(),
-              const SizedBox(height: 16),
+              const SizedBox(height: 6),
               SizedBox(child: _buildTopProductsTable()),
             ],
           ),
@@ -99,41 +96,9 @@ class _TopProductsScreenState extends State<TopProductsScreen> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         // 📅 Date Range Picker
-        SizedBox(
-          width: 260,
-          child: CustomDateRangeField(
-            selectedDateRange: selectedDateRange,
-            onDateRangeSelected: (value) {
-              setState(() => selectedDateRange = value);
-              if (value != null) {
-                _fetchTopProductsReport(from: value.start, to: value.end);
-              }
-            },
-          ),
-        ),
-        const SizedBox(width: 12),
+
 
         // Clear Filters Button
-        ElevatedButton.icon(
-          onPressed: () {
-            setState(() => selectedDateRange = null);
-            context.read<TopProductsBloc>().add(ClearTopProductsFilters());
-            _fetchTopProductsReport();
-          },
-          icon: const Icon(Icons.clear_all),
-          label: const Text("Clear"),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.grey,
-            foregroundColor: AppColors.blackColor,
-          ),
-        ),
-        const SizedBox(width: 12),
-
-        IconButton(
-          onPressed: () => _fetchTopProductsReport(),
-          icon: const Icon(Icons.refresh),
-          tooltip: "Refresh",
-        ),
       ],
     );
   }
@@ -146,8 +111,8 @@ class _TopProductsScreenState extends State<TopProductsScreen> {
         final summary = state.response.summary;
 
         return Wrap(
-          spacing: 12,
-          runSpacing: 12,
+          spacing: 6,
+          runSpacing: 6,
           children: [
             _buildSummaryCard(
               "Total Products",
@@ -173,16 +138,44 @@ class _TopProductsScreenState extends State<TopProductsScreen> {
               Icons.analytics,
               Colors.orange,
             ),
+
+            SizedBox(
+              width: 260,
+              child: CustomDateRangeField(
+                isLabel: false,
+                selectedDateRange: selectedDateRange,
+                onDateRangeSelected: (value) {
+                  setState(() => selectedDateRange = value);
+                  if (value != null) {
+                    _fetchTopProductsReport(from: value.start, to: value.end);
+                  }
+                },
+              ),
+            ),
+            const SizedBox(width: 6),
+            AppButton(
+              name: "Clear",size: 80,
+              onPressed: () {
+                setState(() => selectedDateRange = null);
+                context.read<TopProductsBloc>().add(ClearTopProductsFilters());
+                _fetchTopProductsReport();
+              },
+            ),
           ],
         );
       },
     );
   }
 
-  Widget _buildSummaryCard(String title, String value, IconData icon, Color color) {
+  Widget _buildSummaryCard(
+    String title,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
     return Container(
-      width: 220,
-      padding: const EdgeInsets.all(16),
+      width: 170,
+      padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(8),
@@ -196,8 +189,8 @@ class _TopProductsScreenState extends State<TopProductsScreen> {
       ),
       child: Row(
         children: [
-          Icon(icon, color: color, size: 32),
-          const SizedBox(width: 12),
+          Icon(icon, color: color, size: 30),
+          const SizedBox(width: 8),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -337,11 +330,14 @@ class TopProductsTableCard extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final totalWidth = constraints.maxWidth;
-        const numColumns = 7; // #, Product Name, Price, Quantity Sold, Total Revenue, Performance, Actions
+        const numColumns =
+            7; // #, Product Name, Price, Quantity Sold, Total Revenue, Performance, Actions
         const minColumnWidth = 120.0;
 
-        final dynamicColumnWidth =
-        (totalWidth / numColumns).clamp(minColumnWidth, double.infinity);
+        final dynamicColumnWidth = (totalWidth / numColumns).clamp(
+          minColumnWidth,
+          double.infinity,
+        );
 
         return Container(
           decoration: BoxDecoration(
@@ -402,13 +398,36 @@ class TopProductsTableCard extends StatelessWidget {
                                   ? (_) => onProductTap!()
                                   : null,
                               cells: [
-                                _buildRankCell(entry.key + 1, dynamicColumnWidth * 0.6),
-                                _buildProductNameCell(product.productName, dynamicColumnWidth),
-                                _buildPriceCell(product.sellingPrice, dynamicColumnWidth),
-                                _buildQuantityCell(product.totalSoldQuantity, dynamicColumnWidth),
-                                _buildRevenueCell(product.totalSoldPrice, dynamicColumnWidth),
-                                _buildPerformanceCell(product, products, dynamicColumnWidth),
-                                _buildActionCell(product, context, dynamicColumnWidth),
+                                _buildRankCell(
+                                  entry.key + 1,
+                                  dynamicColumnWidth * 0.6,
+                                ),
+                                _buildProductNameCell(
+                                  product.productName,
+                                  dynamicColumnWidth,
+                                ),
+                                _buildPriceCell(
+                                  product.sellingPrice,
+                                  dynamicColumnWidth,
+                                ),
+                                _buildQuantityCell(
+                                  product.totalSoldQuantity,
+                                  dynamicColumnWidth,
+                                ),
+                                _buildRevenueCell(
+                                  product.totalSoldPrice,
+                                  dynamicColumnWidth,
+                                ),
+                                _buildPerformanceCell(
+                                  product,
+                                  products,
+                                  dynamicColumnWidth,
+                                ),
+                                _buildActionCell(
+                                  product,
+                                  context,
+                                  dynamicColumnWidth,
+                                ),
                               ],
                             );
                           }).toList(),
@@ -475,10 +494,14 @@ class TopProductsTableCard extends StatelessWidget {
   DataCell _buildRankCell(int rank, double width) {
     Color getRankColor() {
       switch (rank) {
-        case 1: return Colors.amber;
-        case 2: return Colors.grey;
-        case 3: return Colors.orange;
-        default: return Colors.blue;
+        case 1:
+          return Colors.amber;
+        case 2:
+          return Colors.grey;
+        case 3:
+          return Colors.orange;
+        default:
+          return Colors.blue;
       }
     }
 
@@ -606,8 +629,15 @@ class TopProductsTableCard extends StatelessWidget {
     );
   }
 
-  DataCell _buildPerformanceCell(TopProductModel product, List<TopProductModel> allProducts, double width) {
-    final totalRevenue = allProducts.fold(0.0, (sum, p) => sum + p.totalSoldPrice);
+  DataCell _buildPerformanceCell(
+    TopProductModel product,
+    List<TopProductModel> allProducts,
+    double width,
+  ) {
+    final totalRevenue = allProducts.fold(
+      0.0,
+      (sum, p) => sum + p.totalSoldPrice,
+    );
     final percentage = (product.totalSoldPrice / totalRevenue * 100);
 
     Color getPerformanceColor() {
@@ -656,7 +686,11 @@ class TopProductsTableCard extends StatelessWidget {
     );
   }
 
-  DataCell _buildActionCell(TopProductModel product, BuildContext context, double width) {
+  DataCell _buildActionCell(
+    TopProductModel product,
+    BuildContext context,
+    double width,
+  ) {
     return DataCell(
       SizedBox(
         width: width,
@@ -717,9 +751,18 @@ class TopProductsTableCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 _buildDetailRow('Product Name:', product.productName),
-                _buildDetailRow('Selling Price:', '\$${product.sellingPrice.toStringAsFixed(2)}'),
-                _buildDetailRow('Quantity Sold:', product.totalSoldQuantity.toString()),
-                _buildDetailRow('Total Revenue:', '\$${product.totalSoldPrice.toStringAsFixed(2)}'),
+                _buildDetailRow(
+                  'Selling Price:',
+                  '\$${product.sellingPrice.toStringAsFixed(2)}',
+                ),
+                _buildDetailRow(
+                  'Quantity Sold:',
+                  product.totalSoldQuantity.toString(),
+                ),
+                _buildDetailRow(
+                  'Total Revenue:',
+                  '\$${product.totalSoldPrice.toStringAsFixed(2)}',
+                ),
 
                 const SizedBox(height: 20),
                 Align(
@@ -757,21 +800,11 @@ class TopProductsTableCard extends StatelessWidget {
             width: 120,
             child: Text(
               label,
-              style: const TextStyle(
-                fontWeight: FontWeight.w600,
-                fontSize: 12,
-              ),
+              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
             ),
           ),
           const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              value,
-              style: const TextStyle(
-                fontSize: 12,
-              ),
-            ),
-          ),
+          Expanded(child: Text(value, style: const TextStyle(fontSize: 12))),
         ],
       ),
     );

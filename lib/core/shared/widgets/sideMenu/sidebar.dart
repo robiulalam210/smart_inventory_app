@@ -94,7 +94,7 @@ class _SidebarState extends State<Sidebar> {
         MenuItem(title: "Supplier Ledger", index: 26),
         MenuItem(title: "Supplier Due/Advance Report", index: 27),
         MenuItem(title: "Expense Report", index: 28),
-        MenuItem(title: "Bad Stock Report", index: 29),
+        // MenuItem(title: "Bad Stock Report", index: 29),
       ],
     ),
     MenuSection(

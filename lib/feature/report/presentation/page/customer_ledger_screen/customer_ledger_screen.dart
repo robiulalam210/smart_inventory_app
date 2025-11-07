@@ -1,15 +1,13 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:hugeicons/hugeicons.dart';
-import 'package:iconsax/iconsax.dart';
 import 'package:lottie/lottie.dart';
 import 'package:smart_inventory/core/configs/app_colors.dart';
 import 'package:smart_inventory/core/configs/app_images.dart';
 import 'package:smart_inventory/core/configs/app_text.dart';
 import 'package:smart_inventory/core/shared/widgets/sideMenu/sidebar.dart';
+import 'package:smart_inventory/core/widgets/app_button.dart';
 import 'package:smart_inventory/core/widgets/app_dropdown.dart';
 import 'package:smart_inventory/core/widgets/date_range.dart';
 import 'package:smart_inventory/feature/customer/data/model/customer_active_model.dart';
@@ -90,11 +88,11 @@ class _CustomerLedgerScreenState extends State<CustomerLedgerScreen> {
         child: Container(
           padding: AppTextStyle.getResponsivePaddingBody(context),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildFilterRow(),
-              const SizedBox(height: 16),
               _buildCustomerSummary(),
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
               SizedBox(child: _buildLedgerTable()),
             ],
           ),
@@ -106,11 +104,12 @@ class _CustomerLedgerScreenState extends State<CustomerLedgerScreen> {
   Widget _buildFilterRow() {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.start,
       children: [
         // 👤 Customer Dropdown
-        Expanded(
-          flex: 1,
+        SizedBox(
+          width: 220,
+
           child: BlocBuilder<CustomerBloc, CustomerState>(
             builder: (context, state) {
               return AppDropdown<CustomerActiveModel>(
@@ -118,8 +117,9 @@ class _CustomerLedgerScreenState extends State<CustomerLedgerScreen> {
                 context: context,
                 isSearch: true,
                 hint: context.read<CustomerLedgerBloc>().selectedCustomer?.name ?? "Select Customer",
-                isNeedAll: true,
+                isNeedAll: false,
                 isRequired: true,
+                isLabel: true,
                 value: context.read<CustomerLedgerBloc>().selectedCustomer,
                 itemList: context.read<CustomerBloc>().activeCustomer,
                 onChanged: (newVal) {
@@ -156,6 +156,7 @@ class _CustomerLedgerScreenState extends State<CustomerLedgerScreen> {
         SizedBox(
           width: 260,
           child: CustomDateRangeField(
+            isLabel: false,
             selectedDateRange: selectedDateRange,
             onDateRangeSelected: (value) {
               setState(() => selectedDateRange = value);
@@ -172,34 +173,13 @@ class _CustomerLedgerScreenState extends State<CustomerLedgerScreen> {
         ),
         const SizedBox(width: 12),
 
+        AppButton(name: "Clear", onPressed: (){
+          setState(() => selectedDateRange = null);
+          context.read<CustomerLedgerBloc>().add(ClearCustomerLedgerFilters());
+        }),
         // Clear Filters Button
-        ElevatedButton.icon(
-          onPressed: () {
-            setState(() => selectedDateRange = null);
-            context.read<CustomerLedgerBloc>().add(ClearCustomerLedgerFilters());
-          },
-          icon: const Icon(Icons.clear_all),
-          label: const Text("Clear"),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.grey,
-            foregroundColor: AppColors.blackColor,
-          ),
-        ),
-        const SizedBox(width: 12),
 
-        // Refresh Button
-        BlocBuilder<CustomerLedgerBloc, CustomerLedgerState>(
-          builder: (context, state) {
-            final customer = context.read<CustomerLedgerBloc>().selectedCustomer;
-            return IconButton(
-              onPressed: customer != null
-                  ? () => _fetchCustomerLedger(customer: customer.id.toString())
-                  : null,
-              icon: const Icon(Icons.refresh),
-              tooltip: "Refresh",
-            );
-          },
-        ),
+
       ],
     );
   }
@@ -209,7 +189,7 @@ class _CustomerLedgerScreenState extends State<CustomerLedgerScreen> {
       builder: (context, state) {
         if (state is! CustomerLedgerSuccess) {
           return Container(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(8),
@@ -266,7 +246,7 @@ class _CustomerLedgerScreenState extends State<CustomerLedgerScreen> {
         final paymentsCount = transactions.where((t) => t.type.toLowerCase() == 'payment').length;
 
         return Container(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(8),
@@ -290,8 +270,8 @@ class _CustomerLedgerScreenState extends State<CustomerLedgerScreen> {
               ),
               const SizedBox(height: 16),
               Wrap(
-                spacing: 12,
-                runSpacing: 12,
+                spacing: 8,
+                runSpacing: 8,
                 children: [
                   _buildSummaryItem("Opening Balance", "\$${openingBalance.toStringAsFixed(2)}", Icons.account_balance_wallet, Colors.blue),
                   _buildSummaryItem(
