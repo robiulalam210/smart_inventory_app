@@ -36,6 +36,7 @@ import '../feature/return/bad_stock/bad_stock_list/bad_stock_list_bloc.dart';
 import '../feature/return/sales_return/presentation/sales_return_bloc/sales_return_bloc.dart';
 import '../feature/supplier/presentation/bloc/supplier_invoice/supplier_invoice_bloc.dart';
 import '../feature/supplier/presentation/bloc/supplier_payment/supplier_payment_bloc.dart';
+import '../test.dart';
 
 class MyApp extends StatelessWidget {
   final DatabaseHelper dbHelper;
@@ -118,7 +119,8 @@ class MyApp extends StatelessWidget {
           title: AppConstants.appName,
           debugShowCheckedModeBanner: false,
           theme: AppTheme.light(context),
-          home: const SplashScreen(),
+          home: const BarcodeScanScreen(),
+          // home: const SplashScreen(),
         ),
       ),
     );
