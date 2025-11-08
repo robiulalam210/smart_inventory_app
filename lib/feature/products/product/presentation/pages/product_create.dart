@@ -2,6 +2,10 @@ import 'package:smart_inventory/feature/products/brand/data/model/brand_model.da
 import 'package:smart_inventory/feature/products/brand/presentation/bloc/brand/brand_bloc.dart';
 import 'package:smart_inventory/feature/products/categories/data/model/categories_model.dart';
 import 'package:smart_inventory/feature/products/categories/presentation/bloc/categories/categories_bloc.dart';
+import 'package:smart_inventory/feature/products/groups/data/model/groups.dart';
+import 'package:smart_inventory/feature/products/groups/presentation/bloc/groups/groups_bloc.dart';
+import 'package:smart_inventory/feature/products/soruce/data/model/source_model.dart';
+import 'package:smart_inventory/feature/products/soruce/presentation/bloc/source/source_bloc.dart';
 import 'package:smart_inventory/feature/products/unit/data/model/unit_model.dart';
 import 'package:smart_inventory/feature/products/unit/presentation/bloc/unit/unti_bloc.dart';
 import '../../../../../../core/configs/configs.dart';
@@ -37,6 +41,8 @@ class _ProductsFormState extends State<ProductsForm> {
   late CategoriesBloc categoriesBloc;
   late UnitBloc unitBloc;
   late BrandBloc brandBloc;
+  late GroupsBloc groupsBloc;
+  late SourceBloc sourceBloc;
 
   bool _isInitialized = false;
   bool _isEditMode = false;
@@ -56,7 +62,8 @@ class _ProductsFormState extends State<ProductsForm> {
       categoriesBloc = context.read<CategoriesBloc>();
       unitBloc = context.read<UnitBloc>();
       brandBloc = context.read<BrandBloc>();
-
+      groupsBloc = context.read<GroupsBloc>(); // <- initialize
+      sourceBloc = context.read<SourceBloc>(); // <- initialize
       _initializeData();
       _isInitialized = true;
     }
@@ -74,6 +81,8 @@ class _ProductsFormState extends State<ProductsForm> {
     categoriesBloc.add(FetchCategoriesList(context));
     brandBloc.add(FetchBrandList(context));
     unitBloc.add(FetchUnitList(context));
+    sourceBloc.add(FetchSourceList(context));
+    groupsBloc.add(FetchGroupsList(context));
   }
 
   void _clearFormData() {
@@ -167,9 +176,9 @@ class _ProductsFormState extends State<ProductsForm> {
                   child: Column(
                     children: [
                       _buildCategoryDropdown(),
-                      const SizedBox(height: 16),
+                      // const SizedBox(height: 8),
                       _buildProductNameField(),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 8),
                       Row(
                         children: [
                           Expanded(child: _buildUnitDropdown()),
@@ -177,7 +186,16 @@ class _ProductsFormState extends State<ProductsForm> {
                           Expanded(child: _buildBrandDropdown()),
                         ],
                       ),
-                      const SizedBox(height: 16),
+                      // const SizedBox(height: 16),
+
+                      Row(
+                        children: [
+                          Expanded(child: _buildGroupsDropdown()),
+                          const SizedBox(width: 10),
+                          Expanded(child: _buildSourceDropdown()),
+                        ],
+                      ),
+                      // const SizedBox(height: 16),
                       Row(
                         children: [
                           Expanded(child: _buildPurchasePriceField()),
@@ -185,7 +203,7 @@ class _ProductsFormState extends State<ProductsForm> {
                           Expanded(child: _buildSellingPriceField()),
                         ],
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 8),
                       Row(
                         children: [
                           Expanded(child: _buildOpeningStockField()),
@@ -193,28 +211,33 @@ class _ProductsFormState extends State<ProductsForm> {
                           Expanded(child: _buildAlertQuantityField()),
                         ],
                       ),
-                      const SizedBox(height: 16),
-                      _buildBarcodeField(),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 8),
+
                       _buildDescriptionField(),
                       const SizedBox(height: 20),
-                      SizedBox(
-                        width: double.infinity,
-                        child: AppButton(
-                          name: _isEditMode ? "Update Product" : "Create Product",
-                          onPressed: _submitProduct,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      if (widget.isDialog)
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
                         SizedBox(
-                          width: double.infinity,
+                          width: 150,
                           child: AppButton(
-                            name: "Cancel",
-                            color: Colors.grey,
-                            onPressed: () => Navigator.pop(context),
+                            name: _isEditMode ? "Update Product" : "Create Product",
+                            onPressed: _submitProduct,
                           ),
                         ),
+                        const SizedBox(width: 10),
+                        if (widget.isDialog)
+                          SizedBox(
+                            width: 150,
+                            child: AppButton(
+                              name: "Cancel",
+                              color: Colors.grey,
+                              onPressed: () => Navigator.pop(context),
+                            ),
+                          ),
+                      ],),
+
                     ],
                   ),
                 ),
@@ -290,10 +313,7 @@ class _ProductsFormState extends State<ProductsForm> {
                           xs: 12, sm: 6, md: 4, lg: 4, xl: 4,
                           child: _buildBrandDropdown(),
                         ),
-                        ResponsiveCol(
-                          xs: 12, sm: 6, md: 4, lg: 4, xl: 4,
-                          child: _buildBarcodeField(),
-                        ),
+
                         ResponsiveCol(
                           xs: 12, sm: 6, md: 6, lg: 6, xl: 6,
                           child: _buildPurchasePriceField(),
@@ -446,6 +466,76 @@ class _ProductsFormState extends State<ProductsForm> {
       },
     );
   }
+  Widget _buildGroupsDropdown() {
+    return BlocBuilder<GroupsBloc, GroupsState>(
+      builder: (context, state) {
+        final selectedGroup = groupsBloc.selectedState;
+        final groupsList = groupsBloc.list;
+
+        return AppDropdown(
+          context: context,
+          label: "Groups ",
+          hint: selectedGroup.isEmpty ? "Select Groups" : selectedGroup,
+          isLabel: false,
+          isNeedAll: false,
+          isRequired: false,
+          isSearch: true,
+          value: selectedGroup.isEmpty ? null : selectedGroup,
+          itemList: groupsList.map((e) => e.name ?? "").toList(),
+          onChanged: (newVal) {
+            setState(() {
+              groupsBloc.selectedState = newVal.toString();
+              final matchingUnit = groupsList.firstWhere(
+                    (unit) => unit.name.toString() == newVal.toString(),
+                orElse: () => GroupsModel(),
+              );
+              groupsBloc.selectedIdState = matchingUnit.id?.toString() ?? "";
+            });
+          },
+          // validator: (value) => value == null ? 'Please select Unit' : null,
+          itemBuilder: (item) => DropdownMenuItem(
+            value: item,
+            child: Text(item.toString()),
+          ),
+        );
+      },
+    );
+  }
+  Widget _buildSourceDropdown() {
+    return BlocBuilder<SourceBloc, SourceState>(
+      builder: (context, state) {
+        final selectedSource = sourceBloc.selectedState;
+        final sourceList = sourceBloc.list;
+
+        return AppDropdown(
+          context: context,
+          label: "Source ",
+          hint: selectedSource.isEmpty ? "Select Source" : selectedSource,
+          isLabel: false,
+          isNeedAll: false,
+          isRequired: false,
+          isSearch: true,
+          value: selectedSource.isEmpty ? null : selectedSource,
+          itemList: sourceList.map((e) => e.name ?? "").toList(),
+          onChanged: (newVal) {
+            setState(() {
+              sourceBloc.selectedState = newVal.toString();
+              final matchingUnit = sourceList.firstWhere(
+                    (unit) => unit.name.toString() == newVal.toString(),
+                orElse: () => SourceModel(),
+              );
+              sourceBloc.selectedIdState = matchingUnit.id?.toString() ?? "";
+            });
+          },
+          // validator: (value) => value == null ? 'Please select Source' : null,
+          itemBuilder: (item) => DropdownMenuItem(
+            value: item,
+            child: Text(item.toString()),
+          ),
+        );
+      },
+    );
+  }
 
   Widget _buildBrandDropdown() {
     return BlocBuilder<BrandBloc, BrandState>(
@@ -547,17 +637,7 @@ class _ProductsFormState extends State<ProductsForm> {
     );
   }
 
-  Widget _buildBarcodeField() {
-    return CustomInputField(
-      isRequiredLable: true,
-      isRequired: false,
-      controller: productsBloc.productBarCodeController,
-      labelText: 'Product Barcode',
-      hintText: 'Product Barcode',
-      fillColor: const Color.fromARGB(255, 255, 255, 255),
-      keyboardType: TextInputType.text,
-    );
-  }
+
 
   Widget _buildDescriptionField() {
     return CustomInputField(
@@ -605,7 +685,11 @@ class _ProductsFormState extends State<ProductsForm> {
     };
 
     // Add optional fields
-    if (brandBloc.selectedId.isNotEmpty) {
+    if (sourceBloc.selectedId.isNotEmpty) {
+      body["source"] = sourceBloc.selectedId;
+    } if (groupsBloc.selectedId.isNotEmpty) {
+      body["groups"] = groupsBloc.selectedId;
+    } if (brandBloc.selectedId.isNotEmpty) {
       body["brand"] = brandBloc.selectedId;
     }
     if (productsBloc.productSellingPriceController.text.isNotEmpty && productsBloc.productSellingPriceController.text != "0") {

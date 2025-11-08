@@ -16,6 +16,8 @@ part 'source_state.dart';
 
 class SourceBloc extends Bloc<SourceEvent, SourceState> {
 
+  String selectedId = "";
+  String selectedIdState = "";
 
   List<SourceModel> list = [];
   final int _itemsPerPage = 15;

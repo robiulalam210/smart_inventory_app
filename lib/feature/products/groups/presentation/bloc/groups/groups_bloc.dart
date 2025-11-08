@@ -15,8 +15,9 @@ class GroupsBloc extends Bloc<GroupsEvent, GroupsState> {
   List<GroupsModel> list = [];
   final int _itemsPerPage = 10;
   String selectedState = "";
+  String selectedId = "";
+  String selectedIdState = "";
   GroupsModel? selectedGroups;
-
   TextEditingController filterTextController = TextEditingController();
   List<String> statesList = ["Active", "Inactive"];
 

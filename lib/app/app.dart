@@ -119,8 +119,8 @@ class MyApp extends StatelessWidget {
           title: AppConstants.appName,
           debugShowCheckedModeBanner: false,
           theme: AppTheme.light(context),
-          home: const BarcodeScanScreen(),
-          // home: const SplashScreen(),
+          // home: const BarcodeScanScreen(),
+          home: const SplashScreen(),
         ),
       ),
     );
