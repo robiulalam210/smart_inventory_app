@@ -302,7 +302,8 @@ class _AccountScreenState extends State<AccountScreen> {
               builder: (context) {
                 return Dialog(
                   child: SizedBox(
-                    width: AppSizes.width(context) * 0.50,
+                    width: AppSizes.width(context) * 0.60,
+                    height: 350,
                     child: const CreateAccountScreen(),
                   ),
                 );

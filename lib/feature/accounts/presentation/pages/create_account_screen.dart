@@ -1,7 +1,4 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/configs/configs.dart';
-import '../../../../core/shared/widgets/sideMenu/sidebar.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_dropdown.dart';
 import '../../../../core/widgets/input_field.dart';
@@ -15,6 +12,7 @@ class CreateAccountScreen extends StatefulWidget {
     this.id = '',
     this.account,
   });
+
   final String id;
   final String submitText;
   final AccountModel? account;
@@ -50,14 +48,18 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
     accountBloc.accountNumberController.text = account.acNumber ?? '';
     accountBloc.bankNameController.text = account.bankName ?? '';
     accountBloc.branchNameController.text = account.branch ?? '';
-    accountBloc.accountOpeningBalanceController.text = account.balance?.toString() ?? '0.0';
+    accountBloc.accountOpeningBalanceController.text =
+        account.balance?.toString() ?? '0.0';
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: AppColors.whiteColor,
-      child: Padding(
+
+decoration: BoxDecoration(
+  color: AppColors.whiteColor,
+borderRadius: BorderRadius.circular(12)
+),      child: Padding(
         padding: const EdgeInsets.all(20.0),
         child: SingleChildScrollView(
           child: Form(
@@ -87,17 +89,11 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
 
                 const SizedBox(height: 20),
 
-                ResponsiveRow(
-                  spacing: 20,
-                  runSpacing: 10,
+                // Account Type and Account Name Row
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Account Type Dropdown
-                    ResponsiveCol(
-                      xs: 12,
-                      sm: 6,
-                      md: 4,
-                      lg: 4,
-                      xl: 4,
+                    Expanded(
                       child: ValueListenableBuilder<String>(
                         valueListenable: selectedAccountType,
                         builder: (context, selectedType, child) {
@@ -110,7 +106,11 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                             isRequired: true,
                             isNeedAll: false,
                             value: selectedType.isEmpty ? null : selectedType,
-                            itemList: const ["Bank", "Mobile Banking", "Cash", "Other"],
+                            itemList: const [
+                              "Bank",
+                              "Mobile Banking",
+                              "Cash",
+                            ],
                             onChanged: (newVal) {
                               selectedAccountType.value = newVal.toString();
                               setState(() {});
@@ -136,19 +136,15 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                         },
                       ),
                     ),
-
-                    // Account Name
-                    ResponsiveCol(
-                      xs: 12,
-                      sm: 6,
-                      md: 4,
-                      lg: 4,
-                      xl: 4,
+                    const SizedBox(width: 10),
+                    Expanded(
                       child: CustomInputField(
                         isRequiredLable: true,
                         isRequired: true,
                         textInputAction: TextInputAction.next,
-                        controller: context.read<AccountBloc>().accountNameController,
+                        controller: context
+                            .read<AccountBloc>()
+                            .accountNameController,
                         hintText: 'Account Name',
                         fillColor: const Color.fromARGB(255, 255, 255, 255),
                         keyboardType: TextInputType.text,
@@ -163,14 +159,43 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                         },
                       ),
                     ),
+                  ],
+                ),
 
-                    // Account Number (Only for Bank and Mobile Banking)
-                    ResponsiveCol(
-                      xs: 12,
-                      sm: 6,
-                      md: 4,
-                      lg: 4,
-                      xl: 4,
+
+                // Account Number (Conditional - Only for Bank and Mobile Banking)
+                Row(  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: CustomInputField(
+                        isRequiredLable: true,
+                        isRequired: true,
+                        textInputAction: TextInputAction.done,
+                        controller: context
+                            .read<AccountBloc>()
+                            .accountOpeningBalanceController,
+                        hintText: 'Opening Balance',
+                        fillColor: const Color.fromARGB(255, 255, 255, 255),
+                        keyboardType: TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Please enter opening balance';
+                          }
+                          final balance = double.tryParse(value);
+                          if (balance == null) {
+                            return 'Please enter a valid number';
+                          }
+                          if (balance < 0) {
+                            return 'Opening balance cannot be negative';
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
                       child: ValueListenableBuilder<String>(
                         valueListenable: selectedAccountType,
                         builder: (context, selectedType, child) {
@@ -179,15 +204,19 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                           final showField = isBank || isMobile;
 
                           if (!showField) {
-                            return Container();
+                            return const SizedBox.shrink();
                           }
 
-                          return CustomInputField(
+                          return  CustomInputField(
                             isRequiredLable: true,
                             isRequired: true,
                             textInputAction: TextInputAction.next,
-                            controller: context.read<AccountBloc>().accountNumberController,
-                            hintText: isBank ? 'Bank Account Number' : 'Mobile Account Number',
+                            controller: context
+                                .read<AccountBloc>()
+                                .accountNumberController,
+                            hintText: isBank
+                                ? 'Bank Account Number'
+                                : 'Mobile Account Number',
                             fillColor: const Color.fromARGB(255, 255, 255, 255),
                             keyboardType: TextInputType.text,
                             validator: (value) {
@@ -206,29 +235,28 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                   ],
                 ),
 
-                const SizedBox(height: 16),
+                const SizedBox(height: 8),
 
                 // Bank Details Section (Only for Bank type)
                 ValueListenableBuilder<String>(
                   valueListenable: selectedAccountType,
                   builder: (context, selectedType, child) {
                     final isBank = selectedType == "Bank";
-                    return isBank
-                        ? ResponsiveRow(
-                      spacing: 20,
-                      runSpacing: 10,
+
+                    if (!isBank) {
+                      return const SizedBox.shrink();
+                    }
+
+                    return Row(
                       children: [
-                        ResponsiveCol(
-                          xs: 12,
-                          sm: 6,
-                          md: 6,
-                          lg: 6,
-                          xl: 6,
+                        Expanded(
                           child: CustomInputField(
                             isRequiredLable: true,
                             isRequired: true,
                             textInputAction: TextInputAction.next,
-                            controller: context.read<AccountBloc>().bankNameController,
+                            controller: context
+                                .read<AccountBloc>()
+                                .bankNameController,
                             hintText: 'Bank Name',
                             fillColor: const Color.fromARGB(255, 255, 255, 255),
                             keyboardType: TextInputType.text,
@@ -243,17 +271,15 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                             },
                           ),
                         ),
-                        ResponsiveCol(
-                          xs: 12,
-                          sm: 6,
-                          md: 6,
-                          lg: 6,
-                          xl: 6,
+                        const SizedBox(width: 10),
+                        Expanded(
                           child: CustomInputField(
                             isRequiredLable: true,
                             isRequired: true,
                             textInputAction: TextInputAction.next,
-                            controller: context.read<AccountBloc>().branchNameController,
+                            controller: context
+                                .read<AccountBloc>()
+                                .branchNameController,
                             hintText: 'Branch Name',
                             fillColor: const Color.fromARGB(255, 255, 255, 255),
                             keyboardType: TextInputType.text,
@@ -269,58 +295,20 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                           ),
                         ),
                       ],
-                    )
-                        : Container();
+                    );
                   },
                 ),
 
-                const SizedBox(height: 16),
-
-                // Opening Balance
-                ResponsiveRow(
-                  spacing: 20,
-                  runSpacing: 10,
-                  children: [
-                    ResponsiveCol(
-                      xs: 12,
-                      sm: 6,
-                      md: 6,
-                      lg: 6,
-                      xl: 6,
-                      child: CustomInputField(
-                        isRequiredLable: true,
-                        isRequired: true,
-                        textInputAction: TextInputAction.done,
-                        controller: context.read<AccountBloc>().accountOpeningBalanceController,
-                        hintText: 'Opening Balance',
-                        fillColor: const Color.fromARGB(255, 255, 255, 255),
-                        keyboardType: TextInputType.numberWithOptions(decimal: true),
-                        validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return 'Please enter opening balance';
-                          }
-                          final balance = double.tryParse(value);
-                          if (balance == null) {
-                            return 'Please enter a valid number';
-                          }
-                          if (balance < 0) {
-                            return 'Opening balance cannot be negative';
-                          }
-                          return null;
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 24),
+                const SizedBox(height: 12),
 
                 // Submit Button
                 Row(
                   children: [
                     Expanded(
                       child: AppButton(
-                        name: widget.submitText.isEmpty ? "Create Account" : widget.submitText,
+                        name: widget.submitText.isEmpty
+                            ? "Create Account"
+                            : widget.submitText,
                         onPressed: () {
                           if (formKey.currentState!.validate()) {
                             _createOrUpdateAccount();
@@ -353,7 +341,8 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
     Map<String, dynamic> body = {
       "ac_name": accountBloc.accountNameController.text.trim(),
       "ac_type": selectedType,
-      "opening_balance": accountBloc.accountOpeningBalanceController.text.trim(),
+      "opening_balance": accountBloc.accountOpeningBalanceController.text
+          .trim(),
     };
 
     // Add account number for bank and mobile banking accounts

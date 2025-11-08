@@ -291,42 +291,9 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
                       },
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  const SizedBox(width: 4),
 
-                  // Expense SubHead Dropdown
-                  Expanded(
-                    child: BlocBuilder<ExpenseSubHeadBloc, ExpenseSubHeadState>(
-                      builder: (context, state) {
-                        final subHeads = _selectedExpenseHead != null
-                            ? (context.read<ExpenseSubHeadBloc>().list)
-                            .where((subHead) => subHead.head == _selectedExpenseHead!.id)
-                            .toList()
-                            : <ExpenseSubHeadModel>[];
 
-                        return AppDropdown<ExpenseSubHeadModel>(
-                          context: context,
-                          label: "Expense Sub Head (Optional)",
-                          hint: _selectedExpenseSubHead?.name ?? "Select Expense Sub Head",
-                          isNeedAll: true,
-                          isRequired: false,
-                          value: _selectedExpenseSubHead,
-                          itemList: subHeads,
-                          onChanged: _onExpenseSubHeadChanged,
-                          itemBuilder: (item) => DropdownMenuItem<ExpenseSubHeadModel>(
-                            value: item,
-                            child: Text(
-                              item.name ?? 'Unnamed Sub Head',
-                              style: const TextStyle(
-                                color: AppColors.blackColor,
-                                fontFamily: 'Quicksand',
-                                fontWeight: FontWeight.w300,
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
                   // 📅 Date Range Picker
                   SizedBox(
                     width: 260,
@@ -343,7 +310,7 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
                       },
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  const SizedBox(width: 4),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 5.0),
                     child: Row(

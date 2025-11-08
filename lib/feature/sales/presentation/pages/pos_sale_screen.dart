@@ -101,7 +101,7 @@ class _PosSaleScreenState extends State<PosSaleScreen> {
   Widget _buildContentArea(bool isBigScreen) {
     return ResponsiveCol(
       xs: 12,
-      lg: 12,
+      lg: 10,
 
       child: RefreshIndicator(
         onRefresh: () async => _fetchApi(),
@@ -187,7 +187,6 @@ class _PosSaleScreenState extends State<PosSaleScreen> {
                 value: context.read<PosSaleBloc>().selectCustomerModel,
                 itemList: context.read<CustomerBloc>().activeCustomer,
                 onChanged: (newVal) {
-                  print('Customer selected: ${newVal?.id} - ${newVal?.name}');
 
                   // Update bloc state
                   context.read<PosSaleBloc>().selectCustomerModel = newVal;
@@ -244,7 +243,6 @@ class _PosSaleScreenState extends State<PosSaleScreen> {
                 value: context.read<PosSaleBloc>().selectUserModel,
                 itemList: context.read<UserBloc>().list,
                 onChanged: (newVal) {
-                  print('Seller selected: ${newVal?.id} - ${newVal?.username}');
 
                   // Update bloc state - UNCOMMENT THIS
                   context.read<PosSaleBloc>().selectUserModel = newVal;

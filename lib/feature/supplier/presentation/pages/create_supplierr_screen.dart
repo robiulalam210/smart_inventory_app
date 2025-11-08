@@ -53,19 +53,41 @@ class _CreateSupplierScreenState extends State<CreateSupplierScreen> {
         width: MediaQuery.of(context).size.width,
         decoration: BoxDecoration(
           shape: BoxShape.rectangle,
-          color: AppColors.whiteColor,
+          color: AppColors.bg,
           borderRadius: BorderRadius.circular(AppSizes.borderRadiusSize),
         ),
-        child: Padding(
-          padding: AppTextStyle.getResponsivePaddingBody(context),
-          child: SingleChildScrollView(
-            child: Form(
-              key: formKey,
-              child: Column(
+        child: SingleChildScrollView(
+          child: Form(
+            key: formKey,
+            child: Container(           padding: AppTextStyle.getResponsivePaddingBody(context),
+
+            child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  SizedBox(height: AppSizes.height(context) * 0.02),
+                  // Header with Cancel/Up Button
+                  Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: AppColors.whiteColor,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Supplier ",
+                          style: AppTextStyle.headerTitle(context),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.close, size: 20),
+                          onPressed: () => Navigator.of(context).pop(),
+                        ),
+                      ],
+                    ),
+                  ),
+
+
 
                   // Supplier Name
                   CustomInputField(
@@ -86,7 +108,7 @@ class _CreateSupplierScreenState extends State<CreateSupplierScreen> {
                     },
                   ),
 
-                  SizedBox(height: AppSizes.height(context) * 0.02),
+                  SizedBox(height: AppSizes.height(context) * 0.01),
 
                   // Phone Number
                   CustomInputField(
@@ -111,7 +133,7 @@ class _CreateSupplierScreenState extends State<CreateSupplierScreen> {
                     },
                   ),
 
-                  SizedBox(height: AppSizes.height(context) * 0.02),
+                  SizedBox(height: AppSizes.height(context) * 0.01),
 
                   // Address
                   CustomInputField(

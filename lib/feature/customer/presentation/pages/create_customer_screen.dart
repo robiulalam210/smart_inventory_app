@@ -1,18 +1,11 @@
 import '../../../../core/configs/configs.dart';
-import '../../../../core/shared/widgets/sideMenu/sidebar.dart';
-import '../../../../core/widgets/app_alert_dialog.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_dropdown.dart';
-import '../../../../core/widgets/app_loader.dart';
-import '../../../../core/widgets/coustom_search_text_field.dart';
-import '../../../../core/widgets/custom_filter_ui.dart';
 import '../../../../core/widgets/input_field.dart';
 import '../../../customer/presentation/bloc/customer/customer_bloc.dart';
-import '../../../products/product/presentation/bloc/products/products_bloc.dart';
-import '../widget/widget.dart';
 
 class CreateCustomerScreen extends StatefulWidget {
-  CreateCustomerScreen({super.key, this.submitText = '', this.id = ''});
+  const CreateCustomerScreen({super.key, this.submitText = '', this.id = ''});
   final String id;
   final String submitText;
 
@@ -21,6 +14,8 @@ class CreateCustomerScreen extends StatefulWidget {
 }
 
 class _CreateCustomerScreenState extends State<CreateCustomerScreen> {
+  final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+
   @override
   Widget build(BuildContext context) {
     final isBigScreen =
@@ -28,219 +23,229 @@ class _CreateCustomerScreenState extends State<CreateCustomerScreen> {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.bg,
-
         borderRadius: BorderRadius.circular(AppSizes.bodyPadding),
-
       ),
       child: SafeArea(
-        child: ResponsiveRow(
-          spacing: 0,
-          runSpacing: 0,
-          children: [
+        child: _buildContentArea(isBigScreen),
+      ),
+    );
+  }
 
-            _buildContentArea(isBigScreen),
-          ],
+  Widget _buildContentArea(bool isBigScreen) {
+    return Container(
+      padding: const EdgeInsets.only(bottom: 10),
+      width: MediaQuery.of(context).size.width,
+      decoration: BoxDecoration(
+        shape: BoxShape.rectangle,
+        color: AppColors.whiteColor,
+        borderRadius: BorderRadius.circular(AppSizes.borderRadiusSize),
+      ),
+      child: Padding(
+        padding: AppTextStyle.getResponsivePaddingBody(context),
+        child: SingleChildScrollView(
+          child: Form(
+            key: formKey,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: AppColors.whiteColor,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "Customer ",
+                        style: AppTextStyle.headerTitle(context),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close, size: 20),
+                        onPressed: () => Navigator.of(context).pop(),
+                      ),
+                    ],
+                  ),
+                ),
+                // Row 1: Customer Name and Phone Number
+                _buildTwoColumnRow(
+                  firstChild: CustomInputField(
+                    isRequiredLable: true,
+                    isRequired: true,
+                    textInputAction: TextInputAction.next,
+                    controller: context.read<CustomerBloc>().customerNameController,
+                    hintText: 'Customer Name',
+                    fillColor: const Color.fromARGB(255, 255, 255, 255),
+                    keyboardType: TextInputType.text,
+                    validator: (value) {
+                      return value!.isEmpty
+                          ? 'Please enter Customer Name'
+                          : null;
+                    },
+                    onChanged: (value) {
+                      return null;
+                    },
+                  ),
+                  secondChild: CustomInputField(
+                    isRequiredLable: true,
+                    isRequired: true,
+                    textInputAction: TextInputAction.next,
+                    controller: context.read<CustomerBloc>().customerNumberController,
+                    hintText: 'Phone Number',
+                    fillColor: const Color.fromARGB(255, 255, 255, 255),
+                    keyboardType: TextInputType.phone,
+                    validator: (value) {
+                      return value!.trim().isEmpty
+                          ? 'Please enter Phone number'
+                          : AppConstants.phoneValidation.hasMatch(value.trim())
+                          ? null
+                          : 'Invalid phone number';
+                    },
+                    onChanged: (value) {
+                      return null;
+                    },
+                  ),
+                ),
+
+                // const SizedBox(height: 16),
+
+                // Row 2: Email and Address
+                _buildTwoColumnRow(
+                  firstChild: CustomInputField(
+                    isRequiredLable: false,
+                    isRequired: false,
+                    textInputAction: TextInputAction.next,
+                    controller: context.read<CustomerBloc>().customerEmailController,
+                    hintText: 'Email (Optional)',
+                    fillColor: const Color.fromARGB(255, 255, 255, 255),
+                    keyboardType: TextInputType.emailAddress,
+                    validator: (value) {
+                      if (value != null && value.isNotEmpty) {
+                        return AppConstants.emailRegex.hasMatch(value.trim())
+                            ? null
+                            : 'Invalid Email';
+                      }
+                      return null; // Email is optional
+                    },
+                    onChanged: (value) {
+                      return null;
+                    },
+                  ),
+                  secondChild: CustomInputField(
+                    isRequiredLable: false,
+                    isRequired: false,
+                    textInputAction: TextInputAction.done,
+                    controller: context.read<CustomerBloc>().addressController,
+                    hintText: 'Address (Optional)',
+                    fillColor: const Color.fromARGB(255, 255, 255, 255),
+                    keyboardType: TextInputType.multiline,
+                    validator: (value) {
+                      return null; // Address is optional
+                    },
+                    onChanged: (value) {
+                      return null;
+                    },
+                  ),
+                ),
+
+                SizedBox(height: AppSizes.height(context) * 0.01),
+
+                // Status Dropdown (only for edit mode)
+                if (widget.id.toString().isNotEmpty) ...[
+                  _buildStatusDropdown(),
+                  SizedBox(height: AppSizes.height(context) * 0.01),
+                ],
+
+                SizedBox(height: AppSizes.height(context) * 0.02),
+
+                // Submit Button
+                AppButton(
+                  name: widget.submitText.isEmpty ? "Create Customer" : widget.submitText,
+                  onPressed: () {
+                    if (formKey.currentState!.validate()) {
+                      _createOrUpdateCustomer();
+                    }
+                  },
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
   }
 
+  Widget _buildTwoColumnRow({required Widget firstChild, required Widget secondChild}) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isSmallScreen = constraints.maxWidth < 600;
 
-  Widget _buildContentArea(bool isBigScreen) {
-    final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+        if (isSmallScreen) {
+          // Stack vertically on small screens
+          return Column(
+            children: [
+              firstChild,
+              const SizedBox(height: 4),
+              secondChild,
+            ],
+          );
+        } else {
+          // Place side by side on larger screens
+          return Row(
+            children: [
+              Expanded(
+                child: firstChild,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: secondChild,
+              ),
+            ],
+          );
+        }
+      },
+    );
+  }
 
-    return ResponsiveCol(
-      xs: 12,
-      sm: 12,
-      md: 12,
-      lg: 10,
-      xl: 10,
-      child: Container(
-        padding: const EdgeInsets.only(bottom: 10),
-        width: MediaQuery.of(context).size.width,
-        decoration: BoxDecoration(
-          shape: BoxShape.rectangle,
-          color: AppColors.whiteColor,
-          borderRadius: BorderRadius.circular(AppSizes.borderRadiusSize),
-        ),
-        child: Padding(
-          padding: AppTextStyle.getResponsivePaddingBody(context),
-          child: SingleChildScrollView(
-            child: Form(
-              key: formKey,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  SizedBox(height: AppSizes.height(context) * 0.02),
+  Widget _buildStatusDropdown() {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isSmallScreen = constraints.maxWidth < 600;
 
-                  ResponsiveRow(
-                    spacing: 20,
-                    runSpacing: 10,
-                    children: [
-                      // Customer Name
-                      ResponsiveCol(
-                        xs: 12,
-                        sm: 6,
-                        md: 4,
-                        lg: 4,
-                        xl: 4,
-                        child: CustomInputField(
-                          isRequiredLable: true,
-                          isRequired: true,
-                          textInputAction: TextInputAction.next,
-                          controller: context.read<CustomerBloc>().customerNameController,
-                          hintText: 'Customer Name',
-                          fillColor: const Color.fromARGB(255, 255, 255, 255),
-                          keyboardType: TextInputType.text,
-                          validator: (value) {
-                            return value!.isEmpty
-                                ? 'Please enter Customer Name'
-                                : null;
-                          },
-                          onChanged: (value) {
-                            return null;
-                          },
-                        ),
-                      ),
-
-                      // Phone Number
-                      ResponsiveCol(
-                        xs: 12,
-                        sm: 6,
-                        md: 4,
-                        lg: 4,
-                        xl: 4,
-                        child: CustomInputField(
-                          isRequiredLable: true,
-                          isRequired: true,
-                          textInputAction: TextInputAction.next,
-                          controller: context.read<CustomerBloc>().customerNumberController,
-                          hintText: 'Phone Number',
-                          fillColor: const Color.fromARGB(255, 255, 255, 255),
-                          keyboardType: TextInputType.phone,
-                          validator: (value) {
-                            return value!.trim().isEmpty
-                                ? 'Please enter Phone number'
-                                : AppConstants.phoneValidation.hasMatch(value.trim())
-                                ? null
-                                : 'Invalid phone number';
-                          },
-                          onChanged: (value) {
-                            return null;
-                          },
-                        ),
-                      ),
-
-                      // Email
-                      ResponsiveCol(
-                        xs: 12,
-                        sm: 6,
-                        md: 4,
-                        lg: 4,
-                        xl: 4,
-                        child: CustomInputField(
-                          isRequiredLable: false,
-                          isRequired: false,
-                          textInputAction: TextInputAction.next,
-                          controller: context.read<CustomerBloc>().customerEmailController,
-                          hintText: 'Email (Optional)',
-                          fillColor: const Color.fromARGB(255, 255, 255, 255),
-                          keyboardType: TextInputType.emailAddress,
-                          validator: (value) {
-                            if (value != null && value.isNotEmpty) {
-                              return AppConstants.emailRegex.hasMatch(value.trim())
-                                  ? null
-                                  : 'Invalid Email';
-                            }
-                            return null; // Email is optional
-                          },
-                          onChanged: (value) {
-                            return null;
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  SizedBox(height: AppSizes.height(context) * 0.01),
-
-                  // Address Field
-                  ResponsiveRow(
-                    spacing: 20,
-                    runSpacing: 10,
-                    children: [
-                      ResponsiveCol(
-                        xs: 12,
-                        sm: 12,
-                        md: 12,
-                        lg: 12,
-                        xl: 12,
-                        child: CustomInputField(
-                          isRequiredLable: false,
-                          isRequired: false,
-                          textInputAction: TextInputAction.done,
-                          controller: context.read<CustomerBloc>().addressController,
-                          hintText: 'Address (Optional)',
-                          fillColor: const Color.fromARGB(255, 255, 255, 255),
-                          keyboardType: TextInputType.multiline,
-                          validator: (value) {
-                            return null; // Address is optional
-                          },
-                          onChanged: (value) {
-                            return null;
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                  widget.id.toString() == ""
-                      ? Container()
-                      : AppDropdown(
-                    label: "Status",context: context,
-                    hint:
-                    context.read<CustomerBloc>().selectedState.isEmpty
-                        ? "Select Status"
-                        : context.read<CustomerBloc>().selectedState,
-                    isLabel: false,
-                    value:
-                    context.read<CustomerBloc>().selectedState.isEmpty
-                        ? null
-                        : context.read<CustomerBloc>().selectedState,
-                    itemList: context.read<CustomerBloc>().status,
-                    onChanged: (newVal) {
-                      context.read<CustomerBloc>().selectedState =
-                          newVal.toString();
-                    },
-                    itemBuilder: (item) => DropdownMenuItem(
-                      value: item,
-                      child: Text(
-                        item.toString(),
-                        style: const TextStyle(
-                          color: AppColors.blackColor,
-                          fontFamily: 'Quicksand',
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: AppSizes.height(context) * 0.03),
-
-                  // Submit Button
-                  AppButton(
-                    name: widget.submitText.isEmpty ? "Create Customer" : widget.submitText,
-                    onPressed: () {
-                      if (formKey.currentState!.validate()) {
-                        _createOrUpdateCustomer();
-                      }
-                    },
-                  ),
-                ],
+        return Container(
+          width: isSmallScreen ? double.infinity : constraints.maxWidth * 0.5,
+          child: AppDropdown(
+            label: "Status",
+            context: context,
+            hint: context.read<CustomerBloc>().selectedState.isEmpty
+                ? "Select Status"
+                : context.read<CustomerBloc>().selectedState,
+            isLabel: false,
+            value: context.read<CustomerBloc>().selectedState.isEmpty
+                ? null
+                : context.read<CustomerBloc>().selectedState,
+            itemList: context.read<CustomerBloc>().status,
+            onChanged: (newVal) {
+              setState(() {
+                context.read<CustomerBloc>().selectedState = newVal.toString();
+              });
+            },
+            itemBuilder: (item) => DropdownMenuItem(
+              value: item,
+              child: Text(
+                item.toString(),
+                style: const TextStyle(
+                  color: AppColors.blackColor,
+                  fontFamily: 'Quicksand',
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -260,22 +265,24 @@ class _CreateCustomerScreenState extends State<CreateCustomerScreen> {
     if (customerBloc.addressController.text.trim().isNotEmpty) {
       body["address"] = customerBloc.addressController.text.trim();
     }
-    if (customerBloc.selectedState.trim().isNotEmpty) {
-      body["is_active"] = customerBloc.selectedState=="Active"?true:false;
+
+    if (widget.id.isNotEmpty && customerBloc.selectedState.trim().isNotEmpty) {
+      body["is_active"] = customerBloc.selectedState == "Active" ? true : false;
     }
+
     print("Sending customer payload: $body"); // For debugging
 
     if (widget.id.isEmpty) {
       // Create new customer
       customerBloc.add(AddCustomer(body: body));
     } else {
-
+      // Update existing customer
       customerBloc.add(UpdateCustomer(body: body, id: widget.id));
     }
 
-    // Show success message
+    // Show success message or handle navigation
+    Navigator.of(context).pop(); // Close the screen after submission
   }
-
 
   @override
   void dispose() {

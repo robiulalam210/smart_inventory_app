@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:iconsax/iconsax.dart';
 
 import '../../../../../core/configs/app_colors.dart';
 import '../../../../../core/configs/app_sizes.dart';
-import '../../../../../core/configs/app_text.dart';
 import '../../../../../core/widgets/delete_dialog.dart';
 import '../../data/model/brand_model.dart';
 import '../bloc/brand/brand_bloc.dart';
@@ -200,7 +200,7 @@ class BrandTableCard extends StatelessWidget {
           children: [
             // Edit Button
             _buildActionButton(
-              icon: Icons.edit,
+              icon:  Iconsax.edit,
               color: Colors.blue,
               tooltip: 'Edit brand',
               onPressed: () => _showEditDialog(context, brand),
