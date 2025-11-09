@@ -170,7 +170,6 @@ class _CustomerScreenState extends State<CustomerScreen> {
                               SizedBox(
                                 child: CustomerTableCard(
                                   customers: state.list,
-
                                 ),
                               ),
                               PaginationBar(
@@ -182,13 +181,12 @@ class _CustomerScreenState extends State<CustomerScreen> {
                                 to: state.to,
                                 onPageChanged: (page) => _fetchCustomerList(
                                   pageNumber: page,
-                                  pageSize: state.pageSize,
+                                  pageSize: state.pageSize, // Use current page size
                                 ),
-                                onPageSizeChanged: (newSize) =>
-                                    _fetchCustomerList(
-                                      pageNumber: 1,
-                                      pageSize: newSize,
-                                    ),
+                                onPageSizeChanged: (newSize) => _fetchCustomerList(
+                                  pageNumber: 1, // Reset to page 1 when changing page size
+                                  pageSize: newSize,
+                                ),
                               ),
                             ],
                           );

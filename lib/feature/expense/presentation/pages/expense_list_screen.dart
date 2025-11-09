@@ -319,7 +319,7 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
                         GestureDetector(
                           onTap: () {
                             _clearFilters();
-                            Navigator.of(context).pop();
+                            // Navigator.of(context).pop();
                           },
                           child: Text(
                             'Clear All',

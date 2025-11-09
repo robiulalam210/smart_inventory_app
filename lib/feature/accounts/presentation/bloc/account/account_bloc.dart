@@ -86,11 +86,11 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
 
     try {
       // Build base URL without pagination parameters since API has no_pagination=true
-      String baseUrl = AppUrls.account;
+      String baseUrl = AppUrls.accountNON;
 
       // Add filter parameters only
       Map<String, String> queryParams = {
-        "no_pagination": "true"  // Fixed syntax - use colon and string value
+        // "no_pagination": "true"  // Fixed syntax - use colon and string value
       };
 
       if (event.filterText.isNotEmpty) {
