@@ -148,9 +148,10 @@ class _ProductsScreenState extends State<ProductsScreen> {
                           builder: (context) {
                             return Dialog(
                               child: SizedBox(
-                                width: MediaQuery.of(context).size.width * 0.7,
-                                height: MediaQuery.of(context).size.height * 0.8,
-                                child: const ProductsForm(isDialog: true),
+                                width: MediaQuery.of(context).size.width * 0.6,
+                                height: 500,
+                                // height: MediaQuery.of(context).size.height * 0.6,
+                                child: const ProductsForm(),
                               ),
                             );
                           },
@@ -242,7 +243,6 @@ class _ProductsScreenState extends State<ProductsScreen> {
             child: ProductsForm(
               productId: product.id.toString(),
               product: product,
-              isDialog: true,
             ),
           ),
         );

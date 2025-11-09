@@ -15,18 +15,15 @@ import '../../../../../../core/widgets/app_button.dart';
 import '../../../../../../core/widgets/app_dropdown.dart';
 import '../../../../../../core/widgets/app_loader.dart';
 import '../../../../../../core/widgets/input_field.dart';
-import '../../../../lab_dashboard/presentation/bloc/dashboard/dashboard_bloc.dart';
 import '../../data/model/product_model.dart';
 import '../bloc/products/products_bloc.dart';
 
 class ProductsForm extends StatefulWidget {
-  final bool isDialog;
   final ProductModel? product;
   final String? productId;
 
   const ProductsForm({
     super.key,
-    this.isDialog = false,
     this.product,
     this.productId,
   });
@@ -134,17 +131,20 @@ class _ProductsFormState extends State<ProductsForm> {
       return const Center(child: CircularProgressIndicator());
     }
 
-    if (widget.isDialog) {
-      return _buildDialogContent();
-    }
 
-    return SafeArea(child: _buildMainContent());
+
+    return SafeArea(child: _buildDialogContent());
   }
 
   Widget _buildDialogContent() {
     return Container(
-      color: AppColors.bg,
-      padding: const EdgeInsets.all(20),
+   
+      decoration: BoxDecoration(
+        color: AppColors.bg,
+        
+        borderRadius: BorderRadius.circular(12)
+      ),
+      padding: const EdgeInsets.all(12),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -164,7 +164,7 @@ class _ProductsFormState extends State<ProductsForm> {
               ),
             ],
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 10),
           Expanded(
             child: SingleChildScrollView(
               child: BlocListener<ProductsBloc, ProductsState>(
@@ -175,28 +175,37 @@ class _ProductsFormState extends State<ProductsForm> {
                   key: formKey,
                   child: Column(
                     children: [
-                      _buildCategoryDropdown(),
-                      // const SizedBox(height: 8),
-                      _buildProductNameField(),
-                      const SizedBox(height: 8),
                       Row(
                         children: [
-                          Expanded(child: _buildUnitDropdown()),
+                          Expanded(child: _buildCategoryDropdown()),
                           const SizedBox(width: 10),
-                          Expanded(child: _buildBrandDropdown()),
+                          Expanded(child: _buildUnitDropdown()),
                         ],
                       ),
-                      // const SizedBox(height: 16),
+                      // _buildCategoryDropdown(),
+                      // const SizedBox(height: 8),
+                      // _buildProductNameField(),
+                      const SizedBox(height: 4),
 
                       Row(
                         children: [
                           Expanded(child: _buildGroupsDropdown()),
-                          const SizedBox(width: 10),
+                          const SizedBox(width: 5),
+                          Expanded(child: _buildBrandDropdown()),
+
+                          const SizedBox(width: 5),
                           Expanded(child: _buildSourceDropdown()),
                         ],
                       ),
                       // const SizedBox(height: 16),
                       Row(
+                        children: [
+                          Expanded(child: _buildProductNameField()),
+                          const SizedBox(width: 10),
+                          Expanded(child: _buildOpeningStockField()),
+                        ],
+                      ),
+                      const SizedBox(height: 8), Row(
                         children: [
                           Expanded(child: _buildPurchasePriceField()),
                           const SizedBox(width: 10),
@@ -206,14 +215,16 @@ class _ProductsFormState extends State<ProductsForm> {
                       const SizedBox(height: 8),
                       Row(
                         children: [
-                          Expanded(child: _buildOpeningStockField()),
-                          const SizedBox(width: 10),
+                          // Expanded(child: _buildOpeningStockField()),
+                          // const SizedBox(width: 10),
                           Expanded(child: _buildAlertQuantityField()),
+                          const SizedBox(width: 10),
+                          Expanded(child: _buildDescriptionField()),
                         ],
                       ),
                       const SizedBox(height: 8),
 
-                      _buildDescriptionField(),
+
                       const SizedBox(height: 20),
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
@@ -227,7 +238,6 @@ class _ProductsFormState extends State<ProductsForm> {
                           ),
                         ),
                         const SizedBox(width: 10),
-                        if (widget.isDialog)
                           SizedBox(
                             width: 150,
                             child: AppButton(
@@ -249,106 +259,6 @@ class _ProductsFormState extends State<ProductsForm> {
     );
   }
 
-  Widget _buildMainContent() {
-    final isBigScreen = Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
-
-    return ResponsiveRow(
-      spacing: 0,
-      runSpacing: 0,
-      children: [
-        if (isBigScreen)
-          ResponsiveCol(
-            xs: 0,
-            sm: 1,
-            md: 1,
-            lg: 2,
-            xl: 2,
-            child: Container(
-              decoration: BoxDecoration(color: AppColors.whiteColor),
-              child: isBigScreen ? const Sidebar() : const SizedBox.shrink(),
-            ),
-          ),
-        ResponsiveCol(
-          xs: 12,
-          sm: 12,
-          md: 12,
-          lg: 10,
-          xl: 10,
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: BlocListener<ProductsBloc, ProductsState>(
-              listener: (context, state) {
-                _handleProductState(state);
-              },
-              child: Form(
-                key: formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      _isEditMode ? "Update Product" : "Create New Product",
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    ResponsiveRow(
-                      spacing: 16,
-                      runSpacing: 16,
-                      children: [
-                        ResponsiveCol(
-                          xs: 12, sm: 6, md: 6, lg: 6, xl: 6,
-                          child: _buildCategoryDropdown(),
-                        ),
-                        ResponsiveCol(
-                          xs: 12, sm: 6, md: 6, lg: 6, xl: 6,
-                          child: _buildProductNameField(),
-                        ),
-                        ResponsiveCol(
-                          xs: 12, sm: 6, md: 4, lg: 4, xl: 4,
-                          child: _buildUnitDropdown(),
-                        ),
-                        ResponsiveCol(
-                          xs: 12, sm: 6, md: 4, lg: 4, xl: 4,
-                          child: _buildBrandDropdown(),
-                        ),
-
-                        ResponsiveCol(
-                          xs: 12, sm: 6, md: 6, lg: 6, xl: 6,
-                          child: _buildPurchasePriceField(),
-                        ),
-                        ResponsiveCol(
-                          xs: 12, sm: 6, md: 6, lg: 6, xl: 6,
-                          child: _buildSellingPriceField(),
-                        ),
-                        ResponsiveCol(
-                          xs: 12, sm: 6, md: 6, lg: 6, xl: 6,
-                          child: _buildOpeningStockField(),
-                        ),
-                        ResponsiveCol(
-                          xs: 12, sm: 6, md: 6, lg: 6, xl: 6,
-                          child: _buildAlertQuantityField(),
-                        ),
-                        ResponsiveCol(
-                          xs: 12, sm: 12, md: 12, lg: 12, xl: 12,
-                          child: _buildDescriptionField(),
-                        ),
-                        ResponsiveCol(
-                          xs: 12, sm: 12, md: 12, lg: 12, xl: 12,
-                          child: _buildSubmitButton(),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
 
   void _handleProductState(ProductsState state) {
     if (state is ProductsAddLoading) {
@@ -370,11 +280,11 @@ class _ProductsFormState extends State<ProductsForm> {
       );
 
       // Close dialog if in dialog mode
-      if (widget.isDialog) {
+      // if (widget.isDialog) {
         Navigator.pop(context);
-      } else {
-        context.read<DashboardBloc>().add(ChangeDashboardScreen(index: 7));
-      }
+      // } else {
+      //   context.read<DashboardBloc>().add(ChangeDashboardScreen(index: 7));
+      // }
     } else if (state is ProductsAddFailed) {
       Navigator.pop(context);
       appAlertDialog(

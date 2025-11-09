@@ -157,7 +157,7 @@ class _GroupsScreenState extends State<GroupsScreen> {
               ),
               gapH8,
               SizedBox(
-                height: 500,
+                // height: 500,
                 child: BlocBuilder<GroupsBloc, GroupsState>(
                   builder: (context, state) {
                     if (state is GroupsListLoading) {

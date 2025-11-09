@@ -184,7 +184,8 @@ class _UsersScreenState extends State<UsersScreen> {
             children: [
               Row(
                 children: [
-                  Expanded(
+                  SizedBox(
+                    width: 400,
                     child: CustomSearchTextFormField(
                       controller: context.read<UserBloc>().filterTextController,
                       onChanged: (value) {
@@ -198,15 +199,13 @@ class _UsersScreenState extends State<UsersScreen> {
                         context.read<UserBloc>().filterTextController.clear();
                       },
                       hintText:
-                      "Search by Name,Email or Phone number", // Pass dynamic hintText if needed
+                      "by Name,Email or Phone number", // Pass dynamic hintText if needed
                     ),
                   ),
-                     CustomFilterBox( onTapDown: (TapDownDetails details) {
-                    _showFilterMenu(context, details.globalPosition);
-                  })
 
                 ],
               ),
+              gapH8,
               BlocBuilder<UserBloc, UserState>(
                 builder: (context, state) {
                   if (state is UserListLoading) {

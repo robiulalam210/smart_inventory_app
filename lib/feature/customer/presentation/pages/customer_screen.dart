@@ -246,7 +246,7 @@ class _CustomerScreenState extends State<CustomerScreen> {
             isNeedAll: true,
             isRequired: false,
             value: selectedStatusNotifier.value,
-            itemList: ['Active', 'Inactive', 'Blocked'],
+            itemList: ['Active', 'Inactive'],
             onChanged: (newVal) {
               selectedStatusNotifier.value = newVal;
               _fetchApi(status: newVal?.toLowerCase() ?? '');
@@ -274,7 +274,8 @@ class _CustomerScreenState extends State<CustomerScreen> {
               builder: (context) {
                 return Dialog(
                   child: SizedBox(
-                    width: AppSizes.width(context) * 0.50,
+                    width: AppSizes.width(context) * 0.55,
+                    height: 280,
                     child: CreateCustomerScreen(),
                   ),
                 );

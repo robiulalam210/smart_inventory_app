@@ -35,7 +35,6 @@ class _PurchaseReturnScreenState extends State<PurchaseReturnScreen> {
     super.initState();
     startDate = DateTime(now.year, now.month - 1, now.day);
     endDate = DateTime(now.year, now.month, now.day);
-    final String id;
     // Load initial data
     context.read<SupplierInvoiceBloc>().add(FetchSupplierActiveList(context));
 
@@ -143,7 +142,6 @@ class _PurchaseReturnScreenState extends State<PurchaseReturnScreen> {
             child: Column(
               children: [
                 _buildFilterRow(),
-                const SizedBox(height: 16),
                 SizedBox(child: _buildDataTable()),
               ],
             ),
@@ -172,7 +170,7 @@ class _PurchaseReturnScreenState extends State<PurchaseReturnScreen> {
             hintText: "by Receipt No, Supplier, or Reason",
           ),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: 6),
 
         // 👤 Supplier Dropdown
         Expanded(
@@ -216,7 +214,7 @@ class _PurchaseReturnScreenState extends State<PurchaseReturnScreen> {
             },
           ),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: 6),
 
         // 📅 Date Range Picker
         SizedBox(
@@ -232,7 +230,7 @@ class _PurchaseReturnScreenState extends State<PurchaseReturnScreen> {
             },
           ),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: 6),
         gapW16,
         AppButton(
           name: "Create Purchase Return",

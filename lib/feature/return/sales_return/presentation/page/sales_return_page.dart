@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
 import 'package:smart_inventory/core/configs/configs.dart';
 import 'package:smart_inventory/feature/customer/data/model/customer_active_model.dart';
@@ -172,7 +171,7 @@ class _SalesReturnScreenState extends State<SalesReturnScreen> {
             hintText: "by Receipt No, Customer, or Reason",
           ),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: 6),
 
         // 👤 Customer Dropdown
         Expanded(
@@ -216,7 +215,7 @@ class _SalesReturnScreenState extends State<SalesReturnScreen> {
             },
           ),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: 6),
 
         // 📅 Date Range Picker
         SizedBox(
@@ -232,10 +231,10 @@ class _SalesReturnScreenState extends State<SalesReturnScreen> {
             },
           ),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: 6),
         gapW16,
         AppButton(
-          name: "Create Supplier", // Fixed button text
+          name: "Create Sales Return", // Fixed button text
           onPressed: () {
             showDialog(
               context: context,
