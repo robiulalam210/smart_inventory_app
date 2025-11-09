@@ -1,6 +1,4 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:smart_inventory/feature/accounts/data/model/create_account_model.dart';
+
 import '../../../../../core/configs/configs.dart';
 import '../../../../../core/repositories/get_response.dart';
 import '../../../../../core/repositories/post_response.dart';
@@ -99,7 +97,7 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
         queryParams['search'] = event.filterText;
       }
       if (event.accountType.isNotEmpty) {
-        queryParams['account_type'] = event.accountType;
+        queryParams['ac_type'] = event.accountType;
       }
 
       Uri uri = Uri.parse(baseUrl).replace(
@@ -165,6 +163,9 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
       emit(AccountListFailed(title: "Error", content: error.toString()));
     }
   }
+
+
+
   Future<void> _onCreateAccountList(
       AddAccount event,
       Emitter<AccountState> emit,
@@ -203,7 +204,7 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
 
     try {
       final res = await patchResponse(
-        url: "${AppUrls.account}${event.id}/",
+        url: "${AppUrls.accountNON}${event.id}/",
         payload: event.body!,
       );
       final jsonString = jsonEncode(res);
@@ -233,7 +234,7 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
 
     try {
       final res = await deleteResponse(
-        url: "${AppUrls.account}${event.id}/",
+        url: "${AppUrls.accountNON}${event.id}/",
       );      final jsonString = jsonEncode(res);
 
 

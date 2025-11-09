@@ -191,11 +191,14 @@ class _SupplierPaymentScreenState extends State<SupplierPaymentScreen> {
             appLoader(context, "Creating payment, please wait...");
           } else if (state is SupplierPaymentAddSuccess) {
             Navigator.pop(context); // Close loader dialog
+            Navigator.pop(context); // Close loader dialog
+            Navigator.pop(context); // Close loader dialog
             _fetchApi(); // Reload payment list
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Payment created successfully')),
             );
           } else if (state is SupplierPaymentAddFailed) {
+            Navigator.pop(context); // Close loader dialog
             Navigator.pop(context); // Close loader dialog
             appAlertDialog(
               context,

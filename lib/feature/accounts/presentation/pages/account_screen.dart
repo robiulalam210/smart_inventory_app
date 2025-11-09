@@ -268,7 +268,7 @@ class _AccountScreenState extends State<AccountScreen> {
             isLabel: false,
             isRequired: false,
             value: selectedAccountTypeNotifier.value,
-            itemList: ['Cash', 'Bank', 'Mobile Banking', 'Credit Card', 'Loan', 'Investment', 'Other'],
+            itemList: ['Cash', 'Bank', 'Mobile Banking'],
             onChanged: (newVal) {
               selectedAccountTypeNotifier.value = newVal;
               _fetchApi(
