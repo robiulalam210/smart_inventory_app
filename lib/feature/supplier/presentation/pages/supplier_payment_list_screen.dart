@@ -21,10 +21,7 @@ class SupplierPaymentScreen extends StatefulWidget {
 
 class _SupplierPaymentScreenState extends State<SupplierPaymentScreen> {
   // Use the correct type that CustomDateRangeField expects
-  DateRange? selectedDateRange = DateRange(
-    start: DateTime(DateTime.now().year, DateTime.now().month - 1, 1),
-    end: DateTime.now(),
-  );
+  DateRange? selectedDateRange;
 
   final TextEditingController _searchController = TextEditingController();
   final int _defaultPageSize = 10;
@@ -194,6 +191,8 @@ class _SupplierPaymentScreenState extends State<SupplierPaymentScreen> {
           if (state is SupplierPaymentAddLoading) {
             appLoader(context, "Creating payment, please wait...");
           } else if (state is SupplierPaymentAddSuccess) {
+            Navigator.pop(context);
+            Navigator.pop(context);
             Navigator.pop(context);
             _fetchApi();
             ScaffoldMessenger.of(context).showSnackBar(

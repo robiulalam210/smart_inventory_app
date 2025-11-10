@@ -18,6 +18,7 @@ import '../../../../../core/widgets/app_loader.dart';
 import '../../../../../core/widgets/input_field.dart';
 import '../../../accounts/presentation/bloc/account/account_bloc.dart';
 import '../../../lab_dashboard/presentation/bloc/dashboard/dashboard_bloc.dart';
+import '../../../products/product/data/model/product_stock_model.dart';
 import '../bloc/create_purchase/create_purchase_bloc.dart';
 
 class CreatePurchaseScreen extends StatefulWidget {
@@ -53,10 +54,11 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
     context.read<SupplierInvoiceBloc>().add(FetchSupplierActiveList(context));
 
     super.initState();
+    context.read<ProductsBloc>().add(FetchProductsStockList(context));
 
-    context.read<ProductsBloc>().add(
-      FetchProductsList(context, filterApiURL: "&all_product=true"),
-    );
+    // context.read<ProductsBloc>().add(
+    //   FetchProductsList(context, filterApiURL: "&all_product=true"),
+    // );
 
     // Initialize date controller
 
@@ -251,7 +253,7 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
 
   bool _isChecked = false;
 
-  void onProductChanged(int index, ProductModel? newVal) {
+  void onProductChanged(int index, ProductModelStockModel? newVal) {
     if (newVal == null) return;
 
     setState(() {
@@ -475,7 +477,7 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                             child: BlocBuilder<ProductsBloc, ProductsState>(
                               builder: (context, state) {
                                 return SizedBox(
-                                  child: AppDropdown<ProductModel>(
+                                  child: AppDropdown<ProductModelStockModel>(
                                     context: context,
                                     isRequired: false,
                                     isLabel: true,
@@ -483,7 +485,7 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                                     label: "Product",
                                     hint: "Select Product",
                                     value: product["product"],
-                                    itemList: context.read<ProductsBloc>().list,
+                                    itemList: context.read<ProductsBloc>().productList,
                                     onChanged: (newVal) =>
                                         onProductChanged(index, newVal),
                                     validator: (value) => value == null
