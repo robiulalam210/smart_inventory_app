@@ -6,14 +6,6 @@ import 'package:smart_inventory/feature/products/product/data/model/product_stoc
 import 'package:smart_inventory/feature/users_list/presentation/bloc/users/user_bloc.dart';
 import 'dart:developer';
 
-import '../../../../../core/configs/configs.dart';
-import '../../../../../core/shared/widgets/sideMenu/sidebar.dart';
-import '../../../../../core/widgets/app_alert_dialog.dart';
-import '../../../../../core/widgets/app_button.dart';
-import '../../../../../core/widgets/app_dropdown.dart';
-import '../../../../../core/widgets/app_loader.dart';
-import '../../../../../core/widgets/app_snack_bar.dart';
-import '../../../../../core/widgets/input_field.dart';
 import '../../../../accounts/data/model/account_active_model.dart';
 import '../../../../accounts/presentation/bloc/account/account_bloc.dart';
 import '../../../../customer/data/model/customer_active_model.dart';

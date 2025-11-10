@@ -1,7 +1,5 @@
-import '../../../../core/configs/configs.dart';
-import '../../../../core/widgets/app_button.dart';
-import '../../../../core/widgets/app_dropdown.dart';
-import '../../../../core/widgets/input_field.dart';
+import 'package:smart_inventory/core/core.dart';
+
 import '../../../customer/presentation/bloc/customer/customer_bloc.dart';
 
 class CreateCustomerScreen extends StatefulWidget {
@@ -37,7 +35,7 @@ class _CreateCustomerScreenState extends State<CreateCustomerScreen> {
       width: MediaQuery.of(context).size.width,
       decoration: BoxDecoration(
         shape: BoxShape.rectangle,
-        color: AppColors.whiteColor,
+        color: AppColors.bg,
         borderRadius: BorderRadius.circular(AppSizes.borderRadiusSize),
       ),
       child: Padding(
@@ -71,30 +69,27 @@ class _CreateCustomerScreenState extends State<CreateCustomerScreen> {
                 ),
                 // Row 1: Customer Name and Phone Number
                 _buildTwoColumnRow(
-                  firstChild: CustomInputField(
-                    isRequiredLable: true,
+                  firstChild: AppTextField(
                     isRequired: true,
                     textInputAction: TextInputAction.next,
                     controller: context.read<CustomerBloc>().customerNameController,
                     hintText: 'Customer Name',
-                    fillColor: const Color.fromARGB(255, 255, 255, 255),
+
                     keyboardType: TextInputType.text,
                     validator: (value) {
                       return value!.isEmpty
                           ? 'Please enter Customer Name'
                           : null;
                     },
-                    onChanged: (value) {
-                      return null;
-                    },
+
                   ),
-                  secondChild: CustomInputField(
-                    isRequiredLable: true,
+                  secondChild: AppTextField(
+
                     isRequired: true,
                     textInputAction: TextInputAction.next,
                     controller: context.read<CustomerBloc>().customerNumberController,
                     hintText: 'Phone Number',
-                    fillColor: const Color.fromARGB(255, 255, 255, 255),
+
                     keyboardType: TextInputType.phone,
                     validator: (value) {
                       return value!.trim().isEmpty
@@ -113,13 +108,13 @@ class _CreateCustomerScreenState extends State<CreateCustomerScreen> {
 
                 // Row 2: Email and Address
                 _buildTwoColumnRow(
-                  firstChild: CustomInputField(
-                    isRequiredLable: false,
+                  firstChild: AppTextField(
+
                     isRequired: false,
                     textInputAction: TextInputAction.next,
                     controller: context.read<CustomerBloc>().customerEmailController,
                     hintText: 'Email (Optional)',
-                    fillColor: const Color.fromARGB(255, 255, 255, 255),
+
                     keyboardType: TextInputType.emailAddress,
                     validator: (value) {
                       if (value != null && value.isNotEmpty) {
@@ -130,16 +125,16 @@ class _CreateCustomerScreenState extends State<CreateCustomerScreen> {
                       return null; // Email is optional
                     },
                     onChanged: (value) {
-                      return null;
+                      return;
                     },
                   ),
-                  secondChild: CustomInputField(
-                    isRequiredLable: false,
+                  secondChild: AppTextField(
+
                     isRequired: false,
                     textInputAction: TextInputAction.done,
                     controller: context.read<CustomerBloc>().addressController,
                     hintText: 'Address (Optional)',
-                    fillColor: const Color.fromARGB(255, 255, 255, 255),
+
                     keyboardType: TextInputType.multiline,
                     validator: (value) {
                       return null; // Address is optional
@@ -158,7 +153,7 @@ class _CreateCustomerScreenState extends State<CreateCustomerScreen> {
                   SizedBox(height: AppSizes.height(context) * 0.01),
                 ],
 
-                SizedBox(height: AppSizes.height(context) * 0.02),
+                SizedBox(height: AppSizes.height(context) * 0.01),
 
                 // Submit Button
                 AppButton(
@@ -184,7 +179,8 @@ class _CreateCustomerScreenState extends State<CreateCustomerScreen> {
 
         if (isSmallScreen) {
           // Stack vertically on small screens
-          return Column(
+          return Column(  crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               firstChild,
               const SizedBox(height: 4),
@@ -194,6 +190,8 @@ class _CreateCustomerScreenState extends State<CreateCustomerScreen> {
         } else {
           // Place side by side on larger screens
           return Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Expanded(
                 child: firstChild,

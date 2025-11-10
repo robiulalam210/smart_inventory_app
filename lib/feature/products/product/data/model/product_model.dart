@@ -23,8 +23,8 @@ class ProductModel {
   final Info? sourceInfo;
   final String? name;
   final String? sku;
-  final String? purchasePrice;
-  final String? sellingPrice;
+  final dynamic? purchasePrice;
+  final dynamic? sellingPrice;
   final int? openingStock;
   final int? stockQty;
   final int? alertQuantity;

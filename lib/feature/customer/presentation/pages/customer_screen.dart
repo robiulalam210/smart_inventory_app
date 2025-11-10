@@ -119,7 +119,7 @@ class _CustomerScreenState extends State<CustomerScreen> {
                 Navigator.pop(context);
                 _fetchApi();
               } else if (state is CustomerAddSuccess) {
-                Navigator.pop(context);
+                // Navigator.pop(context);
                 Navigator.pop(context);
                 _fetchApi();
               } else if (state is CustomerSwitchFailed) {
@@ -137,7 +137,7 @@ class _CustomerScreenState extends State<CustomerScreen> {
                   ],
                 );
               } else if (state is CustomerAddFailed) {
-                Navigator.pop(context);
+                // Navigator.pop(context);
                 Navigator.pop(context);
                 _fetchApi();
                 appAlertDialog(
@@ -170,7 +170,6 @@ class _CustomerScreenState extends State<CustomerScreen> {
                               SizedBox(
                                 child: CustomerTableCard(
                                   customers: state.list,
-
                                 ),
                               ),
                               PaginationBar(
@@ -182,13 +181,12 @@ class _CustomerScreenState extends State<CustomerScreen> {
                                 to: state.to,
                                 onPageChanged: (page) => _fetchCustomerList(
                                   pageNumber: page,
-                                  pageSize: state.pageSize,
+                                  pageSize: state.pageSize, // Use current page size
                                 ),
-                                onPageSizeChanged: (newSize) =>
-                                    _fetchCustomerList(
-                                      pageNumber: 1,
-                                      pageSize: newSize,
-                                    ),
+                                onPageSizeChanged: (newSize) => _fetchCustomerList(
+                                  pageNumber: 1, // Reset to page 1 when changing page size
+                                  pageSize: newSize,
+                                ),
                               ),
                             ],
                           );
@@ -275,7 +273,7 @@ class _CustomerScreenState extends State<CustomerScreen> {
                 return Dialog(
                   child: SizedBox(
                     width: AppSizes.width(context) * 0.55,
-                    height: 280,
+                    // height: 400,
                     child: CreateCustomerScreen(),
                   ),
                 );

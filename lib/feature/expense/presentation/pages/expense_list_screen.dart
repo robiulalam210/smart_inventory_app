@@ -205,6 +205,7 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
               _fetchApi(); // Reload expense list
             } else if (state is ExpenseAddFailed) {
               Navigator.pop(context); // Close loader dialog
+              Navigator.pop(context); // Close loader dialog
               appAlertDialog(
                 context,
                 state.content,
@@ -319,7 +320,7 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
                         GestureDetector(
                           onTap: () {
                             _clearFilters();
-                            Navigator.of(context).pop();
+                            // Navigator.of(context).pop();
                           },
                           child: Text(
                             'Clear All',

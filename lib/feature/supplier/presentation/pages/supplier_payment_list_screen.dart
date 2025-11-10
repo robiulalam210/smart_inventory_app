@@ -1,9 +1,12 @@
+import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
+
 import '../../../../core/configs/configs.dart';
 import '../../../../core/shared/widgets/sideMenu/sidebar.dart';
 import '../../../../core/widgets/app_alert_dialog.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_loader.dart';
 import '../../../../core/widgets/coustom_search_text_field.dart';
+import '../../../../core/widgets/date_range.dart';
 import '../../../products/product/presentation/widget/pagination.dart';
 import '../bloc/supplier_payment/supplier_payment_bloc.dart';
 import '../widget/supplier_payment_widget.dart';
@@ -17,21 +20,19 @@ class SupplierPaymentScreen extends StatefulWidget {
 }
 
 class _SupplierPaymentScreenState extends State<SupplierPaymentScreen> {
-  ValueNotifier<DateTimeRange?> dateRange = ValueNotifier<DateTimeRange?>(
-    DateTimeRange(
-      start: DateTime(DateTime.now().year, DateTime.now().month - 1, 1),
-      end: DateTime.now(),
-    ),
-  );
+  // Use the correct type that CustomDateRangeField expects
+  DateRange? selectedDateRange;
 
-  ValueNotifier<String> selectedQuickOptionNotifier = ValueNotifier<String>("");
   final TextEditingController _searchController = TextEditingController();
-  final int _defaultPageSize = 30; // Define default page size
+  final int _defaultPageSize = 10;
 
   @override
   void initState() {
     super.initState();
-    _fetchApi(from: dateRange.value?.start, to: dateRange.value?.end);
+    _fetchApi(
+        from: selectedDateRange?.start,
+        to: selectedDateRange?.end
+    );
   }
 
   @override
@@ -44,8 +45,8 @@ class _SupplierPaymentScreenState extends State<SupplierPaymentScreen> {
     String filterText = '',
     DateTime? from,
     DateTime? to,
-    int pageNumber = 0,
-    int pageSize = 30, // Add pageSize parameter
+    int pageNumber = 1,
+    int pageSize = 10,
   }) {
     context.read<SupplierPaymentBloc>().add(
       FetchSupplierPaymentList(
@@ -54,18 +55,18 @@ class _SupplierPaymentScreenState extends State<SupplierPaymentScreen> {
         startDate: from,
         endDate: to,
         pageNumber: pageNumber,
-        pageSize: pageSize, // Pass pageSize
+        pageSize: pageSize,
       ),
     );
   }
 
-  void _fetchSupplierList({int pageNumber = 0, int? pageSize}) {
+  void _fetchSupplierList({int pageNumber = 1, int? pageSize}) {
     _fetchApi(
       filterText: _searchController.text,
-      from: dateRange.value?.start,
-      to: dateRange.value?.end,
+      from: selectedDateRange?.start,
+      to: selectedDateRange?.end,
       pageNumber: pageNumber,
-      pageSize: pageSize ?? _defaultPageSize, // Use provided pageSize or default
+      pageSize: pageSize ?? _defaultPageSize,
     );
   }
 
@@ -146,19 +147,19 @@ class _SupplierPaymentScreenState extends State<SupplierPaymentScreen> {
                 ),
               ),
               const SizedBox(width: 16),
-              // Date Filter - You can add this back if needed
-              // Expanded(
-              //   child: CustomFilterUI(
-              //     dateRange: dateRange,
-              //     selectedQuickOptionNotifier: selectedQuickOptionNotifier,
-              //     onDateRangeSelected: (range) {
-              //       dateRange.value = range;
-              //       if (range != null) {
-              //         _fetchApi(from: range.start, to: range.end);
-              //       }
-              //     },
-              //   ),
-              // ),
+              SizedBox(
+                width: 260,
+                child: CustomDateRangeField(
+                  isLabel: false,
+                  selectedDateRange: selectedDateRange,
+                  onDateRangeSelected: (value) {
+                    setState(() => selectedDateRange = value);
+                    if (value != null) {
+                      _fetchApi(from: value.start, to: value.end);
+                    }
+                  },
+                ),
+              ),
               const SizedBox(width: 16),
               AppButton(
                 name: "Create Payment",
@@ -190,13 +191,15 @@ class _SupplierPaymentScreenState extends State<SupplierPaymentScreen> {
           if (state is SupplierPaymentAddLoading) {
             appLoader(context, "Creating payment, please wait...");
           } else if (state is SupplierPaymentAddSuccess) {
-            Navigator.pop(context); // Close loader dialog
-            _fetchApi(); // Reload payment list
+            Navigator.pop(context);
+            Navigator.pop(context);
+            Navigator.pop(context);
+            _fetchApi();
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Payment created successfully')),
             );
           } else if (state is SupplierPaymentAddFailed) {
-            Navigator.pop(context); // Close loader dialog
+            Navigator.pop(context);
             appAlertDialog(
               context,
               state.content,
@@ -209,7 +212,7 @@ class _SupplierPaymentScreenState extends State<SupplierPaymentScreen> {
               ],
             );
           } else if (state is SupplierPaymentDeleteSuccess) {
-            _fetchApi(); // Reload payment list
+            _fetchApi();
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Payment deleted successfully')),
             );
@@ -301,7 +304,7 @@ class _SupplierPaymentScreenState extends State<SupplierPaymentScreen> {
 
   Widget _buildPagination(SupplierPaymentListSuccess state) {
     return PaginationBar(
-      count: state.count, // Use the actual count from state
+      count: state.count,
       totalPages: state.totalPages,
       currentPage: state.currentPage,
       pageSize: state.pageSize,
@@ -309,8 +312,7 @@ class _SupplierPaymentScreenState extends State<SupplierPaymentScreen> {
       to: state.to,
       onPageChanged: (page) => _fetchSupplierList(pageNumber: page),
       onPageSizeChanged: (newPageSize) {
-        // Reset to page 0 when page size changes
-        _fetchSupplierList(pageNumber: 0, pageSize: newPageSize);
+        _fetchSupplierList(pageNumber: 1, pageSize: newPageSize);
       },
     );
   }

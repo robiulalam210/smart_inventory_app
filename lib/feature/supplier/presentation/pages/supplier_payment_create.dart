@@ -77,7 +77,7 @@ class _MoneyReceiptListScreenState extends State<SupplierPaymentForm> {
                 Container(
                   padding:  EdgeInsets.symmetric(horizontal: 8,vertical: 4),
                   decoration: BoxDecoration(
-                    color: AppColors.whiteColor,
+                    color: AppColors.bg,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(

@@ -247,10 +247,10 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
         emit(CustomerAddFailed(title: '', content: response.message ?? ""));
         return;
       }
-      // clearData();
+      clearData();
       emit(CustomerAddSuccess());
     } catch (error) {
-      //     clearData();
+          clearData();
       emit(CustomerAddFailed(title: "Error", content: error.toString()));
     }
   }

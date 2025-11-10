@@ -305,10 +305,14 @@ class _SalesReturnScreenState extends State<SalesReturnScreen> {
                   );
                 },
                 onPageSizeChanged: (newSize) {
-                  // Handle page size change if needed
-                  _fetchSalesReturnList(pageNumber: 0);
+                  // Reset to page 1 when changing page size
+                  _fetchSalesReturnList(
+                    pageNumber: 1, // Changed from 0 to 1
+                    // pageSize: newSize,
+                    from: selectedDateRange?.start,
+                    to: selectedDateRange?.end,
+                  );
                 },
-
               ),
             ],
           );
