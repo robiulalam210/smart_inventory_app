@@ -19,6 +19,7 @@ class AccountModel {
   final dynamic? openingBalance;
   final int? company;
   final dynamic? status;
+  final String? acNo;
   final dynamic number;
 
   AccountModel({
@@ -32,6 +33,7 @@ class AccountModel {
     this.openingBalance,
     this.company,
     this.status,
+    this.acNo,
     this.number,
   });
 
@@ -46,6 +48,7 @@ class AccountModel {
     openingBalance: json["opening_balance"],
     company: json["company"],
     status: json["status"],
+    acNo: json["ac_no"],
     number: json["number"],
   );
 
@@ -60,6 +63,7 @@ class AccountModel {
     "opening_balance": openingBalance,
     "company": company,
     "status": status,
+    "ac_no": acNo,
     "number": number,
   };
 }
