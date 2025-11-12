@@ -24,7 +24,6 @@ void main() async {
     bool shouldMaximize = false;
 
     if (width <= 1366) {
-      print("maximize");
       // For small screens, maximize to use full available space
       windowSize = const Size(1350, 768); // Set to common small screen resolution
       minSize = const Size(900, 600);
