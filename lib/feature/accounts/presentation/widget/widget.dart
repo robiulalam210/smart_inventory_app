@@ -108,7 +108,7 @@ class AccountCard extends StatelessWidget {
                                 ? (_) => onAccountTap!()
                                 : null,
                             cells: [
-                              _buildDataCell('${entry.key + 1}', minColumnWidth * 0.6),
+                              _buildDataCell(account.acNo ?? "N/A", minColumnWidth * 1.2),
                               _buildDataCell(account.acName ?? "N/A", minColumnWidth * 1.2),
                               _buildDataCell(account.acType ?? "N/A", minColumnWidth),
                               _buildDataCell(account.acNumber ?? "-", minColumnWidth),

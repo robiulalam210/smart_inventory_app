@@ -1,3 +1,7 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_quill/flutter_quill.dart';
 import 'package:smart_inventory/feature/products/brand/data/model/brand_model.dart';
 import 'package:smart_inventory/feature/products/brand/presentation/bloc/brand/brand_bloc.dart';
 import 'package:smart_inventory/feature/products/categories/data/model/categories_model.dart';
@@ -59,8 +63,8 @@ class _ProductsFormState extends State<ProductsForm> {
       categoriesBloc = context.read<CategoriesBloc>();
       unitBloc = context.read<UnitBloc>();
       brandBloc = context.read<BrandBloc>();
-      groupsBloc = context.read<GroupsBloc>(); // <- initialize
-      sourceBloc = context.read<SourceBloc>(); // <- initialize
+      groupsBloc = context.read<GroupsBloc>();
+      sourceBloc = context.read<SourceBloc>();
       _initializeData();
       _isInitialized = true;
     }
@@ -90,6 +94,9 @@ class _ProductsFormState extends State<ProductsForm> {
     productsBloc.productSellingPriceController.text = "0";
     productsBloc.productOpeningStockController.text = "0";
     productsBloc.productAlertQuantityController.text = "5";
+    productsBloc.productDiscountValueController.text = "0";
+    productsBloc.selectedDiscountType = "fixed";
+    productsBloc.isDiscountApplied = false;
 
     categoriesBloc.selectedState = "";
     categoriesBloc.selectedStateId = "";
@@ -97,16 +104,22 @@ class _ProductsFormState extends State<ProductsForm> {
     unitBloc.selectedIdState = "";
     brandBloc.selectedState = "";
     brandBloc.selectedId = "";
+    groupsBloc.selectedState = "";
+    groupsBloc.selectedIdState = "";
+    sourceBloc.selectedState = "";
+    sourceBloc.selectedIdState = "";
   }
 
   void _prefillFormData(ProductModel product) {
     productsBloc.productNameController.text = product.name ?? "";
-    // productsBloc.productBarCodeController.text = product.barCode ?? "";
     productsBloc.productDescriptionController.text = product.description ?? "";
     productsBloc.productPurchasePriceController.text = product.purchasePrice?.toString() ?? "0";
     productsBloc.productSellingPriceController.text = product.sellingPrice?.toString() ?? "0";
     productsBloc.productOpeningStockController.text = product.openingStock?.toString() ?? "0";
     productsBloc.productAlertQuantityController.text = product.alertQuantity?.toString() ?? "5";
+    // productsBloc.productDiscountValueController.text = product.discountValue?.toString() ?? "0";
+    // productsBloc.selectedDiscountType = product.discountType ?? "fixed";
+    // productsBloc.isDiscountApplied = product.discountAppliedOn ?? false;
 
     // Set selected category, unit, brand if available
     if (product.categoryInfo?.name != null) {
@@ -123,6 +136,16 @@ class _ProductsFormState extends State<ProductsForm> {
       brandBloc.selectedState = product.brandInfo!.name!;
       brandBloc.selectedId = product.brandInfo!.id?.toString() ?? "";
     }
+
+    if (product.groupInfo?.name != null) {
+      groupsBloc.selectedState = product.groupInfo!.name!;
+      groupsBloc.selectedIdState = product.groupInfo!.id?.toString() ?? "";
+    }
+
+    if (product.sourceInfo?.name != null) {
+      sourceBloc.selectedState = product.sourceInfo!.name!;
+      sourceBloc.selectedIdState = product.sourceInfo!.id?.toString() ?? "";
+    }
   }
 
   @override
@@ -131,18 +154,14 @@ class _ProductsFormState extends State<ProductsForm> {
       return const Center(child: CircularProgressIndicator());
     }
 
-
-
     return SafeArea(child: _buildDialogContent());
   }
 
   Widget _buildDialogContent() {
     return Container(
-   
       decoration: BoxDecoration(
-        color: AppColors.bg,
-        
-        borderRadius: BorderRadius.circular(12)
+          color: AppColors.bg,
+          borderRadius: BorderRadius.circular(12)
       ),
       padding: const EdgeInsets.all(12),
       child: Column(
@@ -175,6 +194,7 @@ class _ProductsFormState extends State<ProductsForm> {
                   key: formKey,
                   child: Column(
                     children: [
+                      // First Row: Category and Unit
                       Row(
                         children: [
                           Expanded(child: _buildCategoryDropdown()),
@@ -182,22 +202,21 @@ class _ProductsFormState extends State<ProductsForm> {
                           Expanded(child: _buildUnitDropdown()),
                         ],
                       ),
-                      // _buildCategoryDropdown(),
-                      // const SizedBox(height: 8),
-                      // _buildProductNameField(),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 8),
 
+                      // Second Row: Groups, Brand, Source
                       Row(
                         children: [
                           Expanded(child: _buildGroupsDropdown()),
                           const SizedBox(width: 5),
                           Expanded(child: _buildBrandDropdown()),
-
                           const SizedBox(width: 5),
                           Expanded(child: _buildSourceDropdown()),
                         ],
                       ),
-                      // const SizedBox(height: 16),
+                      const SizedBox(height: 8),
+
+                      // Third Row: Product Name and Opening Stock
                       Row(
                         children: [
                           Expanded(child: _buildProductNameField()),
@@ -205,7 +224,10 @@ class _ProductsFormState extends State<ProductsForm> {
                           Expanded(child: _buildOpeningStockField()),
                         ],
                       ),
-                      const SizedBox(height: 8), Row(
+                      const SizedBox(height: 8),
+
+                      // Fourth Row: Purchase Price and Selling Price
+                      Row(
                         children: [
                           Expanded(child: _buildPurchasePriceField()),
                           const SizedBox(width: 10),
@@ -213,31 +235,61 @@ class _ProductsFormState extends State<ProductsForm> {
                         ],
                       ),
                       const SizedBox(height: 8),
+
+                      // Fifth Row: Discount Toggle
+                Row(children: [
+                  Expanded(child:     _buildDiscountAppliedToggle(),),
+                  const SizedBox(width: 8),
+                  Expanded(child:     BlocBuilder<ProductsBloc, ProductsState>(
+                    builder: (context, state) {
+                      return Visibility(
+                        visible: productsBloc.isDiscountApplied,
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: _buildDiscountValueField(),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: _buildDiscountTypeDropdown(),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),),
+                ],),
+
+                      // Sixth Row: Discount Value and Type
+
+                      const SizedBox(height: 8),
+
+                      // Seventh Row: Alert Quantity and Description
                       Row(
                         children: [
-                          // Expanded(child: _buildOpeningStockField()),
-                          // const SizedBox(width: 10),
                           Expanded(child: _buildAlertQuantityField()),
                           const SizedBox(width: 10),
                           Expanded(child: _buildDescriptionField()),
                         ],
                       ),
-                      const SizedBox(height: 8),
-
 
                       const SizedBox(height: 20),
+
+                      // Buttons Row
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                        SizedBox(
-                          width: 150,
-                          child: AppButton(
-                            name: _isEditMode ? "Update Product" : "Create Product",
-                            onPressed: _submitProduct,
+                          SizedBox(
+                            width: 150,
+                            child: AppButton(
+                              name: _isEditMode ? "Update Product" : "Create Product",
+                              onPressed: _submitProduct,
+                            ),
                           ),
-                        ),
-                        const SizedBox(width: 10),
+                          const SizedBox(width: 10),
                           SizedBox(
                             width: 150,
                             child: AppButton(
@@ -246,8 +298,8 @@ class _ProductsFormState extends State<ProductsForm> {
                               onPressed: () => Navigator.pop(context),
                             ),
                           ),
-                      ],),
-
+                        ],
+                      ),
                     ],
                   ),
                 ),
@@ -258,7 +310,6 @@ class _ProductsFormState extends State<ProductsForm> {
       ),
     );
   }
-
 
   void _handleProductState(ProductsState state) {
     if (state is ProductsAddLoading) {
@@ -279,12 +330,7 @@ class _ProductsFormState extends State<ProductsForm> {
         ),
       );
 
-      // Close dialog if in dialog mode
-      // if (widget.isDialog) {
-        Navigator.pop(context);
-      // } else {
-      //   context.read<DashboardBloc>().add(ChangeDashboardScreen(index: 7));
-      // }
+      Navigator.pop(context);
     } else if (state is ProductsAddFailed) {
       Navigator.pop(context);
       appAlertDialog(
@@ -301,9 +347,6 @@ class _ProductsFormState extends State<ProductsForm> {
     }
   }
 
-  // ... (Keep all the _build methods as they are: _buildCategoryDropdown, _buildUnitDropdown, etc.)
-  // These methods remain the same as in your original code
-
   Widget _buildCategoryDropdown() {
     return BlocBuilder<CategoriesBloc, CategoriesState>(
       builder: (context, state) {
@@ -312,7 +355,6 @@ class _ProductsFormState extends State<ProductsForm> {
 
         return AppDropdown(
           label: "Category",
-
           context: context,
           hint: selectedCategory.isEmpty ? "Select Category" : selectedCategory,
           isLabel: false,
@@ -376,6 +418,7 @@ class _ProductsFormState extends State<ProductsForm> {
       },
     );
   }
+
   Widget _buildGroupsDropdown() {
     return BlocBuilder<GroupsBloc, GroupsState>(
       builder: (context, state) {
@@ -402,7 +445,6 @@ class _ProductsFormState extends State<ProductsForm> {
               groupsBloc.selectedIdState = matchingUnit.id?.toString() ?? "";
             });
           },
-          // validator: (value) => value == null ? 'Please select Unit' : null,
           itemBuilder: (item) => DropdownMenuItem(
             value: item,
             child: Text(item.toString()),
@@ -411,6 +453,7 @@ class _ProductsFormState extends State<ProductsForm> {
       },
     );
   }
+
   Widget _buildSourceDropdown() {
     return BlocBuilder<SourceBloc, SourceState>(
       builder: (context, state) {
@@ -437,7 +480,6 @@ class _ProductsFormState extends State<ProductsForm> {
               sourceBloc.selectedIdState = matchingUnit.id?.toString() ?? "";
             });
           },
-          // validator: (value) => value == null ? 'Please select Source' : null,
           itemBuilder: (item) => DropdownMenuItem(
             value: item,
             child: Text(item.toString()),
@@ -547,8 +589,6 @@ class _ProductsFormState extends State<ProductsForm> {
     );
   }
 
-
-
   Widget _buildDescriptionField() {
     return CustomInputField(
       isRequiredLable: true,
@@ -561,13 +601,91 @@ class _ProductsFormState extends State<ProductsForm> {
     );
   }
 
-  Widget _buildSubmitButton() {
-    return Padding(
-      padding: const EdgeInsets.only(top: 20),
-      child: AppButton(
-        name: _isEditMode ? "Update Product" : "Create Product",
-        onPressed: _submitProduct,
+
+
+  Widget _buildDiscountAppliedToggle() {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 0),
+      decoration: BoxDecoration(
+        color: Colors.grey[50],
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.grey[300]!),
       ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.discount, color: Colors.orange),
+          const SizedBox(width: 8),
+          Text(
+            'Apply Discount',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: Colors.grey[700],
+            ),
+          ),
+          const SizedBox(width: 5),
+          BlocBuilder<ProductsBloc, ProductsState>(
+            builder: (context, state) {
+              return Switch(
+                padding: EdgeInsets.zero,
+                value: productsBloc.isDiscountApplied,
+                activeColor: Colors.orange,
+                onChanged: (value) {
+                  setState(() {
+                    productsBloc.isDiscountApplied = value;
+                  });
+                },
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDiscountValueField() {
+    return CustomInputField(
+      isRequiredLable: false,
+      isRequired: false,
+      controller: productsBloc.productDiscountValueController,
+      labelText: 'Discount Value',
+      hintText: '0.00',
+      fillColor: const Color.fromARGB(255, 255, 255, 255),
+      inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*'))],
+      keyboardType: TextInputType.number,
+      // prefixIcon: const Icon(Icons.discount, size: 20),
+    );
+  }
+
+  Widget _buildDiscountTypeDropdown() {
+    return BlocBuilder<ProductsBloc, ProductsState>(
+      builder: (context, state) {
+        return AppDropdown(
+          context: context,
+          label: "",
+
+          hint: "Type",
+          isLabel: true,
+          isNeedAll: false,
+          isRequired: false,
+          isSearch: false,
+          value: productsBloc.selectedDiscountType,
+          itemList: const ['fixed', 'percentage'],
+          onChanged: (newVal) {
+            setState(() {
+              productsBloc.selectedDiscountType = newVal.toString();
+            });
+          },
+          itemBuilder: (item) => DropdownMenuItem(
+            value: item,
+            child: Text(
+              item.toString().toUpperCase(),
+              style: const TextStyle(fontSize: 12),
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -595,30 +713,49 @@ class _ProductsFormState extends State<ProductsForm> {
     };
 
     // Add optional fields
-    if (sourceBloc.selectedId.isNotEmpty) {
-      body["source"] = sourceBloc.selectedId;
-    } if (groupsBloc.selectedId.isNotEmpty) {
-      body["groups"] = groupsBloc.selectedId;
-    } if (brandBloc.selectedId.isNotEmpty) {
+    if (sourceBloc.selectedIdState.isNotEmpty) {
+      body["source"] = sourceBloc.selectedIdState;
+    }
+    if (groupsBloc.selectedIdState.isNotEmpty) {
+      body["groups"] = groupsBloc.selectedIdState;
+    }
+    if (brandBloc.selectedId.isNotEmpty) {
       body["brand"] = brandBloc.selectedId;
     }
-    if (productsBloc.productSellingPriceController.text.isNotEmpty && productsBloc.productSellingPriceController.text != "0") {
+    if (productsBloc.productSellingPriceController.text.isNotEmpty &&
+        productsBloc.productSellingPriceController.text != "0") {
       body["selling_price"] = productsBloc.productSellingPriceController.text;
     }
-    if (productsBloc.productPurchasePriceController.text.isNotEmpty && productsBloc.productPurchasePriceController.text != "0") {
+    if (productsBloc.productPurchasePriceController.text.isNotEmpty &&
+        productsBloc.productPurchasePriceController.text != "0") {
       body["purchase_price"] = productsBloc.productPurchasePriceController.text;
     }
     if (productsBloc.productDescriptionController.text.isNotEmpty) {
       body["description"] = productsBloc.productDescriptionController.text;
     }
-    if (productsBloc.productOpeningStockController.text.isNotEmpty && productsBloc.productOpeningStockController.text != "0") {
+    if (productsBloc.productOpeningStockController.text.isNotEmpty &&
+        productsBloc.productOpeningStockController.text != "0") {
       body["opening_stock"] = productsBloc.productOpeningStockController.text;
     }
-    if (productsBloc.productAlertQuantityController.text.isNotEmpty && productsBloc.productAlertQuantityController.text != "5") {
+    if (productsBloc.productAlertQuantityController.text.isNotEmpty &&
+        productsBloc.productAlertQuantityController.text != "5") {
       body["alert_quantity"] = productsBloc.productAlertQuantityController.text;
     }
     if (productsBloc.productBarCodeController.text.isNotEmpty) {
       body["bar_code"] = productsBloc.productBarCodeController.text;
+    }
+
+    // Add discount fields
+    if (productsBloc.isDiscountApplied) {
+      if (productsBloc.productDiscountValueController.text.isNotEmpty &&
+          productsBloc.productDiscountValueController.text != "0") {
+        body["discount_value"] = productsBloc.productDiscountValueController.text;
+        body["discount_type"] = productsBloc.selectedDiscountType;
+        body["discount_applied_on"] = "true";
+      }
+    } else {
+      // Ensure discount is not applied
+      body["discount_applied_on"] = "false";
     }
 
     if (_isEditMode) {

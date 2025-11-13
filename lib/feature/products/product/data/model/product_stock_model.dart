@@ -35,7 +35,7 @@ class ProductModelStockModel {
   final dynamic groupInfo;
   final dynamic sourceInfo;
   final CreatedByInfo? createdByInfo;
-  final int? stockStatus;
+  final dynamic? stockStatus;
 
   ProductModelStockModel({
     this.id,

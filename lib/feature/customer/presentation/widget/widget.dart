@@ -91,7 +91,7 @@ class CustomerTableCard extends StatelessWidget {
                             return DataRow(
                               onSelectChanged: onCustomerTap != null ? (_) => onCustomerTap!() : null,
                               cells: [
-                                _buildDataCell('${entry.key + 1}', dynamicColumnWidth * 0.6),
+                                _buildDataCell('${customer.clientNo}', dynamicColumnWidth * 0.6),
                                 _buildDataCell(customer.name ?? "N/A", dynamicColumnWidth),
                                 _buildDataCell(customer.phone ?? "N/A", dynamicColumnWidth),
                                 _buildDataCell(customer.address ?? "N/A", dynamicColumnWidth),

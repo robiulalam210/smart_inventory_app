@@ -16,7 +16,9 @@ class ProductsBloc extends Bloc<ProductsEvent, ProductsState> {
   List<ProductModelStockModel> productList = [];
   String selectedState = "";
   List<String> statesList = ["Active", "Inactive"];
-
+  final TextEditingController productDiscountValueController = TextEditingController();
+  String selectedDiscountType = "fixed";
+  bool isDiscountApplied = false;
   TextEditingController productNameController = TextEditingController();
   TextEditingController productPurchasePriceController = TextEditingController(
     text: "0",
