@@ -103,6 +103,8 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
           } else if (state is CategoriesAddSuccess ||
               state is CategoriesSwitchSuccess ||
               state is CategoriesDeleteSuccess) {
+            context.read<CategoriesBloc>().nameController.clear();
+
             // Navigator.pop(context);
             if (state is CategoriesAddSuccess) Navigator.pop(context);
             _fetchApiData();
@@ -144,7 +146,6 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                         return Dialog(child: CategoriesCreate());
                       },
                     );
-
                   },
                 ),
               ],
@@ -161,7 +162,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                     if (state.list.isEmpty) {
                       return Center(child: Lottie.asset(AppImages.noData));
                     } else {
-                      return CategoriesTableCard(categories: state.list,);
+                      return CategoriesTableCard(categories: state.list);
                     }
                   } else if (state is CategoriesListFailed) {
                     return Center(

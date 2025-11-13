@@ -119,7 +119,7 @@ class _ExpenseCreateScreenState extends State<ExpenseCreateScreen> {
         // Changed from date
         "head": _selectedExpenseHead!.id.toString(),
         // Changed from expense_type_id
-        "payment_method": context.read<ExpenseBloc>().selectedPayment,
+        "payment_method": context.read<ExpenseBloc>().selectedPayment.toString().toLowerCase(),
         if (_selectedExpenseSubHead != null)
           "subhead": _selectedExpenseSubHead!.id.toString(),
         // Changed from expense_subhead_id

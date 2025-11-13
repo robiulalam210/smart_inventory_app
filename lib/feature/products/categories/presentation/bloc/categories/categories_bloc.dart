@@ -29,7 +29,7 @@ class CategoriesBloc extends Bloc<CategoriesEvent, CategoriesState> {
 
 
   TextEditingController nameController = TextEditingController();
-  TextEditingController shortNameController = TextEditingController();
+  // TextEditingController shortNameController = TextEditingController();
 
   CategoriesBloc() : super(CategoriesInitial()) {
     on<FetchCategoriesList >(_onFetchCategoriesList);
@@ -206,7 +206,7 @@ class CategoriesBloc extends Bloc<CategoriesEvent, CategoriesState> {
 
   clearData(){
     nameController.clear();
-    shortNameController.clear();
+    // shortNameController.clear();
   }
 
 }
