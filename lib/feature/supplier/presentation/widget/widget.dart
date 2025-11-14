@@ -22,8 +22,8 @@ class SupplierDataTableWidget extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final totalWidth = constraints.maxWidth ;
-        const numColumns = 11; // Added one column for actions
+        final totalWidth = constraints.maxWidth;
+        const numColumns = 11; // Keep same number of columns
         const minColumnWidth = 100.0;
 
         final dynamicColumnWidth = (totalWidth / numColumns).clamp(
@@ -67,7 +67,6 @@ class SupplierDataTableWidget extends StatelessWidget {
                             .toList(),
                         headingRowColor: WidgetStateProperty.all(
                             AppColors.primaryColor
-
                         ),
                         headingTextStyle: const TextStyle(
                           color: Colors.white,
@@ -92,46 +91,52 @@ class SupplierDataTableWidget extends StatelessWidget {
 
   List<DataColumn> _buildColumns(double columnWidth) {
     final columns = [
-      _DataColumnConfig("SL", columnWidth ),
-      _DataColumnConfig("Supplier No", columnWidth ),
-      _DataColumnConfig("Name", columnWidth ),
+      _DataColumnConfig("SL", columnWidth),
+      _DataColumnConfig("Supplier No", columnWidth),
+      _DataColumnConfig("Name", columnWidth),
       _DataColumnConfig("Phone", columnWidth),
-      _DataColumnConfig("Address", columnWidth ),
-      _DataColumnConfig("Total Purchases", columnWidth ),
-      _DataColumnConfig("Total Paid", columnWidth ),
-      _DataColumnConfig("Total Due", columnWidth ),
-      _DataColumnConfig("Status", columnWidth ),
+      _DataColumnConfig("Address", columnWidth),
+      _DataColumnConfig("Total Purchases", columnWidth),
+      _DataColumnConfig("Total Paid", columnWidth),
+      _DataColumnConfig("Total Due", columnWidth),
+      _DataColumnConfig("Advance Balance", columnWidth), // ✅ REPLACED Status with Advance Balance
       _DataColumnConfig("Actions", columnWidth),
     ];
 
     return columns
         .map(
           (col) => DataColumn(
-            label: Container(
-              width: col.width,
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              child: Text(
-                col.label,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12,
-                ),
-              ),
+        label: Container(
+          width: col.width,
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Text(
+            col.label,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 12,
             ),
           ),
-        )
+        ),
+      ),
+    )
         .toList();
   }
 
   DataRow _buildRow(int index, SupplierListModel supplier) {
-    Color getStatusColor(bool isActive) {
-      return isActive ? Colors.green : Colors.orange;
+    Color getAdvanceBalanceColor(String? advanceBalance) {
+      final balance = double.tryParse(advanceBalance ?? '0') ?? 0;
+      if (balance > 0) return Colors.green;
+      if (balance < 0) return Colors.red;
+      return Colors.grey;
     }
 
-    String getStatusText(bool isActive) {
-      return isActive ? 'Active' : 'Inactive';
+    String getAdvanceBalanceText(String? advanceBalance) {
+      final balance = double.tryParse(advanceBalance ?? '0') ?? 0;
+      if (balance > 0) return '${supplier.advanceBalance}';
+      if (balance < 0) return '${supplier.advanceBalance}';
+      return '0.00';
     }
 
     return DataRow(
@@ -144,23 +149,22 @@ class SupplierDataTableWidget extends StatelessWidget {
         _buildDataCell(supplier.totalPurchases.toString(), TextAlign.right),
         _buildDataCell(supplier.totalPaid.toString(), TextAlign.right),
         _buildDataCell(supplier.totalDue.toString(), TextAlign.right),
+        // ✅ REPLACED: Status with Advance Balance
         DataCell(
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: getStatusColor(
-                supplier.isActive ?? false,
-              ).withValues(alpha: 0.1),
+              color: getAdvanceBalanceColor(supplier.advanceBalance).withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: getStatusColor(supplier.isActive ?? false),
+                color: getAdvanceBalanceColor(supplier.advanceBalance),
               ),
             ),
             child: Text(
-              getStatusText(supplier.isActive ?? false),
+              getAdvanceBalanceText(supplier.advanceBalance),
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: getStatusColor(supplier.isActive ?? false),
+                color: getAdvanceBalanceColor(supplier.advanceBalance),
                 fontWeight: FontWeight.w500,
                 fontSize: 11,
               ),

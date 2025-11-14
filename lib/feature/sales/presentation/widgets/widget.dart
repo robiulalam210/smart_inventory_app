@@ -1,4 +1,3 @@
-
 import '../../../../core/configs/configs.dart';
 import '../../data/models/pos_sale_model.dart';
 
@@ -90,8 +89,9 @@ class PosSaleDataTableWidget extends StatelessWidget {
       "Sales By",
       "Created By",
       "Grand Total",
-      "Due",
-
+      "Paid Amount",
+      "Due/Advance", // CHANGED: More descriptive column name
+      "Status",
     ];
 
     return labels
@@ -118,6 +118,24 @@ class PosSaleDataTableWidget extends StatelessWidget {
   }
 
   DataRow _buildDataRow(int index, PosSaleModel sale, double columnWidth) {
+    // FIX: Calculate proper due/advance display
+    final dueAmount = sale.dueAmount is String
+        ? double.tryParse(sale.dueAmount!) ?? 0.0
+        : (sale.dueAmount ?? 0.0).toDouble();
+
+    final paidAmount = sale.paidAmount is String
+        ? double.tryParse(sale.paidAmount!) ?? 0.0
+        : (sale.paidAmount ?? 0.0).toDouble();
+
+    final payableAmount = sale.payableAmount is String
+        ? double.tryParse(sale.payableAmount!) ?? 0.0
+        : (sale.payableAmount ?? 0.0).toDouble();
+
+    // Determine if it's due or advance
+    final isAdvance = dueAmount < 0;
+    final displayAmount = isAdvance ? dueAmount.abs() : dueAmount;
+    final status = _getPaymentStatus(paidAmount, payableAmount);
+
     return DataRow(
       cells: [
         _buildDataCell(index.toString(), columnWidth),
@@ -129,20 +147,59 @@ class PosSaleDataTableWidget extends StatelessWidget {
         _buildDataCell(sale.customerName.toString(), columnWidth),
         _buildDataCell(sale.saleByName.toString(), columnWidth),
         _buildDataCell(sale.createdByName.toString(), columnWidth),
-
-        _buildDataCell(sale.payableAmount.toString(), columnWidth),
-
         _buildDataCell(
-          sale.dueAmount.toString(),
+          _formatCurrency(payableAmount),
           columnWidth,
-          isDue: true,
         ),
-
+        _buildDataCell(
+          _formatCurrency(paidAmount),
+          columnWidth,
+        ),
+        // FIXED: Due/Advance column
+        _buildDataCell(
+          isAdvance
+              ? _formatCurrency(displayAmount)
+              : _formatCurrency(displayAmount),
+          columnWidth,
+          isDue: !isAdvance && dueAmount > 0,
+          isAdvance: isAdvance,
+        ),
+        _buildDataCell(status, columnWidth, status: status),
       ],
     );
   }
 
-  DataCell _buildDataCell(String text, double width, {bool isDue = false}) {
+  DataCell _buildDataCell(
+      String text,
+      double width, {
+        bool isDue = false,
+        bool isAdvance = false,
+        String status = '',
+      }) {
+    Color textColor = Colors.black;
+
+    // Set colors based on status
+    if (isDue) {
+      textColor = Colors.red; // Due amount in red
+    } else if (isAdvance) {
+      textColor = Colors.green; // Advance amount in green
+    } else if (status.isNotEmpty) {
+      // Status color coding
+      switch (status.toLowerCase()) {
+        case 'paid':
+          textColor = Colors.green;
+          break;
+        case 'partial':
+          textColor = Colors.orange;
+          break;
+        case 'pending':
+          textColor = Colors.red;
+          break;
+        default:
+          textColor = Colors.black;
+      }
+    }
+
     return DataCell(
       SizedBox(
         width: width,
@@ -151,13 +208,27 @@ class PosSaleDataTableWidget extends StatelessWidget {
           style: TextStyle(
             fontSize: 10,
             fontWeight: FontWeight.w500,
-            color: isDue && (double.tryParse(text) ?? 0) > 0
-                ? Colors.red
-                : Colors.black,
+            color: textColor,
           ),
           textAlign: TextAlign.center,
         ),
       ),
     );
+  }
+
+  // Helper method to format currency
+  String _formatCurrency(double amount) {
+    return '৳${amount.toStringAsFixed(2)}';
+  }
+
+  // Helper method to determine payment status
+  String _getPaymentStatus(double paidAmount, double payableAmount) {
+    if (paidAmount >= payableAmount) {
+      return 'Paid';
+    } else if (paidAmount > 0) {
+      return 'Partial';
+    } else {
+      return 'Pending';
+    }
   }
 }
