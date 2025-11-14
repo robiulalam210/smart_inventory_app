@@ -40,7 +40,7 @@ class AppDropdown<T> extends FormField<T> {
         decoration: BoxDecoration(
             borderRadius: BorderRadius.all(Radius.circular(2))
         ),
-        height: isLabel == true ? 55 : 70,
+        height: isLabel == true ? 55 : 72,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

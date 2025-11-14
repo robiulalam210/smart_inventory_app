@@ -214,31 +214,24 @@ productList=list;
       emit(ProductsAddFailed(title: "Error", content: error.toString()));
     }
   }
-
   Future<void> _onUpdateProductList(
-    UpdateProducts event,
-    Emitter<ProductsState> emit,
-  ) async {
+      UpdateProducts event,
+      Emitter<ProductsState> emit,
+      ) async {
     emit(ProductsAddLoading());
 
     try {
       final res = await patchResponse(
         payload: event.body!,
         url: "${AppUrls.product}${event.id}/",
-
-        // photoPath: event.photoPath!
-      ); // Use the correct API URL
-      final jsonString = jsonEncode(res);
-
-      ApiResponse response = appParseJson(
-        jsonString,
-        (data) =>
-            List<ProductModel>.from(data.map((x) => ProductModel.fromJson(x))),
       );
-      if (response.success == false) {
-        emit(ProductsAddFailed(title: '', content: response.message ?? ""));
-        return;
-      }
+
+      // সরাসরি single Product parse
+      ProductModel updatedProduct = ProductModel.fromJson(res['data']);
+
+      // যদি আপনার App needs List<ProductModel>, তাহলে wrap করতে পারেন
+      // List<ProductModel> updatedList = [updatedProduct];
+
       clearData();
       emit(ProductsAddSuccess());
     } catch (error) {
@@ -246,6 +239,38 @@ productList=list;
       emit(ProductsAddFailed(title: "Error", content: error.toString()));
     }
   }
+
+  // Future<void> _onUpdateProductList(
+  //   UpdateProducts event,
+  //   Emitter<ProductsState> emit,
+  // ) async {
+  //   emit(ProductsAddLoading());
+  //
+  //   try {
+  //     final res = await patchResponse(
+  //       payload: event.body!,
+  //       url: "${AppUrls.product}${event.id}/",
+  //
+  //       // photoPath: event.photoPath!
+  //     ); // Use the correct API URL
+  //     final jsonString = jsonEncode(res);
+  //
+  //     ApiResponse response = appParseJson(
+  //       jsonString,
+  //       (data) =>
+  //           List<ProductModel>.from(data.map((x) => ProductModel.fromJson(x))),
+  //     );
+  //     if (response.success == false) {
+  //       emit(ProductsAddFailed(title: '', content: response.message ?? ""));
+  //       return;
+  //     }
+  //     clearData();
+  //     emit(ProductsAddSuccess());
+  //   } catch (error) {
+  //     clearData();
+  //     emit(ProductsAddFailed(title: "Error", content: error.toString()));
+  //   }
+  // }
 
   clearData() {
     productNameController.clear();

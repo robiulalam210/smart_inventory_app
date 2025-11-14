@@ -1,7 +1,9 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_quill/flutter_quill.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:smart_inventory/feature/products/brand/data/model/brand_model.dart';
 import 'package:smart_inventory/feature/products/brand/presentation/bloc/brand/brand_bloc.dart';
 import 'package:smart_inventory/feature/products/categories/data/model/categories_model.dart';
@@ -117,10 +119,12 @@ class _ProductsFormState extends State<ProductsForm> {
     productsBloc.productSellingPriceController.text = product.sellingPrice?.toString() ?? "0";
     productsBloc.productOpeningStockController.text = product.openingStock?.toString() ?? "0";
     productsBloc.productAlertQuantityController.text = product.alertQuantity?.toString() ?? "5";
-    // productsBloc.productDiscountValueController.text = product.discountValue?.toString() ?? "0";
-    // productsBloc.selectedDiscountType = product.discountType ?? "fixed";
-    // productsBloc.isDiscountApplied = product.discountAppliedOn ?? false;
+    productsBloc.productDiscountValueController.text = product.discountValue?.toString() ?? "0";
+    productsBloc.selectedDiscountType = product.discountType ?? "fixed";
+    productsBloc.isDiscountApplied = product.discountApplied ?? false;
 
+    print(product.discountApplied);
+    print(productsBloc.isDiscountApplied);
     // Set selected category, unit, brand if available
     if (product.categoryInfo?.name != null) {
       categoriesBloc.selectedState = product.categoryInfo!.name!;
@@ -245,8 +249,8 @@ class _ProductsFormState extends State<ProductsForm> {
                       return Visibility(
                         visible: productsBloc.isDiscountApplied,
                         child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          mainAxisAlignment: MainAxisAlignment.end,
                           children: [
                             Expanded(
                               child: _buildDiscountValueField(),
@@ -661,30 +665,69 @@ class _ProductsFormState extends State<ProductsForm> {
   Widget _buildDiscountTypeDropdown() {
     return BlocBuilder<ProductsBloc, ProductsState>(
       builder: (context, state) {
-        return AppDropdown(
-          context: context,
-          label: "",
-
-          hint: "Type",
-          isLabel: true,
-          isNeedAll: false,
-          isRequired: false,
-          isSearch: false,
-          value: productsBloc.selectedDiscountType,
-          itemList: const ['fixed', 'percentage'],
-          onChanged: (newVal) {
-            setState(() {
-              productsBloc.selectedDiscountType = newVal.toString();
-            });
-          },
-          itemBuilder: (item) => DropdownMenuItem(
-            value: item,
-            child: Text(
-              item.toString().toUpperCase(),
-              style: const TextStyle(fontSize: 12),
-            ),
+        return SizedBox(
+          child: BlocBuilder<ProductsBloc, ProductsState>(
+            builder: (context, state) {
+              return CupertinoSegmentedControl<String>(
+                padding: EdgeInsets.zero,
+                children: {
+                  'fixed': Text(
+                    'TK',
+                    style: TextStyle(
+                      fontFamily: GoogleFonts.playfairDisplay().fontFamily,
+                      color: productsBloc.selectedDiscountType == 'fixed'
+                          ? Colors.white
+                          : Colors.black,
+                    ),
+                  ),
+                  'percentage': Text(
+                    '%',
+                    style: TextStyle(
+                      fontFamily: GoogleFonts.playfairDisplay().fontFamily,
+                      color: productsBloc.selectedDiscountType == 'percentage'
+                          ? Colors.white
+                          : Colors.black,
+                    ),
+                  ),
+                },
+                onValueChanged: (val) {
+                  setState(() {
+                    productsBloc.selectedDiscountType = val;
+                  });
+                },
+                groupValue: productsBloc.selectedDiscountType,
+                unselectedColor: Colors.grey[300],
+                selectedColor: AppColors.primaryColor,
+                borderColor: AppColors.primaryColor,
+              );
+            },
           ),
         );
+
+        // return AppDropdown(
+        //   context: context,
+        //   label: "",
+        //
+        //   hint: "Type",
+        //   isLabel: true,
+        //   isNeedAll: false,
+        //   isRequired: false,
+        //   isSearch: false,
+        //   value: productsBloc.selectedDiscountType,
+        //   itemList: const ['fixed', 'percentage'],
+        //   onChanged: (newVal) {
+        //     setState(() {
+        //       productsBloc.selectedDiscountType = newVal.toString();
+        //     });
+        //   },
+        //   itemBuilder: (item) => DropdownMenuItem(
+        //     value: item,
+        //     child: Text(
+        //       item.toString().toUpperCase(),
+        //       style: const TextStyle(fontSize: 12),
+        //     ),
+        //   ),
+        // );
       },
     );
   }
