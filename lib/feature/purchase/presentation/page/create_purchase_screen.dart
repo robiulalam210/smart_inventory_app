@@ -524,7 +524,7 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                                 enabledBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(5),
                                   borderSide: BorderSide(
-                                    color: AppColors.primaryColor.withOpacity(
+                                    color: AppColors.primaryColor.withValues(alpha:
                                       0.5,
                                     ),
                                     width: 0.5,
@@ -909,10 +909,9 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                               "Overall Discount",
                               style: AppTextStyle.cardLevelText(context),
                             ),
-                            const SizedBox(height: 4),
                             Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              mainAxisAlignment: MainAxisAlignment.end,
                               children: [
                                 Expanded(
                                   child: CupertinoSegmentedControl<String>(
@@ -1004,10 +1003,9 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                               "Service Charge",
                               style: AppTextStyle.cardLevelText(context),
                             ),
-                            const SizedBox(height: 4),
                             Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              mainAxisAlignment: MainAxisAlignment.end,
                               children: [
                                 Expanded(
                                   child: CupertinoSegmentedControl<String>(
@@ -1101,10 +1099,9 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                               "Delivery Charge",
                               style: AppTextStyle.cardLevelText(context),
                             ),
-                            const SizedBox(height: 4),
                             Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              mainAxisAlignment: MainAxisAlignment.end,
                               children: [
                                 Expanded(
                                   child: CupertinoSegmentedControl<String>(
@@ -1160,7 +1157,8 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                                   ),
                                 ),
                                 const SizedBox(width: 8),
-                                Expanded(
+                                SizedBox(
+                                  width: 120,
                                   child: CustomInputField(
                                     controller: context
                                         .read<CreatePurchaseBloc>()
@@ -1389,7 +1387,6 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const SizedBox(height: 10),
                             CheckboxListTile(
                               title: Text(
                                 "Instant Pay",
@@ -1570,11 +1567,11 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
         Row(
           children: [
             const SizedBox(width: 10),
-            AppButton(
-              name: 'Preview',
-              onPressed: () async {},
-              color: const Color(0xff800000),
-            ),
+            // AppButton(
+            //   name: 'Preview',
+            //   onPressed: () async {},
+            //   color: const Color(0xff800000),
+            // ),
             const SizedBox(width: 10),
             AppButton(name: 'Submit', onPressed: _submitForm),
             const SizedBox(width: 5),

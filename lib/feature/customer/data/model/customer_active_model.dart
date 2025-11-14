@@ -43,11 +43,19 @@ class CustomerActiveModel {
     this.createdBy,
   });
 
+
   @override
-  String toString() {
-    // TODO: implement toString
-    return name??'';
-  }
+  String toString() => name??"";
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+          other is CustomerActiveModel &&
+              runtimeType == other.runtimeType &&
+              id == other.id;
+
+  @override
+  int get hashCode => id.hashCode;
   factory CustomerActiveModel.fromJson(Map<String, dynamic> json) => CustomerActiveModel(
     id: json["id"],
     name: json["name"],

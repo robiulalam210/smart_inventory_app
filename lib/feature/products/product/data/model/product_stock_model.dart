@@ -37,6 +37,12 @@ class ProductModelStockModel {
   final CreatedByInfo? createdByInfo;
   final dynamic? stockStatus;
 
+  // --- Discount Fields ---
+  final bool? discountApplied;
+  final String? discountType;
+  final String? discountValue;
+  final double? finalPrice;
+
   ProductModelStockModel({
     this.id,
     this.company,
@@ -65,6 +71,10 @@ class ProductModelStockModel {
     this.sourceInfo,
     this.createdByInfo,
     this.stockStatus,
+    this.discountApplied,
+    this.discountType,
+    this.discountValue,
+    this.finalPrice,
   });
 
   @override
@@ -72,35 +82,52 @@ class ProductModelStockModel {
     // TODO: implement toString
     return name??"";
   }
-  factory ProductModelStockModel.fromJson(Map<String, dynamic> json) => ProductModelStockModel(
-    id: json["id"],
-    company: json["company"],
-    createdBy: json["created_by"],
-    name: json["name"],
-    sku: json["sku"],
-    category: json["category"],
-    unit: json["unit"],
-    brand: json["brand"],
-    group: json["group"],
-    source: json["source"],
-    purchasePrice: json["purchase_price"],
-    sellingPrice: json["selling_price"],
-    openingStock: json["opening_stock"],
-    stockQty: json["stock_qty"],
-    alertQuantity: json["alert_quantity"],
-    description: json["description"],
-    image: json["image"],
-    isActive: json["is_active"],
-    createdAt: json["created_at"] == null ? null : DateTime.parse(json["created_at"]),
-    updatedAt: json["updated_at"] == null ? null : DateTime.parse(json["updated_at"]),
-    categoryInfo: json["category_info"] == null ? null : Info.fromJson(json["category_info"]),
-    unitInfo: json["unit_info"] == null ? null : Info.fromJson(json["unit_info"]),
-    brandInfo: json["brand_info"],
-    groupInfo: json["group_info"],
-    sourceInfo: json["source_info"],
-    createdByInfo: json["created_by_info"] == null ? null : CreatedByInfo.fromJson(json["created_by_info"]),
-    stockStatus: json["stock_status"],
-  );
+  factory ProductModelStockModel.fromJson(Map<String, dynamic> json) =>
+      ProductModelStockModel(
+        id: json["id"],
+        company: json["company"],
+        createdBy: json["created_by"],
+        name: json["name"],
+        sku: json["sku"],
+        category: json["category"],
+        unit: json["unit"],
+        brand: json["brand"],
+        group: json["group"],
+        source: json["source"],
+        purchasePrice: json["purchase_price"],
+        sellingPrice: json["selling_price"],
+        openingStock: json["opening_stock"],
+        stockQty: json["stock_qty"],
+        alertQuantity: json["alert_quantity"],
+        description: json["description"],
+        image: json["image"],
+        isActive: json["is_active"],
+        createdAt: json["created_at"] == null
+            ? null
+            : DateTime.parse(json["created_at"]),
+        updatedAt: json["updated_at"] == null
+            ? null
+            : DateTime.parse(json["updated_at"]),
+        categoryInfo: json["category_info"] == null
+            ? null
+            : Info.fromJson(json["category_info"]),
+        unitInfo: json["unit_info"] == null
+            ? null
+            : Info.fromJson(json["unit_info"]),
+        brandInfo: json["brand_info"],
+        groupInfo: json["group_info"],
+        sourceInfo: json["source_info"],
+        createdByInfo: json["created_by_info"] == null
+            ? null
+            : CreatedByInfo.fromJson(json["created_by_info"]),
+        stockStatus: json["stock_status"],
+
+        // --- Discount ---
+        discountApplied: json["discount_applied"],
+        discountType: json["discount_type"],
+        discountValue: json["discount_value"],
+        finalPrice: json["final_price"]?.toDouble(),
+      );
 
   Map<String, dynamic> toJson() => {
     "id": id,
@@ -130,6 +157,12 @@ class ProductModelStockModel {
     "source_info": sourceInfo,
     "created_by_info": createdByInfo?.toJson(),
     "stock_status": stockStatus,
+
+    // --- Discount ---
+    "discount_applied": discountApplied,
+    "discount_type": discountType,
+    "discount_value": discountValue,
+    "final_price": finalPrice,
   };
 }
 

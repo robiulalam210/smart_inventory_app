@@ -16,7 +16,11 @@ part 'create_pos_sale_state.dart';
 class CreatePosSaleBloc extends Bloc<CreatePosSaleEvent, CreatePosSaleState> {
   var customType = "Saved Customer";
   List customTypeList = ["Saved Customer", "Walk In Customer"];
-  CustomerActiveModel? selectClintModel;
+  CustomerActiveModel? selectClintModel = CustomerActiveModel(
+    name: 'Walk-in-customer',
+    id: -1,
+  );
+
   UsersListModel? selectSalesModel;
   AccountActiveModel? accountModel;
   String selectedAccount = "";

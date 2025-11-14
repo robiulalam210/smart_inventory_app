@@ -13,6 +13,7 @@ Future<Map<String, dynamic>> patchResponse({
   Uri uriUrl = Uri.parse(url);
   final token = await LocalDB.getLoginInfo();
   logger.i("patchResponse uriUrl: $uriUrl");
+  logger.i("payload: $payload");
 
   final Map<String, String> header = {
     "Content-Type": "application/json",
