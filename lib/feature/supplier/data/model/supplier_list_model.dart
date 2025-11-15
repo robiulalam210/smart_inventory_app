@@ -20,6 +20,7 @@ class SupplierListModel {
   final String? totalPaid;
   final String? totalPurchases;
   final int? purchaseCount;
+  final String? advanceBalance;
   final String? amountType;
   final int? company;
   final int? createdBy;
@@ -38,6 +39,7 @@ class SupplierListModel {
     this.totalPaid,
     this.totalPurchases,
     this.purchaseCount,
+    this.advanceBalance,
     this.amountType,
     this.company,
     this.createdBy,
@@ -45,11 +47,6 @@ class SupplierListModel {
     this.updatedAt,
   });
 
-  @override
-  String toString() {
-    // TODO: implement toString
-    return name??"";
-  }
   factory SupplierListModel.fromJson(Map<String, dynamic> json) => SupplierListModel(
     id: json["id"],
     name: json["name"],
@@ -62,6 +59,7 @@ class SupplierListModel {
     totalPaid: json["total_paid"],
     totalPurchases: json["total_purchases"],
     purchaseCount: json["purchase_count"],
+    advanceBalance: json["advance_balance"],
     amountType: json["amount_type"],
     company: json["company"],
     createdBy: json["created_by"],
@@ -81,6 +79,7 @@ class SupplierListModel {
     "total_paid": totalPaid,
     "total_purchases": totalPurchases,
     "purchase_count": purchaseCount,
+    "advance_balance": advanceBalance,
     "amount_type": amountType,
     "company": company,
     "created_by": createdBy,

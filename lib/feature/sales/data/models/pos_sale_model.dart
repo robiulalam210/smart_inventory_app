@@ -73,6 +73,11 @@ class PosSaleModel {
     this.items,
   });
 
+  @override
+  String toString() {
+    // TODO: implement toString
+    return invoiceNo??'';
+  }
   factory PosSaleModel.fromJson(Map<String, dynamic> json) => PosSaleModel(
     id: json["id"],
     invoiceNo: json["invoice_no"],

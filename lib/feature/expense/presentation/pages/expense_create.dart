@@ -108,27 +108,40 @@ class _ExpenseCreateScreenState extends State<ExpenseCreateScreen> {
         return;
       }
 
+      // Complete the payment method mapping function
+      String mapPaymentMethodToBackend(String frontendValue) {
+        final mapping = {
+          "Cash": "cash",
+          "Bank": "bank",
+          "Mobile banking": "mobile",
+          "Card": "card",
+          "Other": "other",
+        };
+        return mapping[frontendValue] ?? "cash"; // Added default value
+      }
+
+      // Get the mapped payment method
+      final String backendPaymentMethod = mapPaymentMethodToBackend(
+          context.read<ExpenseBloc>().selectedPayment
+      );
+
       final Map<String, dynamic> body = {
         "account": context.read<ExpenseBloc>().selectedAccountId,
-        // Changed from account_id
         "amount": context.read<ExpenseBloc>().amountTextController.text,
         "expense_date": context
             .read<ExpenseBloc>()
             .dateExpenseTextController
             .text,
-        // Changed from date
         "head": _selectedExpenseHead!.id.toString(),
-        // Changed from expense_type_id
-        "payment_method": context.read<ExpenseBloc>().selectedPayment.toString().toLowerCase(),
+        "payment_method": backendPaymentMethod, // Use the mapped value
         if (_selectedExpenseSubHead != null)
           "subhead": _selectedExpenseSubHead!.id.toString(),
-        // Changed from expense_subhead_id
         if (context.read<ExpenseBloc>().noteTextController.text.isNotEmpty)
           "note": context.read<ExpenseBloc>().noteTextController.text,
-        // Changed from description
       };
 
       // Debug log to see the actual request body
+      print('Submitting expense with body: $body');
 
       if (widget.id == null) {
         // Create new expense
@@ -141,7 +154,6 @@ class _ExpenseCreateScreenState extends State<ExpenseCreateScreen> {
       }
     }
   }
-
   void _onExpenseHeadChanged(ExpenseHeadModel? newHead) {
     setState(() {
       _selectedExpenseHead = newHead;

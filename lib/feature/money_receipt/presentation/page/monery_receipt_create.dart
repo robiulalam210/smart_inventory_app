@@ -416,6 +416,13 @@ class _MoneyReceiptListScreenState extends State<MoneyReceiptForm> {
                                                     onChanged: (newVal) {
                                                       selectPosSaleModel.value =
                                                           newVal;
+                                                      if (newVal != null) {
+                                                        moneyBloc
+                                                            .amountController
+                                                            .text = newVal
+                                                            .dueAmount
+                                                            .toString();
+                                                      }
                                                       setState(() {});
                                                     },
                                                     validator: (value) {
@@ -649,7 +656,8 @@ class _MoneyReceiptListScreenState extends State<MoneyReceiptForm> {
                                     },
                                     onChanged: (value) {
                                       setState(() {});
-                                    }, textInputAction: TextInputAction.done,
+                                    },
+                                    textInputAction: TextInputAction.done,
                                   ),
                                 ),
                               ),
@@ -660,7 +668,6 @@ class _MoneyReceiptListScreenState extends State<MoneyReceiptForm> {
                                 lg: 3,
                                 xl: 3,
                                 child: AppTextField(
-
                                   isRequired: false,
                                   controller: moneyBloc.remarkController,
                                   hintText: 'Remark',

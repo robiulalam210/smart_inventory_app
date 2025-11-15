@@ -1375,23 +1375,43 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
       } else {
         body['customer_id'] = selectedCustomer?.id.toString() ?? '';
       }
+
+
       if (isWalkInCustomer) {
-        appSnackBar(
-          context,
-          "Walk-in customer: Full payment required. No due allowed.",
-          color: Colors.blueAccent,
-        );
-      }else{
+        // For walk-in customers, ensure full payment
+        final netTotal = calculateAllFinalTotal();
+        final paidAmount = double.tryParse(bloc.payableAmount.text.trim()) ?? 0;
+
+        if (paidAmount < netTotal) {
+          appSnackBar(
+            context,
+            "Walk-in customer: Full payment required. No due allowed.",
+            color: Colors.blueAccent,
+          );
+          return; // Don't proceed with submission
+        }
+
         if (_isChecked == true) {
           body['payment_method'] = bloc.selectedPaymentMethod;
           body['account_id'] = bloc.accountModel?.acId.toString() ?? '';
 
-          // if (calculateAllFinalTotal() <= double.parse(bloc.payableAmount.text)) {
+          //
           bloc.add(AddPosSale(body: body));
-          // } else {
-          //   appSnackBar(context, "Payable amount must be greater than or equal to net total", color: Colors.redAccent);
-          // }
-        } else {
+
+        } else if (_isChecked == false) {
+          bloc.add(AddPosSale(body: body));
+        }
+      }
+
+        else{
+        if (_isChecked == true) {
+          body['payment_method'] = bloc.selectedPaymentMethod;
+          body['account_id'] = bloc.accountModel?.acId.toString() ?? '';
+
+          //
+          bloc.add(AddPosSale(body: body));
+
+        } else if (_isChecked == false) {
           bloc.add(AddPosSale(body: body));
         }
       }

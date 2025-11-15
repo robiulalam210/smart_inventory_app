@@ -52,6 +52,7 @@ class _MoneyReceiptListScreenState extends State<SupplierPaymentForm> {
           // AppRoutes.pushReplacement(context, const PaymentListSupplier());
         } else if (state is SupplierPaymentAddFailed) {
           Navigator.pop(context); // Close loader dialog
+          Navigator.pop(context); // Close loader dialog
           appAlertDialog(
             context,
             state.content,
