@@ -1,7 +1,5 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'core/core.dart';
-import 'core/shared/widgets/sideMenu/sidebar.dart';
 import 'core/shared/widgets/sideMenu/tab_sidebar.dart';
 import 'feature/feature.dart';
 import 'feature/splash/presentation/bloc/connectivity_bloc/connectivity_state.dart';

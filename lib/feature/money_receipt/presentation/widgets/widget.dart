@@ -1,6 +1,5 @@
 import '../../../../core/configs/configs.dart';
 import '../../data/model/money_receipt_model/money_receipt_model.dart';
-import 'package:flutter/material.dart';
 
 class MoneyReceiptDataTableWidget extends StatelessWidget {
   final List<MoneyreceiptModel> sales;

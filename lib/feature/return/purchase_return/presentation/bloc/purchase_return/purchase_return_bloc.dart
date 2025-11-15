@@ -66,9 +66,7 @@ class PurchaseReturnBloc extends Bloc<PurchaseReturnEvent, PurchaseReturnState> 
           content: res['message'] ?? "Failed to create purchase return",
         ));
       }
-    } catch (error,s) {
-      print(error);
-      print(s);
+    } catch (error) {
       emit(PurchaseReturnError(
         title: "Error",
         content: "Failed to create purchase return: ${error.toString()}",
@@ -242,87 +240,65 @@ class PurchaseReturnBloc extends Bloc<PurchaseReturnEvent, PurchaseReturnState> 
     emit(PurchaseInvoiceListLoading());
 
     try {
-      print("🔄 Starting to fetch purchase invoice list from: ${AppUrls.purchaseInvoice+event.id}");
 
       final responseString = await getResponse(
           url: AppUrls.purchaseInvoice+event.id,
           context: event.context
       );
 
-      print("✅ Raw response received: $responseString");
 
       final Map<String, dynamic> res = jsonDecode(responseString);
-      print("✅ JSON decoded successfully");
-      print("✅ Response status: ${res['status']}");
-      print("✅ Response message: ${res['message']}");
 
       if (res['status'] == true) {
-        print("✅ Status is true, processing data...");
 
         // Check if data exists and is a List
         if (res['data'] != null) {
-          print("✅ Data field exists, type: ${res['data'].runtimeType}");
 
           // Handle different data structures
           List<dynamic> dataList = [];
 
           if (res['data'] is List) {
             dataList = res['data'];
-            print("✅ Data is a List with ${dataList.length} items");
           } else if (res['data'] is Map) {
             // If data is a Map, check for results key (common in paginated responses)
             if (res['data']['results'] != null && res['data']['results'] is List) {
               dataList = res['data']['results'];
-              print("✅ Data contains 'results' list with ${dataList.length} items");
             } else {
-              print("❌ Data is a Map but doesn't contain 'results' list");
             }
           }
 
           if (dataList.isNotEmpty) {
-            print("🔄 Converting ${dataList.length} items to PurchaseInvoiceModel...");
 
             List<PurchaseInvoiceModel> invoiceData = [];
             for (int i = 0; i < dataList.length; i++) {
               try {
                 final item = dataList[i];
-                print("🔄 Processing item $i: ${item.toString().substring(0, 100)}...");
 
                 final invoice = PurchaseInvoiceModel.fromJson(item);
                 invoiceData.add(invoice);
-                print("✅ Successfully converted item $i");
               } catch (e, s) {
-                print("❌ Error converting item $i: $e");
-                print("❌ Stack trace: $s");
-                print("❌ Item data: ${dataList[i]}");
               }
             }
 
             invoiceList = invoiceData;
-            print("🎉 Final invoiceData length: ${invoiceData.length}");
 
             emit(PurchaseInvoiceListSuccess(list: invoiceData));
           } else {
-            print("⚠️ No data found in response");
             emit(PurchaseInvoiceListSuccess(list: []));
           }
         } else {
-          print("❌ Data field is null in response");
           emit(PurchaseInvoiceError(
             title: "Error",
             content: "No data found in response",
           ));
         }
       } else {
-        print("❌ API returned false status");
         emit(PurchaseInvoiceError(
           title: "Error",
           content: res['message'] ?? "Failed to load purchase invoice list",
         ));
       }
     } catch (error, st) {
-      print("❌ Exception caught in _onFetchPurchaseInvoiceList: $error");
-      print("❌ Stack trace: $st");
 
       emit(PurchaseInvoiceError(
         title: "Error",

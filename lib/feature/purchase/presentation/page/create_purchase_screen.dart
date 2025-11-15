@@ -1488,7 +1488,6 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                                                 value: context.read<CreatePurchaseBloc>().accountActiveModel, // Store object, not string
                                                 itemList: filteredList,
                                                 onChanged: (newVal) {
-                                                  print('Selected account: $newVal');
 
                                                   if (newVal != null) {
                                                     try {
@@ -1496,17 +1495,12 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                                                       context.read<CreatePurchaseBloc>().accountActiveModel = newVal;
                                                       context.read<CreatePurchaseBloc>().selectedAccountId = newVal.acId?.toString() ?? "";
 
-                                                      print("Selected Account ID: ${newVal.acId}");
-                                                      print("Selected Account Number: ${newVal.acNumber}");
-                                                      print("Selected Account Name: ${newVal.acName}");
                                                     } catch (e) {
-                                                      print("Error processing selected account: $e");
                                                       context.read<CreatePurchaseBloc>().selectedAccountId = "";
                                                       context.read<CreatePurchaseBloc>().selectedAccount = "";
                                                     }
                                                   } else {
                                                     // Handle null selection
-                                                    print("No account selected");
                                                     context.read<CreatePurchaseBloc>().selectedAccount = "";
                                                     context.read<CreatePurchaseBloc>().selectedAccountId = "";
                                                   }

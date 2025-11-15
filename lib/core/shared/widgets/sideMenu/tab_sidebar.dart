@@ -205,7 +205,7 @@ class TabSidebar extends StatelessWidget {
                             }).toList(),
                           );
                         }
-                      }).toList(),
+                      }),
                     ],
                   ),
                 ),

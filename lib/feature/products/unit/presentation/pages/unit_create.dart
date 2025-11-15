@@ -194,7 +194,7 @@ class _UnitCreateState extends State<UnitCreate> {
                 if (value == null || value.isEmpty) {
                   return 'Please enter unit code';
                 }
-                if (value.length < 1) {
+                if (value.isEmpty) {
                   return 'Unit code must be at least 1 character long';
                 }
                 if (value.length > 10) {

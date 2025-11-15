@@ -94,7 +94,6 @@ class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
       final responseData = response.data!;
 
       // Debug: Print the full response structure
-      print('Full API response: $responseData');
 
       // Extract data from response - handle different response structures
       final data = responseData['data'] ?? responseData;
@@ -119,15 +118,6 @@ class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
         );
       }
 
-      // Debug: Print what we're emitting
-      print('Emitting ExpenseListSuccess with:');
-      print('  - count: $count');
-      print('  - currentPage: $currentPage');
-      print('  - pageSize: $pageSize');
-      print('  - totalPages: $totalPages');
-      print('  - from: $from');
-      print('  - to: $to');
-      print('  - expenses count: ${expenses.length}');
 
       emit(ExpenseListSuccess(
         list: expenses,
@@ -138,9 +128,8 @@ class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
         from: from,
         to: to.toInt(),
       ));
-    } catch (error, st) {
-      print('Error in _onFetchExpenseList: $error');
-      print('Stack trace: $st');
+    } catch (error) {
+
       emit(ExpenseListFailed(title: "Error", content: error.toString()));
     }
   }
@@ -157,7 +146,7 @@ class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
     emit(ExpenseAddLoading());
 
     try {
-      print('Creating expense with body: ${event.body}'); // Debug log
+      // Debug log
 
       final res = await postResponse(
           url: AppUrls.expense, payload: event.body);
@@ -231,10 +220,6 @@ class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
         jsonString, // Now passing String instead of Map
             (data) => data, // Just return data as-is for delete operations
       );
-      print(response);
-      print(response.success);
-      print(response.message);
-      print(response.data);
 
       if (response.success == false) {
         emit(ExpenseDeleteFailed(

@@ -819,7 +819,7 @@ class ExpenseReportDataTable extends StatelessWidget {
                                 ),
                               ),
                               child: Text(
-                                '${expense.amount.toStringAsFixed(2)}',
+                                expense.amount.toStringAsFixed(2),
                                 style: const TextStyle(
                                   color: Colors.red,
                                   fontWeight: FontWeight.bold,

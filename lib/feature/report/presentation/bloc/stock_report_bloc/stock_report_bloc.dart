@@ -32,7 +32,6 @@ class StockReportBloc extends Bloc<StockReportEvent, StockReportState> {
           filter = '?${Uri(queryParameters: queryParams).query}';
         }
 
-        print('🔗 Making API request to: ${AppUrls.stockReport + filter}');
 
         final responseString = await getResponse(
           url: AppUrls.stockReport + filter,
@@ -40,23 +39,16 @@ class StockReportBloc extends Bloc<StockReportEvent, StockReportState> {
         );
         final Map<String, dynamic> res = jsonDecode(responseString);
 
-        print('📥 Raw API response type: ${responseString.runtimeType}');
 
         // Check if the response indicates success
         if (res['status'] == true) {
           final data = res['data'];
-          print('🔍 Data to parse: $data');
 
           try {
             final stockReportResponse = StockReportResponse.fromJson(data as Map<String, dynamic>);
-            print('✅ Successfully parsed StockReportResponse');
-            print('✅ Total products: ${stockReportResponse.report.length}');
-            print('✅ Total stock value: ${stockReportResponse.summary.totalStockValue}');
 
             emit(StockReportSuccess(response: stockReportResponse));
           } catch (parseError, stackTrace) {
-            print('❌ Error parsing StockReportResponse: $parseError');
-            print('❌ Stack trace: $stackTrace');
             emit(StockReportFailed(
               title: "Parsing Error",
               content: "Failed to parse stock report data: $parseError",
@@ -69,8 +61,6 @@ class StockReportBloc extends Bloc<StockReportEvent, StockReportState> {
           ));
         }
       } catch (e, stackTrace) {
-        print('❌ Error in StockReportBloc: $e');
-        print('❌ Stack trace: $stackTrace');
         emit(StockReportFailed(
           title: "Error",
           content: "Failed to load stock report: ${e.toString()}",

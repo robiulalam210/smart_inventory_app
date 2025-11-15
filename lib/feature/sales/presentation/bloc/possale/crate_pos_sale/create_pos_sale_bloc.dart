@@ -241,14 +241,12 @@ class CreatePosSaleBloc extends Bloc<CreatePosSaleEvent, CreatePosSaleState> {
 
       // Convert the Map to JSON string for appParseJson
       final jsonString = jsonEncode(res);
-      print('📦 Response JSON: $jsonString');
 
       ApiResponse response = appParseJson(
         jsonString,
             (data) => CreatePosSaleModel.fromJson(data),
       );
 
-      print('✅ Parsed response success: ${response.success}');
 
       if (response.success == false) {
         emit(CreatePosSaleFailed(
@@ -263,7 +261,6 @@ class CreatePosSaleBloc extends Bloc<CreatePosSaleEvent, CreatePosSaleState> {
       emit(CreatePosSaleSuccess());
 
     } catch (error) {
-      print('❌ Error in _onCreatePosSale: $error');
       emit(CreatePosSaleFailed(title: "Error", content: error.toString()));
     }
   }

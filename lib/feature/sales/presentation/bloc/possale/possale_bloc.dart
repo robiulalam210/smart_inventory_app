@@ -43,13 +43,12 @@ class PosSaleBloc extends Bloc<PosSaleEvent, PosSaleState> {
         final data = payload['data'] ?? {};
         final List<dynamic> results = (data['results'] is List) ? List<dynamic>.from(data['results']) : [];
 
-        print("📋 Raw results length: ${results.length}");
-        print("📊 Data count from API: ${data['count']}");
+
 
         // Parse POS sale list
         list = results.map((x) => PosSaleModel.fromJson(Map<String, dynamic>.from(x))).toList();
 
-        print("✅ Parsed list length: ${list.length}");
+
 
         // Pagination info - match your API response structure
         final int totalPages = (data['total_pages'] is int) ? data['total_pages'] as int : 1;
@@ -86,7 +85,6 @@ class PosSaleBloc extends Bloc<PosSaleEvent, PosSaleState> {
           ),
         );
 
-        print("🎉 Success! Emitted ${list.length} items");
       } else {
         final message = payload['message'] ?? payload['error'] ?? 'Unknown Error';
         emit(
@@ -97,8 +95,6 @@ class PosSaleBloc extends Bloc<PosSaleEvent, PosSaleState> {
         );
       }
     } catch (error, st) {
-      print("💥 Error fetching POS sales: $error");
-      print("📝 Stack trace: $st");
       emit(PosSaleListFailed(title: "Exception", content: error.toString()));
     }
   }
@@ -142,8 +138,6 @@ class PosSaleBloc extends Bloc<PosSaleEvent, PosSaleState> {
         );
       }
     } catch (error, st) {
-      print(error);
-      print(st);
       emit(PosSaleListFailed(title: "Exception", content: error.toString()));
     }
   }

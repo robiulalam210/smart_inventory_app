@@ -1,8 +1,4 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:hugeicons/hugeicons.dart';
-import 'package:iconsax/iconsax.dart';
 
 import '../../../../../core/configs/configs.dart';
 import '../../../../../core/widgets/delete_dialog.dart';
@@ -169,8 +165,6 @@ class CategoriesTableCard extends StatelessWidget {
     if (category.isActive != null) {
       if (category.isActive is bool) {
         return category.isActive as bool;
-      } else if (category.isActive is int) {
-        return category.isActive == 1;
       }
     }
 

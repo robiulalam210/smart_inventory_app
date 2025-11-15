@@ -141,7 +141,6 @@ class _ExpenseCreateScreenState extends State<ExpenseCreateScreen> {
       };
 
       // Debug log to see the actual request body
-      print('Submitting expense with body: $body');
 
       if (widget.id == null) {
         // Create new expense

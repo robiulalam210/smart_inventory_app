@@ -1,6 +1,4 @@
-import 'dart:convert';
-import 'package:flutter/material.dart';
-import 'package:bloc/bloc.dart';
+
 import '../../../../../core/configs/configs.dart';
 import '../../../../../core/repositories/delete_response.dart';
 import '../../../../../core/repositories/get_response.dart';
@@ -36,7 +34,7 @@ class SupplierPaymentBloc extends Bloc<SupplierPaymentEvent, SupplierPaymentStat
   String selectedPaymentMethod = "";
   late SupplierPaymentDetailsModel data;
 
-  clearData(){
+  void clearData(){
     filterTextController.clear();
     dateController.clear();
     amountController.clear();

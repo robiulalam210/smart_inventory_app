@@ -407,7 +407,7 @@ class SalesReturnTableCard extends StatelessWidget {
                 const SizedBox(height: 16),
                 _buildDetailRow('Customer:', salesReturn.customerName ?? 'N/A'),
                 _buildDetailRow('Return Date:', _formatDate(salesReturn.returnDate)),
-                _buildDetailRow('Return Amount:', '${salesReturn.returnAmount?.toString() ?? "N/A"}'),
+                _buildDetailRow('Return Amount:', salesReturn.returnAmount?.toString() ?? "N/A"),
                 _buildDetailRow('Status:', salesReturn.status?.toUpperCase() ?? 'N/A'),
                 _buildDetailRow('Payment Method:', salesReturn.paymentMethod ?? 'N/A'),
                 _buildDetailRow('Reason:', salesReturn.reason ?? 'No reason provided'),
@@ -441,7 +441,7 @@ class SalesReturnTableCard extends StatelessWidget {
                             Text('Qty: ${item.quantity ?? 0}'),
                             const SizedBox(width: 16),
                             Text(
-                              '${item.total?.toString() ?? "0.00"}',
+                              item.total?.toString() ?? "0.00",
                               style: const TextStyle(
                                 fontWeight: FontWeight.w600,
                                 color: Colors.red,
@@ -450,7 +450,7 @@ class SalesReturnTableCard extends StatelessWidget {
                           ],
                         ),
                       )
-                  ).toList(),
+                  ),
                 ],
 
                 const SizedBox(height: 20),

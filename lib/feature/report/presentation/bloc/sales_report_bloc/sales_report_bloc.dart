@@ -50,36 +50,25 @@ class SalesReportBloc extends Bloc<SalesReportEvent, SalesReportState> {
           filter = '?${Uri(queryParameters: queryParams).query}';
         }
 
-        print('🔗 Making API request to: ${AppUrls.salesReport + filter}');
 
         final responseString = await getResponse(
           url: AppUrls.salesReport + filter,
           context: event.context,
         );
 
-        print('📥 Raw API response type: ${responseString.runtimeType}');
-        print('📥 Raw API response: $responseString');
 
         // Parse the JSON string to Map
         final Map<String, dynamic> res = jsonDecode(responseString);
-        print('📊 Parsed response keys: ${res.keys}');
 
         // Check if the response indicates success
         if (res['status'] == true) {
           final data = res['data'];
-          print('🔍 Data to parse: $data');
-          print('🔍 Data type: ${data.runtimeType}');
 
           try {
             final salesReportResponse = SalesReportResponse.fromJson(data as Map<String, dynamic>);
-            print('✅ Successfully parsed SalesReportResponse');
-            print('✅ Report items count: ${salesReportResponse.report.length}');
-            print('✅ Summary: ${salesReportResponse.summary.totalSales}');
 
             emit(SalesReportSuccess(response: salesReportResponse));
           } catch (parseError, stackTrace) {
-            print('❌ Error parsing SalesReportResponse: $parseError');
-            print('❌ Stack trace: $stackTrace');
             emit(SalesReportFailed(
               title: "Parsing Error",
               content: "Failed to parse sales report data: $parseError",
@@ -92,8 +81,6 @@ class SalesReportBloc extends Bloc<SalesReportEvent, SalesReportState> {
           ));
         }
       } catch (e, stackTrace) {
-        print('❌ Error in SalesReportBloc: $e');
-        print('❌ Stack trace: $stackTrace');
         emit(SalesReportFailed(
           title: "Error",
           content: "Failed to load sales report: ${e.toString()}",
