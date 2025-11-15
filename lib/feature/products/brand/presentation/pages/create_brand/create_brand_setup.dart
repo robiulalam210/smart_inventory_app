@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+
 import 'package:smart_inventory/feature/products/brand/presentation/bloc/brand/brand_bloc.dart';
 
 import '../../../../../../core/configs/configs.dart';
 import '../../../../../../core/widgets/app_button.dart';
+import '../../../../../../core/widgets/app_dropdown.dart';
 import '../../../../../../core/widgets/app_text_field.dart';
 import '../../../../../../core/widgets/input_field.dart';
 import '../../../../../../core/widgets/show_custom_toast.dart';
@@ -75,10 +75,16 @@ class _BrandCreateState extends State<BrandCreate> {
 
   void _submitForm() {
     if (formKey.currentState!.validate()) {
-      final Map<String, String> body = {
+      final Map<String, dynamic> body = {
         "name": nameController.text.trim(),
       };
-
+      if (widget.id != null &&
+          context.read<BrandBloc>().selectedState.trim().isNotEmpty) {
+        body["is_active"] =
+        context.read<BrandBloc>().selectedState == "Active"
+            ? true
+            : false;
+      }
       if (widget.id == null) {
         // Create new brand
         context.read<BrandBloc>().add(AddBrand(body: body));
@@ -191,8 +197,51 @@ class _BrandCreateState extends State<BrandCreate> {
               },
             ),
 
-            SizedBox(height: 20),
+            SizedBox(height: 10),
+            if (widget.id !=null)  ...[
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final isSmallScreen = constraints.maxWidth < 600;
 
+                  return SizedBox(
+                    width: isSmallScreen
+                        ? double.infinity
+                        : constraints.maxWidth * 0.5,
+                    child: AppDropdown(
+                      label: "Status",
+                      context: context,
+                      hint: context.read<BrandBloc>().selectedState.isEmpty
+                          ? "Select Status"
+                          : context.read<BrandBloc>().selectedState,
+                      isLabel: false,
+                      value:
+                      context.read<BrandBloc>().selectedState.isEmpty
+                          ? null
+                          : context.read<BrandBloc>().selectedState,
+                      itemList: ["Active", "Inactive"],
+                      onChanged: (newVal) {
+                        setState(() {
+                          context.read<BrandBloc>().selectedState = newVal
+                              .toString();
+                        });
+                      },
+                      itemBuilder: (item) => DropdownMenuItem(
+                        value: item,
+                        child: Text(
+                          item.toString(),
+                          style: const TextStyle(
+                            color: AppColors.blackColor,
+                            fontFamily: 'Quicksand',
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+              SizedBox(height: AppSizes.height(context) * 0.01),
+            ],
             // Buttons Row
             Row(
               children: [
@@ -234,115 +283,4 @@ class _BrandCreateState extends State<BrandCreate> {
     );
   }
 
-  Widget _buildFullScreenContent() {
-    return SafeArea(
-      child: Scaffold(
-        backgroundColor: AppColors.bg,
-        appBar: AppBar(
-          title: Text(widget.id == null ? 'Create Brand' : 'Update Brand'),
-          backgroundColor: AppColors.primaryColor,
-          foregroundColor: Colors.white,
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back),
-            onPressed: () => Navigator.pop(context),
-          ),
-        ),
-        body: Center(
-          child: Container(
-            constraints: BoxConstraints(
-              maxWidth: 500,
-              maxHeight: MediaQuery.of(context).size.height * 0.6,
-            ),
-            margin: EdgeInsets.all(16),
-            child: Container(
-              padding: const EdgeInsets.all(20),
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: AppColors.whiteColor,
-                borderRadius: BorderRadius.circular(AppSizes.borderRadiusSize),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black12,
-                    blurRadius: 10,
-                    offset: Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: SingleChildScrollView(
-                child: Form(
-                  key: formKey,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      // Name Input Field
-                      CustomInputField(
-                        isRequiredLable: true,
-                        isRequired: true,
-                        controller: nameController,
-                        hintText: 'Enter brand name',
-                        labelText: 'Brand Name',
-                        fillColor: Colors.grey[50],
-                        keyboardType: TextInputType.text,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter brand name';
-                          }
-                          if (value.length < 2) {
-                            return 'Brand name must be at least 2 characters long';
-                          }
-                          if (value.length > 50) {
-                            return 'Brand name must be less than 50 characters';
-                          }
-                          return null;
-                        },
-                      ),
-
-                      SizedBox(height: 30),
-
-                      // Buttons Row
-                      Row(
-                        children: [
-                          Expanded(
-                            child: OutlinedButton(
-                              onPressed: () => Navigator.pop(context),
-                              style: OutlinedButton.styleFrom(
-                                padding: EdgeInsets.symmetric(vertical: 15),
-                                side: BorderSide(color: AppColors.primaryColor),
-                              ),
-                              child: Text(
-                                'Cancel',
-                                style: TextStyle(
-                                  color: AppColors.primaryColor,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                          ),
-                          SizedBox(width: 10),
-                          Expanded(
-                            child: BlocBuilder<BrandBloc, BrandState>(
-                              builder: (context, state) {
-                                return AppButton(
-                                  name: widget.id == null ? 'Create Brand' : 'Update Brand',
-                                  onPressed: (state is BrandAddLoading)
-                                      ? null
-                                      : _showConfirmationDialog,
-                                  isLoading: state is BrandAddLoading,
-                                );
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
 }

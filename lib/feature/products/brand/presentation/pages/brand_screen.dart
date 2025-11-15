@@ -11,6 +11,7 @@ import '../../../../../core/widgets/app_alert_dialog.dart';
 import '../../../../../core/widgets/app_button.dart';
 import '../../../../../core/widgets/app_loader.dart';
 import '../../../../../core/widgets/coustom_search_text_field.dart';
+import '../../../../../core/widgets/show_custom_toast.dart';
 import '../../../../../responsive.dart';
 import '../bloc/brand/brand_bloc.dart';
 import '../widget/widget.dart';
@@ -92,6 +93,13 @@ class _BrandScreenState extends State<BrandScreen> {
               Navigator.pop(context);
               _fetchApi();
             } else if (state is BrandDeleteSuccess) {
+              showCustomToast(
+                context: context,
+                title: 'Success!',
+                description: state.message,
+                icon: Icons.check_circle,
+                primaryColor: Colors.green,
+              );
               Navigator.pop(context);
               _fetchApi();
             } else if (state is BrandAddFailed) {

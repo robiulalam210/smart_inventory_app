@@ -252,9 +252,9 @@ class GroupsTableCard extends StatelessWidget {
     // Pre-fill the form
     final groupsBloc = context.read<GroupsBloc>();
     groupsBloc.nameController.text = group.name ?? "";
+    groupsBloc.selectedState = group.isActive == true ? "Active" : "Inactive";
 
-    // Set status if needed (uncomment and adapt based on your form needs)
-    // groupsBloc.selectedState = _getGroupStatus(group) ? "Active" : "Inactive";
+
 
     showDialog(
       context: context,

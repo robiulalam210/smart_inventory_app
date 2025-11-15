@@ -212,7 +212,7 @@ class CategoriesBloc extends Bloc<CategoriesEvent, CategoriesState> {
         return;
       }
       clearData();
-      emit(CategoriesDeleteSuccess());
+      emit(CategoriesDeleteSuccess(response.message??""));
     } catch (error) {
       clearData();
       emit(CategoriesDeleteFailed(title: "Error", content: error.toString()));

@@ -201,7 +201,7 @@ class GroupsBloc extends Bloc<GroupsEvent, GroupsState> {
     DeleteGroups event,
     Emitter<GroupsState> emit,
   ) async {
-    emit(GroupsAddLoading());
+    emit(GroupDeleteLoading());
 
     try {
       final res = await deleteResponse(
@@ -215,15 +215,15 @@ class GroupsBloc extends Bloc<GroupsEvent, GroupsState> {
             List<GroupsModel>.from(data.map((x) => GroupsModel.fromJson(x))),
       );
       if (response.success == false) {
-        emit(GroupsAddFailed(title: 'Json', content: response.message ?? ""));
+        emit(GroupDeleteFailed(title: 'Json', content: response.message ?? ""));
         return;
       }
       clearData();
-      emit(GroupsAddSuccess());
+      emit(GroupDeleteSuccess(response.message??""));
     } catch (error, stack) {
-      print(stack);
+
       clearData();
-      emit(GroupsAddFailed(title: "Error", content: error.toString()));
+      emit(GroupDeleteFailed(title: "Error", content: error.toString()));
     }
   }
 

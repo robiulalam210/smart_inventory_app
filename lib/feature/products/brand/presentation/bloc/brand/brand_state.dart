@@ -46,7 +46,9 @@ final class BrandDeleteInitial extends BrandState {}
 final class BrandDeleteLoading extends BrandState {}
 
 final class BrandDeleteSuccess extends BrandState {
-  BrandDeleteSuccess();
+  final String message;
+
+  BrandDeleteSuccess({required this.message});
 }
 
 final class BrandDeleteFailed extends BrandState {

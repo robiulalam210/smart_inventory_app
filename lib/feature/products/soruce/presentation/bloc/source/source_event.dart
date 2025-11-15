@@ -12,13 +12,13 @@ class FetchSourceList extends SourceEvent{
 
 }
 class AddSource  extends SourceEvent {
-  final Map<String,String>? body;
+  final Map<String,dynamic>? body;
 
   AddSource({this.body});
 }
 
 class UpdateSource extends SourceEvent {
-  final Map<String,String>? body;
+  final Map<String,dynamic>? body;
   final String? id;
 
 

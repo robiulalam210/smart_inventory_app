@@ -1,15 +1,12 @@
-import 'package:smart_inventory/core/core.dart';
+import '/core/core.dart';
 
-import '../../../../../core/configs/configs.dart';
-import '../../../../../core/widgets/app_button.dart';
-import '../../../../../core/widgets/input_field.dart';
-import '../../../../../core/widgets/show_custom_toast.dart';
+
 import '../bloc/categories/categories_bloc.dart';
 
 class CategoriesCreate extends StatefulWidget {
   final String? id;
 
-  const CategoriesCreate({super.key, this.id, });
+  const CategoriesCreate({super.key, this.id});
 
   @override
   State<CategoriesCreate> createState() => _CategoriesCreateState();
@@ -17,7 +14,6 @@ class CategoriesCreate extends StatefulWidget {
 
 class _CategoriesCreateState extends State<CategoriesCreate> {
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
-
 
   void _showConfirmationDialog() {
     showDialog(
@@ -52,9 +48,16 @@ class _CategoriesCreateState extends State<CategoriesCreate> {
 
   void _submitForm() {
     if (formKey.currentState!.validate()) {
-      final Map<String, String> body = {
-        "name":  context.read<CategoriesBloc>().nameController.text.trim(),
+      final Map<String, dynamic> body = {
+        "name": context.read<CategoriesBloc>().nameController.text.trim(),
       };
+      if (widget.id != null &&
+          context.read<CategoriesBloc>().selectedState.trim().isNotEmpty) {
+        body["is_active"] =
+        context.read<CategoriesBloc>().selectedState == "Active"
+            ? true
+            : false;
+      }
 
       if (widget.id == null) {
         // Create new category
@@ -69,7 +72,7 @@ class _CategoriesCreateState extends State<CategoriesCreate> {
   }
 
   void _clearForm() {
-    context.read<CategoriesBloc>().  nameController.clear();
+    context.read<CategoriesBloc>().nameController.clear();
     formKey.currentState?.reset();
   }
 
@@ -95,7 +98,6 @@ class _CategoriesCreateState extends State<CategoriesCreate> {
             _clearForm();
           }
           Navigator.pop(context, true); // Return success result
-
         } else if (state is CategoriesAddFailed) {
           showCustomToast(
             context: context,
@@ -107,14 +109,13 @@ class _CategoriesCreateState extends State<CategoriesCreate> {
           );
         }
       },
-      child: _buildDialogContent()
-
+      child: _buildDialogContent(),
     );
   }
 
   Widget _buildDialogContent() {
     return Container(
-      width: AppSizes.width(context)*0.40,
+      width: AppSizes.width(context) * 0.40,
       padding: const EdgeInsets.all(20),
       child: Form(
         key: formKey,
@@ -136,11 +137,7 @@ class _CategoriesCreateState extends State<CategoriesCreate> {
                 ),
                 IconButton(
                   onPressed: () => Navigator.pop(context),
-                  icon: Icon(
-                    Icons.close,
-                    color: Colors.red,
-                    size: 20,
-                  ),
+                  icon: Icon(Icons.close, color: Colors.red, size: 20),
                   padding: EdgeInsets.zero,
                   constraints: BoxConstraints(),
                 ),
@@ -149,11 +146,11 @@ class _CategoriesCreateState extends State<CategoriesCreate> {
 
             SizedBox(height: 10),
 
+
             // Name Input Field
             AppTextField(
-
               isRequired: true,
-              controller:  context.read<CategoriesBloc>().nameController,
+              controller: context.read<CategoriesBloc>().nameController,
               hintText: 'Enter category name',
               labelText: 'Category Name',
 
@@ -172,7 +169,51 @@ class _CategoriesCreateState extends State<CategoriesCreate> {
               },
             ),
 
-            SizedBox(height: 20),
+            SizedBox(height: 10),
+            if (widget.id !=null)  ...[
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final isSmallScreen = constraints.maxWidth < 600;
+
+                  return SizedBox(
+                    width: isSmallScreen
+                        ? double.infinity
+                        : constraints.maxWidth * 0.5,
+                    child: AppDropdown(
+                      label: "Status",
+                      context: context,
+                      hint: context.read<CategoriesBloc>().selectedState.isEmpty
+                          ? "Select Status"
+                          : context.read<CategoriesBloc>().selectedState,
+                      isLabel: false,
+                      value:
+                      context.read<CategoriesBloc>().selectedState.isEmpty
+                          ? null
+                          : context.read<CategoriesBloc>().selectedState,
+                      itemList: ["Active", "Inactive"],
+                      onChanged: (newVal) {
+                        setState(() {
+                          context.read<CategoriesBloc>().selectedState = newVal
+                              .toString();
+                        });
+                      },
+                      itemBuilder: (item) => DropdownMenuItem(
+                        value: item,
+                        child: Text(
+                          item.toString(),
+                          style: const TextStyle(
+                            color: AppColors.blackColor,
+                            fontFamily: 'Quicksand',
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+              SizedBox(height: AppSizes.height(context) * 0.01),
+            ],
 
             // Buttons Row
             Row(
@@ -213,5 +254,4 @@ class _CategoriesCreateState extends State<CategoriesCreate> {
       ),
     );
   }
-
 }

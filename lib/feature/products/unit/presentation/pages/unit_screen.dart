@@ -6,6 +6,7 @@ import '../../../../../core/widgets/app_alert_dialog.dart';
 import '../../../../../core/widgets/app_button.dart';
 import '../../../../../core/widgets/app_loader.dart';
 import '../../../../../core/widgets/coustom_search_text_field.dart';
+import '../../../../../core/widgets/show_custom_toast.dart';
 import '../bloc/unit/unti_bloc.dart';
 import '../widget/widget.dart';
 
@@ -20,20 +21,11 @@ class _UnitScreenState extends State<UnitScreen> {
   late var dataBloc = context.read<UnitBloc>();
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // Initialize sourceBloc here
-
-    // Now, you can safely access the SourceBloc and initialize the filterTextController
-    dataBloc.filterTextController = TextEditingController();
+  void initState() {
     _fetchApiData();
-  }
 
-  @override
-  void dispose() {
-    // Dispose of the filterTextController when the widget is disposed
-    dataBloc.filterTextController.dispose();
-    super.dispose();
+    // TODO: implement initState
+    super.initState();
   }
 
   void _fetchApiData({String filterText = '', int pageNumber = 0}) {
@@ -103,6 +95,14 @@ class _UnitScreenState extends State<UnitScreen> {
                 Navigator.pop(context); // Close loader dialog
                 _fetchApiData(); // Reload warehouse list
               } else if (state is UnitDeleteSuccess) {
+                showCustomToast(
+                  context: context,
+                  title: 'Success!',
+                  description: state.message,
+                  icon: Icons.check_circle,
+                  primaryColor: Colors.green,
+                );
+
                 Navigator.pop(context); // Close loader dialog
                 _fetchApiData(); // Reload warehouse list
               } else if (state is UnitAddFailed) {
@@ -162,6 +162,8 @@ class _UnitScreenState extends State<UnitScreen> {
                   AppButton(
                     name: "Create Unit ",
                     onPressed: () {
+                      context.read<UnitBloc>().nameController.clear();
+                      context.read<UnitBloc>().shortNameController.clear();
                       showDialog(
                         context: context,
                         builder: (context) {

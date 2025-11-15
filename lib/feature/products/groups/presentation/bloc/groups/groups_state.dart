@@ -63,3 +63,18 @@ final class GroupSwitchFailed extends GroupsState {
 
   GroupSwitchFailed({required this.title, required this.content});
 }
+
+
+
+final class GroupDeleteLoading extends GroupsState {}
+
+final class GroupDeleteSuccess extends GroupsState {
+  String message;
+  GroupDeleteSuccess(this.message);
+}
+
+final class GroupDeleteFailed extends GroupsState {
+  final String title, content;
+
+  GroupDeleteFailed({required this.title, required this.content});
+}

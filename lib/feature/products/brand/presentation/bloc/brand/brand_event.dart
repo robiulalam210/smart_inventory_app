@@ -12,13 +12,13 @@ class FetchBrandList extends BrandEvent{
 
 }
 class AddBrand  extends BrandEvent {
-  final Map<String,String>? body;
+  final Map<String,dynamic>? body;
 
   AddBrand({this.body});
 }
 
 class UpdateBrand extends BrandEvent {
-  final Map<String,String>? body;
+  final Map<String,dynamic>? body;
   final String? id;
 
 

@@ -63,7 +63,8 @@ final class CategoriesDeleteInitial extends CategoriesState {}
 final class CategoriesDeleteLoading extends CategoriesState {}
 
 final class CategoriesDeleteSuccess extends CategoriesState {
-  CategoriesDeleteSuccess();
+  String message;
+  CategoriesDeleteSuccess(this.message);
 }
 
 final class CategoriesDeleteFailed extends CategoriesState {

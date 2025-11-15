@@ -19,13 +19,13 @@ class FetchCategoriesList extends CategoriesEvent {
 }
 
 class AddCategories extends CategoriesEvent {
-  final Map<String, String>? body;
+  final Map<String, dynamic>? body;
 
   AddCategories({this.body});
 }
 
 class UpdateCategories extends CategoriesEvent {
-  final Map<String, String>? body;
+  final Map<String, dynamic>? body;
   final String? id;
 
   UpdateCategories({this.body, this.id});

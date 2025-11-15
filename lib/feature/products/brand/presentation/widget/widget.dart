@@ -247,6 +247,7 @@ class BrandTableCard extends StatelessWidget {
     // Pre-fill the form
     final brandBloc = context.read<BrandBloc>();
     brandBloc.nameController.text = brand.name ?? "";
+    brandBloc.selectedState = brand.isActive == true ? "Active" : "Inactive";
 
     showDialog(
       context: context,
