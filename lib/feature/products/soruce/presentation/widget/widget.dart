@@ -251,6 +251,7 @@ class SourceTableCard extends StatelessWidget {
     // Pre-fill the form
     final sourceBloc = context.read<SourceBloc>();
     sourceBloc.nameController.text = source.name ?? "";
+    sourceBloc.selectedState = source.isActive == true ? "Active" : "Inactive";
 
     showDialog(
       context: context,

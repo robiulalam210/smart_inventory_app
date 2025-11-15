@@ -260,9 +260,8 @@ class CategoriesTableCard extends StatelessWidget {
     // Pre-fill the form
     final categoriesBloc = context.read<CategoriesBloc>();
     categoriesBloc.nameController.text = category.name ?? "";
+    categoriesBloc.selectedState = category.isActive == true ? "Active" : "Inactive";
 
-    // Set status if needed (uncomment and adapt based on your form)
-    // categoriesBloc.selectedState = _getCategoryStatus(category) ? "Active" : "Inactive";
 
     showDialog(
       context: context,

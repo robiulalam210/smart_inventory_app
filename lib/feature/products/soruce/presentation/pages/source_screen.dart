@@ -6,6 +6,7 @@ import '../../../../../core/widgets/app_alert_dialog.dart';
 import '../../../../../core/widgets/app_button.dart';
 import '../../../../../core/widgets/app_loader.dart';
 import '../../../../../core/widgets/coustom_search_text_field.dart';
+import '../../../../../core/widgets/show_custom_toast.dart';
 import '../bloc/source/source_bloc.dart';
 import '../widget/widget.dart';
 
@@ -91,6 +92,13 @@ class _SourceScreenState extends State<SourceScreen> {
                 // Navigator.pop(context); // Close loader dialog
                 _fetchApiData(); // Reload warehouse list
               } else if (state is SourceDeleteSuccess) {
+                showCustomToast(
+                  context: context,
+                  title: 'Success!',
+                  description: state.message,
+                  icon: Icons.check_circle,
+                  primaryColor: Colors.green,
+                );
                 Navigator.pop(context); // Close loader dialog
                 _fetchApiData(); // Reload warehouse list
               } else if (state is SourceAddFailed) {

@@ -141,8 +141,7 @@ class SourceBloc extends Bloc<SourceEvent, SourceState> {
         jsonString,
             (data) => SourceModel.fromJson(data), // Single object, not list
       );
-print(response.message);
-print(response.success);
+
       if (response.success == false) {
         emit(SourceUpdateFailed(
             title: 'Update Failed',
@@ -196,6 +195,7 @@ print(response.success);
       }
       clearData();
       emit(SourceDeleteSuccess(
+        response.message??""
 
       ));
     } catch (error) {

@@ -3,6 +3,7 @@ import '../../../../../core/shared/widgets/sideMenu/sidebar.dart';
 import '../../../../../core/widgets/app_button.dart';
 import '../../../../../core/widgets/app_loader.dart';
 import '../../../../../core/widgets/coustom_search_text_field.dart';
+import '../../../../../core/widgets/show_custom_toast.dart';
 import '../bloc/categories/categories_bloc.dart';
 import '../widget/widget.dart';
 import 'categories_create.dart';
@@ -23,18 +24,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
     // TODO: implement initState
     super.initState();
   }
-  // @override
-  // void didChangeDependencies() {
-  //   super.didChangeDependencies();
-  //   dataBloc.filterTextController = TextEditingController();
-  //   _fetchApiData();
-  // }
-  //
-  // @override
-  // void dispose() {
-  //   dataBloc.filterTextController.dispose();
-  //   super.dispose();
-  // }
+
 
   void _fetchApiData({
     String filterText = '',
@@ -109,7 +99,15 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
           } else if (state is CategoriesAddSuccess ||
               state is CategoriesSwitchSuccess ||
               state is CategoriesDeleteSuccess) {
-
+            if (state is CategoriesDeleteSuccess) {
+              showCustomToast(
+              context: context,
+              title: 'Success!',
+              description: state.message,
+              icon: Icons.check_circle,
+              primaryColor: Colors.green,
+            );
+            }
             // Navigator.pop(context);
             if (state is CategoriesAddSuccess) Navigator.pop(context);
             _fetchApiData();

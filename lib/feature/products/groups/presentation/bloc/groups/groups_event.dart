@@ -13,13 +13,13 @@ class FetchGroupsList extends GroupsEvent {
 }
 
 class AddGroups extends GroupsEvent {
-  final Map<String, String>? body;
+  final Map<String, dynamic>? body;
 
   AddGroups({this.body});
 }
 
 class UpdateGroups extends GroupsEvent {
-  final Map<String, String>? body;
+  final Map<String, dynamic>? body;
   final String? id;
 
   UpdateGroups({this.body, this.id});

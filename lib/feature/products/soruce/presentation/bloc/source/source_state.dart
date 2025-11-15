@@ -59,7 +59,8 @@ final class SourceDeleteInitial extends SourceState {}
 final class SourceDeleteLoading extends SourceState {}
 
 final class SourceDeleteSuccess extends SourceState {
-  SourceDeleteSuccess();
+  String message;
+  SourceDeleteSuccess(this.message);
 }
 
 final class SourceDeleteFailed extends SourceState {

@@ -14,13 +14,13 @@ class FetchUnitList extends UnitEvent{
 
 }
 class AddUnit  extends UnitEvent {
-  final Map<String,String>? body;
+  final Map<String,dynamic>? body;
 
   AddUnit({this.body});
 }
 
 class UpdateUnit extends UnitEvent {
-  final Map<String,String>? body;
+  final Map<String,dynamic>? body;
   final String? id;
 
 

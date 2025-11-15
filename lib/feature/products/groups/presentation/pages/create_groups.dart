@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:smart_inventory/feature/products/groups/presentation/bloc/groups/groups_bloc.dart';
 import '../../../../../core/configs/configs.dart';
 import '../../../../../core/widgets/app_button.dart';
+import '../../../../../core/widgets/app_dropdown.dart';
 import '../../../../../core/widgets/app_text_field.dart';
 import '../../../../../core/widgets/input_field.dart';
 import '../../../../../core/widgets/show_custom_toast.dart';
@@ -74,10 +75,16 @@ class _GroupsCreateState extends State<GroupsCreate> {
 
   void _submitForm() {
     if (formKey.currentState!.validate()) {
-      final Map<String, String> body = {
+      final Map<String, dynamic> body = {
         "name": nameController.text.trim(),
       };
-
+      if (widget.id != null &&
+          context.read<GroupsBloc>().selectedState.trim().isNotEmpty) {
+        body["is_active"] =
+        context.read<GroupsBloc>().selectedState == "Active"
+            ? true
+            : false;
+      }
       if (widget.id == null) {
         // Create new group
         context.read<GroupsBloc>().add(AddGroups(body: body));
@@ -191,8 +198,51 @@ class _GroupsCreateState extends State<GroupsCreate> {
               },
             ),
 
-            SizedBox(height: 20),
+            SizedBox(height: 10),
+            if (widget.id !=null)  ...[
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final isSmallScreen = constraints.maxWidth < 600;
 
+                  return SizedBox(
+                    width: isSmallScreen
+                        ? double.infinity
+                        : constraints.maxWidth * 0.5,
+                    child: AppDropdown(
+                      label: "Status",
+                      context: context,
+                      hint: context.read<GroupsBloc>().selectedState.isEmpty
+                          ? "Select Status"
+                          : context.read<GroupsBloc>().selectedState,
+                      isLabel: false,
+                      value:
+                      context.read<GroupsBloc>().selectedState.isEmpty
+                          ? null
+                          : context.read<GroupsBloc>().selectedState,
+                      itemList: ["Active", "Inactive"],
+                      onChanged: (newVal) {
+                        setState(() {
+                          context.read<GroupsBloc>().selectedState = newVal
+                              .toString();
+                        });
+                      },
+                      itemBuilder: (item) => DropdownMenuItem(
+                        value: item,
+                        child: Text(
+                          item.toString(),
+                          style: const TextStyle(
+                            color: AppColors.blackColor,
+                            fontFamily: 'Quicksand',
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+              SizedBox(height: AppSizes.height(context) * 0.01),
+            ],
             // Buttons Row
             Row(
               children: [

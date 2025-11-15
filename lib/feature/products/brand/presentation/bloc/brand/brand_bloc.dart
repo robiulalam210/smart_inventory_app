@@ -176,7 +176,7 @@ class BrandBloc extends Bloc<BrandEvent, BrandState> {
         return;
       }
       clearData();
-      emit(BrandDeleteSuccess());
+      emit(BrandDeleteSuccess(message: response.message??""));
     } catch (error) {
       clearData();
       emit(BrandDeleteFailed(title: "Error", content: error.toString()));

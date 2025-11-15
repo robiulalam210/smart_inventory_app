@@ -246,6 +246,8 @@ class UnitTableCard extends StatelessWidget {
     // Pre-fill the form
     final unitBloc = context.read<UnitBloc>();
     unitBloc.nameController.text = unit.name ?? "";
+    unitBloc.shortNameController.text = unit.code ?? "";
+    unitBloc.selectedState = unit.isActive == true ? "Active" : "Inactive";
 
     showDialog(
       context: context,

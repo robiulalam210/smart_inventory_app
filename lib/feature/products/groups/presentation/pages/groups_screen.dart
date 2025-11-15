@@ -14,7 +14,7 @@ import '../../../../../core/widgets/app_button.dart';
 import '../../../../../core/widgets/app_dropdown.dart';
 import '../../../../../core/widgets/app_loader.dart';
 import '../../../../../core/widgets/coustom_search_text_field.dart';
-import '../../../../../core/widgets/custom_filter_ui.dart';
+import '../../../../../core/widgets/show_custom_toast.dart';
 import '../../../../../responsive.dart';
 import '../bloc/groups/groups_bloc.dart';
 import '../widget/widget.dart';
@@ -104,15 +104,45 @@ class _GroupsScreenState extends State<GroupsScreen> {
               appLoader(context, "Creating Group, please wait...");
             } else if (state is GroupsSwitchLoading) {
               appLoader(context, "Update Group, please wait...");
-            } else if (state is GroupsAddSuccess) {
+            }
+            else if (state is GroupDeleteLoading) {
+              appLoader(context, "Deleted Group, please wait...");
+            }
+            else if (state is GroupsAddSuccess) {
               // Navigator.pop(context); // Close loader dialog
               Navigator.pop(context); // Close loader dialog
               _fetchApi(); // Reload warehouse list
-            } else if (state is GroupsSwitchSuccess) {
+            }
+
+            else if (state is GroupsSwitchSuccess) {
               Navigator.pop(context); // Close loader dialog
               _fetchApi(); // Reload warehouse list
-            } else if (state is GroupsAddFailed) {
+            }
+
+            else if (state is GroupDeleteSuccess) {
+              showCustomToast(
+                context: context,
+                title: 'Success!',
+                description: state.message,
+                icon: Icons.check_circle,
+                primaryColor: Colors.green,
+              );
+
               Navigator.pop(context); // Close loader dialog
+              _fetchApi(); // Reload warehouse list
+            }
+            else if (state is GroupsAddFailed) {
+              Navigator.pop(context); // Close loader dialog
+              Navigator.pop(context); // Close loader dialog
+              _fetchApi();
+              appAlertDialog(context, state.content,
+                  title: state.title,
+                  actions: [
+                    TextButton(
+                        onPressed: () => AppRoutes.pop(context),
+                        child: const Text("Dismiss"))
+                  ]);
+            } else if (state is GroupDeleteFailed) {
               Navigator.pop(context); // Close loader dialog
               _fetchApi();
               appAlertDialog(context, state.content,
@@ -195,106 +225,4 @@ class _GroupsScreenState extends State<GroupsScreen> {
   }
 
 
-  void _showFilterMenu(BuildContext context, Offset offset) async {
-    final screenSize = MediaQuery.of(context).size;
-    final left = offset.dx;
-    final top = offset.dy;
-    final right = screenSize.width - left;
-    final bottom = screenSize.height - top;
-
-    await showMenu(
-      color: const Color.fromARGB(255, 248, 248, 248),
-      context: context,
-      position: RelativeRect.fromLTRB(left, top, right, bottom),
-      items: [
-        PopupMenuItem(
-          padding: const EdgeInsets.all(0),
-          enabled: false,
-          child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-              return Column(
-                children: [
-                  Container(
-                    width: double.maxFinite,
-                    padding: const EdgeInsets.only(
-                        top: 5, bottom: 10, left: 10, right: 10),
-                    decoration: const BoxDecoration(
-                      // borderRadius: BorderRadius.all(Radius.circular(10)),
-                      color: Color.fromARGB(255, 248, 248, 248),
-                    ),
-                    child: const Text('Filter'),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: AppDropdown(
-                      label: "Status",context: context,
-                      hint: "Select Status",
-                      isLabel: true,
-                      isNeedAll: true,
-                      value: context.read<GroupsBloc>().selectedState.isEmpty
-                          ? null
-                          : context.read<GroupsBloc>().selectedState,
-                      itemList: context.read<GroupsBloc>().statesList,
-                      onChanged: (newVal) {
-                        context.read<GroupsBloc>().selectedState =
-                            newVal.toString();
-                        _fetchApi(
-                          filterText: context
-                              .read<GroupsBloc>()
-                              .filterTextController
-                              .text,
-                          state:
-                          newVal.toString() == "All" ? "" : newVal.toString(),
-                        );
-                      },
-                      itemBuilder: (item) => DropdownMenuItem(
-                        value: item,
-                        child: Text(
-                          item.toString(),
-                          style: const TextStyle(
-                            color: AppColors.blackColor,
-                            fontFamily: 'Quicksand',
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 5.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              context.read<GroupsBloc>().add(
-                                FetchGroupsList(context,),
-                              );
-                            });
-                            Navigator.of(context).pop();
-                          },
-                          child: const Text(
-                            'Clear',
-                            style: TextStyle(color: Colors.red),
-                          ),
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.of(context).pop();
-                          },
-                          child: const Text('Close'),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
 }

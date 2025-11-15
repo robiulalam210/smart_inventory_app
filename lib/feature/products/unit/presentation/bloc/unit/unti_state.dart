@@ -59,7 +59,8 @@ final class UnitDeleteInitial extends UnitState {}
 final class UnitDeleteLoading extends UnitState {}
 
 final class UnitDeleteSuccess extends UnitState {
-  UnitDeleteSuccess();
+  String message;
+  UnitDeleteSuccess(this.message);
 }
 
 final class UnitDeleteFailed extends UnitState {
