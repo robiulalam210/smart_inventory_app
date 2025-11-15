@@ -216,6 +216,7 @@ class _ExpenseSubCreateScreenState extends State<ExpenseSubCreateScreen> {
                             hint: _selectedExpenseHead?.name ?? "Select Expense Head",
                             isNeedAll: false,
                             isRequired: true,
+                            isSearch: true,
                             value: _selectedExpenseHead,
                             itemList: expenseHeads,
                             onChanged: (newVal) {

@@ -153,11 +153,11 @@ class _CustomerLedgerScreenState extends State<CustomerLedgerScreen> {
             },
           ),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: 8),
 
         // 📅 Date Range Picker
         SizedBox(
-          width: 260,
+          width: 270,
           child: CustomDateRangeField(
             isLabel: false,
             selectedDateRange: selectedDateRange,
@@ -192,13 +192,13 @@ class _CustomerLedgerScreenState extends State<CustomerLedgerScreen> {
       builder: (context, state) {
         if (state is! CustomerLedgerSuccess) {
           return Container(
-            padding: const EdgeInsets.all(10),
+            padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(8),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.grey.withOpacity(0.1),
+                  color: Colors.grey.withValues(alpha: 0.1),
                   blurRadius: 4,
                   offset: const Offset(0, 2),
                 ),
@@ -210,10 +210,10 @@ class _CustomerLedgerScreenState extends State<CustomerLedgerScreen> {
                 children: [
                   Icon(
                     Icons.people_outline,
-                    size: 48,
-                    color: Colors.grey.withOpacity(0.5),
+                    size: 45,
+                    color: Colors.grey.withValues(alpha: 0.5),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 8),
                   Text(
                     "Select a Customer to View Ledger",
                     style: GoogleFonts.inter(
@@ -255,7 +255,7 @@ class _CustomerLedgerScreenState extends State<CustomerLedgerScreen> {
             borderRadius: BorderRadius.circular(8),
             boxShadow: [
               BoxShadow(
-                color: Colors.grey.withOpacity(0.1),
+                color: Colors.grey.withValues(alpha: 0.1),
                 blurRadius: 4,
                 offset: const Offset(0, 2),
               ),
@@ -276,20 +276,20 @@ class _CustomerLedgerScreenState extends State<CustomerLedgerScreen> {
                 spacing: 8,
                 runSpacing: 8,
                 children: [
-                  _buildSummaryItem("Opening Balance", "\$${openingBalance.toStringAsFixed(2)}", Icons.account_balance_wallet, Colors.blue),
+                  _buildSummaryItem("Opening Balance", openingBalance.toStringAsFixed(2), Icons.account_balance_wallet, Colors.blue),
                   _buildSummaryItem(
                       "Closing Balance",
-                      "\$${summary.closingBalance.toStringAsFixed(2)}",
+                      summary.closingBalance.toStringAsFixed(2),
                       summary.closingBalance >= 0 ? Icons.arrow_upward : Icons.arrow_downward,
                       summary.closingBalance >= 0 ? Colors.green : Colors.red
                   ),
-                  _buildSummaryItem("Total Debit", "\$${totalDebit.toStringAsFixed(2)}", Icons.arrow_downward, Colors.red),
-                  _buildSummaryItem("Total Credit", "\$${totalCredit.toStringAsFixed(2)}", Icons.arrow_upward, Colors.green),
+                  _buildSummaryItem("Total Debit", totalDebit.toStringAsFixed(2), Icons.arrow_downward, Colors.red),
+                  _buildSummaryItem("Total Credit", totalCredit.toStringAsFixed(2), Icons.arrow_upward, Colors.green),
                   _buildSummaryItem("Sales Transactions", salesCount.toString(), Icons.shopping_cart, Colors.orange),
                   _buildSummaryItem("Payment Transactions", paymentsCount.toString(), Icons.payment, Colors.purple),
                   _buildSummaryItem("Total Transactions", summary.totalTransactions.toString(), Icons.receipt, AppColors.primaryColor),
                   AppButton(
-                      size: 100,
+                      size: 80,
                       name: "Pdf", onPressed: (){
                     Navigator.push(
                       context,
@@ -359,17 +359,17 @@ class _CustomerLedgerScreenState extends State<CustomerLedgerScreen> {
 
   Widget _buildSummaryItem(String label, String value, IconData icon, Color color) {
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, size: 20, color: color),
-          const SizedBox(width: 8),
+          const SizedBox(width: 4),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -521,7 +521,7 @@ class CustomerLedgerTableCard extends StatelessWidget {
             color: Colors.white,
             boxShadow: [
               BoxShadow(
-                color: Colors.grey.withOpacity(0.1),
+                color: Colors.grey.withValues(alpha: 0.1),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -820,7 +820,7 @@ class CustomerLedgerTableCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
-              '\$${debit.toStringAsFixed(2)}',
+              debit.toStringAsFixed(2),
               style: const TextStyle(
                 color: Colors.red,
                 fontWeight: FontWeight.w600,
@@ -851,11 +851,11 @@ class CustomerLedgerTableCard extends StatelessWidget {
               ? Container(
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
             decoration: BoxDecoration(
-              color: Colors.green.withOpacity(0.1),
+              color: Colors.green.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
-              '\$${credit.toStringAsFixed(2)}',
+              credit.toStringAsFixed(2),
               style: const TextStyle(
                 color: Colors.green,
                 fontWeight: FontWeight.w600,
@@ -887,14 +887,14 @@ class CustomerLedgerTableCard extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
             decoration: BoxDecoration(
-              color: isPositive ? Colors.red.withOpacity(0.1) : Colors.green.withOpacity(0.1),
+              color: isPositive ? Colors.red.withValues(alpha: 0.1) : Colors.green.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(4),
               border: Border.all(
                 color: isPositive ? Colors.red : Colors.green,
               ),
             ),
             child: Text(
-              '\$${balance.abs().toStringAsFixed(2)}',
+              balance.abs().toStringAsFixed(2),
               style: TextStyle(
                 color: isPositive ? Colors.red : Colors.green,
                 fontWeight: FontWeight.w600,

@@ -336,7 +336,7 @@ class _SaleReportScreenState extends State<SaleReportScreen> {
         borderRadius: BorderRadius.circular(8),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.2),
+            color: Colors.grey.withValues(alpha: 0.2),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -495,7 +495,7 @@ class SalesReportTableCard extends StatelessWidget {
             color: Colors.white,
             boxShadow: [
               BoxShadow(
-                color: Colors.grey.withOpacity(0.1),
+                color: Colors.grey.withValues(alpha: 0.1),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -655,11 +655,11 @@ class SalesReportTableCard extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: isSales ? Colors.blue.withOpacity(0.1) : Colors.green.withOpacity(0.1),
+              color: isSales ? Colors.blue.withValues(alpha: 0.1) : Colors.green.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
-              '\$${amount.toStringAsFixed(2)}',
+              amount.toStringAsFixed(2),
               style: TextStyle(
                 color: isSales ? Colors.blue : Colors.green,
                 fontWeight: FontWeight.w600,
@@ -687,7 +687,7 @@ class SalesReportTableCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
-              '\$${profit.toStringAsFixed(2)}',
+              profit.toStringAsFixed(2),
               style: TextStyle(
                 color: isPositive ? Colors.green : Colors.red,
                 fontWeight: FontWeight.w600,

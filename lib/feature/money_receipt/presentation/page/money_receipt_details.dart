@@ -24,13 +24,13 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: isDesktop ? _buildDesktopView() : _buildMobileView(),
+      body: _buildDesktopView(),
     );
   }
 
   Widget _buildDesktopView() {
     return Padding(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(12),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -40,12 +40,12 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
             child: Column(
               children: [
                 _buildHeaderCard(),
-                const SizedBox(height: 16),
+                // const SizedBox(height: 16),
                 _buildPaymentInfoCard(),
               ],
             ),
           ),
-          const SizedBox(width: 16),
+          // const SizedBox(width: 16),
           // Right Column - Summary and Affected Invoices
           Expanded(
             flex: 1,
@@ -62,22 +62,6 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMobileView() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        children: [
-          _buildHeaderCard(),
-          const SizedBox(height: 16),
-          _buildPaymentInfoCard(),
-          const SizedBox(height: 16),
-          _buildSummaryCard(),
-          const SizedBox(height: 16),
-          _buildAffectedInvoicesCard(),
-        ],
-      ),
-    );
-  }
 
   Widget _buildHeaderCard() {
     return Card(
@@ -94,7 +78,7 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
                   child: Text(
                     'Money Receipt: ${receipt.mrNo}',
                     style: const TextStyle(
-                      fontSize: 20,
+                      fontSize: 16,
                       fontWeight: FontWeight.bold,
                       color: AppColors.primaryColor,
                     ),
@@ -102,7 +86,7 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
                 ),
                 Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
+                    horizontal: 8,
                     vertical: 8,
                   ),
                   decoration: BoxDecoration(
@@ -121,7 +105,7 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 4),
             _buildDesktopInfoGrid(),
           ],
         ),
@@ -133,10 +117,10 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
     return GridView.count(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      crossAxisCount: 2,
-      crossAxisSpacing: 16,
-      mainAxisSpacing: 12,
-      childAspectRatio: 4,
+      crossAxisCount: 3,
+      crossAxisSpacing: 8,
+      mainAxisSpacing: 8,
+      childAspectRatio: 5,
       children: [
         _buildInfoItem('MR No', receipt.mrNo ?? '-'),
         _buildInfoItem('Payment Date', _formatDate(receipt.paymentDate)),
@@ -164,7 +148,7 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
             color: Colors.grey,
           ),
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: 2),
         Text(
           value,
           style: const TextStyle(
@@ -255,18 +239,18 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
     return Card(
       elevation: 3,
       child: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(10),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
               'Payment Summary',
               style: TextStyle(
-                fontSize: 18,
+                fontSize: 16,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 4),
             if (before != null) _buildSummarySection('Before Payment', before),
             if (after != null) _buildSummarySection('After Payment', after),
           ],
@@ -277,8 +261,8 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
 
   Widget _buildSummarySection(String title, dynamic paymentData) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(12),
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         border: Border.all(color: Colors.grey.shade300),
         borderRadius: BorderRadius.circular(8),
@@ -293,7 +277,7 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
               color: AppColors.primaryColor,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 4),
           if (paymentData is BeforePayment) ...[
             _buildSummaryRow('Total Due', paymentData.totalDue),
             _buildSummaryRow('Invoice Total', paymentData.invoiceTotal),
@@ -346,11 +330,11 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
             const Text(
               'Affected Invoices',
               style: TextStyle(
-                fontSize: 18,
+                fontSize: 16,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 4),
             if (affectedInvoices.isEmpty)
               const Center(
                 child: Text(
@@ -371,7 +355,7 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
 
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         border: Border.all(color: Colors.grey.shade300),
         borderRadius: BorderRadius.circular(6),

@@ -59,7 +59,7 @@ class _LogInScreenState extends State<LogInScreen> {
   double getImageWidth(double screenWidth) {
     if (screenWidth >= 1200) return 600; // large desktop
     if (screenWidth >= 800) return 550;  // tablet / small desktop
-    return 300;                           // mobile / mini desktop
+    return 350;                           // mobile / mini desktop
   }
 
   @override
@@ -155,20 +155,35 @@ class _LogInScreenState extends State<LogInScreen> {
                                 const SizedBox(height: 10),
                                 AppTextField(
                                   textInputAction: TextInputAction.next,
-                                  labelText: "Email",
+                                  labelText: "Username or Email", // Updated label
                                   isRequiredLabel: false,
                                   isRequired: true,
-                                  hintText: "Email Address",
+                                  hintText: "Enter username or email address", // Updated hint
                                   keyboardType: TextInputType.emailAddress,
-                                  // validator: (value) {
-                                  //   return value!.trim().isEmpty
-                                  //       ? 'Please enter email address'
-                                  //       : AppConstants.emailRegex.hasMatch(value.trim())
-                                  //       ? null
-                                  //       : 'Invalid email address';
-                                  // },
+                                  validator: (value) {
+                                    if (value == null || value.trim().isEmpty) {
+                                      return 'Please enter username or email';
+                                    }
+                                    return null;
+                                  },
                                   controller: emailCon,
                                 ),
+                                // AppTextField(
+                                //   textInputAction: TextInputAction.next,
+                                //   labelText: "Email",
+                                //   isRequiredLabel: false,
+                                //   isRequired: true,
+                                //   hintText: "Email Address",
+                                //   keyboardType: TextInputType.emailAddress,
+                                //   // validator: (value) {
+                                //   //   return value!.trim().isEmpty
+                                //   //       ? 'Please enter email address'
+                                //   //       : AppConstants.emailRegex.hasMatch(value.trim())
+                                //   //       ? null
+                                //   //       : 'Invalid email address';
+                                //   // },
+                                //   controller: emailCon,
+                                // ),
                                 AppTextField(
                                   isRequiredLabel: false,
                                   textInputAction: TextInputAction.done,

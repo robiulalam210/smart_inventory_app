@@ -21,13 +21,11 @@ Future<Uint8List> generateStockReportPdf(
         ),
       ),
       header: (context) => _buildHeader(reportResponse),
-      footer: (context) => _buildFooter(context),
       build: (context) => [
         _buildReportTitle(),
-        pw.SizedBox(height: 0),
         _buildExecutiveSummary(reportResponse.summary,reportResponse.report),
         _buildInventoryHealth(reportResponse.report),
-        _buildStockTable(reportResponse.report),
+        buildStockTable(reportResponse.report),
         _buildValuationAnalysis(reportResponse.report, reportResponse.summary),
       ],
     ),
@@ -50,12 +48,12 @@ pw.Widget _buildHeader(StockReportResponse report) {
             pw.Text(
               'STOCK INVENTORY REPORT',
               style: pw.TextStyle(
-                fontSize: 16,
+                fontSize: 14,
                 fontWeight: pw.FontWeight.bold,
                 color: PdfColors.purple800,
               ),
             ),
-            pw.SizedBox(height: 4),
+            pw.SizedBox(height: 2),
             pw.Text(
               'Complete Inventory Analysis & Valuation',
               style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey600),
@@ -331,7 +329,7 @@ pw.Widget _buildInventoryHealth(List<StockProduct> products) {
                   ],
                 ),
               ),
-              pw.SizedBox(width: 20),
+              pw.SizedBox(width: 5),
               // Category Breakdown
               pw.Expanded(
                 child: pw.Column(
@@ -378,7 +376,7 @@ pw.Widget _buildInventoryHealth(List<StockProduct> products) {
                           ],
                         ),
                       );
-                    }).toList(),
+                    }),
                   ],
                 ),
               ),
@@ -391,21 +389,21 @@ pw.Widget _buildInventoryHealth(List<StockProduct> products) {
 }
 
 // Stock Data Table
-pw.Widget _buildStockTable(List<StockProduct> products) {
+pw.Widget buildStockTable(List<StockProduct> products) {
   return pw.Container(
     margin: const pw.EdgeInsets.all(8),
     decoration: pw.BoxDecoration(
-      border: pw.Border.all(color: PdfColors.grey400),
       borderRadius: pw.BorderRadius.circular(8),
+      border: pw.Border.all(color: PdfColors.grey400, width: 1),
     ),
     child: pw.Column(
       children: [
         // Header
         pw.Container(
           padding: const pw.EdgeInsets.all(12),
-          decoration: const pw.BoxDecoration(
+          decoration: pw.BoxDecoration(
             color: PdfColors.purple800,
-            borderRadius: pw.BorderRadius.only(
+            borderRadius: const pw.BorderRadius.only(
               topLeft: pw.Radius.circular(8),
               topRight: pw.Radius.circular(8),
             ),
@@ -421,30 +419,24 @@ pw.Widget _buildStockTable(List<StockProduct> products) {
             ),
           ),
         ),
-        // Table
-        pw.Padding(
+
+        // Table Body
+        pw.Container(
           padding: const pw.EdgeInsets.all(8),
+          decoration: pw.BoxDecoration(
+            borderRadius: const pw.BorderRadius.only(
+              bottomLeft: pw.Radius.circular(8),
+              bottomRight: pw.Radius.circular(8),
+            ),
+          ),
           child: pw.Table(
-            border: pw.TableBorder.all(color: PdfColors.grey300, width: 0.5),
-            columnWidths: {
-              0: const pw.FlexColumnWidth(0.8), // SL
-              1: const pw.FlexColumnWidth(1.2), // Product No
-              2: const pw.FlexColumnWidth(2.5), // Product Name
-              3: const pw.FlexColumnWidth(1.2), // Category
-              4: const pw.FlexColumnWidth(1.0), // Brand
-              5: const pw.FlexColumnWidth(1.0), // Cost Price
-              6: const pw.FlexColumnWidth(1.0), // Selling Price
-              7: const pw.FlexColumnWidth(1.0), // Stock Qty
-              8: const pw.FlexColumnWidth(1.2), // Stock Value
-              9: const pw.FlexColumnWidth(1.0), // Profit Margin
-              10: const pw.FlexColumnWidth(1.2), // Status
-            },
+            border: pw.TableBorder.all(
+              color: PdfColors.grey300,
+              width: 0.5,
+            ),
             children: [
-              // Table Header
               _buildTableHeader(),
-              // Table Rows
-              ...products.map((product) => _buildTableRow(product)).toList(),
-              // Total Row
+              ...products.map(_buildTableRow),
               _buildTotalRow(products),
             ],
           ),
@@ -780,24 +772,6 @@ pw.Widget _buildAnalysisRow(
 }
 
 // Footer
-pw.Widget _buildFooter(pw.Context context) {
-  return pw.Container(
-    alignment: pw.Alignment.center,
-    margin: const pw.EdgeInsets.only(top: 20),
-    child: pw.Column(
-      children: [
-        pw.Divider(color: PdfColors.grey300),
-        pw.SizedBox(height: 8),
-        pw.Text(
-          'Page ${context.pageNumber} of ${context.pagesCount} • '
-              'Generated on ${_formatDateTime(DateTime.now())} • '
-              'Inventory Management Document',
-          style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey600),
-        ),
-      ],
-    ),
-  );
-}
 
 // Helper functions
 String _formatDate(DateTime date) {
@@ -835,8 +809,9 @@ Map<String, dynamic> _analyzeStockHealth(List<StockProduct> products) {
 
   final healthScore = _calculateHealthScore(products);
   String turnoverRating;
-  if (healthScore >= 80) turnoverRating = 'Excellent';
-  else if (healthScore >= 60) turnoverRating = 'Good';
+  if (healthScore >= 80) {
+    turnoverRating = 'Excellent';
+  } else if (healthScore >= 60) turnoverRating = 'Good';
   else if (healthScore >= 40) turnoverRating = 'Fair';
   else turnoverRating = 'Poor';
 

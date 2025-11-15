@@ -174,63 +174,10 @@ class _StockReportScreenState extends State<StockReportScreen> {
               Icons.star,
               Colors.purple,
             ),
-            AppButton(
-                size: 100,
-                name: "Pdf", onPressed: (){
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => Scaffold(
-                    backgroundColor: Colors.red,
-                    body: PdfPreview.builder(
-                      useActions: true,
-                      allowSharing: false,
-                      canDebug: false,
-                      canChangeOrientation: false,
-                      canChangePageFormat: false,
-                      dynamicLayout: true,
-                      build: (format) => generateStockReportPdf(
-                        state.response,
 
-                      ),
-                      pdfPreviewPageDecoration:
-                      BoxDecoration(color: AppColors.white),
-                      actionBarTheme: PdfActionBarTheme(
-                        backgroundColor: AppColors.primaryColor,
-                        iconColor: Colors.white,
-                        textStyle: const TextStyle(color: Colors.white),
-                      ),
-                      actions: [
-                        IconButton(
-                          onPressed: () => AppRoutes.pop(context),
-                          icon: const Icon(Icons.cancel, color: Colors.red),
-                        ),
-                      ],
-                      pagesBuilder: (context, pages) {
-                        debugPrint('Rendering ${pages.length} pages');
-                        return PageView.builder(
-                          itemCount: pages.length,
-                          scrollDirection: Axis.vertical,
-                          itemBuilder: (context, index) {
-                            final page = pages[index];
-                            return Container(
-                              color: Colors.grey,
-                              alignment: Alignment.center,
-                              padding: const EdgeInsets.all(8.0),
-                              child: Image(image: page.image, fit: BoxFit.contain),
-                            );
-                          },
-                        );
-                      },
-                    ),
-                  ),
-                ),
-              );
-
-            }),
             // Date Range Picker
             SizedBox(
-              width: 260,
+              width: 270,
               child: CustomDateRangeField(
                 isLabel: false,
                 selectedDateRange: selectedDateRange,
@@ -307,7 +254,62 @@ class _StockReportScreenState extends State<StockReportScreen> {
                 _fetchStockReport();
               },
             ),
+            gapW16,
+            AppButton(
+                size: 100,
+                color: AppColors.primaryColor,
+                name: "Pdf", onPressed: (){
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => Scaffold(
+                    backgroundColor: Colors.red,
+                    body: PdfPreview.builder(
+                      useActions: true,
+                      allowSharing: false,
+                      canDebug: false,
+                      canChangeOrientation: false,
+                      canChangePageFormat: false,
+                      dynamicLayout: true,
+                      build: (format) => generateStockReportPdf(
+                        state.response,
 
+                      ),
+                      pdfPreviewPageDecoration:
+                      BoxDecoration(color: AppColors.white),
+                      actionBarTheme: PdfActionBarTheme(
+                        backgroundColor: AppColors.primaryColor,
+                        iconColor: Colors.white,
+                        textStyle: const TextStyle(color: Colors.white),
+                      ),
+                      actions: [
+                        IconButton(
+                          onPressed: () => AppRoutes.pop(context),
+                          icon: const Icon(Icons.cancel, color: Colors.red),
+                        ),
+                      ],
+                      pagesBuilder: (context, pages) {
+                        debugPrint('Rendering ${pages.length} pages');
+                        return PageView.builder(
+                          itemCount: pages.length,
+                          scrollDirection: Axis.vertical,
+                          itemBuilder: (context, index) {
+                            final page = pages[index];
+                            return Container(
+                              color: Colors.grey,
+                              alignment: Alignment.center,
+                              padding: const EdgeInsets.all(8.0),
+                              child: Image(image: page.image, fit: BoxFit.contain),
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              );
+
+            }),
 
           ],
         );
@@ -324,7 +326,7 @@ class _StockReportScreenState extends State<StockReportScreen> {
         borderRadius: BorderRadius.circular(8),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -495,7 +497,7 @@ class StockReportTableCard extends StatelessWidget {
             color: Colors.white,
             boxShadow: [
               BoxShadow(
-                color: Colors.grey.withOpacity(0.1),
+                color: Colors.grey.withValues(alpha: 0.1),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -732,11 +734,11 @@ class StockReportTableCard extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
             decoration: BoxDecoration(
-              color: getPriceColor().withOpacity(0.1),
+              color: getPriceColor().withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
-              '\$${price.toStringAsFixed(2)}',
+              price.toStringAsFixed(2),
               style: TextStyle(
                 color: getPriceColor(),
                 fontWeight: FontWeight.w600,

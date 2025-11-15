@@ -149,10 +149,10 @@ class _ExpenseHeadScreenState extends State<ExpenseHeadScreen> {
                           },
 
                           onClear: () {
-                            context
-                                .read<ExpenseHeadBloc>()
-                                .filterTextController
+                               dataBloc .filterTextController
                                 .clear();
+                               dataBloc.name.clear();
+                               context.read<ExpenseHeadBloc>().name.clear();
                             _fetchApiData();
                           },
                           hintText:

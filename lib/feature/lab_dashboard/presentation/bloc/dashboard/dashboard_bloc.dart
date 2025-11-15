@@ -38,6 +38,7 @@ import '../../../../sales/presentation/pages/create_pos_sale/create_pos_sale.dar
 
 import '../../../../supplier/presentation/pages/supplier_list_screen.dart';
 import '../../../../supplier/presentation/pages/supplier_payment_list_screen.dart';
+import '../../../../transactions/presentation/pages/transaction_screen.dart';
 import '../../../../users_list/presentation/pages/users_screen.dart';
 import '../../../data/models/dashboard/dashboard_model.dart';
 import '../../pages/lab_dashboard_screen.dart';
@@ -98,9 +99,9 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     AppWrapper(child: UnitScreen()),
     AppWrapper(child: BrandScreen()),
     AppWrapper(child: CategoriesScreen()),
-    // AppWrapper(child: TransactionScreen()),
     AppWrapper(child: GroupsScreen()),
-    //
+    AppWrapper(child: TransactionScreen()),
+
 
 
 

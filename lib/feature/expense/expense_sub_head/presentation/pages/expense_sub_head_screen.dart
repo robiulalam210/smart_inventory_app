@@ -164,6 +164,8 @@ class _ExpenseHeadScreenState extends State<ExpenseSubHeadScreen> {
                       AppButton(
                         name: "Create Sub Expanse Head",
                         onPressed: () {
+                          context
+                              .read<ExpenseSubHeadBloc>().clearData();
                           showDialog(
                             context: context,
                             builder: (context) {

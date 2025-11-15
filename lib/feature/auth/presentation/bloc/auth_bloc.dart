@@ -30,9 +30,23 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         return;
       }
 
-      final response = await loginService(
-        payload: {"username": event.username, "password": event.password},
-      );
+      // Determine if the input is email or username
+      final String loginIdentifier = event.username.trim();
+      final bool isEmail = loginIdentifier.contains('@');
+
+      // Create payload based on input type
+      final Map<String, dynamic> payload = {
+        "password": event.password,
+      };
+
+      // Add either email or username to payload based on input
+      if (isEmail) {
+        payload["email"] = loginIdentifier;
+      } else {
+        payload["username"] = loginIdentifier;
+      }
+
+      final response = await loginService(payload: payload);
 
       if (response.success == true && response.user != null) {
         // Validate company status with complete data
@@ -53,6 +67,43 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(AuthError("Login failed. Please try again."));
     }
   }
+  // Future<void> _onLoginRequested(
+  //     LoginRequested event,
+  //     Emitter<AuthState> emit,
+  //     ) async {
+  //   emit(AuthLoading());
+  //   final connectivityState = connectivityBloc.state;
+  //
+  //   try {
+  //     // Check internet connectivity
+  //     if (connectivityState is ConnectivityOffline) {
+  //       emit(AuthError("No internet connection. Please try again later."));
+  //       return;
+  //     }
+  //
+  //     final response = await loginService(
+  //       payload: {"username": event.username, "password": event.password},
+  //     );
+  //
+  //     if (response.success == true && response.user != null) {
+  //       // Validate company status with complete data
+  //       final validationResult = _validateCompany(response.user!);
+  //       if (!validationResult.isValid) {
+  //         emit(AuthError(validationResult.errorMessage));
+  //         return;
+  //       }
+  //
+  //       // Save user locally and emit success
+  //       await authService.saveUserLocally(event.password, response);
+  //       emit(AuthAuthenticated(response));
+  //     } else {
+  //       emit(AuthError(response.message ?? "Login failed. Check credentials."));
+  //     }
+  //   } catch (e, stack) {
+  //     debugPrint("Login Error: $e\n$stack");
+  //     emit(AuthError("Login failed. Please try again."));
+  //   }
+  // }
 
   CompanyValidationResult _validateCompany(LoginModelUser user) {
     final company = user.company;
