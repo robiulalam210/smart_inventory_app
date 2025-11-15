@@ -16,6 +16,7 @@ import 'package:smart_inventory/core/widgets/date_range.dart';
 import 'package:smart_inventory/feature/report/presentation/page/supplier_ledger_screen/pdf.dart';
 import 'package:smart_inventory/feature/supplier/presentation/bloc/supplier_invoice/supplier_invoice_bloc.dart';
 
+import '../../../../../core/configs/app_routes.dart';
 import '../../../../../responsive.dart';
 import '../../../../supplier/data/model/supplier_active_model.dart';
 import '../../../data/model/supplier_ledger_model.dart';
@@ -374,7 +375,7 @@ class _SupplierLedgerScreenState extends State<SupplierLedgerScreen> {
                             canChangeOrientation: false,
                             canChangePageFormat: false,
                             dynamicLayout: true,
-                            build: (format) => generateSupplierDueAdvanceReportPdf(
+                            build: (format) => generateSupplierLedgerReportPdf(
                               state.response,
 
                             ),
