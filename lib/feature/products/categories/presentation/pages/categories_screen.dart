@@ -18,17 +18,23 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
   late var dataBloc = context.read<CategoriesBloc>();
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    dataBloc.filterTextController = TextEditingController();
+  void initState() {
     _fetchApiData();
+    // TODO: implement initState
+    super.initState();
   }
-
-  @override
-  void dispose() {
-    dataBloc.filterTextController.dispose();
-    super.dispose();
-  }
+  // @override
+  // void didChangeDependencies() {
+  //   super.didChangeDependencies();
+  //   dataBloc.filterTextController = TextEditingController();
+  //   _fetchApiData();
+  // }
+  //
+  // @override
+  // void dispose() {
+  //   dataBloc.filterTextController.dispose();
+  //   super.dispose();
+  // }
 
   void _fetchApiData({
     String filterText = '',
@@ -103,11 +109,11 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
           } else if (state is CategoriesAddSuccess ||
               state is CategoriesSwitchSuccess ||
               state is CategoriesDeleteSuccess) {
-            context.read<CategoriesBloc>().nameController.clear();
 
             // Navigator.pop(context);
             if (state is CategoriesAddSuccess) Navigator.pop(context);
             _fetchApiData();
+            context.read<CategoriesBloc>().clearData();
           } else if (state is CategoriesAddFailed ||
               state is CategoriesDeleteFailed) {
             Navigator.pop(context);
@@ -140,6 +146,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                 AppButton(
                   name: "Create Categories ",
                   onPressed: () {
+                    context.read<CategoriesBloc>().nameController.clear();
                     showDialog(
                       context: context,
                       builder: (context) {
@@ -182,76 +189,4 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
     );
   }
 
-  void _showFilterMenu(BuildContext context, Offset offset) async {
-    final screenSize = MediaQuery.of(context).size;
-    final left = offset.dx;
-    final top = offset.dy;
-    final right = screenSize.width - left;
-    final bottom = screenSize.height - top;
-
-    await showMenu(
-      color: const Color.fromARGB(255, 248, 248, 248),
-      context: context,
-      position: RelativeRect.fromLTRB(left, top, right, bottom),
-      items: [
-        PopupMenuItem(
-          padding: const EdgeInsets.all(0),
-          enabled: false,
-          child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-              return Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  children: [
-                    Container(
-                      width: double.maxFinite,
-                      padding: const EdgeInsets.only(
-                        top: 5,
-                        bottom: 10,
-                        left: 10,
-                        right: 10,
-                      ),
-                      color: const Color.fromARGB(255, 248, 248, 248),
-                      child: Text(
-                        'Filter',
-                        style: AppTextStyle.cardLevelText(context),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 5.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          GestureDetector(
-                            onTap: () {
-                              context.read<CategoriesBloc>().add(
-                                FetchCategoriesList(context),
-                              );
-                              Navigator.of(context).pop();
-                            },
-                            child: Text(
-                              'Clear',
-                              style: AppTextStyle.errorTextStyle(context),
-                            ),
-                          ),
-                          GestureDetector(
-                            onTap: () => Navigator.of(context).pop(),
-                            child: Text(
-                              'Close',
-                              style: AppTextStyle.cardLevelText(context),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
 }

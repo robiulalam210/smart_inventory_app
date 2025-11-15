@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:iconsax/iconsax.dart';
 import 'package:smart_inventory/feature/supplier/data/model/supplier_list_model.dart';
 
 import '../../../../core/configs/app_colors.dart';
@@ -176,7 +177,7 @@ class SupplierDataTableWidget extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               IconButton(
-                icon: const Icon(Icons.edit, size: 18),
+                icon:  Icon( Iconsax.edit, size: 18),
                 color: Colors.blue,
                 onPressed: () => onEdit?.call(supplier),
               ),

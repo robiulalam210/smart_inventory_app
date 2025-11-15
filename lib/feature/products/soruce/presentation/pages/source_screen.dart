@@ -18,24 +18,12 @@ class SourceScreen extends StatefulWidget {
 
 class _SourceScreenState extends State<SourceScreen> {
   late var sourceBloc = context.read<SourceBloc>();
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // Initialize sourceBloc here
-
-    // Now, you can safely access the SourceBloc and initialize the filterTextController
-    sourceBloc.filterTextController = TextEditingController();
-    _fetchApiData();
+@override
+  void initState() {
+  _fetchApiData();
+  // TODO: implement initState
+    super.initState();
   }
-
-  @override
-  void dispose() {
-    // Dispose of the filterTextController when the widget is disposed
-    sourceBloc.filterTextController.dispose();
-    super.dispose();
-  }
-
   void _fetchApiData({String filterText = '', int pageNumber = 0}) {
     context.read<SourceBloc>().add(
       FetchSourceList(context, filterText: filterText, pageNumber: pageNumber),
@@ -100,7 +88,7 @@ class _SourceScreenState extends State<SourceScreen> {
                 _fetchApiData(); // Reload warehouse list
               } else if (state is SourceUpdateSuccess) {
                 Navigator.pop(context); // Close loader dialog
-                Navigator.pop(context); // Close loader dialog
+                // Navigator.pop(context); // Close loader dialog
                 _fetchApiData(); // Reload warehouse list
               } else if (state is SourceDeleteSuccess) {
                 Navigator.pop(context); // Close loader dialog

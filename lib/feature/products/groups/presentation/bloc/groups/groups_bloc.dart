@@ -124,9 +124,8 @@ class GroupsBloc extends Bloc<GroupsEvent, GroupsState> {
 
       ApiResponse response = appParseJson(
         jsonString,
-            (data) => GroupsModel.fromJson(data),
+        (data) => GroupsModel.fromJson(data),
       );
-
 
       if (response.success == false) {
         emit(GroupsAddFailed(title: '', content: response.message ?? ""));
@@ -152,11 +151,9 @@ class GroupsBloc extends Bloc<GroupsEvent, GroupsState> {
         payload: event.body!,
       ); // Use the correct API URL
       final jsonString = jsonEncode(res);
-
       ApiResponse response = appParseJson(
         jsonString,
-        (data) =>
-            List<GroupsModel>.from(data.map((x) => GroupsModel.fromJson(x))),
+        (data) => GroupsModel.fromJson(data),
       );
       if (response.success == false) {
         emit(GroupsAddFailed(title: 'Json', content: response.message ?? ""));
@@ -201,31 +198,32 @@ class GroupsBloc extends Bloc<GroupsEvent, GroupsState> {
   }
 
   Future<void> _onDeleteBrandList(
-      DeleteGroups event, Emitter<GroupsState> emit) async {
-
+    DeleteGroups event,
+    Emitter<GroupsState> emit,
+  ) async {
     emit(GroupsAddLoading());
 
     try {
-      final res  = await deleteResponse(url: "${AppUrls.group+event.id.toString()}/"); // Use the correct API URL
+      final res = await deleteResponse(
+        url: "${AppUrls.group + event.id.toString()}/",
+      ); // Use the correct API URL
 
       final jsonString = jsonEncode(res);
       ApiResponse response = appParseJson(
         jsonString,
-            (data) => List<GroupsModel>.from(data.map((x) => GroupsModel.fromJson(x))),
+        (data) =>
+            List<GroupsModel>.from(data.map((x) => GroupsModel.fromJson(x))),
       );
       if (response.success == false) {
-        emit(GroupsAddFailed(title: 'Json', content: response.message??""));
+        emit(GroupsAddFailed(title: 'Json', content: response.message ?? ""));
         return;
       }
       clearData();
-      emit(GroupsAddSuccess(
-
-      ));
-    } catch (error,stack) {
+      emit(GroupsAddSuccess());
+    } catch (error, stack) {
       print(stack);
       clearData();
-      emit(GroupsAddFailed(title: "Error",content: error.toString()));
-
+      emit(GroupsAddFailed(title: "Error", content: error.toString()));
     }
   }
 

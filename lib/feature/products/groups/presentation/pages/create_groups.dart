@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:smart_inventory/feature/products/groups/presentation/bloc/groups/groups_bloc.dart';
 import '../../../../../core/configs/configs.dart';
 import '../../../../../core/widgets/app_button.dart';
+import '../../../../../core/widgets/app_text_field.dart';
 import '../../../../../core/widgets/input_field.dart';
 import '../../../../../core/widgets/show_custom_toast.dart';
 
@@ -126,7 +127,7 @@ class _GroupsCreateState extends State<GroupsCreate> {
           );
         }
       },
-      child: widget.isDialog ? _buildDialogContent() : _buildFullScreenContent(),
+      child: _buildDialogContent() ,
     );
   }
 
@@ -168,13 +169,13 @@ class _GroupsCreateState extends State<GroupsCreate> {
             SizedBox(height: 20),
 
             // Name Input Field
-            CustomInputField(
-              isRequiredLable: true,
+            AppTextField(
+
               isRequired: true,
               controller: nameController,
               hintText: 'Enter group name',
               labelText: 'Group Name',
-              fillColor: Colors.grey[50],
+
               keyboardType: TextInputType.text,
               validator: (value) {
                 if (value == null || value.isEmpty) {

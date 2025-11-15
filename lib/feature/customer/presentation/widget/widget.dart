@@ -272,8 +272,8 @@ class CustomerTableCard extends StatelessWidget {
                 context.read<CustomerBloc>().selectedState = customer.isActive == true ? "Active" : "Inactive";
                 _showEditDialog(context, customer);
               },
-              icon: const Icon(
-                Icons.edit,
+              icon:  Icon(
+                  Iconsax.edit,
                 size: 18,
                 color: Colors.blue,
               ),

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
+import 'package:iconsax/iconsax.dart';
 import '../../../../../core/configs/app_colors.dart';
 import '../../data/model/product_model.dart';
 
@@ -165,12 +167,11 @@ class ProductDataTableWidget extends StatelessWidget {
     return DataCell(
       SizedBox(
         width: columnWidth,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
+        child: Center(
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: color),
             ),
@@ -202,8 +203,8 @@ class ProductDataTableWidget extends StatelessWidget {
               // Edit Button
               IconButton(
                 icon: Icon(
-                  Icons.edit,
-                  size: 16,
+                  Iconsax.edit,
+                  size: 20,
                   color: Colors.blue.shade600,
                 ),
                 onPressed: () => onEdit?.call(product),
@@ -215,8 +216,8 @@ class ProductDataTableWidget extends StatelessWidget {
               // Delete Button
               IconButton(
                 icon: Icon(
-                  Icons.delete,
-                  size: 16,
+                  HugeIcons.strokeRoundedDeleteThrow,
+                  size: 20,
                   color: Colors.red.shade600,
                 ),
                 onPressed: () => onDelete?.call(product),
