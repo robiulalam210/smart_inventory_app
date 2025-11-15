@@ -1,5 +1,10 @@
+import 'package:flutter/material.dart';
+import 'package:printing/printing.dart';
 import '../../../../core/configs/configs.dart';
+import '../../../../core/configs/pdf/lab_billing_preview_invoice.dart';
 import '../../data/models/pos_sale_model.dart';
+import '../pages/sales_details_screen.dart';
+import 'pdf/sales_invocei.dart';
 
 class PosSaleDataTableWidget extends StatelessWidget {
   final List<PosSaleModel> sales;
@@ -52,8 +57,7 @@ class PosSaleDataTableWidget extends StatelessWidget {
                             fontWeight: FontWeight.bold,
                           ),
                           headingRowColor: WidgetStateProperty.all(
-                              AppColors.primaryColor
-                          ),
+                              AppColors.primaryColor),
                           headingRowHeight: 40,
                           columns: _buildColumns(dynamicColumnWidth),
                           rows: sales
@@ -61,6 +65,7 @@ class PosSaleDataTableWidget extends StatelessWidget {
                               .entries
                               .map(
                                 (entry) => _buildDataRow(
+                              context, // Add context parameter
                               entry.key + 1,
                               entry.value,
                               dynamicColumnWidth,
@@ -90,8 +95,9 @@ class PosSaleDataTableWidget extends StatelessWidget {
       "Created By",
       "Grand Total",
       "Paid Amount",
-      "Due/Advance", // CHANGED: More descriptive column name
+      "Due/Advance",
       "Status",
+      "Actions",
     ];
 
     return labels
@@ -117,7 +123,8 @@ class PosSaleDataTableWidget extends StatelessWidget {
         .toList();
   }
 
-  DataRow _buildDataRow(int index, PosSaleModel sale, double columnWidth) {
+  DataRow _buildDataRow(
+      BuildContext context, int index, PosSaleModel sale, double columnWidth) {
     // FIX: Calculate proper due/advance display
     final dueAmount = sale.dueAmount is String
         ? double.tryParse(sale.dueAmount!) ?? 0.0
@@ -141,7 +148,7 @@ class PosSaleDataTableWidget extends StatelessWidget {
         _buildDataCell(index.toString(), columnWidth),
         _buildDataCell(sale.invoiceNo.toString(), columnWidth),
         _buildDataCell(
-          appWidgets.convertDateTimeDDMMMYYYY(sale.saleDate),
+          _formatDate(sale.saleDate),
           columnWidth,
         ),
         _buildDataCell(sale.customerName.toString(), columnWidth),
@@ -165,7 +172,90 @@ class PosSaleDataTableWidget extends StatelessWidget {
           isAdvance: isAdvance,
         ),
         _buildDataCell(status, columnWidth, status: status),
+        _buildActionsCell(context, sale, columnWidth),
       ],
+    );
+  }
+
+  DataCell _buildActionsCell(BuildContext context, PosSaleModel sale, double width) {
+    return DataCell(
+      SizedBox(
+        width: width,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            IconButton(
+              icon: const Icon(Icons.visibility, size: 16),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => SalesDetailsScreen(sale: sale),
+                  ),
+                );
+              },
+              tooltip: 'View Details',
+            ),
+            IconButton(
+              icon: const Icon(Icons.picture_as_pdf, size: 16),
+              onPressed: () {
+
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => Scaffold(
+                      backgroundColor: Colors.red,
+                      body: PdfPreview.builder(
+                        useActions: true,
+                        allowSharing: false,
+                        canDebug: false,
+                        canChangeOrientation: false,
+                        canChangePageFormat: false,
+                        dynamicLayout: true,
+                        build: (format) => generateSalesPdf(
+                         sale,
+
+                        ),
+                        pdfPreviewPageDecoration:
+                         BoxDecoration(color: AppColors.white),
+                        actionBarTheme: PdfActionBarTheme(
+                          backgroundColor: AppColors.primaryColor,
+                          iconColor: Colors.white,
+                          textStyle: const TextStyle(color: Colors.white),
+                        ),
+                        actions: [
+                          IconButton(
+                            onPressed: () => AppRoutes.pop(context),
+                            icon: const Icon(Icons.cancel, color: Colors.red),
+                          ),
+                        ],
+                        pagesBuilder: (context, pages) {
+                          debugPrint('Rendering ${pages.length} pages');
+                          return PageView.builder(
+                            itemCount: pages.length,
+                            scrollDirection: Axis.vertical,
+                            itemBuilder: (context, index) {
+                              final page = pages[index];
+                              return Container(
+                                color: Colors.grey,
+                                alignment: Alignment.center,
+                                padding: const EdgeInsets.all(8.0),
+                                child: Image(image: page.image, fit: BoxFit.contain),
+                              );
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                );
+
+              },
+              tooltip: 'Generate PDF',
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -219,6 +309,12 @@ class PosSaleDataTableWidget extends StatelessWidget {
   // Helper method to format currency
   String _formatCurrency(double amount) {
     return '৳${amount.toStringAsFixed(2)}';
+  }
+
+  // Helper method to format date
+  String _formatDate(DateTime? date) {
+    if (date == null) return 'N/A';
+    return '${date.day}/${date.month}/${date.year}';
   }
 
   // Helper method to determine payment status

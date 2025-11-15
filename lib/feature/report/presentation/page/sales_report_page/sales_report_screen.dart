@@ -1,5 +1,6 @@
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:printing/printing.dart';
 import 'package:smart_inventory/core/core.dart';
 
 import '../../../../../core/widgets/date_range.dart';
@@ -9,6 +10,7 @@ import '../../../../users_list/data/model/user_model.dart';
 import '../../../../users_list/presentation/bloc/users/user_bloc.dart';
 import '../../../data/model/sales_report_model.dart';
 import '../../bloc/sales_report_bloc/sales_report_bloc.dart';
+import 'pdf/sales_report.dart';
 
 class SaleReportScreen extends StatefulWidget {
   const SaleReportScreen({super.key});
@@ -264,6 +266,61 @@ class _SaleReportScreenState extends State<SaleReportScreen> {
               Icons.receipt,
               Colors.purple,
             ),
+
+            AppButton(
+                size: 100,
+                name: "Pdf", onPressed: (){
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => Scaffold(
+                    backgroundColor: Colors.red,
+                    body: PdfPreview.builder(
+                      useActions: true,
+                      allowSharing: false,
+                      canDebug: false,
+                      canChangeOrientation: false,
+                      canChangePageFormat: false,
+                      dynamicLayout: true,
+                      build: (format) => generateSalesReportPdf(
+                        state.response,
+
+                      ),
+                      pdfPreviewPageDecoration:
+                      BoxDecoration(color: AppColors.white),
+                      actionBarTheme: PdfActionBarTheme(
+                        backgroundColor: AppColors.primaryColor,
+                        iconColor: Colors.white,
+                        textStyle: const TextStyle(color: Colors.white),
+                      ),
+                      actions: [
+                        IconButton(
+                          onPressed: () => AppRoutes.pop(context),
+                          icon: const Icon(Icons.cancel, color: Colors.red),
+                        ),
+                      ],
+                      pagesBuilder: (context, pages) {
+                        debugPrint('Rendering ${pages.length} pages');
+                        return PageView.builder(
+                          itemCount: pages.length,
+                          scrollDirection: Axis.vertical,
+                          itemBuilder: (context, index) {
+                            final page = pages[index];
+                            return Container(
+                              color: Colors.grey,
+                              alignment: Alignment.center,
+                              padding: const EdgeInsets.all(8.0),
+                              child: Image(image: page.image, fit: BoxFit.contain),
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              );
+
+            })
           ],
         );
       },
@@ -497,7 +554,6 @@ class SalesReportTableCard extends StatelessWidget {
                                 _buildAmountCell(report.salesPrice, dynamicColumnWidth, isSales: true),
                                 _buildProfitCell(report.profit, dynamicColumnWidth),
                                 _buildStatusCell(report.paymentStatus, dynamicColumnWidth),
-                                _buildActionCell(report, context, dynamicColumnWidth),
                               ],
                             );
                           }).toList(),
@@ -552,12 +608,7 @@ class SalesReportTableCard extends StatelessWidget {
           child: const Text('Status', textAlign: TextAlign.center),
         ),
       ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Actions', textAlign: TextAlign.center),
-        ),
-      ),
+
     ];
   }
 
@@ -678,33 +729,6 @@ class SalesReportTableCard extends StatelessWidget {
     );
   }
 
-  DataCell _buildActionCell(SalesReportModel report, BuildContext context, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // View Button
-            _buildActionButton(
-              icon: HugeIcons.strokeRoundedView,
-              color: Colors.green,
-              tooltip: 'View sales details',
-              onPressed: () => _showViewDialog(context, report),
-            ),
-
-            // Print/Export Button
-            _buildActionButton(
-              icon: Iconsax.printer,
-              color: Colors.blue,
-              tooltip: 'Print report',
-              onPressed: () => _printReport(context, report),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
   Widget _buildActionButton({
     required IconData icon,
@@ -782,15 +806,6 @@ class SalesReportTableCard extends StatelessWidget {
     );
   }
 
-  void _printReport(BuildContext context, SalesReportModel report) {
-    // Implement print/export functionality
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Printing report for ${report.invoiceNo}'),
-        duration: const Duration(seconds: 2),
-      ),
-    );
-  }
 
   Widget _buildDetailRow(String label, String value) {
     return Padding(

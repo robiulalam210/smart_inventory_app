@@ -1,11 +1,13 @@
 // lib/feature/report/presentation/screens/supplier_due_advance_screen.dart
 import 'dart:async';
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
+import 'package:printing/printing.dart';
 import 'package:smart_inventory/core/core.dart';
 import 'package:smart_inventory/core/widgets/date_range.dart';
 
 import '../../../data/model/supplier_due_advance_report_model.dart';
 import '../../bloc/supplier_due_advance_bloc/supplier_due_advance_bloc.dart';
+import '../supplier_ledger_screen/pdf.dart';
 
 class SupplierDueAdvanceScreen extends StatefulWidget {
   const SupplierDueAdvanceScreen({super.key});
@@ -262,7 +264,60 @@ Spacer(),
               Colors.teal,
               subtitle: '${((settledSuppliers / suppliers.length) * 100).toStringAsFixed(1)}% settled',
             ),
+            AppButton(
+                size: 100,
+                name: "Pdf", onPressed: (){
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => Scaffold(
+                    backgroundColor: Colors.red,
+                    body: PdfPreview.builder(
+                      useActions: true,
+                      allowSharing: false,
+                      canDebug: false,
+                      canChangeOrientation: false,
+                      canChangePageFormat: false,
+                      dynamicLayout: true,
+                      build: (format) => generateSupplierDueAdvanceReportPdf(
+                        state.response,
 
+                      ),
+                      pdfPreviewPageDecoration:
+                      BoxDecoration(color: AppColors.white),
+                      actionBarTheme: PdfActionBarTheme(
+                        backgroundColor: AppColors.primaryColor,
+                        iconColor: Colors.white,
+                        textStyle: const TextStyle(color: Colors.white),
+                      ),
+                      actions: [
+                        IconButton(
+                          onPressed: () => AppRoutes.pop(context),
+                          icon: const Icon(Icons.cancel, color: Colors.red),
+                        ),
+                      ],
+                      pagesBuilder: (context, pages) {
+                        debugPrint('Rendering ${pages.length} pages');
+                        return PageView.builder(
+                          itemCount: pages.length,
+                          scrollDirection: Axis.vertical,
+                          itemBuilder: (context, index) {
+                            final page = pages[index];
+                            return Container(
+                              color: Colors.grey,
+                              alignment: Alignment.center,
+                              padding: const EdgeInsets.all(8.0),
+                              child: Image(image: page.image, fit: BoxFit.contain),
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              );
+
+            }),
 
           ],
         );
@@ -443,6 +498,7 @@ class SupplierDueAdvanceDataTable extends StatelessWidget {
         padding: const EdgeInsets.all(0),
         child: Column(
           children: [
+
             // Summary row
             _buildTableSummary(totalDue, totalAdvance, netBalance),
             const SizedBox(height: 8),

@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:lottie/lottie.dart';
+import 'package:printing/printing.dart';
 import 'package:smart_inventory/core/configs/app_colors.dart';
 import 'package:smart_inventory/core/configs/app_images.dart';
 import 'package:smart_inventory/core/configs/app_text.dart';
@@ -15,10 +16,13 @@ import 'package:smart_inventory/core/widgets/app_dropdown.dart';
 import 'package:smart_inventory/core/widgets/date_range.dart';
 import 'package:smart_inventory/feature/customer/data/model/customer_active_model.dart';
 import 'package:smart_inventory/feature/customer/presentation/bloc/customer/customer_bloc.dart';
+import 'package:smart_inventory/feature/report/presentation/page/customer_due_advance_screen/pdf.dart';
 
+import '../../../../../core/configs/app_routes.dart';
 import '../../../../../responsive.dart';
 import '../../../data/model/customer_due_advance_report_model.dart';
 import '../../bloc/customer_due_advance_bloc/customer_due_advance_bloc.dart';
+import '../customer_ledger_screen/pdf.dart';
 
 class CustomerDueAdvanceScreen extends StatefulWidget {
   const CustomerDueAdvanceScreen({super.key});
@@ -344,6 +348,61 @@ AppButton(name: "Clear", onPressed: (){
               Icons.check_circle,
               Colors.green,
             ),
+
+            AppButton(
+                size: 100,
+                name: "Pdf", onPressed: (){
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => Scaffold(
+                    backgroundColor: Colors.red,
+                    body: PdfPreview.builder(
+                      useActions: true,
+                      allowSharing: false,
+                      canDebug: false,
+                      canChangeOrientation: false,
+                      canChangePageFormat: false,
+                      dynamicLayout: true,
+                      build: (format) => generateCustomerDueAdvanceReportPdf(
+                        state.response,
+
+                      ),
+                      pdfPreviewPageDecoration:
+                      BoxDecoration(color: AppColors.white),
+                      actionBarTheme: PdfActionBarTheme(
+                        backgroundColor: AppColors.primaryColor,
+                        iconColor: Colors.white,
+                        textStyle: const TextStyle(color: Colors.white),
+                      ),
+                      actions: [
+                        IconButton(
+                          onPressed: () => AppRoutes.pop(context),
+                          icon: const Icon(Icons.cancel, color: Colors.red),
+                        ),
+                      ],
+                      pagesBuilder: (context, pages) {
+                        debugPrint('Rendering ${pages.length} pages');
+                        return PageView.builder(
+                          itemCount: pages.length,
+                          scrollDirection: Axis.vertical,
+                          itemBuilder: (context, index) {
+                            final page = pages[index];
+                            return Container(
+                              color: Colors.grey,
+                              alignment: Alignment.center,
+                              padding: const EdgeInsets.all(8.0),
+                              child: Image(image: page.image, fit: BoxFit.contain),
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              );
+
+            }),
           ],
         );
       },

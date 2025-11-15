@@ -1,5 +1,9 @@
+import 'package:printing/printing.dart';
+import 'package:smart_inventory/feature/purchase/presentation/page/purchase_details.dart';
+
 import '../../../../core/configs/configs.dart';
 import '../data/model/purchase_sale_model.dart';
+import 'page/pdf/generate_purchase_pdf.dart';
 
 class PurchaseDataTableWidget extends StatelessWidget {
   final List<PurchaseModel> sales;
@@ -61,7 +65,7 @@ class PurchaseDataTableWidget extends StatelessWidget {
                               .asMap()
                               .entries
                               .map(
-                                (entry) => _buildDataRow(
+                                (entry) => _buildDataRow(context,
                               entry.key + 1,
                               entry.value,
                               dynamicColumnWidth,
@@ -93,6 +97,8 @@ class PurchaseDataTableWidget extends StatelessWidget {
       "Paid",
       "Due",
       "Payment Method",
+      "Actions",
+
     ];
 
     return labels
@@ -119,7 +125,7 @@ class PurchaseDataTableWidget extends StatelessWidget {
   }
 
   // --- Build Each Row ---
-  DataRow _buildDataRow(int index, PurchaseModel sale, double columnWidth) {
+  DataRow _buildDataRow(BuildContext context,int index, PurchaseModel sale, double columnWidth) {
     return DataRow(
       cells: [
         _buildDataCell(index.toString(), columnWidth),
@@ -138,7 +144,90 @@ class PurchaseDataTableWidget extends StatelessWidget {
           isDue: true,
         ),
         _buildDataCell(sale.paymentMethod ?? '-', columnWidth),
+        _buildActionsCell(context, sale, columnWidth),
+
       ],
+    );
+  }
+  DataCell _buildActionsCell(BuildContext context, PurchaseModel purchase, double width) {
+    return DataCell(
+      SizedBox(
+        width: width,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            IconButton(
+              icon: const Icon(Icons.visibility, size: 16),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => PurchaseDetailsScreen(purchase: purchase),
+                  ),
+                );
+              },
+              tooltip: 'View Details',
+            ),
+            IconButton(
+              icon: const Icon(Icons.picture_as_pdf, size: 16),
+              onPressed: () {
+
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => Scaffold(
+                      backgroundColor: Colors.red,
+                      body: PdfPreview.builder(
+                        useActions: true,
+                        allowSharing: false,
+                        canDebug: false,
+                        canChangeOrientation: false,
+                        canChangePageFormat: false,
+                        dynamicLayout: true,
+                        build: (format) => generatePurchasePdf(
+                          purchase,
+
+                        ),
+                        pdfPreviewPageDecoration:
+                        BoxDecoration(color: AppColors.white),
+                        actionBarTheme: PdfActionBarTheme(
+                          backgroundColor: AppColors.primaryColor,
+                          iconColor: Colors.white,
+                          textStyle: const TextStyle(color: Colors.white),
+                        ),
+                        actions: [
+                          IconButton(
+                            onPressed: () => AppRoutes.pop(context),
+                            icon: const Icon(Icons.cancel, color: Colors.red),
+                          ),
+                        ],
+                        pagesBuilder: (context, pages) {
+                          debugPrint('Rendering ${pages.length} pages');
+                          return PageView.builder(
+                            itemCount: pages.length,
+                            scrollDirection: Axis.vertical,
+                            itemBuilder: (context, index) {
+                              final page = pages[index];
+                              return Container(
+                                color: Colors.grey,
+                                alignment: Alignment.center,
+                                padding: const EdgeInsets.all(8.0),
+                                child: Image(image: page.image, fit: BoxFit.contain),
+                              );
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                );
+
+              },
+              tooltip: 'Generate PDF',
+            ),
+          ],
+        ),
+      ),
     );
   }
 

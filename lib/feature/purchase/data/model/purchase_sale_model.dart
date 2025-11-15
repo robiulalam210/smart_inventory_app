@@ -33,7 +33,7 @@ class PurchaseModel {
   final String? accountName;
   final String? paymentMethod;
   final dynamic remark;
-  final List<Item>? items;
+  final List<PurchaseItem>? items;
   final String? subTotal;
 
   PurchaseModel({
@@ -90,7 +90,7 @@ class PurchaseModel {
     accountName: json["account_name"],
     paymentMethod: json["payment_method"],
     remark: json["remark"],
-    items: json["items"] == null ? [] : List<Item>.from(json["items"]!.map((x) => Item.fromJson(x))),
+    items: json["items"] == null ? [] : List<PurchaseItem>.from(json["items"]!.map((x) => PurchaseItem.fromJson(x))),
     subTotal: json["sub_total"],
   );
 
@@ -124,7 +124,7 @@ class PurchaseModel {
   };
 }
 
-class Item {
+class PurchaseItem {
   final int? id;
   final String? productName;
   final int? qty;
@@ -133,7 +133,7 @@ class Item {
   final String? discountType;
   final String? productTotal;
 
-  Item({
+  PurchaseItem({
     this.id,
     this.productName,
     this.qty,
@@ -143,7 +143,7 @@ class Item {
     this.productTotal,
   });
 
-  factory Item.fromJson(Map<String, dynamic> json) => Item(
+  factory PurchaseItem.fromJson(Map<String, dynamic> json) => PurchaseItem(
     id: json["id"],
     productName: json["product_name"],
     qty: json["qty"],

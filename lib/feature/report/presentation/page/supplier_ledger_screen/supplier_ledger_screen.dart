@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:lottie/lottie.dart';
+import 'package:printing/printing.dart';
 import 'package:smart_inventory/core/configs/app_colors.dart';
 import 'package:smart_inventory/core/configs/app_images.dart';
 import 'package:smart_inventory/core/configs/app_text.dart';
@@ -12,6 +13,7 @@ import 'package:smart_inventory/core/shared/widgets/sideMenu/sidebar.dart';
 import 'package:smart_inventory/core/widgets/app_button.dart';
 import 'package:smart_inventory/core/widgets/app_dropdown.dart';
 import 'package:smart_inventory/core/widgets/date_range.dart';
+import 'package:smart_inventory/feature/report/presentation/page/supplier_ledger_screen/pdf.dart';
 import 'package:smart_inventory/feature/supplier/presentation/bloc/supplier_invoice/supplier_invoice_bloc.dart';
 
 import '../../../../../responsive.dart';
@@ -355,6 +357,62 @@ class _SupplierLedgerScreenState extends State<SupplierLedgerScreen> {
                   _buildSummaryItem("Total Debit", "\$${summary.totalDebit.toStringAsFixed(2)}", Icons.arrow_circle_up, Colors.red),
                   _buildSummaryItem("Total Credit", "\$${summary.totalCredit.toStringAsFixed(2)}", Icons.arrow_circle_down, Colors.green),
                   _buildSummaryItem("Total Transactions", summary.totalTransactions.toString(), Icons.receipt_long, Colors.purple),
+
+
+                  AppButton(
+                      size: 100,
+                      name: "Pdf", onPressed: (){
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => Scaffold(
+                          backgroundColor: Colors.red,
+                          body: PdfPreview.builder(
+                            useActions: true,
+                            allowSharing: false,
+                            canDebug: false,
+                            canChangeOrientation: false,
+                            canChangePageFormat: false,
+                            dynamicLayout: true,
+                            build: (format) => generateSupplierDueAdvanceReportPdf(
+                              state.response,
+
+                            ),
+                            pdfPreviewPageDecoration:
+                            BoxDecoration(color: AppColors.white),
+                            actionBarTheme: PdfActionBarTheme(
+                              backgroundColor: AppColors.primaryColor,
+                              iconColor: Colors.white,
+                              textStyle: const TextStyle(color: Colors.white),
+                            ),
+                            actions: [
+                              IconButton(
+                                onPressed: () => AppRoutes.pop(context),
+                                icon: const Icon(Icons.cancel, color: Colors.red),
+                              ),
+                            ],
+                            pagesBuilder: (context, pages) {
+                              debugPrint('Rendering ${pages.length} pages');
+                              return PageView.builder(
+                                itemCount: pages.length,
+                                scrollDirection: Axis.vertical,
+                                itemBuilder: (context, index) {
+                                  final page = pages[index];
+                                  return Container(
+                                    color: Colors.grey,
+                                    alignment: Alignment.center,
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Image(image: page.image, fit: BoxFit.contain),
+                                  );
+                                },
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                    );
+
+                  }),
                 ],
               ),
             ],
