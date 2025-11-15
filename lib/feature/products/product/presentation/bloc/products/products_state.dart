@@ -71,7 +71,8 @@ final class ProductsDeleteInitial extends ProductsState {}
 final class ProductsDeleteLoading extends ProductsState {}
 
 final class ProductsDeleteSuccess extends ProductsState {
-  ProductsDeleteSuccess();
+  String message;
+  ProductsDeleteSuccess(this.message);
 }
 
 

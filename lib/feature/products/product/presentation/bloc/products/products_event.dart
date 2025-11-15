@@ -35,7 +35,7 @@ class FetchProductsStockList extends ProductsEvent {
 }
 
 class AddProducts extends ProductsEvent {
-  final Map<String, String>? body;
+  final Map<String, dynamic>? body;
 
   AddProducts({this.body, });
 }
@@ -43,7 +43,7 @@ class AddProducts extends ProductsEvent {
 class UpdateProducts extends ProductsEvent {
   final String id;
 
-  final Map<String, String>? body;
+  final Map<String, dynamic>? body;
   String? photoPath;
 
   UpdateProducts({this.body, this.photoPath, this.id = ''});

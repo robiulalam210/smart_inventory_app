@@ -307,7 +307,7 @@ productList=list;
         return;
       }
       //  clearData();
-      emit(ProductsDeleteSuccess());
+      emit(ProductsDeleteSuccess(response.message??""));
     } catch (error) {
       // clearData();
       emit(ProductsDeleteFailed(title: "Error", content: error.toString()));

@@ -36,6 +36,7 @@ import '../feature/return/bad_stock/bad_stock_list/bad_stock_list_bloc.dart';
 import '../feature/return/sales_return/presentation/sales_return_bloc/sales_return_bloc.dart';
 import '../feature/supplier/presentation/bloc/supplier_invoice/supplier_invoice_bloc.dart';
 import '../feature/supplier/presentation/bloc/supplier_payment/supplier_payment_bloc.dart';
+import '../feature/transactions/presentation/bloc/transactions/transaction_bloc.dart';
 import '../test.dart';
 
 class MyApp extends StatelessWidget {
@@ -103,6 +104,7 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (_) => SalesReturnBloc()),
         BlocProvider(create: (_) => PurchaseReturnBloc()),
         BlocProvider(create: (_) => BadStockListBloc()),
+        BlocProvider(create: (_) => TransactionBloc()),
       ],
       child: Center(
         child: MaterialApp(

@@ -32,6 +32,7 @@ class AppUrls {
   static final String source          = '$baseUrl/sources/';
   static final String account          = '$baseUrl/accounts/?no_pagination=true';
   static final String accountNON          = '$baseUrl/accounts/';
+  static final String transactions          = '$baseUrl/transactions/';
   static final String customer          = '$baseUrl/customers/';
   static final String customerActive          = '$baseUrl/customers-active';
   static final String accountActive          = '$baseUrl/accounts/?is_active=true&no_pagination=true';
