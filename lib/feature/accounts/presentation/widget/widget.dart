@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/configs/configs.dart';
@@ -46,7 +45,7 @@ class AccountCard extends StatelessWidget {
             color: Colors.white,
             boxShadow: [
               BoxShadow(
-                color: Colors.grey.withOpacity(0.1),
+                color: Colors.grey.withValues(alpha: 0.1),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -84,7 +83,7 @@ class AccountCard extends StatelessWidget {
                           fontWeight: FontWeight.w700,
                           fontFamily: GoogleFonts.inter().fontFamily,
                         ),
-                        headingRowColor: MaterialStateProperty.all(
+                        headingRowColor: WidgetStateProperty.all(
                           AppColors.primaryColor,
                         ),
                         dataTextStyle: TextStyle(
@@ -96,10 +95,10 @@ class AccountCard extends StatelessWidget {
                         rows: accounts.asMap().entries.map((entry) {
                           final account = entry.value;
                           return DataRow(
-                            color: MaterialStateProperty.resolveWith<Color?>(
-                                  (Set<MaterialState> states) {
+                            color: WidgetStateProperty.resolveWith<Color?>(
+                                  (Set<WidgetState> states) {
                                 if (entry.key.isEven) {
-                                  return Colors.grey.withOpacity(0.03);
+                                  return Colors.grey.withValues(alpha: 0.03);
                                 }
                                 return null;
                               },
@@ -287,10 +286,10 @@ class AccountCard extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(6),
               border: Border.all(
-                color: color.withOpacity(0.3),
+                color: color.withValues(alpha: 0.3),
                 width: 1,
               ),
             ),
@@ -325,9 +324,9 @@ class AccountCard extends StatelessWidget {
             // Edit Button
             IconButton(
               icon: Icon(
-                Icons.edit,
+                Iconsax.edit,
                 size: 18,
-                color: Colors.blue.shade600,
+                color: Colors.blue,
               ),
               onPressed: () => onEdit?.call(account),
               padding: const EdgeInsets.all(4),
@@ -338,7 +337,7 @@ class AccountCard extends StatelessWidget {
             // Delete Button
             IconButton(
               icon: Icon(
-                Icons.delete,
+                HugeIcons.strokeRoundedDeleteThrow,
                 size: 18,
                 color: Colors.red.shade600,
               ),
@@ -478,7 +477,7 @@ class AccountCard extends StatelessWidget {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -491,7 +490,7 @@ class AccountCard extends StatelessWidget {
           Icon(
             Icons.account_balance_wallet_outlined,
             size: 48,
-            color: Colors.grey.withOpacity(0.5),
+            color: Colors.grey.withValues(alpha: 0.5),
           ),
           const SizedBox(height: 16),
           Text(

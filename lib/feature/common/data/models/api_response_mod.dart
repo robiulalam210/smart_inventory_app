@@ -10,7 +10,7 @@ class ApiResponse<T> {
 
   factory ApiResponse.fromJson(Map<String, dynamic> json, Function fromJsonT) {
     return ApiResponse(
-      success: json['status'] ?? false,
+      success: json['success'] ?? json['status'] ?? false,
       total: json['total'],
       title: json['title'],
       message: json['message'],

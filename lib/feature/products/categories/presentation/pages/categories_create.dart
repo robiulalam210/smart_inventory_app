@@ -1,3 +1,5 @@
+import 'package:smart_inventory/core/core.dart';
+
 import '../../../../../core/configs/configs.dart';
 import '../../../../../core/widgets/app_button.dart';
 import '../../../../../core/widgets/input_field.dart';
@@ -145,16 +147,16 @@ class _CategoriesCreateState extends State<CategoriesCreate> {
               ],
             ),
 
-            SizedBox(height: 20),
+            SizedBox(height: 10),
 
             // Name Input Field
-            CustomInputField(
-              isRequiredLable: true,
+            AppTextField(
+
               isRequired: true,
               controller:  context.read<CategoriesBloc>().nameController,
               hintText: 'Enter category name',
               labelText: 'Category Name',
-              fillColor: Colors.grey[50],
+
               keyboardType: TextInputType.text,
               validator: (value) {
                 if (value == null || value.isEmpty) {

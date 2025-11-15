@@ -26,19 +26,13 @@ class BrandScreen extends StatefulWidget {
 class _BrandScreenState extends State<BrandScreen> {
   late var dataBloc = context.read<BrandBloc>();
 
+
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    dataBloc.filterTextController = TextEditingController();
+  void initState() {
     _fetchApi();
+    // TODO: implement initState
+    super.initState();
   }
-
-  @override
-  void dispose() {
-    dataBloc.filterTextController.dispose();
-    super.dispose();
-  }
-
   void _fetchApi({String filterText = '', int pageNumber = 0}) {
     context.read<BrandBloc>().add(
       FetchBrandList(context, filterText: filterText, pageNumber: pageNumber),

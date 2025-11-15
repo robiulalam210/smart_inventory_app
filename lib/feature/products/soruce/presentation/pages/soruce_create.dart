@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:smart_inventory/core/core.dart';
 import 'package:smart_inventory/feature/products/unit/presentation/bloc/unit/unti_bloc.dart';
 import '../../../../../core/configs/configs.dart';
 import '../../../../../core/widgets/app_button.dart';
@@ -9,9 +10,8 @@ import '../bloc/source/source_bloc.dart';
 
 class SourceCreate extends StatefulWidget {
   final String? id;
-  final bool isDialog;
 
-  const SourceCreate({super.key, this.id, this.isDialog = true});
+  const SourceCreate({super.key, this.id});
 
   @override
   State<SourceCreate> createState() => _SourceCreateState();
@@ -76,9 +76,7 @@ class _SourceCreateState extends State<SourceCreate> {
 
   void _submitForm() {
     if (formKey.currentState!.validate()) {
-      final Map<String, String> body = {
-        "name": nameController.text.trim(),
-      };
+      final Map<String, String> body = {"name": nameController.text.trim()};
 
       if (widget.id == null) {
         // Create new source
@@ -118,7 +116,24 @@ class _SourceCreateState extends State<SourceCreate> {
             _clearForm();
           }
           Navigator.pop(context, true); // Return success result
+        }
+        if (state is SourceUpdateSuccess) {
+          showCustomToast(
+            context: context,
+            title: 'Success!',
+            description: widget.id == null
+                ? 'Source created successfully!'
+                : 'Source updated successfully!',
+            type: ToastificationType.success,
+            icon: Icons.check_circle,
+            primaryColor: Colors.green,
+          );
 
+          // Clear form and close on success
+          if (widget.id == null) {
+            _clearForm();
+          }
+          // Navigator.pop(context, true); // Return success result
         } else if (state is SourceAddFailed) {
           showCustomToast(
             context: context,
@@ -130,7 +145,7 @@ class _SourceCreateState extends State<SourceCreate> {
           );
         }
       },
-      child: widget.isDialog ? _buildDialogContent() : _buildFullScreenContent(),
+      child: _buildDialogContent(),
     );
   }
 
@@ -158,11 +173,7 @@ class _SourceCreateState extends State<SourceCreate> {
                 ),
                 IconButton(
                   onPressed: () => Navigator.pop(context),
-                  icon: Icon(
-                    Icons.close,
-                    color: Colors.red,
-                    size: 20,
-                  ),
+                  icon: Icon(Icons.close, color: Colors.red, size: 20),
                   padding: EdgeInsets.zero,
                   constraints: BoxConstraints(),
                 ),
@@ -172,13 +183,12 @@ class _SourceCreateState extends State<SourceCreate> {
             SizedBox(height: 20),
 
             // Name Input Field
-            CustomInputField(
-              isRequiredLable: true,
+            AppTextField(
               isRequired: true,
               controller: nameController,
               hintText: 'Enter source name',
               labelText: 'Source Name',
-              fillColor: Colors.grey[50],
+
               keyboardType: TextInputType.text,
               validator: (value) {
                 if (value == null || value.isEmpty) {
@@ -322,7 +332,9 @@ class _SourceCreateState extends State<SourceCreate> {
                             child: BlocBuilder<SourceBloc, SourceState>(
                               builder: (context, state) {
                                 return AppButton(
-                                  name: widget.id == null ? 'Create Source' : 'Update Source',
+                                  name: widget.id == null
+                                      ? 'Create Source'
+                                      : 'Update Source',
                                   onPressed: (state is SourceAddLoading)
                                       ? null
                                       : _showConfirmationDialog,

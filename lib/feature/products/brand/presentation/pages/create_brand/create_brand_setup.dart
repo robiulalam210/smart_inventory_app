@@ -4,6 +4,7 @@ import 'package:smart_inventory/feature/products/brand/presentation/bloc/brand/b
 
 import '../../../../../../core/configs/configs.dart';
 import '../../../../../../core/widgets/app_button.dart';
+import '../../../../../../core/widgets/app_text_field.dart';
 import '../../../../../../core/widgets/input_field.dart';
 import '../../../../../../core/widgets/show_custom_toast.dart';
 
@@ -166,16 +167,15 @@ class _BrandCreateState extends State<BrandCreate> {
               ],
             ),
 
-            SizedBox(height: 20),
+            SizedBox(height: 10),
 
             // Name Input Field
-            CustomInputField(
-              isRequiredLable: true,
+            AppTextField(
               isRequired: true,
               controller: nameController,
               hintText: 'Enter brand name',
               labelText: 'Brand Name',
-              fillColor: Colors.grey[50],
+
               keyboardType: TextInputType.text,
               validator: (value) {
                 if (value == null || value.isEmpty) {

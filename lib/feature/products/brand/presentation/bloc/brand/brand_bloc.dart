@@ -137,12 +137,12 @@ class BrandBloc extends Bloc<BrandEvent, BrandState> {
         payload: event.body!,
       ); // Use the correct API URL
       final jsonString = jsonEncode(res);
-
       ApiResponse response = appParseJson(
         jsonString,
-        (data) =>
-            List<BrandModel>.from(data.map((x) => BrandModel.fromJson(x))),
+            (data) => BrandModel.fromJson(data),
       );
+
+
       if (response.success == false) {
         emit(BrandAddFailed(title: 'Alert', content: response.message ?? ""));
         return;
