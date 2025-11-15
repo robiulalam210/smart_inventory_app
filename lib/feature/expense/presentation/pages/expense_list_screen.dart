@@ -1,6 +1,4 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
-import 'package:lottie/lottie.dart';
 import '../../../../core/configs/configs.dart';
 import '../../../../core/shared/widgets/sideMenu/sidebar.dart';
 import '../../../../core/widgets/app_alert_dialog.dart';
@@ -8,8 +6,6 @@ import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_dropdown.dart';
 import '../../../../core/widgets/app_loader.dart';
 import '../../../../core/widgets/coustom_search_text_field.dart';
-import '../../../../core/widgets/custom_date_range.dart';
-import '../../../../core/widgets/custom_filter_ui.dart';
 import '../../../../core/widgets/date_range.dart';
 import '../../../products/product/presentation/widget/pagination.dart';
 import '../../expense_head/data/model/expense_head_model.dart';
@@ -84,30 +80,7 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
     _fetchApi(); // Refresh data with new head filter
   }
 
-  void _onExpenseSubHeadChanged(ExpenseSubHeadModel? value) {
-    setState(() {
-      _selectedExpenseSubHead = value;
-    });
-    _fetchApi(); // Refresh data with new subhead filter
-  }
 
-  Future<void> _selectDateRange(StateSetter setState) async {
-    DateTimeRange? picked = await showDateRangePicker(
-      context: context,
-      initialDateRange: DateTimeRange(
-        start: selectedDateRange?.start ?? DateTime.now().subtract(const Duration(days: 7)),
-        end: selectedDateRange?.end ?? DateTime.now(),
-      ),
-      firstDate: DateTime(2020),
-      lastDate: DateTime(2100),
-    );
-    if (picked != null) {
-      setState(() {
-        selectedDateRange = DateRange( picked.start, picked.end);
-      });
-      _fetchApi(from: selectedDateRange?.start, to: selectedDateRange?.end);
-    }
-  }
 
   void _fetchApi({
     String filterText = '',

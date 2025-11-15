@@ -11,7 +11,6 @@ import '../../../../../core/configs/gaps.dart';
 import '../../../../../core/shared/widgets/sideMenu/sidebar.dart';
 import '../../../../../core/widgets/app_alert_dialog.dart';
 import '../../../../../core/widgets/app_button.dart';
-import '../../../../../core/widgets/app_dropdown.dart';
 import '../../../../../core/widgets/app_loader.dart';
 import '../../../../../core/widgets/coustom_search_text_field.dart';
 import '../../../../../core/widgets/show_custom_toast.dart';
@@ -35,7 +34,7 @@ class _GroupsScreenState extends State<GroupsScreen> {
   }
 
   void _fetchApi(
-      {String filterText = '', String state = '', int pageNumber = 0}) {
+      {String filterText = '', int pageNumber = 0}) {
     context.read<GroupsBloc>().add(
       FetchGroupsList(context,
         filterText: filterText,

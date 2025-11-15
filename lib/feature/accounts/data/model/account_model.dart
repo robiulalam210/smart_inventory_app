@@ -13,12 +13,12 @@ class AccountModel {
   final String? acName;
   final String? acType;
   final String? acNumber;
-  final dynamic? balance;
+  final dynamic balance;
   final String? bankName;
   final String? branch;
-  final dynamic? openingBalance;
+  final dynamic openingBalance;
   final int? company;
-  final dynamic? status;
+  final dynamic status;
   final String? acNo;
   final dynamic number;
 

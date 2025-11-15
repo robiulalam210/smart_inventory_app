@@ -35,7 +35,7 @@ class ProductModelStockModel {
   final dynamic groupInfo;
   final dynamic sourceInfo;
   final CreatedByInfo? createdByInfo;
-  final dynamic? stockStatus;
+  final dynamic stockStatus;
 
   // --- Discount Fields ---
   final bool? discountApplied;

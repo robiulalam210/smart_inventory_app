@@ -31,7 +31,6 @@ final class SupplierListSuccess extends SupplierListState {
     required this.to,
   });
 
-  @override
   List<Object> get props => [list, totalPages, currentPage, count, pageSize, from, to];
 }
 final class SupplierListFailed extends SupplierListState {

@@ -5,7 +5,6 @@ import 'package:smart_inventory/feature/products/groups/presentation/pages/group
 import 'package:smart_inventory/feature/products/soruce/presentation/pages/source_screen.dart';
 import 'package:smart_inventory/feature/products/unit/presentation/pages/unit_screen.dart';
 import 'package:smart_inventory/feature/purchase/presentation/page/purchase_screen.dart';
-import 'package:smart_inventory/feature/report/data/model/bad_stock_report_model.dart';
 import 'package:smart_inventory/feature/report/presentation/page/customer_ledger_screen/customer_ledger_screen.dart';
 import 'package:smart_inventory/feature/report/presentation/page/low_stock_screen/low_stock_screen.dart';
 import 'package:smart_inventory/feature/report/presentation/page/profit_loss_screen/profit_loss_screen.dart';
@@ -39,7 +38,6 @@ import '../../../../sales/presentation/pages/create_pos_sale/create_pos_sale.dar
 
 import '../../../../supplier/presentation/pages/supplier_list_screen.dart';
 import '../../../../supplier/presentation/pages/supplier_payment_list_screen.dart';
-import '../../../../transactions/presentation/pages/transaction_screen.dart';
 import '../../../../users_list/presentation/pages/users_screen.dart';
 import '../../../data/models/dashboard/dashboard_model.dart';
 import '../../pages/lab_dashboard_screen.dart';

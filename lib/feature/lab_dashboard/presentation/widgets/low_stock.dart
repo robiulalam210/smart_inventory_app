@@ -71,7 +71,7 @@ Widget customer(
     }) {
   return Padding(
     padding: const EdgeInsets.all(16.0),
-    child: lowStockProducts?.isNotEmpty ?? false
+    child: lowStockProducts.isNotEmpty
         ?ClipRRect(
         borderRadius: BorderRadius.circular(12),
         child: Container(
@@ -93,20 +93,20 @@ Widget customer(
         ),
       ],
       rows: List<DataRow>.generate(
-        lowStockProducts?.length ?? 0,
+        lowStockProducts.length,
             (index) {
-          final lowStockProduct = lowStockProducts?[index];
+          final lowStockProduct = lowStockProducts[index];
           return DataRow(
             cells: [
               DataCell(Text(
-                lowStockProduct?.name ?? 'N/A',
+                lowStockProduct.name ?? 'N/A',
                 style: AppTextStyle.cardLevelHead(context),
               )),
               DataCell(
                 Container(
                   padding: const EdgeInsets.all(8.0),
                   child: Text(
-                    lowStockProduct?.due ?? '0',
+                    lowStockProduct.due ?? '0',
                     style: AppTextStyle.cardTitle(context),
                   ),
                 ),

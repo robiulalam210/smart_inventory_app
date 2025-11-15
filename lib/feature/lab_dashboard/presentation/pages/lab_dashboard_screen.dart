@@ -521,11 +521,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ...sales.map((sale) => _buildActivityItem(
           icon: Icons.shopping_cart,
           title: sale.invoiceNo ?? 'N/A', // Fixed: null check
-          subtitle: sale?.customer ?? 'N/A', // Fixed: null check
+          subtitle: sale.customer ?? 'N/A', // Fixed: null check
           amount: sale.amount?.toDouble() ?? 0.0, // Fixed: null check and type conversion
           date: sale.date != null ? DateFormat('MMM dd, yyyy').format(sale.date!) : 'N/A', // Fixed: null check
           color: Colors.green,
-        )).toList(),
+        )),
       ],
     );
   }

@@ -1,8 +1,6 @@
 import 'package:crypto/crypto.dart';
-import 'package:http/http.dart'as http;
 import 'package:smart_inventory/feature/auth/data/models/login_mod.dart';
 import '../../../../core/configs/configs.dart';
-import 'login_ser.dart';
 
 class AuthService {
   // Future<dynamic> tryOnlineLogin(String username, String password) async {

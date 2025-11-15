@@ -21,7 +21,6 @@ class FetchSupplierList extends SupplierListEvent {
         this.pageSize = 10, // Added pageSize
       });
 
-  @override
   List<Object> get props => [context, filterText, state, location, pageNumber, pageSize];
 }
 class AddSupplierList extends SupplierListEvent {

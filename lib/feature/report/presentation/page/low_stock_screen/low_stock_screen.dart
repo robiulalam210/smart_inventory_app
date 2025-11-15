@@ -1,5 +1,4 @@
 // lib/feature/report/presentation/screens/low_stock_screen.dart
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -418,27 +417,6 @@ class _LowStockScreenState extends State<LowStockScreen> {
     );
   }
 
-  void _navigateToRestock(LowStockProduct product) {
-    appAlertDialog(
-      context,
-      "Navigate to purchase screen to restock ${product.productName}?",
-      title: "Restock Product",
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text("Cancel"),
-        ),
-        ElevatedButton(
-          onPressed: () {
-            Navigator.pop(context);
-            // Add your navigation logic here
-            // context.read<DashboardBloc>().add(ChangeDashboardScreen(index: /* purchase screen index */));
-          },
-          child: const Text("Go to Purchase"),
-        ),
-      ],
-    );
-  }
 }
 
 class LowStockTableCard extends StatelessWidget {

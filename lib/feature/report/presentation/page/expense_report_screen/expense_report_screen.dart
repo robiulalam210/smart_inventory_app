@@ -102,18 +102,6 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
     );
   }
 
-  void _onExpenseSubHeadChanged(ExpenseSubHeadModel? newValue) {
-    setState(() {
-      _selectedExpenseSubHead = newValue;
-    });
-    _fetchApiWithDebounce(
-      head: _selectedExpenseHead?.id?.toString(),
-      subHead: newValue?.id?.toString(),
-      from: selectedDateRange?.start,
-      to: selectedDateRange?.end,
-      paymentMethod: _selectedPaymentMethod,
-    );
-  }
 
   void _onPaymentMethodChanged(String? newValue) {
     setState(() {

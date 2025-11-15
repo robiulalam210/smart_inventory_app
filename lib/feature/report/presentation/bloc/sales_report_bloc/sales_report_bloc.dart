@@ -1,11 +1,5 @@
-import 'package:bloc/bloc.dart';
-import 'package:meta/meta.dart';
-import 'package:dio/dio.dart';
 import 'package:smart_inventory/core/core.dart';
 
-import '../../../../../core/configs/configs.dart';
-import '../../../../common/data/models/api_response_mod.dart';
-import '../../../../common/data/models/app_parse_json.dart';
 import '../../../../customer/data/model/customer_active_model.dart';
 import '../../../../users_list/data/model/user_model.dart';
 import '../../../data/model/sales_report_model.dart';

@@ -188,50 +188,7 @@ class PurchaseReturnTableCard extends StatelessWidget {
     );
   }
 
-  DataCell _buildDateCell(DateTime? date, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Text(
-          _formatDate(date),
-          style: const TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w500,
-            color: Colors.black87,
-          ),
-          textAlign: TextAlign.center,
-        ),
-      ),
-    );
-  }
 
-  DataCell _buildAmountCell(double? amount, double width) {
-    final amountText = amount != null ? '\$${amount.toStringAsFixed(2)}' : '\$0.00';
-
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: Colors.red.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Text(
-              amountText,
-              style: const TextStyle(
-                color: Colors.red,
-                fontWeight: FontWeight.w600,
-                fontSize: 11,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
 
   DataCell _buildReasonCell(String? reason, double width) {
     return DataCell(
@@ -350,10 +307,6 @@ class PurchaseReturnTableCard extends StatelessWidget {
     }
   }
 
-  String _formatDate(DateTime? date) {
-    if (date == null) return 'N/A';
-    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
-  }
 
   Future<void> _confirmDelete(BuildContext context, PurchaseReturnModel purchaseReturn) async {
     final shouldDelete = await showDeleteConfirmationDialog(context);

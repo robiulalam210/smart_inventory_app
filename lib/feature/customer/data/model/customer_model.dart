@@ -16,8 +16,8 @@ class CustomerModel {
   final String? address;
   final bool? isActive;
   final String? clientNo;
-  final dynamic? totalDue;
-  final dynamic? totalPaid;
+  final dynamic totalDue;
+  final dynamic totalPaid;
   final String? amountType;
   final int? company;
   final dynamic totalSales;

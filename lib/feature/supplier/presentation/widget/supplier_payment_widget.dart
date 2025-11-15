@@ -134,17 +134,6 @@ class SupplierPaymentWidget extends StatelessWidget {
     SupplierPaymentModel supplier,
     double columnWidth,
   ) {
-    String formatCurrency(dynamic value) {
-      if (value == null) return '0.00';
-      if (value is String) {
-        final numValue = double.tryParse(value) ?? 0.0;
-        return numValue.toStringAsFixed(2);
-      }
-      final numValue = value is int
-          ? value.toDouble()
-          : (value is double ? value : 0.0);
-      return numValue.toStringAsFixed(2);
-    }
 
     String formatDate(DateTime? date) {
       if (date == null) return '-';

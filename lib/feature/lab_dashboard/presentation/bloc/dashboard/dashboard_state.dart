@@ -18,7 +18,6 @@ class DashboardLoaded extends DashboardState {
 
    DashboardLoaded(this.dashboardData);
 
-  @override
   List<Object> get props => [dashboardData];
 }
 
@@ -27,6 +26,5 @@ class DashboardError extends DashboardState {
 
    DashboardError(this.message);
 
-  @override
   List<Object> get props => [message];
 }

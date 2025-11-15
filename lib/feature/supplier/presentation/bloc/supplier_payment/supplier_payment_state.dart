@@ -29,7 +29,6 @@ final class SupplierPaymentListSuccess extends SupplierPaymentState {
     required this.to,
   });
 
-  @override
   List<Object?> get props => [
     list,
     totalPages,

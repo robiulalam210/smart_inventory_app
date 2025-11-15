@@ -1,6 +1,5 @@
 part of 'expense_sub_head_bloc.dart';
 
-@immutable
 sealed class ExpenseSubHeadEvent {}
 
 class FetchSubExpenseHeadList extends ExpenseSubHeadEvent {

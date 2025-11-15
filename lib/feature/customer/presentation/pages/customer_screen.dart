@@ -1,4 +1,3 @@
-import 'package:smart_inventory/feature/lab_dashboard/presentation/widgets/low_stock.dart';
 
 import '../../../../core/configs/configs.dart';
 import '../../../../core/shared/widgets/sideMenu/sidebar.dart';
@@ -7,7 +6,6 @@ import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_dropdown.dart';
 import '../../../../core/widgets/app_loader.dart';
 import '../../../../core/widgets/coustom_search_text_field.dart';
-import '../../../../core/widgets/custom_filter_ui.dart';
 import '../../../products/product/presentation/widget/pagination.dart';
 import '../bloc/customer/customer_bloc.dart';
 import '../widget/widget.dart';

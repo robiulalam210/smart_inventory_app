@@ -278,7 +278,7 @@ class UserTableCard extends StatelessWidget {
 
   void _showEditDialog(BuildContext context, UsersListModel user) {
     // Pre-fill the form - adjust based on your UserCreate form fields
-    final userBloc = context.read<UserBloc>();
+    final _ = context.read<UserBloc>();
     // userBloc.usernameController.text = user.username ?? "";
     // userBloc.emailController.text = user.email ?? "";
     // userBloc.roleController.text = user.role ?? "";

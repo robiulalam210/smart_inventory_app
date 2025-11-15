@@ -106,9 +106,9 @@ class ProductsBloc extends Bloc<ProductsEvent, ProductsState> {
         // Pagination info
         final Map<String, dynamic> pagination = Map<String, dynamic>.from(data['pagination'] ?? {});
         final int totalPages = (pagination['total_pages'] is int) ? pagination['total_pages'] as int : (pagination['totalPages'] is int ? pagination['totalPages'] as int : 1);
-        final int currentPage = (pagination['current_page'] is int) ? pagination['current_page'] as int : (event.pageNumber ?? 1);
+        final int currentPage = (pagination['current_page'] is int) ? pagination['current_page'] as int : (event.pageNumber);
         final int count = (pagination['count'] is int) ? pagination['count'] as int : list.length;
-        final int pageSize = (pagination['page_size'] is int) ? pagination['page_size'] as int : (event.pageSize ?? 20);
+        final int pageSize = (pagination['page_size'] is int) ? pagination['page_size'] as int : (event.pageSize);
         final int from = (pagination['from'] is int) ? pagination['from'] as int : ((currentPage - 1) * pageSize + 1);
         final int to = (pagination['to'] is int) ? pagination['to'] as int : (from + list.length - 1);
 
@@ -150,7 +150,7 @@ class ProductsBloc extends Bloc<ProductsEvent, ProductsState> {
         context: event.context,
       );
 
-      final Map<String, dynamic> payload = res is String ? jsonDecode(res) : res;
+      final Map<String, dynamic> payload = jsonDecode(res);
       final bool ok = (payload['status'] == true) || (payload['success'] == true);
 
       if (ok) {
@@ -221,13 +221,12 @@ productList=list;
     emit(ProductsAddLoading());
 
     try {
-      final res = await patchResponse(
+      final _ = await patchResponse(
         payload: event.body!,
         url: "${AppUrls.product}${event.id}/",
       );
 
       // সরাসরি single Product parse
-      ProductModel updatedProduct = ProductModel.fromJson(res['data']);
 
       // যদি আপনার App needs List<ProductModel>, তাহলে wrap করতে পারেন
       // List<ProductModel> updatedList = [updatedProduct];

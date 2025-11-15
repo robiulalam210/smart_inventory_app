@@ -19,7 +19,6 @@ class FetchSupplierPaymentList extends SupplierPaymentEvent {
     this.pageSize = 30, // Default page size
   });
 
-  @override
   List<Object?> get props => [context, filterText, startDate, endDate, pageNumber, pageSize];
 }
 class AddSupplierPayment extends SupplierPaymentEvent {

@@ -1,24 +1,11 @@
 // lib/feature/report/presentation/screens/purchase_report_screen.dart
-import 'dart:async';
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:hugeicons/hugeicons.dart';
-import 'package:iconsax/iconsax.dart';
-import 'package:lottie/lottie.dart';
-import 'package:smart_inventory/core/configs/app_colors.dart';
-import 'package:smart_inventory/core/configs/app_images.dart';
-import 'package:smart_inventory/core/configs/app_text.dart';
 import 'package:smart_inventory/core/core.dart';
-import 'package:smart_inventory/core/shared/widgets/sideMenu/sidebar.dart';
-import 'package:smart_inventory/core/widgets/app_dropdown.dart';
 import 'package:smart_inventory/core/widgets/date_range.dart';
 import 'package:smart_inventory/feature/supplier/data/model/supplier_active_model.dart';
 import 'package:smart_inventory/feature/supplier/presentation/bloc/supplier_invoice/supplier_invoice_bloc.dart';
 
-import '../../../../../core/configs/app_sizes.dart';
-import '../../../../../responsive.dart';
 import '../../../data/model/purchase_report_model.dart';
 import '../../bloc/purchase_report/purchase_report_bloc.dart';
 

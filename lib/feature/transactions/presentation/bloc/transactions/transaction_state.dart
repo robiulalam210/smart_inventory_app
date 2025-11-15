@@ -25,7 +25,6 @@ class TransactionListSuccess extends TransactionState {
     required this.to,
   });
 
-  @override
   List<Object> get props => [
     list,
     count,
