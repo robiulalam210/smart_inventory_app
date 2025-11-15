@@ -11,6 +11,7 @@ import '../../../../../core/widgets/app_loader.dart';
 import '../../../../../core/widgets/coustom_search_text_field.dart';
 import '../../../../../core/widgets/custom_filter_ui.dart';
 import '../../../../../core/widgets/delete_dialog.dart';
+import '../../../../../core/widgets/show_custom_toast.dart';
 import '../../../categories/presentation/bloc/categories/categories_bloc.dart';
 import '../bloc/products/products_bloc.dart';
 import '../widget/pagination.dart';
@@ -59,7 +60,6 @@ class _ProductsScreenState extends State<ProductsScreen> {
     );
   }
 
-  // ... other widget methods remain unchanged ...
 
   @override
   Widget build(BuildContext context) {
@@ -109,7 +109,36 @@ class _ProductsScreenState extends State<ProductsScreen> {
           padding: AppTextStyle.getResponsivePaddingBody(context),
           child: BlocListener<ProductsBloc, ProductsState>(
             listener: (context, state) {
-              // keep existing listener code
+               if (state is ProductsDeleteLoading) {
+                appLoader(context, "Deleted product, please wait...");
+              }  else if (state is ProductsDeleteSuccess) {
+                showCustomToast(
+                  context: context,
+                  title: 'Success!',
+                  description: state.message,
+                  icon: Icons.check_circle,
+                  primaryColor: Colors.green,
+                );
+
+                Navigator.pop(context); // Close loader dialog
+                _fetchProductList(); // Reload warehouse list
+              }
+               else if (state is ProductsDeleteFailed) {
+                Navigator.pop(context); // Close loader dialog
+                // Navigator.pop(context); // Close loader dialog
+                _fetchProductList();
+                appAlertDialog(
+                  context,
+                  state.content,
+                  title: state.title,
+                  actions: [
+                    TextButton(
+                      onPressed: () => AppRoutes.pop(context),
+                      child: const Text("Dismiss"),
+                    ),
+                  ],
+                );
+              }
             },
             child: Column(
               children: [
@@ -251,77 +280,5 @@ class _ProductsScreenState extends State<ProductsScreen> {
   }
 
 
-  void _showFilterMenu(BuildContext context, Offset offset) async {
-    final screenSize = MediaQuery
-        .of(context)
-        .size;
-    final left = offset.dx;
-    final top = offset.dy;
-    final right = screenSize.width - left;
-    final bottom = screenSize.height - top;
-
-    await showMenu(
-      color: const Color.fromARGB(255, 248, 248, 248),
-      context: context,
-      position: RelativeRect.fromLTRB(left, top, right, bottom),
-      items: [
-        PopupMenuItem(
-          padding: const EdgeInsets.all(0),
-          enabled: false,
-          child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-              return Column(
-                children: [
-                  Container(
-                    width: double.maxFinite,
-                    padding: const EdgeInsets.only(
-                        top: 5, bottom: 10, left: 10, right: 10),
-                    decoration: const BoxDecoration(
-                      // borderRadius: BorderRadius.all(Radius.circular(10)),
-                      color: Color.fromARGB(255, 248, 248, 248),
-                    ),
-                    child: Text(
-                        'Filter', style: AppTextStyle.cardLevelText(context)),
-                  ),
-
-
-                  const SizedBox(height: 10),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 5.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              context.read<ProductsBloc>().add(
-                                FetchProductsList(context,),
-                              );
-                            });
-                            Navigator.of(context).pop();
-                          },
-                          child: Text(
-                              'Clear',
-                              style: AppTextStyle.errorTextStyle(context)
-                          ),
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.of(context).pop();
-                          },
-                          child: Text('Close', style: AppTextStyle
-                              .cardLevelText(context)),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
 
 }

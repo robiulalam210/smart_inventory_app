@@ -1,8 +1,4 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_quill/flutter_quill.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:smart_inventory/feature/products/brand/data/model/brand_model.dart';
 import 'package:smart_inventory/feature/products/brand/presentation/bloc/brand/brand_bloc.dart';
@@ -15,7 +11,6 @@ import 'package:smart_inventory/feature/products/soruce/presentation/bloc/source
 import 'package:smart_inventory/feature/products/unit/data/model/unit_model.dart';
 import 'package:smart_inventory/feature/products/unit/presentation/bloc/unit/unti_bloc.dart';
 import '../../../../../../core/configs/configs.dart';
-import '../../../../../../core/shared/widgets/sideMenu/sidebar.dart';
 import '../../../../../../core/widgets/app_alert_dialog.dart';
 import '../../../../../../core/widgets/app_button.dart';
 import '../../../../../../core/widgets/app_dropdown.dart';
@@ -28,11 +23,7 @@ class ProductsForm extends StatefulWidget {
   final ProductModel? product;
   final String? productId;
 
-  const ProductsForm({
-    super.key,
-    this.product,
-    this.productId,
-  });
+  const ProductsForm({super.key, this.product, this.productId});
 
   @override
   State<ProductsForm> createState() => _ProductsFormState();
@@ -115,20 +106,26 @@ class _ProductsFormState extends State<ProductsForm> {
   void _prefillFormData(ProductModel product) {
     productsBloc.productNameController.text = product.name ?? "";
     productsBloc.productDescriptionController.text = product.description ?? "";
-    productsBloc.productPurchasePriceController.text = product.purchasePrice?.toString() ?? "0";
-    productsBloc.productSellingPriceController.text = product.sellingPrice?.toString() ?? "0";
-    productsBloc.productOpeningStockController.text = product.openingStock?.toString() ?? "0";
-    productsBloc.productAlertQuantityController.text = product.alertQuantity?.toString() ?? "5";
-    productsBloc.productDiscountValueController.text = product.discountValue?.toString() ?? "0";
+    productsBloc.productPurchasePriceController.text =
+        product.purchasePrice?.toString() ?? "0";
+    productsBloc.productSellingPriceController.text =
+        product.sellingPrice?.toString() ?? "0";
+    productsBloc.productOpeningStockController.text =
+        product.openingStock?.toString() ?? "0";
+    productsBloc.productAlertQuantityController.text =
+        product.alertQuantity?.toString() ?? "5";
+    productsBloc.productDiscountValueController.text =
+        product.discountValue?.toString() ?? "0";
     productsBloc.selectedDiscountType = product.discountType ?? "fixed";
     productsBloc.isDiscountApplied = product.discountApplied ?? false;
 
-    print(product.discountApplied);
-    print(productsBloc.isDiscountApplied);
+    productsBloc.selectedState = product.isActive == true ? "Active" : "Inactive";
+
     // Set selected category, unit, brand if available
     if (product.categoryInfo?.name != null) {
       categoriesBloc.selectedState = product.categoryInfo!.name!;
-      categoriesBloc.selectedStateId = product.categoryInfo!.id?.toString() ?? "";
+      categoriesBloc.selectedStateId =
+          product.categoryInfo!.id?.toString() ?? "";
     }
 
     if (product.unitInfo?.name != null) {
@@ -164,8 +161,8 @@ class _ProductsFormState extends State<ProductsForm> {
   Widget _buildDialogContent() {
     return Container(
       decoration: BoxDecoration(
-          color: AppColors.bg,
-          borderRadius: BorderRadius.circular(12)
+        color: AppColors.bg,
+        borderRadius: BorderRadius.circular(12),
       ),
       padding: const EdgeInsets.all(12),
       child: Column(
@@ -187,7 +184,6 @@ class _ProductsFormState extends State<ProductsForm> {
               ),
             ],
           ),
-          const SizedBox(height: 10),
           Expanded(
             child: SingleChildScrollView(
               child: BlocListener<ProductsBloc, ProductsState>(
@@ -206,7 +202,6 @@ class _ProductsFormState extends State<ProductsForm> {
                           Expanded(child: _buildUnitDropdown()),
                         ],
                       ),
-                      const SizedBox(height: 8),
 
                       // Second Row: Groups, Brand, Source
                       Row(
@@ -218,7 +213,6 @@ class _ProductsFormState extends State<ProductsForm> {
                           Expanded(child: _buildSourceDropdown()),
                         ],
                       ),
-                      const SizedBox(height: 8),
 
                       // Third Row: Product Name and Opening Stock
                       Row(
@@ -241,33 +235,36 @@ class _ProductsFormState extends State<ProductsForm> {
                       const SizedBox(height: 8),
 
                       // Fifth Row: Discount Toggle
-                Row(children: [
-                  Expanded(child:     _buildDiscountAppliedToggle(),),
-                  const SizedBox(width: 8),
-                  Expanded(child:     BlocBuilder<ProductsBloc, ProductsState>(
-                    builder: (context, state) {
-                      return Visibility(
-                        visible: productsBloc.isDiscountApplied,
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            Expanded(
-                              child: _buildDiscountValueField(),
+                      Row(
+                        children: [
+                          Expanded(child: _buildDiscountAppliedToggle()),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: BlocBuilder<ProductsBloc, ProductsState>(
+                              builder: (context, state) {
+                                return Visibility(
+                                  visible: productsBloc.isDiscountApplied,
+                                  child: Row(
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      Expanded(
+                                        child: _buildDiscountValueField(),
+                                      ),
+                                      const SizedBox(width: 10),
+                                      Expanded(
+                                        child: _buildDiscountTypeDropdown(),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
                             ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: _buildDiscountTypeDropdown(),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),),
-                ],),
+                          ),
+                        ],
+                      ),
 
                       // Sixth Row: Discount Value and Type
-
                       const SizedBox(height: 8),
 
                       // Seventh Row: Alert Quantity and Description
@@ -275,9 +272,63 @@ class _ProductsFormState extends State<ProductsForm> {
                         children: [
                           Expanded(child: _buildAlertQuantityField()),
                           const SizedBox(width: 10),
+
                           Expanded(child: _buildDescriptionField()),
                         ],
                       ),
+
+                      const SizedBox(height: 10),
+                      if (widget.productId != null) ...[
+                        LayoutBuilder(
+                          builder: (context, constraints) {
+                            final isSmallScreen = constraints.maxWidth < 600;
+
+                            return SizedBox(
+                              width: isSmallScreen
+                                  ? double.infinity
+                                  : constraints.maxWidth * 0.5,
+                              child: AppDropdown(
+                                label: "Status",
+                                context: context,
+                                hint:
+                                    context
+                                        .read<ProductsBloc>()
+                                        .selectedState
+                                        .isEmpty
+                                    ? "Select Status"
+                                    : context.read<ProductsBloc>().selectedState,
+                                isLabel: false,
+                                value:
+                                    context
+                                        .read<ProductsBloc>()
+                                        .selectedState
+                                        .isEmpty
+                                    ? null
+                                    : context.read<ProductsBloc>().selectedState,
+                                itemList: ["Active", "Inactive"],
+                                onChanged: (newVal) {
+                                  setState(() {
+                                    context.read<ProductsBloc>().selectedState =
+                                        newVal.toString();
+                                  });
+                                },
+                                itemBuilder: (item) => DropdownMenuItem(
+                                  value: item,
+                                  child: Text(
+                                    item.toString(),
+                                    style: const TextStyle(
+                                      color: AppColors.blackColor,
+                                      fontFamily: 'Quicksand',
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                        SizedBox(height: AppSizes.height(context) * 0.01),
+                      ],
 
                       const SizedBox(height: 20),
 
@@ -289,7 +340,9 @@ class _ProductsFormState extends State<ProductsForm> {
                           SizedBox(
                             width: 150,
                             child: AppButton(
-                              name: _isEditMode ? "Update Product" : "Create Product",
+                              name: _isEditMode
+                                  ? "Update Product"
+                                  : "Create Product",
                               onPressed: _submitProduct,
                             ),
                           ),
@@ -317,7 +370,12 @@ class _ProductsFormState extends State<ProductsForm> {
 
   void _handleProductState(ProductsState state) {
     if (state is ProductsAddLoading) {
-      appLoader(context, _isEditMode ? "Updating Product..." : "Creating Product, please wait...");
+      appLoader(
+        context,
+        _isEditMode
+            ? "Updating Product..."
+            : "Creating Product, please wait...",
+      );
     } else if (state is ProductsAddSuccess) {
       Navigator.pop(context); // Close loader dialog
 
@@ -329,7 +387,11 @@ class _ProductsFormState extends State<ProductsForm> {
       // Show success message
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(_isEditMode ? 'Product updated successfully!' : 'Product created successfully!'),
+          content: Text(
+            _isEditMode
+                ? 'Product updated successfully!'
+                : 'Product created successfully!',
+          ),
           backgroundColor: Colors.green,
         ),
       );
@@ -371,17 +433,16 @@ class _ProductsFormState extends State<ProductsForm> {
             setState(() {
               categoriesBloc.selectedState = newVal.toString();
               final matchingCategory = categoryList.firstWhere(
-                    (category) => category.name.toString() == newVal.toString(),
+                (category) => category.name.toString() == newVal.toString(),
                 orElse: () => CategoryModel(),
               );
-              categoriesBloc.selectedStateId = matchingCategory.id?.toString() ?? "";
+              categoriesBloc.selectedStateId =
+                  matchingCategory.id?.toString() ?? "";
             });
           },
           validator: (value) => value == null ? 'Please select Category' : null,
-          itemBuilder: (item) => DropdownMenuItem(
-            value: item,
-            child: Text(item.toString()),
-          ),
+          itemBuilder: (item) =>
+              DropdownMenuItem(value: item, child: Text(item.toString())),
         );
       },
     );
@@ -407,17 +468,15 @@ class _ProductsFormState extends State<ProductsForm> {
             setState(() {
               unitBloc.selectedState = newVal.toString();
               final matchingUnit = unitList.firstWhere(
-                    (unit) => unit.name.toString() == newVal.toString(),
+                (unit) => unit.name.toString() == newVal.toString(),
                 orElse: () => UnitsModel(),
               );
               unitBloc.selectedIdState = matchingUnit.id?.toString() ?? "";
             });
           },
           validator: (value) => value == null ? 'Please select Unit' : null,
-          itemBuilder: (item) => DropdownMenuItem(
-            value: item,
-            child: Text(item.toString()),
-          ),
+          itemBuilder: (item) =>
+              DropdownMenuItem(value: item, child: Text(item.toString())),
         );
       },
     );
@@ -443,16 +502,14 @@ class _ProductsFormState extends State<ProductsForm> {
             setState(() {
               groupsBloc.selectedState = newVal.toString();
               final matchingUnit = groupsList.firstWhere(
-                    (unit) => unit.name.toString() == newVal.toString(),
+                (unit) => unit.name.toString() == newVal.toString(),
                 orElse: () => GroupsModel(),
               );
               groupsBloc.selectedIdState = matchingUnit.id?.toString() ?? "";
             });
           },
-          itemBuilder: (item) => DropdownMenuItem(
-            value: item,
-            child: Text(item.toString()),
-          ),
+          itemBuilder: (item) =>
+              DropdownMenuItem(value: item, child: Text(item.toString())),
         );
       },
     );
@@ -478,16 +535,14 @@ class _ProductsFormState extends State<ProductsForm> {
             setState(() {
               sourceBloc.selectedState = newVal.toString();
               final matchingUnit = sourceList.firstWhere(
-                    (unit) => unit.name.toString() == newVal.toString(),
+                (unit) => unit.name.toString() == newVal.toString(),
                 orElse: () => SourceModel(),
               );
               sourceBloc.selectedIdState = matchingUnit.id?.toString() ?? "";
             });
           },
-          itemBuilder: (item) => DropdownMenuItem(
-            value: item,
-            child: Text(item.toString()),
-          ),
+          itemBuilder: (item) =>
+              DropdownMenuItem(value: item, child: Text(item.toString())),
         );
       },
     );
@@ -513,16 +568,14 @@ class _ProductsFormState extends State<ProductsForm> {
             setState(() {
               brandBloc.selectedState = newVal.toString();
               final matchingBrand = brandList.firstWhere(
-                    (brand) => brand.name.toString() == newVal.toString(),
+                (brand) => brand.name.toString() == newVal.toString(),
                 orElse: () => BrandModel(),
               );
               brandBloc.selectedId = matchingBrand.id?.toString() ?? "";
             });
           },
-          itemBuilder: (item) => DropdownMenuItem(
-            value: item,
-            child: Text(item.toString()),
-          ),
+          itemBuilder: (item) =>
+              DropdownMenuItem(value: item, child: Text(item.toString())),
         );
       },
     );
@@ -547,7 +600,9 @@ class _ProductsFormState extends State<ProductsForm> {
       isRequired: false,
       controller: productsBloc.productPurchasePriceController,
       labelText: 'Purchase Price',
-      inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*'))],
+      inputFormatters: [
+        FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+      ],
       keyboardType: TextInputType.number,
       hintText: '0.00',
       fillColor: const Color.fromARGB(255, 255, 255, 255),
@@ -562,7 +617,9 @@ class _ProductsFormState extends State<ProductsForm> {
       labelText: 'Selling Price',
       hintText: '0.00',
       fillColor: const Color.fromARGB(255, 255, 255, 255),
-      inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*'))],
+      inputFormatters: [
+        FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+      ],
       keyboardType: TextInputType.number,
     );
   }
@@ -604,8 +661,6 @@ class _ProductsFormState extends State<ProductsForm> {
       keyboardType: TextInputType.multiline,
     );
   }
-
-
 
   Widget _buildDiscountAppliedToggle() {
     return Container(
@@ -656,7 +711,9 @@ class _ProductsFormState extends State<ProductsForm> {
       labelText: 'Discount Value',
       hintText: '0.00',
       fillColor: const Color.fromARGB(255, 255, 255, 255),
-      inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*'))],
+      inputFormatters: [
+        FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+      ],
       keyboardType: TextInputType.number,
       // prefixIcon: const Icon(Icons.discount, size: 20),
     );
@@ -736,20 +793,20 @@ class _ProductsFormState extends State<ProductsForm> {
     if (!formKey.currentState!.validate()) return;
 
     if (categoriesBloc.selectedStateId.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a category')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Please select a category')));
       return;
     }
 
     if (unitBloc.selectedIdState.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a unit')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Please select a unit')));
       return;
     }
 
-    Map<String, String> body = {
+    Map<String, dynamic> body = {
       "category": categoriesBloc.selectedStateId,
       "unit": unitBloc.selectedIdState,
       "name": productsBloc.productNameController.text,
@@ -784,15 +841,20 @@ class _ProductsFormState extends State<ProductsForm> {
         productsBloc.productAlertQuantityController.text != "5") {
       body["alert_quantity"] = productsBloc.productAlertQuantityController.text;
     }
-    if (productsBloc.productBarCodeController.text.isNotEmpty) {
-      body["bar_code"] = productsBloc.productBarCodeController.text;
-    }
 
+    if (widget.productId != null &&
+        context.read<ProductsBloc>().selectedState.trim().isNotEmpty) {
+      body["is_active"] =
+      context.read<ProductsBloc>().selectedState == "Active"
+          ? true
+          : false;
+    }
     // Add discount fields
     if (productsBloc.isDiscountApplied) {
       if (productsBloc.productDiscountValueController.text.isNotEmpty &&
           productsBloc.productDiscountValueController.text != "0") {
-        body["discount_value"] = productsBloc.productDiscountValueController.text;
+        body["discount_value"] =
+            productsBloc.productDiscountValueController.text;
         body["discount_type"] = productsBloc.selectedDiscountType;
         body["discount_applied_on"] = "true";
       }
