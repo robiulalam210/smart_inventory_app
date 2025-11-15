@@ -2,7 +2,8 @@
 //
 //     final posSaleModel = posSaleModelFromJson(jsonString);
 
-import 'dart:convert';
+
+import '../../../../core/core.dart';
 
 List<PosSaleModel> posSaleModelFromJson(String str) => List<PosSaleModel>.from(json.decode(str).map((x) => PosSaleModel.fromJson(x)));
 
@@ -78,6 +79,50 @@ class PosSaleModel {
     // TODO: implement toString
     return invoiceNo??'';
   }
+
+
+  String get formattedSaleDate {
+    if (saleDate == null) return 'N/A';
+    return '${saleDate!.day}/${saleDate!.month}/${saleDate!.year}';
+  }
+
+  String get formattedTime {
+    if (saleDate == null) return 'N/A';
+    return '${saleDate!.hour}:${saleDate!.minute.toString().padLeft(2, '0')}';
+  }
+
+  double get calculatedDueAmount {
+    final payable = payableAmount is String
+        ? double.tryParse(payableAmount!) ?? 0.0
+        : (payableAmount ?? 0.0).toDouble();
+    final paid = paidAmount is String
+        ? double.tryParse(paidAmount!) ?? 0.0
+        : (paidAmount ?? 0.0).toDouble();
+    return payable - paid;
+  }
+
+  String get paymentStatus {
+    final payable = payableAmount is String
+        ? double.tryParse(payableAmount!) ?? 0.0
+        : (payableAmount ?? 0.0).toDouble();
+    final paid = paidAmount is String
+        ? double.tryParse(paidAmount!) ?? 0.0
+        : (paidAmount ?? 0.0).toDouble();
+
+    if (paid >= payable) return 'Paid';
+    if (paid > 0) return 'Partial';
+    return 'Pending';
+  }
+
+  Color get statusColor {
+    switch (paymentStatus.toLowerCase()) {
+      case 'paid': return Colors.green;
+      case 'partial': return Colors.orange;
+      case 'pending': return Colors.red;
+      default: return Colors.grey;
+    }
+  }
+
   factory PosSaleModel.fromJson(Map<String, dynamic> json) => PosSaleModel(
     id: json["id"],
     invoiceNo: json["invoice_no"],

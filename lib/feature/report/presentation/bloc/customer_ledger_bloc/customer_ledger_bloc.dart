@@ -10,6 +10,7 @@ part 'customer_ledger_state.dart';
 class CustomerLedgerBloc extends Bloc<CustomerLedgerEvent, CustomerLedgerState> {
   // Selected filters
   CustomerActiveModel? selectedCustomer;
+  CustomerLedgerResponse? customerLedger;
   DateTime? fromDate;
   DateTime? toDate;
 
@@ -56,7 +57,7 @@ class CustomerLedgerBloc extends Bloc<CustomerLedgerEvent, CustomerLedgerState> 
 
           try {
             final customerLedgerResponse = CustomerLedgerResponse.fromJson(data as Map<String, dynamic>);
-
+            customerLedger=customerLedgerResponse;
             emit(CustomerLedgerSuccess(response: customerLedgerResponse));
           } catch (parseError, stackTrace) {
             emit(CustomerLedgerFailed(

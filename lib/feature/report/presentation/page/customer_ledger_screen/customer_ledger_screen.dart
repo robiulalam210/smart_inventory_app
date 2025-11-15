@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
+import 'package:printing/printing.dart';
 import 'package:smart_inventory/core/configs/app_colors.dart';
 import 'package:smart_inventory/core/configs/app_images.dart';
 import 'package:smart_inventory/core/configs/app_text.dart';
@@ -12,7 +13,9 @@ import 'package:smart_inventory/core/widgets/app_dropdown.dart';
 import 'package:smart_inventory/core/widgets/date_range.dart';
 import 'package:smart_inventory/feature/customer/data/model/customer_active_model.dart';
 import 'package:smart_inventory/feature/customer/presentation/bloc/customer/customer_bloc.dart';
+import 'package:smart_inventory/feature/report/presentation/page/customer_ledger_screen/pdf.dart';
 
+import '../../../../../core/configs/app_routes.dart';
 import '../../../../../responsive.dart';
 import '../../../data/model/customer_ledger_model.dart';
 import '../../bloc/customer_ledger_bloc/customer_ledger_bloc.dart';
@@ -285,6 +288,60 @@ class _CustomerLedgerScreenState extends State<CustomerLedgerScreen> {
                   _buildSummaryItem("Sales Transactions", salesCount.toString(), Icons.shopping_cart, Colors.orange),
                   _buildSummaryItem("Payment Transactions", paymentsCount.toString(), Icons.payment, Colors.purple),
                   _buildSummaryItem("Total Transactions", summary.totalTransactions.toString(), Icons.receipt, AppColors.primaryColor),
+                  AppButton(
+                      size: 100,
+                      name: "Pdf", onPressed: (){
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => Scaffold(
+                          backgroundColor: Colors.red,
+                          body: PdfPreview.builder(
+                            useActions: true,
+                            allowSharing: false,
+                            canDebug: false,
+                            canChangeOrientation: false,
+                            canChangePageFormat: false,
+                            dynamicLayout: true,
+                            build: (format) => generateCustomerLedgerReportPdf(
+                             state.response,
+
+                            ),
+                            pdfPreviewPageDecoration:
+                            BoxDecoration(color: AppColors.white),
+                            actionBarTheme: PdfActionBarTheme(
+                              backgroundColor: AppColors.primaryColor,
+                              iconColor: Colors.white,
+                              textStyle: const TextStyle(color: Colors.white),
+                            ),
+                            actions: [
+                              IconButton(
+                                onPressed: () => AppRoutes.pop(context),
+                                icon: const Icon(Icons.cancel, color: Colors.red),
+                              ),
+                            ],
+                            pagesBuilder: (context, pages) {
+                              debugPrint('Rendering ${pages.length} pages');
+                              return PageView.builder(
+                                itemCount: pages.length,
+                                scrollDirection: Axis.vertical,
+                                itemBuilder: (context, index) {
+                                  final page = pages[index];
+                                  return Container(
+                                    color: Colors.grey,
+                                    alignment: Alignment.center,
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Image(image: page.image, fit: BoxFit.contain),
+                                  );
+                                },
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                    );
+
+                  }),
                 ],
               ),
             ],

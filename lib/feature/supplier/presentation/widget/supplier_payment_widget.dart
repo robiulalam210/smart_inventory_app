@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:printing/printing.dart';
 import 'package:smart_inventory/core/configs/app_colors.dart';
 import 'package:smart_inventory/feature/supplier/data/model/supplier_payment/suppler_payment_model.dart';
+import 'package:smart_inventory/feature/supplier/presentation/pages/supplier_payment_details.dart';
+
+import '../../../../core/configs/app_routes.dart';
+import '../../../sales/presentation/pages/sales_details_screen.dart';
+import '../pages/pdf/generate_supplier_payment.dart';
 
 class SupplierPaymentWidget extends StatelessWidget {
   final List<SupplierPaymentModel> suppliers;
@@ -60,12 +66,12 @@ class SupplierPaymentWidget extends StatelessWidget {
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(12),
                       child: DataTable(
-                        columns: _buildColumns(dynamicColumnWidth),
+                        columns: _buildColumns(context,dynamicColumnWidth),
                         rows: suppliers
                             .asMap()
                             .entries
                             .map(
-                              (e) => _buildRow(
+                              (e) => _buildRow(context,
                                 e.key + 1,
                                 e.value,
                                 dynamicColumnWidth,
@@ -97,7 +103,7 @@ class SupplierPaymentWidget extends StatelessWidget {
     );
   }
 
-  List<DataColumn> _buildColumns(double columnWidth) {
+  List<DataColumn> _buildColumns(BuildContext context,double columnWidth) {
     return [
       _buildDataColumn("SL", columnWidth * 0.6),
       _buildDataColumn("Payment No", columnWidth * 0.8),
@@ -130,6 +136,7 @@ class SupplierPaymentWidget extends StatelessWidget {
   }
 
   DataRow _buildRow(
+      BuildContext context,
     int index,
     SupplierPaymentModel supplier,
     double columnWidth,
@@ -157,34 +164,87 @@ class SupplierPaymentWidget extends StatelessWidget {
         _buildDataCell(formatDate(supplier.paymentDate), columnWidth),
         _buildDataCell(supplier.preparedByName ?? '-', columnWidth),
         _buildStatusCell(getStatus(supplier.paymentSummary), columnWidth * 0.8),
-        _buildActionsCell(supplier, columnWidth * 0.8),
+        _buildActionsCell(context,supplier, columnWidth * 0.8),
       ],
     );
   }
 
-  DataCell _buildActionsCell(SupplierPaymentModel supplier, double width) {
+  DataCell _buildActionsCell(BuildContext context, SupplierPaymentModel sale, double width) {
     return DataCell(
       SizedBox(
         width: width,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            if (onEdit != null)
-              IconButton(
-                icon: const Icon(Icons.edit, size: 16),
-                color: Colors.blue,
-                onPressed: () => onEdit!(supplier),
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-              ),
-            if (onDelete != null)
-              IconButton(
-                icon: const Icon(Icons.delete, size: 16),
-                color: Colors.red,
-                onPressed: () => onDelete!(supplier),
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-              ),
+            IconButton(
+              icon: const Icon(Icons.visibility, size: 16),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => SupplierPaymentDetailsScreen(payment: sale),
+                  ),
+                );
+              },
+              tooltip: 'View Details',
+            ),
+            IconButton(
+              icon: const Icon(Icons.picture_as_pdf, size: 16),
+              onPressed: () {
+
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => Scaffold(
+                      backgroundColor: Colors.red,
+                      body: PdfPreview.builder(
+                        useActions: true,
+                        allowSharing: false,
+                        canDebug: false,
+                        canChangeOrientation: false,
+                        canChangePageFormat: false,
+                        dynamicLayout: true,
+                        build: (format) => generateSupplierPaymentPdf(
+                          sale,
+
+                        ),
+                        pdfPreviewPageDecoration:
+                        BoxDecoration(color: AppColors.white),
+                        actionBarTheme: PdfActionBarTheme(
+                          backgroundColor: AppColors.primaryColor,
+                          iconColor: Colors.white,
+                          textStyle: const TextStyle(color: Colors.white),
+                        ),
+                        actions: [
+                          IconButton(
+                            onPressed: () => AppRoutes.pop(context),
+                            icon: const Icon(Icons.cancel, color: Colors.red),
+                          ),
+                        ],
+                        pagesBuilder: (context, pages) {
+                          debugPrint('Rendering ${pages.length} pages');
+                          return PageView.builder(
+                            itemCount: pages.length,
+                            scrollDirection: Axis.vertical,
+                            itemBuilder: (context, index) {
+                              final page = pages[index];
+                              return Container(
+                                color: Colors.grey,
+                                alignment: Alignment.center,
+                                padding: const EdgeInsets.all(8.0),
+                                child: Image(image: page.image, fit: BoxFit.contain),
+                              );
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                );
+
+              },
+              tooltip: 'Generate PDF',
+            ),
           ],
         ),
       ),

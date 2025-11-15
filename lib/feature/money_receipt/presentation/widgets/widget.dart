@@ -1,5 +1,9 @@
+import 'package:printing/printing.dart';
+import 'package:smart_inventory/feature/money_receipt/presentation/page/money_receipt_details.dart';
+
 import '../../../../core/configs/configs.dart';
 import '../../data/model/money_receipt_model/money_receipt_model.dart';
+import '../page/pdf/generate_money_receipt.dart';
 
 class MoneyReceiptDataTableWidget extends StatelessWidget {
   final List<MoneyreceiptModel> sales;
@@ -50,7 +54,7 @@ class MoneyReceiptDataTableWidget extends StatelessWidget {
                               .asMap()
                               .entries
                               .map(
-                                (entry) => _buildRow(
+                                (entry) => _buildRow(context,
                               entry.key + 1,
                               entry.value,
                               dynamicColumnWidth,
@@ -93,6 +97,8 @@ class MoneyReceiptDataTableWidget extends StatelessWidget {
       "Amount",
       "Total Before",
       "Status",
+      "Actions",
+
     ];
 
     return labels
@@ -118,7 +124,7 @@ class MoneyReceiptDataTableWidget extends StatelessWidget {
         .toList();
   }
 
-  DataRow _buildRow(int index, MoneyreceiptModel sale, double columnWidth) {
+  DataRow _buildRow(BuildContext context,int index, MoneyreceiptModel sale, double columnWidth) {
     // Format date safely
     String formatDate(DateTime? date) {
       if (date == null) return '-';
@@ -158,7 +164,90 @@ class MoneyReceiptDataTableWidget extends StatelessWidget {
           columnWidth,
           statusColor: _getStatusColor(status),
         ),
+
+        _buildActionsCell(context, sale, columnWidth),
       ],
+    );
+  }
+  DataCell _buildActionsCell(BuildContext context, MoneyreceiptModel sale, double width) {
+    return DataCell(
+      SizedBox(
+        width: width,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            IconButton(
+              icon: const Icon(Icons.visibility, size: 16),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => MoneyReceiptDetailsScreen(receipt: sale),
+                  ),
+                );
+              },
+              tooltip: 'View Details',
+            ),
+            IconButton(
+              icon: const Icon(Icons.picture_as_pdf, size: 16),
+              onPressed: () {
+
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => Scaffold(
+                      backgroundColor: Colors.red,
+                      body: PdfPreview.builder(
+                        useActions: true,
+                        allowSharing: false,
+                        canDebug: false,
+                        canChangeOrientation: false,
+                        canChangePageFormat: false,
+                        dynamicLayout: true,
+                        build: (format) => generateMoneyReceiptPdf(
+                          sale,
+
+                        ),
+                        pdfPreviewPageDecoration:
+                        BoxDecoration(color: AppColors.white),
+                        actionBarTheme: PdfActionBarTheme(
+                          backgroundColor: AppColors.primaryColor,
+                          iconColor: Colors.white,
+                          textStyle: const TextStyle(color: Colors.white),
+                        ),
+                        actions: [
+                          IconButton(
+                            onPressed: () => AppRoutes.pop(context),
+                            icon: const Icon(Icons.cancel, color: Colors.red),
+                          ),
+                        ],
+                        pagesBuilder: (context, pages) {
+                          debugPrint('Rendering ${pages.length} pages');
+                          return PageView.builder(
+                            itemCount: pages.length,
+                            scrollDirection: Axis.vertical,
+                            itemBuilder: (context, index) {
+                              final page = pages[index];
+                              return Container(
+                                color: Colors.grey,
+                                alignment: Alignment.center,
+                                padding: const EdgeInsets.all(8.0),
+                                child: Image(image: page.image, fit: BoxFit.contain),
+                              );
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                );
+
+              },
+              tooltip: 'Generate PDF',
+            ),
+          ],
+        ),
+      ),
     );
   }
 
