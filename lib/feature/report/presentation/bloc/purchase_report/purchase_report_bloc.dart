@@ -58,7 +58,7 @@ class PurchaseReportBloc extends Bloc<PurchaseReportEvent, PurchaseReportState> 
             final purchaseReportResponse = PurchaseReportResponse.fromJson(data as Map<String, dynamic>);
 
             emit(PurchaseReportSuccess(response: purchaseReportResponse));
-          } catch (parseError, stackTrace) {
+          } catch (parseError) {
             emit(PurchaseReportFailed(
               title: "Parsing Error",
               content: "Failed to parse purchase report data: $parseError",
@@ -70,7 +70,7 @@ class PurchaseReportBloc extends Bloc<PurchaseReportEvent, PurchaseReportState> 
             content: res['message'] ?? "Failed to load purchase report",
           ));
         }
-      } catch (e, stackTrace) {
+      } catch (e) {
         emit(PurchaseReportFailed(
           title: "Error",
           content: "Failed to load purchase report: ${e.toString()}",

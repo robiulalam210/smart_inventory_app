@@ -481,7 +481,6 @@ pw.Widget _buildHeaderCell(String text) {
 
 pw.TableRow _buildTableRow(TopProductModel product, int rank) {
   final performance = _calculatePerformanceRating(product, rank);
-  final performanceColor = _getPerformanceColor(performance);
 
   return pw.TableRow(
     decoration: const pw.BoxDecoration(

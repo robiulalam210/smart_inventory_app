@@ -48,7 +48,7 @@ class SupplierDueAdvanceBloc extends Bloc<SupplierDueAdvanceEvent, SupplierDueAd
             final supplierDueAdvanceResponse = SupplierDueAdvanceResponse.fromJson(data as Map<String, dynamic>);
 
             emit(SupplierDueAdvanceSuccess(response: supplierDueAdvanceResponse));
-          } catch (parseError, stackTrace) {
+          } catch (parseError) {
             emit(SupplierDueAdvanceFailed(
               title: "Parsing Error",
               content: "Failed to parse supplier due & advance data: $parseError",
@@ -60,7 +60,7 @@ class SupplierDueAdvanceBloc extends Bloc<SupplierDueAdvanceEvent, SupplierDueAd
             content: res['message'] ?? "Failed to load supplier due & advance report",
           ));
         }
-      } catch (e, stackTrace) {
+      } catch (e) {
         emit(SupplierDueAdvanceFailed(
           title: "Error",
           content: "Failed to load supplier due & advance report: ${e.toString()}",

@@ -65,7 +65,7 @@ class ExpenseReportBloc extends Bloc<ExpenseReportEvent, ExpenseReportState> {
             final expenseReportResponse = ExpenseReportResponse.fromJson(data as Map<String, dynamic>);
 
             emit(ExpenseReportSuccess(response: expenseReportResponse));
-          } catch (parseError, stackTrace) {
+          } catch (parseError) {
             emit(ExpenseReportFailed(
               title: "Parsing Error",
               content: "Failed to parse expense report data: $parseError",
@@ -77,7 +77,7 @@ class ExpenseReportBloc extends Bloc<ExpenseReportEvent, ExpenseReportState> {
             content: res['message'] ?? "Failed to load expense report",
           ));
         }
-      } catch (e, stackTrace) {
+      } catch (e) {
         emit(ExpenseReportFailed(
           title: "Error",
           content: "Failed to load expense report: ${e.toString()}",

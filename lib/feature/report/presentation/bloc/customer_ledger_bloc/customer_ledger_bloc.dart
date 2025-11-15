@@ -59,7 +59,7 @@ class CustomerLedgerBloc extends Bloc<CustomerLedgerEvent, CustomerLedgerState> 
             final customerLedgerResponse = CustomerLedgerResponse.fromJson(data as Map<String, dynamic>);
             customerLedger=customerLedgerResponse;
             emit(CustomerLedgerSuccess(response: customerLedgerResponse));
-          } catch (parseError, stackTrace) {
+          } catch (parseError) {
             emit(CustomerLedgerFailed(
               title: "Parsing Error",
               content: "Failed to parse customer ledger data: $parseError",
@@ -71,7 +71,7 @@ class CustomerLedgerBloc extends Bloc<CustomerLedgerEvent, CustomerLedgerState> 
             content: res['message'] ?? "Failed to load customer ledger",
           ));
         }
-      } catch (e, stackTrace) {
+      } catch (e) {
         emit(CustomerLedgerFailed(
           title: "Error",
           content: "Failed to load customer ledger: ${e.toString()}",

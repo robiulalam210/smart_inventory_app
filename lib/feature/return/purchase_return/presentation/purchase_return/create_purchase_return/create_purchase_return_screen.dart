@@ -500,7 +500,6 @@ class _CreatePurchaseReturnScreenState
                             "items": returnProducts,
                           };
 
-                          print("📦 Request Body: $body");
 
                           context.read<PurchaseReturnBloc>().add(
                             CreatePurchaseReturn(context, body: body),

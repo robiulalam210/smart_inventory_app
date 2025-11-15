@@ -3,7 +3,6 @@ import 'dart:typed_data';
 import '../../../data/models/pos_sale_model.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
-import 'package:printing/printing.dart';
 Future<Uint8List> generateSalesPdf(PosSaleModel sale) async {
   final pdf = pw.Document();
 
@@ -85,7 +84,7 @@ Future<Uint8List> generateSalesPdf(PosSaleModel sale) async {
                         width: 120,
                         child: pw.Text('Date:', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
                       ),
-                      pw.Text(sale.formattedSaleDate ?? 'N/A'),
+                      pw.Text(sale.formattedSaleDate),
                     ],
                   ),
                   pw.Row(
@@ -94,7 +93,7 @@ Future<Uint8List> generateSalesPdf(PosSaleModel sale) async {
                         width: 120,
                         child: pw.Text('Time:', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
                       ),
-                      pw.Text(sale.formattedTime ?? 'N/A'),
+                      pw.Text(sale.formattedTime),
                     ],
                   ),
                 ],
@@ -102,11 +101,11 @@ Future<Uint8List> generateSalesPdf(PosSaleModel sale) async {
               pw.Container(
                 padding: const pw.EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 decoration: pw.BoxDecoration(
-                  color: _getStatusColor(sale.paymentStatus ?? ''),
+                  color: _getStatusColor(sale.paymentStatus),
                   borderRadius: pw.BorderRadius.circular(20),
                 ),
                 child: pw.Text(
-                  (sale.paymentStatus ?? 'UNKNOWN').toUpperCase(),
+                  (sale.paymentStatus).toUpperCase(),
                   style: pw.TextStyle(
                     fontWeight: pw.FontWeight.bold,
                     fontSize: 12,

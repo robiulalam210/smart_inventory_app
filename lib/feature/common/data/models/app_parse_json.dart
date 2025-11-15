@@ -11,7 +11,7 @@ ApiResponse<T> appParseJson<T>(String jsonString, Function fromJsonT) {
     return ApiResponse.fromJson(jsonData, fromJsonT);
   } on FormatException catch (e) {
     return ApiResponse(success: false, message: "Invalid JSON format: $e", title: "JSON Decoding Error");
-  } catch (e,s) {
+  } catch (e) {
     return ApiResponse(success: false, message: "Failed to parse JSON data: $e", title: "JSON Decoding Error");
   }
 }

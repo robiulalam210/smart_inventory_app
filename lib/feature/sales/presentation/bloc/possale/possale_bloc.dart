@@ -94,7 +94,7 @@ class PosSaleBloc extends Bloc<PosSaleEvent, PosSaleState> {
           ),
         );
       }
-    } catch (error, st) {
+    } catch (error) {
       emit(PosSaleListFailed(title: "Exception", content: error.toString()));
     }
   }
@@ -137,7 +137,7 @@ class PosSaleBloc extends Bloc<PosSaleEvent, PosSaleState> {
           ),
         );
       }
-    } catch (error, st) {
+    } catch (error) {
       emit(PosSaleListFailed(title: "Exception", content: error.toString()));
     }
   }

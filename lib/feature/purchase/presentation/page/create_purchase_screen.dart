@@ -764,7 +764,7 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                                 enabledBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(5),
                                   borderSide: BorderSide(
-                                    color: AppColors.primaryColor.withOpacity(
+                                    color: AppColors.primaryColor.withValues(alpha:
                                       0.5,
                                     ),
                                     width: 0.5,

@@ -29,7 +29,7 @@ Widget topSelling(BuildContext context, List<Product> topProduct, {Widget? stati
             DataTable(
               columnSpacing: 5,
               dividerThickness: 0.5,
-              headingRowColor: MaterialStateProperty.resolveWith(
+              headingRowColor: WidgetStateProperty.resolveWith(
                       (states) => Colors.orangeAccent.shade200),
               headingTextStyle: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.white),
               columns: const [

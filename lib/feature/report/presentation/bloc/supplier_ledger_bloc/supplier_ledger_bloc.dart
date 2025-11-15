@@ -57,7 +57,7 @@ class SupplierLedgerBloc extends Bloc<SupplierLedgerEvent, SupplierLedgerState> 
             final supplierLedgerResponse = SupplierLedgerResponse.fromJson(data as Map<String, dynamic>);
 
             emit(SupplierLedgerSuccess(response: supplierLedgerResponse));
-          } catch (parseError, stackTrace) {
+          } catch (parseError) {
             emit(SupplierLedgerFailed(
               title: "Parsing Error",
               content: "Failed to parse supplier ledger data: $parseError",
@@ -69,7 +69,7 @@ class SupplierLedgerBloc extends Bloc<SupplierLedgerEvent, SupplierLedgerState> 
             content: res['message'] ?? "Failed to load supplier ledger report",
           ));
         }
-      } catch (e, stackTrace) {
+      } catch (e) {
         emit(SupplierLedgerFailed(
           title: "Error",
           content: "Failed to load supplier ledger report: ${e.toString()}",

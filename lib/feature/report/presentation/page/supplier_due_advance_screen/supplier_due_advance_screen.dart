@@ -8,7 +8,6 @@ import 'package:smart_inventory/feature/report/presentation/page/supplier_due_ad
 
 import '../../../data/model/supplier_due_advance_report_model.dart';
 import '../../bloc/supplier_due_advance_bloc/supplier_due_advance_bloc.dart';
-import '../supplier_ledger_screen/pdf.dart';
 
 class SupplierDueAdvanceScreen extends StatefulWidget {
   const SupplierDueAdvanceScreen({super.key});
@@ -594,7 +593,7 @@ class SupplierDueAdvanceDataTable extends StatelessWidget {
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: DataTable(
-                headingRowColor: MaterialStateProperty.resolveWith<Color>(
+                headingRowColor: WidgetStateProperty.resolveWith<Color>(
                       (states) => AppColors.primaryColor,
                 ),
                 columnSpacing: 12,
@@ -691,9 +690,9 @@ class SupplierDueAdvanceDataTable extends StatelessWidget {
                   final supplier = entry.value;
 
                   return DataRow(
-                    color: MaterialStateProperty.resolveWith<Color>(
-                          (Set<MaterialState> states) {
-                        return index % 2 == 0 ? Colors.grey.withOpacity(0.03) : Colors.transparent;
+                    color: WidgetStateProperty.resolveWith<Color>(
+                          (Set<WidgetState> states) {
+                        return index % 2 == 0 ? Colors.grey.withValues(alpha: 0.03) : Colors.transparent;
                       },
                     ),
                     cells: [

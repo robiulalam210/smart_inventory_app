@@ -78,7 +78,7 @@ class SalesReturnTableCard extends StatelessWidget {
                             fontWeight: FontWeight.w700,
                             fontFamily: GoogleFonts.inter().fontFamily,
                           ),
-                          headingRowColor: MaterialStateProperty.all(
+                          headingRowColor: WidgetStateProperty.all(
                             AppColors.primaryColor,
                           ),
                           dataTextStyle: TextStyle(
@@ -172,8 +172,8 @@ class SalesReturnTableCard extends StatelessWidget {
       final salesReturn = entry.value;
 
       return DataRow(
-        color: MaterialStateProperty.resolveWith<Color>(
-              (Set<MaterialState> states) {
+        color: WidgetStateProperty.resolveWith<Color>(
+              (Set<WidgetState> states) {
             return index % 2 == 0 ? Colors.grey.withValues(alpha: 0.03) : Colors.transparent;
           },
         ),
@@ -251,7 +251,7 @@ class SalesReturnTableCard extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: statusColor.withOpacity(0.1),
+              color: statusColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(

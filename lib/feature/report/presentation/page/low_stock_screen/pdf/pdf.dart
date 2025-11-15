@@ -111,9 +111,6 @@ pw.Widget _buildReportTitle() {
 
 // Critical Alert Section
 pw.Widget _buildCriticalAlertSection(LowStockSummary summary) {
-  final criticalPercentage = summary.totalLowStockItems > 0
-      ? (summary.criticalItems / summary.totalLowStockItems) * 100
-      : 0;
 
   return pw.Container(
     margin: const pw.EdgeInsets.all(8),
@@ -439,7 +436,6 @@ pw.Widget _buildHeaderCell(String text) {
 
 pw.TableRow _buildTableRow(LowStockProduct product) {
   final stockStatus = _getStockStatus(product);
-  final statusColor = _getStatusColor(stockStatus);
   final shortfall = product.alertQuantity - product.totalStockQuantity;
 
   return pw.TableRow(

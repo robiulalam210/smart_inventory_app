@@ -724,7 +724,7 @@ class ExpenseReportDataTable extends StatelessWidget {
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: DataTable(
-                headingRowColor: MaterialStateProperty.resolveWith<Color>(
+                headingRowColor: WidgetStateProperty.resolveWith<Color>(
                   (states) => AppColors.primaryColor,
                 ),
                 columnSpacing: 12,

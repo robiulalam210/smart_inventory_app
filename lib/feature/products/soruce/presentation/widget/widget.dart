@@ -288,7 +288,7 @@ class SourceTableCard extends StatelessWidget {
           Icon(
             Icons.source_outlined,
             size: 48,
-            color: Colors.grey.withOpacity(0.5),
+            color: Colors.grey.withValues(alpha: 0.5),
           ),
           const SizedBox(height: 16),
           Text(

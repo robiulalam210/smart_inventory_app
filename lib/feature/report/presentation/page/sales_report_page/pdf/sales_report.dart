@@ -294,47 +294,6 @@ pw.Widget _buildSummaryCard(
 }
 
 // Filters Section
-pw.Widget _buildFiltersSection(Map<String, dynamic> filters) {
-  if (filters.isEmpty) return pw.SizedBox();
-
-  return pw.Container(
-    decoration: pw.BoxDecoration(
-      color: PdfColors.grey50,
-      borderRadius: pw.BorderRadius.circular(8),
-      border: pw.Border.all(color: PdfColors.grey300),
-    ),
-    padding: const pw.EdgeInsets.all(16),
-    child: pw.Row(
-      crossAxisAlignment: pw.CrossAxisAlignment.start,
-      children: [
-        pw.Wrap(
-          spacing: 12,
-          runSpacing: 8,
-          children: filters.entries.map((entry) {
-            return pw.Container(
-              padding: const pw.EdgeInsets.symmetric(
-                horizontal: 8,
-                vertical: 4,
-              ),
-              decoration: pw.BoxDecoration(
-                color: PdfColors.blue50,
-                border: pw.Border.all(color: PdfColors.blue300),
-                borderRadius: pw.BorderRadius.circular(4),
-              ),
-              child: pw.Text(
-                '${entry.key}: ${entry.value}',
-                style: const pw.TextStyle(
-                  fontSize: 9,
-                  color: PdfColors.blue800,
-                ),
-              ),
-            );
-          }).toList(),
-        ),
-      ],
-    ),
-  );
-}
 
 // Sales Data Table
 pw.Widget _buildSalesTable(List<SalesReportModel> reports) {

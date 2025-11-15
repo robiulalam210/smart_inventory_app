@@ -61,9 +61,7 @@ class _BarcodeScanScreenState extends State<BarcodeScanScreen> {
         'Accept': 'application/json',
       });
 
-      print(url);
-      print(response.statusCode);
-      print(response.body);
+
       if (response.statusCode == 200) {
         final jsonResponse = jsonDecode(response.body);
 
