@@ -1,20 +1,8 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:hugeicons/hugeicons.dart';
-import 'package:iconsax/iconsax.dart';
-import 'package:lottie/lottie.dart';
 import 'package:smart_inventory/core/core.dart';
 
-import '../../../../../core/configs/app_colors.dart';
-import '../../../../../core/configs/app_images.dart';
-import '../../../../../core/configs/app_sizes.dart';
-import '../../../../../core/configs/app_text.dart';
-import '../../../../../core/shared/widgets/sideMenu/sidebar.dart';
-import '../../../../../core/widgets/app_dropdown.dart';
 import '../../../../../core/widgets/date_range.dart';
-import '../../../../../responsive.dart';
 import '../../../../customer/data/model/customer_active_model.dart';
 import '../../../../customer/presentation/bloc/customer/customer_bloc.dart';
 import '../../../../users_list/data/model/user_model.dart';

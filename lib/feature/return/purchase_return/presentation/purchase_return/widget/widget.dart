@@ -337,7 +337,7 @@ class PurchaseReturnTableCard extends StatelessWidget {
                 _buildDetailRow('Return No:', purchaseReturn.invoiceNo ?? 'N/A'),
                 _buildDetailRow('Supplier:', purchaseReturn.supplier ?? 'N/A'),
                 _buildDetailRow('Return Date:', purchaseReturn.returnDate.toString()),
-                _buildDetailRow('Total Amount:', '${purchaseReturn.returnAmount?.toString() ?? "0.00"}'),
+                _buildDetailRow('Total Amount:', purchaseReturn.returnAmount?.toString() ?? "0.00"),
                 _buildDetailRow('Status:', purchaseReturn.status?.toUpperCase() ?? 'PENDING'),
                 _buildDetailRow('Reason:', purchaseReturn.reason ?? 'No reason provided'),
 
@@ -380,7 +380,7 @@ class PurchaseReturnTableCard extends StatelessWidget {
                           ],
                         ),
                       )
-                  ).toList(),
+                  ),
                 ],
 
                 const SizedBox(height: 20),

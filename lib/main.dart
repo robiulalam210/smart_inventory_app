@@ -29,14 +29,12 @@ void main() async {
       minSize = const Size(900, 600);
       shouldMaximize = true;
     } else if (width <= 1920) {
-      print("medium");
 
       // For medium screens, use reasonable window size
       windowSize = const Size(1150, 750);
       minSize = const Size(1100, 700);
       shouldMaximize = false;
     } else {
-      print("large");
       // For large screens, use larger window but don't maximize
       windowSize = const Size(1400, 850);
       minSize = const Size(1200, 750);

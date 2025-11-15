@@ -99,7 +99,7 @@ class _CreateCustomerScreenState extends State<CreateCustomerScreen> {
                           : 'Invalid phone number';
                     },
                     onChanged: (value) {
-                      return null;
+                      return;
                     },
                   ),
                 ),
@@ -140,7 +140,7 @@ class _CreateCustomerScreenState extends State<CreateCustomerScreen> {
                       return null; // Address is optional
                     },
                     onChanged: (value) {
-                      return null;
+                      return;
                     },
                   ),
                 ),
@@ -212,7 +212,7 @@ class _CreateCustomerScreenState extends State<CreateCustomerScreen> {
       builder: (context, constraints) {
         final isSmallScreen = constraints.maxWidth < 600;
 
-        return Container(
+        return SizedBox(
           width: isSmallScreen ? double.infinity : constraints.maxWidth * 0.5,
           child: AppDropdown(
             label: "Status",
@@ -268,7 +268,7 @@ class _CreateCustomerScreenState extends State<CreateCustomerScreen> {
       body["is_active"] = customerBloc.selectedState == "Active" ? true : false;
     }
 
-    print("Sending customer payload: $body"); // For debugging
+    // For debugging
 
     if (widget.id.isEmpty) {
       // Create new customer

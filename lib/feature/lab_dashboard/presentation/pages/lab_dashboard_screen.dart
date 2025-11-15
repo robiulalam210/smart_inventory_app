@@ -550,7 +550,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           amount: purchase.amount?.toDouble() ?? 0.0, // Fixed: null check and type conversion
           date: purchase.date != null ? DateFormat('MMM dd, yyyy').format(purchase.date!) : 'N/A', // Fixed: null check
           color: Colors.blue,
-        )).toList(),
+        )),
       ],
     );
   }

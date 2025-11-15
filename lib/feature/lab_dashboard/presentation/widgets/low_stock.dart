@@ -1,8 +1,5 @@
-import '../../../../core/configs/app_colors.dart';
-import '../../../../core/configs/app_text.dart';
 import '../../../../core/configs/configs.dart';
 import 'top_selling.dart';
-import 'package:flutter/material.dart';
 
 Widget lowStock(BuildContext context, List<Product>? lowStockProducts) {
   return Padding(

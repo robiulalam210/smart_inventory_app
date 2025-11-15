@@ -90,7 +90,6 @@ import 'package:http/http.dart' as http;
 import 'package:smart_inventory/core/core.dart';
 
 import '../../feature/auth/presentation/pages/login_scr.dart';
-import '../configs/configs.dart';
 
 Future<String> getResponse({
   required BuildContext context,

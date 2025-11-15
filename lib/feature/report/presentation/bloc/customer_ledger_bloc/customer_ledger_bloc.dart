@@ -1,6 +1,5 @@
 // lib/feature/report/presentation/bloc/customer_ledger_bloc/customer_ledger_bloc.dart
-import 'package:bloc/bloc.dart';
-import 'package:meta/meta.dart';
+
 import 'package:smart_inventory/core/core.dart';
 import 'package:smart_inventory/feature/customer/data/model/customer_active_model.dart';
 import '../../../data/model/customer_ledger_model.dart';
@@ -43,7 +42,6 @@ class CustomerLedgerBloc extends Bloc<CustomerLedgerEvent, CustomerLedgerState> 
           filter = '?${Uri(queryParameters: queryParams).query}';
         }
 
-        print('🔗 Making API request to: ${AppUrls.customerLedger + filter}');
 
         final responseString = await getResponse(
           url: AppUrls.customerLedger + filter,
@@ -51,23 +49,16 @@ class CustomerLedgerBloc extends Bloc<CustomerLedgerEvent, CustomerLedgerState> 
         );
         final Map<String, dynamic> res = jsonDecode(responseString);
 
-        print('📥 Raw API response type: ${res.runtimeType}');
 
         // Check if the response indicates success
         if (res['status'] == true) {
           final data = res['data'];
-          print('🔍 Data to parse: $data');
 
           try {
             final customerLedgerResponse = CustomerLedgerResponse.fromJson(data as Map<String, dynamic>);
-            print('✅ Successfully parsed CustomerLedgerResponse');
-            print('✅ Transactions: ${customerLedgerResponse.report.length}');
-            print('✅ Closing Balance: ${customerLedgerResponse.summary.closingBalance}');
 
             emit(CustomerLedgerSuccess(response: customerLedgerResponse));
           } catch (parseError, stackTrace) {
-            print('❌ Error parsing CustomerLedgerResponse: $parseError');
-            print('❌ Stack trace: $stackTrace');
             emit(CustomerLedgerFailed(
               title: "Parsing Error",
               content: "Failed to parse customer ledger data: $parseError",
@@ -80,8 +71,6 @@ class CustomerLedgerBloc extends Bloc<CustomerLedgerEvent, CustomerLedgerState> 
           ));
         }
       } catch (e, stackTrace) {
-        print('❌ Error in CustomerLedgerBloc: $e');
-        print('❌ Stack trace: $stackTrace');
         emit(CustomerLedgerFailed(
           title: "Error",
           content: "Failed to load customer ledger: ${e.toString()}",

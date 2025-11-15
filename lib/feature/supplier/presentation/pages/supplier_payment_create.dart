@@ -387,7 +387,6 @@ class _MoneyReceiptListScreenState extends State<SupplierPaymentForm> {
                                     context.read<SupplierPaymentBloc>().selectedAccountId =
                                         matchingAccount.acId.toString();
                                   } catch (e) {
-                                    print("Error finding account: $e");
                                     context.read<SupplierPaymentBloc>().selectedAccountId = "";
                                   }
                                 }

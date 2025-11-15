@@ -151,7 +151,6 @@ class SupplierListBloc extends Bloc<SupplierListEvent, SupplierListState> {
     emit(SupplierAddLoading());
 
     try {
-      print('Creating supplier with body: ${event.body}'); // Debug log
 
       final res = await postResponse(url: AppUrls.supplierList, payload: event.body);
       final jsonString = jsonEncode(res);

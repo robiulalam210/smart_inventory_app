@@ -180,7 +180,7 @@ class _SidebarState extends State<Sidebar> {
                               }).toList(),
                             );
                           }
-                        }).toList(),
+                        }),
                       ],
                     ),
                   ),

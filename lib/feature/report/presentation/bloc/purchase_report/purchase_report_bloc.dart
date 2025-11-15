@@ -42,7 +42,6 @@ class PurchaseReportBloc extends Bloc<PurchaseReportEvent, PurchaseReportState> 
           filter = '?${Uri(queryParameters: queryParams).query}';
         }
 
-        print('🔗 Making API request to: ${AppUrls.purchaseReport + filter}');
 
         final responseString = await getResponse(
           url: AppUrls.purchaseReport + filter,
@@ -50,25 +49,16 @@ class PurchaseReportBloc extends Bloc<PurchaseReportEvent, PurchaseReportState> 
         );
         final Map<String, dynamic> res = jsonDecode(responseString);
 
-        print('📥 Raw API response type: ${res.runtimeType}');
-        print('📥 Raw API response keys: ${res.keys}');
 
         // Check if the response indicates success
         if (res['status'] == true) {
           final data = res['data'];
-          print('🔍 Data to parse: $data');
-          print('🔍 Data type: ${data.runtimeType}');
 
           try {
             final purchaseReportResponse = PurchaseReportResponse.fromJson(data as Map<String, dynamic>);
-            print('✅ Successfully parsed PurchaseReportResponse');
-            print('✅ Report items count: ${purchaseReportResponse.report.length}');
-            print('✅ Summary total: ${purchaseReportResponse.summary.totalPurchases}');
 
             emit(PurchaseReportSuccess(response: purchaseReportResponse));
           } catch (parseError, stackTrace) {
-            print('❌ Error parsing PurchaseReportResponse: $parseError');
-            print('❌ Stack trace: $stackTrace');
             emit(PurchaseReportFailed(
               title: "Parsing Error",
               content: "Failed to parse purchase report data: $parseError",
@@ -81,8 +71,6 @@ class PurchaseReportBloc extends Bloc<PurchaseReportEvent, PurchaseReportState> 
           ));
         }
       } catch (e, stackTrace) {
-        print('❌ Error in PurchaseReportBloc: $e');
-        print('❌ Stack trace: $stackTrace');
         emit(PurchaseReportFailed(
           title: "Error",
           content: "Failed to load purchase report: ${e.toString()}",

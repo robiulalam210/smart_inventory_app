@@ -50,7 +50,6 @@ class ExpenseReportBloc extends Bloc<ExpenseReportEvent, ExpenseReportState> {
           filter = '?${Uri(queryParameters: queryParams).query}';
         }
 
-        print('🔗 Making API request to: ${AppUrls.expenseReport + filter}');
 
         final responseString = await getResponse(
           url: AppUrls.expenseReport + filter,
@@ -58,21 +57,15 @@ class ExpenseReportBloc extends Bloc<ExpenseReportEvent, ExpenseReportState> {
         );
         final Map<String, dynamic> res = jsonDecode(responseString);
 
-        print('📥 Raw API response: ${res['status']}');
 
         if (res['status'] == true) {
           final data = res['data'];
-          print('🔍 Data to parse: $data');
 
           try {
             final expenseReportResponse = ExpenseReportResponse.fromJson(data as Map<String, dynamic>);
-            print('✅ Successfully parsed ExpenseReportResponse');
-            print('✅ Total expenses: ${expenseReportResponse.report.length}');
 
             emit(ExpenseReportSuccess(response: expenseReportResponse));
           } catch (parseError, stackTrace) {
-            print('❌ Error parsing ExpenseReportResponse: $parseError');
-            print('❌ Stack trace: $stackTrace');
             emit(ExpenseReportFailed(
               title: "Parsing Error",
               content: "Failed to parse expense report data: $parseError",
@@ -85,8 +78,6 @@ class ExpenseReportBloc extends Bloc<ExpenseReportEvent, ExpenseReportState> {
           ));
         }
       } catch (e, stackTrace) {
-        print('❌ Error in ExpenseReportBloc: $e');
-        print('❌ Stack trace: $stackTrace');
         emit(ExpenseReportFailed(
           title: "Error",
           content: "Failed to load expense report: ${e.toString()}",

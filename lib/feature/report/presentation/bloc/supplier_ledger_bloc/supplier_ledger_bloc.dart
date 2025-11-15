@@ -40,31 +40,24 @@ class SupplierLedgerBloc extends Bloc<SupplierLedgerEvent, SupplierLedgerState> 
           filter = '?${Uri(queryParameters: queryParams).query}';
         }
 
-        print('🔗 Making API request to: ${AppUrls.supplierLedger + filter}');
 
         final responseString = await getResponse(
           url: AppUrls.supplierLedger + filter,
           context: event.context,
         );
 
-        print('📥 Raw API response type: ${responseString.runtimeType}');
         final Map<String, dynamic> res = jsonDecode(responseString);
 
         // Check if the response indicates success
         if (res['status'] == true) {
           final data = res['data'];
-          print('🔍 Data to parse: $data');
+
 
           try {
             final supplierLedgerResponse = SupplierLedgerResponse.fromJson(data as Map<String, dynamic>);
-            print('✅ Successfully parsed SupplierLedgerResponse');
-            print('✅ Total transactions: ${supplierLedgerResponse.report.length}');
-            print('✅ Closing balance: ${supplierLedgerResponse.summary.closingBalance}');
 
             emit(SupplierLedgerSuccess(response: supplierLedgerResponse));
           } catch (parseError, stackTrace) {
-            print('❌ Error parsing SupplierLedgerResponse: $parseError');
-            print('❌ Stack trace: $stackTrace');
             emit(SupplierLedgerFailed(
               title: "Parsing Error",
               content: "Failed to parse supplier ledger data: $parseError",
@@ -77,8 +70,6 @@ class SupplierLedgerBloc extends Bloc<SupplierLedgerEvent, SupplierLedgerState> 
           ));
         }
       } catch (e, stackTrace) {
-        print('❌ Error in SupplierLedgerBloc: $e');
-        print('❌ Stack trace: $stackTrace');
         emit(SupplierLedgerFailed(
           title: "Error",
           content: "Failed to load supplier ledger report: ${e.toString()}",

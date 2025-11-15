@@ -166,8 +166,7 @@ class ProductsBloc extends Bloc<ProductsEvent, ProductsState> {
           }
         }).toList();
 productList=list;
-        print(list.length);
-        print(productList.length);
+
 
         emit(ProductsListStockSuccess(list: list));
       } else {

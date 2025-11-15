@@ -44,7 +44,6 @@ class CustomerDueAdvanceBloc extends Bloc<CustomerDueAdvanceEvent, CustomerDueAd
           filter = '?${Uri(queryParameters: queryParams).query}';
         }
 
-        print('🔗 Making API request to: ${AppUrls.customerDueAdvance + filter}');
 
         final responseString = await getResponse(
           url: AppUrls.customerDueAdvance + filter,
@@ -52,21 +51,15 @@ class CustomerDueAdvanceBloc extends Bloc<CustomerDueAdvanceEvent, CustomerDueAd
         );
         final Map<String, dynamic> res = jsonDecode(responseString);
 
-        print('📥 Raw API response: ${res['status']}');
 
         if (res['status'] == true) {
           final data = res['data'];
-          print('🔍 Data to parse: $data');
 
           try {
             final customerDueAdvanceResponse = CustomerDueAdvanceResponse.fromJson(data as Map<String, dynamic>);
-            print('✅ Successfully parsed CustomerDueAdvanceResponse');
-            print('✅ Total customers: ${customerDueAdvanceResponse.report.length}');
 
             emit(CustomerDueAdvanceSuccess(response: customerDueAdvanceResponse));
           } catch (parseError, stackTrace) {
-            print('❌ Error parsing CustomerDueAdvanceResponse: $parseError');
-            print('❌ Stack trace: $stackTrace');
             emit(CustomerDueAdvanceFailed(
               title: "Parsing Error",
               content: "Failed to parse customer due & advance data: $parseError",
@@ -79,8 +72,6 @@ class CustomerDueAdvanceBloc extends Bloc<CustomerDueAdvanceEvent, CustomerDueAd
           ));
         }
       } catch (e, stackTrace) {
-        print('❌ Error in CustomerDueAdvanceBloc: $e');
-        print('❌ Stack trace: $stackTrace');
         emit(CustomerDueAdvanceFailed(
           title: "Error",
           content: "Failed to load customer due & advance report: ${e.toString()}",
