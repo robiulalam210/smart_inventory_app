@@ -276,7 +276,7 @@ class PurchaseReturnBloc extends Bloc<PurchaseReturnEvent, PurchaseReturnState> 
 
                 final invoice = PurchaseInvoiceModel.fromJson(item);
                 invoiceData.add(invoice);
-              } catch (e, s) {
+              } catch (e) {
               }
             }
 
@@ -298,7 +298,7 @@ class PurchaseReturnBloc extends Bloc<PurchaseReturnEvent, PurchaseReturnState> 
           content: res['message'] ?? "Failed to load purchase invoice list",
         ));
       }
-    } catch (error, st) {
+    } catch (error) {
 
       emit(PurchaseInvoiceError(
         title: "Error",

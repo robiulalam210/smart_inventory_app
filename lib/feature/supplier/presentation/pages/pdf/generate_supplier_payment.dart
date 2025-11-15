@@ -10,8 +10,7 @@ Future<Uint8List> generateSupplierPaymentPdf(SupplierPaymentModel payment) async
 
   final amount = double.tryParse(payment.amount ?? '0') ?? 0;
   final summary = payment.paymentSummary;
-  final before = summary?.beforePayment;
-  final after = summary?.afterPayment;
+
 
   pdf.addPage(
     pw.MultiPage(

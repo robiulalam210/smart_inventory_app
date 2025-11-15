@@ -206,7 +206,7 @@ class CustomSearchTextFormField extends StatelessWidget {
         autofocus: autofocus,
         validator: validator,
         style: TextStyle(
-          color: enabled ? AppColors.matteBlack : AppColors.matteBlack.withOpacity(0.6),
+          color: enabled ? AppColors.matteBlack : AppColors.matteBlack.withValues(alpha: 0.6),
           fontSize: 14,
           fontWeight: FontWeight.w400,
         ),

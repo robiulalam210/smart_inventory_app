@@ -483,7 +483,6 @@ pw.Widget _buildHeaderCell(String text) {
 pw.TableRow _buildTableRow(CustomerDueAdvance customer) {
   final netBalance = customer.netBalance;
   final status = customer.balanceStatus;
-  final statusColor = _getStatusColor(status);
 
   return pw.TableRow(
     decoration: const pw.BoxDecoration(
@@ -598,7 +597,6 @@ pw.TableRow _buildTotalRow(List<CustomerDueAdvance> customers) {
 
 // Risk Analysis
 pw.Widget _buildRiskAnalysis(List<CustomerDueAdvance> customers, CustomerDueAdvanceSummary summary) {
-  final analysis = _analyzeBalances(customers);
   final topDueCustomers = customers.where((c) => c.presentDue > 0).toList()
     ..sort((a, b) => b.presentDue.compareTo(a.presentDue));
   final topAdvanceCustomers = customers.where((c) => c.presentAdvance > 0).toList()

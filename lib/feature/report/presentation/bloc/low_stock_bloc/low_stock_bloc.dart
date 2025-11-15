@@ -28,7 +28,7 @@ class LowStockBloc extends Bloc<LowStockEvent, LowStockState> {
             final lowStockResponse = LowStockResponse.fromJson(data as Map<String, dynamic>);
 
             emit(LowStockSuccess(response: lowStockResponse));
-          } catch (parseError, stackTrace) {
+          } catch (parseError) {
             emit(LowStockFailed(
               title: "Parsing Error",
               content: "Failed to parse low stock report data: $parseError",
@@ -40,7 +40,7 @@ class LowStockBloc extends Bloc<LowStockEvent, LowStockState> {
             content: res['message'] ?? "Failed to load low stock report",
           ));
         }
-      } catch (e, stackTrace) {
+      } catch (e) {
         emit(LowStockFailed(
           title: "Error",
           content: "Failed to load low stock report: ${e.toString()}",

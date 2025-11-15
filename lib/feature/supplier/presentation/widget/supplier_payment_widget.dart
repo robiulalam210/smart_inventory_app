@@ -5,7 +5,6 @@ import 'package:smart_inventory/feature/supplier/data/model/supplier_payment/sup
 import 'package:smart_inventory/feature/supplier/presentation/pages/supplier_payment_details.dart';
 
 import '../../../../core/configs/app_routes.dart';
-import '../../../sales/presentation/pages/sales_details_screen.dart';
 import '../pages/pdf/generate_supplier_payment.dart';
 
 class SupplierPaymentWidget extends StatelessWidget {

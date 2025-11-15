@@ -60,7 +60,7 @@ class TopProductsBloc extends Bloc<TopProductsEvent, TopProductsState> {
             content: res['message'] ?? "Failed to load top products report",
           ));
         }
-      } catch (e, stackTrace) {
+      } catch (e) {
         emit(TopProductsFailed(
           title: "Error",
           content: "Failed to load top products report: ${e.toString()}",

@@ -272,7 +272,7 @@ class SalesReturnBloc extends Bloc<SalesReturnEvent, SalesReturnState> {
 
                 final invoice = SalesInvoiceModel.fromJson(item);
                 invoiceData.add(invoice);
-              } catch (e,s) {
+              } catch (e) {
               }
             }
 
@@ -294,7 +294,7 @@ class SalesReturnBloc extends Bloc<SalesReturnEvent, SalesReturnState> {
           content: res['message'] ?? "Failed to load invoice list",
         ));
       }
-    } catch (error,st) {
+    } catch (error) {
 
       emit(InvoiceError(
         title: "Error",

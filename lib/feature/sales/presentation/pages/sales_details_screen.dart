@@ -1,9 +1,7 @@
 // sales_details_screen.dart
-import 'package:printing/printing.dart';
 
 import '../../../../core/configs/configs.dart';
 import '../../data/models/pos_sale_model.dart';
-import '../widgets/pdf/sales_invocei.dart';
 
 class SalesDetailsScreen extends StatelessWidget {
   final PosSaleModel sale;

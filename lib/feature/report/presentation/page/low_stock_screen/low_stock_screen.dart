@@ -544,7 +544,7 @@ class LowStockTableCard extends StatelessWidget {
                             fontWeight: FontWeight.w700,
                             fontFamily: GoogleFonts.inter().fontFamily,
                           ),
-                          headingRowColor: MaterialStateProperty.all(
+                          headingRowColor: WidgetStateProperty.all(
                             Colors.red, // Red header for low stock alert
                           ),
                           dataTextStyle: TextStyle(

@@ -64,7 +64,7 @@ class ProductDataTableWidget extends StatelessWidget {
                             fontWeight: FontWeight.bold,
                           ),
                           headingRowColor:
-                          MaterialStateProperty.all(
+                          WidgetStateProperty.all(
                               AppColors.primaryColor
                           ),
                           columns: _buildColumns(dynamicColumnWidth),

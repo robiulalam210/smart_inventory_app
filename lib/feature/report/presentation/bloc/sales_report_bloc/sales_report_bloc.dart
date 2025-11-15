@@ -68,7 +68,7 @@ class SalesReportBloc extends Bloc<SalesReportEvent, SalesReportState> {
             final salesReportResponse = SalesReportResponse.fromJson(data as Map<String, dynamic>);
 
             emit(SalesReportSuccess(response: salesReportResponse));
-          } catch (parseError, stackTrace) {
+          } catch (parseError) {
             emit(SalesReportFailed(
               title: "Parsing Error",
               content: "Failed to parse sales report data: $parseError",
@@ -80,7 +80,7 @@ class SalesReportBloc extends Bloc<SalesReportEvent, SalesReportState> {
             content: res['message']?.toString() ?? "Failed to load sales report",
           ));
         }
-      } catch (e, stackTrace) {
+      } catch (e) {
         emit(SalesReportFailed(
           title: "Error",
           content: "Failed to load sales report: ${e.toString()}",

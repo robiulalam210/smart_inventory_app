@@ -61,7 +61,7 @@ class MoneyReceiptDataTableWidget extends StatelessWidget {
                             ),
                           )
                               .toList(),
-                          headingRowColor: MaterialStateProperty.all(
+                          headingRowColor: WidgetStateProperty.all(
                             AppColors.primaryColor
                           ),
                           headingTextStyle: const TextStyle(

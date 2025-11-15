@@ -10,8 +10,7 @@ Future<Uint8List> generateMoneyReceiptPdf(MoneyreceiptModel receipt) async {
 
   final amount = double.tryParse(receipt.amount ?? '0') ?? 0;
   final summary = receipt.paymentSummary;
-  final before = summary?.beforePayment;
-  final after = summary?.afterPayment;
+
 
   pdf.addPage(
     pw.MultiPage(

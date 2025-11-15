@@ -483,7 +483,6 @@ pw.Widget _buildHeaderCell(String text) {
 pw.TableRow _buildTableRow(SupplierDueAdvance supplier) {
   final netBalance = supplier.netBalance;
   final status = supplier.balanceStatus;
-  final statusColor = _getStatusColor(status);
 
   return pw.TableRow(
     decoration: const pw.BoxDecoration(
@@ -598,7 +597,6 @@ pw.TableRow _buildTotalRow(List<SupplierDueAdvance> suppliers) {
 
 // Payment Analysis
 pw.Widget _buildPaymentAnalysis(List<SupplierDueAdvance> suppliers, SupplierDueAdvanceSummary summary) {
-  final analysis = _analyzeBalances(suppliers);
   final topDueSuppliers = suppliers.where((s) => s.netBalance < 0).toList()
     ..sort((a, b) => a.netBalance.compareTo(b.netBalance));
   final topAdvanceSuppliers = suppliers.where((s) => s.netBalance > 0).toList()

@@ -38,8 +38,6 @@ Future<Uint8List> generateCustomerLedgerReportPdf(
 
 // Header with Report Info
 pw.Widget _buildHeader(CustomerLedgerResponse report) {
-  final totalDebit = report.report.fold(0.0, (sum, transaction) => sum + transaction.debit);
-  final totalCredit = report.report.fold(0.0, (sum, transaction) => sum + transaction.credit);
 
   return pw.Container(
     padding: const pw.EdgeInsets.all(8),

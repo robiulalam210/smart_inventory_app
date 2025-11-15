@@ -490,9 +490,7 @@ pw.Widget _buildHeaderCell(String text) {
 
 pw.TableRow _buildTableRow(StockProduct product) {
   final stockStatus = _getStockStatus(product.currentStock);
-  final statusColor = _getStatusColor(stockStatus);
   final profitMargin = product.profitMargin;
-  final marginColor = _getMarginColor(profitMargin);
 
   return pw.TableRow(
     decoration: const pw.BoxDecoration(
@@ -597,7 +595,6 @@ pw.Widget _buildStatusCell(String status) {
 pw.TableRow _buildTotalRow(List<StockProduct> products) {
   final totalValue = products.fold(0.0, (sum, product) => sum + product.value);
   final totalQuantity = products.fold(0, (sum, product) => sum + product.currentStock);
-  final totalPotentialValue = products.fold(0.0, (sum, product) => sum + product.potentialValue);
 
   return pw.TableRow(
     decoration: const pw.BoxDecoration(color: PdfColors.grey50),

@@ -40,12 +40,10 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
     dataBloc.filterTextController = TextEditingController();
 
     // Initialize selectedDateRange if not set
-    if (selectedDateRange == null) {
-      selectedDateRange = DateRange(
+    selectedDateRange ??= DateRange(
        DateTime(now.year, now.month - 1, now.day),
        DateTime(now.year, now.month, now.day),
       );
-    }
 
     _fetchApi(from: selectedDateRange?.start, to: selectedDateRange?.end);
   }

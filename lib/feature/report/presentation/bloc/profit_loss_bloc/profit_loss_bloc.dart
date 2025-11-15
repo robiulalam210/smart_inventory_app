@@ -48,7 +48,7 @@ class ProfitLossBloc extends Bloc<ProfitLossEvent, ProfitLossState> {
             final profitLossResponse = ProfitLossResponse.fromJson(data as Map<String, dynamic>);
 
             emit(ProfitLossSuccess(response: profitLossResponse));
-          } catch (parseError, stackTrace) {
+          } catch (parseError) {
             emit(ProfitLossFailed(
               title: "Parsing Error",
               content: "Failed to parse profit & loss report data: $parseError",
@@ -60,7 +60,7 @@ class ProfitLossBloc extends Bloc<ProfitLossEvent, ProfitLossState> {
             content: res['message'] ?? "Failed to load profit & loss report",
           ));
         }
-      } catch (e, stackTrace) {
+      } catch (e) {
         emit(ProfitLossFailed(
           title: "Error",
           content: "Failed to load profit & loss report: ${e.toString()}",

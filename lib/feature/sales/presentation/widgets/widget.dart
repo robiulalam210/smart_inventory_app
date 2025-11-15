@@ -1,7 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:printing/printing.dart';
 import '../../../../core/configs/configs.dart';
-import '../../../../core/configs/pdf/lab_billing_preview_invoice.dart';
 import '../../data/models/pos_sale_model.dart';
 import '../pages/sales_details_screen.dart';
 import 'pdf/sales_invocei.dart';

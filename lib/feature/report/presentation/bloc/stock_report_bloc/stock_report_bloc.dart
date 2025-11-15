@@ -48,7 +48,7 @@ class StockReportBloc extends Bloc<StockReportEvent, StockReportState> {
             final stockReportResponse = StockReportResponse.fromJson(data as Map<String, dynamic>);
 
             emit(StockReportSuccess(response: stockReportResponse));
-          } catch (parseError, stackTrace) {
+          } catch (parseError) {
             emit(StockReportFailed(
               title: "Parsing Error",
               content: "Failed to parse stock report data: $parseError",
@@ -60,7 +60,7 @@ class StockReportBloc extends Bloc<StockReportEvent, StockReportState> {
             content: res['message'] ?? "Failed to load stock report",
           ));
         }
-      } catch (e, stackTrace) {
+      } catch (e) {
         emit(StockReportFailed(
           title: "Error",
           content: "Failed to load stock report: ${e.toString()}",

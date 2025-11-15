@@ -22,7 +22,6 @@ import '../../../../../core/configs/app_routes.dart';
 import '../../../../../responsive.dart';
 import '../../../data/model/customer_due_advance_report_model.dart';
 import '../../bloc/customer_due_advance_bloc/customer_due_advance_bloc.dart';
-import '../customer_ledger_screen/pdf.dart';
 
 class CustomerDueAdvanceScreen extends StatefulWidget {
   const CustomerDueAdvanceScreen({super.key});
@@ -631,7 +630,7 @@ class CustomerDueAdvanceTableCard extends StatelessWidget {
                             fontWeight: FontWeight.w700,
                             fontFamily: GoogleFonts.inter().fontFamily,
                           ),
-                          headingRowColor: MaterialStateProperty.all(
+                          headingRowColor: WidgetStateProperty.all(
                             AppColors.primaryColor,
                           ),
                           dataTextStyle: TextStyle(
