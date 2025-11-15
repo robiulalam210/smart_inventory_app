@@ -28,7 +28,6 @@ class ProductsListSuccess extends ProductsState {
     required this.to,
   });
 
-  @override
   List<Object?> get props => [list, totalPages, currentPage, count, pageSize, from, to];
 }
 class ProductsListStockSuccess extends ProductsState {

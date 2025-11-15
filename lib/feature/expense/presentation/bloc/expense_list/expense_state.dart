@@ -26,7 +26,6 @@ final class ExpenseListSuccess extends ExpenseState {
     required this.to,
   });
 
-  @override
   List<Object?> get props => [
     list,
     totalPages,

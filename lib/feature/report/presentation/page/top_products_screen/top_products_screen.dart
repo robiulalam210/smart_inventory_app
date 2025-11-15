@@ -1,22 +1,10 @@
 // lib/feature/report/presentation/screens/top_products_screen.dart
-import 'dart:async';
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:hugeicons/hugeicons.dart';
-import 'package:iconsax/iconsax.dart';
-import 'package:lottie/lottie.dart';
-import 'package:smart_inventory/core/configs/app_colors.dart';
-import 'package:smart_inventory/core/configs/app_images.dart';
-import 'package:smart_inventory/core/configs/app_text.dart';
 import 'package:smart_inventory/core/core.dart';
-import 'package:smart_inventory/core/shared/widgets/sideMenu/sidebar.dart';
 import 'package:smart_inventory/core/widgets/date_range.dart';
 import 'package:smart_inventory/feature/report/presentation/bloc/top_products_bloc/top_products_bloc.dart';
 
-import '../../../../../core/configs/app_sizes.dart';
-import '../../../../../responsive.dart';
 import '../../../data/model/top_products_model.dart';
 
 class TopProductsScreen extends StatefulWidget {

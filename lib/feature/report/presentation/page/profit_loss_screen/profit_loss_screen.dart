@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:iconsax/iconsax.dart';
 import 'package:smart_inventory/core/configs/app_colors.dart';
 import 'package:smart_inventory/core/configs/app_text.dart';
 import 'package:smart_inventory/core/shared/widgets/sideMenu/sidebar.dart';
@@ -279,42 +278,6 @@ class _ProfitLossScreenState extends State<ProfitLossScreen> {
     );
   }
 
-  Widget _buildExportSection() {
-    return Container(
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.2),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          ElevatedButton.icon(
-            onPressed: () => _exportReport(context),
-            icon: const Icon(Iconsax.printer),
-            label: const Text("Print Report"),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primaryColor,
-              foregroundColor: Colors.white,
-            ),
-          ),
-          const SizedBox(width: 12),
-          OutlinedButton.icon(
-            onPressed: () => _exportReport(context, isPdf: true),
-            icon: const Icon(Iconsax.document_download),
-            label: const Text("Export PDF"),
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildEmptyState(String message) {
     return Container(
@@ -383,14 +346,6 @@ class _ProfitLossScreenState extends State<ProfitLossScreen> {
     );
   }
 
-  void _exportReport(BuildContext context, {bool isPdf = false}) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('${isPdf ? 'Exporting' : 'Printing'} profit & loss report...'),
-        duration: const Duration(seconds: 2),
-      ),
-    );
-  }
 }
 
 class ExpenseBreakdownTableCard extends StatelessWidget {

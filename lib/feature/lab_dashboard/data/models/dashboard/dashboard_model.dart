@@ -69,11 +69,11 @@ class DateFilterInfo {
 }
 
 class FinancialSummary {
-  final dynamic? netSales;
-  final dynamic? netPurchases;
-  final dynamic? grossProfit;
-  final dynamic? netProfit;
-  final dynamic? operatingCashFlow;
+  final dynamic netSales;
+  final dynamic netPurchases;
+  final dynamic grossProfit;
+  final dynamic netProfit;
+  final dynamic operatingCashFlow;
   final CashComponents? cashComponents;
 
   FinancialSummary({
@@ -105,9 +105,9 @@ class FinancialSummary {
 }
 
 class CashComponents {
-  final dynamic? cashIn;
-  final dynamic? cashOutPurchases;
-  final dynamic? cashOutExpenses;
+  final dynamic cashIn;
+  final dynamic cashOutPurchases;
+  final dynamic cashOutExpenses;
 
   CashComponents({
     this.cashIn,
@@ -129,8 +129,8 @@ class CashComponents {
 }
 
 class ProfitLoss {
-  final dynamic? grossProfit;
-  final dynamic? netProfit;
+  final dynamic grossProfit;
+  final dynamic netProfit;
   final double? profitMargin;
 
   ProfitLoss({
@@ -175,8 +175,8 @@ class RecentActivities {
 class Purchase {
   final String? invoiceNo;
   final String? supplier;
-  final dynamic? amount;
-  final dynamic? dueAmount;
+  final dynamic amount;
+  final dynamic dueAmount;
   final int? quantity;
   final DateTime? date;
   final String? customer;
@@ -265,7 +265,7 @@ class TodayMetrics {
 }
 
 class Expenses {
-  final dynamic? total;
+  final dynamic total;
   final int? count;
 
   Expenses({
@@ -285,7 +285,7 @@ class Expenses {
 }
 
 class Returns {
-  final dynamic? totalAmount;
+  final dynamic totalAmount;
   final int? totalQuantity;
   final int? count;
 
@@ -309,11 +309,11 @@ class Returns {
 }
 
 class Purchases {
-  final dynamic? total;
+  final dynamic total;
   final int? count;
   final int? totalQuantity;
-  final dynamic? totalDue;
-  final dynamic? netTotal;
+  final dynamic totalDue;
+  final dynamic netTotal;
 
   Purchases({
     this.total,

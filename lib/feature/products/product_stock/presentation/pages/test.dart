@@ -1,4 +1,3 @@
-import 'dart:async';
 
 import '../../../../../core/configs/configs.dart';
 import '../../../../../core/shared/widgets/sideMenu/sidebar.dart';

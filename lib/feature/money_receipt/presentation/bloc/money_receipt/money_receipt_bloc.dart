@@ -8,8 +8,6 @@ import '../../../../../core/repositories/post_response.dart';
 import '../../../../common/data/models/api_response_mod.dart';
 import '../../../../common/data/models/app_parse_json.dart';
 import '../../../../customer/data/model/customer_active_model.dart';
-import '../../../../customer/data/model/customer_model.dart';
-import '../../../../sales/data/models/pos_sale_model.dart';
 import '../../../../users_list/data/model/user_model.dart';
 import '../../../data/model/money_receipt_model/create_money_recipt_model.dart';
 import '../../../data/model/money_receipt_model/money_receipt_invoice_model.dart';

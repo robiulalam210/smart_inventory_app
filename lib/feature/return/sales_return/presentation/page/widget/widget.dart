@@ -174,7 +174,7 @@ class SalesReturnTableCard extends StatelessWidget {
       return DataRow(
         color: MaterialStateProperty.resolveWith<Color>(
               (Set<MaterialState> states) {
-            return index % 2 == 0 ? Colors.grey.withOpacity(0.03) : Colors.transparent;
+            return index % 2 == 0 ? Colors.grey.withValues(alpha: 0.03) : Colors.transparent;
           },
         ),
         onSelectChanged: onSalesReturnTap != null ? (_) => onSalesReturnTap!() : null,

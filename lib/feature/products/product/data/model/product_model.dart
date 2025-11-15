@@ -28,7 +28,7 @@ class ProductModel {
   final bool? discountApplied;
   final String? discountType;
   final String? discountValue;
-  final dynamic? finalPrice;
+  final dynamic finalPrice;
 
   ProductModel({
     this.id,

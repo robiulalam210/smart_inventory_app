@@ -1,11 +1,6 @@
 // lib/feature/report/presentation/screens/stock_report_screen.dart
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:hugeicons/hugeicons.dart';
-import 'package:iconsax/iconsax.dart';
-import 'package:lottie/lottie.dart';
 import 'package:smart_inventory/core/core.dart';
 import 'package:smart_inventory/core/widgets/date_range.dart';
 import 'package:smart_inventory/feature/report/presentation/bloc/stock_report_bloc/stock_report_bloc.dart';
@@ -23,8 +18,6 @@ class _StockReportScreenState extends State<StockReportScreen> {
   DateRange? selectedDateRange;
   String _sortBy = 'value';
   bool _sortAscending = false;
-  final ScrollController _horizontalScrollController = ScrollController();
-  final ScrollController _verticalScrollController = ScrollController();
 
   @override
   void initState() {

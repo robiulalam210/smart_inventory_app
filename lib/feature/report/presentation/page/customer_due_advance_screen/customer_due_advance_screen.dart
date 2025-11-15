@@ -819,7 +819,6 @@ class CustomerDueAdvanceTableCard extends StatelessWidget {
   }
 
   DataCell _buildNetBalanceCell(CustomerDueAdvance customer, double width) {
-    final isPositive = customer.netBalance >= 0;
 
     return DataCell(
       SizedBox(

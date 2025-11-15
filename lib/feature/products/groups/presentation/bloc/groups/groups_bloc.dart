@@ -220,14 +220,14 @@ class GroupsBloc extends Bloc<GroupsEvent, GroupsState> {
       }
       clearData();
       emit(GroupDeleteSuccess(response.message??""));
-    } catch (error, stack) {
+    } catch (error) {
 
       clearData();
       emit(GroupDeleteFailed(title: "Error", content: error.toString()));
     }
   }
 
-  clearData() {
+  void clearData() {
     nameController.clear();
     shortNameController.clear();
   }

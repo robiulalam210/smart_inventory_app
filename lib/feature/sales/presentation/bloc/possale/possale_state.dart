@@ -26,7 +26,6 @@ class PosSaleListSuccess extends PosSaleState {
     required this.to,
   });
 
-  @override
   List<Object> get props => [list, count, totalPages, currentPage, pageSize, from, to];
 }
 class CartUpdateInProgress extends PosSaleState {}

@@ -17,13 +17,13 @@ class SalesInvoiceModel {
   final DateTime? saleDate;
   final String? saleByName;
   final String? createdByName;
-  final dynamic? grossTotal;
-  final dynamic? netTotal;
-  final dynamic? grandTotal;
-  final dynamic? payableAmount;
-  final dynamic? paidAmount;
-  final dynamic? dueAmount;
-  final dynamic? changeAmount;
+  final dynamic grossTotal;
+  final dynamic netTotal;
+  final dynamic grandTotal;
+  final dynamic payableAmount;
+  final dynamic paidAmount;
+  final dynamic dueAmount;
+  final dynamic changeAmount;
   final String? overallDiscount;
   final String? overallDiscountType;
   final String? overallDeliveryCharge;
@@ -151,10 +151,10 @@ class Item {
   final int? productId;
   final String? productName;
   final int? quantity;
-  final dynamic? unitPrice;
+  final dynamic unitPrice;
   final String? discount;
   final String? discountType;
-  final dynamic? subtotal;
+  final dynamic subtotal;
 
   Item({
     this.id,

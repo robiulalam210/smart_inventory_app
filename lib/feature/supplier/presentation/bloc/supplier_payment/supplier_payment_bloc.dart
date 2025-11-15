@@ -18,7 +18,6 @@ part 'supplier_payment_state.dart';
 
 class SupplierPaymentBloc extends Bloc<SupplierPaymentEvent, SupplierPaymentState> {
   List<SupplierPaymentModel> allWarehouses = [];
-  final int _itemsPerPage = 30;
 
   List paymentTo = ["Over All", "Specific"];
   TextEditingController filterTextController = TextEditingController();
@@ -181,38 +180,7 @@ class SupplierPaymentBloc extends Bloc<SupplierPaymentEvent, SupplierPaymentStat
     return "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
   }
 
-  List<SupplierPaymentModel> _filterData(
-      List<SupplierPaymentModel> warehouses,
-      String filterText,
-      DateTime? startDate,
-      DateTime? endDate) {
-    return warehouses.where((warehouse) {
-      // Check if the warehouse's paymentDate is not null and falls within the given date range
-      final matchesDate = (startDate == null || endDate == null) ||
-          (warehouse.paymentDate != null &&
-              ((warehouse.paymentDate!.isAfter(startDate) &&
-                  warehouse.paymentDate!.isBefore(endDate)) ||
-                  warehouse.paymentDate!.isAtSameMomentAs(startDate) ||
-                  warehouse.paymentDate!.isAtSameMomentAs(endDate)));
 
-      // Check if the warehouse's supplierName or supplierPhone matches the filterText (case-insensitive)
-      final matchesText = filterText.isEmpty ||
-          (warehouse.supplierName?.toLowerCase().contains(filterText.toLowerCase()) ?? false) ||
-          (warehouse.supplierPhone?.toLowerCase().contains(filterText.toLowerCase()) ?? false);
-
-      // Return true only if both conditions match
-      return matchesDate && matchesText;
-    }).toList();
-  }
-
-  List<SupplierPaymentModel> _paginateData(
-      List<SupplierPaymentModel> warehouses, int pageNumber) {
-    final start = pageNumber * _itemsPerPage;
-    final end = start + _itemsPerPage;
-    if (start >= warehouses.length) return [];
-    return warehouses.sublist(
-        start, end > warehouses.length ? warehouses.length : end);
-  }
 
   Future<void> _onCreateWarehouseList(
       AddSupplierPayment event, Emitter<SupplierPaymentState> emit) async {

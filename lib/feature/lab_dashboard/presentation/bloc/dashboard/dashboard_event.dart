@@ -17,6 +17,5 @@ class FetchDashboardData extends DashboardEvent {
 
    FetchDashboardData({this.dateFilter,required this.context});
 
-  @override
   List<Object> get props => [dateFilter ?? ''];
 }

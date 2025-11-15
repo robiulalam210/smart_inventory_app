@@ -1,5 +1,4 @@
 import '../../../../../core/configs/configs.dart';
-import '../../../../../core/repositories/delete_response.dart';
 import '../../../../../core/repositories/get_response.dart';
 import '../../../../common/data/models/api_response_mod.dart';
 import '../../../../common/data/models/app_parse_json.dart';
@@ -29,7 +28,7 @@ class PosSaleBloc extends Bloc<PosSaleEvent, PosSaleState> {
 
     try {
       final res = await getResponse(
-        url: AppUrls.posSale + (event.dropdownFilter ?? ''),
+        url: AppUrls.posSale + (event.dropdownFilter),
         context: event.context,
       );
 
@@ -113,7 +112,7 @@ class PosSaleBloc extends Bloc<PosSaleEvent, PosSaleState> {
 
     try {
       final res = await getResponse(
-        url: AppUrls.baseUrl + (event.dropdownFilter ?? ''),
+        url: AppUrls.baseUrl + (event.dropdownFilter ),
         context: event.context,
       );
 

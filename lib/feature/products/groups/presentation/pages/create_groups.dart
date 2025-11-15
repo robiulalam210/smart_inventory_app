@@ -1,11 +1,8 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:smart_inventory/feature/products/groups/presentation/bloc/groups/groups_bloc.dart';
 import '../../../../../core/configs/configs.dart';
 import '../../../../../core/widgets/app_button.dart';
 import '../../../../../core/widgets/app_dropdown.dart';
 import '../../../../../core/widgets/app_text_field.dart';
-import '../../../../../core/widgets/input_field.dart';
 import '../../../../../core/widgets/show_custom_toast.dart';
 
 class GroupsCreate extends StatefulWidget {
@@ -284,115 +281,4 @@ class _GroupsCreateState extends State<GroupsCreate> {
     );
   }
 
-  Widget _buildFullScreenContent() {
-    return SafeArea(
-      child: Scaffold(
-        backgroundColor: AppColors.bg,
-        appBar: AppBar(
-          title: Text(widget.id == null ? 'Create Group' : 'Update Group'),
-          backgroundColor: AppColors.primaryColor,
-          foregroundColor: Colors.white,
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back),
-            onPressed: () => Navigator.pop(context),
-          ),
-        ),
-        body: Center(
-          child: Container(
-            constraints: BoxConstraints(
-              maxWidth: 500,
-              maxHeight: MediaQuery.of(context).size.height * 0.6,
-            ),
-            margin: EdgeInsets.all(16),
-            child: Container(
-              padding: const EdgeInsets.all(20),
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: AppColors.whiteColor,
-                borderRadius: BorderRadius.circular(AppSizes.borderRadiusSize),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black12,
-                    blurRadius: 10,
-                    offset: Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: SingleChildScrollView(
-                child: Form(
-                  key: formKey,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      // Name Input Field
-                      CustomInputField(
-                        isRequiredLable: true,
-                        isRequired: true,
-                        controller: nameController,
-                        hintText: 'Enter group name',
-                        labelText: 'Group Name',
-                        fillColor: Colors.grey[50],
-                        keyboardType: TextInputType.text,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter group name';
-                          }
-                          if (value.length < 2) {
-                            return 'Group name must be at least 2 characters long';
-                          }
-                          if (value.length > 50) {
-                            return 'Group name must be less than 50 characters';
-                          }
-                          return null;
-                        },
-                      ),
-
-                      SizedBox(height: 30),
-
-                      // Buttons Row
-                      Row(
-                        children: [
-                          Expanded(
-                            child: OutlinedButton(
-                              onPressed: () => Navigator.pop(context),
-                              style: OutlinedButton.styleFrom(
-                                padding: EdgeInsets.symmetric(vertical: 15),
-                                side: BorderSide(color: AppColors.primaryColor),
-                              ),
-                              child: Text(
-                                'Cancel',
-                                style: TextStyle(
-                                  color: AppColors.primaryColor,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                          ),
-                          SizedBox(width: 10),
-                          Expanded(
-                            child: BlocBuilder<GroupsBloc, GroupsState>(
-                              builder: (context, state) {
-                                return AppButton(
-                                  name: widget.id == null ? 'Create Group' : 'Update Group',
-                                  onPressed: (state is GroupsAddLoading)
-                                      ? null
-                                      : _showConfirmationDialog,
-                                  isLoading: state is GroupsAddLoading,
-                                );
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
 }

@@ -100,53 +100,7 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
   }
 
   // Add these missing methods
-  Widget _errorWidget(String message) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.error_outline,
-              color: Colors.red,
-              size: 48,
-            ),
-            SizedBox(height: 16),
-            Text(
-              message,
-              style: TextStyle(color: Colors.red),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
-  Widget _noDataWidget(String message) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.inventory_2_outlined,
-              color: Colors.grey,
-              size: 48,
-            ),
-            SizedBox(height: 16),
-            Text(
-              message,
-              style: TextStyle(color: Colors.grey),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {

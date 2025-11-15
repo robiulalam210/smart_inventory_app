@@ -28,7 +28,6 @@ class FetchTransactionList extends TransactionEvent {
         this.noPagination = false,
       });
 
-  @override
   List<Object> get props => [
     context,
     filterText,

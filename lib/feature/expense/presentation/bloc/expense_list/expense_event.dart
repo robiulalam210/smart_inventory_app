@@ -26,7 +26,6 @@ class FetchExpenseList extends ExpenseEvent {
         this.subHeadId, // Add this parameter
       });
 
-  @override
   List<Object?> get props => [
     context,
     pageNumber,
