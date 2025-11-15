@@ -6,6 +6,7 @@ import '../../../../core/widgets/app_dropdown.dart';
 import '../../../../core/widgets/app_loader.dart';
 import '../../../../core/widgets/coustom_search_text_field.dart';
 import '../../../../core/widgets/delete_dialog.dart';
+import '../../../../core/widgets/show_custom_toast.dart';
 import '../../../products/product/presentation/widget/pagination.dart';
 import '../../data/model/account_model.dart';
 import '../bloc/account/account_bloc.dart';
@@ -110,7 +111,6 @@ class _AccountScreenState extends State<AccountScreen> {
               } else if (state is AccountAddSuccess) {
                 Navigator.pop(context);
                 _fetchApi();
-
               } else if (state is AccountAddFailed) {
                 Navigator.pop(context);
                 appAlertDialog(
@@ -120,6 +120,33 @@ class _AccountScreenState extends State<AccountScreen> {
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(context),
+                      child: const Text("Dismiss"),
+                    ),
+                  ],
+                );
+              } else if (state is AccountDeleteLoading) {
+                appLoader(context, "Deleted Account, please wait...");
+              } else if (state is AccountDeleteSuccess) {
+                showCustomToast(
+                  context: context,
+                  title: 'Success!',
+                  description: state.message,
+                  icon: Icons.check_circle,
+                  primaryColor: Colors.green,
+                );
+
+                Navigator.pop(context); // Close loader dialog
+                _fetchApi(); // Reload warehouse list
+              } else if (state is AccountDeleteFailed) {
+                Navigator.pop(context); // Close loader dialog
+                _fetchApi();
+                appAlertDialog(
+                  context,
+                  state.content,
+                  title: state.title,
+                  actions: [
+                    TextButton(
+                      onPressed: () => AppRoutes.pop(context),
                       child: const Text("Dismiss"),
                     ),
                   ],
@@ -146,19 +173,14 @@ class _AccountScreenState extends State<AccountScreen> {
                                   _showEditDialog(context, account);
                                 },
                                 onDelete: (account) async {
-                                  bool shouldDelete = await showDeleteConfirmationDialog(context);
+                                  bool shouldDelete =
+                                      await showDeleteConfirmationDialog(
+                                        context,
+                                      );
                                   if (!shouldDelete) return;
 
                                   context.read<AccountBloc>().add(
                                     DeleteAccount(account.acId.toString()),
-                                  );
-
-                                  // Show success message after deletion
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text('Account ${account.acName} deleted successfully'),
-                                      backgroundColor: Colors.green,
-                                    ),
                                   );
                                 },
                               ),
@@ -169,10 +191,15 @@ class _AccountScreenState extends State<AccountScreen> {
                                 pageSize: state.pageSize,
                                 from: state.from,
                                 to: state.to,
-                                onPageChanged: (page) =>
-                                    _fetchAccountList(pageNumber: page, pageSize: state.pageSize),
+                                onPageChanged: (page) => _fetchAccountList(
+                                  pageNumber: page,
+                                  pageSize: state.pageSize,
+                                ),
                                 onPageSizeChanged: (newSize) =>
-                                    _fetchAccountList(pageNumber: 1, pageSize: newSize),
+                                    _fetchAccountList(
+                                      pageNumber: 1,
+                                      pageSize: newSize,
+                                    ),
                               ),
                             ],
                           );
@@ -207,7 +234,8 @@ class _AccountScreenState extends State<AccountScreen> {
     accountBloc.accountNumberController.text = account.acNumber ?? "";
     accountBloc.bankNameController.text = account.bankName ?? "";
     accountBloc.branchNameController.text = account.branch ?? "";
-    accountBloc.accountOpeningBalanceController.text = account.balance?.toString() ?? "0.0";
+    accountBloc.accountOpeningBalanceController.text =
+        account.balance?.toString() ?? "0.0";
 
     showDialog(
       context: context,
@@ -268,9 +296,7 @@ class _AccountScreenState extends State<AccountScreen> {
             itemList: ['Cash', 'Bank', 'Mobile Banking'],
             onChanged: (newVal) {
               selectedAccountTypeNotifier.value = newVal;
-              _fetchApi(
-                accountType: newVal?.toLowerCase() ?? '',
-              );
+              _fetchApi(accountType: newVal?.toLowerCase() ?? '');
             },
             validator: (value) => null,
             itemBuilder: (item) => DropdownMenuItem<String>(

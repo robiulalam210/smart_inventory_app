@@ -74,6 +74,24 @@ final class AccountAddFailed extends AccountState {
 
 
 
+final class AccountDeleteLoading extends AccountState {}
+
+final class AccountDeleteSuccess extends AccountState {
+String message;
+AccountDeleteSuccess(this.message);
+}
+
+
+
+final class AccountDeleteFailed extends AccountState {
+  final String title, content;
+
+  AccountDeleteFailed({required this.title, required this.content});
+}
+
+
+
+
 sealed class AccountDetailsState {}
 
 final class AccountDetailsInitial extends AccountDetailsState {}

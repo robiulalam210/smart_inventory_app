@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:smart_inventory/feature/supplier/data/model/supplier_list_model.dart';
 
@@ -181,11 +182,11 @@ class SupplierDataTableWidget extends StatelessWidget {
                 color: Colors.blue,
                 onPressed: () => onEdit?.call(supplier),
               ),
-              // IconButton(
-              //   icon: const Icon(Icons.delete, size: 18),
-              //   color: Colors.red,
-              //   onPressed: () => onDelete?.call(supplier),
-              // ),
+              IconButton(
+                icon:  Icon( HugeIcons.strokeRoundedDeleteThrow, size: 18),
+                color: Colors.red,
+                onPressed: () => onDelete?.call(supplier),
+              ),
             ],
           ),
         ),

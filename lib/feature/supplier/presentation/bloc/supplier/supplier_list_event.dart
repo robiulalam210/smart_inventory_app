@@ -44,9 +44,9 @@ class UpdateSwitchSupplierList extends SupplierListEvent {
 }
 
 class DeleteSupplierList extends SupplierListEvent {
-  final String branchId;
+  final String id;
 
-  DeleteSupplierList(this.branchId);
+  DeleteSupplierList(this.id);
 }
 
 

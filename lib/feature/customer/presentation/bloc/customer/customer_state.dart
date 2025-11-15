@@ -68,7 +68,8 @@ final class CustomerAddSuccess extends CustomerState {
 final class CustomerDeleteLoading extends CustomerState {}
 
 final class CustomerDeleteSuccess extends CustomerState {
-  CustomerDeleteSuccess();
+  String message;
+  CustomerDeleteSuccess(this.message);
 }
 final class CustomerAddFailed extends CustomerState {
   final String title, content;

@@ -6,6 +6,7 @@ import '../../../../core/widgets/app_dropdown.dart';
 import '../../../../core/widgets/app_loader.dart';
 import '../../../../core/widgets/coustom_search_text_field.dart';
 import '../../../../core/widgets/delete_dialog.dart';
+import '../../../../core/widgets/show_custom_toast.dart';
 import '../../../lab_dashboard/presentation/bloc/dashboard/dashboard_bloc.dart';
 import '../../../products/product/presentation/widget/pagination.dart';
 import '../../../products/soruce/presentation/bloc/source/source_bloc.dart';
@@ -114,7 +115,11 @@ class _SupplierScreenState extends State<SupplierScreen> {
           listener: (context, state) {
             if (state is SupplierAddLoading) {
               appLoader(context, "Creating Supplier, please wait...");
-            } else if (state is SupplierAddSuccess) {
+            }
+            else if (state is SupplierDeleteLoading) {
+              appLoader(context, "Delete Customer, please wait...");
+            }
+            else if (state is SupplierAddSuccess) {
               Navigator.pop(context); // Close loader dialog
               Navigator.pop(context); // Close loader dialog
               _fetchApi(); // Reload supplier list
@@ -124,6 +129,32 @@ class _SupplierScreenState extends State<SupplierScreen> {
               );
             } else if (state is SupplierAddFailed) {
               Navigator.pop(context); // Close loader dialog
+              appAlertDialog(
+                context,
+                state.content,
+                title: state.title,
+                actions: [
+                  TextButton(
+                    onPressed: () => AppRoutes.pop(context),
+                    child: const Text("Dismiss"),
+                  ),
+                ],
+              );
+            }
+            else if (state is SupplierDeleteSuccess) {
+              showCustomToast(
+                context: context,
+                title: 'Success!',
+                description: state.message,
+                icon: Icons.check_circle,
+                primaryColor: Colors.green,
+              );
+
+              Navigator.pop(context); // Close loader dialog
+              _fetchApi(); // Reload warehouse list
+            } else if (state is SupplierDeleteFailed) {
+              Navigator.pop(context); // Close loader dialog
+              _fetchApi();
               appAlertDialog(
                 context,
                 state.content,

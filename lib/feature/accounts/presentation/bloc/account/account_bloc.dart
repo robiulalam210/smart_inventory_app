@@ -230,7 +230,7 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
       DeleteAccount event,
       Emitter<AccountState> emit,
       ) async {
-    emit(AccountAddLoading());
+    emit(AccountDeleteLoading());
 
     try {
       final res = await deleteResponse(
@@ -245,12 +245,12 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
       );
 
       if (response.success == false) {
-        emit(AccountAddFailed(title: 'Error', content: response.message ?? ""));
+        emit(AccountDeleteFailed(title: 'Error', content: response.message ?? ""));
         return;
       }
-      emit(AccountAddSuccess());
+      emit(AccountDeleteSuccess(response.message??""));
     } catch (error) {
-      emit(AccountAddFailed(title: "Error", content: error.toString()));
+      emit(AccountDeleteFailed(title: "Error", content: error.toString()));
     }
   }
 
