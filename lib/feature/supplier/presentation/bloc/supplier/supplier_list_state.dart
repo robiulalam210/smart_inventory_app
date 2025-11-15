@@ -76,3 +76,15 @@ final class SupplierSwitchFailed extends SupplierListState {
 }
 
 
+
+final class SupplierDeleteLoading extends SupplierListState {}
+
+final class SupplierDeleteSuccess extends SupplierListState {
+  String message;
+  SupplierDeleteSuccess(this.message);
+}
+final class SupplierDeleteFailed extends SupplierListState {
+  final String title, content;
+
+  SupplierDeleteFailed({required this.title, required this.content});
+}

@@ -1,4 +1,5 @@
 import '../../../../../core/configs/configs.dart';
+import '../../../../../core/repositories/delete_response.dart';
 import '../../../../../core/repositories/get_response.dart';
 import '../../../../../core/repositories/patch_response.dart';
 import '../../../../../core/repositories/post_response.dart';
@@ -45,6 +46,37 @@ class SupplierListBloc extends Bloc<SupplierListEvent, SupplierListState> {
     on<FetchSupplierList>(_onFetchSupplierList);
     on<AddSupplierList>(_onCreateSupplier);
     on<UpdateSupplierList>(_onUpdateSupplier);
+    on<DeleteSupplierList>(_onDeleteSupplierList);
+  }
+  Future<void> _onDeleteSupplierList(
+      DeleteSupplierList event,
+      Emitter<SupplierListState> emit,
+      ) async {
+    emit(SupplierDeleteLoading());
+
+    try {
+      final res = await deleteResponse(
+        url:"${ AppUrls.supplierList + event.id.toString()}/",
+      ); // Use the correct API URL
+
+      final jsonString = jsonEncode(res);
+
+      ApiResponse response = appParseJson(
+        jsonString, // Now passing String instead of Map
+            (data) => data, // Just return data as-is for delete operations
+      );
+      if (response.success == false) {
+        emit(
+          SupplierDeleteFailed(title: 'Alert', content: response.message ?? ""),
+        );
+        return;
+      }
+      clearData();
+      emit(SupplierDeleteSuccess(response.message??""));
+    } catch (error) {
+      // clearData();
+      emit(SupplierDeleteFailed(title: "Error", content: error.toString()));
+    }
   }
 
   Future<void> _onFetchSupplierList(
