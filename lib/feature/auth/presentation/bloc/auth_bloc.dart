@@ -50,7 +50,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
       if (response.success == true && response.user != null) {
         // Validate company status with complete data
-        final validationResult = _validateCompany(response.user!);
+        final validationResult = _validateCompany(response);
         if (!validationResult.isValid) {
           emit(AuthError(validationResult.errorMessage));
           return;
@@ -105,7 +105,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   //   }
   // }
 
-  CompanyValidationResult _validateCompany(LoginModelUser user) {
+  CompanyValidationResult _validateCompany(LoginModel user) {
     final company = user.company;
 
     // If no company data, allow login (some users might not have company)
@@ -122,9 +122,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
 
     // Check expiry date if available
-    if (company.expiryDate != null && company.expiryDate!.isNotEmpty) {
+    if (company.expiryDate != null ) {
       try {
-        final expiryDate = DateTime.parse(company.expiryDate!);
+        final expiryDate = DateTime.parse(company.expiryDate.toString());
         final currentDate = DateTime.now();
 
         // Add one day to expiry date to include the entire day

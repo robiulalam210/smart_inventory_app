@@ -1,38 +1,154 @@
+// To parse this JSON data, do
+//
+//     final loginModel = loginModelFromJson(jsonString);
+
 import 'dart:convert';
 
-LoginModel loginModelFromJson(String str) =>
-    LoginModel.fromJson(json.decode(str));
+LoginModel loginModelFromJson(String str) => LoginModel.fromJson(json.decode(str));
 
 String loginModelToJson(LoginModel data) => json.encode(data.toJson());
 
 class LoginModel {
-  final LoginModelUser? user;
+   bool? success;
+   String? message;
+  final User? user;
   final Tokens? tokens;
-  bool? success;
-  String? message;
+  final Company? company;
 
   LoginModel({
-    this.user,
-    this.tokens,
     this.success,
     this.message,
+    this.user,
+    this.tokens,
+    this.company,
   });
 
   factory LoginModel.fromJson(Map<String, dynamic> json) => LoginModel(
-    user: json["user"] == null
-        ? null
-        : LoginModelUser.fromJson(json["user"]),
-    tokens:
-    json["tokens"] == null ? null : Tokens.fromJson(json["tokens"]),
-    success: json["success"], // optional from API
-    message: json["message"], // optional from API
+    success: json["success"],
+    message: json["message"],
+    user: json["user"] == null ? null : User.fromJson(json["user"]),
+    tokens: json["tokens"] == null ? null : Tokens.fromJson(json["tokens"]),
+    company: json["company"] == null ? null : Company.fromJson(json["company"]),
   );
 
   Map<String, dynamic> toJson() => {
-    "user": user?.toJson(),
-    "tokens": tokens?.toJson(),
     "success": success,
     "message": message,
+    "user": user?.toJson(),
+    "tokens": tokens?.toJson(),
+    "company": company?.toJson(),
+  };
+}
+
+class Company {
+  final int? id;
+  final String? name;
+  final dynamic tradeLicense;
+  final dynamic address;
+  final dynamic phone;
+  final dynamic email;
+  final dynamic website;
+  final dynamic logo;
+  final String? currency;
+  final String? timezone;
+  final DateTime? fiscalYearStart;
+  final String? planType;
+  final DateTime? startDate;
+  final DateTime? expiryDate;
+  final bool? isActive;
+  final int? maxUsers;
+  final int? maxProducts;
+  final int? maxBranches;
+  final String? companyCode;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
+  final bool? isExpired;
+  final int? daysUntilExpiry;
+  final int? activeUserCount;
+  final int? productCount;
+
+  Company({
+    this.id,
+    this.name,
+    this.tradeLicense,
+    this.address,
+    this.phone,
+    this.email,
+    this.website,
+    this.logo,
+    this.currency,
+    this.timezone,
+    this.fiscalYearStart,
+    this.planType,
+    this.startDate,
+    this.expiryDate,
+    this.isActive,
+    this.maxUsers,
+    this.maxProducts,
+    this.maxBranches,
+    this.companyCode,
+    this.createdAt,
+    this.updatedAt,
+    this.isExpired,
+    this.daysUntilExpiry,
+    this.activeUserCount,
+    this.productCount,
+  });
+
+  factory Company.fromJson(Map<String, dynamic> json) => Company(
+    id: json["id"],
+    name: json["name"],
+    tradeLicense: json["trade_license"],
+    address: json["address"],
+    phone: json["phone"],
+    email: json["email"],
+    website: json["website"],
+    logo: json["logo"],
+    currency: json["currency"],
+    timezone: json["timezone"],
+    fiscalYearStart: json["fiscal_year_start"] == null ? null : DateTime.parse(json["fiscal_year_start"]),
+    planType: json["plan_type"],
+    startDate: json["start_date"] == null ? null : DateTime.parse(json["start_date"]),
+    expiryDate: json["expiry_date"] == null ? null : DateTime.parse(json["expiry_date"]),
+    isActive: json["is_active"],
+    maxUsers: json["max_users"],
+    maxProducts: json["max_products"],
+    maxBranches: json["max_branches"],
+    companyCode: json["company_code"],
+    createdAt: json["created_at"] == null ? null : DateTime.parse(json["created_at"]),
+    updatedAt: json["updated_at"] == null ? null : DateTime.parse(json["updated_at"]),
+    isExpired: json["is_expired"],
+    daysUntilExpiry: json["days_until_expiry"],
+    activeUserCount: json["active_user_count"],
+    productCount: json["product_count"],
+  );
+
+  Map<String, dynamic> toJson() => {
+    "id": id,
+    "name": name,
+    "trade_license": tradeLicense,
+    "address": address,
+    "phone": phone,
+    "email": email,
+    "website": website,
+    "logo": logo,
+    "currency": currency,
+    "timezone": timezone,
+    "fiscal_year_start": "${fiscalYearStart!.year.toString().padLeft(4, '0')}-${fiscalYearStart!.month.toString().padLeft(2, '0')}-${fiscalYearStart!.day.toString().padLeft(2, '0')}",
+    "plan_type": planType,
+    "start_date": "${startDate!.year.toString().padLeft(4, '0')}-${startDate!.month.toString().padLeft(2, '0')}-${startDate!.day.toString().padLeft(2, '0')}",
+    "expiry_date": "${expiryDate!.year.toString().padLeft(4, '0')}-${expiryDate!.month.toString().padLeft(2, '0')}-${expiryDate!.day.toString().padLeft(2, '0')}",
+    "is_active": isActive,
+    "max_users": maxUsers,
+    "max_products": maxProducts,
+    "max_branches": maxBranches,
+    "company_code": companyCode,
+    "created_at": createdAt?.toIso8601String(),
+    "updated_at": updatedAt?.toIso8601String(),
+    "is_expired": isExpired,
+    "days_until_expiry": daysUntilExpiry,
+    "active_user_count": activeUserCount,
+    "product_count": productCount,
   };
 }
 
@@ -40,7 +156,10 @@ class Tokens {
   final String? refresh;
   final String? access;
 
-  Tokens({this.refresh, this.access});
+  Tokens({
+    this.refresh,
+    this.access,
+  });
 
   factory Tokens.fromJson(Map<String, dynamic> json) => Tokens(
     refresh: json["refresh"],
@@ -53,164 +172,32 @@ class Tokens {
   };
 }
 
-class LoginModelUser {
+class User {
   final int? id;
   final String? username;
   final String? email;
+  final bool? isStaff;
+  final bool? isSuperuser;
+  final bool? isActive;
   final String? role;
-  final Company? company;
-  final Staff? staff;
 
-  LoginModelUser({
+  User({
     this.id,
     this.username,
     this.email,
-    this.role,
-    this.company,
-    this.staff,
-  });
-
-  factory LoginModelUser.fromJson(Map<String, dynamic> json) =>
-      LoginModelUser(
-        id: json["id"],
-        username: json["username"],
-        email: json["email"],
-        role: json["role"],
-        company:
-        json["company"] == null ? null : Company.fromJson(json["company"]),
-        staff: json["staff"] == null ? null : Staff.fromJson(json["staff"]),
-      );
-
-  Map<String, dynamic> toJson() => {
-    "id": id,
-    "username": username,
-    "email": email,
-    "role": role,
-    "company": company?.toJson(),
-    "staff": staff?.toJson(),
-  };
-}
-
-class Company {
-  final int? id;
-  final String? name;
-  final String? address;
-  final dynamic phone;
-  final dynamic logo;
-  final bool? isActive;
-  final String? startDate;  // Added this field
-  final String? expiryDate; // Added this field
-
-  Company({
-    this.id,
-    this.name,
-    this.address,
-    this.phone,
-    this.logo,
+    this.isStaff,
+    this.isSuperuser,
     this.isActive,
-    this.startDate,
-    this.expiryDate,
+    this.role,
   });
 
-  factory Company.fromJson(Map<String, dynamic> json) => Company(
-    id: json["id"],
-    name: json["name"],
-    address: json["address"],
-    phone: json["phone"],
-    logo: json["logo"],
-    isActive: json["is_active"],
-    startDate: json["start_date"],  // Added this line
-    expiryDate: json["expiry_date"], // Added this line
-  );
-
-  Map<String, dynamic> toJson() => {
-    "id": id,
-    "name": name,
-    "address": address,
-    "phone": phone,
-    "logo": logo,
-    "is_active": isActive,
-    "start_date": startDate,  // Added this line
-    "expiry_date": expiryDate, // Added this line
-  };
-}
-
-class Staff {
-  final int? id;
-  final StaffUser? user;
-  final String? roleName;
-  final String? phone;
-  final dynamic designation;
-  final String? salary;
-  final String? commission;
-  final bool? isMainUser;
-  final int? status;
-  final DateTime? joiningDate;
-  final String? address;
-  final DateTime? createdAt;
-
-  Staff({
-    this.id,
-    this.user,
-    this.roleName,
-    this.phone,
-    this.designation,
-    this.salary,
-    this.commission,
-    this.isMainUser,
-    this.status,
-    this.joiningDate,
-    this.address,
-    this.createdAt,
-  });
-
-  factory Staff.fromJson(Map<String, dynamic> json) => Staff(
-    id: json["id"],
-    user: json["user"] == null ? null : StaffUser.fromJson(json["user"]),
-    roleName: json["role_name"],
-    phone: json["phone"],
-    designation: json["designation"],
-    salary: json["salary"],
-    commission: json["commission"],
-    isMainUser: json["is_main_user"],
-    status: json["status"],
-    joiningDate: json["joining_date"] == null
-        ? null
-        : DateTime.parse(json["joining_date"]),
-    address: json["address"],
-    createdAt: json["created_at"] == null
-        ? null
-        : DateTime.parse(json["created_at"]),
-  );
-
-  Map<String, dynamic> toJson() => {
-    "id": id,
-    "user": user?.toJson(),
-    "role_name": roleName,
-    "phone": phone,
-    "designation": designation,
-    "salary": salary,
-    "commission": commission,
-    "is_main_user": isMainUser,
-    "status": status,
-    "joining_date": joiningDate?.toIso8601String(),
-    "address": address,
-    "created_at": createdAt?.toIso8601String(),
-  };
-}
-
-class StaffUser {
-  final int? id;
-  final String? username;
-  final String? email;
-  final String? role;
-
-  StaffUser({this.id, this.username, this.email, this.role});
-
-  factory StaffUser.fromJson(Map<String, dynamic> json) => StaffUser(
+  factory User.fromJson(Map<String, dynamic> json) => User(
     id: json["id"],
     username: json["username"],
     email: json["email"],
+    isStaff: json["is_staff"],
+    isSuperuser: json["is_superuser"],
+    isActive: json["is_active"],
     role: json["role"],
   );
 
@@ -218,6 +205,9 @@ class StaffUser {
     "id": id,
     "username": username,
     "email": email,
+    "is_staff": isStaff,
+    "is_superuser": isSuperuser,
+    "is_active": isActive,
     "role": role,
   };
 }
