@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:ui';
 import '../../../../core/core.dart';
+import '../../../../core/database/login_local_storage.dart';
 import '../../../../root.dart';
 import '../../../feature.dart';
 
@@ -18,13 +19,25 @@ class _LogInScreenState extends State<LogInScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool _visible = false;
 
+
   @override
   void initState() {
     super.initState();
+
+    _loadSavedLogin();
+
     Future.delayed(const Duration(milliseconds: 500), () {
       setState(() {
         _visible = !_visible;
       });
+    });
+  }
+
+  Future<void> _loadSavedLogin() async {
+    final data = await LoginLocalStorage.getSavedLogin();
+    setState(() {
+      emailCon.text = data['username'] ?? "";
+      passwordCon.text = data['password'] ?? "";
     });
   }
 
@@ -72,6 +85,16 @@ class _LogInScreenState extends State<LogInScreen> {
         body: BlocListener<AuthBloc, AuthState>(
           listener: (context, state) async {
             if (state is AuthAuthenticated || state is AuthAuthenticatedOffline) {
+
+
+
+              // 🔥 Save username & password
+              await LoginLocalStorage.saveLogin(
+                emailCon.text.trim(),
+                passwordCon.text.trim(),
+              );
+
+
               _dismissLoaderIfOpen();
 
               showCustomToast(

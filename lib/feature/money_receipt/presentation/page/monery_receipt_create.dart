@@ -862,7 +862,7 @@ class _MoneyReceiptListScreenState extends State<MoneyReceiptForm> {
 
     Map<String, dynamic> body = {
       "amount": moneyBloc.amountController.text.trim(),
-      "customer": moneyBloc.selectCustomerModel!.id.toString(),
+      "customer_id": moneyBloc.selectCustomerModel!.id.toString(),
       "payment_date": appWidgets.convertDateTime(
         DateFormat(
           "dd-MM-yyyy",

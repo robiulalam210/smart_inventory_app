@@ -23,7 +23,7 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
   String selectedLocation = " ";
   String selectedId = "";
 
-  List<String> accountType = ["Bank", "Cash", "Mobile Bank"];
+  List<String> accountType = ["Bank", "Cash", "Mobile banking"];
 
   TextEditingController filterTextController = TextEditingController();
   TextEditingController accountNameController = TextEditingController();
