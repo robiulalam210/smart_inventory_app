@@ -297,7 +297,7 @@ class AccountCard extends StatelessWidget {
               minWidth: 80,
             ),
             child: Text(
-              '${getAmountPrefix()}\$${getAmountText()}',
+              '${getAmountPrefix()}${getAmountText()}',
               style: GoogleFonts.inter(
                 color: color,
                 fontWeight: FontWeight.w600,

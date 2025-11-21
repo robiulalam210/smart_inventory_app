@@ -35,16 +35,7 @@ Future<Uint8List> generateSalesPdf(PosSaleModel sale) async {
       header: (context) {
         return pw.Container();
       },
-      footer: (context) {
-        return pw.Container(
-          alignment: pw.Alignment.center,
-          margin: const pw.EdgeInsets.only(top: 20),
-          child: pw.Text(
-            'Page ${context.pageNumber} of ${context.pagesCount}',
-            style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey600),
-          ),
-        );
-      },
+
       build: (context) => [
         // Header Section with improved styling
         pw.Container(
@@ -63,12 +54,12 @@ Future<Uint8List> generateSalesPdf(PosSaleModel sale) async {
                   pw.Text(
                     'SALES INVOICE',
                     style: pw.TextStyle(
-                      fontSize: 24,
+                      fontSize: 16,
                       fontWeight: pw.FontWeight.bold,
                       color: PdfColors.blue800,
                     ),
                   ),
-                  pw.SizedBox(height: 8),
+                  pw.SizedBox(height: 4),
                   pw.Row(
                     children: [
                       pw.Container(
@@ -117,7 +108,6 @@ Future<Uint8List> generateSalesPdf(PosSaleModel sale) async {
           ),
         ),
 
-        // pw.SizedBox(height: 20),
 
         // Customer Info Section
         pw.Container(
@@ -125,7 +115,7 @@ Future<Uint8List> generateSalesPdf(PosSaleModel sale) async {
             color: PdfColors.grey50,
             borderRadius: pw.BorderRadius.circular(6),
           ),
-          padding: const pw.EdgeInsets.all(12),
+          padding: const pw.EdgeInsets.symmetric(horizontal: 12),
           child: pw.Row(
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
@@ -159,7 +149,7 @@ Future<Uint8List> generateSalesPdf(PosSaleModel sale) async {
                         color: PdfColors.blue800,
                       ),
                     ),
-                    pw.SizedBox(height: 8),
+
                     _buildInfoRow('Payment Method:', sale.paymentMethod ?? 'Cash'),
                     if (sale.accountName != null && sale.accountName!.isNotEmpty)
                       _buildInfoRow('Account:', sale.accountName!),
@@ -169,18 +159,17 @@ Future<Uint8List> generateSalesPdf(PosSaleModel sale) async {
             ],
           ),
         ),
-
+        pw.SizedBox(height: 4),
 
         // Items Table Section
-        pw.Padding(padding: pw.EdgeInsets.all(12),child: pw.Text(
+        pw.Padding(padding: pw.EdgeInsets.symmetric(horizontal: 12),child: pw.Text(
           'ITEMS DETAILS',
           style: pw.TextStyle(
-            fontSize: 16,
+            fontSize: 14,
             fontWeight: pw.FontWeight.bold,
             color: PdfColors.blue800,
           ),
         ),),
-        pw.SizedBox(height: 12),
 
         pw.Padding(padding: pw.EdgeInsets.all(8),child: pw.Table(
           border: pw.TableBorder.all(color: PdfColors.grey400, width: 1),
@@ -202,7 +191,7 @@ Future<Uint8List> generateSalesPdf(PosSaleModel sale) async {
               ),
               children: [
                 pw.Padding(
-                  padding: const pw.EdgeInsets.all(12),
+                  padding: const pw.EdgeInsets.all(8),
                   child: pw.Text(
                     'PRODUCT',
                     style: pw.TextStyle(
@@ -212,7 +201,7 @@ Future<Uint8List> generateSalesPdf(PosSaleModel sale) async {
                   ),
                 ),
                 pw.Padding(
-                  padding: const pw.EdgeInsets.all(12),
+                  padding: const pw.EdgeInsets.all(8),
                   child: pw.Text(
                     'QTY',
                     style: pw.TextStyle(
@@ -223,7 +212,7 @@ Future<Uint8List> generateSalesPdf(PosSaleModel sale) async {
                   ),
                 ),
                 pw.Padding(
-                  padding: const pw.EdgeInsets.all(12),
+                  padding: const pw.EdgeInsets.all(8),
                   child: pw.Text(
                     'PRICE',
                     style: pw.TextStyle(
@@ -234,7 +223,7 @@ Future<Uint8List> generateSalesPdf(PosSaleModel sale) async {
                   ),
                 ),
                 pw.Padding(
-                  padding: const pw.EdgeInsets.all(12),
+                  padding: const pw.EdgeInsets.all(8),
                   child: pw.Text(
                     'TOTAL',
                     style: pw.TextStyle(
@@ -257,14 +246,14 @@ Future<Uint8List> generateSalesPdf(PosSaleModel sale) async {
                 ),
                 children: [
                   pw.Padding(
-                    padding: const pw.EdgeInsets.all(12),
+                    padding: const pw.EdgeInsets.all(8),
                     child: pw.Text(
                       item.productName ?? 'Unknown Product',
                       style: const pw.TextStyle(fontSize: 11),
                     ),
                   ),
                   pw.Padding(
-                    padding: const pw.EdgeInsets.all(12),
+                    padding: const pw.EdgeInsets.all(8),
                     child: pw.Text(
                       (item.quantity ?? 0).toString(),
                       style: const pw.TextStyle(fontSize: 11),
@@ -272,17 +261,17 @@ Future<Uint8List> generateSalesPdf(PosSaleModel sale) async {
                     ),
                   ),
                   pw.Padding(
-                    padding: const pw.EdgeInsets.all(12),
+                    padding: const pw.EdgeInsets.all(8),
                     child: pw.Text(
-                      '\$${unitPrice.toStringAsFixed(2)}',
+                      unitPrice.toStringAsFixed(2),
                       style: const pw.TextStyle(fontSize: 11),
                       textAlign: pw.TextAlign.right,
                     ),
                   ),
                   pw.Padding(
-                    padding: const pw.EdgeInsets.all(12),
+                    padding: const pw.EdgeInsets.all(8),
                     child: pw.Text(
-                      '\$${subtotal.toStringAsFixed(2)}',
+                      subtotal.toStringAsFixed(2),
                       style: const pw.TextStyle(fontSize: 11),
                       textAlign: pw.TextAlign.right,
                     ),
@@ -304,7 +293,7 @@ Future<Uint8List> generateSalesPdf(PosSaleModel sale) async {
                 crossAxisAlignment: pw.CrossAxisAlignment.start,
                 children: [
                   pw.Container(
-                    padding: const pw.EdgeInsets.all(16),
+                    padding: const pw.EdgeInsets.all(10),
                     decoration: pw.BoxDecoration(
                       color: PdfColors.green50,
                       borderRadius: pw.BorderRadius.circular(8),
@@ -322,7 +311,7 @@ Future<Uint8List> generateSalesPdf(PosSaleModel sale) async {
                           ),
                         ),
                         if (sale.remark != null && sale.remark!.isNotEmpty) ...[
-                          pw.SizedBox(height: 8),
+                          pw.SizedBox(height: 4),
                           pw.Text(
                             'Remarks: ${sale.remark}',
                             style: const pw.TextStyle(fontSize: 11, color: PdfColors.grey700),
@@ -336,7 +325,7 @@ Future<Uint8List> generateSalesPdf(PosSaleModel sale) async {
             ),
             pw.Expanded(
               child: pw.Container(
-                padding: const pw.EdgeInsets.all(20),
+                padding: const pw.EdgeInsets.all(10),
                 decoration: pw.BoxDecoration(
                   color: PdfColors.blue50,
                   border: pw.Border.all(color: PdfColors.blue200),
@@ -347,12 +336,12 @@ Future<Uint8List> generateSalesPdf(PosSaleModel sale) async {
                     _buildSummaryRow('Subtotal:', '\$${netTotal.toStringAsFixed(2)}'),
                     if (discount > 0) _buildSummaryRow('Discount:', '-\$${discount.toStringAsFixed(2)}'),
                     if (vat > 0) _buildSummaryRow('Vat:', '\$${vat.toStringAsFixed(2)}'),
-                    pw.SizedBox(height: 8),
+                    pw.SizedBox(height: 4),
                     pw.Divider(color: PdfColors.blue400, height: 1, thickness: 1),
-                    pw.SizedBox(height: 8),
+                    pw.SizedBox(height: 4),
                     _buildSummaryRow(
                       'GRAND TOTAL:',
-                      '\$${grandTotal.toStringAsFixed(2)}',
+                      grandTotal.toStringAsFixed(2),
                       isTotal: true,
                     ),
                   ],

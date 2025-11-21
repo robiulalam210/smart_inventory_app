@@ -1,7 +1,5 @@
-import '../../../../core/configs/configs.dart';
-import '../../../../core/widgets/app_button.dart';
-import '../../../../core/widgets/app_dropdown.dart';
-import '../../../../core/widgets/input_field.dart';
+import 'package:smart_inventory/core/core.dart';
+
 import '../bloc/supplier/supplier_list_bloc.dart';
 
 class CreateSupplierScreen extends StatefulWidget {
@@ -87,16 +85,17 @@ class _CreateSupplierScreenState extends State<CreateSupplierScreen> {
                     ),
                   ),
 
+                  SizedBox(height: AppSizes.height(context) * 0.01),
 
 
                   // Supplier Name
-                  CustomInputField(
-                    isRequiredLable: true,
+                  AppTextField(
+
                     isRequired: true,
                     textInputAction: TextInputAction.next,
                     controller: context.read<SupplierListBloc>().customerNameController,
                     hintText: 'Supplier Name',
-                    fillColor: const Color.fromARGB(255, 255, 255, 255),
+
                     keyboardType: TextInputType.text,
                     validator: (value) {
                       return value!.isEmpty
@@ -111,15 +110,15 @@ class _CreateSupplierScreenState extends State<CreateSupplierScreen> {
                   SizedBox(height: AppSizes.height(context) * 0.01),
 
                   // Phone Number
-                  CustomInputField(
-                    isRequiredLable: true,
+                  AppTextField(
+
                     isRequired: true,
                     textInputAction: TextInputAction.next,
                     controller: context.read<SupplierListBloc>().customerNumberController,
                     hintText: 'Phone Number',
                     labelText: "Phone Number",
                     // maxLength: 11,
-                    fillColor: const Color.fromARGB(255, 255, 255, 255),
+
                     keyboardType: TextInputType.phone,
                     validator: (value) {
                       return value!.trim().isEmpty
@@ -136,13 +135,13 @@ class _CreateSupplierScreenState extends State<CreateSupplierScreen> {
                   SizedBox(height: AppSizes.height(context) * 0.01),
 
                   // Address
-                  CustomInputField(
-                    isRequiredLable: true,
+                  AppTextField(
+
                     isRequired: true,
                     textInputAction: TextInputAction.done,
                     controller: context.read<SupplierListBloc>().addressController,
                     hintText: 'Address',
-                    fillColor: const Color.fromARGB(255, 255, 255, 255),
+
                     keyboardType: TextInputType.multiline,
                     validator: (value) {
                       return value!.isEmpty ? 'Please enter address' : null;

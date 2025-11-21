@@ -3,12 +3,7 @@ import 'package:smart_inventory/feature/auth/data/models/login_mod.dart';
 import '../../../../core/configs/configs.dart';
 
 class AuthService {
-  // Future<dynamic> tryOnlineLogin(String username, String password) async {
-  //   return await loginService(payload: {
-  //     'email': username,
-  //     'password': password,
-  //   });
-  // }
+
   Future<void> saveUserLocally( String plainPassword, LoginModel response) async {
     final user = response.user;
 

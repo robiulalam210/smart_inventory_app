@@ -152,12 +152,12 @@ class _CustomDateRangeFieldState extends State<CustomDateRangeField> {
                 hintStyle: TextStyle(
                   color: AppColors.matteBlack.withOpacity(0.5),
                   fontWeight: FontWeight.w300,
-                  fontSize: 14,
+                  fontSize: 12,
                 ),
                 errorMaxLines: 2,
-                suffixIcon: const Icon(Icons.date_range, size: 18), // Smaller icon
+                suffixIcon: const Icon(Icons.date_range, size: 16), // Smaller icon
                 contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 12,
+                  horizontal: 8,
                   vertical: 8, // Reduced vertical padding
                 ),
                 errorBorder: OutlineInputBorder(

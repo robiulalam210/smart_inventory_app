@@ -1,8 +1,10 @@
 // money_receipt_pdf.dart
 import 'dart:typed_data';
+import 'package:flutter/services.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
+import '../../../../../core/configs/configs.dart';
 import '../../../data/model/money_receipt_model/money_receipt_model.dart';
 
 Future<Uint8List> generateMoneyReceiptPdf(MoneyreceiptModel receipt) async {
@@ -11,26 +13,36 @@ Future<Uint8List> generateMoneyReceiptPdf(MoneyreceiptModel receipt) async {
   final amount = double.tryParse(receipt.amount ?? '0') ?? 0;
   final summary = receipt.paymentSummary;
 
+  // Load fonts
+  final roboto = pw.Font.ttf(await rootBundle.load("assets/fonts/Roboto-Regular.ttf"));
+  final robotoBold = pw.Font.ttf(await rootBundle.load("assets/fonts/Roboto-Bold.ttf"));
+  final notoSans = pw.Font.ttf(await rootBundle.load("assets/fonts/NotoSans-Regular.ttf"));
+
+  // Global Theme with fallback
+  final theme = pw.ThemeData.withFont(
+    base: roboto,
+    bold: robotoBold,
+    fontFallback: [notoSans],
+  );
 
   pdf.addPage(
     pw.MultiPage(
       pageTheme: pw.PageTheme(
+        theme:theme ,
         pageFormat: PdfPageFormat.a4,
-        buildBackground: (context) =>  pw.Container(
-          color: PdfColors.white, // Solid white background
-        ),        margin: const pw.EdgeInsets.all(25),
+        buildBackground: (context) => pw.Container(color: PdfColors.white),
+        margin: const pw.EdgeInsets.all(25),
       ),
       header: (context) => _buildHeader(),
-      footer: (context) => _buildFooter(context),
       build: (context) => [
         _buildReceiptHeader(receipt),
-        pw.SizedBox(height: 20),
+        pw.SizedBox(height: 4),
         _buildCustomerInfo(receipt),
-        pw.SizedBox(height: 20),
+        pw.SizedBox(height: 4),
         _buildPaymentDetails(receipt, amount),
-        pw.SizedBox(height: 20),
+        pw.SizedBox(height: 4),
         if (summary != null) _buildPaymentSummary(summary),
-        pw.SizedBox(height: 20),
+        pw.SizedBox(height: 4),
         _buildAuthorizationSection(),
       ],
     ),
@@ -39,10 +51,11 @@ Future<Uint8List> generateMoneyReceiptPdf(MoneyreceiptModel receipt) async {
   return pdf.save();
 }
 
-// Header with Company Info
+// ---------------------- HEADER ----------------------
 pw.Widget _buildHeader() {
   return pw.Container(
-    margin: const pw.EdgeInsets.only(bottom: 20),
+    padding: const pw.EdgeInsets.all(8),
+    margin: const pw.EdgeInsets.all(8),
     child: pw.Row(
       mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
       children: [
@@ -73,14 +86,15 @@ pw.Widget _buildHeader() {
   );
 }
 
-// Receipt Header
+// ---------------------- RECEIPT HEADER ----------------------
 pw.Widget _buildReceiptHeader(MoneyreceiptModel receipt) {
   return pw.Container(
     decoration: pw.BoxDecoration(
       border: pw.Border.all(color: PdfColors.blue800, width: 1.5),
       borderRadius: pw.BorderRadius.circular(8),
     ),
-    padding: const pw.EdgeInsets.all(16),
+    padding: const pw.EdgeInsets.all(8),
+    margin: const pw.EdgeInsets.all(8),
     child: pw.Row(
       mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
       crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -91,7 +105,7 @@ pw.Widget _buildReceiptHeader(MoneyreceiptModel receipt) {
             pw.Text(
               'RECEIPT NO: ${receipt.mrNo ?? 'N/A'}',
               style: pw.TextStyle(
-                fontSize: 18,
+                fontSize: 14,
                 fontWeight: pw.FontWeight.bold,
                 color: PdfColors.blue800,
               ),
@@ -126,15 +140,16 @@ pw.Widget _buildReceiptHeader(MoneyreceiptModel receipt) {
   );
 }
 
-// Customer Information
+// ---------------------- CUSTOMER INFO ----------------------
 pw.Widget _buildCustomerInfo(MoneyreceiptModel receipt) {
   return pw.Container(
+    padding: const pw.EdgeInsets.all(8),
+    margin: const pw.EdgeInsets.all(8),
     decoration: pw.BoxDecoration(
       color: PdfColors.grey50,
       borderRadius: pw.BorderRadius.circular(6),
       border: pw.Border.all(color: PdfColors.grey300),
     ),
-    padding: const pw.EdgeInsets.all(16),
     child: pw.Row(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
@@ -209,10 +224,11 @@ pw.Widget _buildInfoRow(String label, String value) {
   );
 }
 
-// Payment Details
+// ---------------------- PAYMENT DETAILS ----------------------
 pw.Widget _buildPaymentDetails(MoneyreceiptModel receipt, double amount) {
   return pw.Container(
-    padding: const pw.EdgeInsets.all(20),
+    padding: const pw.EdgeInsets.all(8),
+    margin: const pw.EdgeInsets.all(8),
     decoration: pw.BoxDecoration(
       color: PdfColors.green50,
       border: pw.Border.all(color: PdfColors.green200),
@@ -223,14 +239,14 @@ pw.Widget _buildPaymentDetails(MoneyreceiptModel receipt, double amount) {
         pw.Text(
           'PAYMENT RECEIVED',
           style: pw.TextStyle(
-            fontSize: 16,
+            fontSize: 14,
             fontWeight: pw.FontWeight.bold,
             color: PdfColors.green800,
           ),
         ),
-        pw.SizedBox(height: 12),
+        pw.SizedBox(height: 4),
         pw.Container(
-          padding: const pw.EdgeInsets.all(16),
+          padding: const pw.EdgeInsets.all(4),
           decoration: pw.BoxDecoration(
             color: PdfColors.white,
             borderRadius: pw.BorderRadius.circular(6),
@@ -241,12 +257,12 @@ pw.Widget _buildPaymentDetails(MoneyreceiptModel receipt, double amount) {
               pw.Text(
                 '৳${amount.toStringAsFixed(2)}',
                 style: pw.TextStyle(
-                  fontSize: 28,
+                  fontSize: 16,
                   fontWeight: pw.FontWeight.bold,
                   color: PdfColors.green800,
                 ),
               ),
-              pw.SizedBox(height: 8),
+              pw.SizedBox(height: 4),
               pw.Text(
                 'Amount Received',
                 style: const pw.TextStyle(
@@ -257,7 +273,7 @@ pw.Widget _buildPaymentDetails(MoneyreceiptModel receipt, double amount) {
             ],
           ),
         ),
-        pw.SizedBox(height: 12),
+        pw.SizedBox(height: 4),
         pw.Row(
           mainAxisAlignment: pw.MainAxisAlignment.spaceAround,
           children: [
@@ -298,7 +314,7 @@ pw.Widget _buildDetailItem(String label, String value) {
       pw.SizedBox(height: 4),
       pw.Text(
         value,
-        style:  pw.TextStyle(
+        style: pw.TextStyle(
           fontSize: 10,
           fontWeight: pw.FontWeight.bold,
         ),
@@ -307,21 +323,22 @@ pw.Widget _buildDetailItem(String label, String value) {
   );
 }
 
-// Payment Summary
+// ---------------------- PAYMENT SUMMARY ----------------------
 pw.Widget _buildPaymentSummary(PaymentSummary summary) {
   final before = summary.beforePayment;
   final after = summary.afterPayment;
 
   return pw.Container(
+    padding: const pw.EdgeInsets.all(8),
+    margin: const pw.EdgeInsets.all(8),
     decoration: pw.BoxDecoration(
       border: pw.Border.all(color: PdfColors.grey400),
       borderRadius: pw.BorderRadius.circular(8),
     ),
     child: pw.Column(
       children: [
-        // Header
         pw.Container(
-          padding: const pw.EdgeInsets.all(12),
+          padding: const pw.EdgeInsets.all(8),
           decoration: const pw.BoxDecoration(
             color: PdfColors.blue800,
             borderRadius: pw.BorderRadius.only(
@@ -340,26 +357,19 @@ pw.Widget _buildPaymentSummary(PaymentSummary summary) {
             ),
           ),
         ),
-        // Content
         pw.Padding(
           padding: const pw.EdgeInsets.all(16),
           child: pw.Row(
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
-              if (before != null)
-                pw.Expanded(
-                  child: _buildSummarySection('BEFORE PAYMENT', before),
-                ),
+              if (before != null) pw.Expanded(child: _buildSummarySection('BEFORE PAYMENT', before)),
               if (after != null) ...[
                 pw.SizedBox(width: 16),
-                pw.Expanded(
-                  child: _buildSummarySection('AFTER PAYMENT', after),
-                ),
+                pw.Expanded(child: _buildSummarySection('AFTER PAYMENT', after)),
               ],
             ],
           ),
         ),
-        // Affected Invoices
         if (summary.affectedInvoices != null && summary.affectedInvoices!.isNotEmpty)
           _buildAffectedInvoices(summary.affectedInvoices!),
       ],
@@ -426,6 +436,7 @@ pw.Widget _buildSummaryRow(String label, dynamic value) {
   );
 }
 
+// ---------------------- AFFECTED INVOICES ----------------------
 pw.Widget _buildAffectedInvoices(List<AffectedInvoice> invoices) {
   return pw.Container(
     padding: const pw.EdgeInsets.all(16),
@@ -462,8 +473,8 @@ pw.Widget _buildInvoiceRow(AffectedInvoice invoice) {
           style: const pw.TextStyle(fontSize: 10),
         ),
         pw.Text(
-          '${amount.toStringAsFixed(2)}',
-          style:  pw.TextStyle(
+          '৳${amount.toStringAsFixed(2)}',
+          style: pw.TextStyle(
             fontSize: 10,
             fontWeight: pw.FontWeight.bold,
           ),
@@ -473,7 +484,7 @@ pw.Widget _buildInvoiceRow(AffectedInvoice invoice) {
   );
 }
 
-// Authorization Section
+// ---------------------- AUTHORIZATION ----------------------
 pw.Widget _buildAuthorizationSection() {
   return pw.Container(
     margin: const pw.EdgeInsets.only(top: 20),
@@ -482,30 +493,16 @@ pw.Widget _buildAuthorizationSection() {
       children: [
         pw.Column(
           children: [
-            pw.Container(
-              width: 120,
-              height: 1,
-              color: PdfColors.black,
-            ),
+            pw.Container(width: 120, height: 1, color: PdfColors.black),
             pw.SizedBox(height: 4),
-            pw.Text(
-              'Customer Signature',
-              style: const pw.TextStyle(fontSize: 9),
-            ),
+            pw.Text('Customer Signature', style: const pw.TextStyle(fontSize: 9)),
           ],
         ),
         pw.Column(
           children: [
-            pw.Container(
-              width: 120,
-              height: 1,
-              color: PdfColors.black,
-            ),
+            pw.Container(width: 120, height: 1, color: PdfColors.black),
             pw.SizedBox(height: 4),
-            pw.Text(
-              'Authorized Signature',
-              style: const pw.TextStyle(fontSize: 9),
-            ),
+            pw.Text('Authorized Signature', style: const pw.TextStyle(fontSize: 9)),
           ],
         ),
       ],
@@ -513,19 +510,7 @@ pw.Widget _buildAuthorizationSection() {
   );
 }
 
-// Footer
-pw.Widget _buildFooter(pw.Context context) {
-  return pw.Container(
-    alignment: pw.Alignment.center,
-    margin: const pw.EdgeInsets.only(top: 20),
-    child: pw.Text(
-      'Page ${context.pageNumber} of ${context.pagesCount} • Generated on ${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}',
-      style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey600),
-    ),
-  );
-}
-
-// Helper functions
+// ---------------------- HELPERS ----------------------
 String _formatDate(DateTime? date) {
   if (date == null) return 'N/A';
   return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';

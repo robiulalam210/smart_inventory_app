@@ -1,65 +1,6 @@
-// import '../configs/configs.dart';
-//
-// class AppButton extends StatelessWidget {
-//   const AppButton({
-//     super.key,
-//     required this.name,
-//     required this.onPressed,
-//     this.color,
-//     this.size,
-//     this.isDisabled = false,
-//   });
-//
-//   final String name;
-//   final double? size;
-//   final Color? color;
-//   final VoidCallback? onPressed;
-//   final bool isDisabled;
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     final buttonContent = Container(
-//       decoration: BoxDecoration(
-//         gradient: isDisabled || color != null
-//             ? null
-//             : const LinearGradient(
-//           begin: Alignment.topCenter,
-//           end: Alignment.bottomCenter,
-//           colors: [Color(0xFF33E547), Color(0xFF2A9136)],
-//         ),
-//         color: isDisabled
-//             ? Colors.grey
-//             : color, // If color is passed, use it (disable gradient)
-//         borderRadius: BorderRadius.circular(4), // Match border-radius: 4px
-//       ),
-//       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-//       child: Center(
-//         child: Text(
-//           name,
-//           style: AppTextStyle.buttonTextStyle(context).copyWith(
-//             color: isDisabled ? Colors.black54 : Colors.white,
-//           ),
-//         ),
-//       ),
-//     );
-//
-//     return SizedBox(
-//       width: size ?? (Responsive.isMobile(context) ? 300 : null),
-//       child: Material(
-//         color: Colors.transparent,
-//         borderRadius: BorderRadius.circular(4),
-//         child: InkWell(
-//           borderRadius: BorderRadius.circular(4),
-//           onTap: isDisabled ? null : onPressed,
-//           child: buttonContent,
-//         ),
-//       ),
-//     );
-//   }
-// }
 import '../configs/configs.dart';
 
-class AppButton extends StatelessWidget {
+class AppButton extends StatefulWidget {
   const AppButton({
     super.key,
     required this.name,
@@ -100,39 +41,64 @@ class AppButton extends StatelessWidget {
   final bool isOutlined;
 
   @override
-  Widget build(BuildContext context) {
+  State<AppButton> createState() => _AppButtonState();
+}
 
-    return Container(
-      width: size ?? (Responsive.isMobile(context) ? 300 : null),
-      margin: margin ?? EdgeInsets.zero,
-      child: Material(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(borderRadius ?? 8),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(borderRadius ?? 8),
-          onTap: (isDisabled || isLoading) ? null : onPressed,
-          child: Container(
-            decoration: BoxDecoration(
-              gradient: _getGradient(context),
-              color: _getBackgroundColor(context),
-              border: isOutlined
-                  ? Border.all(
-                color: borderColor ?? (color ?? AppColors.primaryColor),
-                width: 1.5,
-              )
-                  : null,
-              borderRadius: BorderRadius.circular(borderRadius ?? 8),
-              boxShadow: elevation != null ? [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.1),
-                  blurRadius: elevation!,
-                  offset: const Offset(0, 2),
+class _AppButtonState extends State<AppButton> {
+  bool isHover = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final br = BorderRadius.circular(widget.borderRadius ?? 8);
+
+    return MouseRegion(
+      onEnter: (_) => setState(() => isHover = true),
+      onExit: (_) => setState(() => isHover = false),
+
+      child: Container(
+        width: widget.size ?? (Responsive.isMobile(context) ? 300 : null),
+        margin: widget.margin ?? EdgeInsets.zero,
+
+        child: Material(
+          color: Colors.transparent,
+          borderRadius: br,
+
+          child: InkWell(
+            borderRadius: br,
+            onTap: (widget.isDisabled || widget.isLoading)
+                ? null
+                : widget.onPressed,
+
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 150),
+              decoration: BoxDecoration(
+                gradient: _getGradient(context),
+                color: _getBackgroundColor(context),
+                border: widget.isOutlined
+                    ? Border.all(
+                  color: isHover
+                      ? (widget.borderColor ??
+                      (widget.color ?? AppColors.primaryColor))
+                      : (widget.borderColor ??
+                      (widget.color ?? AppColors.primaryColor))
+                      .withOpacity(0.8),
+                  width: 1.5,
                 )
-              ] : null,
-            ),
-            padding: padding ?? const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-            child: Center(
-              child: _buildButtonContent(context),
+                    : null,
+                borderRadius: br,
+                boxShadow: widget.elevation != null
+                    ? [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: widget.elevation!,
+                    offset: const Offset(0, 2),
+                  )
+                ]
+                    : null,
+              ),
+              padding: widget.padding ??
+                  const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+              child: Center(child: _buildButtonContent(context)),
             ),
           ),
         ),
@@ -141,29 +107,44 @@ class AppButton extends StatelessWidget {
   }
 
   Gradient? _getGradient(BuildContext context) {
-    if (isOutlined || isDisabled || isLoading) return null;
-    if (gradient != null) return gradient;
-    if (color != null) return null;
+    if (widget.isOutlined || widget.isDisabled || widget.isLoading) return null;
+    if (widget.gradient != null) return widget.gradient;
+    if (widget.color != null) return null;
 
-    return  AppColors.primaryGradient;
+    // Hover lighten effect
+    if (isHover) {
+      return LinearGradient(
+        colors: [
+          AppColors.primaryColor.withOpacity(0.9),
+          AppColors.secondaryBabyBlue.withOpacity(0.9),
+        ],
+      );
+    }
+
+    return AppColors.primaryGradient;
   }
 
   Color? _getBackgroundColor(BuildContext context) {
-    if (isOutlined) return Colors.transparent;
-    if (isDisabled || isLoading) return Colors.grey.shade400;
-    if (color != null) return color;
-    return null; // Let gradient handle it
+    if (widget.isOutlined) return Colors.transparent;
+    if (widget.isDisabled || widget.isLoading) return Colors.grey.shade400;
+    if (widget.color != null) return isHover
+        ? widget.color!.withOpacity(0.9)
+        : widget.color;
+
+    return null;
   }
 
   Widget _buildButtonContent(BuildContext context) {
-    if (isLoading) {
+    if (widget.isLoading) {
       return SizedBox(
         width: 20,
         height: 20,
         child: CircularProgressIndicator(
           strokeWidth: 2,
           valueColor: AlwaysStoppedAnimation<Color>(
-            isOutlined ? (color ?? AppColors.primaryColor) : Colors.white,
+            widget.isOutlined
+                ? (widget.color ?? AppColors.primaryColor)
+                : Colors.white,
           ),
         ),
       );
@@ -173,13 +154,13 @@ class AppButton extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        if (icon != null) ...[
-          icon!,
+        if (widget.icon != null) ...[
+          widget.icon!,
           const SizedBox(width: 8),
         ],
         Flexible(
           child: Text(
-            name,
+            widget.name,
             style: _getTextStyle(context),
             textAlign: TextAlign.center,
             overflow: TextOverflow.ellipsis,
@@ -193,9 +174,12 @@ class AppButton extends StatelessWidget {
     final baseStyle = AppTextStyle.buttonTextStyle(context);
 
     Color getTextColor() {
-      if (isDisabled) return Colors.black54;
-      if (isOutlined) return textColor ?? (color ?? AppColors.primaryColor);
-      return textColor ?? Colors.white;
+      if (widget.isDisabled) return Colors.black54;
+      if (widget.isOutlined) {
+        return widget.textColor ??
+            (widget.color ?? AppColors.primaryColor);
+      }
+      return widget.textColor ?? Colors.white;
     }
 
     return baseStyle.copyWith(

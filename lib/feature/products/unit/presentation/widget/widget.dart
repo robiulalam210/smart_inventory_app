@@ -28,7 +28,7 @@ class UnitTableCard extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final totalWidth = constraints.maxWidth;
-        const numColumns = 4; // No., Unit Name, Status, Actions
+        const numColumns = 5; // No., Unit Name, Status, Actions
         const minColumnWidth = 100.0;
 
         final dynamicColumnWidth =
@@ -40,7 +40,7 @@ class UnitTableCard extends StatelessWidget {
             color: Colors.white,
             boxShadow: [
               BoxShadow(
-                color: Colors.grey.withOpacity(0.1),
+                color: Colors.grey.withValues(alpha: 0.1),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -95,6 +95,7 @@ class UnitTableCard extends StatelessWidget {
                               cells: [
                                 _buildDataCell('${entry.key + 1}', dynamicColumnWidth * 0.6),
                                 _buildDataCell(unit.name?.capitalize() ?? "N/A", dynamicColumnWidth),
+                                _buildDataCell(unit.code?.capitalize() ?? "N/A", dynamicColumnWidth),
                                 _buildStatusCell(unit.isActive ?? false, dynamicColumnWidth),
                                 _buildActionCell(unit, context, dynamicColumnWidth),
                               ],
@@ -117,7 +118,7 @@ class UnitTableCard extends StatelessWidget {
     return [
       DataColumn(
         label: SizedBox(
-          width: columnWidth * 0.6,
+          width: columnWidth,
           child: const Text('No.', textAlign: TextAlign.center),
         ),
       ),
@@ -125,6 +126,11 @@ class UnitTableCard extends StatelessWidget {
         label: SizedBox(
           width: columnWidth,
           child: const Text('Unit Name', textAlign: TextAlign.center),
+        ),
+      ),  DataColumn(
+        label: SizedBox(
+          width: columnWidth,
+          child: const Text('Code', textAlign: TextAlign.center),
         ),
       ),
       DataColumn(

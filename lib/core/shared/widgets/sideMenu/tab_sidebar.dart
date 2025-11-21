@@ -102,6 +102,7 @@ class TabSidebar extends StatelessWidget {
         MenuItem(title: "Brand", index: 33),
         MenuItem(title: "Category", index: 34),
         MenuItem(title: "Group", index: 35),
+        MenuItem(title: "Transaction", index: 36),
       ],
     ),
   ];

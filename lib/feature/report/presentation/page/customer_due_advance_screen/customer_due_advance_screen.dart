@@ -148,7 +148,7 @@ class _CustomerDueAdvanceScreenState extends State<CustomerDueAdvanceScreen> {
             Text(
               "Customer Due & Advance Report",
               style: AppTextStyle.cardTitle(context).copyWith(
-                fontSize: 24,
+                fontSize: 16,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -174,7 +174,7 @@ class _CustomerDueAdvanceScreenState extends State<CustomerDueAdvanceScreen> {
       children: [
         // 📅 Date Range Picker
         SizedBox(
-          width: 260,
+          width: 270,
           child: CustomDateRangeField(
             isLabel: false,
             selectedDateRange: selectedDateRange,
@@ -417,7 +417,7 @@ AppButton(name: "Clear", onPressed: (){
         borderRadius: BorderRadius.circular(8),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -428,7 +428,7 @@ AppButton(name: "Clear", onPressed: (){
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(icon, color: color, size: 24),
@@ -593,7 +593,7 @@ class CustomerDueAdvanceTableCard extends StatelessWidget {
             color: Colors.white,
             boxShadow: [
               BoxShadow(
-                color: Colors.grey.withOpacity(0.1),
+                color: Colors.grey.withValues(alpha: 0.1),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -815,7 +815,7 @@ class CustomerDueAdvanceTableCard extends StatelessWidget {
               ? Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: Colors.red.withOpacity(0.1),
+              color: Colors.red.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
@@ -850,11 +850,11 @@ class CustomerDueAdvanceTableCard extends StatelessWidget {
               ? Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: Colors.green.withOpacity(0.1),
+              color: Colors.green.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
-              '\$${customer.presentAdvance.toStringAsFixed(2)}',
+              customer.presentAdvance.toStringAsFixed(2),
               style: const TextStyle(
                 color: Colors.green,
                 fontWeight: FontWeight.w600,
@@ -885,7 +885,7 @@ class CustomerDueAdvanceTableCard extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: customer.balanceStatusColor.withOpacity(0.1),
+              color: customer.balanceStatusColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(4),
               border: Border.all(color: customer.balanceStatusColor),
             ),
@@ -912,7 +912,7 @@ class CustomerDueAdvanceTableCard extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: customer.balanceStatusColor.withOpacity(0.1),
+              color: customer.balanceStatusColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(4),
             ),
             child: Row(

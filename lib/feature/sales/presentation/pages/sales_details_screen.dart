@@ -1,7 +1,10 @@
 // sales_details_screen.dart
 
+import 'package:printing/printing.dart';
+
 import '../../../../core/configs/configs.dart';
 import '../../data/models/pos_sale_model.dart';
+import '../widgets/pdf/sales_invocei.dart';
 
 class SalesDetailsScreen extends StatelessWidget {
   final PosSaleModel sale;
@@ -20,13 +23,61 @@ class SalesDetailsScreen extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.print),
             onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => Scaffold(
+                    backgroundColor: Colors.red,
+                    body: PdfPreview.builder(
+                      useActions: true,
+                      allowSharing: false,
+                      canDebug: false,
+                      canChangeOrientation: false,
+                      canChangePageFormat: false,
+                      dynamicLayout: true,
+                      build: (format) => generateSalesPdf(
+                        sale,
 
+                      ),
+                      pdfPreviewPageDecoration:
+                      BoxDecoration(color: AppColors.white),
+                      actionBarTheme: PdfActionBarTheme(
+                        backgroundColor: AppColors.primaryColor,
+                        iconColor: Colors.white,
+                        textStyle: const TextStyle(color: Colors.white),
+                      ),
+                      actions: [
+                        IconButton(
+                          onPressed: () => AppRoutes.pop(context),
+                          icon: const Icon(Icons.cancel, color: Colors.red),
+                        ),
+                      ],
+                      pagesBuilder: (context, pages) {
+                        debugPrint('Rendering ${pages.length} pages');
+                        return PageView.builder(
+                          itemCount: pages.length,
+                          scrollDirection: Axis.vertical,
+                          itemBuilder: (context, index) {
+                            final page = pages[index];
+                            return Container(
+                              color: Colors.grey,
+                              alignment: Alignment.center,
+                              padding: const EdgeInsets.all(8.0),
+                              child: Image(image: page.image, fit: BoxFit.contain),
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              );
             },
             tooltip: 'Generate PDF',
           ),
         ],
       ),
-      body: isDesktop ? _buildDesktopView() : _buildMobileView(),
+      body:  _buildDesktopView(),
     );
   }
 
@@ -42,7 +93,6 @@ class SalesDetailsScreen extends StatelessWidget {
             child: Column(
               children: [
                 _buildHeaderCard(),
-                const SizedBox(height: 16),
                 _buildItemsCard(),
               ],
             ),
@@ -86,7 +136,7 @@ class SalesDetailsScreen extends StatelessWidget {
       elevation: 3,
       color: AppColors.white,
       child: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(10),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -97,7 +147,7 @@ class SalesDetailsScreen extends StatelessWidget {
                   child: Text(
                     'Invoice: ${sale.invoiceNo}',
                     style: const TextStyle(
-                      fontSize: 20,
+                      fontSize: 14,
                       fontWeight: FontWeight.bold,
                       color: AppColors.primaryColor,
                     ),
@@ -109,7 +159,7 @@ class SalesDetailsScreen extends StatelessWidget {
                     vertical: 8,
                   ),
                   decoration: BoxDecoration(
-                    color: sale.statusColor.withOpacity(0.1),
+                    color: sale.statusColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(color: sale.statusColor),
                   ),
@@ -124,7 +174,7 @@ class SalesDetailsScreen extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 4),
             _buildDesktopInfoGrid(),
           ],
         ),
@@ -136,10 +186,10 @@ class SalesDetailsScreen extends StatelessWidget {
     return GridView.count(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      crossAxisCount: 2,
-      crossAxisSpacing: 16,
-      mainAxisSpacing: 12,
-      childAspectRatio: 4,
+      crossAxisCount: 3,
+      crossAxisSpacing: 8,
+      mainAxisSpacing: 8,
+      childAspectRatio: 5,
       children: [
         _buildInfoItem('Sale Date', sale.formattedSaleDate),
         _buildInfoItem('Sale Time', sale.formattedTime),
@@ -188,11 +238,11 @@ class SalesDetailsScreen extends StatelessWidget {
             const Text(
               'Items',
               style: TextStyle(
-                fontSize: 18,
+                fontSize: 14,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 4),
             if (sale.items == null || sale.items!.isEmpty)
               const Center(
                 child: Text(
@@ -228,7 +278,7 @@ class SalesDetailsScreen extends StatelessWidget {
           // Header row
           TableRow(
             decoration: BoxDecoration(
-              color: AppColors.primaryColor.withOpacity(0.1),
+              color: AppColors.primaryColor.withValues(alpha: 0.1),
             ),
             children: [
               _buildTableHeaderCell('Product'),
@@ -246,7 +296,7 @@ class SalesDetailsScreen extends StatelessWidget {
 
   Widget _buildTableHeaderCell(String text) {
     return Padding(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(8),
       child: Text(
         text,
         style: const TextStyle(
@@ -269,7 +319,7 @@ class SalesDetailsScreen extends StatelessWidget {
     return TableRow(
       children: [
         Padding(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.all(8),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -286,14 +336,14 @@ class SalesDetailsScreen extends StatelessWidget {
           ),
         ),
         Padding(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.all(8),
           child: Text(
             item.quantity?.toString() ?? '0',
             textAlign: TextAlign.center,
           ),
         ),
         Padding(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.all(6),
           child: Text(
             '৳${unitPrice.toStringAsFixed(2)}',
             textAlign: TextAlign.center,
@@ -336,7 +386,7 @@ class SalesDetailsScreen extends StatelessWidget {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 4),
             _buildDesktopSummaryList(
               grossTotal,
               netTotal,
@@ -394,7 +444,7 @@ class SalesDetailsScreen extends StatelessWidget {
         bool isGrandTotal = false,
       }) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 8),
+      margin: const EdgeInsets.only(bottom: 4),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -445,11 +495,11 @@ class SalesDetailsScreen extends StatelessWidget {
             const Text(
               'Payment Summary',
               style: TextStyle(
-                fontSize: 18,
+                fontSize: 14,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 4),
             _buildPaymentItem('Payable Amount', payable),
             _buildPaymentItem('Paid Amount', paid),
             _buildPaymentItem(

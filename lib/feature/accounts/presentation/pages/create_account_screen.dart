@@ -1,3 +1,5 @@
+import 'package:smart_inventory/core/core.dart';
+
 import '../../../../core/configs/configs.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_dropdown.dart';
@@ -106,11 +108,7 @@ borderRadius: BorderRadius.circular(12)
                             isRequired: true,
                             isNeedAll: false,
                             value: selectedType.isEmpty ? null : selectedType,
-                            itemList: const [
-                              "Bank",
-                              "Mobile Banking",
-                              "Cash",
-                            ],
+                            itemList:["Bank", "Cash", "Mobile banking"],
                             onChanged: (newVal) {
                               selectedAccountType.value = newVal.toString();
                               setState(() {});
@@ -138,15 +136,15 @@ borderRadius: BorderRadius.circular(12)
                     ),
                     const SizedBox(width: 10),
                     Expanded(
-                      child: CustomInputField(
-                        isRequiredLable: true,
+                      child: AppTextField(
+
                         isRequired: true,
                         textInputAction: TextInputAction.next,
                         controller: context
                             .read<AccountBloc>()
                             .accountNameController,
                         hintText: 'Account Name',
-                        fillColor: const Color.fromARGB(255, 255, 255, 255),
+
                         keyboardType: TextInputType.text,
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
@@ -167,15 +165,15 @@ borderRadius: BorderRadius.circular(12)
                 Row(  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
-                      child: CustomInputField(
-                        isRequiredLable: true,
+                      child: AppTextField(
+
                         isRequired: true,
                         textInputAction: TextInputAction.done,
                         controller: context
                             .read<AccountBloc>()
                             .accountOpeningBalanceController,
                         hintText: 'Opening Balance',
-                        fillColor: const Color.fromARGB(255, 255, 255, 255),
+
                         keyboardType: TextInputType.numberWithOptions(
                           decimal: true,
                         ),
@@ -200,15 +198,15 @@ borderRadius: BorderRadius.circular(12)
                         valueListenable: selectedAccountType,
                         builder: (context, selectedType, child) {
                           final isBank = selectedType == "Bank";
-                          final isMobile = selectedType == "Mobile Banking";
+                          final isMobile = selectedType == "Mobile banking";
                           final showField = isBank || isMobile;
 
                           if (!showField) {
                             return const SizedBox.shrink();
                           }
 
-                          return  CustomInputField(
-                            isRequiredLable: true,
+                          return  AppTextField(
+
                             isRequired: true,
                             textInputAction: TextInputAction.next,
                             controller: context
@@ -217,7 +215,7 @@ borderRadius: BorderRadius.circular(12)
                             hintText: isBank
                                 ? 'Bank Account Number'
                                 : 'Mobile Account Number',
-                            fillColor: const Color.fromARGB(255, 255, 255, 255),
+
                             keyboardType: TextInputType.text,
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
@@ -250,15 +248,15 @@ borderRadius: BorderRadius.circular(12)
                     return Row(
                       children: [
                         Expanded(
-                          child: CustomInputField(
-                            isRequiredLable: true,
+                          child: AppTextField(
+
                             isRequired: true,
                             textInputAction: TextInputAction.next,
                             controller: context
                                 .read<AccountBloc>()
                                 .bankNameController,
                             hintText: 'Bank Name',
-                            fillColor: const Color.fromARGB(255, 255, 255, 255),
+
                             keyboardType: TextInputType.text,
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
@@ -273,15 +271,15 @@ borderRadius: BorderRadius.circular(12)
                         ),
                         const SizedBox(width: 10),
                         Expanded(
-                          child: CustomInputField(
-                            isRequiredLable: true,
+                          child: AppTextField(
+
                             isRequired: true,
                             textInputAction: TextInputAction.next,
                             controller: context
                                 .read<AccountBloc>()
                                 .branchNameController,
                             hintText: 'Branch Name',
-                            fillColor: const Color.fromARGB(255, 255, 255, 255),
+
                             keyboardType: TextInputType.text,
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
@@ -346,7 +344,7 @@ borderRadius: BorderRadius.circular(12)
     };
 
     // Add account number for bank and mobile banking accounts
-    if (selectedType == "Bank" || selectedType == "Mobile Banking") {
+    if (selectedType == "Bank" || selectedType == "Mobile banking") {
       body["ac_number"] = accountBloc.accountNumberController.text.trim();
     }
 

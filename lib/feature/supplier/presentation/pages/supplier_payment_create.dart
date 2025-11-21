@@ -482,7 +482,7 @@ class _MoneyReceiptListScreenState extends State<SupplierPaymentForm> {
                           body["invoice_no"] = context.read<SupplierInvoiceBloc>().supplierInvoiceListModel.toString().split("(").first;
                         }
                         if (context.read<SupplierPaymentBloc>().remarkController.text.isNotEmpty) {
-                          body["remark"] = context.read<SupplierPaymentBloc>().remarkController.text.toString();
+                          body["description"] = context.read<SupplierPaymentBloc>().remarkController.text.toString();
                         }
 
                         context.read<SupplierPaymentBloc>().add(AddSupplierPayment(body: body));
