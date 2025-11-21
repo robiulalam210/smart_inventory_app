@@ -25,6 +25,7 @@ import '../../../../money_receipt/presentation/page/money_receipt_list.dart';
 import '../../../../products/brand/presentation/pages/brand_screen.dart';
 import '../../../../products/categories/presentation/pages/categories_screen.dart';
 import '../../../../products/product/presentation/pages/product_screen.dart';
+import '../../../../profile/presentation/pages/profile_screen.dart';
 import '../../../../purchase/presentation/page/create_purchase_screen.dart';
 
 import '../../../../report/presentation/page/customer_due_advance_screen/customer_due_advance_screen.dart';
@@ -101,6 +102,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     AppWrapper(child: CategoriesScreen()),
     AppWrapper(child: GroupsScreen()),
     AppWrapper(child: TransactionScreen()),
+    AppWrapper(child: ProfileScreen()),
 
 
 

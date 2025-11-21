@@ -1,5 +1,5 @@
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-final bool isLive = true; // Set to true for production environment
+final bool isLive = false; // Set to true for production environment
 
 class AppUrls {
 
@@ -73,7 +73,10 @@ class AppUrls {
   static final String purchaseInvoice = '$baseUrl/purchases-invoice/supplier/';
   static final String dashboard = '$baseUrl/reports/dashboard/';
 
-
+  static final String userProfile = "$baseUrl/profile/";
+  // static final String profilePermission = "$baseUrl/profile/permissions/";
+  static final String updateProfile = "$baseUrl/profile/update/";
+  static final String changePassword = "$baseUrl/profile/change-password/";
 
   //!for App update link
   static const String playStoreLink= '';

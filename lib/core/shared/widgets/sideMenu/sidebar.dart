@@ -106,6 +106,8 @@ class _SidebarState extends State<Sidebar> {
         MenuItem(title: "Brand", index: 33),
         MenuItem(title: "Category", index: 34),
         MenuItem(title: "Group", index: 35),
+        MenuItem(title: "Transaction", index: 36),
+        MenuItem(title: "Profile", index: 37),
       ],
     ),
   ];
