@@ -1,4 +1,4 @@
-# smart_inventory
+# meherin_mart
 
 A new Flutter project.
 

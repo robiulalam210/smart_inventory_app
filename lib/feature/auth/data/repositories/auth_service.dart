@@ -1,5 +1,5 @@
 import 'package:crypto/crypto.dart';
-import 'package:smart_inventory/feature/auth/data/models/login_mod.dart';
+import 'package:meherin_mart/feature/auth/data/models/login_mod.dart';
 import '../../../../core/configs/configs.dart';
 
 class AuthService {

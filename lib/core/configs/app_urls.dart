@@ -1,5 +1,5 @@
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-final bool isLive = false; // Set to true for production environment
+final bool isLive = true; // Set to true for production environment
 
 class AppUrls {
 

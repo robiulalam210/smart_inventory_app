@@ -1,4 +1,4 @@
-package com.example.smart_inventory
+package com.meherin.meherin_mart
 
 import io.flutter.embedding.android.FlutterActivity
 

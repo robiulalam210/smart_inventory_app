@@ -1,6 +1,6 @@
 // lib/feature/report/presentation/bloc/purchase_report_bloc/purchase_report_bloc.dart
-import 'package:smart_inventory/core/core.dart';
-import 'package:smart_inventory/feature/supplier/data/model/supplier_active_model.dart';
+import 'package:meherin_mart/core/core.dart';
+import 'package:meherin_mart/feature/supplier/data/model/supplier_active_model.dart';
 
 import '../../../data/model/purchase_report_model.dart';
 

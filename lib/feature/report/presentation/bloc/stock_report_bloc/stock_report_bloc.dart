@@ -1,5 +1,5 @@
 // lib/feature/report/presentation/bloc/stock_report_bloc/stock_report_bloc.dart
-import 'package:smart_inventory/core/core.dart';
+import 'package:meherin_mart/core/core.dart';
 import '../../../data/model/stock_report_model.dart';
 
 part 'stock_report_event.dart';

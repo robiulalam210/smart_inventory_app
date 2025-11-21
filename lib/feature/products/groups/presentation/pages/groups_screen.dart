@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lottie/lottie.dart';
-import 'package:smart_inventory/feature/products/groups/presentation/pages/create_groups.dart';
+import 'package:meherin_mart/feature/products/groups/presentation/pages/create_groups.dart';
 
 import '../../../../../core/configs/app_colors.dart';
 import '../../../../../core/configs/app_images.dart';

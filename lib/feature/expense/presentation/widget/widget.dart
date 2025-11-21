@@ -1,5 +1,5 @@
 import 'package:google_fonts/google_fonts.dart';
-import 'package:smart_inventory/feature/expense/expense_sub_head/data/model/expense_sub_head_model.dart';
+import 'package:meherin_mart/feature/expense/expense_sub_head/data/model/expense_sub_head_model.dart';
 
 import '../../../../core/configs/configs.dart';
 import '../../../../core/widgets/delete_dialog.dart';

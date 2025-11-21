@@ -31,7 +31,7 @@ Future<Map<String, dynamic>> postResponse({
   try {
     final response = await http
         .post(uriUrl, body: jsonEncode(payload), headers: header)
-        .timeout(const Duration(seconds: 60));
+        .timeout(const Duration(seconds: 90));
 
     logger.i("postResponse body: ${response.body}");
     logger.i("postResponse statusCode: ${response.statusCode}");

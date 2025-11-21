@@ -1,5 +1,5 @@
 
-import 'package:smart_inventory/feature/products/brand/presentation/bloc/brand/brand_bloc.dart';
+import 'package:meherin_mart/feature/products/brand/presentation/bloc/brand/brand_bloc.dart';
 
 import '../../../../../../core/configs/configs.dart';
 import '../../../../../../core/widgets/app_button.dart';

@@ -1,5 +1,5 @@
 import 'package:intl/intl.dart';
-import 'package:smart_inventory/core/core.dart';
+import 'package:meherin_mart/core/core.dart';
 import '../../../accounts/data/model/account_active_model.dart';
 import '../../../accounts/presentation/bloc/account/account_bloc.dart';
 import '../../../customer/presentation/bloc/customer/customer_bloc.dart';

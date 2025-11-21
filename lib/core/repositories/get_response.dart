@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
-import 'package:smart_inventory/core/core.dart';
+import 'package:meherin_mart/core/core.dart';
 
 import '../../feature/auth/presentation/pages/login_scr.dart';
 

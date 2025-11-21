@@ -1,5 +1,5 @@
 import 'package:printing/printing.dart';
-import 'package:smart_inventory/feature/purchase/presentation/page/purchase_details.dart';
+import 'package:meherin_mart/feature/purchase/presentation/page/purchase_details.dart';
 
 import '../../../../core/configs/configs.dart';
 import '../data/model/purchase_sale_model.dart';

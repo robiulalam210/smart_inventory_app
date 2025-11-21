@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
-import 'package:smart_inventory/core/configs/app_images.dart';
+import 'package:meherin_mart/core/configs/app_images.dart';
 
 // Dummy Product class definition for illustration (replace with your own)
 class Product {

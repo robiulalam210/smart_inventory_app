@@ -1,6 +1,6 @@
 
 
-import 'package:smart_inventory/core/core.dart';
+import 'package:meherin_mart/core/core.dart';
 
 import '../../../../../core/widgets/coustom_search_text_field.dart';
 import '../bloc/expense_head/expense_head_bloc.dart';

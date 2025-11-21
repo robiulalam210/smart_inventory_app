@@ -1,6 +1,6 @@
 
-import 'package:smart_inventory/feature/expense/expense_head/data/model/expense_head_model.dart';
-import 'package:smart_inventory/feature/expense/expense_sub_head/presentation/bloc/expense_sub_head/expense_sub_head_bloc.dart';
+import 'package:meherin_mart/feature/expense/expense_head/data/model/expense_head_model.dart';
+import 'package:meherin_mart/feature/expense/expense_sub_head/presentation/bloc/expense_sub_head/expense_sub_head_bloc.dart';
 
 import '../../../../../core/configs/configs.dart';
 import '../../../../../core/widgets/app_button.dart';

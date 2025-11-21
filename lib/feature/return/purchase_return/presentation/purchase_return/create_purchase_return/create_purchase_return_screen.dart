@@ -1,9 +1,9 @@
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:smart_inventory/feature/return/purchase_return/data/model/purchase_invoice_model.dart';
-import 'package:smart_inventory/feature/supplier/data/model/supplier_active_model.dart';
-import 'package:smart_inventory/feature/supplier/presentation/bloc/supplier_invoice/supplier_invoice_bloc.dart';
+import 'package:meherin_mart/feature/return/purchase_return/data/model/purchase_invoice_model.dart';
+import 'package:meherin_mart/feature/supplier/data/model/supplier_active_model.dart';
+import 'package:meherin_mart/feature/supplier/presentation/bloc/supplier_invoice/supplier_invoice_bloc.dart';
 
 import '../../../../../../core/configs/app_colors.dart';
 import '../../../../../../core/widgets/app_alert_dialog.dart';
