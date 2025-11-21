@@ -39,7 +39,7 @@ class AccountActiveModel {
   }
 
   factory AccountActiveModel.fromJson(Map<String, dynamic> json) => AccountActiveModel(
-    acId: json["ac_id"],
+    acId: json["id"],
     acName: json["ac_name"],
     acType: json["ac_type"],
     acNumber: json["ac_number"],
@@ -52,7 +52,7 @@ class AccountActiveModel {
   );
 
   Map<String, dynamic> toJson() => {
-    "ac_id": acId,
+    "id": acId,
     "ac_name": acName,
     "ac_type": acType,
     "ac_number": acNumber,

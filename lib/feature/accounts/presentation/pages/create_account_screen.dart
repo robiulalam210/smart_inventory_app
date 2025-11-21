@@ -1,9 +1,5 @@
 import 'package:smart_inventory/core/core.dart';
 
-import '../../../../core/configs/configs.dart';
-import '../../../../core/widgets/app_button.dart';
-import '../../../../core/widgets/app_dropdown.dart';
-import '../../../../core/widgets/input_field.dart';
 import '../../data/model/account_model.dart';
 import '../bloc/account/account_bloc.dart';
 
@@ -198,8 +194,9 @@ borderRadius: BorderRadius.circular(12)
                         valueListenable: selectedAccountType,
                         builder: (context, selectedType, child) {
                           final isBank = selectedType == "Bank";
+                          final isCash = selectedType == "Cash";
                           final isMobile = selectedType == "Mobile banking";
-                          final showField = isBank || isMobile;
+                          final showField = isBank || isMobile||isCash;
 
                           if (!showField) {
                             return const SizedBox.shrink();
@@ -344,9 +341,9 @@ borderRadius: BorderRadius.circular(12)
     };
 
     // Add account number for bank and mobile banking accounts
-    if (selectedType == "Bank" || selectedType == "Mobile banking") {
+    // if (selectedType == "Bank" || selectedType == "Mobile banking") {
       body["ac_number"] = accountBloc.accountNumberController.text.trim();
-    }
+    // }
 
     // Add bank details only for bank accounts
     if (selectedType == "Bank") {
