@@ -1,6 +1,6 @@
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
-import 'package:smart_inventory/feature/products/product/presentation/bloc/products/products_bloc.dart';
-import 'package:smart_inventory/feature/users_list/data/model/user_model.dart';
+import 'package:meherin_mart/feature/products/product/presentation/bloc/products/products_bloc.dart';
+import 'package:meherin_mart/feature/users_list/data/model/user_model.dart';
 
 import '../../../../core/configs/configs.dart';
 import '../../../../core/shared/widgets/sideMenu/sidebar.dart';

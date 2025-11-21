@@ -4,12 +4,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:printing/printing.dart';
-import 'package:smart_inventory/core/configs/app_colors.dart';
-import 'package:smart_inventory/core/configs/app_text.dart';
-import 'package:smart_inventory/core/shared/widgets/sideMenu/sidebar.dart';
-import 'package:smart_inventory/core/widgets/date_range.dart';
-import 'package:smart_inventory/feature/report/presentation/bloc/profit_loss_bloc/profit_loss_bloc.dart';
-import 'package:smart_inventory/feature/report/presentation/page/profit_loss_screen/pdf.dart';
+import 'package:meherin_mart/core/configs/app_colors.dart';
+import 'package:meherin_mart/core/configs/app_text.dart';
+import 'package:meherin_mart/core/shared/widgets/sideMenu/sidebar.dart';
+import 'package:meherin_mart/core/widgets/date_range.dart';
+import 'package:meherin_mart/feature/report/presentation/bloc/profit_loss_bloc/profit_loss_bloc.dart';
+import 'package:meherin_mart/feature/report/presentation/page/profit_loss_screen/pdf.dart';
 
 import '../../../../../core/configs/app_routes.dart';
 import '../../../../../core/widgets/app_button.dart';

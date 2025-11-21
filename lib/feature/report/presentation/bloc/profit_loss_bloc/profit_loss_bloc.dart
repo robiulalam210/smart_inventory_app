@@ -1,5 +1,5 @@
 // lib/feature/report/presentation/bloc/profit_loss_bloc/profit_loss_bloc.dart
-import 'package:smart_inventory/core/core.dart';
+import 'package:meherin_mart/core/core.dart';
 import '../../../data/model/profit_loss_report_model.dart';
 
 part 'profit_loss_event.dart';

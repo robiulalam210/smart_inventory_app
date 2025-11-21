@@ -1,7 +1,7 @@
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
-import 'package:smart_inventory/core/configs/configs.dart';
-import 'package:smart_inventory/feature/customer/data/model/customer_active_model.dart';
-import 'package:smart_inventory/feature/return/sales_return/presentation/page/widget/widget.dart';
+import 'package:meherin_mart/core/configs/configs.dart';
+import 'package:meherin_mart/feature/customer/data/model/customer_active_model.dart';
+import 'package:meherin_mart/feature/return/sales_return/presentation/page/widget/widget.dart';
 import '../../../../../core/shared/widgets/sideMenu/sidebar.dart';
 import '../../../../../core/widgets/app_alert_dialog.dart';
 import '../../../../../core/widgets/app_button.dart';

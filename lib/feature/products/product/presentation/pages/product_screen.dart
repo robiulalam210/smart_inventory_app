@@ -1,7 +1,7 @@
 
 
 
-import 'package:smart_inventory/feature/products/product/data/model/product_model.dart';
+import 'package:meherin_mart/feature/products/product/data/model/product_model.dart';
 
 import '../../../../../core/configs/configs.dart';
 import '../../../../../core/shared/widgets/sideMenu/sidebar.dart';

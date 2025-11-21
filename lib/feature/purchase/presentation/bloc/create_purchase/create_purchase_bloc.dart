@@ -2,7 +2,7 @@
 
 
 
-import 'package:smart_inventory/feature/supplier/data/model/supplier_active_model.dart';
+import 'package:meherin_mart/feature/supplier/data/model/supplier_active_model.dart';
 
 import '../../../../../core/configs/configs.dart';
 import '../../../../../core/repositories/post_response.dart';

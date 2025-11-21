@@ -1,7 +1,7 @@
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:printing/printing.dart';
-import 'package:smart_inventory/core/core.dart';
+import 'package:meherin_mart/core/core.dart';
 
 import '../../../../../core/widgets/date_range.dart';
 import '../../../../customer/data/model/customer_active_model.dart';

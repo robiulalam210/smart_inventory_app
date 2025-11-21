@@ -1,7 +1,7 @@
 // lib/feature/report/presentation/bloc/customer_ledger_bloc/customer_ledger_bloc.dart
 
-import 'package:smart_inventory/core/core.dart';
-import 'package:smart_inventory/feature/customer/data/model/customer_active_model.dart';
+import 'package:meherin_mart/core/core.dart';
+import 'package:meherin_mart/feature/customer/data/model/customer_active_model.dart';
 import '../../../data/model/customer_ledger_model.dart';
 
 part 'customer_ledger_event.dart';

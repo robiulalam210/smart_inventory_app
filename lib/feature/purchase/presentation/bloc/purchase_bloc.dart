@@ -2,7 +2,7 @@
 
 
 
-import 'package:smart_inventory/feature/users_list/data/model/user_model.dart';
+import 'package:meherin_mart/feature/users_list/data/model/user_model.dart';
 
 import '../../../../core/configs/configs.dart';
 import '../../../../core/repositories/get_response.dart';

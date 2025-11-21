@@ -1,4 +1,4 @@
-import 'package:smart_inventory/feature/return/purchase_return/data/model/purchase_return_model.dart';
+import 'package:meherin_mart/feature/return/purchase_return/data/model/purchase_return_model.dart';
 
 class PurchaseReturnCreatedModel {
   final int? id;

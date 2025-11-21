@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:iconsax/iconsax.dart';
-import 'package:smart_inventory/feature/supplier/data/model/supplier_list_model.dart';
+import 'package:meherin_mart/feature/supplier/data/model/supplier_list_model.dart';
 
 import '../../../../core/configs/app_colors.dart';
 

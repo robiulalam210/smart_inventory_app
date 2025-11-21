@@ -1,4 +1,4 @@
-import 'package:smart_inventory/core/core.dart';
+import 'package:meherin_mart/core/core.dart';
 
 import '../../../../../common/data/models/api_response_mod.dart';
 import '../../../../../common/data/models/app_parse_json.dart';

@@ -1,4 +1,4 @@
-import 'package:smart_inventory/feature/products/unit/presentation/pages/unit_create.dart';
+import 'package:meherin_mart/feature/products/unit/presentation/pages/unit_create.dart';
 
 import '../../../../../core/configs/configs.dart';
 import '../../../../../core/shared/widgets/sideMenu/sidebar.dart';

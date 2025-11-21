@@ -7,7 +7,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:smart_inventory/app/app.dart';
+import 'package:meherin_mart/app/app.dart';
 
 
 void main() {

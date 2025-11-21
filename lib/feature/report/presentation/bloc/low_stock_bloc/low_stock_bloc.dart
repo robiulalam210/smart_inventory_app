@@ -1,5 +1,5 @@
 // lib/feature/report/presentation/bloc/low_stock_bloc/low_stock_bloc.dart
-import 'package:smart_inventory/core/core.dart';
+import 'package:meherin_mart/core/core.dart';
 
 import '../../../data/model/low_stock_model.dart';
 
