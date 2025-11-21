@@ -14,11 +14,11 @@ class PurchaseModel {
   final int? supplier;
   final String? supplierName;
   final DateTime? purchaseDate;
-  final String? total;
-  final String? grandTotal;
-  final String? paidAmount;
-  final String? dueAmount;
-  final String? changeAmount;
+  final dynamic total;
+  final dynamic grandTotal;
+  final dynamic paidAmount;
+  final dynamic dueAmount;
+  final dynamic changeAmount;
   final String? overallDiscount;
   final String? overallDiscountType;
   final String? overallDeliveryCharge;

@@ -384,9 +384,11 @@ class _MoneyReceiptListScreenState extends State<SupplierPaymentForm> {
                                     var matchingAccount = filteredList.firstWhere(
                                           (acc) => acc.toString() == newVal.toString(),
                                     );
+                                    print(matchingAccount.id);
                                     context.read<SupplierPaymentBloc>().selectedAccountId =
-                                        matchingAccount.acId.toString();
+                                        matchingAccount.id.toString();
                                   } catch (e) {
+                                    print(e);
                                     context.read<SupplierPaymentBloc>().selectedAccountId = "";
                                   }
                                 }

@@ -573,7 +573,7 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
         return AppDropdown<AccountActiveModel>(
           label: "Account",
           context: context,
-          hint: salesReturnBloc.selectedAccount?.acName ?? "Select Account",
+          hint: salesReturnBloc.selectedAccount?.name ?? "Select Account",
           isLabel: false,
           isRequired: true,
           isNeedAll: false,
@@ -583,8 +583,8 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
             if (newVal != null) {
               setState(() {
                 salesReturnBloc.selectedAccount = newVal;
-                moneyReceiptBloc.selectedAccount = newVal.acName ?? "";
-                moneyReceiptBloc.selectedAccountId = newVal.acId?.toString() ?? "";
+                moneyReceiptBloc.selectedAccount = newVal.name ?? "";
+                moneyReceiptBloc.selectedAccountId = newVal.id?.toString() ?? "";
               });
             }
           },
@@ -596,7 +596,7 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  item.acName ?? 'Unknown Account',
+                  item.name ?? 'Unknown Account',
                   style: const TextStyle(
                     color: AppColors.blackColor,
                     fontFamily: 'Quicksand',
