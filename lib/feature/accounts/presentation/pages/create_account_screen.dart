@@ -194,26 +194,25 @@ borderRadius: BorderRadius.circular(12)
                         valueListenable: selectedAccountType,
                         builder: (context, selectedType, child) {
                           final isBank = selectedType == "Bank";
-                          final isCash = selectedType == "Cash";
                           final isMobile = selectedType == "Mobile banking";
-                          final showField = isBank || isMobile||isCash;
+                          final isCash = selectedType == "Cash";
 
-                          if (!showField) {
+                          // Return nothing if it's not Bank, Mobile, or Cash
+                          if (!(isBank || isMobile || isCash)) {
                             return const SizedBox.shrink();
                           }
 
-                          return  AppTextField(
-
+                          return AppTextField(
                             isRequired: true,
                             textInputAction: TextInputAction.next,
-                            controller: context
-                                .read<AccountBloc>()
-                                .accountNumberController,
+                            controller: context.read<AccountBloc>().accountNumberController,
                             hintText: isBank
                                 ? 'Bank Account Number'
-                                : 'Mobile Account Number',
+                                : isMobile
+                                ? 'Mobile Account Number'
+                                : 'Cash Account Number',
 
-                            keyboardType: TextInputType.text,
+                            keyboardType: TextInputType.number,
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
                                 return 'Please enter account number';
@@ -227,6 +226,45 @@ borderRadius: BorderRadius.circular(12)
                         },
                       ),
                     ),
+
+                    // Expanded(
+                    //   child: ValueListenableBuilder<String>(
+                    //     valueListenable: selectedAccountType,
+                    //     builder: (context, selectedType, child) {
+                    //       final isBank = selectedType == "Bank";
+                    //       final isCash = selectedType == "Cash";
+                    //       final isMobile = selectedType == "Mobile banking";
+                    //       final showField = isBank || isMobile||isCash;
+                    //
+                    //       if (!showField) {
+                    //         return const SizedBox.shrink();
+                    //       }
+                    //
+                    //       return  AppTextField(
+                    //
+                    //         isRequired: true,
+                    //         textInputAction: TextInputAction.next,
+                    //         controller: context
+                    //             .read<AccountBloc>()
+                    //             .accountNumberController,
+                    //         hintText: isBank
+                    //             ? 'Bank Account Number'
+                    //             : 'Mobile Account Number',
+                    //
+                    //         keyboardType: TextInputType.text,
+                    //         validator: (value) {
+                    //           if (value == null || value.trim().isEmpty) {
+                    //             return 'Please enter account number';
+                    //           }
+                    //           if (value.trim().length < 5) {
+                    //             return 'Account number must be at least 5 characters';
+                    //           }
+                    //           return null;
+                    //         },
+                    //       );
+                    //     },
+                    //   ),
+                    // ),
                   ],
                 ),
 

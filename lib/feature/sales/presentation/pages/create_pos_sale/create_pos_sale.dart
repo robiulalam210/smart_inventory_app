@@ -1220,7 +1220,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                       return AppDropdown<AccountActiveModel>(
                         context: context,
                         label: "Account",
-                        hint: bloc.accountModel == null ? "Select Account" : bloc.accountModel!.acName.toString(),
+                        hint: bloc.accountModel == null ? "Select Account" : bloc.accountModel!.name.toString(),
                         isLabel: false,
                         isRequired: true,
                         isNeedAll: false,
@@ -1393,7 +1393,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
 
         if (_isChecked == true) {
           body['payment_method'] = bloc.selectedPaymentMethod;
-          body['account_id'] = bloc.accountModel?.acId.toString() ?? '';
+          body['account_id'] = bloc.accountModel?.id.toString() ?? '';
 
           //
           bloc.add(AddPosSale(body: body));
@@ -1406,7 +1406,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
         else{
         if (_isChecked == true) {
           body['payment_method'] = bloc.selectedPaymentMethod;
-          body['account_id'] = bloc.accountModel?.acId.toString() ?? '';
+          body['account_id'] = bloc.accountModel?.id.toString() ?? '';
 
           //
           bloc.add(AddPosSale(body: body));

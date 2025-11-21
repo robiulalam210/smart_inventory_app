@@ -421,7 +421,7 @@ class _ExpenseCreateScreenState extends State<ExpenseCreateScreen> {
                                               expenseBloc.selectedAccount =
                                                   newVal.toString();
                                               expenseBloc.selectedAccountId =
-                                                  selectedAccount.acId
+                                                  selectedAccount.id
                                                       .toString();
                                             });
                                           },

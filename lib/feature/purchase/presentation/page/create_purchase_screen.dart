@@ -1206,7 +1206,7 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                         onChanged: (newVal) {
                           if (newVal != null) {
                             context.read<CreatePurchaseBloc>().accountActiveModel = newVal;
-                            context.read<CreatePurchaseBloc>().selectedAccountId = newVal.acId?.toString() ?? "";
+                            context.read<CreatePurchaseBloc>().selectedAccountId = newVal.id?.toString() ?? "";
                           } else {
                             context.read<CreatePurchaseBloc>().selectedAccountId = "";
                           }
@@ -1217,7 +1217,7 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                         itemBuilder: (item) => DropdownMenuItem<AccountActiveModel>(
                           value: item,
                           child: Text(
-                            "${item.acName} (${item.acType})",
+                            "${item.name} (${item.acType})",
                             style: const TextStyle(
                               color: AppColors.blackColor,
                               fontFamily: 'Quicksand',

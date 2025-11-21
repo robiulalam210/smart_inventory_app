@@ -717,7 +717,7 @@ class _MoneyReceiptListScreenState extends State<MoneyReceiptForm> {
     debugPrint("All Accounts:");
     for (var account in accounts) {
       debugPrint(
-        " - ${account.acName} | Type: '${account.acType}' | ID: ${account.acId}",
+        " - ${account.name} | Type: '${account.acType}' | ID: ${account.id}",
       );
     }
 
@@ -754,7 +754,7 @@ class _MoneyReceiptListScreenState extends State<MoneyReceiptForm> {
       debugPrint("Filtered Accounts Count: ${filteredList.length}");
       debugPrint("Filtered Accounts:");
       for (var account in filteredList) {
-        debugPrint(" - ${account.acName} | Type: '${account.acType}'");
+        debugPrint(" - ${account.name} | Type: '${account.acType}'");
       }
     } else {
       filteredList = accounts;
@@ -765,14 +765,14 @@ class _MoneyReceiptListScreenState extends State<MoneyReceiptForm> {
     // Auto-select first account if none is selected and list is available
     if (moneyBloc.accountModel == null && filteredList.isNotEmpty) {
       moneyBloc.accountModel = filteredList.first;
-      moneyBloc.selectedAccountId = filteredList.first.acId.toString();
-      debugPrint("Auto-selected account: ${filteredList.first.acName}");
+      moneyBloc.selectedAccountId = filteredList.first.id.toString();
+      debugPrint("Auto-selected account: ${filteredList.first.name}");
     }
 
     // Clear selection if selected account is not in filtered list
     if (moneyBloc.accountModel != null &&
         !filteredList.any(
-          (account) => account.acId == moneyBloc.accountModel!.acId,
+          (account) => account.id == moneyBloc.accountModel!.id,
         )) {
       moneyBloc.accountModel = null;
       moneyBloc.selectedAccountId = "";
@@ -786,7 +786,7 @@ class _MoneyReceiptListScreenState extends State<MoneyReceiptForm> {
           ? "No accounts available"
           : (moneyBloc.accountModel == null
                 ? "Select Account"
-                : "${moneyBloc.accountModel!.acName}${moneyBloc.accountModel!.acNumber != null ? ' - ${moneyBloc.accountModel!.acNumber}' : ''}"),
+                : "${moneyBloc.accountModel!.name}${moneyBloc.accountModel!.acNumber != null ? ' - ${moneyBloc.accountModel!.acNumber}' : ''}"),
       isLabel: false,
       isRequired: true,
       isNeedAll: false,
@@ -796,9 +796,9 @@ class _MoneyReceiptListScreenState extends State<MoneyReceiptForm> {
         setState(() {
           moneyBloc.accountModel = newVal;
           if (newVal != null) {
-            moneyBloc.selectedAccountId = newVal.acId.toString();
+            moneyBloc.selectedAccountId = newVal.id.toString();
             debugPrint(
-              "Selected Account: ${newVal.acName} (ID: ${newVal.acId})",
+              "Selected Account: ${newVal.name} (ID: ${newVal.id})",
             );
           } else {
             moneyBloc.selectedAccountId = "";
@@ -815,7 +815,7 @@ class _MoneyReceiptListScreenState extends State<MoneyReceiptForm> {
       itemBuilder: (item) => DropdownMenuItem(
         value: item,
         child: Text(
-          "${item.acName ?? 'Unknown'}${item.acNumber != null && item.acNumber!.isNotEmpty ? ' - ${item.acNumber}' : ''}",
+          "${item.name ?? 'Unknown'}${item.acNumber != null && item.acNumber!.isNotEmpty ? ' - ${item.acNumber}' : ''}",
           style: const TextStyle(
             color: AppColors.blackColor,
             fontFamily: 'Quicksand',
