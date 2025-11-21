@@ -3,10 +3,10 @@ import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:meherin_mart/feature/customer/presentation/bloc/customer/customer_bloc.dart';
 import 'package:meherin_mart/feature/expense/expense_head/presentation/bloc/expense_head/expense_head_bloc.dart';
 import 'package:meherin_mart/feature/expense/presentation/bloc/expense_list/expense_bloc.dart';
-import 'package:meherin_mart/feature/money_receipt/presentation/bloc/money_receipt/money_receipt_bloc.dart';
-import 'package:meherin_mart/feature/purchase/presentation/bloc/create_purchase/create_purchase_bloc.dart';
-import 'package:meherin_mart/feature/purchase/presentation/bloc/purchase_bloc.dart';
-import 'package:meherin_mart/feature/report/presentation/bloc/low_stock_bloc/low_stock_bloc.dart';
+import '/feature/money_receipt/presentation/bloc/money_receipt/money_receipt_bloc.dart';
+import '/feature/purchase/presentation/bloc/create_purchase/create_purchase_bloc.dart';
+import '/feature/purchase/presentation/bloc/purchase_bloc.dart';
+import '/feature/report/presentation/bloc/low_stock_bloc/low_stock_bloc.dart';
 import 'package:meherin_mart/feature/report/presentation/bloc/sales_report_bloc/sales_report_bloc.dart';
 import 'package:meherin_mart/feature/return/purchase_return/presentation/bloc/purchase_return/purchase_return_bloc.dart';
 import 'package:meherin_mart/feature/sales/presentation/bloc/possale/crate_pos_sale/create_pos_sale_bloc.dart';
@@ -23,6 +23,7 @@ import '../feature/products/groups/presentation/bloc/groups/groups_bloc.dart';
 import '../feature/products/product/presentation/bloc/products/products_bloc.dart';
 import '../feature/products/soruce/presentation/bloc/source/source_bloc.dart';
 import '../feature/products/unit/presentation/bloc/unit/unti_bloc.dart';
+import '../feature/profile/presentation/bloc/profile_bloc/profile_bloc.dart';
 import '../feature/report/presentation/bloc/customer_due_advance_bloc/customer_due_advance_bloc.dart';
 import '../feature/report/presentation/bloc/customer_ledger_bloc/customer_ledger_bloc.dart';
 import '../feature/report/presentation/bloc/expense_report_bloc/expense_report_bloc.dart';
@@ -65,6 +66,7 @@ class MyApp extends StatelessWidget {
 
         BlocProvider(create: (context) => PrintLayoutBloc(PrintLayoutRepoDb())),
 
+        BlocProvider(create: (_) => ProfileBloc()),
         BlocProvider(create: (_) => BrandBloc()),
         BlocProvider(create: (_) => UnitBloc()),
         BlocProvider(create: (_) => CategoriesBloc()),
