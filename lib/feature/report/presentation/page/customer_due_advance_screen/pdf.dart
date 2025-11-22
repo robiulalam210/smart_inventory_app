@@ -782,8 +782,9 @@ Map<String, dynamic> _analyzeBalances(List<CustomerDueAdvance> customers) {
 
   final totalDue = customers.fold(0.0, (sum, c) => sum + c.presentDue);
   String riskLevel;
-  if (totalDue > 10000) riskLevel = 'High';
-  else if (totalDue > 5000) riskLevel = 'Medium';
+  if (totalDue > 10000) {
+    riskLevel = 'High';
+  } else if (totalDue > 5000) riskLevel = 'Medium';
   else if (totalDue > 1000) riskLevel = 'Low';
   else riskLevel = 'Minimal';
 

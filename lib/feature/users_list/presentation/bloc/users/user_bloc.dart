@@ -132,7 +132,7 @@ class UserBloc extends Bloc<UserEvent, UserState> {
 
 
 
-  clearData() {
+  void clearData() {
     userNameController.clear();
     userEmailController.clear();
     userPhoneController.clear();

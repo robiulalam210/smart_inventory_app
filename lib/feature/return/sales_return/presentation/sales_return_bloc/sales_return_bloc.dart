@@ -273,6 +273,7 @@ class SalesReturnBloc extends Bloc<SalesReturnEvent, SalesReturnState> {
                 final invoice = SalesInvoiceModel.fromJson(item);
                 invoiceData.add(invoice);
               } catch (e) {
+
               }
             }
 

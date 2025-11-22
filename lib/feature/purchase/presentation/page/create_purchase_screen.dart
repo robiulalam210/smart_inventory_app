@@ -1301,7 +1301,7 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
           Expanded(
             child: Text(label, style: AppTextStyle.cardLevelHead(context)),
           ),
-          Text(value, style: AppTextStyle.cardLevelText(context)?.copyWith(
+          Text(value, style: AppTextStyle.cardLevelText(context).copyWith(
             color: color,
             fontWeight: FontWeight.bold,
           )),
@@ -1469,23 +1469,7 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
       }
 
       // DEBUG: Print products with detailed information
-      print("=== PRODUCTS DEBUG INFO ===");
-      for (var i = 0; i < products.length; i++) {
-        var product = products[i];
-        print("Product $i:");
-        print("  ID: ${product["id"]}");
-        print("  Product: ${product["product"]}");
-        print("  Product ID: ${product["product_id"]}");
-        print("  Product Name: ${product["product_name"]}");
-        print("  Price: ${product["price"]}");
-        print("  Quantity: ${product["quantity"]}");
-        print("  Discount: ${product["discount"]}");
-        print("  Discount Type: ${product["discount_type"]}");
-        print("  Total: ${product["total"]}");
-        print("  Ticket Total: ${product["ticket_total"]}");
-        print("  ---");
-      }
-      print("=== END PRODUCTS DEBUG ===");
+
 
       var transferProducts = products
           .where((product) => product["product_id"] != null)
@@ -1505,18 +1489,7 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
       })
           .toList();
 
-      // DEBUG: Print transfer products
-      print("=== TRANSFER PRODUCTS ===");
-      for (var i = 0; i < transferProducts.length; i++) {
-        var product = transferProducts[i];
-        print("Transfer Product $i:");
-        print("  Product ID: ${product["product_id"]}");
-        print("  Qty: ${product["qty"]}");
-        print("  Price: ${product["price"]}");
-        print("  Discount: ${product["discount"]}");
-        print("  Discount Type: ${product["discount_type"]}");
-      }
-      print("=== END TRANSFER PRODUCTS ===");
+
 
       Map<String, dynamic> body = {
         "instant_pay": _isChecked,
@@ -1553,15 +1526,6 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
         body["paid_amount"] = paidAmount;
       }
 
-      // DEBUG: Print final body
-      print("=== FINAL REQUEST BODY ===");
-      print("Supplier: ${body["supplier"]}");
-      print("Purchase Date: ${body["purchase_date"]}");
-      print("Payment Method: ${body["payment_method"]}");
-      print("Account: ${body["account"]}");
-      print("Paid Amount: ${body["paid_amount"]}");
-      print("Total Items: ${transferProducts.length}");
-      print("=== END FINAL BODY ===");
 
       log("Purchase Body: ${jsonEncode(body)}");
       context.read<CreatePurchaseBloc>().add(AddPurchase(body: body));

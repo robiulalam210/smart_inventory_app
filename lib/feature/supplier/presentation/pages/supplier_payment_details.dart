@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:printing/printing.dart';
 import 'package:meherin_mart/feature/supplier/presentation/pages/pdf/generate_supplier_payment.dart';
 import '../../../../core/configs/configs.dart';
@@ -108,7 +107,7 @@ class SupplierPaymentDetailsScreen extends StatelessWidget {
                     vertical: 8,
                   ),
                   decoration: BoxDecoration(
-                    color: _getStatusColor(payment.paymentSummary?.status ?? '').withOpacity(0.1),
+                    color: _getStatusColor(payment.paymentSummary?.status ?? '').withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(color: _getStatusColor(payment.paymentSummary?.status ?? '')),
                   ),

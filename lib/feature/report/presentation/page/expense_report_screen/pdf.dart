@@ -331,7 +331,7 @@ pw.Widget _buildExpenseBreakdown(List<ExpenseReport> expenses) {
                           ],
                         ),
                       );
-                    }).toList(),
+                    }),
                   ],
                 ),
               ),
@@ -382,7 +382,7 @@ pw.Widget _buildExpenseBreakdown(List<ExpenseReport> expenses) {
                           ],
                         ),
                       );
-                    }).toList(),
+                    }),
                   ],
                 ),
               ),
@@ -443,7 +443,7 @@ pw.Widget _buildExpenseTable(List<ExpenseReport> expenses) {
               // Table Header
               _buildTableHeader(),
               // Table Rows
-              ...expenses.map((expense) => _buildTableRow(expense)).toList(),
+              ...expenses.map((expense) => _buildTableRow(expense)),
               // Total Row
               _buildTotalRow(expenses),
             ],

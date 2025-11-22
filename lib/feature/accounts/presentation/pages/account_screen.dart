@@ -225,7 +225,6 @@ class _AccountScreenState extends State<AccountScreen> {
   }
 
   void _showEditDialog(BuildContext context, AccountModel account) {
-    print(account.acId);
     // Clear existing data first
     _clearAccountBlocData();
 

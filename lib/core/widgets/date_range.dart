@@ -150,7 +150,7 @@ class _CustomDateRangeFieldState extends State<CustomDateRangeField> {
                 isDense: true,
                 hintText: 'Please select a start end date',
                 hintStyle: TextStyle(
-                  color: AppColors.matteBlack.withOpacity(0.5),
+                  color: AppColors.matteBlack.withValues(alpha: 0.5),
                   fontWeight: FontWeight.w300,
                   fontSize: 12,
                 ),
@@ -187,7 +187,7 @@ class _CustomDateRangeFieldState extends State<CustomDateRangeField> {
                       style: TextStyle(
                         color: selectedDateRange != null
                             ? AppColors.matteBlack
-                            : AppColors.matteBlack.withOpacity(0.5),
+                            : AppColors.matteBlack.withValues(alpha: 0.5),
                         fontSize: 14,
                       ),
                       overflow: TextOverflow.ellipsis,

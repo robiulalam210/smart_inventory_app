@@ -347,7 +347,7 @@ pw.Widget _buildSalesTable(List<SalesReportModel> reports) {
               // Table Header
               _buildTableHeader(),
               // Table Rows
-              ...reports.map((report) => _buildTableRow(report)).toList(),
+              ...reports.map((report) => _buildTableRow(report)),
               // Total Row
               _buildTotalRow(reports),
             ],

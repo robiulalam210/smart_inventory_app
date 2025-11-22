@@ -760,7 +760,7 @@ class StockReportTableCard extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: product.stockStatusColor.withOpacity(0.1),
+              color: product.stockStatusColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(4),
               border: Border.all(color: product.stockStatusColor),
             ),
@@ -787,7 +787,7 @@ class StockReportTableCard extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
             decoration: BoxDecoration(
-              color: Colors.green.withOpacity(0.1),
+              color: Colors.green.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
@@ -832,7 +832,7 @@ class StockReportTableCard extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
             decoration: BoxDecoration(
-              color: product.profitabilityColor.withOpacity(0.1),
+              color: product.profitabilityColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
@@ -858,7 +858,7 @@ class StockReportTableCard extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
             decoration: BoxDecoration(
-              color: product.stockStatusColor.withOpacity(0.1),
+              color: product.stockStatusColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
@@ -884,7 +884,7 @@ class StockReportTableCard extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
             decoration: BoxDecoration(
-              color: product.profitabilityColor.withOpacity(0.1),
+              color: product.profitabilityColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(

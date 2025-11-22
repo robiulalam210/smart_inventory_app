@@ -177,7 +177,7 @@ Spacer(),
               borderRadius: BorderRadius.circular(8),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.grey.withOpacity(0.1),
+                  color: Colors.grey.withValues(alpha: 0.1),
                   blurRadius: 4,
                   offset: const Offset(0, 2),
                 ),
@@ -190,7 +190,7 @@ Spacer(),
                   Icon(
                     Icons.account_balance_wallet_outlined,
                     size: 48,
-                    color: Colors.grey.withOpacity(0.5),
+                    color: Colors.grey.withValues(alpha: 0.5),
                   ),
                   const SizedBox(height: 12),
                   Text(
@@ -334,7 +334,7 @@ Spacer(),
         borderRadius: BorderRadius.circular(8),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.2),
+            color: Colors.grey.withValues(alpha: 0.2),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -345,7 +345,7 @@ Spacer(),
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(icon, color: color, size: 24),
@@ -806,9 +806,9 @@ class SupplierDueAdvanceDataTable extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         decoration: BoxDecoration(
-          color: amount > 0 ? color.withOpacity(0.1) : Colors.transparent,
+          color: amount > 0 ? color.withValues(alpha: 0.1) : Colors.transparent,
           borderRadius: BorderRadius.circular(4),
-          border: amount > 0 ? Border.all(color: color.withOpacity(0.3)) : null,
+          border: amount > 0 ? Border.all(color: color.withValues(alpha: 0.3)) : null,
         ),
         child: Text(
           amount > 0 ? '\$${amount.toStringAsFixed(2)}' : '-',
@@ -837,13 +837,13 @@ class SupplierDueAdvanceDataTable extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         decoration: BoxDecoration(
           color: isSettled
-              ? Colors.green.withOpacity(0.1)
-              : (isDue ? Colors.red.withOpacity(0.1) : Colors.green.withOpacity(0.1)),
+              ? Colors.green.withValues(alpha: 0.1)
+              : (isDue ? Colors.red.withValues(alpha: 0.1) : Colors.green.withValues(alpha: 0.1)),
           borderRadius: BorderRadius.circular(4),
           border: Border.all(
             color: isSettled
-                ? Colors.green.withOpacity(0.3)
-                : (isDue ? Colors.red.withOpacity(0.3) : Colors.green.withOpacity(0.3)),
+                ? Colors.green.withValues(alpha: 0.3)
+                : (isDue ? Colors.red.withValues(alpha: 0.3) : Colors.green.withValues(alpha: 0.3)),
           ),
         ),
         child: Row(

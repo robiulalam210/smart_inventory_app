@@ -81,7 +81,7 @@ class _AppButtonState extends State<AppButton> {
                       (widget.color ?? AppColors.primaryColor))
                       : (widget.borderColor ??
                       (widget.color ?? AppColors.primaryColor))
-                      .withOpacity(0.8),
+                      .withValues(alpha: 0.8),
                   width: 1.5,
                 )
                     : null,
@@ -89,7 +89,7 @@ class _AppButtonState extends State<AppButton> {
                 boxShadow: widget.elevation != null
                     ? [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
+                    color: Colors.black.withValues(alpha: 0.1),
                     blurRadius: widget.elevation!,
                     offset: const Offset(0, 2),
                   )
@@ -115,8 +115,8 @@ class _AppButtonState extends State<AppButton> {
     if (isHover) {
       return LinearGradient(
         colors: [
-          AppColors.primaryColor.withOpacity(0.9),
-          AppColors.secondaryBabyBlue.withOpacity(0.9),
+          AppColors.primaryColor.withValues(alpha: 0.9),
+          AppColors.secondaryBabyBlue.withValues(alpha: 0.9),
         ],
       );
     }
@@ -128,7 +128,7 @@ class _AppButtonState extends State<AppButton> {
     if (widget.isOutlined) return Colors.transparent;
     if (widget.isDisabled || widget.isLoading) return Colors.grey.shade400;
     if (widget.color != null) return isHover
-        ? widget.color!.withOpacity(0.9)
+        ? widget.color!.withValues(alpha: 0.9)
         : widget.color;
 
     return null;

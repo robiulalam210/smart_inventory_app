@@ -368,7 +368,7 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
               borderRadius: BorderRadius.circular(8),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.grey.withOpacity(0.1),
+                  color: Colors.grey.withValues(alpha: 0.1),
                   blurRadius: 4,
                   offset: const Offset(0, 2),
                 ),
@@ -381,7 +381,7 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
                   Icon(
                     Icons.analytics_outlined,
                     size: 48,
-                    color: Colors.grey.withOpacity(0.5),
+                    color: Colors.grey.withValues(alpha: 0.5),
                   ),
                   const SizedBox(height: 12),
                   Text(
@@ -512,7 +512,7 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
         borderRadius: BorderRadius.circular(8),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.2),
+            color: Colors.grey.withValues(alpha: 0.2),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -523,7 +523,7 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
           Container(
             padding: const EdgeInsets.all(4),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(icon, color: color, size: 24),
@@ -869,10 +869,10 @@ class ExpenseReportDataTable extends StatelessWidget {
                                 vertical: 4,
                               ),
                               decoration: BoxDecoration(
-                                color: Colors.red.withOpacity(0.1),
+                                color: Colors.red.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(4),
                                 border: Border.all(
-                                  color: Colors.red.withOpacity(0.3),
+                                  color: Colors.red.withValues(alpha: 0.3),
                                 ),
                               ),
                               child: Text(
@@ -900,7 +900,7 @@ class ExpenseReportDataTable extends StatelessWidget {
                               decoration: BoxDecoration(
                                 color: _getPaymentMethodColor(
                                   expense.paymentMethod,
-                                ).withOpacity(0.1),
+                                ).withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: Text(

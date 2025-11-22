@@ -437,7 +437,7 @@ pw.Widget _buildSupplierDueAdvanceTable(List<SupplierDueAdvance> suppliers) {
               // Table Header
               _buildTableHeader(),
               // Table Rows
-              ...suppliers.map((supplier) => _buildTableRow(supplier)).toList(),
+              ...suppliers.map((supplier) => _buildTableRow(supplier)),
               // Total Row
               _buildTotalRow(suppliers),
             ],
