@@ -10,7 +10,6 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDesktop = MediaQuery.of(context).size.width > 768;
 
     return Scaffold(
       backgroundColor: AppColors.bg,

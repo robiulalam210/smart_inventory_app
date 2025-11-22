@@ -16,7 +16,7 @@ class _BarcodeScanScreenState extends State<BarcodeScanScreen> {
   String _statusMessage = '';
 
   // Store scanned products
-  List<Map<String, dynamic>> _scannedProducts = [];
+  final List<Map<String, dynamic>> _scannedProducts = [];
 
   // Replace with your API base URL
   final String apiBaseUrl = 'http://127.0.0.1:8000/api/products/barcode-search';

@@ -764,8 +764,9 @@ Map<String, dynamic> _analyzePeriod(List<SupplierLedger> transactions, Map<Strin
   final transactionsPerDay = transactions.length / daysInPeriod;
 
   String activityLevel;
-  if (transactionsPerDay > 2) activityLevel = 'High';
-  else if (transactionsPerDay > 0.5) activityLevel = 'Medium';
+  if (transactionsPerDay > 2) {
+    activityLevel = 'High';
+  } else if (transactionsPerDay > 0.5) activityLevel = 'Medium';
   else activityLevel = 'Low';
 
   return {

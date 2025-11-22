@@ -515,7 +515,7 @@ pw.Widget _buildExpenseBreakdown(ProfitLossSummary summary) {
                     ),
                   ],
                 );
-              }).toList(),
+              }),
               // Total Row
               pw.TableRow(
                 decoration: const pw.BoxDecoration(color: PdfColors.grey50),

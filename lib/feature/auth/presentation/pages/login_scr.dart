@@ -19,7 +19,6 @@ class _LogInScreenState extends State<LogInScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool _visible = false;
 
-
   @override
   void initState() {
     super.initState();
@@ -57,10 +56,12 @@ class _LogInScreenState extends State<LogInScreen> {
   void _submitLoginForm() {
     final currentState = _formKey.currentState;
     if (currentState != null && currentState.validate()) {
-      context.read<AuthBloc>().add(LoginRequested(
-        username: emailCon.text.trim(),
-        password: passwordCon.text.trim(),
-      ));
+      context.read<AuthBloc>().add(
+        LoginRequested(
+          username: emailCon.text.trim(),
+          password: passwordCon.text.trim(),
+        ),
+      );
     }
   }
 
@@ -69,10 +70,11 @@ class _LogInScreenState extends State<LogInScreen> {
     if (screenWidth >= 800) return 350; // Tablet
     return screenWidth * 0.9; // Mobile
   }
+
   double getImageWidth(double screenWidth) {
     if (screenWidth >= 1200) return 600; // large desktop
-    if (screenWidth >= 800) return 550;  // tablet / small desktop
-    return 350;                           // mobile / mini desktop
+    if (screenWidth >= 800) return 550; // tablet / small desktop
+    return 350; // mobile / mini desktop
   }
 
   @override
@@ -84,16 +86,13 @@ class _LogInScreenState extends State<LogInScreen> {
         backgroundColor: AppColors.bg,
         body: BlocListener<AuthBloc, AuthState>(
           listener: (context, state) async {
-            if (state is AuthAuthenticated || state is AuthAuthenticatedOffline) {
-
-
-
+            if (state is AuthAuthenticated ||
+                state is AuthAuthenticatedOffline) {
               // 🔥 Save username & password
               await LoginLocalStorage.saveLogin(
                 emailCon.text.trim(),
                 passwordCon.text.trim(),
               );
-
 
               _dismissLoaderIfOpen();
 
@@ -126,12 +125,7 @@ class _LogInScreenState extends State<LogInScreen> {
           child: Container(
             width: double.infinity,
             height: double.infinity,
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage(AppImages.loginBg),
-                fit: BoxFit.cover,
-              ),
-            ),
+            decoration: BoxDecoration(gradient: AppColors.primaryGradient),
             child: Center(
               child: SingleChildScrollView(
                 child: Row(
@@ -140,20 +134,19 @@ class _LogInScreenState extends State<LogInScreen> {
                       : MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                      SizedBox(
-                        width: getImageWidth(screenWidth),
-                        // child: Image.asset(
-                        //   AppImages.loginBg,
-                        //   fit: BoxFit.contain,
-                        // ),
-                      ),
+                    SizedBox(
+                      width: getImageWidth(screenWidth),
+                      child: Lottie.asset(AppImages.loginLottie),
+                    ),
                     ClipRRect(
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(15),
                       child: BackdropFilter(
                         filter: ImageFilter.blur(sigmaX: 6.1, sigmaY: 6.1),
                         child: Container(
                           width: _getFormWidth(screenWidth),
-                          padding: const EdgeInsets.all(AppSizes.bodyTabPadding),
+                          padding: const EdgeInsets.all(
+                            AppSizes.bodyTabPadding,
+                          ),
                           decoration: BoxDecoration(
                             color: const Color.fromRGBO(233, 233, 233, 0.22),
                             border: Border.all(color: Color(0xFFE3E3E3)),
@@ -171,17 +164,19 @@ class _LogInScreenState extends State<LogInScreen> {
                                     style: TextStyle(
                                       fontSize: screenWidth >= 800 ? 28 : 20,
                                       fontWeight: FontWeight.w500,
-                                      color: AppColors.primaryColor,
+                                      color: AppColors.white,
                                     ),
                                   ),
                                 ),
                                 const SizedBox(height: 10),
                                 AppTextField(
                                   textInputAction: TextInputAction.next,
-                                  labelText: "Username or Email", // Updated label
+                                  labelText: "Username or Email",
+                                  // Updated label
                                   isRequiredLabel: false,
                                   isRequired: true,
-                                  hintText: "Enter username or email address", // Updated hint
+                                  hintText: "Enter username or email address",
+                                  // Updated hint
                                   keyboardType: TextInputType.emailAddress,
                                   validator: (value) {
                                     if (value == null || value.trim().isEmpty) {
@@ -214,8 +209,9 @@ class _LogInScreenState extends State<LogInScreen> {
                                   isRequired: true,
                                   hintText: "Password",
                                   keyboardType: TextInputType.text,
-                                  validator: (value) =>
-                                  value!.trim().isEmpty ? 'Please enter password' : null,
+                                  validator: (value) => value!.trim().isEmpty
+                                      ? 'Please enter password'
+                                      : null,
                                   controller: passwordCon,
                                   obscureText: hidePassword,
                                   suffixIcon: IconButton(
@@ -226,7 +222,9 @@ class _LogInScreenState extends State<LogInScreen> {
                                       });
                                     },
                                     icon: Icon(
-                                      hidePassword ? Iconsax.eye_slash : Iconsax.eye,
+                                      hidePassword
+                                          ? Iconsax.eye_slash
+                                          : Iconsax.eye,
                                     ),
                                   ),
                                   onFieldSubmitted: (_) => _submitLoginForm(),
@@ -237,19 +235,24 @@ class _LogInScreenState extends State<LogInScreen> {
                                     final isLoading = state is AuthLoading;
                                     return isLoading
                                         ? SizedBox(
-                                      width: 24,
-                                      height: 24,
-                                      child: CircularProgressIndicator.adaptive(
-                                        strokeWidth: 2,
-                                        valueColor:
-                                        AlwaysStoppedAnimation<Color>(Colors.white),
-                                      ),
-                                    )
+                                            width: 24,
+                                            height: 24,
+                                            child:
+                                                CircularProgressIndicator.adaptive(
+                                                  strokeWidth: 2,
+                                                  valueColor:
+                                                      AlwaysStoppedAnimation<
+                                                        Color
+                                                      >(Colors.white),
+                                                ),
+                                          )
                                         : AppButton(
-                                      size: screenWidth >= 800 ? 500 : double.infinity,
-                                      name: "Log In",
-                                      onPressed: _submitLoginForm,
-                                    );
+                                            size: screenWidth >= 800
+                                                ? 500
+                                                : double.infinity,
+                                            name: "Log In",
+                                            onPressed: _submitLoginForm,
+                                          );
                                   },
                                 ),
                               ],

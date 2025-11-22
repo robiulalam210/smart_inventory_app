@@ -214,7 +214,7 @@ class CustomSearchTextFormField extends StatelessWidget {
           isDense: true,
           hintText: forSearch ? "Search $hintText" : hintText,
           hintStyle: TextStyle(
-            color: AppColors.matteBlack.withOpacity(0.5),
+            color: AppColors.matteBlack.withValues(alpha: 0.5),
             fontWeight: FontWeight.w300,
             fontSize: 14,
           ),
@@ -246,7 +246,7 @@ class CustomSearchTextFormField extends StatelessWidget {
           ),
           disabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(AppSizes.radius),
-            borderSide: BorderSide(color: AppColors.border.withOpacity(0.5)),
+            borderSide: BorderSide(color: AppColors.border.withValues(alpha: 0.5)),
           ),
           focusedErrorBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(AppSizes.radius),
@@ -263,7 +263,7 @@ class CustomSearchTextFormField extends StatelessWidget {
       child: Icon(
         Icons.search,
         size: 20,
-        color: AppColors.matteBlack.withOpacity(0.5),
+        color: AppColors.matteBlack.withValues(alpha: 0.5),
       ),
     );
   }
@@ -273,7 +273,7 @@ class CustomSearchTextFormField extends StatelessWidget {
       icon: Icon(
         Icons.clear,
         size: 20,
-        color: AppColors.matteBlack.withOpacity(0.5),
+        color: AppColors.matteBlack.withValues(alpha: 0.5),
       ),
       onPressed: onClear ?? () {
         controller.clear();

@@ -333,7 +333,7 @@ pw.Widget _buildPurchaseTable(List<PurchaseReportModel> reports) {
               // Table Header
               _buildTableHeader(),
               // Table Rows
-              ...reports.map((report) => _buildTableRow(report)).toList(),
+              ...reports.map((report) => _buildTableRow(report)),
               // Total Row
               _buildTotalRow(reports),
             ],

@@ -392,7 +392,7 @@ pw.Widget _buildLowStockTable(List<LowStockProduct> reports) {
               // Table Header
               _buildTableHeader(),
               // Table Rows
-              ...reports.map((report) => _buildTableRow(report)).toList(),
+              ...reports.map((report) => _buildTableRow(report)),
             ],
           ),
         ),

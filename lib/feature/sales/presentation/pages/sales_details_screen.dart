@@ -13,7 +13,6 @@ class SalesDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDesktop = MediaQuery.of(context).size.width > 768;
 
     return Scaffold(
       backgroundColor: AppColors.bg,
@@ -114,22 +113,6 @@ class SalesDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMobileView() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        children: [
-          _buildHeaderCard(),
-          const SizedBox(height: 16),
-          _buildItemsCard(),
-          const SizedBox(height: 16),
-          _buildSummaryCard(),
-          const SizedBox(height: 16),
-          _buildPaymentCard(),
-        ],
-      ),
-    );
-  }
 
   Widget _buildHeaderCard() {
     return Card(

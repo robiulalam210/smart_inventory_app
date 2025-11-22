@@ -103,7 +103,7 @@ class _CreateSupplierScreenState extends State<CreateSupplierScreen> {
                           : null;
                     },
                     onChanged: (value) {
-                      return null;
+                      return;
                     },
                   ),
 
@@ -128,7 +128,7 @@ class _CreateSupplierScreenState extends State<CreateSupplierScreen> {
                           : 'Invalid phone number';
                     },
                     onChanged: (value) {
-                      return null;
+                      return;
                     },
                   ),
 
@@ -147,7 +147,7 @@ class _CreateSupplierScreenState extends State<CreateSupplierScreen> {
                       return value!.isEmpty ? 'Please enter address' : null;
                     },
                     onChanged: (value) {
-                      return null;
+                      return;
                     },
                   ),
 

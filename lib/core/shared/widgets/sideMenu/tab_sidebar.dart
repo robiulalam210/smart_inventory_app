@@ -131,7 +131,7 @@ class TabSidebar extends StatelessWidget {
                     color: Theme.of(context)
                         .colorScheme
                         .inversePrimary
-                        .withOpacity(0.1),
+                        .withValues(alpha: 0.1),
                     borderRadius: const BorderRadius.only(
                       bottomLeft: Radius.circular(8),
                       bottomRight: Radius.circular(8),

@@ -163,8 +163,8 @@ class _RootScreenState extends State<RootScreen> {
       onPressed: () => _drawerKey.currentState?.openEndDrawer(),
       backgroundColor: AppColors.primaryColor,
       foregroundColor: Colors.white,
-      child: const Icon(Icons.menu),
       mini: true,
+      child: const Icon(Icons.menu),
     );
   }
 }
