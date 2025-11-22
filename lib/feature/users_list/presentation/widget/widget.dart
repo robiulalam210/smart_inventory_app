@@ -219,12 +219,12 @@ class UserTableCard extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             // Edit Button
-            _buildActionButton(
-              icon: Iconsax.edit,
-              color: Colors.blue,
-              tooltip: 'Edit user',
-              onPressed: () => _showEditDialog(context, user),
-            ),
+            // _buildActionButton(
+            //   icon: Iconsax.edit,
+            //   color: Colors.blue,
+            //   tooltip: 'Edit user',
+            //   onPressed: () => _showEditDialog(context, user),
+            // ),
 
             // View Button (optional)
             _buildActionButton(
@@ -234,13 +234,13 @@ class UserTableCard extends StatelessWidget {
               onPressed: () => _showViewDialog(context, user),
             ),
 
-            // Delete Button
-            _buildActionButton(
-              icon: HugeIcons.strokeRoundedDeleteThrow,
-              color: Colors.red,
-              tooltip: 'Delete user',
-              onPressed: () => _confirmDelete(context, user),
-            ),
+            // // Delete Button
+            // _buildActionButton(
+            //   icon: HugeIcons.strokeRoundedDeleteThrow,
+            //   color: Colors.red,
+            //   tooltip: 'Delete user',
+            //   onPressed: () => _confirmDelete(context, user),
+            // ),
           ],
         ),
       ),

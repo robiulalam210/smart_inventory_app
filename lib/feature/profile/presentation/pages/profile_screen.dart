@@ -95,7 +95,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
           }
         },
         builder: (context, state) {
-          print("Current State: $state");
 
           if (state is ProfilePermissionLoading) {
             return _buildLoadingState();

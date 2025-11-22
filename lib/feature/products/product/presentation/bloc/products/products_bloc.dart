@@ -37,7 +37,7 @@ class ProductsBloc extends Bloc<ProductsEvent, ProductsState> {
 
   TextEditingController filterTextController = TextEditingController();
 
-  clearDataAll(BuildContext context) {
+  void clearDataAll(BuildContext context) {
     context.read<UnitBloc>().selectedState = "";
     context.read<CategoriesBloc>().selectedState = "";
     context.read<UnitBloc>().selectedState = "";
@@ -270,7 +270,7 @@ productList=list;
   //   }
   // }
 
-  clearData() {
+  void clearData() {
     productNameController.clear();
     productBarCodeController.clear();
     productPurchasePriceController.clear();

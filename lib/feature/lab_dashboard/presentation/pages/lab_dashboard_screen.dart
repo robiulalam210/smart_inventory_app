@@ -190,7 +190,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 const SizedBox(height: 16),
 
                                 // ==== RECENT ACTIVITIES ====
-                                _buildRecentActivities(state.dashboardData),
+                                // _buildRecentActivities(state.dashboardData),
                               ],
 
                               // ==== ERROR STATE ====

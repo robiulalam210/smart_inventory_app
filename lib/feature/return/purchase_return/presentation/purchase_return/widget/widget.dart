@@ -357,7 +357,7 @@ class PurchaseReturnTableCard extends StatelessWidget {
                         margin: const EdgeInsets.only(bottom: 8),
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: Colors.grey.withOpacity(0.05),
+                          color: Colors.grey.withValues(alpha: 0.05),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Row(
@@ -494,7 +494,7 @@ class PurchaseReturnTableCard extends StatelessWidget {
           Icon(
             Icons.assignment_return_outlined,
             size: 48,
-            color: Colors.grey.withOpacity(0.5),
+            color: Colors.grey.withValues(alpha: 0.5),
           ),
           const SizedBox(height: 16),
           Text(

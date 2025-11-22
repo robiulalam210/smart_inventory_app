@@ -440,7 +440,7 @@ pw.Widget _buildTopProductsTable(List<TopProductModel> products) {
               // Table Header
               _buildTableHeader(),
               // Table Rows
-              ...products.asMap().entries.map((entry) => _buildTableRow(entry.value, entry.key + 1)).toList(),
+              ...products.asMap().entries.map((entry) => _buildTableRow(entry.value, entry.key + 1)),
             ],
           ),
         ),
