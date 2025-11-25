@@ -254,7 +254,7 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
     }
   }
 
-  clearData() {
+  void clearData() {
     accountOpeningBalanceController.clear();
     accountNumberController.clear();
     accountNameController.clear();

@@ -127,9 +127,11 @@ class _AppButtonState extends State<AppButton> {
   Color? _getBackgroundColor(BuildContext context) {
     if (widget.isOutlined) return Colors.transparent;
     if (widget.isDisabled || widget.isLoading) return Colors.grey.shade400;
-    if (widget.color != null) return isHover
+    if (widget.color != null) {
+      return isHover
         ? widget.color!.withValues(alpha: 0.9)
         : widget.color;
+    }
 
     return null;
   }

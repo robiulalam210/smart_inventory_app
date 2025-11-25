@@ -47,7 +47,7 @@ class SplashScreenState extends State<SplashScreen>
   Widget build(BuildContext context) {
     final Uri toLaunch = Uri(
       scheme: 'https',
-      host: 'macrohealthplus.org',
+      host: 'robi.meherinmart.xyz',
     );
 
     return Scaffold(
@@ -66,7 +66,9 @@ class SplashScreenState extends State<SplashScreen>
 // Update visibility when state changes
             }
             return Container(
-              decoration: const BoxDecoration(color: AppColors.whiteColor),
+              decoration:  BoxDecoration(
+                  gradient:AppColors.primaryGradient,
+                  color: AppColors.whiteColor),
               child: Stack(
                 fit: StackFit.expand,
                 children: <Widget>[
@@ -83,15 +85,15 @@ class SplashScreenState extends State<SplashScreen>
                               text: 'Developed by ',
                               style: TextStyle(
                                 fontSize: 12,
-                                color: Colors.black,
+                                color: Colors.white,
                               ),
                               children: [
                                 TextSpan(
-                                  text: "Macro Health Plus",
+                                  text: "Meherin Mart",
                                   style: TextStyle(
                                     fontWeight: FontWeight.w500,
                                     fontSize: 12,
-                                    color: Colors.indigoAccent,
+                                    color: Colors.red,
                                   ),
                                 ),
                               ],
@@ -115,7 +117,7 @@ class SplashScreenState extends State<SplashScreen>
 
                       Text(
                         AppConstants.appName,
-                        style: TextStyle(fontSize: 30),
+                        style: TextStyle(fontSize: 30,color: AppColors.white),
                       ),
                       // ),
                     ],

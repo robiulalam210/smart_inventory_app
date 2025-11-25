@@ -141,6 +141,40 @@ class _SidebarState extends State<Sidebar> {
                         horizontal: AppSizes.paddingInside,
                       ),
                       children: [
+                        /// Drawer Header
+                        DrawerHeader(
+
+                          margin: EdgeInsets.zero,
+                          padding: const EdgeInsets.all(0),
+                          decoration: BoxDecoration(
+                            // color: Theme.of(context)
+                            //     .colorScheme
+                            //     .inversePrimary
+                            //     .withValues(alpha: 0.1),
+                            borderRadius: const BorderRadius.only(
+                              bottomLeft: Radius.circular(8),
+                              bottomRight: Radius.circular(8),
+                            ),
+                          ),
+                          child: Center(
+                            child: Image.asset(
+                              "assets/images/logo.png",
+                              fit: BoxFit.fill,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Text(
+                                  "Great Lab",
+                                  style: TextStyle(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                    color: Theme.of(context).primaryColor,
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+
+                        const Divider(height: 1),
                         // Build menu sections dynamically
                         ...menuSections.map((section) {
                           if (section.items.length == 1) {

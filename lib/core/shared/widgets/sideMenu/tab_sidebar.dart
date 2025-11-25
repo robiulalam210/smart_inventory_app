@@ -128,10 +128,10 @@ class TabSidebar extends StatelessWidget {
                   margin: EdgeInsets.zero,
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .inversePrimary
-                        .withValues(alpha: 0.1),
+                    // color: Theme.of(context)
+                    //     .colorScheme
+                    //     .inversePrimary
+                    //     .withValues(alpha: 0.1),
                     borderRadius: const BorderRadius.only(
                       bottomLeft: Radius.circular(8),
                       bottomRight: Radius.circular(8),
@@ -140,8 +140,8 @@ class TabSidebar extends StatelessWidget {
                   child: Center(
                     child: Image.asset(
                       "assets/images/logo.png",
-                      fit: BoxFit.contain,
-                      height: 60,
+                      fit: BoxFit.fill,
+                      height: 250,
                       errorBuilder: (context, error, stackTrace) {
                         return Text(
                           "Great Lab",

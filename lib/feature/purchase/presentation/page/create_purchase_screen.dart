@@ -448,67 +448,69 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                "VAT",
-                                style: AppTextStyle.cardLevelText(context),
-                              ),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: CupertinoSegmentedControl<String>(
-                                      padding: EdgeInsets.zero,
-                                      children: {
-                                        'fixed': Padding(
-                                          padding: const EdgeInsets.symmetric(horizontal: 2.0),
-                                          child: Text(
-                                            'TK',
-                                            style: TextStyle(
-                                              fontFamily: GoogleFonts.playfairDisplay().fontFamily,
-                                              color: selectedVatType == 'fixed' ? Colors.white : Colors.black,
-                                            ),
-                                          ),
-                                        ),
-                                        'percentage': Padding(
-                                          padding: const EdgeInsets.symmetric(horizontal: 2.0),
-                                          child: Text(
-                                            '%',
-                                            style: TextStyle(
-                                              fontFamily: GoogleFonts.playfairDisplay().fontFamily,
-                                              color: selectedVatType == 'percentage' ? Colors.white : Colors.black,
-                                            ),
-                                          ),
-                                        ),
-                                      },
-                                      onValueChanged: (value) {
-                                        setState(() {
-                                          selectedVatType = value;
-                                          calculateVatTotal();
-                                          _updatePaymentCalculations();
-                                        });
-                                      },
-                                      groupValue: selectedVatType,
-                                      unselectedColor: Colors.grey[300],
-                                      selectedColor: AppColors.primaryColor,
-                                      borderColor: AppColors.primaryColor,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: CustomInputField(
-                                      controller: vatController,
-                                      hintText: 'VAT Amount',
-                                      isRequiredLable: false,
-                                      fillColor: Colors.white,
-                                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                                      onChanged: (value) {
-                                        calculateVatTotal();
-                                        _updatePaymentCalculations();
-                                        setState(() {});
-                                      },
-                                    ),
-                                  ),
-                                ],
-                              ),
+                              // Text(
+                              //   "VAT",
+                              //   style: AppTextStyle.cardLevelText(context),
+                              // ),
+                              // Row(
+                              //   crossAxisAlignment: CrossAxisAlignment.end,
+                              //   mainAxisAlignment: MainAxisAlignment.start,
+                              //   children: [
+                              //     Expanded(
+                              //       child: CupertinoSegmentedControl<String>(
+                              //         padding: EdgeInsets.zero,
+                              //         children: {
+                              //           'fixed': Padding(
+                              //             padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                              //             child: Text(
+                              //               'TK',
+                              //               style: TextStyle(
+                              //                 fontFamily: GoogleFonts.playfairDisplay().fontFamily,
+                              //                 color: selectedVatType == 'fixed' ? Colors.white : Colors.black,
+                              //               ),
+                              //             ),
+                              //           ),
+                              //           'percentage': Padding(
+                              //             padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                              //             child: Text(
+                              //               '%',
+                              //               style: TextStyle(
+                              //                 fontFamily: GoogleFonts.playfairDisplay().fontFamily,
+                              //                 color: selectedVatType == 'percentage' ? Colors.white : Colors.black,
+                              //               ),
+                              //             ),
+                              //           ),
+                              //         },
+                              //         onValueChanged: (value) {
+                              //           setState(() {
+                              //             selectedVatType = value;
+                              //             calculateVatTotal();
+                              //             _updatePaymentCalculations();
+                              //           });
+                              //         },
+                              //         groupValue: selectedVatType,
+                              //         unselectedColor: Colors.grey[300],
+                              //         selectedColor: AppColors.primaryColor,
+                              //         borderColor: AppColors.primaryColor,
+                              //       ),
+                              //     ),
+                              //     const SizedBox(width: 8),
+                              //     Expanded(
+                              //       child: CustomInputField(
+                              //         controller: vatController,
+                              //         hintText: 'VAT Amount',
+                              //         isRequiredLable: false,
+                              //         fillColor: Colors.white,
+                              //         keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                              //         onChanged: (value) {
+                              //           calculateVatTotal();
+                              //           _updatePaymentCalculations();
+                              //           setState(() {});
+                              //         },
+                              //       ),
+                              //     ),
+                              //   ],
+                              // ),
                             ],
                           ),
                         ),

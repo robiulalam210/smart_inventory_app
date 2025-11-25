@@ -53,7 +53,7 @@ class MoneyReceiptBloc extends Bloc<MoneyReceiptEvent, MoneyReceiptState> {
     on<DeleteMoneyReceipt>(_onDeleteMoneyReceipt);
   }
 
-  clearData() {
+  void clearData() {
     dateController.clear();
     amountController.clear();
     remarkController.clear();

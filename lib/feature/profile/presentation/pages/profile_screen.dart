@@ -1,5 +1,5 @@
-
 import '../../../../core/configs/configs.dart';
+import '../../../../core/shared/widgets/sideMenu/sidebar.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/show_custom_toast.dart';
 import '../../data/model/profile_perrmission_model.dart';
@@ -21,9 +21,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
 
-  final TextEditingController _currentPasswordController = TextEditingController();
+  final TextEditingController _currentPasswordController =
+      TextEditingController();
   final TextEditingController _newPasswordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
 
   int _currentSection = 0;
 
@@ -51,62 +53,96 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(24.0),
-      child: BlocConsumer<ProfileBloc, ProfileState>(
-        listener: (context, state) {
-          if (state is ProfileUpdateSuccess) {
-            _loadProfileData();
-            showCustomToast(
-              context: context,
-              title: 'Success!',
-              description: 'Profile updated successfully',
-              icon: Icons.check_circle,
-              primaryColor: Colors.green,
-            );
-          } else if (state is ProfileUpdateFailed) {
-            _loadProfileData();
-            showCustomToast(
-              context: context,
-              title: state.title,
-              description: state.content,
-              icon: Icons.error,
-              primaryColor: Colors.red,
-            );
-          } else if (state is PasswordChangeSuccess) {
-            _loadProfileData();
-            showCustomToast(
-              context: context,
-              title: 'Success!',
-              description: 'Password changed successfully',
-              icon: Icons.check_circle,
-              primaryColor: Colors.green,
-            );
-            _clearPasswordFields();
-          } else if (state is PasswordChangeFailed) {
-            _loadProfileData();
-            showCustomToast(
-              context: context,
-              title: state.title,
-              description: state.content,
-              icon: Icons.error,
-              primaryColor: Colors.red,
-            );
-          }
-        },
-        builder: (context, state) {
-          print("Current State: $state");
+    final isBigScreen =
+        Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
 
-          if (state is ProfilePermissionLoading) {
-            return _buildLoadingState();
-          } else if (state is ProfilePermissionSuccess) {
-            _populateFormFields(state.permissionData);
-            return _buildDesktopLayout(state.permissionData, state);
-          } else if (state is ProfilePermissionFailed) {
-            return _buildErrorState(state, _loadProfileData);
-          }
-          return _buildLoadingState();
-        },
+    return Container(
+      color: AppColors.bg,
+      child: SafeArea(
+        child: ResponsiveRow(
+          children: [
+            if (isBigScreen) _buildSidebar(),
+            _buildContentArea(isBigScreen),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSidebar() => ResponsiveCol(
+    xs: 0,
+    sm: 1,
+    md: 1,
+    lg: 2,
+    xl: 2,
+    child: Container(color: Colors.white, child: const Sidebar()),
+  );
+
+  Widget _buildContentArea(bool isBigScreen) {
+    return ResponsiveCol(
+      xs: 12,
+      lg: 10,
+      child: RefreshIndicator(
+        onRefresh: () async {},
+        child: Container(
+          padding: AppTextStyle.getResponsivePaddingBody(context),
+          child: Container(
+            padding: const EdgeInsets.all(24.0),
+            child: BlocConsumer<ProfileBloc, ProfileState>(
+              listener: (context, state) {
+                if (state is ProfileUpdateSuccess) {
+                  _loadProfileData();
+                  showCustomToast(
+                    context: context,
+                    title: 'Success!',
+                    description: 'Profile updated successfully',
+                    icon: Icons.check_circle,
+                    primaryColor: Colors.green,
+                  );
+                } else if (state is ProfileUpdateFailed) {
+                  _loadProfileData();
+                  showCustomToast(
+                    context: context,
+                    title: state.title,
+                    description: state.content,
+                    icon: Icons.error,
+                    primaryColor: Colors.red,
+                  );
+                } else if (state is PasswordChangeSuccess) {
+                  _loadProfileData();
+                  showCustomToast(
+                    context: context,
+                    title: 'Success!',
+                    description: 'Password changed successfully',
+                    icon: Icons.check_circle,
+                    primaryColor: Colors.green,
+                  );
+                  _clearPasswordFields();
+                } else if (state is PasswordChangeFailed) {
+                  _loadProfileData();
+                  showCustomToast(
+                    context: context,
+                    title: state.title,
+                    description: state.content,
+                    icon: Icons.error,
+                    primaryColor: Colors.red,
+                  );
+                }
+              },
+              builder: (context, state) {
+                if (state is ProfilePermissionLoading) {
+                  return _buildLoadingState();
+                } else if (state is ProfilePermissionSuccess) {
+                  _populateFormFields(state.permissionData);
+                  return _buildDesktopLayout(state.permissionData, state);
+                } else if (state is ProfilePermissionFailed) {
+                  return _buildErrorState(state, _loadProfileData);
+                }
+                return _buildLoadingState();
+              },
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -117,14 +153,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
       children: [
         // Sidebar Navigation - Fixed width
         SizedBox(
-          width: 320,
+          width: 280,
           child: Column(
             children: [
               // Profile Card
               Card(
                 elevation: 4,
                 child: Padding(
-                  padding: const EdgeInsets.all(24.0),
+                  padding: const EdgeInsets.all(50.0),
                   child: Column(
                     children: [
                       _buildProfilePicture(p, isLarge: true),
@@ -140,20 +176,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       const SizedBox(height: 8),
                       Text(
                         '@${p.data?.user?.username ?? "No Username"}',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[600],
-                        ),
+                        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                       ),
                       const SizedBox(height: 4),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 6,
+                        ),
                         decoration: BoxDecoration(
-                          color: AppColors.primaryColor.withOpacity(0.1),
+                          color: AppColors.primaryColor.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(16),
                         ),
                         child: Text(
-                          p.data?.user?.role?.replaceAll('_', ' ').toUpperCase() ?? "NO ROLE",
+                          p.data?.user?.role
+                                  ?.replaceAll('_', ' ')
+                                  .toUpperCase() ??
+                              "NO ROLE",
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
@@ -165,13 +204,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 12),
 
               // Navigation Card
               Card(
                 elevation: 4,
                 child: Padding(
-                  padding: const EdgeInsets.all(20.0),
+                  padding: const EdgeInsets.all(10.0),
                   child: Column(
                     children: [
                       _buildDesktopNavItem(
@@ -200,7 +239,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ),
 
-        const SizedBox(width: 24),
+        const SizedBox(width: 12),
 
         // Main Content - Flexible width
         Expanded(
@@ -246,7 +285,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
             fontSize: 14,
           ),
         ),
-        tileColor: isActive ? AppColors.primaryColor.withOpacity(0.1) : Colors.transparent,
+        tileColor: isActive
+            ? AppColors.primaryColor.withValues(alpha: 0.1)
+            : Colors.transparent,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
           side: BorderSide(
@@ -259,9 +300,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildProfilePicture(ProfilePermissionModel profile, {bool isLarge = false}) {
+  Widget _buildProfilePicture(
+    ProfilePermissionModel profile, {
+    bool isLarge = false,
+  }) {
     final profilePicture = profile.data?.user?.profilePicture;
-    final hasProfilePicture = profilePicture != null && profilePicture.isNotEmpty;
+    final hasProfilePicture =
+        profilePicture != null && profilePicture.isNotEmpty;
 
     return Stack(
       children: [
@@ -273,7 +318,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             border: Border.all(color: AppColors.primaryColor, width: 3),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
+                color: Colors.black.withValues(alpha: 0.1),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -287,11 +332,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 : null,
             child: hasProfilePicture
                 ? null
-                : Icon(
-              Icons.person,
-              size: 50,
-              color: Colors.grey[400],
-            ),
+                : Icon(Icons.person, size: 50, color: Colors.grey[400]),
           ),
         ),
         Positioned(
@@ -333,18 +374,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
               children: [
                 const Text(
                   'Profile Information',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
                 const Text(
                   'Update your personal information and contact details',
-                  style: TextStyle(
-                    color: Colors.grey,
-                    fontSize: 14,
-                  ),
+                  style: TextStyle(color: Colors.grey, fontSize: 14),
                 ),
                 const SizedBox(height: 32),
 
@@ -451,7 +486,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               if (value == null || value.isEmpty) {
                                 return 'Please enter email address';
                               }
-                              if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                              if (!RegExp(
+                                r'^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$',
+                              ).hasMatch(value)) {
                                 return 'Please enter a valid email address';
                               }
                               return null;
@@ -473,7 +510,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                           const SizedBox(height: 16),
                           TextFormField(
-                            initialValue: profile?.role?.replaceAll('_', ' ').toUpperCase() ?? "No Role",
+                            initialValue:
+                                profile?.role
+                                    ?.replaceAll('_', ' ')
+                                    .toUpperCase() ??
+                                "No Role",
                             decoration: InputDecoration(
                               labelText: 'Role',
                               border: OutlineInputBorder(
@@ -536,18 +577,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
             children: [
               const Text(
                 'Module Permissions',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               const Text(
                 'Your access permissions for different system modules',
-                style: TextStyle(
-                  color: Colors.grey,
-                  fontSize: 14,
-                ),
+                style: TextStyle(color: Colors.grey, fontSize: 14),
               ),
               const SizedBox(height: 32),
 
@@ -556,33 +591,48 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   spacing: 24,
                   runSpacing: 24,
                   children: [
-                    _buildPermissionCard(
-                      'Dashboard',
-                      Icons.dashboard,
-                      [
-                        _buildPermissionItem('View', permissions.dashboard?.view ?? false),
-                      ],
-                    ),
-                    _buildPermissionCard(
-                      'Sales',
-                      Icons.shopping_cart,
-                      [
-                        _buildPermissionItem('View', permissions.sales?.view ?? false),
-                        _buildPermissionItem('Create', permissions.sales?.create ?? false),
-                        _buildPermissionItem('Edit', permissions.sales?.edit ?? false),
-                        _buildPermissionItem('Delete', permissions.sales?.delete ?? false),
-                      ],
-                    ),
-                    _buildPermissionCard(
-                      'Money Receipt',
-                      Icons.receipt,
-                      [
-                        _buildPermissionItem('View', permissions.moneyReceipt?.view ?? false),
-                        _buildPermissionItem('Create', permissions.moneyReceipt?.create ?? false),
-                        _buildPermissionItem('Edit', permissions.moneyReceipt?.edit ?? false),
-                        _buildPermissionItem('Delete', permissions.moneyReceipt?.delete ?? false),
-                      ],
-                    ),
+                    _buildPermissionCard('Dashboard', Icons.dashboard, [
+                      _buildPermissionItem(
+                        'View',
+                        permissions.dashboard?.view ?? false,
+                      ),
+                    ]),
+                    _buildPermissionCard('Sales', Icons.shopping_cart, [
+                      _buildPermissionItem(
+                        'View',
+                        permissions.sales?.view ?? false,
+                      ),
+                      _buildPermissionItem(
+                        'Create',
+                        permissions.sales?.create ?? false,
+                      ),
+                      _buildPermissionItem(
+                        'Edit',
+                        permissions.sales?.edit ?? false,
+                      ),
+                      _buildPermissionItem(
+                        'Delete',
+                        permissions.sales?.delete ?? false,
+                      ),
+                    ]),
+                    _buildPermissionCard('Money Receipt', Icons.receipt, [
+                      _buildPermissionItem(
+                        'View',
+                        permissions.moneyReceipt?.view ?? false,
+                      ),
+                      _buildPermissionItem(
+                        'Create',
+                        permissions.moneyReceipt?.create ?? false,
+                      ),
+                      _buildPermissionItem(
+                        'Edit',
+                        permissions.moneyReceipt?.edit ?? false,
+                      ),
+                      _buildPermissionItem(
+                        'Delete',
+                        permissions.moneyReceipt?.delete ?? false,
+                      ),
+                    ]),
                     // Add more permission cards as needed
                   ],
                 )
@@ -606,7 +656,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildPermissionCard(String title, IconData icon, List<Widget> permissions) {
+  Widget _buildPermissionCard(
+    String title,
+    IconData icon,
+    List<Widget> permissions,
+  ) {
     return SizedBox(
       width: 280,
       child: Card(
@@ -621,7 +675,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: AppColors.primaryColor.withOpacity(0.1),
+                      color: AppColors.primaryColor.withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(icon, color: AppColors.primaryColor, size: 24),
@@ -637,11 +691,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ],
               ),
               const SizedBox(height: 16),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: permissions,
-              ),
+              Wrap(spacing: 8, runSpacing: 8, children: permissions),
             ],
           ),
         ),
@@ -653,7 +703,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: hasPermission ? Colors.green.withOpacity(0.1) : Colors.red.withOpacity(0.1),
+        color: hasPermission
+            ? Colors.green.withValues(alpha: 0.1)
+            : Colors.red.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color: hasPermission ? Colors.green : Colors.red,
@@ -696,18 +748,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
               children: [
                 const Text(
                   'Change Password',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
                 const Text(
                   'Update your password to keep your account secure',
-                  style: TextStyle(
-                    color: Colors.grey,
-                    fontSize: 14,
-                  ),
+                  style: TextStyle(color: Colors.grey, fontSize: 14),
                 ),
                 const SizedBox(height: 32),
 
@@ -789,8 +835,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             return SizedBox(
                               width: 200,
                               child: AppButton(
-                                name: state is PasswordChanging ? "Changing Password..." : "Change Password",
-                                onPressed: state is PasswordChanging ? null : _changePassword,
+                                name: state is PasswordChanging
+                                    ? "Changing Password..."
+                                    : "Change Password",
+                                onPressed: state is PasswordChanging
+                                    ? null
+                                    : _changePassword,
                               ),
                             );
                           },
@@ -808,9 +858,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildLoadingState() {
-    return const Center(
-      child: CircularProgressIndicator(),
-    );
+    return const Center(child: CircularProgressIndicator());
   }
 
   Widget _buildErrorState(dynamic state, VoidCallback onRetry) {
@@ -818,11 +866,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Lottie.asset(
-            AppImages.noData,
-            width: 200,
-            height: 200,
-          ),
+          Lottie.asset(AppImages.noData, width: 200, height: 200),
           const SizedBox(height: 24),
           Text(
             state.title,
@@ -838,18 +882,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: Text(
               state.content,
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey[600],
-              ),
+              style: TextStyle(fontSize: 16, color: Colors.grey[600]),
             ),
           ),
           const SizedBox(height: 24),
-          AppButton(
-            name: "Try Again",
-            onPressed: onRetry,
-            width: 200,
-          ),
+          AppButton(name: "Try Again", onPressed: onRetry, width: 200),
         ],
       ),
     );
@@ -887,10 +924,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       };
 
       context.read<ProfileBloc>().add(
-        UpdateUserProfile(
-          profileData: profileData,
-          context: context,
-        ),
+        UpdateUserProfile(profileData: profileData, context: context),
       );
     }
   }

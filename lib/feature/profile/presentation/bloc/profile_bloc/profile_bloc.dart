@@ -1,7 +1,4 @@
-import 'package:bloc/bloc.dart';
-import 'package:meta/meta.dart';
 
-import '../../../../../core/configs/app_urls.dart';
 import '../../../../../core/configs/configs.dart';
 import '../../../../../core/repositories/get_response.dart';
 import '../../../../../core/repositories/patch_response.dart';
@@ -33,49 +30,30 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       );
 
       // Print the raw response to see the actual structure
-      print("Raw API Response: $response");
 
       // Parse the JSON string to Map first
       final Map<String, dynamic> responseData = json.decode(response);
 
       // Comprehensive debugging of the response structure
-      print("=== RESPONSE STRUCTURE DEBUG ===");
-      print("Top-level keys: ${responseData.keys}");
-      print("Status: ${responseData['status']}");
-      print("Message: ${responseData['message']}");
 
       // Check the data field
-      print("Data field exists: ${responseData.containsKey('data')}");
-      print("Data field value: ${responseData['data']}");
-      print("Data field type: ${responseData['data']?.runtimeType}");
 
       if (responseData['data'] != null && responseData['data'] is Map) {
         final data = responseData['data'] as Map<String, dynamic>;
-        print("Data keys: ${data.keys}");
 
         // Check all possible user locations
-        print("User in data: ${data['user']}");
-        print("User field exists in data: ${data.containsKey('user')}");
 
         // Also check if user might be at root level
-        print("User at root level: ${responseData['user']}");
-        print("User exists at root: ${responseData.containsKey('user')}");
 
         // Print all fields in data to see what's available
         data.forEach((key, value) {
-          print("Data field '$key': $value (type: ${value.runtimeType})");
         });
       }
 
-      print("=== END DEBUG ===");
 
       // Now use the parsed map with ProfilePermissionModel.fromJson
       final ProfilePermissionModel permissionData = ProfilePermissionModel.fromJson(responseData);
 
-      print("Response message: ${permissionData.message}");
-      print("Response status: ${permissionData.status}");
-      print("Permission data: ${permissionData.data}");
-      print("Permission data user: ${permissionData.data?.user}");
 
       if (permissionData.status == true) {
         emit(ProfilePermissionSuccess(permissionData: permissionData));
@@ -88,7 +66,6 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         );
       }
     } catch (error) {
-      print("Error in _onFetchProfilePermission: $error");
       emit(ProfilePermissionFailed(
           title: "Error",
           content: error.toString()

@@ -113,8 +113,7 @@ class PurchaseBloc extends Bloc<PurchaseEvent, PurchaseState> {
         from: from,
         to: to,
       ));
-    } catch (error,st) {
-      print(st);
+    } catch (error) {
       emit(PurchaseListFailed(title: "Error", content: error.toString()));
     }
   }

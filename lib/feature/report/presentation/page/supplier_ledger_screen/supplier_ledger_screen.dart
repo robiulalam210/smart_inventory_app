@@ -277,7 +277,7 @@ class _SupplierLedgerScreenState extends State<SupplierLedgerScreen> {
               borderRadius: BorderRadius.circular(8),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.grey.withOpacity(0.1),
+                  color: Colors.grey.withValues(alpha: 0.1),
                   blurRadius: 4,
                   offset: const Offset(0, 2),
                 ),
@@ -290,7 +290,7 @@ class _SupplierLedgerScreenState extends State<SupplierLedgerScreen> {
                   Icon(
                     Icons.business_outlined,
                     size: 48,
-                    color: Colors.grey.withOpacity(0.5),
+                    color: Colors.grey.withValues(alpha: 0.5),
                   ),
                   const SizedBox(height: 12),
                   Text(
@@ -326,7 +326,7 @@ class _SupplierLedgerScreenState extends State<SupplierLedgerScreen> {
             borderRadius: BorderRadius.circular(8),
             boxShadow: [
               BoxShadow(
-                color: Colors.grey.withOpacity(0.1),
+                color: Colors.grey.withValues(alpha: 0.1),
                 blurRadius: 4,
                 offset: const Offset(0, 2),
               ),
@@ -427,9 +427,9 @@ class _SupplierLedgerScreenState extends State<SupplierLedgerScreen> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -586,7 +586,7 @@ class SupplierLedgerTableCard extends StatelessWidget {
             color: Colors.white,
             boxShadow: [
               BoxShadow(
-                color: Colors.grey.withOpacity(0.1),
+                color: Colors.grey.withValues(alpha: 0.1),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -798,7 +798,7 @@ class SupplierLedgerTableCard extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
             decoration: BoxDecoration(
-              color: ledger.typeColor.withOpacity(0.1),
+              color: ledger.typeColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(4),
             ),
             child: Row(
@@ -888,7 +888,7 @@ class SupplierLedgerTableCard extends StatelessWidget {
               ? Container(
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
             decoration: BoxDecoration(
-              color: Colors.red.withOpacity(0.1),
+              color: Colors.red.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
@@ -923,7 +923,7 @@ class SupplierLedgerTableCard extends StatelessWidget {
               ? Container(
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
             decoration: BoxDecoration(
-              color: Colors.green.withOpacity(0.1),
+              color: Colors.green.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
@@ -959,7 +959,7 @@ class SupplierLedgerTableCard extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
             decoration: BoxDecoration(
-              color: isPositive ? Colors.red.withOpacity(0.1) : Colors.green.withOpacity(0.1),
+              color: isPositive ? Colors.red.withValues(alpha: 0.1) : Colors.green.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(4),
               border: Border.all(
                 color: isPositive ? Colors.red : Colors.green,

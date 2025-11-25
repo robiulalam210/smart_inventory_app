@@ -89,7 +89,7 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
                     vertical: 8,
                   ),
                   decoration: BoxDecoration(
-                    color: _getStatusColor(receipt.paymentSummary?.status ?? '').withOpacity(0.1),
+                    color: _getStatusColor(receipt.paymentSummary?.status ?? '').withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(color: _getStatusColor(receipt.paymentSummary?.status ?? '')),
                   ),

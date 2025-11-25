@@ -95,10 +95,11 @@ class _StockReportScreenState extends State<StockReportScreen> {
     child: Container(color: Colors.white, child: const Sidebar()),
   );
 
+
   Widget _buildContentArea(bool isBigScreen) {
     return ResponsiveCol(
       xs: 12,
-      lg: 12,
+      lg: 10,
       child: RefreshIndicator(
         onRefresh: () async => _fetchStockReport(),
         child: Container(
