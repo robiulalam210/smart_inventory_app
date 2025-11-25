@@ -1,9 +1,7 @@
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/configs/configs.dart';
-import '../../../../core/widgets/delete_dialog.dart';
 import '../../data/model/user_model.dart';
-import '../bloc/users/user_bloc.dart';
 
 class UserTableCard extends StatelessWidget {
   final List<UsersListModel> users;
@@ -262,39 +260,7 @@ class UserTableCard extends StatelessWidget {
     );
   }
 
-  Future<void> _confirmDelete(BuildContext context, UsersListModel user) async {
-    final shouldDelete = await showDeleteConfirmationDialog(context);
-    if (shouldDelete && context.mounted) {
-      // Adjust this based on your UserBloc implementation
-      context.read<UserBloc>().add(
-          DeleteUser(id: user.id.toString())
-      );
-    }
-  }
 
-  void _showEditDialog(BuildContext context, UsersListModel user) {
-    // Pre-fill the form - adjust based on your UserCreate form fields
-    final _ = context.read<UserBloc>();
-    // userBloc.usernameController.text = user.username ?? "";
-    // userBloc.emailController.text = user.email ?? "";
-    // userBloc.roleController.text = user.role ?? "";
-    // Add other fields as needed
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return Dialog(
-          child: SizedBox(
-            width: AppSizes.width(context) * 0.50,
-            // child: UserCreateScreen( // Adjust to your actual user create screen
-            //   id: user.id.toString(),
-            //   submitText: "Update User",
-            // ),
-          ),
-        );
-      },
-    );
-  }
 
   void _showViewDialog(BuildContext context, UsersListModel user) {
     showDialog(
