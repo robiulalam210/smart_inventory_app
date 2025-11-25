@@ -38,18 +38,18 @@ class PurchaseData {
   final int? supplier;
   final String? supplierName;
   final DateTime? purchaseDate;
-  final String? total;
-  final String? grandTotal;
-  final String? paidAmount;
-  final String? dueAmount;
-  final String? changeAmount;
-  final String? overallDiscount;
+  final dynamic total;
+  final dynamic grandTotal;
+  final dynamic paidAmount;
+  final dynamic dueAmount;
+  final dynamic changeAmount;
+  final dynamic overallDiscount;
   final String? overallDiscountType;
-  final String? overallDeliveryCharge;
+  final dynamic overallDeliveryCharge;
   final String? overallDeliveryChargeType;
-  final String? overallServiceCharge;
+  final dynamic overallServiceCharge;
   final String? overallServiceChargeType;
-  final String? vat;
+  final dynamic vat;
   final String? vatType;
   final String? invoiceNo;
   final String? paymentStatus;
@@ -58,7 +58,7 @@ class PurchaseData {
   final dynamic paymentMethod;
   final dynamic remark;
   final List<Item>? items;
-  final String? subTotal;
+  final dynamic subTotal;
 
   PurchaseData({
     this.id,

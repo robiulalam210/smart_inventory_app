@@ -108,7 +108,7 @@ class AccountCard extends StatelessWidget {
                                 : null,
                             cells: [
                               _buildDataCell(account.acNo ?? "N/A", minColumnWidth * 1.2),
-                              _buildDataCell(account.acName ?? "N/A", minColumnWidth * 1.2),
+                              _buildDataCell(account.name ?? "N/A", minColumnWidth * 1.2),
                               _buildDataCell(account.acType ?? "N/A", minColumnWidth),
                               _buildDataCell(account.acNumber ?? "-", minColumnWidth),
                               _buildBankCell(account.bankName, account.branch, minColumnWidth * 1.3),
@@ -397,7 +397,7 @@ class AccountCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      account.acName ?? 'Unnamed Account',
+                      account.name ?? 'Unnamed Account',
                       style: GoogleFonts.inter(
                         fontWeight: FontWeight.w600,
                         fontSize: 14,

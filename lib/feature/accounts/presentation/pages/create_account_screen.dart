@@ -42,7 +42,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
     selectedAccountType.value = account.acType ?? '';
 
     // Set controllers
-    accountBloc.accountNameController.text = account.acName ?? '';
+    accountBloc.accountNameController.text = account.name ?? '';
     accountBloc.accountNumberController.text = account.acNumber ?? '';
     accountBloc.bankNameController.text = account.bankName ?? '';
     accountBloc.branchNameController.text = account.branch ?? '';

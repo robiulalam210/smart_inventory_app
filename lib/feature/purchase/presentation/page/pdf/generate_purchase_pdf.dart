@@ -30,12 +30,20 @@ Future<Uint8List> generatePurchasePdf(PurchaseModel purchase) async {
 
   pdf.addPage(
     pw.MultiPage(
-      pageTheme: const pw.PageTheme(
+      pageTheme: pw.PageTheme(
         pageFormat: PdfPageFormat.a4,
-        margin: pw.EdgeInsets.all(25),
+        margin: const pw.EdgeInsets.all(25),
+        buildBackground: (context) => pw.Container(
+          color: PdfColors.white, // Solid color background
+        ),
       ),
       header: (context) => pw.Container(
-        margin: const pw.EdgeInsets.only(bottom: 20),
+        padding: const pw.EdgeInsets.only(
+          bottom: 20,
+          left: 20,
+          right: 20,
+          top: 30,
+        ),
         child: pw.Row(
           mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
           crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -83,25 +91,26 @@ Future<Uint8List> generatePurchasePdf(PurchaseModel purchase) async {
               child: pw.Center(
                 child: pw.Text(
                   'LOGO',
-                  style: pw.TextStyle(
-                    fontSize: 12,
-                    color: PdfColors.grey600,
-                  ),
+                  style: pw.TextStyle(fontSize: 12, color: PdfColors.grey600),
                 ),
               ),
             ),
           ],
         ),
-      ),      footer: (context) => _buildFooter(context),
+      ),
+      footer: (context) => _buildFooter(context),
       build: (context) => [
         _buildHeader(purchase),
-        pw.SizedBox(height: 16),
         _buildSupplierInfo(purchase),
-        pw.SizedBox(height: 20),
         _buildItemsTable(purchase),
-        pw.SizedBox(height: 20),
-        _buildSummarySection(purchase, subTotal, discount, vat, total, grandTotal),
-        pw.SizedBox(height: 16),
+        _buildSummarySection(
+          purchase,
+          subTotal,
+          discount,
+          vat,
+          total,
+          grandTotal,
+        ),
         _buildPaymentSection(paidAmount, dueAmount),
       ],
     ),
@@ -117,7 +126,8 @@ pw.Widget _buildHeader(PurchaseModel purchase) {
       border: pw.Border.all(color: PdfColors.blue800, width: 1.5),
       borderRadius: pw.BorderRadius.circular(8),
     ),
-    padding: const pw.EdgeInsets.all(16),
+    padding: const pw.EdgeInsets.all(12),
+    margin: const pw.EdgeInsets.all(16),
     child: pw.Row(
       mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
       crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -168,10 +178,7 @@ pw.Widget _buildHeaderRow(String label, String value) {
           width: 80,
           child: pw.Text(
             label,
-            style: pw.TextStyle(
-              fontWeight: pw.FontWeight.bold,
-              fontSize: 11,
-            ),
+            style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 11),
           ),
         ),
         pw.Text(value, style: const pw.TextStyle(fontSize: 11)),
@@ -189,6 +196,8 @@ pw.Widget _buildSupplierInfo(PurchaseModel purchase) {
       border: pw.Border.all(color: PdfColors.grey300),
     ),
     padding: const pw.EdgeInsets.all(16),
+    margin: const pw.EdgeInsets.all(16),
+
     child: pw.Row(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
@@ -206,7 +215,10 @@ pw.Widget _buildSupplierInfo(PurchaseModel purchase) {
               ),
               pw.SizedBox(height: 8),
               _buildInfoRow('Supplier Name:', purchase.supplierName ?? 'N/A'),
-              _buildInfoRow('Payment Method:', purchase.paymentMethod ?? 'Cash'),
+              _buildInfoRow(
+                'Payment Method:',
+                purchase.paymentMethod ?? 'Cash',
+              ),
             ],
           ),
         ),
@@ -243,17 +255,11 @@ pw.Widget _buildInfoRow(String label, String value) {
           width: 100,
           child: pw.Text(
             label,
-            style: pw.TextStyle(
-              fontWeight: pw.FontWeight.bold,
-              fontSize: 10,
-            ),
+            style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 10),
           ),
         ),
         pw.Expanded(
-          child: pw.Text(
-            value,
-            style: const pw.TextStyle(fontSize: 10),
-          ),
+          child: pw.Text(value, style: const pw.TextStyle(fontSize: 10)),
         ),
       ],
     ),
@@ -273,71 +279,79 @@ pw.Widget _buildItemsTable(PurchaseModel purchase) {
     return 0.0;
   }
 
-  return pw.Column(
-    crossAxisAlignment: pw.CrossAxisAlignment.start,
-    children: [
-      pw.Text(
-        'PURCHASE ITEMS',
-        style: pw.TextStyle(
-          fontSize: 14,
-          fontWeight: pw.FontWeight.bold,
-          color: PdfColors.blue800,
-        ),
-      ),
-      pw.SizedBox(height: 12),
-      pw.Table(
-        border: pw.TableBorder.all(color: PdfColors.grey400, width: 0.5),
-        columnWidths: {
-          0: const pw.FlexColumnWidth(3.5),
-          1: const pw.FlexColumnWidth(1),
-          2: const pw.FlexColumnWidth(1.3),
-          3: const pw.FlexColumnWidth(1.2),
-          4: const pw.FlexColumnWidth(1.3),
-        },
-        children: [
-          // Header row
-          pw.TableRow(
-            decoration: const pw.BoxDecoration(
-              color: PdfColors.blue800,
-            ),
-            children: [
-              _buildTableHeaderCell('PRODUCT'),
-              _buildTableHeaderCell('QTY', center: true),
-              _buildTableHeaderCell('PRICE', right: true),
-              _buildTableHeaderCell('DISCOUNT', center: true),
-              _buildTableHeaderCell('TOTAL', right: true),
-            ],
-          ),
-          // Data rows
-          ...(purchase.items ?? []).map((item) {
-            final price = toDouble(item.price);
-            final total = toDouble(item.productTotal);
+  return pw.Container(
+    margin: const pw.EdgeInsets.all(16),
 
-            return pw.TableRow(
-              decoration: pw.BoxDecoration(
-                border: pw.Border(bottom: pw.BorderSide(color: PdfColors.grey200)),
-              ),
+    child: pw.Column(
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
+      children: [
+        pw.Text(
+          'PURCHASE ITEMS',
+          style: pw.TextStyle(
+            fontSize: 14,
+            fontWeight: pw.FontWeight.bold,
+            color: PdfColors.blue800,
+          ),
+        ),
+        pw.SizedBox(height: 12),
+        pw.Table(
+          border: pw.TableBorder.all(color: PdfColors.grey400, width: 0.5),
+          columnWidths: {
+            0: const pw.FlexColumnWidth(3.5),
+            1: const pw.FlexColumnWidth(1),
+            2: const pw.FlexColumnWidth(1.3),
+            3: const pw.FlexColumnWidth(1.2),
+            4: const pw.FlexColumnWidth(1.3),
+          },
+          children: [
+            // Header row
+            pw.TableRow(
+              decoration: const pw.BoxDecoration(color: PdfColors.blue800),
               children: [
-                _buildTableCell(item.productName ?? 'Unknown Product'),
-                _buildTableCell(item.qty?.toString() ?? '0', center: true),
-                _buildTableCell(price.toStringAsFixed(2), right: true),
-                _buildTableCell(
-                  item.discount != null && item.discount != "0"
-                      ? '${item.discount}${item.discountType == 'percent' ? '%' : ''}'
-                      : '-',
-                  center: true,
-                ),
-                _buildTableCell(total.toStringAsFixed(2), right: true),
+                _buildTableHeaderCell('PRODUCT'),
+                _buildTableHeaderCell('QTY', center: true),
+                _buildTableHeaderCell('PRICE', right: true),
+                _buildTableHeaderCell('DISCOUNT', center: true),
+                _buildTableHeaderCell('TOTAL', right: true),
               ],
-            );
-          }),
-        ],
-      ),
-    ],
+            ),
+            // Data rows
+            ...(purchase.items ?? []).map((item) {
+              final price = toDouble(item.price);
+              final total = toDouble(item.productTotal);
+
+              return pw.TableRow(
+                decoration: pw.BoxDecoration(
+                  border: pw.Border(
+                    bottom: pw.BorderSide(color: PdfColors.grey200),
+                  ),
+                ),
+                children: [
+                  _buildTableCell(item.productName ?? 'Unknown Product'),
+                  _buildTableCell(item.qty?.toString() ?? '0', center: true),
+                  _buildTableCell(price.toStringAsFixed(2), right: true),
+                  _buildTableCell(
+                    item.discount != null && item.discount != "0"
+                        ? '${item.discount}${item.discountType == 'percent' ? '%' : ''}'
+                        : '-',
+                    center: true,
+                  ),
+                  _buildTableCell(total.toStringAsFixed(2), right: true),
+                ],
+              );
+            }),
+          ],
+        ),
+      ],
+    ),
   );
 }
 
-pw.Widget _buildTableHeaderCell(String text, {bool center = false, bool right = false}) {
+pw.Widget _buildTableHeaderCell(
+  String text, {
+  bool center = false,
+  bool right = false,
+}) {
   return pw.Padding(
     padding: const pw.EdgeInsets.all(10),
     child: pw.Text(
@@ -347,37 +361,52 @@ pw.Widget _buildTableHeaderCell(String text, {bool center = false, bool right = 
         color: PdfColors.white,
         fontSize: 10,
       ),
-      textAlign: center ? pw.TextAlign.center : (right ? pw.TextAlign.right : pw.TextAlign.left),
+      textAlign: center
+          ? pw.TextAlign.center
+          : (right ? pw.TextAlign.right : pw.TextAlign.left),
     ),
   );
 }
 
-pw.Widget _buildTableCell(String text, {bool center = false, bool right = false}) {
+pw.Widget _buildTableCell(
+  String text, {
+  bool center = false,
+  bool right = false,
+}) {
   return pw.Padding(
     padding: const pw.EdgeInsets.all(8),
     child: pw.Text(
       text,
       style: const pw.TextStyle(fontSize: 9),
-      textAlign: center ? pw.TextAlign.center : (right ? pw.TextAlign.right : pw.TextAlign.left),
+      textAlign: center
+          ? pw.TextAlign.center
+          : (right ? pw.TextAlign.right : pw.TextAlign.left),
     ),
   );
 }
 
 // Summary Section
-pw.Widget _buildSummarySection(PurchaseModel purchase, double subTotal, double discount, double vat, double total, double grandTotal) {
-  return pw.Row(
-    crossAxisAlignment: pw.CrossAxisAlignment.start,
-    children: [
-      pw.Expanded(
-        flex: 3,
-        child: _buildRemarksSection(purchase),
-      ),
-      pw.SizedBox(width: 16),
-      pw.Expanded(
-        flex: 2,
-        child: _buildTotalSection(subTotal, discount, vat, total, grandTotal),
-      ),
-    ],
+pw.Widget _buildSummarySection(
+  PurchaseModel purchase,
+  double subTotal,
+  double discount,
+  double vat,
+  double total,
+  double grandTotal,
+) {
+  return pw.Container(
+    margin: const pw.EdgeInsets.all(16),
+    child: pw.Row(
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
+      children: [
+        pw.Expanded(flex: 3, child: _buildRemarksSection(purchase)),
+        pw.SizedBox(width: 16),
+        pw.Expanded(
+          flex: 2,
+          child: _buildTotalSection(subTotal, discount, vat, total, grandTotal),
+        ),
+      ],
+    ),
   );
 }
 
@@ -400,7 +429,8 @@ pw.Widget _buildRemarksSection(PurchaseModel purchase) {
             fontSize: 12,
           ),
         ),
-        if (purchase.remark != null && purchase.remark.toString().isNotEmpty) ...[
+        if (purchase.remark != null &&
+            purchase.remark.toString().isNotEmpty) ...[
           pw.SizedBox(height: 8),
           pw.Text(
             'Remarks: ${purchase.remark}',
@@ -412,7 +442,13 @@ pw.Widget _buildRemarksSection(PurchaseModel purchase) {
   );
 }
 
-pw.Widget _buildTotalSection(double subTotal, double discount, double vat, double total, double grandTotal) {
+pw.Widget _buildTotalSection(
+  double subTotal,
+  double discount,
+  double vat,
+  double total,
+  double grandTotal,
+) {
   return pw.Container(
     padding: const pw.EdgeInsets.all(16),
     decoration: pw.BoxDecoration(
@@ -422,16 +458,19 @@ pw.Widget _buildTotalSection(double subTotal, double discount, double vat, doubl
     ),
     child: pw.Column(
       children: [
-        if (subTotal > 0) _buildSummaryRow('Subtotal:', subTotal.toStringAsFixed(2)),
-        if (discount > 0) _buildSummaryRow('Discount:', '-${discount.toStringAsFixed(2)}'),
+        if (subTotal > 0)
+          _buildSummaryRow('Subtotal:', subTotal.toStringAsFixed(2)),
+        if (discount > 0)
+          _buildSummaryRow('Discount:', '-${discount.toStringAsFixed(2)}'),
         if (vat > 0) _buildSummaryRow('VAT:', vat.toStringAsFixed(2)),
-        if (total > 0) _buildSummaryRow('Total:', total.toStringAsFixed(2), isTotal: true),
+        if (total > 0)
+          _buildSummaryRow('Total:', total.toStringAsFixed(2), isTotal: true),
         pw.SizedBox(height: 6),
         pw.Divider(color: PdfColors.blue400, height: 1),
         pw.SizedBox(height: 6),
         _buildSummaryRow(
           'GRAND TOTAL:',
-          '৳${grandTotal.toStringAsFixed(2)}',
+          grandTotal.toStringAsFixed(2),
           isGrandTotal: true,
         ),
       ],
@@ -442,10 +481,13 @@ pw.Widget _buildTotalSection(double subTotal, double discount, double vat, doubl
 // Payment Section
 pw.Widget _buildPaymentSection(double paidAmount, double dueAmount) {
   return pw.Container(
+    margin: const pw.EdgeInsets.all(16),
     padding: const pw.EdgeInsets.all(16),
     decoration: pw.BoxDecoration(
       color: dueAmount > 0 ? PdfColors.orange50 : PdfColors.green50,
-      border: pw.Border.all(color: dueAmount > 0 ? PdfColors.orange200 : PdfColors.green200),
+      border: pw.Border.all(
+        color: dueAmount > 0 ? PdfColors.orange200 : PdfColors.green200,
+      ),
       borderRadius: pw.BorderRadius.circular(6),
     ),
     child: pw.Row(
@@ -486,7 +528,12 @@ pw.Widget _buildPaymentItem(String label, String value, {bool isDue = false}) {
   );
 }
 
-pw.Widget _buildSummaryRow(String label, String value, {bool isTotal = false, bool isGrandTotal = false}) {
+pw.Widget _buildSummaryRow(
+  String label,
+  String value, {
+  bool isTotal = false,
+  bool isGrandTotal = false,
+}) {
   return pw.Padding(
     padding: const pw.EdgeInsets.only(bottom: 6),
     child: pw.Row(
@@ -495,7 +542,9 @@ pw.Widget _buildSummaryRow(String label, String value, {bool isTotal = false, bo
         pw.Text(
           label,
           style: pw.TextStyle(
-            fontWeight: isTotal || isGrandTotal ? pw.FontWeight.bold : pw.FontWeight.normal,
+            fontWeight: isTotal || isGrandTotal
+                ? pw.FontWeight.bold
+                : pw.FontWeight.normal,
             fontSize: isGrandTotal ? 11 : 10,
             color: isGrandTotal ? PdfColors.blue800 : PdfColors.grey700,
           ),
@@ -503,7 +552,9 @@ pw.Widget _buildSummaryRow(String label, String value, {bool isTotal = false, bo
         pw.Text(
           value,
           style: pw.TextStyle(
-            fontWeight: isTotal || isGrandTotal ? pw.FontWeight.bold : pw.FontWeight.normal,
+            fontWeight: isTotal || isGrandTotal
+                ? pw.FontWeight.bold
+                : pw.FontWeight.normal,
             fontSize: isGrandTotal ? 11 : 10,
             color: isGrandTotal ? PdfColors.blue800 : PdfColors.grey700,
           ),

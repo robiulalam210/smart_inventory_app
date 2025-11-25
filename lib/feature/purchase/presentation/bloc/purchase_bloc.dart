@@ -42,7 +42,7 @@ class PurchaseBloc extends Bloc<PurchaseEvent, PurchaseState> {
         queryParams['search'] = event.filterText;
       }
       if (event.supplier.isNotEmpty) {
-        queryParams['supplier'] = event.supplier;
+        queryParams['supplier_id'] = event.supplier;
       }
       if (event.paymentStatus.isNotEmpty) {
         queryParams['payment_status'] = event.paymentStatus;

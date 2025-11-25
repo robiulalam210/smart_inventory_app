@@ -254,7 +254,7 @@ pw.Widget _buildPaymentDetails(MoneyreceiptModel receipt, double amount) {
           child: pw.Column(
             children: [
               pw.Text(
-                '৳${amount.toStringAsFixed(2)}',
+                '${amount.toStringAsFixed(2)}',
                 style: pw.TextStyle(
                   fontSize: 16,
                   fontWeight: pw.FontWeight.bold,
@@ -357,7 +357,7 @@ pw.Widget _buildPaymentSummary(PaymentSummary summary) {
           ),
         ),
         pw.Padding(
-          padding: const pw.EdgeInsets.all(16),
+          padding: const pw.EdgeInsets.all(6),
           child: pw.Row(
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
@@ -378,7 +378,7 @@ pw.Widget _buildPaymentSummary(PaymentSummary summary) {
 
 pw.Widget _buildSummarySection(String title, dynamic paymentData) {
   return pw.Container(
-    padding: const pw.EdgeInsets.all(12),
+    padding: const pw.EdgeInsets.all(10),
     decoration: pw.BoxDecoration(
       border: pw.Border.all(color: PdfColors.grey300),
       borderRadius: pw.BorderRadius.circular(6),
@@ -423,7 +423,7 @@ pw.Widget _buildSummaryRow(String label, dynamic value) {
           style: const pw.TextStyle(fontSize: 9),
         ),
         pw.Text(
-          '৳${amount.toStringAsFixed(2)}',
+          amount.toStringAsFixed(2),
           style: pw.TextStyle(
             fontSize: 9,
             fontWeight: pw.FontWeight.bold,
