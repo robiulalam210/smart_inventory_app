@@ -183,7 +183,7 @@ class BrandBloc extends Bloc<BrandEvent, BrandState> {
     }
   }
 
-  clearData() {
+  void clearData() {
     nameController.clear();
     addressController.clear();
   }

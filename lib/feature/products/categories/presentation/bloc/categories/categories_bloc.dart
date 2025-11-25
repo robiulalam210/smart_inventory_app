@@ -219,7 +219,7 @@ class CategoriesBloc extends Bloc<CategoriesEvent, CategoriesState> {
     }
   }
 
-  clearData() {
+  void clearData() {
     nameController.clear();
     // shortNameController.clear();
   }

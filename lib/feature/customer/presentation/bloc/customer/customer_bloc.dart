@@ -287,7 +287,7 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
   }
 
 
-  clearData() {
+  void clearData() {
     customerNameController.clear();
     customerNumberController.clear();
     customerEmailController.clear();
