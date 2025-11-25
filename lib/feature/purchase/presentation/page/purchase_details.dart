@@ -106,7 +106,7 @@ class PurchaseDetailsScreen extends StatelessWidget {
                     vertical: 8,
                   ),
                   decoration: BoxDecoration(
-                    color: _getStatusColor(purchase.paymentStatus ?? '').withOpacity(0.1),
+                    color: _getStatusColor(purchase.paymentStatus ?? '').withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(color: _getStatusColor(purchase.paymentStatus ?? '')),
                   ),
@@ -226,7 +226,7 @@ class PurchaseDetailsScreen extends StatelessWidget {
           // Header row
           TableRow(
             decoration: BoxDecoration(
-              color: AppColors.primaryColor.withOpacity(0.1),
+              color: AppColors.primaryColor.withValues(alpha: 0.1),
             ),
             children: [
               _buildTableHeaderCell('Product'),

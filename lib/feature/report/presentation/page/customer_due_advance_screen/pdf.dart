@@ -437,7 +437,7 @@ pw.Widget _buildCustomerDueAdvanceTable(List<CustomerDueAdvance> customers) {
               // Table Header
               _buildTableHeader(),
               // Table Rows
-              ...customers.map((customer) => _buildTableRow(customer)).toList(),
+              ...customers.map((customer) => _buildTableRow(customer)),
               // Total Row
               _buildTotalRow(customers),
             ],

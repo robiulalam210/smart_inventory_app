@@ -184,7 +184,7 @@ class UnitBloc extends Bloc<UnitEvent, UnitState> {
     }
   }
 
-  clearData() {
+  void clearData() {
     nameController.clear();
     shortNameController.clear();
   }
