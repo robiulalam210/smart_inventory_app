@@ -7,6 +7,7 @@ import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_loader.dart';
 import '../../../../core/widgets/coustom_search_text_field.dart';
 import '../../../../core/widgets/date_range.dart';
+import '../../../../core/widgets/show_custom_toast.dart';
 import '../../../products/product/presentation/widget/pagination.dart';
 import '../bloc/supplier_payment/supplier_payment_bloc.dart';
 import '../widget/supplier_payment_widget.dart';
@@ -213,9 +214,15 @@ class _SupplierPaymentScreenState extends State<SupplierPaymentScreen> {
             );
           } else if (state is SupplierPaymentDeleteSuccess) {
             _fetchApi();
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Payment deleted successfully')),
+            showCustomToast(
+              context: context,
+              title: 'Alert!',
+              description:
+              'Payment deleted successfully',
+              icon: Icons.error,
+              primaryColor: Colors.redAccent,
             );
+
           } else if (state is SupplierPaymentDeleteFailed) {
             appAlertDialog(
               context,

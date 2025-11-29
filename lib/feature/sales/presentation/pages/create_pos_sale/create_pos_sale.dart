@@ -325,7 +325,15 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
 
       updateTotal(index);
     } else {
-      appSnackBar(context, "Product stock not available");
+      showCustomToast(
+        context: context,
+        title: 'Alert!',
+        description:
+        "Product stock not available",
+        icon: Icons.error,
+        primaryColor: Colors.redAccent,
+      );
+
     }
   }
 
@@ -374,7 +382,15 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
               appLoader(context, "Creating PosSale, please wait...");
             } else if (state is CreatePosSaleSuccess) {
               Navigator.pop(context);
-              appSnackBar(context, "Sale created successfully!", color: Colors.green);
+              showCustomToast(
+                context: context,
+                title: 'Success!',
+                description:
+                "Sale created successfully!",
+                icon: Icons.check_circle,
+                primaryColor: Colors.green,
+              );
+
               // Reset local state when form is cleared
               changeAmountController.clear();
               // bloc.add(ChangeDashboardScreen(index: 1));
@@ -1383,11 +1399,15 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
         final paidAmount = double.tryParse(bloc.payableAmount.text.trim()) ?? 0;
 
         if (paidAmount < netTotal) {
-          appSnackBar(
-            context,
+          showCustomToast(
+            context: context,
+            title: 'Warning!',
+            description:
             "Walk-in customer: Full payment required. No due allowed.",
-            color: Colors.blueAccent,
+            icon: Icons.error,
+            primaryColor: Colors.redAccent,
           );
+
           return; // Don't proceed with submission
         }
 

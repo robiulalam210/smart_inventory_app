@@ -372,7 +372,7 @@ borderRadius: BorderRadius.circular(12)
     final selectedType = selectedAccountType.value;
 
     Map<String, dynamic> body = {
-      "ac_name": accountBloc.accountNameController.text.trim(),
+      "name": accountBloc.accountNameController.text.trim(),
       "ac_type": selectedType,
       "opening_balance": accountBloc.accountOpeningBalanceController.text
           .trim(),

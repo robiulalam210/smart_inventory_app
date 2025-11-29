@@ -84,9 +84,6 @@ class CustomerTableCard extends StatelessWidget {
                           columns: _buildColumns(dynamicColumnWidth),
                           rows: customers.asMap().entries.map((entry) {
                             final customer = entry.value;
-                            final dueValue = customer.totalDue != null
-                                ? double.tryParse(customer.totalDue.toString())
-                                : null;
 
                             return DataRow(
                               onSelectChanged: onCustomerTap != null ? (_) => onCustomerTap!() : null,
@@ -96,7 +93,7 @@ class CustomerTableCard extends StatelessWidget {
                                 _buildDataCell(customer.phone ?? "N/A", dynamicColumnWidth),
                                 _buildDataCell(customer.address ?? "N/A", dynamicColumnWidth),
                                 _buildStatusCell(customer.isActive ?? false, dynamicColumnWidth),
-                                _buildBalanceCell(dueValue, dynamicColumnWidth),
+                                _buildBalanceCell(customer, dynamicColumnWidth),
                                 _buildActionCell(customer, context, dynamicColumnWidth),
                               ],
                             );
@@ -205,23 +202,31 @@ class CustomerTableCard extends StatelessWidget {
     );
   }
 
-  DataCell _buildBalanceCell(double? dueValue, double width) {
+  DataCell _buildBalanceCell(CustomerModel customer, double width) {
+    double due = double.tryParse(customer.totalDue.toString()) ?? 0.0;
+    double paid = double.tryParse(customer.totalPaid.toString()) ?? 0.0;
+    double advance = double.tryParse(customer.advanceBalance.toString()) ?? 0.0;
+
+    /// Calculate Net Balance:
+    /// Balance = Due - Paid - Advance
+    /// Positive => Due
+    /// Negative => Advance
+    /// Zero => Paid
+    double balance = due - paid - advance;
+
     Color getAmountColor() {
-      if (dueValue == null) return Colors.grey;
-      if (dueValue < 0) return Colors.green;
-      if (dueValue > 0) return Colors.red;
-      return Colors.grey;
+      if (balance < 0) return Colors.green; // Advance
+      if (balance > 0) return Colors.red;   // Due
+      return Colors.grey;                   // Paid
     }
 
     String getAmountText() {
-      if (dueValue == null) return "N/A";
-      return dueValue.abs().toStringAsFixed(2);
+      return balance.abs().toStringAsFixed(2);
     }
 
     String getAmountLabel() {
-      if (dueValue == null) return "N/A";
-      if (dueValue < 0) return "Advance";
-      if (dueValue > 0) return "Due";
+      if (balance < 0) return "Advance";
+      if (balance > 0) return "Due";
       return "Paid";
     }
 

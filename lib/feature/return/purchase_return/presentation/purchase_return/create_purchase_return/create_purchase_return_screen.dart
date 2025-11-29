@@ -10,8 +10,8 @@ import '../../../../../../core/widgets/app_alert_dialog.dart';
 import '../../../../../../core/widgets/app_button.dart';
 import '../../../../../../core/widgets/app_dropdown.dart';
 import '../../../../../../core/widgets/app_loader.dart';
-import '../../../../../../core/widgets/app_snack_bar.dart';
 import '../../../../../../core/widgets/input_field.dart';
+import '../../../../../../core/widgets/show_custom_toast.dart';
 import '../../../../../accounts/presentation/bloc/account/account_bloc.dart';
 import '../../bloc/purchase_return/purchase_return_bloc.dart';
 
@@ -143,7 +143,14 @@ class _CreatePurchaseReturnScreenState
             appLoader(context, "Creating purchase return...");
           } else if (state is PurchaseReturnCreateSuccess) {
             Navigator.pop(context);
-            appSnackBar(context, state.message, color: AppColors.secondaryBabyBlue);
+            showCustomToast(
+              context: context,
+              title: 'Success!',
+              description:
+              state.message,
+              icon: Icons.check_circle,
+              primaryColor: Colors.green,
+            );
             Navigator.pop(context);
           } else if (state is PurchaseReturnError) {
             Navigator.pop(context);
@@ -464,17 +471,36 @@ class _CreatePurchaseReturnScreenState
                       onPressed: () {
                         if (formKey.currentState!.validate()) {
                           if (products.isEmpty) {
-                            appSnackBar(context, "Please select products to return", color: AppColors.redColor);
+
+                            showCustomToast(
+                              context: context,
+                              title: 'Warning!',
+                              description:"Please select products to return",
+                              icon: Icons.check_circle,
+                              primaryColor: Colors.yellow,
+                            );
                             return;
                           }
 
                           if (_selectedSupplier == null) {
-                            appSnackBar(context, "Please select a supplier", color: AppColors.redColor);
+                            showCustomToast(
+                              context: context,
+                              title: 'Warning!',
+                              description:  "Please select a supplier",
+                              icon: Icons.check_circle,
+                              primaryColor: Colors.yellow,
+                            );
                             return;
                           }
 
                           if (_selectedInvoice == null) {
-                            appSnackBar(context, "Please select an invoice", color: AppColors.redColor);
+                            showCustomToast(
+                              context: context,
+                              title: 'Warning!',
+                              description:"Please select an invoice",
+                              icon: Icons.check_circle,
+                              primaryColor: Colors.yellow,
+                            );
                             return;
                           }
 

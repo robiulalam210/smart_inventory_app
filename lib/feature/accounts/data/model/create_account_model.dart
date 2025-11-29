@@ -40,7 +40,7 @@ class Data {
   final String? balance;
   final String? bankName;
   final String? branch;
-  final String? openingBalance;
+  final dynamic openingBalance;
   final int? company;
 
   Data({

@@ -190,7 +190,9 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
       }
       clearData();
       emit(AccountAddSuccess());
-    } catch (error) {
+    } catch (error,st) {
+      print(error);
+      print(st);
       clearData();
       emit(AccountAddFailed(title: "Error", content: error.toString()));
     }
