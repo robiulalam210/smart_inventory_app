@@ -8,6 +8,7 @@ import '../../../../common/data/models/api_response_mod.dart';
 import '../../../../common/data/models/app_parse_json.dart';
 import '../../../data/model/account_active_model.dart';
 import '../../../data/model/account_model.dart';
+import '../../../data/model/create_account_model.dart';
 
 part 'account_event.dart';
 part 'account_state.dart';
@@ -181,7 +182,7 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
 
       ApiResponse response = appParseJson(
         jsonString,
-            (data) => AccountModel.fromJson(data),
+            (data) => CreateAccountModel.fromJson(data),
       );
 
       if (response.success == false) {
