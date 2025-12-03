@@ -74,7 +74,9 @@ Future<Map<String, dynamic>> postResponse({
       "message": "Unable to connect to the server. Please check your network connection and try again.",
       "data": null
     };
-  } catch (e) {
+  } catch (e,st) {
+    print(e);
+    print(st);
     logger.e("postResponse e: $e");
     return {
       "status": false,

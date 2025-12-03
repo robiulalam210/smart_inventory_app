@@ -9,8 +9,8 @@ List<AccountModel> accountModelFromJson(String str) => List<AccountModel>.from(j
 String accountModelToJson(List<AccountModel> data) => json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
 
 class AccountModel {
-  final int? acId;
-  final String? acName;
+  final int? id;
+  final String? name;
   final String? acType;
   final String? acNumber;
   final dynamic balance;
@@ -18,13 +18,13 @@ class AccountModel {
   final String? branch;
   final dynamic openingBalance;
   final int? company;
-  final dynamic status;
+  final String? status;
   final String? acNo;
   final dynamic number;
 
   AccountModel({
-    this.acId,
-    this.acName,
+    this.id,
+    this.name,
     this.acType,
     this.acNumber,
     this.balance,
@@ -38,8 +38,8 @@ class AccountModel {
   });
 
   factory AccountModel.fromJson(Map<String, dynamic> json) => AccountModel(
-    acId: json["id"],
-    acName: json["ac_name"],
+    id: json["id"],
+    name: json["name"],
     acType: json["ac_type"],
     acNumber: json["ac_number"],
     balance: json["balance"],
@@ -53,8 +53,8 @@ class AccountModel {
   );
 
   Map<String, dynamic> toJson() => {
-    "id": acId,
-    "ac_name": acName,
+    "id": id,
+    "name": name,
     "ac_type": acType,
     "ac_number": acNumber,
     "balance": balance,

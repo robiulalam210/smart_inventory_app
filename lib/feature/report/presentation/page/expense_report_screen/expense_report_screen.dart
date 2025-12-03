@@ -15,6 +15,7 @@ import 'package:meherin_mart/core/widgets/date_range.dart';
 import 'package:meherin_mart/feature/report/presentation/page/expense_report_screen/pdf.dart';
 
 import '../../../../../core/configs/app_routes.dart';
+import '../../../../../core/widgets/show_custom_toast.dart';
 import '../../../../../responsive.dart';
 import '../../../../expense/expense_head/data/model/expense_head_model.dart';
 import '../../../../expense/expense_head/presentation/bloc/expense_head/expense_head_bloc.dart';
@@ -123,9 +124,15 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
     setState(() => selectedDateRange = value);
 
     if (value != null && value.start.isAfter(value.end)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('End date cannot be before start date')),
+      showCustomToast(
+        context: context,
+        title: 'Alert!',
+        description:
+        'End date cannot be before start date',
+        icon: Icons.error,
+        primaryColor: Colors.redAccent,
       );
+
       return;
     }
 

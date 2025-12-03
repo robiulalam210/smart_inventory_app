@@ -16,6 +16,7 @@ import '../../../../../../core/widgets/app_button.dart';
 import '../../../../../../core/widgets/app_dropdown.dart';
 import '../../../../../../core/widgets/app_loader.dart';
 import '../../../../../../core/widgets/input_field.dart';
+import '../../../../../core/widgets/show_custom_toast.dart';
 import '../../data/model/product_model.dart';
 import '../bloc/products/products_bloc.dart';
 
@@ -383,18 +384,17 @@ class _ProductsFormState extends State<ProductsForm> {
       context.read<ProductsBloc>().add(
         FetchProductsList(context, pageNumber: 1, pageSize: 20),
       );
-
-      // Show success message
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            _isEditMode
-                ? 'Product updated successfully!'
-                : 'Product created successfully!',
-          ),
-          backgroundColor: Colors.green,
-        ),
+      showCustomToast(
+        context: context,
+        title: 'Success!',
+        description:
+              _isEditMode
+                  ? 'Product updated successfully!'
+                  : 'Product created successfully!',
+        icon: Icons.check_circle,
+        primaryColor: Colors.green,
       );
+
 
       Navigator.pop(context);
     } else if (state is ProductsAddFailed) {

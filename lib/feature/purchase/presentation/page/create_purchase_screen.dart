@@ -610,14 +610,14 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(5),
                       borderSide: BorderSide(
-                        color: AppColors.primaryColor.withOpacity(0.5),
+                        color: AppColors.primaryColor.withValues(alpha: 0.5),
                         width: 0.5,
                       ),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(5),
                       borderSide: BorderSide(
-                        color: AppColors.primaryColor.withOpacity(0.5),
+                        color: AppColors.primaryColor.withValues(alpha: 0.5),
                         width: 0.5,
                       ),
                     ),
@@ -703,14 +703,14 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(5),
                       borderSide: BorderSide(
-                        color: AppColors.primaryColor.withOpacity(0.5),
+                        color: AppColors.primaryColor.withValues(alpha: 0.5),
                         width: 0.5,
                       ),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(5),
                       borderSide: BorderSide(
-                        color: AppColors.primaryColor.withOpacity(0.5),
+                        color: AppColors.primaryColor.withValues(alpha: 0.5),
                         width: 0.5,
                       ),
                     ),
@@ -808,7 +808,7 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(5),
                       borderSide: BorderSide(
-                        color: AppColors.primaryColor.withOpacity(
+                        color: AppColors.primaryColor.withValues(alpha:
                           0.5,
                         ),
                         width: 0.5,
@@ -859,7 +859,7 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(5),
                       borderSide: BorderSide(
-                        color: AppColors.primaryColor.withOpacity(
+                        color: AppColors.primaryColor.withValues(alpha:
                           0.5,
                         ),
                         width: 0.5,
@@ -868,7 +868,7 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(5),
                       borderSide: BorderSide(
-                        color: AppColors.primaryColor.withOpacity(
+                        color: AppColors.primaryColor.withValues(alpha:
                           0.5,
                         ),
                         width: 0.5,
@@ -1518,7 +1518,7 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
         "vat": double.tryParse(vatController.text) ?? 0.0,
         "vat_type": selectedVatType,
 
-        "remark": "Purchase from mobile app",
+        // "remark": context.read<CreatePurchaseBloc>().n ,
       };
 
       // Add payment information if payment method is selected
@@ -1529,7 +1529,7 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
       }
 
 
-      log("Purchase Body: ${jsonEncode(body)}");
+      // log("Purchase Body: ${jsonEncode(body)}");
       context.read<CreatePurchaseBloc>().add(AddPurchase(body: body));
     }
   }

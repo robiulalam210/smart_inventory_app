@@ -7,6 +7,7 @@ import '../../../../../core/widgets/app_button.dart';
 import '../../../../../core/widgets/app_dropdown.dart';
 import '../../../../../core/widgets/app_loader.dart';
 import '../../../../../core/widgets/input_field.dart';
+import '../../../../../core/widgets/show_custom_toast.dart';
 import '../../../../accounts/presentation/bloc/account/account_bloc.dart';
 import '../../../../expense/presentation/bloc/expense_list/expense_bloc.dart';
 import '../../../../money_receipt/presentation/bloc/money_receipt/money_receipt_bloc.dart';
@@ -74,12 +75,16 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
 
       if (newQuantity > originalMaxQuantity) {
         newQuantity = originalMaxQuantity;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Cannot return more than $originalMaxQuantity items'),
-            backgroundColor: Colors.orange,
-          ),
+        showCustomToast(
+          context: context,
+          title: 'Alert!',
+          description:
+          'Cannot return more than $originalMaxQuantity items',
+          icon: Icons.error,
+          primaryColor: Colors.redAccent,
         );
+
+
       }
 
       item.quantity = newQuantity;

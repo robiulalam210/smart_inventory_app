@@ -46,6 +46,8 @@ class _PurchaseScreenState extends State<PurchaseScreen> {
     context.read<SupplierListBloc>().add(
       FetchSupplierList(context),
     );
+    context.read<SupplierInvoiceBloc>().add(FetchSupplierActiveList(context));
+
     _fetchApi(
       from: selectedDateRange?.start,
       to: selectedDateRange?.end,

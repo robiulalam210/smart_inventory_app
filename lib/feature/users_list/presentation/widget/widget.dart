@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/configs/configs.dart';
@@ -25,11 +26,11 @@ class UserTableCard extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final totalWidth = constraints.maxWidth;
-        const numColumns = 6; // No., Username, Email, Role, Status, Actions
         const minColumnWidth = 100.0;
 
+        // Calculate dynamic column width based on totalWidth
         final dynamicColumnWidth =
-        (totalWidth / numColumns).clamp(minColumnWidth, double.infinity);
+        (totalWidth / 8).clamp(minColumnWidth, double.infinity);
 
         return Container(
           decoration: BoxDecoration(
@@ -37,7 +38,7 @@ class UserTableCard extends StatelessWidget {
             color: Colors.white,
             boxShadow: [
               BoxShadow(
-                color: Colors.grey.withValues(alpha: 0.1),
+                color: Colors.grey.withOpacity(0.1),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -74,7 +75,7 @@ class UserTableCard extends StatelessWidget {
                             fontWeight: FontWeight.w700,
                             fontFamily: GoogleFonts.inter().fontFamily,
                           ),
-                          headingRowColor: WidgetStateProperty.all(
+                          headingRowColor: MaterialStateProperty.all(
                             AppColors.primaryColor,
                           ),
                           dataTextStyle: TextStyle(
@@ -90,10 +91,15 @@ class UserTableCard extends StatelessWidget {
                                   ? (_) => onUserTap!()
                                   : null,
                               cells: [
-                                _buildDataCell('${entry.key + 1}', dynamicColumnWidth * 0.6),
-                                _buildDataCell(user.username ?? "N/A", dynamicColumnWidth),
+                                _buildDataCell(
+                                    '${entry.key + 1}', dynamicColumnWidth * 0.5),
+                                _buildDataCell(
+                                    '${user.firstName ?? ""} ${user.lastName ?? ""}'.trim(),
+                                    dynamicColumnWidth),
                                 _buildDataCell(user.email ?? "N/A", dynamicColumnWidth),
                                 _buildDataCell(user.role ?? "N/A", dynamicColumnWidth),
+                                _buildDataCell(user.phone ?? "N/A", dynamicColumnWidth),
+                                _buildDataCell(user.company?.name ?? "N/A", dynamicColumnWidth),
                                 _buildStatusCell(_getUserStatus(user), dynamicColumnWidth),
                                 _buildActionCell(user, context, dynamicColumnWidth),
                               ],
@@ -116,14 +122,14 @@ class UserTableCard extends StatelessWidget {
     return [
       DataColumn(
         label: SizedBox(
-          width: columnWidth * 0.6,
+          width: columnWidth * 0.5,
           child: const Text('No.', textAlign: TextAlign.center),
         ),
       ),
       DataColumn(
         label: SizedBox(
           width: columnWidth,
-          child: const Text('Username', textAlign: TextAlign.center),
+          child: const Text('Full Name', textAlign: TextAlign.center),
         ),
       ),
       DataColumn(
@@ -136,6 +142,18 @@ class UserTableCard extends StatelessWidget {
         label: SizedBox(
           width: columnWidth,
           child: const Text('Role', textAlign: TextAlign.center),
+        ),
+      ),
+      DataColumn(
+        label: SizedBox(
+          width: columnWidth,
+          child: const Text('Phone', textAlign: TextAlign.center),
+        ),
+      ),
+      DataColumn(
+        label: SizedBox(
+          width: columnWidth,
+          child: const Text('Company', textAlign: TextAlign.center),
         ),
       ),
       DataColumn(
@@ -172,14 +190,9 @@ class UserTableCard extends StatelessWidget {
   }
 
   bool _getUserStatus(UsersListModel user) {
-    // Handle different possible status representations
     if (user.isActive != null) {
-      if (user.isActive is bool) {
-        return user.isActive as bool;
-      }
+      return user.isActive!;
     }
-
-    // Default to inactive if status is unclear
     return false;
   }
 
@@ -191,7 +204,9 @@ class UserTableCard extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: isActive ? Colors.green.withValues(alpha: 0.1) : Colors.red.withValues(alpha: 0.1),
+              color: isActive
+                  ? Colors.green.withOpacity(0.1)
+                  : Colors.red.withOpacity(0.1),
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
@@ -209,36 +224,20 @@ class UserTableCard extends StatelessWidget {
     );
   }
 
-  DataCell _buildActionCell(UsersListModel user, BuildContext context, double width) {
+  DataCell _buildActionCell(
+      UsersListModel user, BuildContext context, double width) {
     return DataCell(
       SizedBox(
         width: width,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Edit Button
-            // _buildActionButton(
-            //   icon: Iconsax.edit,
-            //   color: Colors.blue,
-            //   tooltip: 'Edit user',
-            //   onPressed: () => _showEditDialog(context, user),
-            // ),
-
-            // View Button (optional)
             _buildActionButton(
-              icon: HugeIcons.strokeRoundedView,
+              icon: Icons.visibility,
               color: Colors.green,
               tooltip: 'View user details',
               onPressed: () => _showViewDialog(context, user),
             ),
-
-            // // Delete Button
-            // _buildActionButton(
-            //   icon: HugeIcons.strokeRoundedDeleteThrow,
-            //   color: Colors.red,
-            //   tooltip: 'Delete user',
-            //   onPressed: () => _confirmDelete(context, user),
-            // ),
           ],
         ),
       ),
@@ -260,8 +259,6 @@ class UserTableCard extends StatelessWidget {
     );
   }
 
-
-
   void _showViewDialog(BuildContext context, UsersListModel user) {
     showDialog(
       context: context,
@@ -279,11 +276,14 @@ class UserTableCard extends StatelessWidget {
                   style: AppTextStyle.cardLevelHead(context),
                 ),
                 const SizedBox(height: 16),
+                _buildDetailRow(
+                    'Full Name:', '${user.firstName ?? ""} ${user.lastName ?? ""}'.trim()),
                 _buildDetailRow('Username:', user.username ?? 'N/A'),
                 _buildDetailRow('Email:', user.email ?? 'N/A'),
                 _buildDetailRow('Role:', user.role ?? 'N/A'),
+                _buildDetailRow('Phone:', user.phone ?? 'N/A'),
+                _buildDetailRow('Company:', user.company?.name ?? 'N/A'),
                 _buildDetailRow('Status:', _getUserStatus(user) ? 'Active' : 'Inactive'),
-                // Add more fields as needed
                 const SizedBox(height: 20),
                 Align(
                   alignment: Alignment.centerRight,
@@ -307,7 +307,7 @@ class UserTableCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: 80,
+            width: 100,
             child: Text(
               label,
               style: const TextStyle(
@@ -337,7 +337,7 @@ class UserTableCard extends StatelessWidget {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.1),
+            color: Colors.grey.withOpacity(0.1),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -350,7 +350,7 @@ class UserTableCard extends StatelessWidget {
           Icon(
             Icons.people_outline,
             size: 48,
-            color: Colors.grey.withValues(alpha: 0.5),
+            color: Colors.grey.withOpacity(0.5),
           ),
           const SizedBox(height: 16),
           Text(

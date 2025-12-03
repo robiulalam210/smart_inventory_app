@@ -23,6 +23,7 @@ class CustomerModel {
   final dynamic totalSales;
   final DateTime? dateCreated;
   final int? createdBy;
+  final dynamic advanceBalance; // 👈 NEW
 
   CustomerModel({
     this.id,
@@ -39,6 +40,7 @@ class CustomerModel {
     this.totalSales,
     this.dateCreated,
     this.createdBy,
+    this.advanceBalance, // 👈 NEW
   });
 
   factory CustomerModel.fromJson(Map<String, dynamic> json) => CustomerModel(
@@ -54,8 +56,11 @@ class CustomerModel {
     amountType: json["amount_type"],
     company: json["company"],
     totalSales: json["total_sales"],
-    dateCreated: json["date_created"] == null ? null : DateTime.parse(json["date_created"]),
+    dateCreated: json["date_created"] == null
+        ? null
+        : DateTime.parse(json["date_created"]),
     createdBy: json["created_by"],
+    advanceBalance: json["advance_balance"] ?? 0, // 👈 NEW
   );
 
   Map<String, dynamic> toJson() => {
@@ -73,5 +78,6 @@ class CustomerModel {
     "total_sales": totalSales,
     "date_created": dateCreated?.toIso8601String(),
     "created_by": createdBy,
+    "advance_balance": advanceBalance, // 👈 NEW
   };
 }

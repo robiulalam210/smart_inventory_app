@@ -42,7 +42,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
     selectedAccountType.value = account.acType ?? '';
 
     // Set controllers
-    accountBloc.accountNameController.text = account.acName ?? '';
+    accountBloc.accountNameController.text = account.name ?? '';
     accountBloc.accountNumberController.text = account.acNumber ?? '';
     accountBloc.bankNameController.text = account.bankName ?? '';
     accountBloc.branchNameController.text = account.branch ?? '';
@@ -372,7 +372,7 @@ borderRadius: BorderRadius.circular(12)
     final selectedType = selectedAccountType.value;
 
     Map<String, dynamic> body = {
-      "ac_name": accountBloc.accountNameController.text.trim(),
+      "name": accountBloc.accountNameController.text.trim(),
       "ac_type": selectedType,
       "opening_balance": accountBloc.accountOpeningBalanceController.text
           .trim(),

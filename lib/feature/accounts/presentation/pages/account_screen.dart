@@ -180,7 +180,7 @@ class _AccountScreenState extends State<AccountScreen> {
                                   if (!shouldDelete) return;
 
                                   context.read<AccountBloc>().add(
-                                    DeleteAccount(account.acId.toString()),
+                                    DeleteAccount(account.id.toString()),
                                   );
                                 },
                               ),
@@ -230,7 +230,7 @@ class _AccountScreenState extends State<AccountScreen> {
 
     // Pre-fill the form with account data
     final accountBloc = context.read<AccountBloc>();
-    accountBloc.accountNameController.text = account.acName ?? "";
+    accountBloc.accountNameController.text = account.name ?? "";
     accountBloc.accountNumberController.text = account.acNumber ?? "";
     accountBloc.bankNameController.text = account.bankName ?? "";
     accountBloc.branchNameController.text = account.branch ?? "";
@@ -244,7 +244,7 @@ class _AccountScreenState extends State<AccountScreen> {
           child: SizedBox(
             width: AppSizes.width(context) * 0.50,
             child: CreateAccountScreen(
-              id: account.acId.toString(),
+              id: account.id.toString(),
               submitText: "Update Account",
               account: account, // Pass the account for pre-filling
             ),
