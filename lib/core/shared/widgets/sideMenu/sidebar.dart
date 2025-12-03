@@ -106,8 +106,16 @@ class _SidebarState extends State<Sidebar> {
         MenuItem(title: "Brand", index: 33),
         MenuItem(title: "Category", index: 34),
         MenuItem(title: "Group", index: 35),
-        MenuItem(title: "Transaction", index: 36),
-        MenuItem(title: "Profile", index: 37),
+        MenuItem(title: "Profile", index: 36),
+      ],
+    ),
+    MenuSection(
+      title: "Transfer Balance",
+      items: [
+        MenuItem(title: "Account Transfer From", index: 37),
+        MenuItem(title: "Account Transfer List", index: 38),
+        MenuItem(title: "Translation", index: 39),
+
       ],
     ),
   ];
