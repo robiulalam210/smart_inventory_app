@@ -1,5 +1,6 @@
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
+import 'package:meherin_mart/feature/account_transfer/presentation/bloc/account_transfer/account_transfer_bloc.dart';
 import 'package:meherin_mart/feature/customer/presentation/bloc/customer/customer_bloc.dart';
 import 'package:meherin_mart/feature/expense/expense_head/presentation/bloc/expense_head/expense_head_bloc.dart';
 import 'package:meherin_mart/feature/expense/presentation/bloc/expense_list/expense_bloc.dart';
@@ -106,6 +107,7 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (_) => PurchaseReturnBloc()),
         BlocProvider(create: (_) => BadStockListBloc()),
         BlocProvider(create: (_) => TransactionBloc()),
+        BlocProvider(create: (_) => AccountTransferBloc()),
       ],
       child: Center(
         child: MaterialApp(

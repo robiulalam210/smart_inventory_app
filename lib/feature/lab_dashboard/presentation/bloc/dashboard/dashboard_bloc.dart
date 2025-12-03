@@ -17,6 +17,8 @@ import 'package:meherin_mart/feature/sales/presentation/pages/pos_sale_screen.da
 import '../../../../../core/configs/configs.dart';
 import '../../../../../core/repositories/get_response.dart';
 import '../../../../../enery_screen.dart';
+import '../../../../account_transfer/presentation/screen/account_transfer_form.dart';
+import '../../../../account_transfer/presentation/screen/account_transfer_screen.dart';
 import '../../../../customer/presentation/pages/customer_screen.dart';
 import '../../../../expense/expense_sub_head/presentation/pages/expense_sub_head_screen.dart';
 import '../../../../money_receipt/presentation/page/monery_receipt_create.dart';
@@ -69,6 +71,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     AppWrapper(child: CustomerScreen()),
 
     AppWrapper(child: SupplierScreen()),
+
     AppWrapper(child: SupplierPaymentScreen()),
 
 
@@ -101,10 +104,12 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     AppWrapper(child: BrandScreen()),
     AppWrapper(child: CategoriesScreen()),
     AppWrapper(child: GroupsScreen()),
-    AppWrapper(child: TransactionScreen()),
     AppWrapper(child: ProfileScreen()),
 
 
+    AppWrapper(child: AccountTransferForm()),
+    AppWrapper(child: AccountTransferScreen()),
+    AppWrapper(child: TransactionScreen()),
 
 
 
