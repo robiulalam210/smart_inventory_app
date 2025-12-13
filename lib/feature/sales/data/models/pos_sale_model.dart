@@ -25,13 +25,13 @@ class PosSaleModel {
   final dynamic paidAmount;
   final dynamic dueAmount;
   final dynamic changeAmount;
-  final String? overallDiscount;
+  final dynamic overallDiscount;
   final String? overallDiscountType;
-  final String? overallDeliveryCharge;
+  final dynamic overallDeliveryCharge;
   final String? overallDeliveryType;
-  final String? overallServiceCharge;
+  final dynamic overallServiceCharge;
   final String? overallServiceType;
-  final String? overallVatAmount;
+  final dynamic overallVatAmount;
   final String? overallVatType;
   final String? paymentMethod;
   final int? accountId;
