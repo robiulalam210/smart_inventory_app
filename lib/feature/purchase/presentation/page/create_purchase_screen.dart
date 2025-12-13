@@ -1343,84 +1343,6 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
       });
     }
   }
-
-  // void _submitForm() {
-  //   if (formKey.currentState!.validate()) {
-  //     // Validate that at least one product is selected
-  //     bool hasValidProducts = false;
-  //     for (var product in products) {
-  //       if (product["product_id"] != null) {
-  //         hasValidProducts = true;
-  //         break;
-  //       }
-  //     }
-  //
-  //     if (!hasValidProducts) {
-  //       appAlertDialog(
-  //         context,
-  //         "Please add at least one product to the purchase.",
-  //         title: "Validation Error",
-  //         actions: [
-  //           TextButton(
-  //             onPressed: () => Navigator.pop(context),
-  //             child: const Text("OK"),
-  //           ),
-  //         ],
-  //       );
-  //       return;
-  //     }
-  //
-  //     print(products);
-  //     var transferProducts = products
-  //         .where((product) => product["product_id"] != null)
-  //         .map((product) => {
-  //       "product_id": product["product_id"].toString(),
-  //       "qty": int.tryParse(product["quantity"].toString()) ?? 1,
-  //       "price": double.tryParse(product["price"].toString()) ?? 0.0,
-  //       "discount": double.tryParse(product["discount"].toString()) ?? 0.0,
-  //       "discount_type": product["discount_type"].toString(),
-  //     })
-  //         .toList();
-  //
-  //     Map<String, dynamic> body = {
-  //       "supplier": context.read<CreatePurchaseBloc>().supplierListModel?.id.toString(),
-  //       "purchase_date": context.read<CreatePurchaseBloc>().dateEditingController.text.trim(),
-  //       "purchase_items": transferProducts,
-  //
-  //       // Charges
-  //       "overall_discount": double.tryParse(
-  //         context.read<CreatePurchaseBloc>().discountOverAllController.text,
-  //       ) ?? 0.0,
-  //       "overall_discount_type": selectedOverallDiscountType,
-  //
-  //       "overall_service_charge": double.tryParse(
-  //         context.read<CreatePurchaseBloc>().serviceChargeOverAllController.text,
-  //       ) ?? 0.0,
-  //       "overall_service_charge_type": selectedOverallServiceChargeType,
-  //
-  //       "overall_delivery_charge": double.tryParse(
-  //         context.read<CreatePurchaseBloc>().deliveryChargeOverAllController.text,
-  //       ) ?? 0.0,
-  //       "overall_delivery_charge_type": selectedOverallDeliveryType,
-  //
-  //       "vat": double.tryParse(vatController.text) ?? 0.0,
-  //       "vat_type": selectedVatType,
-  //
-  //       "remark": "Purchase from mobile app",
-  //     };
-  //
-  //     // Add payment information if payment method is selected
-  //     if (context.read<CreatePurchaseBloc>().selectedPaymentMethod.isNotEmpty) {
-  //       body["payment_method"] = context.read<CreatePurchaseBloc>().selectedPaymentMethod;
-  //       body["account"] = context.read<CreatePurchaseBloc>().selectedAccountId;
-  //       body["paid_amount"] = paidAmount;
-  //     }
-  //
-  //     log("Purchase Body: ${jsonEncode(body)}");
-  //     context.read<CreatePurchaseBloc>().add(AddPurchase(body: body));
-  //   }
-  // }
-
   void _submitForm() {
     if (formKey.currentState!.validate()) {
       // Validate that at least one product is selected
@@ -1470,9 +1392,8 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
         return;
       }
 
-      // DEBUG: Print products with detailed information
-
-
+      // Calculate totals from products
+      double subtotal = 0.0;
       var transferProducts = products
           .where((product) => product["product_id"] != null)
           .map((product) {
@@ -1480,18 +1401,91 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
         double price = double.tryParse(product["price"].toString()) ?? 0.0;
         int qty = int.tryParse(product["quantity"].toString()) ?? 1;
         double discount = double.tryParse(product["discount"].toString()) ?? 0.0;
+        String discountType = product["discount_type"].toString();
+
+        // Calculate item total
+        double itemTotal = price * qty;
+        double itemDiscount = 0.0;
+
+        if (discountType == 'percentage') {
+          itemDiscount = itemTotal * (discount / 100);
+        } else {
+          itemDiscount = discount;
+        }
+
+        double itemNetTotal = itemTotal - itemDiscount;
+        subtotal += itemNetTotal;
 
         return {
           "product_id": product["product_id"].toString(),
           "qty": qty,
           "price": price,
           "discount": discount,
-          "discount_type": product["discount_type"].toString(),
+          "discount_type": discountType,
         };
-      })
-          .toList();
+      }).toList();
 
+      // Calculate charges based on subtotal
+      double overallDiscount = double.tryParse(
+        context.read<CreatePurchaseBloc>().discountOverAllController.text,
+      ) ?? 0.0;
 
+      double serviceCharge = double.tryParse(
+        context.read<CreatePurchaseBloc>().serviceChargeOverAllController.text,
+      ) ?? 0.0;
+
+      double deliveryCharge = double.tryParse(
+        context.read<CreatePurchaseBloc>().deliveryChargeOverAllController.text,
+      ) ?? 0.0;
+
+      double vat = double.tryParse(vatController.text) ?? 0.0;
+
+      // Apply overall discount
+      double netAfterDiscount = subtotal;
+      if (selectedOverallDiscountType == 'percentage' && overallDiscount > 0) {
+        double discountAmount = subtotal * (overallDiscount / 100);
+        netAfterDiscount = subtotal - discountAmount;
+      } else if (selectedOverallDiscountType == 'fixed' && overallDiscount > 0) {
+        netAfterDiscount = subtotal - overallDiscount;
+      }
+
+      // Apply charges
+      double totalCharges = 0.0;
+
+      // Service charge
+      if (selectedOverallServiceChargeType == 'percentage' && serviceCharge > 0) {
+        totalCharges += netAfterDiscount * (serviceCharge / 100);
+      } else if (selectedOverallServiceChargeType == 'fixed' && serviceCharge > 0) {
+        totalCharges += serviceCharge;
+      }
+
+      // Delivery charge
+      if (selectedOverallDeliveryType == 'percentage' && deliveryCharge > 0) {
+        totalCharges += netAfterDiscount * (deliveryCharge / 100);
+      } else if (selectedOverallDeliveryType == 'fixed' && deliveryCharge > 0) {
+        totalCharges += deliveryCharge;
+      }
+
+      // VAT
+      if (selectedVatType == 'percentage' && vat > 0) {
+        totalCharges += netAfterDiscount * (vat / 100);
+      } else if (selectedVatType == 'fixed' && vat > 0) {
+        totalCharges += vat;
+      }
+
+      double grandTotal = netAfterDiscount + totalCharges;
+
+      // Debug logging
+      print("=== PURCHASE CALCULATION DEBUG ===");
+      print("Subtotal: $subtotal");
+      print("Overall Discount: $overallDiscount (${selectedOverallDiscountType})");
+      print("Net after discount: $netAfterDiscount");
+      print("Service Charge: $serviceCharge (${selectedOverallServiceChargeType})");
+      print("Delivery Charge: $deliveryCharge (${selectedOverallDeliveryType})");
+      print("VAT: $vat (${selectedVatType})");
+      print("Total Charges: $totalCharges");
+      print("Grand Total: $grandTotal");
+      print("================================");
 
       Map<String, dynamic> body = {
         "instant_pay": _isChecked,
@@ -1500,25 +1494,19 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
         "purchase_items": transferProducts,
 
         // Charges
-        "overall_discount": double.tryParse(
-          context.read<CreatePurchaseBloc>().discountOverAllController.text,
-        ) ?? 0.0,
+        "overall_discount": overallDiscount,
         "overall_discount_type": selectedOverallDiscountType,
 
-        "overall_service_charge": double.tryParse(
-          context.read<CreatePurchaseBloc>().serviceChargeOverAllController.text,
-        ) ?? 0.0,
+        "overall_service_charge": serviceCharge,
         "overall_service_charge_type": selectedOverallServiceChargeType,
 
-        "overall_delivery_charge": double.tryParse(
-          context.read<CreatePurchaseBloc>().deliveryChargeOverAllController.text,
-        ) ?? 0.0,
+        "overall_delivery_charge": deliveryCharge,
         "overall_delivery_charge_type": selectedOverallDeliveryType,
 
-        "vat": double.tryParse(vatController.text) ?? 0.0,
+        "vat": vat,
         "vat_type": selectedVatType,
 
-        // "remark": context.read<CreatePurchaseBloc>().n ,
+        // "remark": context.read<CreatePurchaseBloc>().remarkController.text.trim(),
       };
 
       // Add payment information if payment method is selected
@@ -1528,9 +1516,12 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
         body["paid_amount"] = paidAmount;
       }
 
+      // Log the request body for debugging
+      print("Purchase Request Body: $body");
 
-      // log("Purchase Body: ${jsonEncode(body)}");
+      // Send the request
       context.read<CreatePurchaseBloc>().add(AddPurchase(body: body));
     }
   }
+
 }
