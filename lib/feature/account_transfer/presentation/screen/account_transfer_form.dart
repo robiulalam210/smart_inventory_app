@@ -598,7 +598,11 @@ class _AccountTransferFormState extends State<AccountTransferForm> {
     }
 
     // Check if from account has sufficient balance
-    final fromBalance = double.tryParse(transferBloc.fromAccountModel!.balance ?? '0') ?? 0;
+
+    final fromBalance = transferBloc.fromAccountModel?.balance is String
+        ? double.tryParse(transferBloc.fromAccountModel?.balance) ?? 0.0
+        : (transferBloc.fromAccountModel?.balance ?? 0.0);
+
     final transferAmount = double.tryParse(transferBloc.amountController.text.trim()) ?? 0;
 
     if (transferAmount > fromBalance) {

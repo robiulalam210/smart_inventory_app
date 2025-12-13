@@ -1,5 +1,4 @@
-// lib/account_transfer/data/models/account_transfer_model.dart
-import 'package:intl/intl.dart';
+
 
 class AccountTransferModel {
   final int? id;
