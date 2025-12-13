@@ -1,9 +1,6 @@
 // lib/account_transfer/presentation/screens/account_transfer_screen.dart
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import 'package:lottie/lottie.dart';
 import '../../../../core/configs/configs.dart';
 import '../../../../core/shared/widgets/sideMenu/sidebar.dart';
 import '../../../../core/widgets/app_alert_dialog.dart';
@@ -183,7 +180,8 @@ class _AccountTransferScreenState extends State<AccountTransferScreen> {
                 );
                 _fetchApi();
               } else if (state is ExecuteTransferFailed) {
-                Navigator.pop(context);
+                Navigator.pop(context);                _fetchApi();
+
                 appAlertDialog(
                   context,
                   state.content,
@@ -209,6 +207,8 @@ class _AccountTransferScreenState extends State<AccountTransferScreen> {
                 _fetchApi();
               } else if (state is ReverseTransferFailed) {
                 Navigator.pop(context);
+                _fetchApi();
+
                 appAlertDialog(
                   context,
                   state.content,
@@ -234,6 +234,8 @@ class _AccountTransferScreenState extends State<AccountTransferScreen> {
                 _fetchApi();
               } else if (state is CancelTransferFailed) {
                 Navigator.pop(context);
+                _fetchApi();
+
                 appAlertDialog(
                   context,
                   state.content,
@@ -736,7 +738,7 @@ class _AccountTransferScreenState extends State<AccountTransferScreen> {
               : "Select Date Range",
           onPressed: () => _showDateRangePicker(context),
           color: startDate != null && endDate != null
-              ? AppColors.primaryColor.withOpacity(0.8)
+              ? AppColors.primaryColor.withValues(alpha: 0.8)
               : AppColors.primaryColor,
         ),
 
@@ -763,7 +765,7 @@ class _AccountTransferScreenState extends State<AccountTransferScreen> {
                 isReversalNotifier.value = value;
                 _fetchApi(isReversal: value);
               },
-              activeColor: AppColors.primaryColor,
+              activeThumbColor: AppColors.primaryColor,
             ),
           ],
         ),

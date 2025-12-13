@@ -1,8 +1,6 @@
 // lib/account_transfer/presentation/widget/account_transfer_card.dart
-import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:meherin_mart/core/configs/configs.dart';
-import 'package:iconsax/iconsax.dart';
+import '/core/configs/configs.dart';
 
 import '../../../data/model/account_transfer_model.dart';
 

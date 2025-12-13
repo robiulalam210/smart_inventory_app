@@ -353,9 +353,10 @@ class AccountTransferBloc extends Bloc<AccountTransferEvent, AccountTransferStat
       );
       final jsonString = jsonEncode(res);
 
-      ApiResponse response = appParseJson(
+
+      final ApiResponse response = appParseJson(
         jsonString,
-            (data) => AccountTransferModel.fromJson(data),
+            (_) => null, // ✅ no model parsing
       );
 
       if (response.success == false) {
@@ -385,39 +386,41 @@ class AccountTransferBloc extends Bloc<AccountTransferEvent, AccountTransferStat
 
     try {
       final Map<String, dynamic> body = {};
-      if (event.reason != null && event.reason!.isNotEmpty) {
-        body['reason'] = event.reason!;
+      if (event.reason?.isNotEmpty == true) {
+        body['reason'] = event.reason;
       }
 
       final res = await postResponse(
         url: '${AppUrls.baseUrl}/transfers/${event.transferId}/cancel/',
         payload: body,
       );
+
       final jsonString = jsonEncode(res);
 
-      ApiResponse response = appParseJson(
+      final ApiResponse response = appParseJson(
         jsonString,
-            (data) => AccountTransferModel.fromJson(data),
+            (_) => null, // ✅ no model parsing
       );
 
-      if (response.success == false) {
+      if (response.success != true) {
         emit(CancelTransferFailed(
           title: 'Error',
-          content: response.message ?? "",
+          content: response.message ?? 'Cancel failed',
         ));
         return;
       }
 
       emit(CancelTransferSuccess());
     } catch (error, st) {
-      print(error);
-      print(st);
+      debugPrint(error.toString());
+      debugPrintStack(stackTrace: st);
       emit(CancelTransferFailed(
         title: "Error",
         content: error.toString(),
       ));
     }
   }
+
 
   void _onResetForm(ResetForm event, Emitter<AccountTransferState> emit) {
     resetForm();
