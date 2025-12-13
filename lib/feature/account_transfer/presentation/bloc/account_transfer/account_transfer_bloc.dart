@@ -182,7 +182,7 @@ class AccountTransferBloc extends Bloc<AccountTransferEvent, AccountTransferStat
 
     try {
       final res = await getResponse(
-        url: '/api/transfers/available_accounts/',
+        url: '${AppUrls.baseUrl}/transfers/available_accounts/',
         context: event.context,
       );
 
@@ -317,14 +317,16 @@ class AccountTransferBloc extends Bloc<AccountTransferEvent, AccountTransferStat
           content: response.message ?? "",
         ));
         return;
+      }else{
+        final transfer = AccountTransferModel.fromJson(response.data!);
+        list.insert(0, transfer);
+
+        emit(QuickTransferSuccess(transfer: transfer));
       }
       resetForm();
 
       // Add to list
-      final transfer = AccountTransferModel.fromJson(response.data!);
-      list.insert(0, transfer);
 
-      emit(QuickTransferSuccess(transfer: transfer));
     } catch (error, st) {
       print(error);
       print(st);
@@ -365,9 +367,10 @@ class AccountTransferBloc extends Bloc<AccountTransferEvent, AccountTransferStat
           content: response.message ?? "",
         ));
         return;
-      }
+      }else{
+        emit(ReverseTransferSuccess());
 
-      emit(ReverseTransferSuccess());
+      }
     } catch (error, st) {
       print(error);
       print(st);
