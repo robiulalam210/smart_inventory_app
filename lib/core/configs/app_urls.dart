@@ -1,5 +1,5 @@
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-final bool isLive = false; // Set to true for production environment
+final bool isLive = true; // Set to true for production environment
 
 class AppUrls {
 
@@ -35,7 +35,7 @@ class AppUrls {
   static final String transactions          = '$baseUrl/transactions/';
   static final String customer          = '$baseUrl/customers/';
   static final String customerActive          = '$baseUrl/customers-active';
-  static final String accountActive          = '$baseUrl/accounts/?is_active=true&no_pagination=true';
+  static final String accountActive          = '$baseUrl/accounts/?is_active=true';
   static final String administrationUser          = '$baseUrl/users/';
 
 

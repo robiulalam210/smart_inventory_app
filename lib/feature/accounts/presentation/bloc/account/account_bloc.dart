@@ -91,7 +91,7 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
 
       // Add filter parameters only
       Map<String, String> queryParams = {
-        // "no_pagination": "true"  // Fixed syntax - use colon and string value
+        "no_pagination": "true"  // Fixed syntax - use colon and string value
       };
 
       if (event.filterText.isNotEmpty) {
@@ -175,7 +175,7 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
 
     try {
       final res = await postResponse(
-        url: AppUrls.account,
+        url: AppUrls.accountNON,
         payload: event.body,
       );
       final jsonString = jsonEncode(res);
