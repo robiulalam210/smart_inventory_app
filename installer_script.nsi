@@ -1,4 +1,4 @@
-!define APP_NAME        "Meherin Mart Release 1.0.0"
+!define APP_NAME        "Meherin Mart Release 1.0.1"
 !define REG_APP_KEY     "MeherinMart_App"
 !define APP_VERSION     "1.0.0"
 !define EXE_NAME        "meherin_mart.exe"
