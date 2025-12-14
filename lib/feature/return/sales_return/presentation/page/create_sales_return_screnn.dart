@@ -1,6 +1,8 @@
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:meherin_mart/feature/accounts/data/model/account_active_model.dart';
 import 'package:meherin_mart/feature/return/sales_return/data/model/sales_invoice_model.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../core/configs/configs.dart';
 import '../../../../../core/widgets/app_button.dart';
@@ -12,8 +14,6 @@ import '../../../../accounts/presentation/bloc/account/account_bloc.dart';
 import '../../../../expense/presentation/bloc/expense_list/expense_bloc.dart';
 import '../../../../money_receipt/presentation/bloc/money_receipt/money_receipt_bloc.dart';
 import '../sales_return_bloc/sales_return_bloc.dart';
-
-// Your other imports...
 
 class CreateSalesReturnScreen extends StatefulWidget {
   const CreateSalesReturnScreen({super.key});
@@ -42,6 +42,28 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
   void onProductChanged(SalesInvoiceModel? newVal) {
     if (newVal == null) return;
 
+    print(newVal);
+    print(newVal.invoiceNo);
+    // DEBUG: Print the invoice data to see structure
+    print("📦 Invoice Data Received:");
+    print("Invoice No: ${newVal.invoiceNo}");
+    print("Customer: ${newVal.customerName}");
+
+    if (newVal.items != null) {
+      print("Items count: ${newVal.items!.length}");
+      for (var i = 0; i < newVal.items!.length; i++) {
+        var item = newVal.items![i];
+        print("Item $i:");
+        print("  - productName: ${item.productName}");
+        print("  - productId: ${item.id}");
+        print("  - quantity: ${item.quantity}");
+        print("  - unitPrice: ${item.unitPrice}");
+        print("  - subtotal: ${item.subtotal}");
+        // Print ALL fields to see what's available
+        print("  - All fields: ${item.toJson()}");
+      }
+    }
+
     setState(() {
       // Update customer name
       String name = newVal.customerName ?? "Walk-in-customer";
@@ -51,14 +73,24 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
       products.clear();
       if (newVal.items != null) {
         for (var item in newVal.items!) {
+          // FIX: Try multiple possible field names for product ID
+          int? productId = item.productId ??
+              item.id  // if snake_case
+              ;   // if nested object
+
+          if (productId == null) {
+            print("⚠️ WARNING: Could not find productId for ${item.productName}");
+            print("   Available fields: ${item.toJson().keys.toList()}");
+          }
+
           products.add(Item(
-            productId: item.productId,
+            productId: productId,
             productName: item.productName,
-            unitPrice: double.tryParse(item.unitPrice.toString()) ?? 0.0,
-            totalPrice: double.tryParse(item.subtotal.toString()) ?? 0.0,
+            unitPrice: double.tryParse(item.unitPrice?.toString() ?? "0") ?? 0.0,
+            totalPrice: double.tryParse(item.subtotal?.toString() ?? "0") ?? 0.0,
             quantity: item.quantity ?? 1,
-            discount: double.tryParse(item.discount.toString()) ?? 0.0,
-            discountType: item.discountType,
+            discount: double.tryParse(item.discount?.toString() ?? "0") ?? 0.0,
+            discountType: item.discountType ?? "fixed",
             originalQuantity: item.quantity ?? 1,
           ));
         }
@@ -78,13 +110,10 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
         showCustomToast(
           context: context,
           title: 'Alert!',
-          description:
-          'Cannot return more than $originalMaxQuantity items',
+          description: 'Cannot return more than $originalMaxQuantity items',
           icon: Icons.error,
           primaryColor: Colors.redAccent,
         );
-
-
       }
 
       item.quantity = newQuantity;
@@ -104,9 +133,6 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
     return products.fold(0.0, (sum, item) => sum + (item.totalPrice ?? 0));
   }
 
-  // Add these missing methods
-
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -123,9 +149,9 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
             if (state is InvoiceListLoading) {
               appLoader(context, "Loading invoices...");
             } else if (state is InvoiceListSuccess) {
-              Navigator.pop(context); // Close loader - REMOVED DUPLICATE
+              Navigator.pop(context);
             } else if (state is InvoiceError) {
-              Navigator.pop(context); // Close loader
+              Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(state.content),
@@ -144,12 +170,11 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
-                    Expanded(child:  _buildReceiptNumberDropdown(),),
-                    const SizedBox(width: 12),
-                    Expanded(child:  _buildCustomerNameField(),),
-                  ],),
-
-
+                      Expanded(child: _buildReceiptNumberDropdown()),
+                      const SizedBox(width: 12),
+                      Expanded(child: _buildCustomerNameField()),
+                    ],
+                  ),
 
                   if (products.isNotEmpty) _buildProductsList(),
                   if (products.isNotEmpty) _buildTotalAmount(),
@@ -169,7 +194,6 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
   Widget _buildReceiptNumberDropdown() {
     return BlocBuilder<SalesReturnBloc, SalesReturnState>(
       buildWhen: (previous, current) {
-        // Rebuild only when invoice list states change
         return current is InvoiceListLoading ||
             current is InvoiceListSuccess ||
             current is InvoiceError;
@@ -201,12 +225,14 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
           onChanged: (newVal) {
             if (newVal != null) {
               setState(() {
+                print("obs${newVal}");
                 bloc.selectedInvoice = newVal;
                 onProductChanged(newVal);
               });
             }
           },
-          validator: (value) => value == null ? 'Please select Receipt Number' : null,
+          validator: (value) =>
+          value == null ? 'Please select Receipt Number' : null,
           itemBuilder: (item) => DropdownMenuItem<SalesInvoiceModel>(
             value: item,
             child: Column(
@@ -292,22 +318,34 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(          crossAxisAlignment: CrossAxisAlignment.start,
-
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
-                  child: Text(
-                    item.productName ?? 'Unknown Product',
-                    style: AppTextStyle.cardTitle(context).copyWith(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        item.productName ?? 'Unknown Product',
+                        style: AppTextStyle.cardTitle(context).copyWith(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      if (item.productId != null)
+                        Text(
+                          'ID: ${item.productId}',
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: Colors.grey,
+                          ),
+                        ),
+                    ],
                   ),
                 ),
-
                 Row(
                   children: [
                     Text(
@@ -368,13 +406,13 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
                       ),
                     ),
                   ],
-                ),                    const SizedBox(width: 8),
-
+                ),
+                const SizedBox(width: 8),
                 if (products.length > 1)
                   IconButton(
                     onPressed: () => _removeProduct(index),
                     icon: const Icon(
-                      HugeIcons.strokeRoundedDelete02,
+                      Icons.delete_outline,
                       size: 20,
                       color: Colors.red,
                     ),
@@ -384,7 +422,6 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
               ],
             ),
             const SizedBox(height: 8),
-
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -452,8 +489,8 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
   }
 
   Widget _buildTotalAmount() {
-    return Container(      color: AppColors.background,
-
+    return Container(
+      color: AppColors.background,
       padding: const EdgeInsets.all(8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -481,24 +518,16 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
   Widget _buildAdditionalFields() {
     return Column(
       children: [
-
         Row(children: [
-          Expanded(child:  _buildPaymentMethodDropdown(),),
+          Expanded(child: _buildPaymentMethodDropdown()),
           const SizedBox(width: 8),
-          Expanded(child:  _buildAccountDropdown(),),
-
-        ],),
-
-
+          Expanded(child: _buildAccountDropdown()),
+        ]),
         Row(children: [
-          Expanded(child:    _buildReturnDateField(),),
+          Expanded(child: _buildReturnDateField()),
           const SizedBox(width: 8),
-          Expanded(child:  _buildRemarkField(),),
-
-        ],),
-
-
-
+          Expanded(child: _buildRemarkField()),
+        ]),
       ],
     );
   }
@@ -547,7 +576,8 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
         context.read<MoneyReceiptBloc>().selectedPaymentMethod = newVal.toString();
         setState(() {});
       },
-      validator: (value) => value == null ? 'Please select a payment method' : null,
+      validator: (value) =>
+      value == null ? 'Please select a payment method' : null,
       itemBuilder: (item) => DropdownMenuItem(
         value: item,
         child: Text(
@@ -654,27 +684,38 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
                 return;
               }
 
-              var returnProducts = products
-                  .where((product) => (product.quantity ?? 0) > 0)
-                  .map((product) => {
-                "product_id": product.productId,
-                "quantity": product.quantity,
-                "unit_price": product.unitPrice,
-                "discount": product.discount,
-                "discount_type": product.discountType,
-                "total": product.totalPrice,
-              })
-                  .toList();
+              // VALIDATE: Check if any product has null productId
+              List<Item> validProducts = products.where((product) {
+                if (product.productId == null) {
+                  print("❌ Invalid product: ${product.productName} has null productId");
+                  return false;
+                }
+                return (product.quantity ?? 0) > 0;
+              }).toList();
 
-              if (returnProducts.isEmpty) {
+              if (validProducts.isEmpty) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Please select at least one product with quantity > 0'),
+                  SnackBar(
+                    content: Text(products.any((p) => p.productId == null)
+                        ? 'Some products have invalid IDs. Please check console.'
+                        : 'Please select at least one product with quantity > 0'),
                     backgroundColor: Colors.red,
                   ),
                 );
                 return;
               }
+
+              var returnProducts = validProducts.map((product) {
+                print("✅ Sending product: ${product.productName}, ID: ${product.productId}");
+                return {
+                  "product_id": product.productId,
+                  "quantity": product.quantity,
+                  "unit_price": product.unitPrice,
+                  "discount": product.discount,
+                  "discount_type": product.discountType ?? "fixed",
+                  "total": product.totalPrice,
+                };
+              }).toList();
 
               Map<String, dynamic> body = {
                 "items": returnProducts,
@@ -687,18 +728,21 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
                 ),
                 "invoice_no": context.read<SalesReturnBloc>().selectedInvoice?.invoiceNo.toString(),
                 "note": context.read<SalesReturnBloc>().remarkController.text.trim(),
-                "discount": double.tryParse(context.read<SalesReturnBloc>().selectedInvoice!.overallDiscount.toString()),
-                "discount_type": context.read<SalesReturnBloc>().selectedInvoice?.overallDiscountType,
-                "vat": double.tryParse(context.read<SalesReturnBloc>().selectedInvoice!.overallVatAmount.toString()),
-                "vat_type": context.read<SalesReturnBloc>().selectedInvoice?.overallVatType,
-                "delivary_charge": double.tryParse(context.read<SalesReturnBloc>().selectedInvoice!.overallDeliveryCharge.toString()),
-                "delivery_charge_type": context.read<SalesReturnBloc>().selectedInvoice?.overallDeliveryType,
-                "service_charge": double.tryParse(context.read<SalesReturnBloc>().selectedInvoice!.overallServiceCharge.toString()),
-                "service_charge_type": context.read<SalesReturnBloc>().selectedInvoice?.overallServiceType,
+                "discount": double.tryParse(context.read<SalesReturnBloc>().selectedInvoice!.overallDiscount.toString()) ?? 0.0,
+                "discount_type": context.read<SalesReturnBloc>().selectedInvoice?.overallDiscountType ?? "fixed",
+                "vat": double.tryParse(context.read<SalesReturnBloc>().selectedInvoice!.overallVatAmount.toString()) ?? 0.0,
+                "vat_type": context.read<SalesReturnBloc>().selectedInvoice?.overallVatType ?? "fixed",
+                "delivary_charge": double.tryParse(context.read<SalesReturnBloc>().selectedInvoice!.overallDeliveryCharge.toString()) ?? 0.0,
+                "delivery_charge_type": context.read<SalesReturnBloc>().selectedInvoice?.overallDeliveryType ?? "fixed",
+                "service_charge": double.tryParse(context.read<SalesReturnBloc>().selectedInvoice!.overallServiceCharge.toString()) ?? 0.0,
+                "service_charge_type": context.read<SalesReturnBloc>().selectedInvoice?.overallServiceType ?? "fixed",
                 "payment_method": context.read<MoneyReceiptBloc>().selectedPaymentMethod.toString(),
                 "account_id": context.read<MoneyReceiptBloc>().selectedAccountId,
                 "return_amount": _totalReturnAmount,
               };
+
+              print("📦 Final request body:");
+              print(body);
 
               context.read<SalesReturnBloc>().add(SalesReturnCreate(body: body, context: context));
             }
