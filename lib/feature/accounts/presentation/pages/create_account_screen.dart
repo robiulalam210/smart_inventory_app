@@ -85,7 +85,7 @@ borderRadius: BorderRadius.circular(12)
                   ],
                 ),
 
-                const SizedBox(height: 20),
+                const SizedBox(height: 10),
 
                 // Account Type and Account Name Row
                 Row(
@@ -268,7 +268,7 @@ borderRadius: BorderRadius.circular(12)
                   ],
                 ),
 
-                const SizedBox(height: 8),
+                // const SizedBox(height: 8),
 
                 // Bank Details Section (Only for Bank type)
                 ValueListenableBuilder<String>(
@@ -332,7 +332,7 @@ borderRadius: BorderRadius.circular(12)
                   },
                 ),
 
-                const SizedBox(height: 12),
+                const SizedBox(height: 6),
 
                 // Submit Button
                 Row(

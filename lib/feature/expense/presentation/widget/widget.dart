@@ -307,6 +307,7 @@ class ExpenseTableCard extends StatelessWidget {
             width: AppSizes.width(context) * 0.50,
             child: ExpenseCreateScreen(
               id: expense.id.toString(),
+              accountId:expense.account.toString(),
               name: "Update",
               selectedExpenseHead: ExpenseHeadModel(
                 id: expense.head,

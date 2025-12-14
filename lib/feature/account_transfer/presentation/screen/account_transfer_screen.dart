@@ -170,6 +170,7 @@ class _AccountTransferScreenState extends State<AccountTransferScreen> {
               if (state is ExecuteTransferLoading) {
                 appLoader(context, "Executing transfer, please wait...");
               } else if (state is ExecuteTransferSuccess) {
+
                 Navigator.pop(context);
                 showCustomToast(
                   context: context,

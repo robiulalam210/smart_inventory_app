@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:meherin_mart/core/core.dart';
 import 'package:meherin_mart/feature/accounts/presentation/bloc/account/account_bloc.dart';
 import '../../../accounts/data/model/account_active_model.dart';
+import '../../../lab_dashboard/presentation/bloc/dashboard/dashboard_bloc.dart';
 import '../bloc/account_transfer/account_transfer_bloc.dart';
 
 class AccountTransferForm extends StatefulWidget {
@@ -90,18 +91,30 @@ class _AccountTransferFormState extends State<AccountTransferForm> {
                       appLoader(context, "Processing transfer, please wait...");
                     } else if (state is AccountTransferAddSuccess) {
                       Navigator.pop(context); // Close loader dialog
+
+                      context.read<DashboardBloc>().add(ChangeDashboardScreen(index: 38));
+
                       _showSuccessDialog(
                         "Transfer Created",
                         "Transfer request created successfully. Use execute option to complete it.",
                       );
+
+
                     } else if (state is QuickTransferSuccess) {
+                      context.read<DashboardBloc>().add(ChangeDashboardScreen(index: 38));
+
                       Navigator.pop(context); // Close loader dialog
                       _showSuccessDialog(
                         "Transfer Completed",
                         "Transfer completed successfully.",
                       );
                     } else if (state is ExecuteTransferSuccess) {
+                      context.read<DashboardBloc>().add(ChangeDashboardScreen(index: 38));
+
                       Navigator.pop(context); // Close loader dialog
+
+
+
                       _showSuccessDialog(
                         "Transfer Executed",
                         "Transfer executed successfully.",

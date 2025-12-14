@@ -48,35 +48,36 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
       Emitter<AccountState> emit,
       ) async {
     emit(AccountActiveListLoading());
-
     try {
-      final res = await getResponse(
-        url: AppUrls.accountActive,
-        context: event.context,
-      );
+      final res = await getResponse(url: AppUrls.accountActive, context: event.context);
+      print("API Raw Response: $res");
 
       ApiResponse response = appParseJson(
         res,
-            (data) => List<AccountActiveModel>.from(
-          data.map((x) => AccountActiveModel.fromJson(x)),
-        ),
+            (data) {
+          print("Raw data: $data");
+          return List<AccountActiveModel>.from(data.map((x) => AccountActiveModel.fromJson(x)));
+        },
       );
+
+      print("Parsed Response: success=${response.success}, data=${response.data}");
 
       if (response.success == true) {
         final List<AccountActiveModel> accountList = response.data ?? [];
         activeAccount = accountList;
         emit(AccountActiveListSuccess(list: accountList));
       } else {
-        emit(
-          AccountActiveListFailed(
-            title: "Error",
-            content: response.message ?? "Unknown Error",
-          ),
-        );
+        emit(AccountActiveListFailed(
+          title: "Error",
+          content: response.message ?? "Unknown Error",
+        ));
       }
-    } catch (error) {
+    } catch (error, stacktrace) {
+      print("Exception caught: $error");
+      print("Stacktrace: $stacktrace");
       emit(AccountActiveListFailed(title: "Error", content: error.toString()));
     }
+
   }
 
   Future<void> _onFetchAccountList(
