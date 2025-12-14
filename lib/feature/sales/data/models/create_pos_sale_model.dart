@@ -141,10 +141,10 @@ class Item {
   final int? productId;
   final String? productName;
   final int? quantity;
-  final String? unitPrice;
-  final String? discount;
+  final dynamic unitPrice;
+  final dynamic discount;
   final String? discountType;
-  final int? subtotal;
+  final dynamic subtotal;
 
   Item({
     this.id,
