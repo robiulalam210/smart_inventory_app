@@ -31,7 +31,7 @@ class _CreatePurchaseReturnScreenState
   String _selectedReturnChargeType = "fixed";
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   SupplierActiveModel? _selectedSupplier;
-  String? _selectedInvoice;
+  PurchaseInvoiceModel? _selectedInvoice;
 
   @override
   void initState() {
@@ -49,6 +49,7 @@ class _CreatePurchaseReturnScreenState
 
   @override
   void dispose() {
+    _returnChargeController.removeListener(_updateReturnAmount);
     _returnChargeController.dispose();
     _returnAmountController.dispose();
     super.dispose();
@@ -71,7 +72,7 @@ class _CreatePurchaseReturnScreenState
 
     products.clear();
     setState(() {
-      if (newVal.items != null) {
+      if (newVal.items != null && newVal.items!.isNotEmpty) {
         for (var item in newVal.items!) {
           products.add(Item(
             productId: item.id,
@@ -82,6 +83,15 @@ class _CreatePurchaseReturnScreenState
             discountType: item.discountType ?? 'fixed',
           ));
         }
+      } else {
+        // Show warning if no items in invoice
+        showCustomToast(
+          context: context,
+          title: 'Info',
+          description: 'No products found in selected invoice',
+          icon: Icons.info,
+          primaryColor: Colors.blue,
+        );
       }
       _updateReturnAmount();
     });
@@ -136,24 +146,25 @@ class _CreatePurchaseReturnScreenState
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       child: BlocListener<PurchaseReturnBloc, PurchaseReturnState>(
         listener: (context, state) {
           if (state is PurchaseReturnCreateLoading) {
             appLoader(context, "Creating purchase return...");
           } else if (state is PurchaseReturnCreateSuccess) {
-            Navigator.pop(context);
+            Navigator.pop(context); // Close loader
             showCustomToast(
               context: context,
               title: 'Success!',
-              description:
-              state.message,
+              description: state.message,
               icon: Icons.check_circle,
               primaryColor: Colors.green,
             );
+            // Clear form and reset state
+            _resetForm();
             Navigator.pop(context);
           } else if (state is PurchaseReturnError) {
-            Navigator.pop(context);
+            Navigator.pop(context); // Close loader
             appAlertDialog(
               context,
               state.content,
@@ -171,109 +182,148 @@ class _CreatePurchaseReturnScreenState
           child: Form(
             key: formKey,
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(children: [
-                  Expanded(child:   BlocBuilder<SupplierInvoiceBloc, SupplierInvoiceState>(
-                    builder: (context, state) {
-                      List<SupplierActiveModel> suppliers = [];
-                      if (state is SupplierActiveListSuccess) {
-                        suppliers = state.list;
-                      }
-                      return AppDropdown<SupplierActiveModel>(
-                        context: context,
-                        label: "Supplier",
-                        hint: _selectedSupplier?.name ?? "Select Supplier",
-                        isRequired: true,
-                        value: _selectedSupplier,
-                        itemList: suppliers,
-                        onChanged: (newVal) {
-                          if (newVal != null) {
-                            setState(() {
-                              _selectedSupplier = newVal;
-                              _selectedInvoice = null;
-                              products.clear();
-                            });
+                // Header
+                Row(
+                  children: [
+                    Text(
+                      'Create Purchase Return',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primaryColor,
+                      ),
+                    ),
+                    const Spacer(),
+                    IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(Icons.close),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
 
-                            // Fetch invoices for selected supplier
-                            context.read<PurchaseReturnBloc>().add(
-                              FetchPurchaseInvoiceList(context, newVal.id.toString()),
-                            );
+                // Supplier and Invoice Selection
+                Row(
+                  children: [
+                    Expanded(
+                      child: BlocBuilder<SupplierInvoiceBloc, SupplierInvoiceState>(
+                        builder: (context, state) {
+                          List<SupplierActiveModel> suppliers = [];
+                          bool isLoading = false;
+
+                          if (state is SupplierActiveListSuccess) {
+                            suppliers = state.list;
+                          } else if (state is SupplierInvoiceLoading) {
+                            isLoading = true;
                           }
-                        },
-                        validator: (value) => value == null ? 'Please select Supplier' : null,
-                        itemBuilder: (item) => DropdownMenuItem<SupplierActiveModel>(
-                          value: item,
-                          child: Text(
-                            item.name ?? 'Unknown',
-                            style: const TextStyle(
-                              color: AppColors.blackColor,
-                              fontFamily: 'Quicksand',
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),),
-                  const SizedBox(width: 8),
 
-                  Expanded(child:   BlocBuilder<PurchaseReturnBloc, PurchaseReturnState>(
-                    builder: (context, state) {
-                      final bloc = context.read<PurchaseReturnBloc>();
-                      return AppDropdown<PurchaseInvoiceModel>(
-                        context: context,
-                        label: "Invoice Number",
-                        hint: _selectedInvoice ?? "Select Invoice Number",
-                        isRequired: true,
-                        value: _selectedInvoice != null
-                            ? bloc.invoiceList.firstWhere(
-                              (inv) => inv.invoiceNo == _selectedInvoice,
-                          orElse: () => PurchaseInvoiceModel(),
-                        )
-                            : null,
-                        itemList: bloc.invoiceList,
-                        onChanged: (newVal) {
-                          if (newVal != null) {
-                            setState(() {
-                              _selectedInvoice = newVal.invoiceNo;
-                            });
-                            onProductChanged(newVal);
+                          return AppDropdown<SupplierActiveModel>(
+                            context: context,
+                            label: "Supplier *",
+                            hint: "Select Supplier",
+                            isRequired: true,
+                            value: _selectedSupplier,
+                            itemList: suppliers,
+                            onChanged: (newVal) {
+                              if (newVal != null) {
+                                setState(() {
+                                  _selectedSupplier = newVal;
+                                  _selectedInvoice = null;
+                                  products.clear();
+                                });
+
+                                // Fetch invoices for selected supplier
+                                context.read<PurchaseReturnBloc>().add(
+                                  FetchPurchaseInvoiceList(
+                                 context,
+                                    supplierId: newVal.id.toString(),
+                                  ),
+                                );
+                              }
+                            },
+                            validator: (value) => value == null ? 'Please select a supplier' : null,
+                            itemBuilder: (item) => DropdownMenuItem<SupplierActiveModel>(
+                              value: item,
+                              child: Text(
+                                item.name ?? 'Unknown',
+                                style: const TextStyle(
+                                  color: AppColors.blackColor,
+                                  fontFamily: 'Quicksand',
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+
+                    Expanded(
+                      child: BlocBuilder<PurchaseReturnBloc, PurchaseReturnState>(
+                        builder: (context, state) {
+                          final bloc = context.read<PurchaseReturnBloc>();
+                          bool isLoading = false;
+
+                          if (state is PurchaseInvoiceListLoading) {
+                            isLoading = true;
                           }
-                        },
-                        validator: (value) => value == null ? 'Please select Invoice Number' : null,
-                        itemBuilder: (item) => DropdownMenuItem<PurchaseInvoiceModel>(
-                          value: item,
-                          child: Text(
-                            item.invoiceNo ?? 'Unknown',
-                            style: const TextStyle(
-                              color: AppColors.blackColor,
-                              fontFamily: 'Quicksand',
-                              fontWeight: FontWeight.w600,
+
+                          // Check if invoice list is empty
+                          final hasInvoices = bloc.invoiceList.isNotEmpty;
+
+                          return AppDropdown<PurchaseInvoiceModel>(
+                            context: context,
+                            label: "Invoice Number *",
+                            hint: hasInvoices ? "Select Invoice Number" : "No invoices available",
+                            isRequired: true,
+                            value: _selectedInvoice,
+                            itemList: bloc.invoiceList,
+                            onChanged: (newVal) {
+                              if (newVal != null) {
+                                setState(() {
+                                  _selectedInvoice = newVal;
+                                });
+                                onProductChanged(newVal);
+                              }
+                            } ,
+                            validator: (value) {
+                              if (value == null) return 'Please select an invoice';
+                              if (!hasInvoices) return 'No invoices available for this supplier';
+                              return null;
+                            },
+                            itemBuilder: (item) => DropdownMenuItem<PurchaseInvoiceModel>(
+                              value: item,
+                              child: Text(
+                                item.invoiceNo ?? 'Unknown',
+                                style: const TextStyle(
+                                  color: AppColors.blackColor,
+                                  fontFamily: 'Quicksand',
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
                             ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),),
-                ],),
-                // Supplier Dropdown
-
-
-                // Invoice Dropdown
-
-
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
 
                 // Products List
                 if (products.isNotEmpty) ...[
                   Text(
                     'Products to Return',
                     style: TextStyle(
-                      fontSize: 18,
+                      fontSize: 16,
                       fontWeight: FontWeight.bold,
                       color: AppColors.primaryColor,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 8),
                   ListView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
@@ -284,10 +334,11 @@ class _CreatePurchaseReturnScreenState
 
                       return Card(
                         margin: const EdgeInsets.symmetric(vertical: 4),
+                        elevation: 1,
                         child: ListTile(
                           title: Text(
                             item.productName ?? 'Unknown Product',
-                            style: TextStyle(fontWeight: FontWeight.bold),
+                            style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
                           subtitle: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -295,8 +346,8 @@ class _CreatePurchaseReturnScreenState
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text('Price: \$${item.unitPrice?.toStringAsFixed(2)}'),
-                                  Text('Discount: \$${item.discount?.toStringAsFixed(2)}'),
+                                  Text('Price: \$${item.unitPrice?.toStringAsFixed(2) ?? "0.00"}'),
+                                  Text('Discount: \$${item.discount?.toStringAsFixed(2) ?? "0.00"}'),
                                 ],
                               ),
                               const SizedBox(height: 4),
@@ -306,24 +357,24 @@ class _CreatePurchaseReturnScreenState
                                     child: Row(
                                       children: [
                                         IconButton(
-                                          icon: Icon(Icons.remove, size: 20),
+                                          icon: const Icon(Icons.remove, size: 20),
                                           onPressed: () {
                                             _updateProductQuantity(index, (item.quantity ?? 1) - 1);
                                           },
                                         ),
                                         Container(
-                                          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                                           decoration: BoxDecoration(
                                             border: Border.all(color: Colors.grey),
                                             borderRadius: BorderRadius.circular(4),
                                           ),
                                           child: Text(
                                             '${item.quantity}',
-                                            style: TextStyle(fontWeight: FontWeight.bold),
+                                            style: const TextStyle(fontWeight: FontWeight.bold),
                                           ),
                                         ),
                                         IconButton(
-                                          icon: Icon(Icons.add, size: 20),
+                                          icon: const Icon(Icons.add, size: 20),
                                           onPressed: () {
                                             _updateProductQuantity(index, (item.quantity ?? 1) + 1);
                                           },
@@ -333,7 +384,7 @@ class _CreatePurchaseReturnScreenState
                                   ),
                                   Text(
                                     'Total: \$${total.toStringAsFixed(2)}',
-                                    style: TextStyle(fontWeight: FontWeight.bold),
+                                    style: const TextStyle(fontWeight: FontWeight.bold),
                                   ),
                                 ],
                               ),
@@ -341,7 +392,7 @@ class _CreatePurchaseReturnScreenState
                           ),
                           trailing: products.length > 1
                               ? IconButton(
-                            icon: Icon(Icons.delete, color: Colors.red),
+                            icon: const Icon(Icons.delete, color: Colors.red),
                             onPressed: () => _removeProduct(index),
                           )
                               : null,
@@ -351,194 +402,260 @@ class _CreatePurchaseReturnScreenState
                   ),
                   const SizedBox(height: 8),
                 ],
+
+                // Return Charge Type and Charge
                 Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                  Expanded(child:     AppDropdown<String>(
-                    context: context,
-                    label: "Return Charge Type",
-                    hint: _selectedReturnChargeType == 'fixed' ? 'Fixed' : 'Percentage',
-                    isRequired: true,
-                    value: _selectedReturnChargeType,
-                    itemList: const ["fixed", "percentage"],
-                    onChanged: (newVal) {
-                      if (newVal != null) {
-                        setState(() {
-                          _selectedReturnChargeType = newVal;
-                          _updateReturnAmount();
-                        });
-                      }
-                    },
-                    itemBuilder: (item) => DropdownMenuItem<String>(
-                      value: item,
-                      child: Text(
-                        item == 'fixed' ? 'Fixed' : 'Percentage',
-                        style: const TextStyle(
-                          color: AppColors.blackColor,
-                          fontFamily: 'Quicksand',
-                          fontWeight: FontWeight.w600,
+                    Expanded(
+                      child: AppDropdown<String>(
+                        context: context,
+                        label: "Return Charge Type *",
+                        hint: "Select Type",
+                        isRequired: true,
+                        value: _selectedReturnChargeType,
+                        itemList: const ["fixed", "percentage"],
+                        onChanged: (newVal) {
+                          if (newVal != null) {
+                            setState(() {
+                              _selectedReturnChargeType = newVal;
+                              _updateReturnAmount();
+                            });
+                          }
+                        },
+                        itemBuilder: (item) => DropdownMenuItem<String>(
+                          value: item,
+                          child: Text(
+                            item == 'fixed' ? 'Fixed Amount' : 'Percentage',
+                            style: const TextStyle(
+                              color: AppColors.blackColor,
+                              fontFamily: 'Quicksand',
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                         ),
                       ),
                     ),
-                  ),),
-                  const SizedBox(width: 8),
+                    const SizedBox(width: 12),
 
-                  Expanded(child:    CustomInputField(
-                    isRequiredLable: true,
-                    isRequired: true,
-                    controller: _returnChargeController,
-                    hintText: 'Return Charge',
-                    fillColor: Colors.white,
-                    keyboardType: TextInputType.numberWithOptions(decimal: true),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter Return Charge';
-                      }
-                      if (double.tryParse(value) == null) {
-                        return 'Please enter a valid number';
-                      }
-                      return null;
-                    },
-                  ),),
-                ],),
-                // Return Charge Type
+                    Expanded(
+                      child: CustomInputField(
+                        isRequired: true,
+                        controller: _returnChargeController,
+                        labelText: 'Return Charge *',
+                        hintText: _selectedReturnChargeType == 'fixed' ? 'Enter amount' : 'Enter percentage',
+                        fillColor: Colors.white,
+                        keyboardType: TextInputType.numberWithOptions(decimal: true),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter Return Charge';
+                          }
+                          if (double.tryParse(value) == null) {
+                            return 'Please enter a valid number';
+                          }
+                          final doubleVal = double.parse(value);
+                          if (_selectedReturnChargeType == 'percentage' && (doubleVal < 0 || doubleVal > 100)) {
+                            return 'Percentage must be between 0 and 100';
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
 
+                // Return Amount and Date
+                Row(
+                  children: [
+                    Expanded(
+                      child: CustomInputField(
+                        isRequired: false,
+                        controller: _returnAmountController,
+                        labelText: 'Return Amount',
+                        hintText: 'Calculated amount',
+                        fillColor: Colors.grey[100],
+                        keyboardType: TextInputType.number,
+                        readOnly: true,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
 
-                // Return Charge
-
-                const SizedBox(height: 8),
-
-                Row(children: [
-                  Expanded(child:   CustomInputField(
-                    isRequiredLable: true,
-                    isRequired: false,
-                    controller: _returnAmountController,
-                    hintText: 'Return Amount',
-                    fillColor: Colors.grey[100],
-                    keyboardType: TextInputType.number,
-                    readOnly: true,
-                  ),),
-
-                  const SizedBox(width: 8),
-
-                  Expanded(child:       CustomInputField(
-                    isRequiredLable: true,
-                    isRequired: true,
-                    controller: context.read<PurchaseReturnBloc>().returnDateTextController,
-                    hintText: 'Return Date',
-                    fillColor: Colors.white,
-                    readOnly: true,
-                    validator: (value) {
-                      return value == null || value.isEmpty ? 'Please select Return Date' : null;
-                    },
-                    onTap: () async {
-                      final DateTime? pickedDate = await showDatePicker(
-                        context: context,
-                        initialDate: DateTime.now(),
-                        firstDate: DateTime(2000),
-                        lastDate: DateTime.now(),
-                      );
-                      if (pickedDate != null) {
-                        context.read<PurchaseReturnBloc>().returnDateTextController.text = _formatDate(pickedDate);
-                      }
-                    }, keyboardType: TextInputType.name,
-                  ),),
-                ],),
-                // Return Amount (Read-only)
-
-                const SizedBox(height: 8),
-
-                // Return Date
-
+                    Expanded(
+                      child: CustomInputField(
+                        isRequired: true,
+                        controller: context.read<PurchaseReturnBloc>().returnDateTextController,
+                        labelText: 'Return Date *',
+                        hintText: 'Select date',
+                        fillColor: Colors.white,
+                        readOnly: true,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please select Return Date';
+                          }
+                          return null;
+                        },
+                        onTap: () async {
+                          final DateTime? pickedDate = await showDatePicker(
+                            context: context,
+                            initialDate: DateTime.now(),
+                            firstDate: DateTime(2000),
+                            lastDate: DateTime.now(),
+                          );
+                          if (pickedDate != null && context.mounted) {
+                            context.read<PurchaseReturnBloc>().returnDateTextController.text = _formatDate(pickedDate);
+                          }
+                        }, keyboardType: TextInputType.text,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
 
                 // Remark
                 CustomInputField(
-                  isRequiredLable: false,
-                  isRequired: false,
+                  isRequired: false, keyboardType: TextInputType.text,
                   controller: context.read<PurchaseReturnBloc>().remarkController,
-                  hintText: 'Remark',
+                  labelText: 'Remark',
+                  hintText: 'Enter remark (optional)',
                   fillColor: Colors.white,
-                  keyboardType: TextInputType.multiline,
                 ),
                 const SizedBox(height: 24),
 
-                // Submit Button
-                BlocBuilder<PurchaseReturnBloc, PurchaseReturnState>(
-                  builder: (context, state) {
-                    return AppButton(
-                      name: "Create Purchase Return",
+                // Action Buttons
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
                       onPressed: () {
-                        if (formKey.currentState!.validate()) {
-                          if (products.isEmpty) {
-
-                            showCustomToast(
-                              context: context,
-                              title: 'Warning!',
-                              description:"Please select products to return",
-                              icon: Icons.check_circle,
-                              primaryColor: Colors.yellow,
-                            );
-                            return;
-                          }
-
-                          if (_selectedSupplier == null) {
-                            showCustomToast(
-                              context: context,
-                              title: 'Warning!',
-                              description:  "Please select a supplier",
-                              icon: Icons.check_circle,
-                              primaryColor: Colors.yellow,
-                            );
-                            return;
-                          }
-
-                          if (_selectedInvoice == null) {
-                            showCustomToast(
-                              context: context,
-                              title: 'Warning!',
-                              description:"Please select an invoice",
-                              icon: Icons.check_circle,
-                              primaryColor: Colors.yellow,
-                            );
-                            return;
-                          }
-
-                          // Prepare products data
-                          var returnProducts = products.map((product) => {
-                            "product_id": product.productId,
-                            "quantity": product.quantity,
-                            "unit_price": product.unitPrice?.toString(),
-                            "discount": product.discount?.toString(),
-                            "discount_type": product.discountType,
-                          }).toList();
-
-                          // Prepare the request body
-                          Map<String, dynamic> body = {
-                            "supplier_id": _selectedSupplier!.id.toString(),
-                            "invoice_no": _selectedInvoice,
-                            "return_date": _parseDate(context.read<PurchaseReturnBloc>().returnDateTextController.text)?.toIso8601String().split('T').first,
-                            "payment_method": "Cash",
-                            "return_charge": _returnChargeController.text,
-                            "return_charge_type": _selectedReturnChargeType,
-                            "return_amount": _returnAmountController.text,
-                            "reason": context.read<PurchaseReturnBloc>().remarkController.text.trim(),
-                            "items": returnProducts,
-                          };
-
-
-                          context.read<PurchaseReturnBloc>().add(
-                            CreatePurchaseReturn(context, body: body),
-                          );
-                        }
+                        Navigator.pop(context);
                       },
-                    );
-                  },
+                      child: const Text('Cancel'),
+                    ),
+                    const SizedBox(width: 12),
+                    BlocBuilder<PurchaseReturnBloc, PurchaseReturnState>(
+                      builder: (context, state) {
+                        final isLoading = state is PurchaseReturnCreateLoading;
+
+                        return ElevatedButton(
+                          onPressed: isLoading ? null : () => _submitForm(),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primaryColor,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                          ),
+                          child: isLoading
+                              ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                              : const Text('Create Purchase Return'),
+                        );
+                      },
+                    ),
+                  ],
                 ),
               ],
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  void _resetForm() {
+    setState(() {
+      products.clear();
+      _selectedSupplier = null;
+      _selectedInvoice = null;
+      _returnChargeController.text = "0";
+      _returnAmountController.text = "0.00";
+      _selectedReturnChargeType = "fixed";
+      formKey.currentState?.reset();
+    });
+
+    final bloc = context.read<PurchaseReturnBloc>();
+    bloc.returnDateTextController.text = _formatDate(DateTime.now());
+    bloc.remarkController.text = "Purchase return processed.";
+  }
+
+  void _submitForm() {
+    if (!formKey.currentState!.validate()) {
+      showCustomToast(
+        context: context,
+        title: 'Validation Error',
+        description: 'Please fix all errors in the form',
+        icon: Icons.error,
+        primaryColor: Colors.red,
+      );
+      return;
+    }
+
+    if (products.isEmpty) {
+      showCustomToast(
+        context: context,
+        title: 'Warning!',
+        description: "Please select products to return",
+        icon: Icons.warning,
+        primaryColor: Colors.orange,
+      );
+      return;
+    }
+
+    if (_selectedSupplier == null) {
+      showCustomToast(
+        context: context,
+        title: 'Warning!',
+        description: "Please select a supplier",
+        icon: Icons.warning,
+        primaryColor: Colors.orange,
+      );
+      return;
+    }
+
+    if (_selectedInvoice == null) {
+      showCustomToast(
+        context: context,
+        title: 'Warning!',
+        description: "Please select an invoice",
+        icon: Icons.warning,
+        primaryColor: Colors.orange,
+      );
+      return;
+    }
+
+    // Prepare products data
+    var returnProducts = products.map((product) => {
+      "product_id": product.productId,
+      "quantity": product.quantity,
+      "unit_price": product.unitPrice?.toString(),
+      "discount": product.discount?.toString(),
+      "discount_type": product.discountType,
+    }).toList();
+
+    // Prepare the request body
+    final returnDate = _parseDate(context.read<PurchaseReturnBloc>().returnDateTextController.text);
+
+    Map<String, dynamic> body = {
+      "supplier_id": _selectedSupplier!.id.toString(),
+      "invoice_no": _selectedInvoice!.invoiceNo,
+      "return_date": returnDate?.toIso8601String().split('T').first,
+      "payment_method": "Cash",
+      "return_charge": _returnChargeController.text,
+      "return_charge_type": _selectedReturnChargeType,
+      "return_amount": _returnAmountController.text,
+      "reason": context.read<PurchaseReturnBloc>().remarkController.text.trim(),
+      "items": returnProducts,
+    };
+
+    // Dispatch create event
+    context.read<PurchaseReturnBloc>().add(
+      CreatePurchaseReturn(
+         context,
+        body: body,
       ),
     );
   }
