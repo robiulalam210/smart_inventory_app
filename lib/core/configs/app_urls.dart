@@ -69,7 +69,9 @@ class AppUrls {
   static final String saleReturn          = '$baseUrl/sales-returns/';
   static final String purchaseReturn          = '$baseUrl/purchase-returns/';
   static final String badStock          = '$baseUrl/bad-stocks/';
-
+  static String saleReturnApprove(int id) => '/api/returns/sales-returns/$id/approve/';
+  static String saleReturnReject(int id) => '/api/returns/sales-returns/$id/reject/';
+  static String saleReturnComplete(int id) => '/api/returns/sales-returns/$id/complete/';
   static final String purchaseInvoice = '$baseUrl/purchases-invoice/supplier/';
   static final String dashboard = '$baseUrl/reports/dashboard/';
 

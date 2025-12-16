@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:meherin_mart/feature/accounts/data/model/account_active_model.dart';
+import 'package:meherin_mart/feature/accounts/presentation/bloc/account/account_bloc.dart';
+import 'package:meherin_mart/feature/expense/presentation/bloc/expense_list/expense_bloc.dart';
+import 'package:meherin_mart/feature/money_receipt/presentation/bloc/money_receipt/money_receipt_bloc.dart';
 import 'package:meherin_mart/feature/return/sales_return/data/model/sales_invoice_model.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:meherin_mart/feature/return/sales_return/data/sales_return_create_model.dart';
 
 import '../../../../../core/configs/configs.dart';
 import '../../../../../core/widgets/app_button.dart';
@@ -10,94 +14,80 @@ import '../../../../../core/widgets/app_dropdown.dart';
 import '../../../../../core/widgets/app_loader.dart';
 import '../../../../../core/widgets/input_field.dart';
 import '../../../../../core/widgets/show_custom_toast.dart';
-import '../../../../accounts/presentation/bloc/account/account_bloc.dart';
-import '../../../../expense/presentation/bloc/expense_list/expense_bloc.dart';
-import '../../../../money_receipt/presentation/bloc/money_receipt/money_receipt_bloc.dart';
+import '../../data/model/sales_return_create_model.dart';
 import '../sales_return_bloc/sales_return_bloc.dart';
 
 class CreateSalesReturnScreen extends StatefulWidget {
-  const CreateSalesReturnScreen({super.key});
+  final VoidCallback? onSuccess;
+
+  const CreateSalesReturnScreen({super.key, this.onSuccess});
 
   @override
-  State<CreateSalesReturnScreen> createState() =>
-      _CreateSalesReturnScreenState();
+  State<CreateSalesReturnScreen> createState() => _CreateSalesReturnScreenState();
 }
 
 class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
   List<Item> products = [];
   TextEditingController customerNameController = TextEditingController();
+  TextEditingController returnDateController = TextEditingController();
+  TextEditingController remarkController = TextEditingController();
+  TextEditingController returnChargeController = TextEditingController(text: "0");
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+
+  String? _selectedPaymentMethod;
+  String? _returnChargeType = 'fixed';
+  AccountActiveModel? _selectedAccount;
+  SalesInvoiceModel? _selectedInvoice;
 
   @override
   void initState() {
     super.initState();
+
+    // Load initial data
     context.read<AccountBloc>().add(FetchAccountActiveList(context));
     context.read<SalesReturnBloc>().add(FetchInvoiceList(context));
 
-    // Setting initial return date
-    context.read<SalesReturnBloc>().returnDateTextController.text = appWidgets
-        .convertDateTimeDDMMYYYY(DateTime.now());
+    // Set initial return date to today
+    returnDateController.text = DateFormat('dd-MM-yyyy').format(DateTime.now());
+
+    // Initialize controllers from bloc if needed
+    final bloc = context.read<SalesReturnBloc>();
+    if (bloc.selectedInvoice != null) {
+      _selectedInvoice = bloc.selectedInvoice;
+    }
   }
 
   void onProductChanged(SalesInvoiceModel? newVal) {
     if (newVal == null) return;
 
-    print(newVal);
-    print(newVal.invoiceNo);
-    // DEBUG: Print the invoice data to see structure
-    print("📦 Invoice Data Received:");
-    print("Invoice No: ${newVal.invoiceNo}");
-    print("Customer: ${newVal.customerName}");
-
-    if (newVal.items != null) {
-      print("Items count: ${newVal.items!.length}");
-      for (var i = 0; i < newVal.items!.length; i++) {
-        var item = newVal.items![i];
-        print("Item $i:");
-        print("  - productName: ${item.productName}");
-        print("  - productId: ${item.id}");
-        print("  - quantity: ${item.quantity}");
-        print("  - unitPrice: ${item.unitPrice}");
-        print("  - subtotal: ${item.subtotal}");
-        // Print ALL fields to see what's available
-        print("  - All fields: ${item.toJson()}");
-      }
-    }
-
     setState(() {
+      _selectedInvoice = newVal;
+
       // Update customer name
-      String name = newVal.customerName ?? "Walk-in-customer";
+      String name = newVal.customerName ?? "Walk-in Customer";
       customerNameController.text = name;
 
       // Clear and update product details
       products.clear();
-      if (newVal.items != null) {
+      if (newVal.items != null && newVal.items!.isNotEmpty) {
         for (var item in newVal.items!) {
-          // FIX: Try multiple possible field names for product ID
-          int? productId =
-              item.productId ??
-              item
-                  .id // if snake_case
-                  ; // if nested object
+          // Extract product ID - handle different field names
+          int? productId = item.productId ?? item.id;
 
           if (productId == null) {
-            print(
-              "⚠️ WARNING: Could not find productId for ${item.productName}",
-            );
-            print("   Available fields: ${item.toJson().keys.toList()}");
+            // Log warning but still add the item
+            print("⚠️ WARNING: Could not find productId for ${item.productName}");
           }
 
           products.add(
             Item(
-              productId: productId,
-              productName: item.productName,
-              unitPrice:
-                  double.tryParse(item.unitPrice?.toString() ?? "0") ?? 0.0,
-              totalPrice:
-                  double.tryParse(item.subtotal?.toString() ?? "0") ?? 0.0,
+              productId: productId ?? 0,
+              productName: item.productName ?? 'Unknown Product',
+              unitPrice: double.tryParse(item.unitPrice?.toString() ?? "0") ?? 0.0,
+              totalPrice: double.tryParse(item.subtotal?.toString() ?? "0") ?? 0.0,
               quantity: item.quantity ?? 1,
-              discount:
-                  double.tryParse(item.discount?.toString() ?? "0") ?? 0.0,
+              damageQuantity: 0, // Initialize damage quantity as 0
+              discount: double.tryParse(item.discount?.toString() ?? "0") ?? 0.0,
               discountType: item.discountType ?? "fixed",
               originalQuantity: item.quantity ?? 1,
             ),
@@ -107,26 +97,49 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
     });
   }
 
-  void _updateProductQuantity(int index, int newQuantity) {
+  void _updateProductQuantity(int index, int newQuantity, {bool isDamage = false}) {
     if (newQuantity < 0) return;
 
     setState(() {
       final item = products[index];
       final originalMaxQuantity = item.originalQuantity ?? item.quantity ?? 1;
 
-      if (newQuantity > originalMaxQuantity) {
-        newQuantity = originalMaxQuantity;
-        showCustomToast(
-          context: context,
-          title: 'Alert!',
-          description: 'Cannot return more than $originalMaxQuantity items',
-          icon: Icons.error,
-          primaryColor: Colors.redAccent,
-        );
-      }
+      if (isDamage) {
+        // Update damage quantity
+        final maxDamage = item.quantity ?? 0;
+        if (newQuantity > maxDamage) {
+          newQuantity = maxDamage;
+          showCustomToast(
+            context: context,
+            title: 'Alert!',
+            description: 'Damage quantity cannot exceed returned quantity ($maxDamage)',
+            icon: Icons.error,
+            primaryColor: Colors.redAccent,
+          );
+        }
+        item.damageQuantity = newQuantity;
+      } else {
+        // Update return quantity
+        if (newQuantity > originalMaxQuantity) {
+          newQuantity = originalMaxQuantity;
+          showCustomToast(
+            context: context,
+            title: 'Alert!',
+            description: 'Cannot return more than $originalMaxQuantity items',
+            icon: Icons.error,
+            primaryColor: Colors.redAccent,
+          );
+        }
+        item.quantity = newQuantity;
 
-      item.quantity = newQuantity;
-      item.totalPrice = (item.unitPrice ?? 0) * newQuantity;
+        // Update damage quantity if it exceeds new quantity
+        if (item.damageQuantity! > newQuantity) {
+          item.damageQuantity = newQuantity;
+        }
+
+        // Recalculate total
+        item.totalPrice = (item.unitPrice ?? 0) * newQuantity;
+      }
     });
   }
 
@@ -145,79 +158,112 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      // color: AppColors.bg,
-
       decoration: BoxDecoration(
-      color: AppColors.white,
-      borderRadius: BorderRadius.circular(12),
-    ),
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(12),
+      ),
       padding: AppTextStyle.getResponsivePaddingBody(context),
-      child: RefreshIndicator(
-        color: AppColors.primaryColor,
-        onRefresh: () async {
-          context.read<AccountBloc>().add(FetchAccountList(context));
-          context.read<SalesReturnBloc>().add(FetchInvoiceList(context));
+      child: BlocListener<SalesReturnBloc, SalesReturnState>(
+        listener: (context, state) {
+          if (state is SalesReturnCreateLoading) {
+            appLoader(context, "Creating Sales Return...");
+          } else if (state is SalesReturnCreateSuccess) {
+            Navigator.pop(context); // Close loader
+            Navigator.pop(context); // Close dialog
+            widget.onSuccess?.call();
+            showCustomToast(
+              context: context,
+              title: 'Success!',
+              description: state.message,
+              icon: Icons.check_circle,
+              primaryColor: Colors.green,
+            );
+          } else if (state is SalesReturnError) {
+            Navigator.pop(context); // Close loader
+            showCustomToast(
+              context: context,
+              title: 'Error!',
+              description: state.content,
+              icon: Icons.error,
+              primaryColor: Colors.redAccent,
+            );
+          }
         },
-        child: BlocListener<SalesReturnBloc, SalesReturnState>(
-          listener: (context, state) {
-            if (state is InvoiceListLoading) {
-              appLoader(context, "Loading invoices...");
-            } else if (state is InvoiceListSuccess) {
-              Navigator.pop(context);
-            } else if (state is InvoiceError) {
-              Navigator.pop(context);
-              showCustomToast(
-                context: context,
-                title: 'Error!',
-                description: state.content,
-                icon: Icons.error,
-                primaryColor: Colors.redAccent,
-              );
-
-            }
-          },
-          child: SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            child: Form(
-              key: formKey,
-              child: Column(
-                children: [
-                  // Header
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                      "Create Sales Return" ,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.primaryColor,
-                        ),
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: Form(
+            key: formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Create Sales Return",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primaryColor,
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: () => Navigator.of(context).pop(),
-                      ),
-                    ],
-                  ),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Expanded(child: _buildReceiptNumberDropdown()),
-                      const SizedBox(width: 12),
-                      Expanded(child: _buildCustomerNameField()),
-                    ],
-                  ),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.close, color: AppColors.grey),
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
 
-                  if (products.isNotEmpty) _buildProductsList(),
-                  if (products.isNotEmpty) _buildTotalAmount(),
-                  const SizedBox(height: 12),
-                  _buildAdditionalFields(),
-                  const SizedBox(height: 20),
-                  _buildSubmitButton(),
+                // Invoice Selection
+                Row(
+                  children: [
+                    Expanded(child: _buildReceiptNumberDropdown()),
+                    const SizedBox(width: 12),
+                    Expanded(child: _buildCustomerNameField()),
+                  ],
+                ),
+                const SizedBox(height: 16),
+
+                // Return Date and Charge
+                Row(
+                  children: [
+                    Expanded(child: _buildReturnDateField()),
+                    const SizedBox(width: 12),
+                    Expanded(child: _buildReturnChargeField()),
+                  ],
+                ),
+                const SizedBox(height: 16),
+
+                // Payment Method and Account
+                Row(
+                  children: [
+                    Expanded(child: _buildPaymentMethodDropdown()),
+                    const SizedBox(width: 12),
+                    Expanded(child: _buildAccountDropdown()),
+                  ],
+                ),
+                const SizedBox(height: 16),
+
+                // Products Section
+                if (products.isNotEmpty) ...[
+                  _buildProductsList(),
+                  const SizedBox(height: 16),
                 ],
-              ),
+
+                // Remark Field
+                _buildRemarkField(),
+                const SizedBox(height: 16),
+
+                // Total and Submit Button
+                if (products.isNotEmpty) ...[
+                  _buildTotalSection(),
+                  const SizedBox(height: 16),
+                ],
+
+                _buildActionButtons(),
+              ],
             ),
           ),
         ),
@@ -227,11 +273,6 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
 
   Widget _buildReceiptNumberDropdown() {
     return BlocBuilder<SalesReturnBloc, SalesReturnState>(
-      buildWhen: (previous, current) {
-        return current is InvoiceListLoading ||
-            current is InvoiceListSuccess ||
-            current is InvoiceError;
-      },
       builder: (context, state) {
         final bloc = context.read<SalesReturnBloc>();
 
@@ -249,23 +290,19 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
         }
 
         return AppDropdown<SalesInvoiceModel>(
-          label: "Receipt Number",
+          label: "Receipt Number *",
           isSearch: true,
           context: context,
-          hint: bloc.selectedInvoice?.invoiceNo ?? "Select Receipt Number",
+          hint: _selectedInvoice?.invoiceNo ?? "Select Receipt Number",
           isRequired: true,
-          value: bloc.selectedInvoice,
+          value: _selectedInvoice,
           itemList: bloc.invoiceList,
           onChanged: (newVal) {
             if (newVal != null) {
-              setState(() {
-                bloc.selectedInvoice = newVal;
-                onProductChanged(newVal);
-              });
+              onProductChanged(newVal);
             }
           },
-          validator: (value) =>
-              value == null ? 'Please select Receipt Number' : null,
+          validator: (value) => value == null ? 'Please select Receipt Number' : null,
           itemBuilder: (item) => DropdownMenuItem<SalesInvoiceModel>(
             value: item,
             child: Column(
@@ -274,7 +311,7 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
               children: [
                 Text(
                   item.invoiceNo ?? 'Unknown',
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.blackColor,
                     fontFamily: 'Quicksand',
                     fontWeight: FontWeight.w600,
@@ -305,361 +342,131 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
       isRequiredLable: true,
       controller: customerNameController,
       hintText: 'Customer Name',
-      fillColor: const Color.fromARGB(255, 255, 255, 255),
+      fillColor: Colors.white,
       readOnly: true,
       keyboardType: TextInputType.text,
       onChanged: (value) {},
-      autofillHints: '',
-    );
-  }
-
-  Widget _buildProductsList() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          "Products to Return",
-          style: AppTextStyle.cardTitle(
-            context,
-          ).copyWith(fontWeight: FontWeight.bold, fontSize: 16),
-        ),
-        const SizedBox(height: 8),
-        ListView.separated(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: products.length,
-          separatorBuilder: (context, index) => const SizedBox(height: 4),
-          itemBuilder: (context, index) => _buildProductItem(index),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildProductItem(int index) {
-    final item = products[index];
-    final originalMaxQuantity = item.originalQuantity ?? item.quantity ?? 1;
-
-    return Card(
-      elevation: 2,
-      margin: EdgeInsets.zero,
-      child: Container(
-        padding: const EdgeInsets.all(8),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        item.productName ?? 'Unknown Product',
-                        style: AppTextStyle.cardTitle(
-                          context,
-                        ).copyWith(fontWeight: FontWeight.bold, fontSize: 14),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      if (item.productId != null)
-                        Text(
-                          'ID: ${item.productId}',
-                          style: TextStyle(fontSize: 10, color: Colors.grey),
-                        ),
-                    ],
-                  ),
-                ),
-                Row(
-                  children: [
-                    Text(
-                      'Quantity:',
-                      style: AppTextStyle.cardLevelText(
-                        context,
-                      ).copyWith(fontWeight: FontWeight.w600),
-                    ),
-                    const SizedBox(width: 8),
-                    Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(color: AppColors.grey),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.remove, size: 18),
-                            onPressed: () {
-                              if (item.quantity! > 0) {
-                                _updateProductQuantity(
-                                  index,
-                                  item.quantity! - 1,
-                                );
-                              }
-                            },
-                            padding: const EdgeInsets.all(4),
-                            constraints: const BoxConstraints(),
-                          ),
-                          Container(
-                            width: 40,
-                            padding: const EdgeInsets.symmetric(horizontal: 8),
-                            child: Text(
-                              item.quantity.toString(),
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
-                              ),
-                            ),
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.add, size: 18),
-                            onPressed: () {
-                              if (item.quantity! < originalMaxQuantity) {
-                                _updateProductQuantity(
-                                  index,
-                                  item.quantity! + 1,
-                                );
-                              }
-                            },
-                            padding: const EdgeInsets.all(4),
-                            constraints: const BoxConstraints(),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Max: $originalMaxQuantity',
-                      style: AppTextStyle.cardLevelText(
-                        context,
-                      ).copyWith(fontSize: 12, color: Colors.grey),
-                    ),
-                  ],
-                ),
-                const SizedBox(width: 8),
-                if (products.length > 1)
-                  IconButton(
-                    onPressed: () => _removeProduct(index),
-                    icon: const Icon(
-                      HugeIcons.strokeRoundedDelete02,
-                      size: 20,
-                      color: Colors.red,
-                    ),
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Unit Price:',
-                      style: AppTextStyle.cardLevelText(
-                        context,
-                      ).copyWith(fontSize: 12),
-                    ),
-                    Text(
-                      '৳${(item.unitPrice ?? 0).toStringAsFixed(2)}',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ],
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Discount:',
-                      style: AppTextStyle.cardLevelText(
-                        context,
-                      ).copyWith(fontSize: 12),
-                    ),
-                    Text(
-                      '৳${(item.discount ?? 0).toStringAsFixed(2)}',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ],
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      'Total:',
-                      style: AppTextStyle.cardLevelText(
-                        context,
-                      ).copyWith(fontSize: 12),
-                    ),
-                    Text(
-                      '৳${(item.totalPrice ?? 0).toStringAsFixed(2)}',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                        color: AppColors.primaryColor,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTotalAmount() {
-    return Container(
-      color: AppColors.background,
-      padding: const EdgeInsets.all(8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            'Total Return Amount:',
-            style: AppTextStyle.cardTitle(
-              context,
-            ).copyWith(fontWeight: FontWeight.bold, fontSize: 16),
-          ),
-          Text(
-            '৳${_totalReturnAmount.toStringAsFixed(2)}',
-            style: AppTextStyle.cardTitle(context).copyWith(
-              fontWeight: FontWeight.bold,
-              fontSize: 18,
-              color: AppColors.primaryColor,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildAdditionalFields() {
-    return Column(
-      children: [
-        Row(
-          children: [
-            Expanded(child: _buildPaymentMethodDropdown()),
-            const SizedBox(width: 8),
-            Expanded(child: _buildAccountDropdown()),
-          ],
-        ),
-        Row(
-          children: [
-            Expanded(child: _buildReturnDateField()),
-            const SizedBox(width: 8),
-            Expanded(child: _buildRemarkField()),
-          ],
-        ),
-      ],
     );
   }
 
   Widget _buildReturnDateField() {
     return CustomInputField(
       isRequiredLable: true,
-      isRequired: true,
-      controller: context.read<SalesReturnBloc>().returnDateTextController,
-      hintText: 'Return Date',
-      fillColor: const Color.fromARGB(255, 255, 255, 255),
+      controller: returnDateController,
+      hintText: 'DD-MM-YYYY',
+      fillColor: Colors.white,
       readOnly: true,
       keyboardType: TextInputType.text,
-      validator: (value) => value!.isEmpty ? 'Please enter Date' : null,
+      validator: (value) => value!.isEmpty ? 'Please enter Return Date' : null,
       onTap: () async {
         FocusScope.of(context).requestFocus(FocusNode());
         DateTime? pickedDate = await showDatePicker(
           context: context,
           initialDate: DateTime.now(),
-          firstDate: DateTime(1900),
+          firstDate: DateTime(2000),
           lastDate: DateTime.now(),
         );
         if (pickedDate != null) {
-          context.read<SalesReturnBloc>().returnDateTextController.text =
-              appWidgets.convertDateTimeDDMMYYYY(pickedDate);
+          setState(() {
+            returnDateController.text = DateFormat('dd-MM-yyyy').format(pickedDate);
+          });
         }
       },
-      autofillHints: '',
+    );
+  }
+
+  Widget _buildReturnChargeField() {
+    return Row(
+      children: [
+        Expanded(
+          flex: 3,
+          child: CustomInputField(
+            controller: returnChargeController,
+            hintText: '0.00',
+            fillColor: Colors.white,
+            keyboardType: TextInputType.number,
+            onChanged: (value) {},
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          flex: 2,
+          child: AppDropdown<String>(
+            label: "Type",
+            context: context,
+            hint: _returnChargeType ?? "Select",
+            value: _returnChargeType,
+            itemList: ['fixed', 'percentage'],
+            onChanged: (newVal) {
+              setState(() {
+                _returnChargeType = newVal;
+              });
+            },
+            itemBuilder: (item) => DropdownMenuItem(
+              value: item,
+              child: Text(
+                item.toUpperCase(),
+                style: TextStyle(
+                  color: AppColors.blackColor,
+                  fontFamily: 'Quicksand',
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
   Widget _buildPaymentMethodDropdown() {
-    return AppDropdown(
-      label: "Payment Method",
-      context: context,
-      hint: context.read<MoneyReceiptBloc>().selectedPaymentMethod.isEmpty
-          ? "Select Payment Method"
-          : context.read<MoneyReceiptBloc>().selectedPaymentMethod,
-      isLabel: false,
-      isRequired: true,
-      value: context.read<MoneyReceiptBloc>().selectedPaymentMethod.isEmpty
-          ? null
-          : context.read<MoneyReceiptBloc>().selectedPaymentMethod,
-      itemList: context.read<ExpenseBloc>().paymentMethod,
-      onChanged: (newVal) {
-        context.read<MoneyReceiptBloc>().selectedPaymentMethod = newVal
-            .toString();
-        setState(() {});
-      },
-      validator: (value) =>
-          value == null ? 'Please select a payment method' : null,
-      itemBuilder: (item) => DropdownMenuItem(
-        value: item,
-        child: Text(
-          item.toString(),
-          style: const TextStyle(
-            color: AppColors.blackColor,
-            fontFamily: 'Quicksand',
-            fontWeight: FontWeight.w600,
+    return BlocBuilder<ExpenseBloc, ExpenseState>(
+      builder: (context, state) {
+        return AppDropdown<String>(
+          label: "Payment Method *",
+          context: context,
+          hint: _selectedPaymentMethod ?? "Select Payment Method",
+          isRequired: true,
+          value: _selectedPaymentMethod,
+          itemList: ['cash', 'bank', 'mobile', 'card', 'credit'],
+          onChanged: (newVal) {
+            setState(() {
+              _selectedPaymentMethod = newVal;
+            });
+          },
+          validator: (value) => value == null ? 'Please select Payment Method' : null,
+          itemBuilder: (item) => DropdownMenuItem(
+            value: item,
+            child: Text(
+              item.toUpperCase(),
+              style: TextStyle(
+                color: AppColors.blackColor,
+                fontFamily: 'Quicksand',
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
   Widget _buildAccountDropdown() {
     return BlocBuilder<AccountBloc, AccountState>(
       builder: (context, state) {
-        final salesReturnBloc = context.read<SalesReturnBloc>();
-        final moneyReceiptBloc = context.read<MoneyReceiptBloc>();
-
-        final filteredList = moneyReceiptBloc.selectedPaymentMethod.isNotEmpty
-            ? context.read<AccountBloc>().activeAccount.where((item) {
-                return item.acType?.toLowerCase() ==
-                    moneyReceiptBloc.selectedPaymentMethod.toLowerCase();
-              }).toList()
-            : context.read<AccountBloc>().activeAccount;
-
         return AppDropdown<AccountActiveModel>(
-          label: "Account",
+          label: "Account *",
           context: context,
-          hint: salesReturnBloc.selectedAccount?.name ?? "Select Account",
-          isLabel: false,
+          hint: _selectedAccount?.name ?? "Select Account",
           isRequired: true,
-          isNeedAll: false,
-          value: salesReturnBloc.selectedAccount,
-          itemList: filteredList,
+          value: _selectedAccount,
+          itemList: context.read<AccountBloc>().activeAccount,
           onChanged: (newVal) {
-            if (newVal != null) {
-              setState(() {
-                salesReturnBloc.selectedAccount = newVal;
-                moneyReceiptBloc.selectedAccount = newVal.name ?? "";
-                moneyReceiptBloc.selectedAccountId =
-                    newVal.id?.toString() ?? "";
-              });
-            }
+            setState(() {
+              _selectedAccount = newVal;
+            });
           },
-          validator: (value) =>
-              value == null ? 'Please select an account' : null,
+          validator: (value) => value == null ? 'Please select Account' : null,
           itemBuilder: (item) => DropdownMenuItem<AccountActiveModel>(
             value: item,
             child: Column(
@@ -668,7 +475,7 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
               children: [
                 Text(
                   item.name ?? 'Unknown Account',
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.blackColor,
                     fontFamily: 'Quicksand',
                     fontWeight: FontWeight.w600,
@@ -687,192 +494,377 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
     );
   }
 
+  Widget _buildProductsList() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "Products to Return",
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: AppColors.primaryColor,
+          ),
+        ),
+        const SizedBox(height: 12),
+        ListView.separated(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: products.length,
+          separatorBuilder: (context, index) => const SizedBox(height: 8),
+          itemBuilder: (context, index) => _buildProductItem(index),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildProductItem(int index) {
+    final item = products[index];
+    final originalMaxQuantity = item.originalQuantity ?? item.quantity ?? 1;
+
+    return Card(
+      elevation: 1,
+      margin: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+        side: BorderSide(color: Colors.grey.shade200),
+      ),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Product Header
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    item.productName ?? 'Unknown Product',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primaryColor,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                if (products.length > 1)
+                  IconButton(
+                    onPressed: () => _removeProduct(index),
+                    icon: Icon(Icons.delete, size: 20, color: Colors.red),
+                    padding: EdgeInsets.zero,
+                    constraints: BoxConstraints(),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 8),
+
+            // Quantity Controls
+            Row(
+              children: [
+                _buildQuantityControl(
+                  label: "Return Qty:",
+                  quantity: item.quantity ?? 0,
+                  maxQuantity: originalMaxQuantity,
+                  onIncrement: () => _updateProductQuantity(index, (item.quantity ?? 0) + 1),
+                  onDecrement: () => _updateProductQuantity(index, (item.quantity ?? 0) - 1),
+                  color: AppColors.primaryColor,
+                ),
+                const SizedBox(width: 16),
+                _buildQuantityControl(
+                  label: "Damage Qty:",
+                  quantity: item.damageQuantity ?? 0,
+                  maxQuantity: item.quantity ?? 0,
+                  onIncrement: () => _updateProductQuantity(index, (item.damageQuantity ?? 0) + 1, isDamage: true),
+                  onDecrement: () => _updateProductQuantity(index, (item.damageQuantity ?? 0) - 1, isDamage: true),
+                  color: Colors.orange,
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+
+            // Price Information
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _buildPriceInfo("Unit Price", item.unitPrice ?? 0),
+                _buildPriceInfo("Discount", item.discount ?? 0),
+                _buildPriceInfo("Total", item.totalPrice ?? 0, isTotal: true),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildQuantityControl({
+    required String label,
+    required int quantity,
+    required int maxQuantity,
+    required VoidCallback onIncrement,
+    required VoidCallback onDecrement,
+    required Color color,
+  }) {
+    return Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: TextStyle(fontSize: 12, color: Colors.grey),
+          ),
+          const SizedBox(height: 4),
+          Container(
+            decoration: BoxDecoration(
+              border: Border.all(color: color.withOpacity(0.3)),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              children: [
+                IconButton(
+                  icon: Icon(Icons.remove, size: 18, color: color),
+                  onPressed: quantity > 0 ? onDecrement : null,
+                  padding: const EdgeInsets.all(4),
+                  constraints: const BoxConstraints(),
+                ),
+                Expanded(
+                  child: Text(
+                    quantity.toString(),
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                      color: color,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  icon: Icon(Icons.add, size: 18, color: color),
+                  onPressed: quantity < maxQuantity ? onIncrement : null,
+                  padding: const EdgeInsets.all(4),
+                  constraints: const BoxConstraints(),
+                ),
+              ],
+            ),
+          ),
+          Text(
+            'Max: $maxQuantity',
+            style: TextStyle(fontSize: 10, color: Colors.grey),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPriceInfo(String label, double amount, {bool isTotal = false}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(fontSize: 11, color: Colors.grey),
+        ),
+        Text(
+          '৳${amount.toStringAsFixed(2)}',
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            color: isTotal ? AppColors.primaryColor : AppColors.blackColor,
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildRemarkField() {
     return CustomInputField(
-      isRequiredLable: true,
-      isRequired: false,
-      controller: context.read<SalesReturnBloc>().remarkController,
-      hintText: 'Product Return Note',
-      fillColor: const Color.fromARGB(255, 255, 255, 255),
-      keyboardType: TextInputType.text,
-      autofillHints: AutofillHints.telephoneNumber,
+      controller: remarkController,
+      hintText: 'Enter reason for return...',
+      fillColor: Colors.white,
+      keyboardType: TextInputType.multiline,
       onChanged: (value) {},
     );
   }
 
-  Widget _buildSubmitButton() {
+  Widget _buildTotalSection() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.primaryColor.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: AppColors.primaryColor.withOpacity(0.1)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            'Total Return Amount:',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: AppColors.primaryColor,
+            ),
+          ),
+          Text(
+            '৳${_totalReturnAmount.toStringAsFixed(2)}',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: AppColors.primaryColor,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionButtons() {
     return Row(
-      spacing: 20,
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        AppButton(size: 100,name: "Cancel",color: AppColors.redAccent,onPressed: (){AppRoutes.pop(context);},),
-        BlocBuilder<SalesReturnBloc, SalesReturnState>(
-          builder: (context, state) {
-            return AppButton(
-              size: 200,
-              name: "Submit Return",
-              onPressed: () {
-                if (formKey.currentState!.validate()) {
-                  if (products.isEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Please select products to return'),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
-                    return;
-                  }
-
-                  // VALIDATE: Check if any product has null productId
-                  List<Item> validProducts = products.where((product) {
-                    if (product.productId == null) {
-                      print(
-                        "❌ Invalid product: ${product.productName} has null productId",
-                      );
-                      return false;
-                    }
-                    return (product.quantity ?? 0) > 0;
-                  }).toList();
-
-                  if (validProducts.isEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          products.any((p) => p.productId == null)
-                              ? 'Some products have invalid IDs. Please check console.'
-                              : 'Please select at least one product with quantity > 0',
-                        ),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
-                    return;
-                  }
-
-                  var returnProducts = validProducts.map((product) {
-                    print(
-                      "✅ Sending product: ${product.productName}, ID: ${product.productId}",
-                    );
-                    return {
-                      "product_id": product.productId,
-                      "quantity": product.quantity,
-                      "unit_price": product.unitPrice,
-                      "discount": product.discount,
-                      "discount_type": product.discountType ?? "fixed",
-                      "total": product.totalPrice,
-                    };
-                  }).toList();
-
-                  Map<String, dynamic> body = {
-                    "items": returnProducts,
-                    "return_date": appWidgets.convertDateTime(
-                      DateFormat("dd-MM-yyyy").parse(
-                        context
-                            .read<SalesReturnBloc>()
-                            .returnDateTextController
-                            .text
-                            .trim(),
-                        true,
-                      ),
-                      "yyyy-MM-dd",
-                    ),
-                    "invoice_no": context
-                        .read<SalesReturnBloc>()
-                        .selectedInvoice
-                        ?.invoiceNo
-                        .toString(),
-                    "note": context
-                        .read<SalesReturnBloc>()
-                        .remarkController
-                        .text
-                        .trim(),
-                    "discount":
-                        double.tryParse(
-                          context
-                              .read<SalesReturnBloc>()
-                              .selectedInvoice!
-                              .overallDiscount
-                              .toString(),
-                        ) ??
-                        0.0,
-                    "discount_type":
-                        context
-                            .read<SalesReturnBloc>()
-                            .selectedInvoice
-                            ?.overallDiscountType ??
-                        "fixed",
-                    "vat":
-                        double.tryParse(
-                          context
-                              .read<SalesReturnBloc>()
-                              .selectedInvoice!
-                              .overallVatAmount
-                              .toString(),
-                        ) ??
-                        0.0,
-                    "vat_type":
-                        context
-                            .read<SalesReturnBloc>()
-                            .selectedInvoice
-                            ?.overallVatType ??
-                        "fixed",
-                    "delivary_charge":
-                        double.tryParse(
-                          context
-                              .read<SalesReturnBloc>()
-                              .selectedInvoice!
-                              .overallDeliveryCharge
-                              .toString(),
-                        ) ??
-                        0.0,
-                    "delivery_charge_type":
-                        context
-                            .read<SalesReturnBloc>()
-                            .selectedInvoice
-                            ?.overallDeliveryType ??
-                        "fixed",
-                    "service_charge":
-                        double.tryParse(
-                          context
-                              .read<SalesReturnBloc>()
-                              .selectedInvoice!
-                              .overallServiceCharge
-                              .toString(),
-                        ) ??
-                        0.0,
-                    "service_charge_type":
-                        context
-                            .read<SalesReturnBloc>()
-                            .selectedInvoice
-                            ?.overallServiceType ??
-                        "fixed",
-                    "payment_method": context
-                        .read<MoneyReceiptBloc>()
-                        .selectedPaymentMethod
-                        .toString(),
-                    "account_id": context
-                        .read<MoneyReceiptBloc>()
-                        .selectedAccountId,
-                    "return_amount": _totalReturnAmount,
-                  };
-
-                  print("📦 Final request body:");
-                  print(body);
-
-                  context.read<SalesReturnBloc>().add(
-                    SalesReturnCreate(body: body, context: context),
-                  );
-                }
-              },
-            );
-          },
+        AppButton(
+          name: "Cancel",
+          color: AppColors.redAccent,
+          onPressed: () => Navigator.pop(context),
+        ),
+        const SizedBox(width: 12),
+        AppButton(
+          name: "Submit Return",
+          onPressed: _submitReturn,
         ),
       ],
+    );
+  }
+
+  void _submitReturn() {
+    if (!formKey.currentState!.validate()) {
+      showCustomToast(
+        context: context,
+        title: 'Validation Error!',
+        description: 'Please fill all required fields',
+        icon: Icons.error,
+        primaryColor: Colors.redAccent,
+      );
+      return;
+    }
+
+    if (products.isEmpty) {
+      showCustomToast(
+        context: context,
+        title: 'Alert!',
+        description: 'Please select products to return',
+        icon: Icons.error,
+        primaryColor: Colors.redAccent,
+      );
+      return;
+    }
+
+    // Validate product quantities
+    for (var product in products) {
+      if (product.quantity == null || product.quantity! <= 0) {
+        showCustomToast(
+          context: context,
+          title: 'Alert!',
+          description: 'Quantity must be greater than 0 for all products',
+          icon: Icons.error,
+          primaryColor: Colors.redAccent,
+        );
+        return;
+      }
+
+      if (product.damageQuantity! > product.quantity!) {
+        showCustomToast(
+          context: context,
+          title: 'Alert!',
+          description: 'Damage quantity cannot exceed return quantity',
+          icon: Icons.error,
+          primaryColor: Colors.redAccent,
+        );
+        return;
+      }
+    }
+
+    // Parse return date
+    DateTime? returnDate;
+    try {
+      returnDate = DateFormat('dd-MM-yyyy').parse(returnDateController.text);
+    } catch (e) {
+      showCustomToast(
+        context: context,
+        title: 'Error!',
+        description: 'Invalid date format. Use DD-MM-YYYY',
+        icon: Icons.error,
+        primaryColor: Colors.redAccent,
+      );
+      return;
+    }
+
+    // Create request items
+    List<Map<String, dynamic>> returnItems = products.map((product) {
+      return {
+        "product_id": product.productId,
+        "quantity": product.quantity,
+        "damage_quantity": product.damageQuantity,
+        "unit_price": product.unitPrice,
+        "discount": product.discount,
+        "discount_type": product.discountType,
+      };
+    }).toList();
+
+    // Create request body
+    Map<String, dynamic> body = {
+      "customer_name": customerNameController.text,
+      "return_date": DateFormat('yyyy-MM-dd').format(returnDate),
+      "account_id": _selectedAccount?.id,
+      "payment_method": _selectedPaymentMethod,
+      "reason": remarkController.text,
+      "return_charge": double.tryParse(returnChargeController.text) ?? 0.0,
+      "return_charge_type": _returnChargeType ?? 'fixed',
+      "items": returnItems,
+    };
+
+    // If we have an invoice reference
+    if (_selectedInvoice != null && _selectedInvoice!.invoiceNo != null) {
+      body["receipt_no"] = _selectedInvoice!.invoiceNo;
+    }
+
+    print("📦 Submitting sales return:");
+    print(body);
+
+    // Dispatch the event
+    context.read<SalesReturnBloc>().add(
+      SalesReturnCreate(
+        context: context,
+        body: SalesReturnCreateModel(
+          customerName: customerNameController.text,
+          returnDate: returnDate,
+          accountId: _selectedAccount?.id,
+          paymentMethod: _selectedPaymentMethod,
+          reason: remarkController.text,
+          returnCharge: double.tryParse(returnChargeController.text) ?? 0.0,
+          returnChargeType: _returnChargeType,
+          items: products.map((item) => SalesReturnItemCreate(
+            productId: item.productId!,
+            quantity: item.quantity!,
+            damageQuantity: item.damageQuantity!,
+            unitPrice: item.unitPrice!,
+            discount: item.discount ?? 0,
+            discountType: item.discountType,
+          )).toList(),
+        ),
+      ),
     );
   }
 
   @override
   void dispose() {
     customerNameController.dispose();
+    returnDateController.dispose();
+    remarkController.dispose();
+    returnChargeController.dispose();
     super.dispose();
   }
 }
@@ -882,17 +874,19 @@ class Item {
   String? productName;
   double? unitPrice;
   int? quantity;
+  int? damageQuantity;
   double? totalPrice;
   double? discount;
   String? discountType;
   int? originalQuantity;
 
   Item({
-    this.productId,
+    required this.productId,
     this.productName,
     this.unitPrice,
-    this.totalPrice,
     this.quantity,
+    this.damageQuantity = 0,
+    this.totalPrice,
     this.discount,
     this.discountType,
     this.originalQuantity,
