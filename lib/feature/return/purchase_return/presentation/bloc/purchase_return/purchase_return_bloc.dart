@@ -680,10 +680,7 @@ class PurchaseReturnBloc extends Bloc<PurchaseReturnEvent, PurchaseReturnState> 
     emit(PurchaseInvoiceListLoading());
 
     try {
-      // Build URL with query parameters
-      String url = AppUrls.purchaseInvoice;
 
-      //
 
 
       final responseString = await getResponse(

@@ -14,27 +14,27 @@ class PurchaseInvoiceModel {
   final int? supplier;
   final String? supplierName;
   final DateTime? purchaseDate;
-  final String? total;
-  final String? grandTotal;
-  final String? paidAmount;
-  final String? dueAmount;
-  final String? changeAmount;
-  final String? overallDiscount;
+  final dynamic total;
+  final dynamic grandTotal;
+  final dynamic paidAmount;
+  final dynamic dueAmount;
+  final dynamic changeAmount;
+  final dynamic overallDiscount;
   final String? overallDiscountType;
-  final String? overallDeliveryCharge;
+  final dynamic overallDeliveryCharge;
   final String? overallDeliveryChargeType;
-  final String? overallServiceCharge;
+  final dynamic overallServiceCharge;
   final String? overallServiceChargeType;
-  final String? vat;
+  final dynamic vat;
   final String? vatType;
   final String? invoiceNo;
   final String? paymentStatus;
-  final String? returnAmount;
+  final dynamic returnAmount;
   final String? accountName;
   final String? paymentMethod;
   final dynamic remark;
   final List<Item>? items;
-  final String? subTotal;
+  final dynamic subTotal;
 
 
 
@@ -135,10 +135,10 @@ class Item {
   final int? id;
   final String? productName;
   final int? qty;
-  final String? price;
-  final String? discount;
+  final dynamic price;
+  final dynamic discount;
   final String? discountType;
-  final String? productTotal;
+  final dynamic productTotal;
 
   Item({
     this.id,

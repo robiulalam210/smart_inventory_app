@@ -265,7 +265,6 @@ class PurchaseReturnTableCard extends StatelessWidget {
 
             // Edit Button (only for pending status)
             if (purchaseReturn.status?.toLowerCase() == 'pending') ...[
-              const SizedBox(width: 4),
               _buildActionButton(
                 icon: Iconsax.edit,
                 color: Colors.blue,
@@ -276,14 +275,12 @@ class PurchaseReturnTableCard extends StatelessWidget {
 
             // Status Action Buttons
             if (purchaseReturn.status?.toLowerCase() == 'pending') ...[
-              const SizedBox(width: 4),
               _buildActionButton(
                 icon: Iconsax.tick_circle,
                 color: Colors.green,
                 tooltip: 'Approve purchase return',
                 onPressed: () => _confirmApprove(context, purchaseReturn),
               ),
-              const SizedBox(width: 4),
               _buildActionButton(
                 icon: Iconsax.close_circle,
                 color: Colors.red,
