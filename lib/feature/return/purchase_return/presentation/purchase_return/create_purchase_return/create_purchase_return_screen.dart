@@ -13,7 +13,9 @@ import '../../../../../../core/widgets/app_dropdown.dart';
 import '../../../../../../core/widgets/app_loader.dart';
 import '../../../../../../core/widgets/input_field.dart';
 import '../../../../../../core/widgets/show_custom_toast.dart';
+import '../../../../../accounts/data/model/account_active_model.dart';
 import '../../../../../accounts/presentation/bloc/account/account_bloc.dart';
+import '../../../../../expense/presentation/bloc/expense_list/expense_bloc.dart';
 import '../../bloc/purchase_return/purchase_return_bloc.dart';
 
 class CreatePurchaseReturnScreen extends StatefulWidget {
@@ -33,12 +35,15 @@ class _CreatePurchaseReturnScreenState
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   SupplierActiveModel? _selectedSupplier;
   PurchaseInvoiceModel? _selectedInvoice;
+  String? _selectedPaymentMethod;
+  AccountActiveModel? _selectedAccount;
 
   @override
   void initState() {
     super.initState();
     context.read<AccountBloc>().add(FetchAccountList(context));
     context.read<SupplierInvoiceBloc>().add(FetchSupplierActiveList(context));
+    context.read<AccountBloc>().add(FetchAccountActiveList(context));
 
     // Set initial return date
     final bloc = context.read<PurchaseReturnBloc>();
@@ -402,7 +407,14 @@ class _CreatePurchaseReturnScreenState
                   ),
                   const SizedBox(height: 8),
                 ],
-
+                // Payment Method and Account
+                Row(
+                  children: [
+                    Expanded(child: _buildPaymentMethodDropdown()),
+                    const SizedBox(width: 12),
+                    Expanded(child: _buildAccountDropdown()),
+                  ],
+                ),
                 // Return Charge Type and Charge
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -552,7 +564,80 @@ class _CreatePurchaseReturnScreenState
       ),
     );
   }
+  Widget _buildPaymentMethodDropdown() {
+    return BlocBuilder<ExpenseBloc, ExpenseState>(
+      builder: (context, state) {
+        return AppDropdown<String>(
+          label: "Payment Method",
+          context: context,
+          hint: _selectedPaymentMethod ?? "Select Payment Method",
+          isRequired: true,
+          value: _selectedPaymentMethod,
+          itemList: ['cash', 'bank', 'mobile', 'card', 'credit'],
+          onChanged: (newVal) {
+            setState(() {
+              _selectedPaymentMethod = newVal;
+            });
+          },
+          validator: (value) => value == null ? 'Please select Payment Method' : null,
+          itemBuilder: (item) => DropdownMenuItem(
+            value: item,
+            child: Text(
+              item.toUpperCase(),
+              style: TextStyle(
+                color: AppColors.blackColor,
+                fontFamily: 'Quicksand',
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
 
+  Widget _buildAccountDropdown() {
+    return BlocBuilder<AccountBloc, AccountState>(
+      builder: (context, state) {
+        return AppDropdown<AccountActiveModel>(
+          label: "Account ",
+          context: context,
+          hint: _selectedAccount?.name ?? "Select Account",
+          isRequired: true,
+          value: _selectedAccount,
+          itemList: context.read<AccountBloc>().activeAccount,
+          onChanged: (newVal) {
+            setState(() {
+              _selectedAccount = newVal;
+            });
+          },
+          validator: (value) => value == null ? 'Please select Account' : null,
+          itemBuilder: (item) => DropdownMenuItem<AccountActiveModel>(
+            value: item,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  item.name ?? 'Unknown Account',
+                  style: TextStyle(
+                    color: AppColors.blackColor,
+                    fontFamily: 'Quicksand',
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                if (item.acType != null)
+                  Text(
+                    'Type: ${item.acType}',
+                    style: TextStyle(color: AppColors.grey, fontSize: 12),
+                  ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
   void _resetForm() {
     setState(() {
       products.clear();
@@ -630,10 +715,11 @@ class _CreatePurchaseReturnScreenState
       "supplier_id": _selectedSupplier!.id.toString(),
       "invoice_no": _selectedInvoice!.invoiceNo,
       "return_date": returnDate?.toIso8601String().split('T').first,
-      "payment_method": "Cash",
       "return_charge": _returnChargeController.text,
       "return_charge_type": _selectedReturnChargeType,
       "return_amount": _returnAmountController.text,
+      "account_id": _selectedAccount?.id,
+      "payment_method": _selectedPaymentMethod,
       "reason": context.read<PurchaseReturnBloc>().remarkController.text.trim(),
       "items": returnProducts,
     };

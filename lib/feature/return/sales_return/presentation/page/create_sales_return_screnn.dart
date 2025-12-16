@@ -4,7 +4,6 @@ import 'package:intl/intl.dart';
 import 'package:meherin_mart/feature/accounts/data/model/account_active_model.dart';
 import 'package:meherin_mart/feature/accounts/presentation/bloc/account/account_bloc.dart';
 import 'package:meherin_mart/feature/expense/presentation/bloc/expense_list/expense_bloc.dart';
-import 'package:meherin_mart/feature/money_receipt/presentation/bloc/money_receipt/money_receipt_bloc.dart';
 import 'package:meherin_mart/feature/return/sales_return/data/model/sales_invoice_model.dart';
 import 'package:meherin_mart/feature/return/sales_return/data/sales_return_create_model.dart';
 
@@ -32,6 +31,10 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
   TextEditingController returnDateController = TextEditingController();
   TextEditingController remarkController = TextEditingController();
   TextEditingController returnChargeController = TextEditingController(text: "0");
+  TextEditingController returnChargeAmountController = TextEditingController(text: "0.00");
+  TextEditingController subtotalController = TextEditingController(text: "0.00");
+  TextEditingController totalAmountController = TextEditingController(text: "0.00");
+
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
   String? _selectedPaymentMethod;
@@ -55,6 +58,72 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
     if (bloc.selectedInvoice != null) {
       _selectedInvoice = bloc.selectedInvoice;
     }
+
+    // Add listener to return charge controller
+    returnChargeController.addListener(_calculateTotals);
+  }
+
+  @override
+  void dispose() {
+    returnChargeController.removeListener(_calculateTotals);
+    customerNameController.dispose();
+    returnDateController.dispose();
+    remarkController.dispose();
+    returnChargeController.dispose();
+    returnChargeAmountController.dispose();
+    subtotalController.dispose();
+    totalAmountController.dispose();
+    super.dispose();
+  }
+
+  void _calculateTotals() {
+    if (_returnChargeType == null) return;
+
+    double subtotal = _calculateSubtotal();
+    double returnCharge = double.tryParse(returnChargeController.text) ?? 0.0;
+    double returnChargeAmount = 0.0;
+    double totalAmount = 0.0;
+
+    // Calculate return charge amount
+    if (_returnChargeType == 'percentage') {
+      returnChargeAmount = subtotal * (returnCharge / 100);
+    } else {
+      returnChargeAmount = returnCharge;
+    }
+
+    // Calculate total amount (subtotal + return charge)
+    totalAmount = subtotal + returnChargeAmount;
+
+    // Update controllers
+    setState(() {
+      subtotalController.text = subtotal.toStringAsFixed(2);
+      returnChargeAmountController.text = returnChargeAmount.toStringAsFixed(2);
+      totalAmountController.text = totalAmount.toStringAsFixed(2);
+    });
+  }
+
+  double _calculateSubtotal() {
+    double subtotal = 0.0;
+
+    for (var item in products) {
+      double itemPrice = item.unitPrice ?? 0.0;
+      int quantity = item.quantity ?? 0;
+      double discount = item.discount ?? 0.0;
+      String discountType = item.discountType ?? 'fixed';
+
+      double itemTotal = itemPrice * quantity;
+
+      // Apply discount
+      if (discountType == 'percentage') {
+        itemTotal = itemTotal - (itemTotal * discount / 100);
+      } else {
+        itemTotal = itemTotal - discount;
+      }
+
+      subtotal += itemTotal;
+    }
+
+    return subtotal;
   }
 
   void onProductChanged(SalesInvoiceModel? newVal) {
@@ -94,6 +163,9 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
           );
         }
       }
+
+      // Recalculate totals after products update
+      _calculateTotals();
     });
   }
 
@@ -137,9 +209,25 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
           item.damageQuantity = newQuantity;
         }
 
-        // Recalculate total
-        item.totalPrice = (item.unitPrice ?? 0) * newQuantity;
+        // Recalculate item total
+        double itemPrice = item.unitPrice ?? 0.0;
+        double discount = item.discount ?? 0.0;
+        String discountType = item.discountType ?? 'fixed';
+
+        double itemTotal = itemPrice * newQuantity;
+
+        // Apply discount
+        if (discountType == 'percentage') {
+          itemTotal = itemTotal - (itemTotal * discount / 100);
+        } else {
+          itemTotal = itemTotal - discount;
+        }
+
+        item.totalPrice = itemTotal;
       }
+
+      // Recalculate totals after quantity change
+      _calculateTotals();
     });
   }
 
@@ -147,12 +235,9 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
     setState(() {
       if (index >= 0 && index < products.length) {
         products.removeAt(index);
+        _calculateTotals();
       }
     });
-  }
-
-  double get _totalReturnAmount {
-    return products.fold(0.0, (sum, item) => sum + (item.totalPrice ?? 0));
   }
 
   @override
@@ -218,23 +303,25 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
 
                 // Invoice Selection
                 Row(
-                  children: [
+                  crossAxisAlignment: CrossAxisAlignment.start,
+
+mainAxisAlignment: MainAxisAlignment.start,                  children: [
                     Expanded(child: _buildReceiptNumberDropdown()),
                     const SizedBox(width: 12),
                     Expanded(child: _buildCustomerNameField()),
-                  ],
-                ),
-                const SizedBox(height: 16),
-
-                // Return Date and Charge
-                Row(
-                  children: [
-                    Expanded(child: _buildReturnDateField()),
                     const SizedBox(width: 12),
-                    Expanded(child: _buildReturnChargeField()),
+
+                   Expanded(child: _buildReturnDateField())
+
                   ],
                 ),
-                const SizedBox(height: 16),
+
+                // Return Date
+                const SizedBox(height: 8),
+
+                // Return Charge Section
+                _buildReturnChargeSection(),
+                const SizedBox(height: 8),
 
                 // Payment Method and Account
                 Row(
@@ -252,16 +339,17 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
                   const SizedBox(height: 16),
                 ],
 
+                // Summary Section
+                if (products.isNotEmpty) ...[
+                  _buildSummarySection(),
+                  const SizedBox(height: 16),
+                ],
+
                 // Remark Field
                 _buildRemarkField(),
                 const SizedBox(height: 16),
 
-                // Total and Submit Button
-                if (products.isNotEmpty) ...[
-                  _buildTotalSection(),
-                  const SizedBox(height: 16),
-                ],
-
+                // Submit Button
                 _buildActionButtons(),
               ],
             ),
@@ -290,7 +378,7 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
         }
 
         return AppDropdown<SalesInvoiceModel>(
-          label: "Receipt Number *",
+          label: "Receipt Number",
           isSearch: true,
           context: context,
           hint: _selectedInvoice?.invoiceNo ?? "Select Receipt Number",
@@ -375,47 +463,90 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
     );
   }
 
-  Widget _buildReturnChargeField() {
-    return Row(
-      children: [
-        Expanded(
-          flex: 3,
-          child: CustomInputField(
-            controller: returnChargeController,
-            hintText: '0.00',
-            fillColor: Colors.white,
-            keyboardType: TextInputType.number,
-            onChanged: (value) {},
-          ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          flex: 2,
-          child: AppDropdown<String>(
-            label: "Type",
-            context: context,
-            hint: _returnChargeType ?? "Select",
-            value: _returnChargeType,
-            itemList: ['fixed', 'percentage'],
-            onChanged: (newVal) {
-              setState(() {
-                _returnChargeType = newVal;
-              });
-            },
-            itemBuilder: (item) => DropdownMenuItem(
-              value: item,
-              child: Text(
-                item.toUpperCase(),
-                style: TextStyle(
-                  color: AppColors.blackColor,
-                  fontFamily: 'Quicksand',
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
+  Widget _buildReturnChargeSection() {
+    return Container(
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade50,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.grey.shade300),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Return Charge',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: AppColors.primaryColor,
             ),
           ),
-        ),
-      ],
+          const SizedBox(height: 6),
+
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                flex: 3,
+                child: CustomInputField(
+                  labelText: "Return Charge",
+                  controller: returnChargeController,
+                  hintText: '0.00',
+                  fillColor: Colors.white,
+                  keyboardType: TextInputType.number,
+                  onChanged: (value) {
+                    _calculateTotals();
+                  },
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                flex: 2,
+                child: AppDropdown<String>(
+                  label: "Type",
+                  context: context,
+                  hint: _returnChargeType ?? "Select",
+                  value: _returnChargeType,
+                  itemList: ['fixed', 'percentage'],
+                  onChanged: (newVal) {
+                    setState(() {
+                      _returnChargeType = newVal;
+                      _calculateTotals();
+                    });
+                  },
+                  itemBuilder: (item) => DropdownMenuItem(
+                    value: item,
+                    child: Text(
+                      item == 'percentage' ? '%' : 'Fixed',
+                      style: TextStyle(
+                        color: AppColors.blackColor,
+                        fontFamily: 'Quicksand',
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+
+              Expanded(
+                child: CustomInputField(
+                  labelText: "Charge Amount",
+                  controller: returnChargeAmountController,
+                  hintText: '0.00',
+                  fillColor: Colors.white,
+                  readOnly: true,
+                  keyboardType: TextInputType.number,
+                ),
+              ),
+            ],
+          ),
+
+
+
+        ],
+      ),
     );
   }
 
@@ -423,7 +554,7 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
     return BlocBuilder<ExpenseBloc, ExpenseState>(
       builder: (context, state) {
         return AppDropdown<String>(
-          label: "Payment Method *",
+          label: "Payment Method ",
           context: context,
           hint: _selectedPaymentMethod ?? "Select Payment Method",
           isRequired: true,
@@ -455,7 +586,7 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
     return BlocBuilder<AccountBloc, AccountState>(
       builder: (context, state) {
         return AppDropdown<AccountActiveModel>(
-          label: "Account *",
+          label: "Account",
           context: context,
           hint: _selectedAccount?.name ?? "Select Account",
           isRequired: true,
@@ -679,6 +810,101 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
     );
   }
 
+  Widget _buildSummarySection() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.blue.shade50,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.blue.shade200),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Return Summary',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: AppColors.primaryColor,
+            ),
+          ),
+          const SizedBox(height: 12),
+
+          // Subtotal
+          _buildSummaryRow(
+            label: 'Subtotal:',
+            value: double.tryParse(subtotalController.text) ?? 0.0,
+            color: Colors.black87,
+          ),
+
+          // Return Charge
+          _buildSummaryRow(
+            label: 'Return Charge:',
+            value: double.tryParse(returnChargeAmountController.text) ?? 0.0,
+            color: Colors.orange.shade700,
+            showType: true,
+          ),
+
+          Divider(height: 20, thickness: 1, color: Colors.grey.shade300),
+
+          // Total Amount
+          _buildSummaryRow(
+            label: 'Total Return Amount:',
+            value: double.tryParse(totalAmountController.text) ?? 0.0,
+            color: AppColors.primaryColor,
+            isTotal: true,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSummaryRow({
+    required String label,
+    required double value,
+    required Color color,
+    bool showType = false,
+    bool isTotal = false,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: isTotal ? 16 : 14,
+                  fontWeight: isTotal ? FontWeight.bold : FontWeight.w600,
+                  color: color,
+                ),
+              ),
+              if (showType && _returnChargeType == 'percentage')
+                Text(
+                  ' (${returnChargeController.text}%)',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey,
+                  ),
+                ),
+            ],
+          ),
+          Text(
+            '৳${value.toStringAsFixed(2)}',
+            style: TextStyle(
+              fontSize: isTotal ? 18 : 14,
+              fontWeight: isTotal ? FontWeight.bold : FontWeight.w600,
+              color: color,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildRemarkField() {
     return CustomInputField(
       controller: remarkController,
@@ -686,38 +912,6 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
       fillColor: Colors.white,
       keyboardType: TextInputType.multiline,
       onChanged: (value) {},
-    );
-  }
-
-  Widget _buildTotalSection() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.primaryColor.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppColors.primaryColor.withOpacity(0.1)),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            'Total Return Amount:',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: AppColors.primaryColor,
-            ),
-          ),
-          Text(
-            '৳${_totalReturnAmount.toStringAsFixed(2)}',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: AppColors.primaryColor,
-            ),
-          ),
-        ],
-      ),
     );
   }
 
@@ -802,6 +996,30 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
       return;
     }
 
+    // Validate account
+    if (_selectedAccount == null) {
+      showCustomToast(
+        context: context,
+        title: 'Error!',
+        description: 'Please select an account for the return',
+        icon: Icons.error,
+        primaryColor: Colors.redAccent,
+      );
+      return;
+    }
+
+    // Validate payment method
+    if (_selectedPaymentMethod == null || _selectedPaymentMethod!.isEmpty) {
+      showCustomToast(
+        context: context,
+        title: 'Error!',
+        description: 'Please select a payment method',
+        icon: Icons.error,
+        primaryColor: Colors.redAccent,
+      );
+      return;
+    }
+
     // Create request items
     List<Map<String, dynamic>> returnItems = products.map((product) {
       return {
@@ -814,15 +1032,21 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
       };
     }).toList();
 
+    // Get calculated amounts
+    double subtotal = double.tryParse(subtotalController.text) ?? 0.0;
+    double returnChargeAmount = double.tryParse(returnChargeAmountController.text) ?? 0.0;
+    double totalAmount = double.tryParse(totalAmountController.text) ?? 0.0;
+
     // Create request body
     Map<String, dynamic> body = {
       "customer_name": customerNameController.text,
       "return_date": DateFormat('yyyy-MM-dd').format(returnDate),
-      "account_id": _selectedAccount?.id,
+      "account_id": _selectedAccount!.id,
       "payment_method": _selectedPaymentMethod,
       "reason": remarkController.text,
       "return_charge": double.tryParse(returnChargeController.text) ?? 0.0,
       "return_charge_type": _returnChargeType ?? 'fixed',
+      "return_amount": totalAmount,  // Send calculated total
       "items": returnItems,
     };
 
@@ -831,8 +1055,13 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
       body["receipt_no"] = _selectedInvoice!.invoiceNo;
     }
 
+    // Log for debugging
     print("📦 Submitting sales return:");
-    print(body);
+    print("Account ID: ${_selectedAccount!.id}");
+    print("Payment Method: $_selectedPaymentMethod");
+    print("Return Charge: ${body["return_charge"]} (${_returnChargeType})");
+    print("Return Amount: $totalAmount");
+    print("Items count: ${returnItems.length}");
 
     // Dispatch the event
     context.read<SalesReturnBloc>().add(
@@ -841,11 +1070,12 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
         body: SalesReturnCreateModel(
           customerName: customerNameController.text,
           returnDate: returnDate,
-          accountId: _selectedAccount?.id,
+          accountId: _selectedAccount!.id,
           paymentMethod: _selectedPaymentMethod,
           reason: remarkController.text,
           returnCharge: double.tryParse(returnChargeController.text) ?? 0.0,
           returnChargeType: _returnChargeType,
+          returnAmount: totalAmount,  // Pass calculated amount
           items: products.map((item) => SalesReturnItemCreate(
             productId: item.productId!,
             quantity: item.quantity!,
@@ -857,15 +1087,6 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
         ),
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    customerNameController.dispose();
-    returnDateController.dispose();
-    remarkController.dispose();
-    returnChargeController.dispose();
-    super.dispose();
   }
 }
 
