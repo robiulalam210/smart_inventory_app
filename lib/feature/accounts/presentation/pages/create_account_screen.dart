@@ -53,11 +53,11 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
   @override
   Widget build(BuildContext context) {
     return Container(
-
-decoration: BoxDecoration(
-  color: AppColors.whiteColor,
-borderRadius: BorderRadius.circular(12)
-),      child: Padding(
+      decoration: BoxDecoration(
+        color: AppColors.whiteColor,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Padding(
         padding: const EdgeInsets.all(20.0),
         child: SingleChildScrollView(
           child: Form(
@@ -104,7 +104,7 @@ borderRadius: BorderRadius.circular(12)
                             isRequired: true,
                             isNeedAll: false,
                             value: selectedType.isEmpty ? null : selectedType,
-                            itemList:["Bank", "Cash", "Mobile banking"],
+                            itemList: ["Bank", "Cash", "Mobile banking"],
                             onChanged: (newVal) {
                               selectedAccountType.value = newVal.toString();
                               setState(() {});
@@ -133,7 +133,6 @@ borderRadius: BorderRadius.circular(12)
                     const SizedBox(width: 10),
                     Expanded(
                       child: AppTextField(
-
                         isRequired: true,
                         textInputAction: TextInputAction.next,
                         controller: context
@@ -156,13 +155,12 @@ borderRadius: BorderRadius.circular(12)
                   ],
                 ),
 
-
                 // Account Number (Conditional - Only for Bank and Mobile Banking)
-                Row(  crossAxisAlignment: CrossAxisAlignment.start,
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
                       child: AppTextField(
-
                         isRequired: true,
                         textInputAction: TextInputAction.done,
                         controller: context
@@ -205,7 +203,9 @@ borderRadius: BorderRadius.circular(12)
                           return AppTextField(
                             isRequired: true,
                             textInputAction: TextInputAction.next,
-                            controller: context.read<AccountBloc>().accountNumberController,
+                            controller: context
+                                .read<AccountBloc>()
+                                .accountNumberController,
                             hintText: isBank
                                 ? 'Bank Account Number'
                                 : isMobile
@@ -284,7 +284,6 @@ borderRadius: BorderRadius.circular(12)
                       children: [
                         Expanded(
                           child: AppTextField(
-
                             isRequired: true,
                             textInputAction: TextInputAction.next,
                             controller: context
@@ -307,7 +306,6 @@ borderRadius: BorderRadius.circular(12)
                         const SizedBox(width: 10),
                         Expanded(
                           child: AppTextField(
-
                             isRequired: true,
                             textInputAction: TextInputAction.next,
                             controller: context
@@ -380,7 +378,7 @@ borderRadius: BorderRadius.circular(12)
 
     // Add account number for bank and mobile banking accounts
     // if (selectedType == "Bank" || selectedType == "Mobile banking") {
-      body["ac_number"] = accountBloc.accountNumberController.text.trim();
+    body["ac_number"] = accountBloc.accountNumberController.text.trim();
     // }
 
     // Add bank details only for bank accounts

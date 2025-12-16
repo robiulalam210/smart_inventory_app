@@ -213,7 +213,7 @@ class SalesReturnTableCard extends StatelessWidget {
   }
 
   DataCell _buildAmountCell(double? amount, double width) {
-    final amountText = amount != null ? '\$${amount.toStringAsFixed(2)}' : 'N/A';
+    final amountText = amount != null ? '${amount.toStringAsFixed(2)}' : 'N/A';
 
     return DataCell(
       SizedBox(

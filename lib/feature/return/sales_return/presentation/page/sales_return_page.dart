@@ -97,6 +97,7 @@ class _SalesReturnScreenState extends State<SalesReturnScreen> {
                 appLoader(context, "Creating Sales Return...");
               } else if (state is SalesReturnCreateSuccess) {
                 Navigator.pop(context);
+                Navigator.pop(context);
                 _fetchSalesReturnList(from: startDate, to: endDate);
                 appAlertDialog(
                   context,
@@ -126,7 +127,7 @@ class _SalesReturnScreenState extends State<SalesReturnScreen> {
                   ],
                 );
               } else if (state is SalesReturnError) {
-                // Navigator.pop(context);
+                Navigator.pop(context);
                 appAlertDialog(
                   context,
                   state.content,
@@ -138,6 +139,7 @@ class _SalesReturnScreenState extends State<SalesReturnScreen> {
                     ),
                   ],
                 );
+                _fetchSalesReturnList(from: startDate, to: endDate);
               }
             },
             child: Column(

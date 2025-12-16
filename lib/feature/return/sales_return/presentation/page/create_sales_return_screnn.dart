@@ -35,8 +35,8 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
     context.read<SalesReturnBloc>().add(FetchInvoiceList(context));
 
     // Setting initial return date
-    context.read<SalesReturnBloc>().returnDateTextController.text =
-        appWidgets.convertDateTimeDDMMYYYY(DateTime.now());
+    context.read<SalesReturnBloc>().returnDateTextController.text = appWidgets
+        .convertDateTimeDDMMYYYY(DateTime.now());
   }
 
   void onProductChanged(SalesInvoiceModel? newVal) {
@@ -74,25 +74,34 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
       if (newVal.items != null) {
         for (var item in newVal.items!) {
           // FIX: Try multiple possible field names for product ID
-          int? productId = item.productId ??
-              item.id  // if snake_case
-              ;   // if nested object
+          int? productId =
+              item.productId ??
+              item
+                  .id // if snake_case
+                  ; // if nested object
 
           if (productId == null) {
-            print("⚠️ WARNING: Could not find productId for ${item.productName}");
+            print(
+              "⚠️ WARNING: Could not find productId for ${item.productName}",
+            );
             print("   Available fields: ${item.toJson().keys.toList()}");
           }
 
-          products.add(Item(
-            productId: productId,
-            productName: item.productName,
-            unitPrice: double.tryParse(item.unitPrice?.toString() ?? "0") ?? 0.0,
-            totalPrice: double.tryParse(item.subtotal?.toString() ?? "0") ?? 0.0,
-            quantity: item.quantity ?? 1,
-            discount: double.tryParse(item.discount?.toString() ?? "0") ?? 0.0,
-            discountType: item.discountType ?? "fixed",
-            originalQuantity: item.quantity ?? 1,
-          ));
+          products.add(
+            Item(
+              productId: productId,
+              productName: item.productName,
+              unitPrice:
+                  double.tryParse(item.unitPrice?.toString() ?? "0") ?? 0.0,
+              totalPrice:
+                  double.tryParse(item.subtotal?.toString() ?? "0") ?? 0.0,
+              quantity: item.quantity ?? 1,
+              discount:
+                  double.tryParse(item.discount?.toString() ?? "0") ?? 0.0,
+              discountType: item.discountType ?? "fixed",
+              originalQuantity: item.quantity ?? 1,
+            ),
+          );
         }
       }
     });
@@ -136,7 +145,12 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: AppColors.bg,
+      // color: AppColors.bg,
+
+      decoration: BoxDecoration(
+      color: AppColors.white,
+      borderRadius: BorderRadius.circular(12),
+    ),
       padding: AppTextStyle.getResponsivePaddingBody(context),
       child: RefreshIndicator(
         color: AppColors.primaryColor,
@@ -152,12 +166,14 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
               Navigator.pop(context);
             } else if (state is InvoiceError) {
               Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(state.content),
-                  backgroundColor: Colors.red,
-                ),
+              showCustomToast(
+                context: context,
+                title: 'Error!',
+                description: state.content,
+                icon: Icons.error,
+                primaryColor: Colors.redAccent,
               );
+
             }
           },
           child: SingleChildScrollView(
@@ -166,6 +182,24 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
               key: formKey,
               child: Column(
                 children: [
+                  // Header
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                      "Create Sales Return" ,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primaryColor,
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.of(context).pop(),
+                      ),
+                    ],
+                  ),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.start,
@@ -225,14 +259,13 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
           onChanged: (newVal) {
             if (newVal != null) {
               setState(() {
-                print("obs${newVal}");
                 bloc.selectedInvoice = newVal;
                 onProductChanged(newVal);
               });
             }
           },
           validator: (value) =>
-          value == null ? 'Please select Receipt Number' : null,
+              value == null ? 'Please select Receipt Number' : null,
           itemBuilder: (item) => DropdownMenuItem<SalesInvoiceModel>(
             value: item,
             child: Column(
@@ -249,10 +282,7 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
                 ),
                 Text(
                   'Customer: ${item.customerName ?? "Walk-in Customer"}',
-                  style: TextStyle(
-                    color: AppColors.grey,
-                    fontSize: 12,
-                  ),
+                  style: TextStyle(color: AppColors.grey, fontSize: 12),
                 ),
                 Text(
                   'Total: ৳${item.grandTotal?.toStringAsFixed(2) ?? "0.00"}',
@@ -289,10 +319,9 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
       children: [
         Text(
           "Products to Return",
-          style: AppTextStyle.cardTitle(context).copyWith(
-            fontWeight: FontWeight.bold,
-            fontSize: 16,
-          ),
+          style: AppTextStyle.cardTitle(
+            context,
+          ).copyWith(fontWeight: FontWeight.bold, fontSize: 16),
         ),
         const SizedBox(height: 8),
         ListView.separated(
@@ -328,20 +357,16 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
                     children: [
                       Text(
                         item.productName ?? 'Unknown Product',
-                        style: AppTextStyle.cardTitle(context).copyWith(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                        ),
+                        style: AppTextStyle.cardTitle(
+                          context,
+                        ).copyWith(fontWeight: FontWeight.bold, fontSize: 14),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
                       if (item.productId != null)
                         Text(
                           'ID: ${item.productId}',
-                          style: TextStyle(
-                            fontSize: 10,
-                            color: Colors.grey,
-                          ),
+                          style: TextStyle(fontSize: 10, color: Colors.grey),
                         ),
                     ],
                   ),
@@ -350,9 +375,9 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
                   children: [
                     Text(
                       'Quantity:',
-                      style: AppTextStyle.cardLevelText(context).copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+                      style: AppTextStyle.cardLevelText(
+                        context,
+                      ).copyWith(fontWeight: FontWeight.w600),
                     ),
                     const SizedBox(width: 8),
                     Container(
@@ -366,7 +391,10 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
                             icon: const Icon(Icons.remove, size: 18),
                             onPressed: () {
                               if (item.quantity! > 0) {
-                                _updateProductQuantity(index, item.quantity! - 1);
+                                _updateProductQuantity(
+                                  index,
+                                  item.quantity! - 1,
+                                );
                               }
                             },
                             padding: const EdgeInsets.all(4),
@@ -388,7 +416,10 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
                             icon: const Icon(Icons.add, size: 18),
                             onPressed: () {
                               if (item.quantity! < originalMaxQuantity) {
-                                _updateProductQuantity(index, item.quantity! + 1);
+                                _updateProductQuantity(
+                                  index,
+                                  item.quantity! + 1,
+                                );
                               }
                             },
                             padding: const EdgeInsets.all(4),
@@ -400,10 +431,9 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
                     const SizedBox(width: 8),
                     Text(
                       'Max: $originalMaxQuantity',
-                      style: AppTextStyle.cardLevelText(context).copyWith(
-                        fontSize: 12,
-                        color: Colors.grey,
-                      ),
+                      style: AppTextStyle.cardLevelText(
+                        context,
+                      ).copyWith(fontSize: 12, color: Colors.grey),
                     ),
                   ],
                 ),
@@ -412,7 +442,7 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
                   IconButton(
                     onPressed: () => _removeProduct(index),
                     icon: const Icon(
-                      Icons.delete_outline,
+                      HugeIcons.strokeRoundedDelete02,
                       size: 20,
                       color: Colors.red,
                     ),
@@ -430,9 +460,9 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
                   children: [
                     Text(
                       'Unit Price:',
-                      style: AppTextStyle.cardLevelText(context).copyWith(
-                        fontSize: 12,
-                      ),
+                      style: AppTextStyle.cardLevelText(
+                        context,
+                      ).copyWith(fontSize: 12),
                     ),
                     Text(
                       '৳${(item.unitPrice ?? 0).toStringAsFixed(2)}',
@@ -448,9 +478,9 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
                   children: [
                     Text(
                       'Discount:',
-                      style: AppTextStyle.cardLevelText(context).copyWith(
-                        fontSize: 12,
-                      ),
+                      style: AppTextStyle.cardLevelText(
+                        context,
+                      ).copyWith(fontSize: 12),
                     ),
                     Text(
                       '৳${(item.discount ?? 0).toStringAsFixed(2)}',
@@ -466,9 +496,9 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
                   children: [
                     Text(
                       'Total:',
-                      style: AppTextStyle.cardLevelText(context).copyWith(
-                        fontSize: 12,
-                      ),
+                      style: AppTextStyle.cardLevelText(
+                        context,
+                      ).copyWith(fontSize: 12),
                     ),
                     Text(
                       '৳${(item.totalPrice ?? 0).toStringAsFixed(2)}',
@@ -497,10 +527,9 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
         children: [
           Text(
             'Total Return Amount:',
-            style: AppTextStyle.cardTitle(context).copyWith(
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
-            ),
+            style: AppTextStyle.cardTitle(
+              context,
+            ).copyWith(fontWeight: FontWeight.bold, fontSize: 16),
           ),
           Text(
             '৳${_totalReturnAmount.toStringAsFixed(2)}',
@@ -518,16 +547,20 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
   Widget _buildAdditionalFields() {
     return Column(
       children: [
-        Row(children: [
-          Expanded(child: _buildPaymentMethodDropdown()),
-          const SizedBox(width: 8),
-          Expanded(child: _buildAccountDropdown()),
-        ]),
-        Row(children: [
-          Expanded(child: _buildReturnDateField()),
-          const SizedBox(width: 8),
-          Expanded(child: _buildRemarkField()),
-        ]),
+        Row(
+          children: [
+            Expanded(child: _buildPaymentMethodDropdown()),
+            const SizedBox(width: 8),
+            Expanded(child: _buildAccountDropdown()),
+          ],
+        ),
+        Row(
+          children: [
+            Expanded(child: _buildReturnDateField()),
+            const SizedBox(width: 8),
+            Expanded(child: _buildRemarkField()),
+          ],
+        ),
       ],
     );
   }
@@ -573,11 +606,12 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
           : context.read<MoneyReceiptBloc>().selectedPaymentMethod,
       itemList: context.read<ExpenseBloc>().paymentMethod,
       onChanged: (newVal) {
-        context.read<MoneyReceiptBloc>().selectedPaymentMethod = newVal.toString();
+        context.read<MoneyReceiptBloc>().selectedPaymentMethod = newVal
+            .toString();
         setState(() {});
       },
       validator: (value) =>
-      value == null ? 'Please select a payment method' : null,
+          value == null ? 'Please select a payment method' : null,
       itemBuilder: (item) => DropdownMenuItem(
         value: item,
         child: Text(
@@ -600,9 +634,9 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
 
         final filteredList = moneyReceiptBloc.selectedPaymentMethod.isNotEmpty
             ? context.read<AccountBloc>().activeAccount.where((item) {
-          return item.acType?.toLowerCase() ==
-              moneyReceiptBloc.selectedPaymentMethod.toLowerCase();
-        }).toList()
+                return item.acType?.toLowerCase() ==
+                    moneyReceiptBloc.selectedPaymentMethod.toLowerCase();
+              }).toList()
             : context.read<AccountBloc>().activeAccount;
 
         return AppDropdown<AccountActiveModel>(
@@ -619,11 +653,13 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
               setState(() {
                 salesReturnBloc.selectedAccount = newVal;
                 moneyReceiptBloc.selectedAccount = newVal.name ?? "";
-                moneyReceiptBloc.selectedAccountId = newVal.id?.toString() ?? "";
+                moneyReceiptBloc.selectedAccountId =
+                    newVal.id?.toString() ?? "";
               });
             }
           },
-          validator: (value) => value == null ? 'Please select an account' : null,
+          validator: (value) =>
+              value == null ? 'Please select an account' : null,
           itemBuilder: (item) => DropdownMenuItem<AccountActiveModel>(
             value: item,
             child: Column(
@@ -641,10 +677,7 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
                 if (item.acType != null)
                   Text(
                     'Type: ${item.acType}',
-                    style: TextStyle(
-                      color: AppColors.grey,
-                      fontSize: 12,
-                    ),
+                    style: TextStyle(color: AppColors.grey, fontSize: 12),
                   ),
               ],
             ),
@@ -668,87 +701,172 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
   }
 
   Widget _buildSubmitButton() {
-    return BlocBuilder<SalesReturnBloc, SalesReturnState>(
-      builder: (context, state) {
-        return AppButton(
-          name: "Submit Return",
-          onPressed: () {
-            if (formKey.currentState!.validate()) {
-              if (products.isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Please select products to return'),
-                    backgroundColor: Colors.red,
-                  ),
-                );
-                return;
-              }
+    return Row(
+      spacing: 20,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        AppButton(size: 100,name: "Cancel",color: AppColors.redAccent,onPressed: (){AppRoutes.pop(context);},),
+        BlocBuilder<SalesReturnBloc, SalesReturnState>(
+          builder: (context, state) {
+            return AppButton(
+              size: 200,
+              name: "Submit Return",
+              onPressed: () {
+                if (formKey.currentState!.validate()) {
+                  if (products.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Please select products to return'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                    return;
+                  }
 
-              // VALIDATE: Check if any product has null productId
-              List<Item> validProducts = products.where((product) {
-                if (product.productId == null) {
-                  print("❌ Invalid product: ${product.productName} has null productId");
-                  return false;
+                  // VALIDATE: Check if any product has null productId
+                  List<Item> validProducts = products.where((product) {
+                    if (product.productId == null) {
+                      print(
+                        "❌ Invalid product: ${product.productName} has null productId",
+                      );
+                      return false;
+                    }
+                    return (product.quantity ?? 0) > 0;
+                  }).toList();
+
+                  if (validProducts.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          products.any((p) => p.productId == null)
+                              ? 'Some products have invalid IDs. Please check console.'
+                              : 'Please select at least one product with quantity > 0',
+                        ),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                    return;
+                  }
+
+                  var returnProducts = validProducts.map((product) {
+                    print(
+                      "✅ Sending product: ${product.productName}, ID: ${product.productId}",
+                    );
+                    return {
+                      "product_id": product.productId,
+                      "quantity": product.quantity,
+                      "unit_price": product.unitPrice,
+                      "discount": product.discount,
+                      "discount_type": product.discountType ?? "fixed",
+                      "total": product.totalPrice,
+                    };
+                  }).toList();
+
+                  Map<String, dynamic> body = {
+                    "items": returnProducts,
+                    "return_date": appWidgets.convertDateTime(
+                      DateFormat("dd-MM-yyyy").parse(
+                        context
+                            .read<SalesReturnBloc>()
+                            .returnDateTextController
+                            .text
+                            .trim(),
+                        true,
+                      ),
+                      "yyyy-MM-dd",
+                    ),
+                    "invoice_no": context
+                        .read<SalesReturnBloc>()
+                        .selectedInvoice
+                        ?.invoiceNo
+                        .toString(),
+                    "note": context
+                        .read<SalesReturnBloc>()
+                        .remarkController
+                        .text
+                        .trim(),
+                    "discount":
+                        double.tryParse(
+                          context
+                              .read<SalesReturnBloc>()
+                              .selectedInvoice!
+                              .overallDiscount
+                              .toString(),
+                        ) ??
+                        0.0,
+                    "discount_type":
+                        context
+                            .read<SalesReturnBloc>()
+                            .selectedInvoice
+                            ?.overallDiscountType ??
+                        "fixed",
+                    "vat":
+                        double.tryParse(
+                          context
+                              .read<SalesReturnBloc>()
+                              .selectedInvoice!
+                              .overallVatAmount
+                              .toString(),
+                        ) ??
+                        0.0,
+                    "vat_type":
+                        context
+                            .read<SalesReturnBloc>()
+                            .selectedInvoice
+                            ?.overallVatType ??
+                        "fixed",
+                    "delivary_charge":
+                        double.tryParse(
+                          context
+                              .read<SalesReturnBloc>()
+                              .selectedInvoice!
+                              .overallDeliveryCharge
+                              .toString(),
+                        ) ??
+                        0.0,
+                    "delivery_charge_type":
+                        context
+                            .read<SalesReturnBloc>()
+                            .selectedInvoice
+                            ?.overallDeliveryType ??
+                        "fixed",
+                    "service_charge":
+                        double.tryParse(
+                          context
+                              .read<SalesReturnBloc>()
+                              .selectedInvoice!
+                              .overallServiceCharge
+                              .toString(),
+                        ) ??
+                        0.0,
+                    "service_charge_type":
+                        context
+                            .read<SalesReturnBloc>()
+                            .selectedInvoice
+                            ?.overallServiceType ??
+                        "fixed",
+                    "payment_method": context
+                        .read<MoneyReceiptBloc>()
+                        .selectedPaymentMethod
+                        .toString(),
+                    "account_id": context
+                        .read<MoneyReceiptBloc>()
+                        .selectedAccountId,
+                    "return_amount": _totalReturnAmount,
+                  };
+
+                  print("📦 Final request body:");
+                  print(body);
+
+                  context.read<SalesReturnBloc>().add(
+                    SalesReturnCreate(body: body, context: context),
+                  );
                 }
-                return (product.quantity ?? 0) > 0;
-              }).toList();
-
-              if (validProducts.isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(products.any((p) => p.productId == null)
-                        ? 'Some products have invalid IDs. Please check console.'
-                        : 'Please select at least one product with quantity > 0'),
-                    backgroundColor: Colors.red,
-                  ),
-                );
-                return;
-              }
-
-              var returnProducts = validProducts.map((product) {
-                print("✅ Sending product: ${product.productName}, ID: ${product.productId}");
-                return {
-                  "product_id": product.productId,
-                  "quantity": product.quantity,
-                  "unit_price": product.unitPrice,
-                  "discount": product.discount,
-                  "discount_type": product.discountType ?? "fixed",
-                  "total": product.totalPrice,
-                };
-              }).toList();
-
-              Map<String, dynamic> body = {
-                "items": returnProducts,
-                "return_date": appWidgets.convertDateTime(
-                  DateFormat("dd-MM-yyyy").parse(
-                    context.read<SalesReturnBloc>().returnDateTextController.text.trim(),
-                    true,
-                  ),
-                  "yyyy-MM-dd",
-                ),
-                "invoice_no": context.read<SalesReturnBloc>().selectedInvoice?.invoiceNo.toString(),
-                "note": context.read<SalesReturnBloc>().remarkController.text.trim(),
-                "discount": double.tryParse(context.read<SalesReturnBloc>().selectedInvoice!.overallDiscount.toString()) ?? 0.0,
-                "discount_type": context.read<SalesReturnBloc>().selectedInvoice?.overallDiscountType ?? "fixed",
-                "vat": double.tryParse(context.read<SalesReturnBloc>().selectedInvoice!.overallVatAmount.toString()) ?? 0.0,
-                "vat_type": context.read<SalesReturnBloc>().selectedInvoice?.overallVatType ?? "fixed",
-                "delivary_charge": double.tryParse(context.read<SalesReturnBloc>().selectedInvoice!.overallDeliveryCharge.toString()) ?? 0.0,
-                "delivery_charge_type": context.read<SalesReturnBloc>().selectedInvoice?.overallDeliveryType ?? "fixed",
-                "service_charge": double.tryParse(context.read<SalesReturnBloc>().selectedInvoice!.overallServiceCharge.toString()) ?? 0.0,
-                "service_charge_type": context.read<SalesReturnBloc>().selectedInvoice?.overallServiceType ?? "fixed",
-                "payment_method": context.read<MoneyReceiptBloc>().selectedPaymentMethod.toString(),
-                "account_id": context.read<MoneyReceiptBloc>().selectedAccountId,
-                "return_amount": _totalReturnAmount,
-              };
-
-              print("📦 Final request body:");
-              print(body);
-
-              context.read<SalesReturnBloc>().add(SalesReturnCreate(body: body, context: context));
-            }
+              },
+            );
           },
-        );
-      },
+        ),
+      ],
     );
   }
 

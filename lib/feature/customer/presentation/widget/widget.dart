@@ -203,31 +203,30 @@ class CustomerTableCard extends StatelessWidget {
   }
 
   DataCell _buildBalanceCell(CustomerModel customer, double width) {
-    double due = double.tryParse(customer.totalDue.toString()) ?? 0.0;
-    double paid = double.tryParse(customer.totalPaid.toString()) ?? 0.0;
-    double advance = double.tryParse(customer.advanceBalance.toString()) ?? 0.0;
+    final dueAnalysis = customer.paymentBreakdown?.calculation?.dueAnalysis;
 
-    /// Calculate Net Balance:
-    /// Balance = Due - Paid - Advance
-    /// Positive => Due
-    /// Negative => Advance
-    /// Zero => Paid
-    double balance = due - paid - advance;
+    final double netDue =
+        (dueAnalysis?.netDueAfterAdvance as num?)?.toDouble() ?? 0.0;
 
-    Color getAmountColor() {
-      if (balance < 0) return Colors.green; // Advance
-      if (balance > 0) return Colors.red;   // Due
-      return Colors.grey;                   // Paid
-    }
+    final double remainingAdvance =
+        (dueAnalysis?.remainingAdvanceBalance as num?)?.toDouble() ?? 0.0;
 
-    String getAmountText() {
-      return balance.abs().toStringAsFixed(2);
-    }
+    double amount;
+    String label;
+    Color color;
 
-    String getAmountLabel() {
-      if (balance < 0) return "Advance";
-      if (balance > 0) return "Due";
-      return "Paid";
+    if (netDue > 0) {
+      amount = netDue;
+      label = "Due";
+      color = Colors.red;
+    } else if (remainingAdvance > 0) {
+      amount = remainingAdvance;
+      label = "Advance";
+      color = Colors.green;
+    } else {
+      amount = 0.0;
+      label = "Paid";
+      color = Colors.grey;
     }
 
     return DataCell(
@@ -237,18 +236,18 @@ class CustomerTableCard extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              getAmountText(),
+              amount.toStringAsFixed(2),
               style: TextStyle(
-                color: getAmountColor(),
+                color: color,
                 fontWeight: FontWeight.w600,
                 fontSize: 11,
               ),
               textAlign: TextAlign.center,
             ),
             Text(
-              getAmountLabel(),
+              label,
               style: TextStyle(
-                color: getAmountColor(),
+                color: color,
                 fontWeight: FontWeight.w400,
                 fontSize: 9,
               ),
