@@ -384,7 +384,7 @@ class _PurchaseReturnScreenState extends State<PurchaseReturnScreen> {
           }
           return Column(
             children: [
-              Expanded(
+              SizedBox(
                 child: PurchaseReturnTableCard(purchaseReturns: state.list),
               ),
               const SizedBox(height: 16),

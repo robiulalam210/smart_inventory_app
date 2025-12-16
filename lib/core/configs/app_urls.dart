@@ -73,11 +73,11 @@ class AppUrls {
   static String saleReturnReject(int id) => '/api/returns/sales-returns/$id/reject/';
   static String saleReturnComplete(int id) => '/api/returns/sales-returns/$id/complete/';
 
-  // Add these for purchase return actions
-  static String purchaseReturnApprove(String id) => '/api/returns/purchase-returns/$id/approve/';
-  static String purchaseReturnReject(String id) => '/api/returns/purchase-returns/$id/reject/';
-  static String purchaseReturnComplete(String id) => '/api/returns/purchase-returns/$id/complete/';
 
+// NEW (Correct):
+  static String purchaseReturnApprove(String id) => '$baseUrl/purchase-returns/$id/approve/';
+  static String purchaseReturnReject(String id) => '$baseUrl/purchase-returns/$id/reject/';
+  static String purchaseReturnComplete(String id) => '$baseUrl/purchase-returns/$id/complete/';
   static final String purchaseInvoice = '$baseUrl/purchases-invoice/supplier/';
   static final String dashboard = '$baseUrl/reports/dashboard/';
 

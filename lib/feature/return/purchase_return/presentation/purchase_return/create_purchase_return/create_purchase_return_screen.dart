@@ -1,3 +1,4 @@
+import 'package:hugeicons/hugeicons.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -221,7 +222,7 @@ class _CreatePurchaseReturnScreenState
 
                           return AppDropdown<SupplierActiveModel>(
                             context: context,
-                            label: "Supplier *",
+                            label: "Supplier ",
                             hint: "Select Supplier",
                             isRequired: true,
                             value: _selectedSupplier,
@@ -276,7 +277,7 @@ class _CreatePurchaseReturnScreenState
 
                           return AppDropdown<PurchaseInvoiceModel>(
                             context: context,
-                            label: "Invoice Number *",
+                            label: "Invoice Number ",
                             hint: hasInvoices ? "Select Invoice Number" : "No invoices available",
                             isRequired: true,
                             value: _selectedInvoice,
@@ -311,19 +312,19 @@ class _CreatePurchaseReturnScreenState
                     ),
                   ],
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 4),
 
                 // Products List
                 if (products.isNotEmpty) ...[
                   Text(
                     'Products to Return',
                     style: TextStyle(
-                      fontSize: 16,
+                      fontSize: 14,
                       fontWeight: FontWeight.bold,
                       color: AppColors.primaryColor,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 4),
                   ListView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
@@ -340,59 +341,58 @@ class _CreatePurchaseReturnScreenState
                             item.productName ?? 'Unknown Product',
                             style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                          subtitle: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
                             children: [
                               Row(
+                                spacing: 20,
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text('Price: \$${item.unitPrice?.toStringAsFixed(2) ?? "0.00"}'),
-                                  Text('Discount: \$${item.discount?.toStringAsFixed(2) ?? "0.00"}'),
+                                  Text('Price: ${item.unitPrice?.toStringAsFixed(2) ?? "0.00"}'),
+                                  Text('Discount: ${item.discount?.toStringAsFixed(2) ?? "0.00"}'),
                                 ],
                               ),
                               const SizedBox(height: 4),
                               Row(
                                 children: [
-                                  Expanded(
-                                    child: Row(
-                                      children: [
-                                        IconButton(
-                                          icon: const Icon(Icons.remove, size: 20),
-                                          onPressed: () {
-                                            _updateProductQuantity(index, (item.quantity ?? 1) - 1);
-                                          },
-                                        ),
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                                          decoration: BoxDecoration(
-                                            border: Border.all(color: Colors.grey),
-                                            borderRadius: BorderRadius.circular(4),
-                                          ),
-                                          child: Text(
-                                            '${item.quantity}',
-                                            style: const TextStyle(fontWeight: FontWeight.bold),
-                                          ),
-                                        ),
-                                        IconButton(
-                                          icon: const Icon(Icons.add, size: 20),
-                                          onPressed: () {
-                                            _updateProductQuantity(index, (item.quantity ?? 1) + 1);
-                                          },
-                                        ),
-                                      ],
+                                  IconButton(
+                                    icon: const Icon(Icons.remove, size: 20),
+                                    onPressed: () {
+                                      _updateProductQuantity(index, (item.quantity ?? 1) - 1);
+                                    },
+                                  ),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      border: Border.all(color: Colors.grey),
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: Text(
+                                      '${item.quantity}',
+                                      style: const TextStyle(fontWeight: FontWeight.bold),
                                     ),
                                   ),
-                                  Text(
-                                    'Total: \$${total.toStringAsFixed(2)}',
-                                    style: const TextStyle(fontWeight: FontWeight.bold),
+                                  IconButton(
+                                    icon: const Icon(Icons.add, size: 20),
+                                    onPressed: () {
+                                      _updateProductQuantity(index, (item.quantity ?? 1) + 1);
+                                    },
                                   ),
                                 ],
                               ),
+
+                              Text(
+                                'Total: ${total.toStringAsFixed(2)}',
+                                style: const TextStyle(fontWeight: FontWeight.bold),
+                              ),
+
                             ],
                           ),
                           trailing: products.length > 1
                               ? IconButton(
-                            icon: const Icon(Icons.delete, color: Colors.red),
+                            icon:  Icon(HugeIcons.strokeRoundedDelete02, color: Colors.red),
                             onPressed: () => _removeProduct(index),
                           )
                               : null,
@@ -405,11 +405,12 @@ class _CreatePurchaseReturnScreenState
 
                 // Return Charge Type and Charge
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
                       child: AppDropdown<String>(
                         context: context,
-                        label: "Return Charge Type *",
+                        label: "Return Charge Type",
                         hint: "Select Type",
                         isRequired: true,
                         value: _selectedReturnChargeType,
@@ -441,7 +442,7 @@ class _CreatePurchaseReturnScreenState
                       child: CustomInputField(
                         isRequired: true,
                         controller: _returnChargeController,
-                        labelText: 'Return Charge *',
+                        labelText: 'Return Charge',
                         hintText: _selectedReturnChargeType == 'fixed' ? 'Enter amount' : 'Enter percentage',
                         fillColor: Colors.white,
                         keyboardType: TextInputType.numberWithOptions(decimal: true),
@@ -462,7 +463,6 @@ class _CreatePurchaseReturnScreenState
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
 
                 // Return Amount and Date
                 Row(
@@ -484,7 +484,7 @@ class _CreatePurchaseReturnScreenState
                       child: CustomInputField(
                         isRequired: true,
                         controller: context.read<PurchaseReturnBloc>().returnDateTextController,
-                        labelText: 'Return Date *',
+                        labelText: 'Return Date',
                         hintText: 'Select date',
                         fillColor: Colors.white,
                         readOnly: true,
@@ -509,7 +509,7 @@ class _CreatePurchaseReturnScreenState
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 6),
 
                 // Remark
                 CustomInputField(
@@ -519,7 +519,7 @@ class _CreatePurchaseReturnScreenState
                   hintText: 'Enter remark (optional)',
                   fillColor: Colors.white,
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 10),
 
                 // Action Buttons
                 Row(
@@ -536,23 +536,10 @@ class _CreatePurchaseReturnScreenState
                       builder: (context, state) {
                         final isLoading = state is PurchaseReturnCreateLoading;
 
-                        return ElevatedButton(
+                        return AppButton(
                           onPressed: isLoading ? null : () => _submitForm(),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primaryColor,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-                          ),
-                          child: isLoading
-                              ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.white,
-                            ),
-                          )
-                              : const Text('Create Purchase Return'),
+                         isLoading: isLoading,
+                          name:'Create Purchase Return',
                         );
                       },
                     ),
