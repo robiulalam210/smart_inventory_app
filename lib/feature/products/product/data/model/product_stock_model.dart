@@ -30,10 +30,10 @@ class ProductModelStockModel {
   final DateTime? createdAt;
   final DateTime? updatedAt;
   final Info? categoryInfo;
-  final Info? unitInfo;
-  final dynamic brandInfo;
-  final dynamic groupInfo;
-  final dynamic sourceInfo;
+  final UnitInfo? unitInfo;
+  final Info? brandInfo;
+  final Info? groupInfo;
+  final Info? sourceInfo;
   final CreatedByInfo? createdByInfo;
   final dynamic stockStatus;
 
@@ -80,7 +80,7 @@ class ProductModelStockModel {
   @override
   String toString() {
     // TODO: implement toString
-    return name??"";
+    return "$name(${unitInfo?.name})";
   }
   factory ProductModelStockModel.fromJson(Map<String, dynamic> json) =>
       ProductModelStockModel(
@@ -113,10 +113,24 @@ class ProductModelStockModel {
             : Info.fromJson(json["category_info"]),
         unitInfo: json["unit_info"] == null
             ? null
-            : Info.fromJson(json["unit_info"]),
-        brandInfo: json["brand_info"],
-        groupInfo: json["group_info"],
-        sourceInfo: json["source_info"],
+            : UnitInfo.fromJson(json["unit_info"]),
+        brandInfo:
+
+        json["brand_info"] == null
+            ? null
+            : Info.fromJson(json["brand_info"]),
+
+        groupInfo:
+        json["group_info"] == null
+            ? null
+            : Info.fromJson(json["group_info"]),
+
+        sourceInfo:
+        json["source_info"] == null
+            ? null
+            : Info.fromJson(json["source_info"]),
+
+
         createdByInfo: json["created_by_info"] == null
             ? null
             : CreatedByInfo.fromJson(json["created_by_info"]),
@@ -183,6 +197,29 @@ class Info {
   Map<String, dynamic> toJson() => {
     "id": id,
     "name": name,
+  };
+}
+class UnitInfo {
+  final int? id;
+  final String? name;
+  final String? code;
+
+  UnitInfo({
+    this.id,
+    this.name,
+    this.code,
+  });
+
+  factory UnitInfo.fromJson(Map<String, dynamic> json) => UnitInfo(
+    id: json["id"],
+    name: json["name"],
+    code: json["code"],
+  );
+
+  Map<String, dynamic> toJson() => {
+    "id": id,
+    "name": name,
+    "code": code,
   };
 }
 
