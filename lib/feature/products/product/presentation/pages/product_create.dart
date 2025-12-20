@@ -568,7 +568,7 @@ class _ProductsFormState extends State<ProductsForm> {
             setState(() {
               brandBloc.selectedState = newVal.toString();
               final matchingBrand = brandList.firstWhere(
-                (brand) => brand.name.toString() == newVal.toString(),
+                    (brand) => brand.name.toString() == newVal.toString(),
                 orElse: () => BrandModel(),
               );
               brandBloc.selectedId = matchingBrand.id?.toString() ?? "";
