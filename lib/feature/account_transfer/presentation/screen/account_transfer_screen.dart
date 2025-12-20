@@ -167,6 +167,7 @@ class _AccountTransferScreenState extends State<AccountTransferScreen> {
           padding: AppTextStyle.getResponsivePaddingBody(context),
           child: BlocListener<AccountTransferBloc, AccountTransferState>(
             listener: (context, state) {
+              print(state);
               if (state is ExecuteTransferLoading) {
                 appLoader(context, "Executing transfer, please wait...");
               } else if (state is ExecuteTransferSuccess) {
@@ -273,7 +274,7 @@ class _AccountTransferScreenState extends State<AccountTransferScreen> {
                                   context.read<AccountTransferBloc>().add(
                                     ExecuteTransfer(
                                       context: context,
-                                      transferId: transfer.id!,
+                                      transferId: transfer.id.toString(),
                                     ),
                                   );
                                 },
