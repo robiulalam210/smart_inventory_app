@@ -2,16 +2,35 @@ import 'dart:convert';
 
 import '../models/api_response_mod.dart';
 
-ApiResponse<T> appParseJson<T>(String jsonString, Function fromJsonT) {
+ApiResponse<T> appParseJson<T>(
+    String jsonString,
+    T Function(dynamic data) fromJsonT,
+    ) {
   try {
-    final jsonData = json.decode(jsonString);
+    final dynamic decoded = json.decode(jsonString);
 
-    // Log the parsed JSON data
+    // Ensure decoded JSON is a Map
+    if (decoded is! Map<String, dynamic>) {
+      return ApiResponse<T>(
+        success: false,
+        title: "Invalid Response",
+        message: "Expected JSON object but got ${decoded.runtimeType}",
+      );
+    }
 
-    return ApiResponse.fromJson(jsonData, fromJsonT);
+    return ApiResponse<T>.fromJson(decoded, fromJsonT);
   } on FormatException catch (e) {
-    return ApiResponse(success: false, message: "Invalid JSON format: $e", title: "JSON Decoding Error");
+    return ApiResponse<T>(
+      success: false,
+      title: "JSON Decoding Error",
+      message: "Invalid JSON format: ${e.message}",
+    );
   } catch (e) {
-    return ApiResponse(success: false, message: "Failed to parse JSON data: $e", title: "JSON Decoding Error");
+    return ApiResponse<T>(
+      success: false,
+      title: "JSON Parsing Error",
+      message: "Failed to parse JSON data: $e",
+    );
   }
 }
+

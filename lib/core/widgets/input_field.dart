@@ -259,7 +259,7 @@ class CustomInputFieldPayRollState extends State<CustomInputFieldPayRoll> {
       padding: const EdgeInsets.all(0),
       child: ConstrainedBox(
         constraints: BoxConstraints(
-          maxHeight: widget.maxLine * 28.0, // Adjust max height as needed
+          maxHeight: widget.maxLine * 40.0, // Adjust max height as needed
         ),
         child: SingleChildScrollView(
           scrollDirection: Axis.vertical,
@@ -343,7 +343,7 @@ class CustomInputFieldPayRollState extends State<CustomInputFieldPayRoll> {
                   suffixIcon: widget.suffixIcon,
                   prefixIcon: widget.prefixIcon,
                   contentPadding:
-                      const EdgeInsets.only(top: 10.0, bottom: 10.0, left: 12),
+                      const EdgeInsets.only(top: 12.0, bottom: 12.0, left: 12),
                   isDense: true,
                   hintText:
                       widget.forSearch ? widget.hintText : widget.hintText,

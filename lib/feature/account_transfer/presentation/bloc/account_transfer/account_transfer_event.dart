@@ -45,7 +45,7 @@ class CreateAccountTransfer extends AccountTransferEvent {
 
 class ExecuteTransfer extends AccountTransferEvent {
   final BuildContext context;
-  final int transferId;
+  final String transferId;
 
   ExecuteTransfer({required this.context, required this.transferId});
 }
