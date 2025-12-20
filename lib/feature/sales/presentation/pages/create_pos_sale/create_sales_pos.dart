@@ -1667,8 +1667,8 @@ class _SalesScreenState extends State<SalesScreen> {
             if (isBigScreen)
               ResponsiveCol(
                 xs: 0,
-                sm: 1,
-                md: 1,
+                sm: 0,
+                md: 0,
                 lg: 2,
                 xl: 2,
                 child: Container(
@@ -1722,7 +1722,7 @@ class _SalesScreenState extends State<SalesScreen> {
                       children: [
                         // LEFT: Sales form (~65%)
                         Expanded(
-                          flex: 2,
+                          // flex: 8,
                           child: SingleChildScrollView(
                             child: Form(
                               key: formKey,
@@ -1748,9 +1748,8 @@ class _SalesScreenState extends State<SalesScreen> {
                           ),
                         ),
 
-                        const SizedBox(width: 12),
 
-                        Expanded(flex: 1, child: _buildProductBrowser()),
+                        SizedBox(width: 250, child: _buildProductBrowser()),
                       ],
                     );
                   },
