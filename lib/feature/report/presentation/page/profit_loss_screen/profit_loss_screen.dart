@@ -553,7 +553,7 @@ class ExpenseBreakdownTableCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
-              '\$${amount.toStringAsFixed(2)}',
+              amount.toStringAsFixed(2),
               style: const TextStyle(
                 color: Colors.red,
                 fontWeight: FontWeight.w600,
@@ -626,8 +626,8 @@ class ProfitLossSummaryCard extends StatelessWidget {
     }
 
     String getFormattedAmount() {
-      if (isNet && isNegative) return '-\$${amount.abs().toStringAsFixed(2)}';
-      return '\$${amount.toStringAsFixed(2)}';
+      if (isNet && isNegative) return '-${amount.abs().toStringAsFixed(2)}';
+      return amount.toStringAsFixed(2);
     }
 
     return Padding(
