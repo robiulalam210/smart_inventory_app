@@ -18,7 +18,6 @@
 //     );
 //   }
 // }
-
 class ApiResponse<T> {
   final bool success;
   final int? total;
@@ -38,13 +37,10 @@ class ApiResponse<T> {
       Map<String, dynamic> json,
       T Function(dynamic data) fromJsonT,
       ) {
-    // 🔹 outer status
     final bool outerStatus = json['status'] == true;
 
-    // 🔹 inner data object (if exists)
-    final inner = json['data'];
+    final dynamic inner = json['data'];
 
-    // 🔹 inner status (preferred if exists)
     final bool finalStatus =
     inner is Map && inner['status'] is bool
         ? inner['status']
@@ -52,14 +48,24 @@ class ApiResponse<T> {
 
     return ApiResponse<T>(
       success: finalStatus,
-      total: json['total'],
+      total: _parseInt(json['total']),
       title: json['title']?.toString(),
       message: (inner is Map && inner['message'] != null)
           ? inner['message'].toString()
           : json['message']?.toString(),
       data: (inner is Map && inner['data'] != null)
           ? fromJsonT(inner['data'])
+          : (inner is List || inner is Map)
+          ? fromJsonT(inner)
           : null,
     );
+  }
+
+  /// 🔹 helper
+  static int? _parseInt(dynamic value) {
+    if (value == null) return null;
+    if (value is int) return value;
+    if (value is String) return int.tryParse(value);
+    return null;
   }
 }
