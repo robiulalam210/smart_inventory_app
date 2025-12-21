@@ -3,11 +3,9 @@ import 'dart:convert';
 import 'dart:developer';
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:meherin_mart/core/core.dart';
@@ -20,7 +18,6 @@ import '../../../../customer/data/model/customer_active_model.dart';
 import '../../../../customer/presentation/bloc/customer/customer_bloc.dart';
 import '../../../../lab_dashboard/presentation/bloc/dashboard/dashboard_bloc.dart';
 import '../../../../products/brand/presentation/bloc/brand/brand_bloc.dart';
-import '../../../../products/categories/data/model/categories_model.dart';
 import '../../../../products/categories/presentation/bloc/categories/categories_bloc.dart';
 import '../../../../products/product/presentation/bloc/products/products_bloc.dart';
 import '../../bloc/possale/crate_pos_sale/create_pos_sale_bloc.dart';
@@ -52,11 +49,10 @@ class _SalesScreenState extends State<SalesScreen> {
   // ---------------- Barcode scanner state ----------------
   final FocusNode _focusNode = FocusNode();
   String _barcodeBuffer = '';
-  String _statusMessage = '';
   final List<Map<String, dynamic>> _scannedProducts = [];
 
   // Replace with your API base URL / token or load from secure storage
-  final String apiBaseUrl = 'http://127.0.0.1:8000/api/products/barcode-search';
+  final String apiBaseUrl = '${AppUrls.baseUrl}/products/barcode-search';
   final String jwtToken =
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzYyNjg2MTI1LCJpYXQiOjE3NjI1OTk3MjUsImp0aSI6ImRiNjAzMmFjOWFkOTQ2NzRiNTE5Njk5OGI0ZWI0OTMzIiwidXNlcl9pZCI6IjIifQ.LJv3l53GjkdDWHKT-YPiCpuNQfBK8NorsWN56WirY8s";
 
@@ -179,6 +175,48 @@ class _SalesScreenState extends State<SalesScreen> {
     super.dispose();
   }
 
+  void _updateChangeAmount() {
+    final bloc = context.read<CreatePosSaleBloc>();
+    final payableAmount = double.tryParse(bloc.payableAmount.text) ?? 0.0;
+    final changeAmount = calculateAllFinalTotal() - payableAmount;
+
+    setState(() {
+      changeAmountController.text = changeAmount.toStringAsFixed(2);
+    });
+  }
+
+  // Helper to compute grand/net total same as in summary widget
+  double calculateAllFinalTotal() {
+    final bloc = context.read<CreatePosSaleBloc>();
+    final productList = products;
+    double _ = productList.fold(0.0, (p, e) => p + _toDouble(e["ticket_total"]));
+    double _ = productList.fold(0.0, (p, e) {
+      final disc = _toDouble(e["discount"]);
+      final ticket = _toDouble(e["ticket_total"]);
+      return p + ((e["discount_type"] == 'percent') ? (ticket * (disc / 100.0)) : disc);
+    });
+    double subTotal = productList.fold(0.0, (p, e) => p + _toDouble(e["total"]));
+    double overallDiscount =
+        double.tryParse(bloc.discountOverAllController.text) ?? 0.0;
+    if (selectedOverallDiscountType == 'percent') {
+      overallDiscount = subTotal * (overallDiscount / 100.0);
+    }
+    double vat = double.tryParse(bloc.vatOverAllController.text) ?? 0.0;
+    if (selectedOverallVatType == 'percent') vat = subTotal * (vat / 100.0);
+    double serviceCharge =
+        double.tryParse(bloc.serviceChargeOverAllController.text) ?? 0.0;
+    if (selectedOverallServiceChargeType == 'percent') {
+      serviceCharge = subTotal * (serviceCharge / 100.0);
+    }
+    double deliveryCharge =
+        double.tryParse(bloc.deliveryChargeOverAllController.text) ?? 0.0;
+    if (selectedOverallDeliveryType == 'percent') {
+      deliveryCharge = subTotal * (deliveryCharge / 100.0);
+    }
+    double netTotal = (subTotal - overallDiscount) + vat + serviceCharge + deliveryCharge;
+    return netTotal;
+  }
+
   // Helpers for parsing values safely
   double _toDouble(dynamic v) {
     if (v == null) return 0.0;
@@ -223,9 +261,7 @@ class _SalesScreenState extends State<SalesScreen> {
   }
 
   Future<void> _fetchProduct(String sku) async {
-    setState(() {
-      _statusMessage = 'Searching...';
-    });
+    setState(() {});
 
     final url = Uri.parse('$apiBaseUrl/?sku=$sku');
 
@@ -264,9 +300,7 @@ class _SalesScreenState extends State<SalesScreen> {
             });
           }
 
-          setState(() {
-            _statusMessage = 'Product found: ${product['name']}';
-          });
+          setState(() {});
 
           // Normalize product map for internal use then add to sale list
           final productMap = {
@@ -287,22 +321,15 @@ class _SalesScreenState extends State<SalesScreen> {
 
           _addScannedProductToSale(productMap);
         } else {
-          setState(() {
-            _statusMessage = jsonResponse['message'] ?? 'Product not found';
-          });
+          setState(() {});
         }
       } else if (response.statusCode == 404) {
-        setState(() {
-          _statusMessage = 'Product not found';
-        });
+        setState(() {});
       } else {
-        setState(() {
-          _statusMessage = 'Error: ${response.statusCode}';
-        });
+        setState(() {});
       }
     } catch (e) {
       setState(() {
-        _statusMessage = 'Network error';
         log('Fetch product error: $e');
       });
     }
@@ -377,8 +404,8 @@ class _SalesScreenState extends State<SalesScreen> {
 
   Widget _buildTopFormSection(CreatePosSaleBloc bloc) {
     return ResponsiveRow(
-      spacing: 5,
-      runSpacing: 5,
+      spacing: 2,
+      runSpacing: 2,
       children: [
         ResponsiveCol(
           xs: 12,
@@ -502,7 +529,7 @@ class _SalesScreenState extends State<SalesScreen> {
             color: Colors.white,
             borderRadius: BorderRadius.circular(8),
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
           child: ResponsiveRow(
             spacing: 6,
             runSpacing: 6,
@@ -588,7 +615,7 @@ class _SalesScreenState extends State<SalesScreen> {
           ),
         ),
 
-        const SizedBox(height: 8),
+        const SizedBox(height: 4),
 
         // Product rows
         ...products.asMap().entries.map((entry) {
@@ -598,7 +625,7 @@ class _SalesScreenState extends State<SalesScreen> {
 
           return Container(
             padding: const EdgeInsets.all(6),
-            margin: const EdgeInsets.only(bottom: 8),
+            margin: const EdgeInsets.only(bottom: 4),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(8),
@@ -709,7 +736,10 @@ class _SalesScreenState extends State<SalesScreen> {
                           onChanged: discountApplied
                               ? null
                               : (value) {
-                            product["quantity"] = double.tryParse(value) ?? 0.0;
+                            // allow decimal input but convert to int for storage
+                            final parsed = double.tryParse(value) ?? 0.0;
+                            products[index]["quantity"] = parsed.toInt();
+                            controllers[index]!["quantity"]!.text = parsed.toInt().toString();
                             updateTotal(index);
                           },
                         ),
@@ -931,8 +961,8 @@ class _SalesScreenState extends State<SalesScreen> {
                         padding: const EdgeInsets.all(6),
                         decoration: BoxDecoration(
                           color: product == products.last
-                              ? Colors.green.withValues(alpha: 0.08)
-                              : Colors.red.withValues(alpha: 0.08),
+                              ? Colors.green.withOpacity(0.08)
+                              : Colors.red.withOpacity(0.08),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
                             color: product == products.last
@@ -954,9 +984,7 @@ class _SalesScreenState extends State<SalesScreen> {
               ],
             ),
           );
-        }),
-
-
+        }).toList(),
 
       ],
     );
@@ -1127,7 +1155,8 @@ class _SalesScreenState extends State<SalesScreen> {
                       controller: controller,
                       hintText: label,
                       fillColor: Colors.white,
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
                       onChanged: (_) => setState(() {}),
                       autofillHints: '',
                       levelText: '',
@@ -1204,23 +1233,26 @@ class _SalesScreenState extends State<SalesScreen> {
     double subTotal = products.fold(0.0, (p, e) => p + _toDouble(e["total"]));
     double overallDiscount =
         double.tryParse(bloc.discountOverAllController.text) ?? 0.0;
-    if (selectedOverallDiscountType == 'percent')
+    if (selectedOverallDiscountType == 'percent') {
       overallDiscount = subTotal * (overallDiscount / 100.0);
+    }
     double vat = double.tryParse(bloc.vatOverAllController.text) ?? 0.0;
     if (selectedOverallVatType == 'percent') vat = subTotal * (vat / 100.0);
     double serviceCharge =
         double.tryParse(bloc.serviceChargeOverAllController.text) ?? 0.0;
-    if (selectedOverallServiceChargeType == 'percent')
+    if (selectedOverallServiceChargeType == 'percent') {
       serviceCharge = subTotal * (serviceCharge / 100.0);
+    }
     double deliveryCharge =
         double.tryParse(bloc.deliveryChargeOverAllController.text) ?? 0.0;
-    if (selectedOverallDeliveryType == 'percent')
+    if (selectedOverallDeliveryType == 'percent') {
       deliveryCharge = subTotal * (deliveryCharge / 100.0);
+    }
     double netTotal = (subTotal - overallDiscount) + vat + serviceCharge + deliveryCharge;
 
     return ResponsiveRow(
-      spacing: 20,
-      runSpacing: 10,
+      spacing: 6,
+      runSpacing: 6,
       children: [
         ResponsiveCol(
           xs: 12,
@@ -1229,7 +1261,7 @@ class _SalesScreenState extends State<SalesScreen> {
           lg: 5,
           xl: 5,
           child: Container(
-            padding: const EdgeInsets.all(8),
+            padding: const EdgeInsets.all(4),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8),
               color: Colors.white,
@@ -1257,7 +1289,6 @@ class _SalesScreenState extends State<SalesScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 10),
               CheckboxListTile(
                 title: Text(
                   "With Money Receipt",
@@ -1273,7 +1304,7 @@ class _SalesScreenState extends State<SalesScreen> {
                 controlAffinity: ListTileControlAffinity.leading,
               ),
               if (_isChecked) ...[
-                const SizedBox(height: 10),
+                const SizedBox(height: 0),
                 Row(
                   children: [
                     Expanded(
@@ -1340,7 +1371,7 @@ class _SalesScreenState extends State<SalesScreen> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 0),
                 Row(
                   children: [
                     Expanded(
@@ -1357,13 +1388,16 @@ class _SalesScreenState extends State<SalesScreen> {
                         controller: context.read<CreatePosSaleBloc>().payableAmount,
                         hintText: 'Payable Amount',
                         keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                        onChanged: (v) => setState(() {}),
+                        onChanged: (v) => setState(() {
+                          _updateChangeAmount();
+
+                        }),
                       ),
                     ),
                   ],
                 ),
               ],
-              const SizedBox(height: 8),
+              const SizedBox(height: 0),
               CustomInputField(
                 isRequiredLable: true,
                 controller: context.read<CreatePosSaleBloc>().remarkController,
@@ -1382,7 +1416,7 @@ class _SalesScreenState extends State<SalesScreen> {
 
   Widget _buildSummaryRow(String label, double value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2.5),
+      padding: const EdgeInsets.symmetric(vertical: 2.0),
       child: Row(
         children: [
           Expanded(flex: 4, child: Text(label, style: AppTextStyle.cardLevelHead(context))),
@@ -1420,7 +1454,7 @@ class _SalesScreenState extends State<SalesScreen> {
         } else if (state is ProductsListLoading) {
           return const Center(child: CircularProgressIndicator());
         } else if (state is ProductsListFailed) {
-          return Center(child: Text(state.content ?? "Failed to load products"));
+          return Center(child: Text(state.content));
         }
 
         // 🔹 Get search query
@@ -1431,14 +1465,9 @@ class _SalesScreenState extends State<SalesScreen> {
           final searchableText = [p.name, p.sku].whereType<String>().join(' ').toLowerCase();
           final matchesSearch = query.isEmpty || searchableText.contains(query);
           final matchesCategory = selectedCategoryFilter.isEmpty || p.categoryInfo?.name == selectedCategoryFilter;
-          final matchesBrand = selectedBrandFilter.isEmpty || p.brand?.name == selectedBrandFilter;
+          final matchesBrand = selectedBrandFilter.isEmpty || p.brand == selectedBrandFilter;
           return matchesSearch && matchesCategory && matchesBrand;
         }).toList();
-
-        // 🔹 Empty state
-        if (filteredProducts.isEmpty) {
-          return const Center(child: Text("No products found"));
-        }
 
         return Container(
           padding: const EdgeInsets.all(6),
@@ -1457,6 +1486,7 @@ class _SalesScreenState extends State<SalesScreen> {
                           context: context,
                           hint: "Select Category",
                           isLabel: false,
+                          isNeedAll: true,
                           isSearch: true,
                           value: selectedCategoryFilter.isEmpty ? null : selectedCategoryFilter,
                           itemList: categoryList.map((e) => e.name ?? '').toList(),
@@ -1478,6 +1508,7 @@ class _SalesScreenState extends State<SalesScreen> {
                           context: context,
                           hint: "Select Brand",
                           isLabel: false,
+                          isNeedAll: true,
                           isSearch: true,
                           value: selectedBrandFilter.isEmpty ? null : selectedBrandFilter,
                           itemList: brandList.map((e) => e.name ?? '').toList(),
@@ -1508,17 +1539,6 @@ class _SalesScreenState extends State<SalesScreen> {
                       onChanged: (_) => setState(() {}),
                     ),
                   ),
-                  const SizedBox(width: 6),
-                  // status indicator for last scan result (optional)
-                  SizedBox(
-                    width: 120,
-                    child: Text(
-                      _statusMessage,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(fontSize: 12, color: Colors.black54),
-                    ),
-                  ),
                 ],
               ),
 
@@ -1531,7 +1551,7 @@ class _SalesScreenState extends State<SalesScreen> {
                   itemCount: filteredProducts.length,
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 3,
-                    childAspectRatio: 0.9,
+                    childAspectRatio: 0.6,
                     crossAxisSpacing: 5,
                     mainAxisSpacing: 5,
                   ),
@@ -1591,60 +1611,118 @@ class _SalesScreenState extends State<SalesScreen> {
         }
         setState(() {});
       },
-      child: Container(
-        decoration: BoxDecoration(borderRadius: BorderRadius.circular(6), border: Border.all(color: Colors.grey.shade200)),
-        child: Stack(
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Container(
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      borderRadius: const BorderRadius.vertical(top: Radius.circular(6)),
-                      color: Colors.grey.shade200,
-                      image: p.image != null ? DecorationImage(image: NetworkImage(p.image!), fit: BoxFit.cover) : null,
-                    ),
-                    child: p.image == null ? const Icon(Icons.image_not_supported, size: 30, color: Colors.black26) : null,
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(3.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        p.toString(),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: AppTextStyle.cardLevelHead(context).copyWith(fontSize: 10),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        _toDouble(p.sellingPrice).toStringAsFixed(2),
-                        style: AppTextStyle.cardLevelText(context).copyWith(fontSize: 12),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            Positioned(
-              right: 0,
-              top: 1,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 2),
-                decoration: BoxDecoration(color: Colors.redAccent, borderRadius: BorderRadius.circular(6)),
-                child: Text(
-                  'Stock: ${p.stockQty ?? 0}',
-                  style: const TextStyle(color: Colors.white, fontSize: 10),
-                ),
-              ),
+      child:Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
             ),
           ],
         ),
-      ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(10),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              /// IMAGE
+              Stack(
+                children: [
+                  AspectRatio(
+                    aspectRatio: 1,
+                    child: p.image != null
+                        ? Image.network(
+                      p.image!,
+                      fit: BoxFit.cover,
+                    )
+                        : Container(
+                      color: Colors.grey.shade200,
+                      child: const Icon(
+                        Icons.image_not_supported,
+                        size: 30,
+                        color: Colors.black26,
+                      ),
+                    ),
+                  ),
+
+                  /// STOCK
+                  Positioned(
+                    top: 6,
+                    right: 6,
+                    child: Container(
+                      padding:
+                      const EdgeInsets.symmetric(horizontal: 3, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: p.stockQty == 0
+                            ? Colors.grey
+                            : Colors.redAccent,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        'Stock ${p.stockQty ?? 0}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+
+              /// DETAILS
+              Padding(
+                padding: const EdgeInsets.all(2),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    /// PRICE (FOCUS)
+                    Text(
+                      '৳ ${_toDouble(p.sellingPrice).toStringAsFixed(2)}',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+
+                    const SizedBox(height: 4),
+
+                    /// NAME
+                    Text(
+                      p.toString(),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+
+                    const SizedBox(height: 2),
+
+                    /// BRAND / CATEGORY
+                    Text(
+                      '${p.brandInfo?.name ?? ''} • ${p.categoryInfo?.name ?? ''}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      )
+
+
     );
   }
 
@@ -1832,10 +1910,9 @@ class _SalesScreenState extends State<SalesScreen> {
                                       _buildTopFormSection(bloc),
                                       _buildProductListSection(bloc),
                                       _buildChargesSection(bloc),
-                                      const SizedBox(height: 6),
-
+                                      const SizedBox(height: 4),
                                       _buildSummaryAndPayment(bloc),
-                                      gapH20,
+                                      gapH8,
                                       _buildActionButtons(),
                                     ],
                                   ),
