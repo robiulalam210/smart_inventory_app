@@ -1,10 +1,14 @@
+// NOTE: adjust imports paths to match your project structure
+import 'dart:convert';
 import 'dart:developer';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:http/http.dart' as http;
 
 import 'package:meherin_mart/core/core.dart';
 import 'package:meherin_mart/feature/products/product/data/model/product_stock_model.dart';
@@ -45,6 +49,17 @@ class _SalesScreenState extends State<SalesScreen> {
   String selectedOverallServiceChargeType = 'fixed';
   String selectedOverallDeliveryType = 'fixed';
 
+  // ---------------- Barcode scanner state ----------------
+  final FocusNode _focusNode = FocusNode();
+  String _barcodeBuffer = '';
+  String _statusMessage = '';
+  final List<Map<String, dynamic>> _scannedProducts = [];
+
+  // Replace with your API base URL / token or load from secure storage
+  final String apiBaseUrl = 'http://127.0.0.1:8000/api/products/barcode-search';
+  final String jwtToken =
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzYyNjg2MTI1LCJpYXQiOjE3NjI1OTk3MjUsImp0aSI6ImRiNjAzMmFjOWFkOTQ2NzRiNTE5Njk5OGI0ZWI0OTMzIiwidXNlcl9pZCI6IjIifQ.LJv3l53GjkdDWHKT-YPiCpuNQfBK8NorsWN56WirY8s";
+
   @override
   void initState() {
     super.initState();
@@ -56,8 +71,7 @@ class _SalesScreenState extends State<SalesScreen> {
     context.read<ProductsBloc>().add(FetchProductsStockList(context));
     categoriesBloc = context.read<CategoriesBloc>();
     brandBloc = context.read<BrandBloc>();
-    categoriesBloc.add(FetchCategoriesList(context));
-    brandBloc.add(FetchBrandList(context));
+
     // Initialize BLoC fields (dates etc)
     final bloc = context.read<CreatePosSaleBloc>();
     bloc.dateEditingController.text = appWidgets.convertDateTimeDDMMYYYY(
@@ -74,7 +88,7 @@ class _SalesScreenState extends State<SalesScreen> {
         ? bloc.selectedOverallDiscountType
         : selectedOverallDiscountType;
     selectedOverallServiceChargeType =
-        bloc.selectedOverallServiceChargeType.isNotEmpty
+    bloc.selectedOverallServiceChargeType.isNotEmpty
         ? bloc.selectedOverallServiceChargeType
         : selectedOverallServiceChargeType;
     selectedOverallDeliveryType = bloc.selectedOverallDeliveryType.isNotEmpty
@@ -82,10 +96,20 @@ class _SalesScreenState extends State<SalesScreen> {
         : selectedOverallDeliveryType;
     _isChecked = bloc.isChecked;
 
-    // Defer setDefaultSalesUser to after first frame to avoid setState during build
+    // Ensure there's at least one product row (empty) so UI has an 'add' row
+    if (bloc.products.isEmpty) {
+      bloc.addProduct();
+    }
+
+    // Defer setDefaultSalesUser and focus to after first frame to avoid setState during build
     WidgetsBinding.instance.addPostFrameCallback((_) {
       setDefaultSalesUser();
+      categoriesBloc.add(FetchCategoriesList(context));
+      brandBloc.add(FetchBrandList(context));
       _ensureControllersForExistingProducts();
+
+      // Request keyboard focus so RawKeyboardListener receives scanner input
+      FocusScope.of(context).requestFocus(_focusNode);
     });
   }
 
@@ -102,7 +126,7 @@ class _SalesScreenState extends State<SalesScreen> {
     if (userList.isEmpty) return;
 
     final matchedUser = userList.firstWhere(
-      (user) => user.id == loginUserId,
+          (user) => user.id == loginUserId,
       orElse: () => userList.first,
     );
 
@@ -116,7 +140,7 @@ class _SalesScreenState extends State<SalesScreen> {
     for (int i = 0; i < bloc.products.length; i++) {
       controllers.putIfAbsent(
         i,
-        () => {
+            () => {
           "price": TextEditingController(
             text: _toDouble(bloc.products[i]["price"]).toStringAsFixed(2),
           ),
@@ -137,6 +161,12 @@ class _SalesScreenState extends State<SalesScreen> {
         },
       );
     }
+
+    // If there are controllers but some ticket_total/total are empty, compute them
+    for (int i = 0; i < bloc.products.length; i++) {
+      updateTotal(i);
+    }
+
     if (mounted) setState(() {});
   }
 
@@ -144,6 +174,7 @@ class _SalesScreenState extends State<SalesScreen> {
   void dispose() {
     changeAmountController.dispose();
     productSearchController.dispose();
+    _focusNode.dispose();
     // controllers are owned by CreatePosSaleBloc; dispose there if needed
     super.dispose();
   }
@@ -174,14 +205,180 @@ class _SalesScreenState extends State<SalesScreen> {
   Map<int, Map<String, TextEditingController>> get controllers =>
       context.read<CreatePosSaleBloc>().controllers;
 
-  // ---------- UI parts (kept structure) ----------
-  // The layout below is tuned to match the UI in the provided image: wider product name,
-  // compact quantity controls, small price/disc columns and read-only subtotal/total.
+  // ---------------- Raw keyboard handling for barcode scanner ----------------
+  void _handleKey(RawKeyEvent event) {
+    if (event is RawKeyDownEvent) {
+      final keyLabel = event.character ?? '';
+
+      if (event.logicalKey == LogicalKeyboardKey.enter) {
+        if (_barcodeBuffer.isNotEmpty) {
+          final code = _barcodeBuffer;
+          _barcodeBuffer = '';
+          _fetchProduct(code);
+        }
+      } else if (keyLabel.isNotEmpty && keyLabel != '\n' && keyLabel != '\r') {
+        _barcodeBuffer += keyLabel;
+      }
+    }
+  }
+
+  Future<void> _fetchProduct(String sku) async {
+    setState(() {
+      _statusMessage = 'Searching...';
+    });
+
+    final url = Uri.parse('$apiBaseUrl/?sku=$sku');
+
+    try {
+      final response = await http.get(url, headers: {
+        'Authorization': 'Bearer $jwtToken',
+        'Accept': 'application/json',
+      });
+
+      if (response.statusCode == 200) {
+        final jsonResponse = jsonDecode(response.body);
+
+        if (jsonResponse['status'] == true && jsonResponse['data'] != null) {
+          final product = jsonResponse['data'];
+
+          // Update local scanned list (optional)
+          final index = _scannedProducts.indexWhere((p) => p['sku'] == product['sku']);
+          if (index >= 0) {
+            setState(() {
+              _scannedProducts[index]['quantity'] += 1;
+            });
+          } else {
+            setState(() {
+              _scannedProducts.add({
+                'sku': product['sku'],
+                'id': product['id'],
+                'name': product['name'],
+                'selling_price': product['selling_price'],
+                'stock_qty': product['stock_qty'],
+                'category_info': product['category_info'],
+                'brand_info': product['brand_info'],
+                'image': product['image'],
+                'stock_status_display': product['stock_status_display'],
+                'quantity': 1,
+              });
+            });
+          }
+
+          setState(() {
+            _statusMessage = 'Product found: ${product['name']}';
+          });
+
+          // Normalize product map for internal use then add to sale list
+          final productMap = {
+            'id': product['id'],
+            'sku': product['sku'] ?? product['id']?.toString(),
+            'name': product['name'],
+            'selling_price': product['selling_price'],
+            'price': product['selling_price'],
+            'stock_qty': product['stock_qty'],
+            'category_info': product['category_info'],
+            'brand_info': product['brand_info'],
+            'image': product['image'],
+            'stock_status_display': product['stock_status_display'],
+            'discount': product['discount'] ?? 0,
+            'discount_type': product['discount_type'] ?? 'fixed',
+            'discount_applied': product['discount_applied'] ?? false,
+          };
+
+          _addScannedProductToSale(productMap);
+        } else {
+          setState(() {
+            _statusMessage = jsonResponse['message'] ?? 'Product not found';
+          });
+        }
+      } else if (response.statusCode == 404) {
+        setState(() {
+          _statusMessage = 'Product not found';
+        });
+      } else {
+        setState(() {
+          _statusMessage = 'Error: ${response.statusCode}';
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _statusMessage = 'Network error';
+        log('Fetch product error: $e');
+      });
+    }
+  }
+
+  // Add scanned product into the current sale products list
+  void _addScannedProductToSale(Map<String, dynamic> productJson) {
+    final bloc = context.read<CreatePosSaleBloc>();
+
+    // ensure at least one row
+    if (bloc.products.isEmpty) bloc.addProduct();
+
+    final emptyIndex = bloc.products.indexWhere((row) => row["product_id"] == null);
+    final targetIndex = emptyIndex >= 0 ? emptyIndex : (bloc.products.length - 1);
+
+    // If target already has a product, append new row
+    final int useIndex;
+    if (bloc.products[targetIndex]["product_id"] != null) {
+      bloc.addProduct();
+      useIndex = bloc.products.length - 1;
+    } else {
+      useIndex = targetIndex;
+    }
+
+    // Map fields (normalize)
+    final pid = productJson['id'] ?? productJson['product_id'] ?? 0;
+    final name = productJson['name'] ?? '';
+    final sellingPrice = _toDouble(productJson['selling_price'] ?? productJson['price'] ?? productJson['sellingPrice'] ?? 0);
+    final discountValue = _toDouble(productJson['discount'] ?? productJson['discount_value'] ?? 0);
+    final discountType = (productJson['discount_type'] ?? productJson['discountType'] ?? 'fixed').toString();
+    final discountApplied = (productJson['discount_applied'] ?? productJson['discountApplied'] ?? false) == true;
+    final stockQty = _toInt(productJson['stock_qty'] ?? productJson['stockQty'] ?? 0);
+    final image = productJson['image']?.toString();
+
+    // Construct ProductModelStockModel (fields used in this screen)
+    final model = ProductModelStockModel(
+      id: _toInt(pid),
+      name: name,
+      stockQty: stockQty,
+      sellingPrice: sellingPrice,
+      discountValue: discountValue,
+      discountType: discountType,
+      discountApplied: discountApplied,
+      image: image,
+    );
+
+    // Use existing logic to set product into row (validations handled there)
+    onProductChanged(useIndex, model);
+
+    // Ensure controllers exist and set values
+    controllers.putIfAbsent(
+      useIndex,
+          () => {
+        "price": TextEditingController(text: sellingPrice.toStringAsFixed(2)),
+        "discount": TextEditingController(text: discountApplied ? discountValue.toString() : "0"),
+        "quantity": TextEditingController(text: "1"),
+        "ticket_total": TextEditingController(),
+        "total": TextEditingController(),
+      },
+    );
+
+    controllers[useIndex]!["quantity"]!.text = "1";
+    controllers[useIndex]!["price"]!.text = sellingPrice.toStringAsFixed(2);
+    controllers[useIndex]!["discount"]!.text = discountApplied ? discountValue.toString() : "0";
+
+    updateTotal(useIndex);
+
+    if (mounted) setState(() {});
+  }
+
+  // ---------------- UI builders ----------------
 
   Widget _buildTopFormSection(CreatePosSaleBloc bloc) {
     return ResponsiveRow(
-      spacing: 20,
-      runSpacing: 10,
+      spacing: 5,
+      runSpacing: 5,
       children: [
         ResponsiveCol(
           xs: 12,
@@ -200,7 +397,7 @@ class _SalesScreenState extends State<SalesScreen> {
                 isRequired: true,
                 value: bloc.selectClintModel,
                 itemList:
-                    [CustomerActiveModel(name: 'Walk-in-customer', id: -1)] +
+                [CustomerActiveModel(name: 'Walk-in-customer', id: -1)] +
                     context.read<CustomerBloc>().activeCustomer,
                 onChanged: (newVal) {
                   bloc.selectClintModel = newVal;
@@ -210,7 +407,7 @@ class _SalesScreenState extends State<SalesScreen> {
                   setState(() {});
                 },
                 validator: (value) =>
-                    value == null ? 'Please select Customer' : null,
+                value == null ? 'Please select Customer' : null,
                 itemBuilder: (item) => DropdownMenuItem(
                   value: item,
                   child: Text(
@@ -248,7 +445,7 @@ class _SalesScreenState extends State<SalesScreen> {
                   setState(() {});
                 },
                 validator: (value) =>
-                    value == null ? 'Please select Sales' : null,
+                value == null ? 'Please select Sales' : null,
                 itemBuilder: (item) => DropdownMenuItem(
                   value: item,
                   child: Text(
@@ -312,10 +509,10 @@ class _SalesScreenState extends State<SalesScreen> {
             children: [
               ResponsiveCol(
                 xs: 12,
-                sm: 3,
-                md: 3,
-                lg: 5,
-                xl: 5,
+                sm: 2,
+                md: 2,
+                lg: 3,
+                xl: 3,
                 child: Text(
                   'Product Name',
                   style: AppTextStyle.cardLevelHead(context),
@@ -323,10 +520,10 @@ class _SalesScreenState extends State<SalesScreen> {
               ),
               ResponsiveCol(
                 xs: 12,
-                sm: 1,
-                md: 1,
-                lg: 2,
-                xl: 2,
+                sm: 2.3,
+                md: 2.3,
+                lg: 2.3,
+                xl: 2.3,
                 child: Text(
                   'Quantity',
                   style: AppTextStyle.cardLevelHead(context),
@@ -334,8 +531,8 @@ class _SalesScreenState extends State<SalesScreen> {
               ),
               ResponsiveCol(
                 xs: 12,
-                sm: 1.5,
-                md: 1.5,
+                sm: 1.3,
+                md: 1.3,
                 lg: 1.5,
                 xl: 1.5,
                 child: Text(
@@ -345,8 +542,8 @@ class _SalesScreenState extends State<SalesScreen> {
               ),
               ResponsiveCol(
                 xs: 12,
-                sm: 1.5,
-                md: 1.5,
+                sm: 2,
+                md: 2,
                 lg: 1.5,
                 xl: 1.5,
                 child: Text(
@@ -378,8 +575,8 @@ class _SalesScreenState extends State<SalesScreen> {
               ),
               ResponsiveCol(
                 xs: 12,
-                sm: 0.8,
-                md: 0.8,
+                sm: 0.6,
+                md: 0.6,
                 lg: 0.8,
                 xl: 0.8,
                 child: Text(
@@ -419,31 +616,26 @@ class _SalesScreenState extends State<SalesScreen> {
                   xl: 3,
                   child: BlocBuilder<ProductsBloc, ProductsState>(
                     builder: (context, state) {
-                      final allProducts = context
-                          .read<ProductsBloc>()
-                          .productList;
+                      final allProducts = context.read<ProductsBloc>().productList;
 
                       ProductModelStockModel? selectedItem;
                       if (product["product_id"] != null) {
                         selectedItem = allProducts.firstWhere(
-                          (p) => p.id == _toInt(product["product_id"]),
+                              (p) => p.id == _toInt(product["product_id"]),
                           orElse: () {
                             return allProducts.isNotEmpty
                                 ? allProducts.first
                                 : ProductModelStockModel(
-                                    id: 0,
-                                    name: 'Unknown',
-                                    stockQty: 0,
-                                    // fill other required fields
-                                  );
+                              id: 0,
+                              name: 'Unknown',
+                              stockQty: 0,
+                            );
                           },
                         );
                       }
 
                       final title =
-                          selectedItem?.name ??
-                          product["product"]?.toString() ??
-                          '';
+                          selectedItem?.name ?? product["product"]?.toString() ?? '';
                       return Text(
                         title,
                         style: AppTextStyle.cardLevelText(context),
@@ -474,10 +666,9 @@ class _SalesScreenState extends State<SalesScreen> {
                             ),
                           ),
                           onPressed: () {
-                            int currentQuantity =
-                                int.tryParse(
-                                  controllers[index]?["quantity"]?.text ?? "0",
-                                ) ??
+                            int currentQuantity = int.tryParse(
+                              controllers[index]?["quantity"]?.text ?? "0",
+                            ) ??
                                 0;
                             if (currentQuantity > 1) {
                               controllers[index]!["quantity"]!.text =
@@ -518,10 +709,9 @@ class _SalesScreenState extends State<SalesScreen> {
                           onChanged: discountApplied
                               ? null
                               : (value) {
-                                  product["quantity"] =
-                                      double.tryParse(value) ?? 0.0;
-                                  updateTotal(index);
-                                },
+                            product["quantity"] = double.tryParse(value) ?? 0.0;
+                            updateTotal(index);
+                          },
                         ),
                       ),
                       const SizedBox(width: 4),
@@ -538,10 +728,9 @@ class _SalesScreenState extends State<SalesScreen> {
                             elevation: 0,
                           ),
                           onPressed: () {
-                            int currentQuantity =
-                                int.tryParse(
-                                  controllers[index]?["quantity"]?.text ?? "0",
-                                ) ??
+                            int currentQuantity = int.tryParse(
+                              controllers[index]?["quantity"]?.text ?? "0",
+                            ) ??
                                 0;
                             controllers[index]!["quantity"]!.text =
                                 (currentQuantity + 1).toString();
@@ -629,11 +818,11 @@ class _SalesScreenState extends State<SalesScreen> {
                           onValueChanged: discountApplied
                               ? (_) {}
                               : (value) {
-                                  setState(() {
-                                    product["discount_type"] = value;
-                                    updateTotal(index);
-                                  });
-                                },
+                            setState(() {
+                              product["discount_type"] = value;
+                              updateTotal(index);
+                            });
+                          },
                           groupValue: product["discount_type"],
                           unselectedColor: Colors.grey[200],
                           selectedColor: AppColors.primaryColor,
@@ -667,10 +856,9 @@ class _SalesScreenState extends State<SalesScreen> {
                           onChanged: discountApplied
                               ? null
                               : (value) {
-                                  product["discount"] =
-                                      double.tryParse(value) ?? 0.0;
-                                  updateTotal(index);
-                                },
+                            product["discount"] = double.tryParse(value) ?? 0.0;
+                            updateTotal(index);
+                          },
                         ),
                       ),
                     ],
@@ -743,8 +931,8 @@ class _SalesScreenState extends State<SalesScreen> {
                         padding: const EdgeInsets.all(6),
                         decoration: BoxDecoration(
                           color: product == products.last
-                              ? Colors.green.withOpacity(0.08)
-                              : Colors.red.withOpacity(0.08),
+                              ? Colors.green.withValues(alpha: 0.08)
+                              : Colors.red.withValues(alpha: 0.08),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
                             color: product == products.last
@@ -766,11 +954,10 @@ class _SalesScreenState extends State<SalesScreen> {
               ],
             ),
           );
-        }).toList(),
+        }),
 
-        const SizedBox(height: 6),
-        _buildSummaryAndPayment(bloc),
-        const SizedBox(height: 6),
+
+
       ],
     );
   }
@@ -812,7 +999,7 @@ class _SalesScreenState extends State<SalesScreen> {
     if (newVal == null) return;
 
     final alreadyAdded = products.asMap().entries.any(
-      (entry) => entry.key != index && entry.value["product_id"] == newVal.id,
+          (entry) => entry.key != index && entry.value["product_id"] == newVal.id,
     );
 
     if (alreadyAdded) {
@@ -847,7 +1034,7 @@ class _SalesScreenState extends State<SalesScreen> {
     // ensure controllers exist
     controllers.putIfAbsent(
       index,
-      () => {
+          () => {
         "price": TextEditingController(),
         "discount": TextEditingController(),
         "quantity": TextEditingController(text: "1"),
@@ -863,7 +1050,7 @@ class _SalesScreenState extends State<SalesScreen> {
         ? _toDouble(newVal.discountValue).toString()
         : "0");
     controllers[index]!["quantity"]!.text =
-        controllers[index]!["quantity"]!.text.isEmpty
+    controllers[index]!["quantity"]!.text.isEmpty
         ? "1"
         : controllers[index]!["quantity"]!.text;
 
@@ -873,15 +1060,15 @@ class _SalesScreenState extends State<SalesScreen> {
   // Charges section (kept)
   Widget _buildChargesSection(CreatePosSaleBloc bloc) {
     Widget chargeField(
-      String label,
-      String selectedType,
-      TextEditingController controller,
-      Function(String) onTypeChanged,
-    ) {
+        String label,
+        String selectedType,
+        TextEditingController controller,
+        Function(String) onTypeChanged,
+        ) {
       return ResponsiveCol(
         xs: 12,
         sm: 2.5,
-        md: 3,
+        md: 2.5,
         lg: 1.5,
         xl: 1.5,
         child: Column(
@@ -890,64 +1077,61 @@ class _SalesScreenState extends State<SalesScreen> {
             Text(label, style: AppTextStyle.cardLevelText(context)),
             const SizedBox(height: 4),
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                // Fixed width & height for segmented control
+                // Segmented control (fixed width)
                 SizedBox(
-                  width: 60,
+                  width: 50,
                   height: 38,
                   child: CupertinoSegmentedControl<String>(
                     padding: EdgeInsets.zero,
                     children: {
-                      'fixed': Container(
-                        alignment: Alignment.center,
+                      'fixed': Center(
                         child: Text(
                           'TK',
                           style: TextStyle(
-                            fontFamily:
-                                GoogleFonts.playfairDisplay().fontFamily,
-                            color: selectedType == 'fixed'
-                                ? Colors.white
-                                : Colors.black,
+                            fontFamily: GoogleFonts.playfairDisplay().fontFamily,
+                            color:
+                            selectedType == 'fixed' ? Colors.white : Colors.black,
                           ),
                         ),
                       ),
-                      'percent': Container(
-                        alignment: Alignment.center,
+                      'percent': Center(
                         child: Text(
                           '%',
                           style: TextStyle(
-                            fontFamily:
-                                GoogleFonts.playfairDisplay().fontFamily,
-                            color: selectedType == 'percent'
-                                ? Colors.white
-                                : Colors.black,
+                            fontFamily: GoogleFonts.playfairDisplay().fontFamily,
+                            color:
+                            selectedType == 'percent' ? Colors.white : Colors.black,
                           ),
                         ),
                       ),
                     },
-                    onValueChanged: onTypeChanged,
                     groupValue: selectedType,
+                    onValueChanged: onTypeChanged,
                     unselectedColor: Colors.grey[300],
                     selectedColor: AppColors.primaryColor,
                     borderColor: AppColors.primaryColor,
                   ),
                 ),
-                const SizedBox(width: 4),
-                // Fixed width & height for input field
-                SizedBox(
-                  width: 70,
-                  // height: 38,
-                  child: CustomInputFieldPayRoll(
-                    isRequiredLevle: false,
-                    controller: controller,
-                    hintText: label,
-                    fillColor: Colors.white,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
+
+                const SizedBox(width: 6),
+
+                // ✅ FIX: Expanded gives bounded width
+                Expanded(
+                  child: SizedBox(
+                    height: 38,
+                    child: CustomInputFieldPayRoll(
+                      isRequiredLevle: false,
+                      controller: controller,
+                      hintText: label,
+                      fillColor: Colors.white,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      onChanged: (_) => setState(() {}),
+                      autofillHints: '',
+                      levelText: '',
                     ),
-                    onChanged: (value) => setState(() {}),
-                    autofillHints: '',
-                    levelText: '',
                   ),
                 ),
               ],
@@ -964,41 +1148,41 @@ class _SalesScreenState extends State<SalesScreen> {
         chargeField(
           "Discount",
           selectedOverallDiscountType,
-          bloc.discountOverAllController,
-          (value) {
+          context.read<CreatePosSaleBloc>().discountOverAllController,
+              (value) {
             setState(() {
               selectedOverallDiscountType = value;
-              bloc.selectedOverallDiscountType = value;
+              context.read<CreatePosSaleBloc>().selectedOverallDiscountType = value;
             });
           },
         ),
-        chargeField("Vat", selectedOverallVatType, bloc.vatOverAllController, (
-          value,
-        ) {
+        chargeField("Vat", selectedOverallVatType, context.read<CreatePosSaleBloc>().vatOverAllController, (
+            value,
+            ) {
           setState(() {
             selectedOverallVatType = value;
-            bloc.selectedOverallVatType = value;
+            context.read<CreatePosSaleBloc>().selectedOverallVatType = value;
           });
         }),
         chargeField(
           "Service Charge",
           selectedOverallServiceChargeType,
-          bloc.serviceChargeOverAllController,
-          (value) {
+          context.read<CreatePosSaleBloc>().serviceChargeOverAllController,
+              (value) {
             setState(() {
               selectedOverallServiceChargeType = value;
-              bloc.selectedOverallServiceChargeType = value;
+              context.read<CreatePosSaleBloc>().selectedOverallServiceChargeType = value;
             });
           },
         ),
         chargeField(
           "Delivery Charge",
           selectedOverallDeliveryType,
-          bloc.deliveryChargeOverAllController,
-          (value) {
+          context.read<CreatePosSaleBloc>().deliveryChargeOverAllController,
+              (value) {
             setState(() {
               selectedOverallDeliveryType = value;
-              bloc.selectedOverallDeliveryType = value;
+              context.read<CreatePosSaleBloc>().selectedOverallDeliveryType = value;
             });
           },
         ),
@@ -1009,15 +1193,13 @@ class _SalesScreenState extends State<SalesScreen> {
   Widget _buildSummaryAndPayment(CreatePosSaleBloc bloc) {
     double productTotal = products.fold(
       0.0,
-      (p, e) => p + _toDouble(e["ticket_total"]),
+          (p, e) => p + _toDouble(e["ticket_total"]),
     );
     double specificDiscount = products.fold(0.0, (p, e) {
       final disc = _toDouble(e["discount"]);
       final ticket = _toDouble(e["ticket_total"]);
       return p +
-          ((e["discount_type"] == 'percent')
-              ? (ticket * (disc / 100.0))
-              : disc);
+          ((e["discount_type"] == 'percent') ? (ticket * (disc / 100.0)) : disc);
     });
     double subTotal = products.fold(0.0, (p, e) => p + _toDouble(e["total"]));
     double overallDiscount =
@@ -1034,8 +1216,7 @@ class _SalesScreenState extends State<SalesScreen> {
         double.tryParse(bloc.deliveryChargeOverAllController.text) ?? 0.0;
     if (selectedOverallDeliveryType == 'percent')
       deliveryCharge = subTotal * (deliveryCharge / 100.0);
-    double netTotal =
-        (subTotal - overallDiscount) + vat + serviceCharge + deliveryCharge;
+    double netTotal = (subTotal - overallDiscount) + vat + serviceCharge + deliveryCharge;
 
     return ResponsiveRow(
       spacing: 20,
@@ -1099,40 +1280,21 @@ class _SalesScreenState extends State<SalesScreen> {
                       child: AppDropdown(
                         context: context,
                         label: "Payment Method",
-                        hint:
-                            context
-                                .read<CreatePosSaleBloc>()
-                                .selectedPaymentMethod
-                                .isEmpty
+                        hint: context.read<CreatePosSaleBloc>().selectedPaymentMethod.isEmpty
                             ? "Select Payment Method"
-                            : context
-                                  .read<CreatePosSaleBloc>()
-                                  .selectedPaymentMethod,
+                            : context.read<CreatePosSaleBloc>().selectedPaymentMethod,
                         isLabel: false,
                         isRequired: true,
                         isNeedAll: false,
-                        value:
-                            context
-                                .read<CreatePosSaleBloc>()
-                                .selectedPaymentMethod
-                                .isEmpty
+                        value: context.read<CreatePosSaleBloc>().selectedPaymentMethod.isEmpty
                             ? null
-                            : context
-                                  .read<CreatePosSaleBloc>()
-                                  .selectedPaymentMethod,
-                        itemList:
-                            [] +
-                            context.read<CreatePosSaleBloc>().paymentMethod,
+                            : context.read<CreatePosSaleBloc>().selectedPaymentMethod,
+                        itemList: [] + context.read<CreatePosSaleBloc>().paymentMethod,
                         onChanged: (newVal) {
-                          context
-                              .read<CreatePosSaleBloc>()
-                              .selectedPaymentMethod = newVal
-                              .toString();
+                          context.read<CreatePosSaleBloc>().selectedPaymentMethod = newVal.toString();
                           setState(() {});
                         },
-                        validator: (value) => value == null
-                            ? 'Please select a payment method'
-                            : null,
+                        validator: (value) => value == null ? 'Please select a payment method' : null,
                         itemBuilder: (item) => DropdownMenuItem(
                           value: item,
                           child: Text(item.toString()),
@@ -1144,34 +1306,20 @@ class _SalesScreenState extends State<SalesScreen> {
                       child: BlocBuilder<AccountBloc, AccountState>(
                         builder: (context, state) {
                           if (state is AccountActiveListLoading) {
-                            return const Center(
-                              child: CircularProgressIndicator(),
-                            );
+                            return const Center(child: CircularProgressIndicator());
                           } else if (state is AccountActiveListSuccess) {
                             final bloc = context.read<CreatePosSaleBloc>();
-                            final filteredList =
-                                bloc.selectedPaymentMethod.isNotEmpty
+                            final filteredList = bloc.selectedPaymentMethod.isNotEmpty
                                 ? state.list
-                                      .where(
-                                        (item) =>
-                                            item.acType?.toLowerCase() ==
-                                            bloc.selectedPaymentMethod
-                                                .toLowerCase(),
-                                      )
-                                      .toList()
+                                .where((item) => item.acType?.toLowerCase() == bloc.selectedPaymentMethod.toLowerCase())
+                                .toList()
                                 : state.list;
-                            final selectedAccount =
-                                bloc.accountModel ??
-                                (filteredList.isNotEmpty
-                                    ? filteredList.first
-                                    : null);
+                            final selectedAccount = bloc.accountModel ?? (filteredList.isNotEmpty ? filteredList.first : null);
                             bloc.accountModel = selectedAccount;
                             return AppDropdown<AccountActiveModel>(
                               context: context,
                               label: "Account",
-                              hint: bloc.accountModel == null
-                                  ? "Select Account"
-                                  : bloc.accountModel!.name.toString(),
+                              hint: bloc.accountModel == null ? "Select Account" : bloc.accountModel!.name.toString(),
                               isLabel: false,
                               isRequired: true,
                               isNeedAll: false,
@@ -1181,13 +1329,8 @@ class _SalesScreenState extends State<SalesScreen> {
                                 bloc.accountModel = newVal;
                                 setState(() {});
                               },
-                              validator: (value) => value == null
-                                  ? 'Please select an account'
-                                  : null,
-                              itemBuilder: (item) => DropdownMenuItem(
-                                value: item,
-                                child: Text(item.toString()),
-                              ),
+                              validator: (value) => value == null ? 'Please select an account' : null,
+                              itemBuilder: (item) => DropdownMenuItem(value: item, child: Text(item.toString())),
                             );
                           } else {
                             return Container();
@@ -1204,22 +1347,16 @@ class _SalesScreenState extends State<SalesScreen> {
                       child: AppTextField(
                         controller: changeAmountController,
                         hintText: 'Change Amount',
-                        keyboardType: const TextInputType.numberWithOptions(
-                          decimal: true,
-                        ),
+                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
                         readOnly: true,
                       ),
                     ),
                     const SizedBox(width: 5),
                     Expanded(
                       child: AppTextField(
-                        controller: context
-                            .read<CreatePosSaleBloc>()
-                            .payableAmount,
+                        controller: context.read<CreatePosSaleBloc>().payableAmount,
                         hintText: 'Payable Amount',
-                        keyboardType: const TextInputType.numberWithOptions(
-                          decimal: true,
-                        ),
+                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
                         onChanged: (v) => setState(() {}),
                       ),
                     ),
@@ -1232,8 +1369,7 @@ class _SalesScreenState extends State<SalesScreen> {
                 controller: context.read<CreatePosSaleBloc>().remarkController,
                 hintText: 'Remark',
                 fillColor: Colors.white,
-                validator: (value) =>
-                    value!.isEmpty ? 'Please enter Remark' : null,
+                validator: (value) => value!.isEmpty ? 'Please enter Remark' : null,
                 onChanged: (value) => setState(() {}),
                 keyboardType: TextInputType.text,
               ),
@@ -1249,17 +1385,8 @@ class _SalesScreenState extends State<SalesScreen> {
       padding: const EdgeInsets.symmetric(vertical: 2.5),
       child: Row(
         children: [
-          Expanded(
-            flex: 4,
-            child: Text(label, style: AppTextStyle.cardLevelHead(context)),
-          ),
-          Expanded(
-            flex: 2,
-            child: Text(
-              value.toStringAsFixed(2),
-              style: AppTextStyle.cardLevelText(context),
-            ),
-          ),
+          Expanded(flex: 4, child: Text(label, style: AppTextStyle.cardLevelHead(context))),
+          Expanded(flex: 2, child: Text(value.toStringAsFixed(2), style: AppTextStyle.cardLevelText(context))),
         ],
       ),
     );
@@ -1283,155 +1410,163 @@ class _SalesScreenState extends State<SalesScreen> {
 
   // Product browser -------------------------------------------------------
   Widget _buildProductBrowser() {
-    final productsBloc = context.read<ProductsBloc>();
-    final productList = productsBloc.productList;
-    final filtered = productList.where((p) {
-      final title = p.toString().toLowerCase();
-      final query = productSearchController.text.toLowerCase();
-      final matchesQuery = query.isEmpty ? true : title.contains(query);
-      final matchesCategory = selectedCategoryFilter.isEmpty
-          ? true
-          : (p.categoryInfo?.name?.toString() == selectedCategoryFilter);
-      final matchesBrand = selectedBrandFilter.isEmpty
-          ? true
-          : (p.brand?.name?.toString() == selectedBrandFilter);
-      return matchesQuery && matchesCategory && matchesBrand;
-    }).toList();
+    return BlocBuilder<ProductsBloc, ProductsState>(
+      builder: (context, state) {
+        List<ProductModelStockModel> productList = [];
 
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Column(
-        children: [
-          // Filters row
-          Row(
+        // 🔹 Use the correct product list based on state
+        if (state is ProductsListStockSuccess) {
+          productList = state.list;
+        } else if (state is ProductsListLoading) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (state is ProductsListFailed) {
+          return Center(child: Text(state.content ?? "Failed to load products"));
+        }
+
+        // 🔹 Get search query
+        final query = productSearchController.text.trim().toLowerCase();
+
+        // 🔹 Filter logic
+        final filteredProducts = productList.where((p) {
+          final searchableText = [p.name, p.sku].whereType<String>().join(' ').toLowerCase();
+          final matchesSearch = query.isEmpty || searchableText.contains(query);
+          final matchesCategory = selectedCategoryFilter.isEmpty || p.categoryInfo?.name == selectedCategoryFilter;
+          final matchesBrand = selectedBrandFilter.isEmpty || p.brand?.name == selectedBrandFilter;
+          return matchesSearch && matchesCategory && matchesBrand;
+        }).toList();
+
+        // 🔹 Empty state
+        if (filteredProducts.isEmpty) {
+          return const Center(child: Text("No products found"));
+        }
+
+        return Container(
+          padding: const EdgeInsets.all(6),
+          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8)),
+          child: Column(
             children: [
-              Expanded(
-                child: BlocBuilder<CategoriesBloc, CategoriesState>(
-                  builder: (context, state) {
-                    final categoryList = categoriesBloc.list;
-
-                    return AppDropdown(
-                      label: "Category",
-                      context: context,
-                      hint: selectedCategoryFilter.isEmpty
-                          ? "Select Category"
-                          : selectedCategoryFilter,
-                      isRequired: false,
-                      isNeedAll: true,
-                      isLabel: true,
-                      isSearch: true,
-                      value: selectedCategoryFilter.isEmpty
-                          ? null
-                          : selectedCategoryFilter,
-                      itemList: categoryList.map((e) => e.name ?? "").toList(),
-                      onChanged: (newVal) {
-                        setState(() {
-                          selectedCategoryFilter = newVal?.toString() ?? '';
-                        });
+              // ---------------- Filters ----------------
+              Row(
+                children: [
+                  Expanded(
+                    child: BlocBuilder<CategoriesBloc, CategoriesState>(
+                      builder: (context, state) {
+                        final categoryList = categoriesBloc.list;
+                        return AppDropdown(
+                          label: "Category",
+                          context: context,
+                          hint: "Select Category",
+                          isLabel: false,
+                          isSearch: true,
+                          value: selectedCategoryFilter.isEmpty ? null : selectedCategoryFilter,
+                          itemList: categoryList.map((e) => e.name ?? '').toList(),
+                          onChanged: (v) => setState(() {
+                            selectedCategoryFilter = v?.toString() ?? '';
+                          }),
+                          itemBuilder: (item) => DropdownMenuItem(value: item, child: Text(item)),
+                        );
                       },
-                      itemBuilder: (item) => DropdownMenuItem(
-                        value: item,
-                        child: Text(item.toString()),
-                      ),
-                    );
-                  },
-                ),
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: BlocBuilder<BrandBloc, BrandState>(
+                      builder: (context, state) {
+                        final brandList = brandBloc.brandModel;
+                        return AppDropdown(
+                          label: "Brand",
+                          context: context,
+                          hint: "Select Brand",
+                          isLabel: false,
+                          isSearch: true,
+                          value: selectedBrandFilter.isEmpty ? null : selectedBrandFilter,
+                          itemList: brandList.map((e) => e.name ?? '').toList(),
+                          onChanged: (v) => setState(() {
+                            selectedBrandFilter = v?.toString() ?? '';
+                          }),
+                          itemBuilder: (item) => DropdownMenuItem(value: item, child: Text(item)),
+                        );
+                      },
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: BlocBuilder<BrandBloc, BrandState>(
-                  builder: (context, state) {
-                    final brandList = brandBloc.brandModel;
-                    return AppDropdown(
-                      label: "Brand",
-                      context: context,
-                      hint: selectedBrandFilter.isEmpty
-                          ? "Select Brand"
-                          : selectedBrandFilter,
-                      isLabel: false,
-                      isNeedAll: false,
-                      isSearch: true,
-                      isRequired: false,
-                      value: selectedBrandFilter.isEmpty
-                          ? null
-                          : selectedBrandFilter,
-                      itemList: brandList.map((e) => e.name ?? "").toList(),
-                      onChanged: (newVal) {
-                        setState(() {
-                          selectedBrandFilter = newVal?.toString() ?? '';
-                        });
-                      },
-                      itemBuilder: (item) => DropdownMenuItem(
-                        value: item,
-                        child: Text(item.toString()),
+
+              const SizedBox(height: 6),
+
+              // ---------------- Search + small status ----------------
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: productSearchController,
+                      decoration: InputDecoration(
+                        prefixIcon: const Icon(Icons.search),
+                        hintText: 'Search by name / SKU / barcode',
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(6)),
                       ),
-                    );
-                  },
+                      onChanged: (_) => setState(() {}),
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  // status indicator for last scan result (optional)
+                  SizedBox(
+                    width: 120,
+                    child: Text(
+                      _statusMessage,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(fontSize: 12, color: Colors.black54),
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 12),
+
+              // ---------------- Grid ----------------
+              Expanded(
+                child: GridView.builder(
+                  padding: EdgeInsets.zero,
+                  itemCount: filteredProducts.length,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                    childAspectRatio: 0.9,
+                    crossAxisSpacing: 5,
+                    mainAxisSpacing: 5,
+                  ),
+                  itemBuilder: (context, index) => _buildProductCard(filteredProducts[index]),
                 ),
               ),
             ],
           ),
-
-          const SizedBox(height: 8),
-          // Search
-          TextField(
-            controller: productSearchController,
-            decoration: InputDecoration(
-              prefixIcon: const Icon(Icons.search),
-              hintText: 'Search name and barcode ...',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(6),
-              ),
-            ),
-            onChanged: (v) => setState(() {}),
-          ),
-          const SizedBox(height: 12),
-
-          // Grid: give it expanded space inside the browser column
-          Expanded(
-            child: GridView.builder(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: EdgeInsets.zero,
-              itemCount: filtered.length,
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
-                childAspectRatio: 0.9,
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
-              ),
-              itemBuilder: (context, i) {
-                final p = filtered[i];
-                return _buildProductCard(p);
-              },
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
   Widget _buildProductCard(ProductModelStockModel p) {
     return InkWell(
       onTap: () {
-        final emptyIndex = products.indexWhere(
-          (row) => row["product_id"] == null,
-        );
-        final targetIndex = emptyIndex >= 0
-            ? emptyIndex
-            : (products.length - 1);
+        final bloc = context.read<CreatePosSaleBloc>();
+
+        // If products list is empty for some reason, add an empty row first.
+        if (bloc.products.isEmpty) {
+          bloc.addProduct();
+        }
+
+        final emptyIndex = bloc.products.indexWhere((row) => row["product_id"] == null);
+
+        final targetIndex = emptyIndex >= 0 ? emptyIndex : (bloc.products.length - 1);
 
         // If the target row already has a product, append a new row and use it
-        if (products[targetIndex]["product_id"] != null) {
-          context.read<CreatePosSaleBloc>().addProduct();
-          final newIndex = products.length - 1;
+        if (bloc.products[targetIndex]["product_id"] != null) {
+          bloc.addProduct();
+          final newIndex = bloc.products.length - 1;
           onProductChanged(newIndex, p);
           controllers.putIfAbsent(
             newIndex,
-            () => {
+                () => {
               "price": TextEditingController(),
               "discount": TextEditingController(),
               "quantity": TextEditingController(text: "1"),
@@ -1444,7 +1579,7 @@ class _SalesScreenState extends State<SalesScreen> {
           onProductChanged(targetIndex, p);
           controllers.putIfAbsent(
             targetIndex,
-            () => {
+                () => {
               "price": TextEditingController(),
               "discount": TextEditingController(),
               "quantity": TextEditingController(text: "1"),
@@ -1457,10 +1592,7 @@ class _SalesScreenState extends State<SalesScreen> {
         setState(() {});
       },
       child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(6),
-          border: Border.all(color: Colors.grey.shade200),
-        ),
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(6), border: Border.all(color: Colors.grey.shade200)),
         child: Stack(
           children: [
             Column(
@@ -1470,28 +1602,15 @@ class _SalesScreenState extends State<SalesScreen> {
                   child: Container(
                     width: double.infinity,
                     decoration: BoxDecoration(
-                      borderRadius: const BorderRadius.vertical(
-                        top: Radius.circular(6),
-                      ),
+                      borderRadius: const BorderRadius.vertical(top: Radius.circular(6)),
                       color: Colors.grey.shade200,
-                      image: p.image != null
-                          ? DecorationImage(
-                              image: NetworkImage(p.image!),
-                              fit: BoxFit.cover,
-                            )
-                          : null,
+                      image: p.image != null ? DecorationImage(image: NetworkImage(p.image!), fit: BoxFit.cover) : null,
                     ),
-                    child: p.image == null
-                        ? const Icon(
-                            Icons.image_not_supported,
-                            size: 36,
-                            color: Colors.black26,
-                          )
-                        : null,
+                    child: p.image == null ? const Icon(Icons.image_not_supported, size: 30, color: Colors.black26) : null,
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.all(6.0),
+                  padding: const EdgeInsets.all(3.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -1499,16 +1618,12 @@ class _SalesScreenState extends State<SalesScreen> {
                         p.toString(),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: AppTextStyle.cardLevelHead(
-                          context,
-                        ).copyWith(fontSize: 12),
+                        style: AppTextStyle.cardLevelHead(context).copyWith(fontSize: 10),
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Price: ${_toDouble(p.sellingPrice).toStringAsFixed(2)}',
-                        style: AppTextStyle.cardLevelText(
-                          context,
-                        ).copyWith(fontSize: 12),
+                        _toDouble(p.sellingPrice).toStringAsFixed(2),
+                        style: AppTextStyle.cardLevelText(context).copyWith(fontSize: 12),
                       ),
                     ],
                   ),
@@ -1516,17 +1631,14 @@ class _SalesScreenState extends State<SalesScreen> {
               ],
             ),
             Positioned(
-              left: 8,
-              top: 8,
+              right: 0,
+              top: 1,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.redAccent,
-                  borderRadius: BorderRadius.circular(6),
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 2),
+                decoration: BoxDecoration(color: Colors.redAccent, borderRadius: BorderRadius.circular(6)),
                 child: Text(
                   'Stock: ${p.stockQty ?? 0}',
-                  style: const TextStyle(color: Colors.white, fontSize: 11),
+                  style: const TextStyle(color: Colors.white, fontSize: 10),
                 ),
               ),
             ),
@@ -1546,9 +1658,7 @@ class _SalesScreenState extends State<SalesScreen> {
     );
     if (pickedDate != null) {
       final bloc = context.read<CreatePosSaleBloc>();
-      bloc.dateEditingController.text = appWidgets.convertDateTimeDDMMYYYY(
-        pickedDate,
-      );
+      bloc.dateEditingController.text = appWidgets.convertDateTimeDDMMYYYY(pickedDate);
       setState(() {});
     }
   }
@@ -1574,28 +1684,18 @@ class _SalesScreenState extends State<SalesScreen> {
     Map<String, dynamic> body = {
       "type": "normal_sale",
       "sale_date": appWidgets.convertDateTime(
-        DateFormat(
-          "dd-MM-yyyy",
-        ).parse(bloc.dateEditingController.text.trim(), true),
+        DateFormat("dd-MM-yyyy").parse(bloc.dateEditingController.text.trim(), true),
         "yyyy-MM-dd",
       ),
       "sale_by": bloc.selectSalesModel?.id.toString() ?? '',
       "overall_vat_type": selectedOverallVatType.toLowerCase(),
-      "vat": bloc.vatOverAllController.text.isEmpty
-          ? 0
-          : double.tryParse(bloc.vatOverAllController.text),
+      "vat": bloc.vatOverAllController.text.isEmpty ? 0 : double.tryParse(bloc.vatOverAllController.text),
       "overall_service_type": selectedOverallServiceChargeType.toLowerCase(),
-      "service_charge": bloc.serviceChargeOverAllController.text.isEmpty
-          ? 0
-          : double.tryParse(bloc.serviceChargeOverAllController.text),
+      "service_charge": bloc.serviceChargeOverAllController.text.isEmpty ? 0 : double.tryParse(bloc.serviceChargeOverAllController.text),
       "overall_delivery_type": selectedOverallDeliveryType.toLowerCase(),
-      "delivery_charge": bloc.deliveryChargeOverAllController.text.isEmpty
-          ? 0
-          : double.tryParse(bloc.deliveryChargeOverAllController.text),
+      "delivery_charge": bloc.deliveryChargeOverAllController.text.isEmpty ? 0 : double.tryParse(bloc.deliveryChargeOverAllController.text),
       "overall_discount_type": selectedOverallDiscountType.toLowerCase(),
-      "overall_discount": bloc.discountOverAllController.text.isEmpty
-          ? 0.0
-          : double.tryParse(bloc.discountOverAllController.text),
+      "overall_discount": bloc.discountOverAllController.text.isEmpty ? 0.0 : double.tryParse(bloc.discountOverAllController.text),
       "remark": bloc.remarkController.text,
       "items": transferProducts,
       "customer_type": isWalkInCustomer ? "walk_in" : "saved_customer",
@@ -1603,35 +1703,26 @@ class _SalesScreenState extends State<SalesScreen> {
       "paid_amount": double.tryParse(bloc.payableAmount.text.trim()) ?? 0,
     };
 
-    if (!isWalkInCustomer)
-      body['customer_id'] = selectedCustomer?.id.toString() ?? '';
+    if (!isWalkInCustomer) body['customer_id'] = selectedCustomer?.id.toString() ?? '';
 
     if (isWalkInCustomer) {
       final subTotal = products.fold(0.0, (p, e) => p + _toDouble(e["total"]));
-      double overallDiscount =
-          double.tryParse(bloc.discountOverAllController.text) ?? 0.0;
-      if (selectedOverallDiscountType == 'percent')
-        overallDiscount = subTotal * (overallDiscount / 100.0);
+      double overallDiscount = double.tryParse(bloc.discountOverAllController.text) ?? 0.0;
+      if (selectedOverallDiscountType == 'percent') overallDiscount = subTotal * (overallDiscount / 100.0);
       double vat = double.tryParse(bloc.vatOverAllController.text) ?? 0.0;
       if (selectedOverallVatType == 'percent') vat = subTotal * (vat / 100.0);
-      double serviceVal =
-          double.tryParse(bloc.serviceChargeOverAllController.text) ?? 0.0;
-      if (selectedOverallServiceChargeType == 'percent')
-        serviceVal = subTotal * (serviceVal / 100.0);
-      double delivery =
-          double.tryParse(bloc.deliveryChargeOverAllController.text) ?? 0.0;
-      if (selectedOverallDeliveryType == 'percent')
-        delivery = subTotal * (delivery / 100.0);
+      double serviceVal = double.tryParse(bloc.serviceChargeOverAllController.text) ?? 0.0;
+      if (selectedOverallServiceChargeType == 'percent') serviceVal = subTotal * (serviceVal / 100.0);
+      double delivery = double.tryParse(bloc.deliveryChargeOverAllController.text) ?? 0.0;
+      if (selectedOverallDeliveryType == 'percent') delivery = subTotal * (delivery / 100.0);
 
-      final netTotal =
-          (subTotal - overallDiscount) + vat + serviceVal + delivery;
+      final netTotal = (subTotal - overallDiscount) + vat + serviceVal + delivery;
       final paidAmount = double.tryParse(bloc.payableAmount.text.trim()) ?? 0;
       if (paidAmount < netTotal) {
         showCustomToast(
           context: context,
           title: 'Warning!',
-          description:
-              "Walk-in customer: Full payment required. No due allowed.",
+          description: "Walk-in customer: Full payment required. No due allowed.",
           icon: Icons.error,
           primaryColor: Colors.redAccent,
         );
@@ -1650,113 +1741,118 @@ class _SalesScreenState extends State<SalesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isBigScreen =
-        Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
+    final isBigScreen = Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
 
     // Constrain the main content height so internal Expanded widgets can layout properly.
-    final availableHeight =
-        MediaQuery.of(context).size.height - kToolbarHeight - 24;
+    final availableHeight = MediaQuery.of(context).size.height - kToolbarHeight - 24;
 
-    return Container(
-      color: AppColors.bg,
-      child: SafeArea(
-        child: ResponsiveRow(
-          spacing: 12,
-          runSpacing: 12,
-          children: [
-            if (isBigScreen)
-              ResponsiveCol(
-                xs: 0,
-                sm: 0,
-                md: 0,
-                lg: 2,
-                xl: 2,
-                child: Container(
-                  decoration: const BoxDecoration(color: Colors.white),
-                  child: const Sidebar(),
+    // Wrap the whole content in a RawKeyboardListener so barcode scanners (keyboard emulators) can send input.
+    return RawKeyboardListener(
+      focusNode: _focusNode,
+      autofocus: true,
+      onKey: _handleKey,
+      child: Container(
+        color: AppColors.bg,
+        child: SafeArea(
+          child: ResponsiveRow(
+            spacing: 0,
+            runSpacing: 0,
+            children: [
+              if (isBigScreen)
+                ResponsiveCol(
+                  xs: 0,
+                  sm: 1,
+                  md: 1,
+                  lg: 2,
+                  xl: 2,
+                  child: Container(
+                    decoration: const BoxDecoration(color: Colors.white),
+                    child: const Sidebar(),
+                  ),
                 ),
-              ),
-            ResponsiveCol(
-              xs: 12,
-              lg: 10,
-              md: 10,
-              child: SizedBox(
-                height: availableHeight,
-                child: BlocConsumer<CreatePosSaleBloc, CreatePosSaleState>(
-                  listener: (context, state) {
-                    if (state is CreatePosSaleLoading) {
-                      appLoader(context, "Creating PosSale, please wait...");
-                    } else if (state is CreatePosSaleSuccess) {
-                      Navigator.pop(context);
-                      showCustomToast(
-                        context: context,
-                        title: 'Success!',
-                        description: "Sale created successfully!",
-                        icon: Icons.check_circle,
-                        primaryColor: Colors.green,
-                      );
-                      changeAmountController.clear();
-                      context.read<DashboardBloc>().add(
-                        ChangeDashboardScreen(index: 2),
-                      );
-                      setState(() {});
-                    } else if (state is CreatePosSaleFailed) {
-                      Navigator.pop(context);
-                      appAlertDialog(
-                        context,
-                        state.content,
-                        title: state.title,
-                        actions: [
-                          TextButton(
-                            onPressed: () => AppRoutes.pop(context),
-                            child: const Text("Dismiss"),
-                          ),
-                        ],
-                      );
-                    }
-                  },
-                  builder: (context, state) {
-                    final bloc = context.read<CreatePosSaleBloc>();
+              ResponsiveCol(
+                xs: 12,
+                sm: 12,
+                md: 12,
+                lg: 10,
+                xl: 10,
+                child: SizedBox(
+                  height: availableHeight,
+                  child: BlocConsumer<CreatePosSaleBloc, CreatePosSaleState>(
+                    listener: (context, state) {
+                      if (state is CreatePosSaleLoading) {
+                        appLoader(context, "Creating PosSale, please wait...");
+                      } else if (state is CreatePosSaleSuccess) {
+                        Navigator.pop(context);
+                        showCustomToast(
+                          context: context,
+                          title: 'Success!',
+                          description: "Sale created successfully!",
+                          icon: Icons.check_circle,
+                          primaryColor: Colors.green,
+                        );
+                        changeAmountController.clear();
+                        context.read<DashboardBloc>().add(
+                          ChangeDashboardScreen(index: 2),
+                        );
+                        setState(() {});
+                      } else if (state is CreatePosSaleFailed) {
+                        Navigator.pop(context);
+                        appAlertDialog(
+                          context,
+                          state.content,
+                          title: state.title,
+                          actions: [
+                            TextButton(
+                              onPressed: () => AppRoutes.pop(context),
+                              child: const Text("Dismiss"),
+                            ),
+                          ],
+                        );
+                      }
+                    },
+                    builder: (context, state) {
+                      final bloc = context.read<CreatePosSaleBloc>();
 
-                    return Row(
-                      children: [
-                        // LEFT: Sales form (~65%)
-                        Expanded(
-                          // flex: 8,
-                          child: SingleChildScrollView(
-                            child: Form(
-                              key: formKey,
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const SizedBox(height: 6),
-                                    _buildTopFormSection(bloc),
-                                    const SizedBox(height: 6),
-                                    _buildProductListSection(bloc),
-                                    const SizedBox(height: 6),
-                                    _buildChargesSection(bloc),
-                                    const SizedBox(height: 6),
-                                    gapH20,
-                                    _buildActionButtons(),
-                                    const SizedBox(height: 12),
-                                  ],
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // LEFT: Sales form (~65%)
+                          Expanded(
+                            child: SingleChildScrollView(
+                              child: Form(
+                                key: formKey,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(6.0),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      _buildTopFormSection(bloc),
+                                      _buildProductListSection(bloc),
+                                      _buildChargesSection(bloc),
+                                      const SizedBox(height: 6),
+
+                                      _buildSummaryAndPayment(bloc),
+                                      gapH20,
+                                      _buildActionButtons(),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),
                           ),
-                        ),
 
-
-                        SizedBox(width: 250, child: _buildProductBrowser()),
-                      ],
-                    );
-                  },
+                          SizedBox(width: 280, child: _buildProductBrowser()),
+                        ],
+                      );
+                    },
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

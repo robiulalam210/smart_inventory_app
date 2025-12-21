@@ -19,8 +19,8 @@ class ProductModelStockModel {
   final dynamic brand;
   final dynamic group;
   final dynamic source;
-  final String? purchasePrice;
-  final String? sellingPrice;
+  final dynamic? purchasePrice;
+  final dynamic? sellingPrice;
   final int? openingStock;
   final int? stockQty;
   final int? alertQuantity;
@@ -40,7 +40,7 @@ class ProductModelStockModel {
   // --- Discount Fields ---
   final bool? discountApplied;
   final String? discountType;
-  final String? discountValue;
+  final dynamic? discountValue;
   final double? finalPrice;
 
   ProductModelStockModel({
