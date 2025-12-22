@@ -56,7 +56,9 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
   final List<Widget> myScreens = [
     AppWrapper(child: DashboardScreen()),
 
+    AppWrapper(child: CreatePosSalePage()),
     AppWrapper(child: SalesScreen()),
+
     AppWrapper(child: PosSaleScreen()),
 
     AppWrapper(child: MoneyReceiptForm()),

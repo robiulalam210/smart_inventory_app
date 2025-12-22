@@ -18,7 +18,8 @@ class TabSidebar extends StatelessWidget {
       title: "Sales",
       items: [
         MenuItem(title: "Sale", index: 1),
-        MenuItem(title: "Sale List", index: 2),
+        MenuItem(title: "Pos Sale", index: 2),
+        MenuItem(title: "Sale List", index: 3),
       ],
     ),
     MenuSection(
