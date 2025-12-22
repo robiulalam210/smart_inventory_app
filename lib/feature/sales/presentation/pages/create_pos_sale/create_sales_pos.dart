@@ -1,9 +1,7 @@
 // NOTE: adjust imports paths to match your project structure
-import 'dart:convert';
 import 'dart:developer';
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
@@ -1551,7 +1549,7 @@ class _SalesScreenState extends State<SalesScreen> {
                   itemCount: filteredProducts.length,
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 3,
-                    childAspectRatio: 0.6,
+                    childAspectRatio: 0.5,
                     crossAxisSpacing: 5,
                     mainAxisSpacing: 5,
                   ),
