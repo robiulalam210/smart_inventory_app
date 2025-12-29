@@ -39,6 +39,7 @@ import '../../../../return/purchase_return/presentation/purchase_return/purchase
 import '../../../../return/sales_return/presentation/page/sales_return_page.dart';
 import '../../../../sales/presentation/pages/create_pos_sale/create_pos_sale.dart';
 
+import '../../../../sales/presentation/pages/create_pos_sale/create_sales_pos.dart';
 import '../../../../supplier/presentation/pages/supplier_list_screen.dart';
 import '../../../../supplier/presentation/pages/supplier_payment_list_screen.dart';
 import '../../../../transactions/presentation/pages/transaction_screen.dart';
@@ -56,6 +57,8 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     AppWrapper(child: DashboardScreen()),
 
     AppWrapper(child: CreatePosSalePage()),
+    AppWrapper(child: SalesScreen()),
+
     AppWrapper(child: PosSaleScreen()),
 
     AppWrapper(child: MoneyReceiptForm()),

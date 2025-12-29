@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'core/core.dart';
 import 'core/shared/widgets/sideMenu/tab_sidebar.dart';
 import 'feature/feature.dart';
@@ -16,11 +17,11 @@ class RootScreen extends StatefulWidget {
 class _RootScreenState extends State<RootScreen> {
   @override
   void initState() {
+    super.initState();
+    // initialize blocs and services
     context.read<DashboardBloc>().add(ChangeDashboardScreen(index: 0));
     context.read<PrintLayoutBloc>().add(FetchPrintLayout());
-
     AutoTimerService().startTimer();
-    super.initState();
   }
 
   @override
@@ -28,47 +29,106 @@ class _RootScreenState extends State<RootScreen> {
     final isSmallScreen = Responsive.isMobile(context) ||
         Responsive.isTablet(context) ||
         Responsive.isSmallDesktop(context);
-    final isBigScreen = Responsive.isDesktop(context) ||
-        Responsive.isMaxDesktop(context);
+    final isBigScreen =
+        Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
 
     return SafeArea(
       child: Scaffold(
         key: _drawerKey,
 
-        /// Drawer for different screen sizes
+        // Mobile/tablet drawer
         drawer: isSmallScreen ? const Drawer(child: TabSidebar()) : null,
         drawerEnableOpenDragGesture: isSmallScreen,
 
-        /// Sidebar for big screens (end drawer)
-        endDrawer: isBigScreen ? const Drawer(child: Sidebar()) : null,
-        endDrawerEnableOpenDragGesture: isBigScreen,
-
-        /// AppBar only for smaller screens
+        // AppBar only for smaller screens
         appBar: isSmallScreen ? _buildAppBar(context) : null,
 
         body: PopScope(
           canPop: false,
           onPopInvoked: (didPop) {
-            // Handle back button if needed
+            // Prevent default back behavior / handle back if necessary.
             if (didPop) return;
-            // Prevent default back behavior
           },
           child: BlocBuilder<DashboardBloc, DashboardState>(
             builder: (context, state) {
               int currentIndex = 0;
-
               if (state is DashboardScreenChanged) {
                 currentIndex = state.index;
               }
-
               final bloc = context.read<DashboardBloc>();
-              return _buildBody(context, isBigScreen, bloc, currentIndex);
+
+              // Desktop: permanent sidebar + content
+              if (isBigScreen) {
+                return Row(
+                  children: [
+                    // Permanent Sidebar
+                    const SizedBox(
+                      width: 300, // adjust as needed
+                      child: Sidebar(),
+                    ),
+
+                    // Vertical divider (optional)
+                    Container(width: 1, color: AppColors.border),
+
+                    // Main content area
+                    Expanded(
+                      child: Column(
+                        children: [
+                          // Header only on big screens
+                           Header(drawerKey: _drawerKey,),
+
+                          // Content area: refreshable scrollable view
+                          Expanded(
+                            child: RefreshIndicator(
+                              onRefresh: () async {
+                                context.read<DashboardBloc>().add(
+                                  ChangeDashboardScreen(index: currentIndex),
+                                );
+                              },
+                              child: SingleChildScrollView(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: AppSizes.bodyPadding *
+                                      (Responsive.isMobile(context) ? 0.5 : 1.5),
+                                ),
+                                child: bloc.myScreens[currentIndex],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                );
+              }
+
+              // Small screens: drawer + appbar layout (keeps previous behavior)
+              return RefreshIndicator(
+                onRefresh: () async {
+                  context.read<DashboardBloc>().add(
+                    ChangeDashboardScreen(index: currentIndex),
+                  );
+                },
+                child: ListView(
+                  padding: EdgeInsets.zero,
+                  children: [
+                    if (isBigScreen) Header(drawerKey: _drawerKey),
+                    Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: AppSizes.bodyPadding *
+                            (Responsive.isMobile(context) ? 0.5 : 1.5),
+                      ),
+                      child: bloc.myScreens[currentIndex],
+                    ),
+                  ],
+                ),
+              );
             },
           ),
         ),
 
-        /// Floating Action Button for drawer on big screens
-        floatingActionButton: isBigScreen ? _buildDrawerFAB() : null,
+        // FAB not needed on desktop since sidebar is permanent.
+        // If you still want a FAB on some screens, toggle it with isSmallScreen/isBigScreen.
+        floatingActionButton: null,
       ),
     );
   }
@@ -82,7 +142,7 @@ class _RootScreenState extends State<RootScreen> {
       ),
       title: Row(
         children: [
-          /// App title
+          // App title
           Expanded(
             child: Padding(
               padding: EdgeInsets.symmetric(
@@ -101,7 +161,7 @@ class _RootScreenState extends State<RootScreen> {
 
           gapW8,
 
-          /// Connectivity Status
+          // Connectivity Status
           BlocBuilder<ConnectivityBloc, ConnectivityState>(
             builder: (context, state) {
               String status;
@@ -124,7 +184,7 @@ class _RootScreenState extends State<RootScreen> {
 
           gapW8,
 
-          /// Sign out button
+          // Sign out button
           AppButton(
             onPressed: () => _showLogoutConfirmation(context),
             name: "Sign Out",
@@ -133,38 +193,6 @@ class _RootScreenState extends State<RootScreen> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildBody(BuildContext context, bool isBigScreen, DashboardBloc bloc, int currentIndex) {
-    return RefreshIndicator(
-      onRefresh: () async {
-        // Add refresh logic here if needed
-        context.read<DashboardBloc>().add(ChangeDashboardScreen(index: currentIndex));
-      },
-      child: ListView(
-        padding: EdgeInsets.zero,
-        children: [
-          if (isBigScreen) Header(drawerKey: _drawerKey),
-          Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: AppSizes.bodyPadding *
-                  (Responsive.isMobile(context) ? 0.5 : 1.5),
-            ),
-            child: bloc.myScreens[currentIndex],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDrawerFAB() {
-    return FloatingActionButton(
-      onPressed: () => _drawerKey.currentState?.openEndDrawer(),
-      backgroundColor: AppColors.primaryColor,
-      foregroundColor: Colors.white,
-      mini: true,
-      child: const Icon(Icons.menu),
     );
   }
 }
@@ -196,10 +224,7 @@ void _showLogoutConfirmation(BuildContext context) {
                   (route) => false,
             );
           },
-          child: const Text(
-              "Sign Out",
-              style: TextStyle(color: Colors.red)
-          ),
+          child: const Text("Sign Out", style: TextStyle(color: Colors.red)),
         ),
       ],
     ),

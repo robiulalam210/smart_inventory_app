@@ -1,6 +1,28 @@
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 final bool isLive = true; // Set to true for production environment
 
+// String getBaseUrl() {
+//   // If you set a compile-time constant via --dart-define, prefer that:
+//   // const envBaseUrl = String.fromEnvironment('BASE_URL', defaultValue: '');
+//   // if (envBaseUrl.isNotEmpty) return envBaseUrl;
+//
+//   if (kIsWeb) {
+//     return 'http://localhost:8000';
+//   }
+//   if (Platform.isAndroid) {
+//     // Android emulator (AVD)
+//     return 'http://10.0.2.2:8000';
+//   }
+//   if (Platform.isIOS) {
+//     // iOS simulator uses localhost
+//     return 'http://localhost:8000';
+//   }
+//   // Desktop or others
+//   return 'http://localhost:8000';
+// }
 class AppUrls {
 
 
@@ -12,6 +34,7 @@ class AppUrls {
       isLive ? dotenv.env['BASE_URL'] : dotenv.env['TEST_BASE_URL'];
 
   static final String baseUrl = "$baseUrlMain/api"; //!Server url
+  // static  final baseUrl = getBaseUrl();
 
   static final String login          = '$baseUrl/auth/login/';
   static final String patient          = '$baseUrl/user/bloc/change-password';
@@ -69,7 +92,15 @@ class AppUrls {
   static final String saleReturn          = '$baseUrl/sales-returns/';
   static final String purchaseReturn          = '$baseUrl/purchase-returns/';
   static final String badStock          = '$baseUrl/bad-stocks/';
+  static String saleReturnApprove(int id) => '/api/returns/sales-returns/$id/approve/';
+  static String saleReturnReject(int id) => '/api/returns/sales-returns/$id/reject/';
+  static String saleReturnComplete(int id) => '/api/returns/sales-returns/$id/complete/';
 
+
+// NEW (Correct):
+  static String purchaseReturnApprove(String id) => '$baseUrl/purchase-returns/$id/approve/';
+  static String purchaseReturnReject(String id) => '$baseUrl/purchase-returns/$id/reject/';
+  static String purchaseReturnComplete(String id) => '$baseUrl/purchase-returns/$id/complete/';
   static final String purchaseInvoice = '$baseUrl/purchases-invoice/supplier/';
   static final String dashboard = '$baseUrl/reports/dashboard/';
 

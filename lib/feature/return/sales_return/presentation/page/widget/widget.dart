@@ -1,10 +1,9 @@
-
+import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-
+import 'package:meherin_mart/feature/return/sales_return/data/model/sales_return_model.dart';
 
 import '../../../../../../core/configs/configs.dart';
 import '../../../../../../core/widgets/delete_dialog.dart';
-import '../../../data/model/sales_return_model.dart';
 import '../../sales_return_bloc/sales_return_bloc.dart';
 
 class SalesReturnTableCard extends StatelessWidget {
@@ -29,7 +28,7 @@ class SalesReturnTableCard extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final totalWidth = constraints.maxWidth;
-        const numColumns = 11; // #, Receipt No, Customer, Return Date, Return Amount, Status, Payment Method, Reason, Items, Actions
+        const numColumns = 11;
         const minColumnWidth = 100.0;
 
         final dynamicColumnWidth =
@@ -41,7 +40,7 @@ class SalesReturnTableCard extends StatelessWidget {
             color: Colors.white,
             boxShadow: [
               BoxShadow(
-                color: Colors.grey.withValues(alpha: 0.1),
+                color: Colors.grey.withOpacity(0.1),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -78,7 +77,7 @@ class SalesReturnTableCard extends StatelessWidget {
                             fontWeight: FontWeight.w700,
                             fontFamily: GoogleFonts.inter().fontFamily,
                           ),
-                          headingRowColor: WidgetStateProperty.all(
+                          headingRowColor: MaterialStateProperty.all(
                             AppColors.primaryColor,
                           ),
                           dataTextStyle: TextStyle(
@@ -159,7 +158,7 @@ class SalesReturnTableCard extends StatelessWidget {
       ),
       DataColumn(
         label: SizedBox(
-          width: columnWidth * 1.2,
+          width: columnWidth * 1.5,
           child: const Text('Actions', textAlign: TextAlign.center),
         ),
       ),
@@ -172,9 +171,9 @@ class SalesReturnTableCard extends StatelessWidget {
       final salesReturn = entry.value;
 
       return DataRow(
-        color: WidgetStateProperty.resolveWith<Color>(
-              (Set<WidgetState> states) {
-            return index % 2 == 0 ? Colors.grey.withValues(alpha: 0.03) : Colors.transparent;
+        color: MaterialStateProperty.resolveWith<Color>(
+              (Set<MaterialState> states) {
+            return index % 2 == 0 ? Colors.grey.withOpacity(0.03) : Colors.transparent;
           },
         ),
         onSelectChanged: onSalesReturnTap != null ? (_) => onSalesReturnTap!() : null,
@@ -188,7 +187,7 @@ class SalesReturnTableCard extends StatelessWidget {
           _buildDataCell(salesReturn.paymentMethod ?? 'N/A', columnWidth),
           _buildReasonCell(salesReturn.reason, columnWidth * 1.2),
           _buildItemsCell(salesReturn.items, columnWidth * 0.8),
-          _buildActionCell(salesReturn, context, columnWidth * 1.2),
+          _buildActionCell(salesReturn, context, columnWidth * 1.5),
         ],
       );
     }).toList();
@@ -213,7 +212,7 @@ class SalesReturnTableCard extends StatelessWidget {
   }
 
   DataCell _buildAmountCell(double? amount, double width) {
-    final amountText = amount != null ? '\$${amount.toStringAsFixed(2)}' : 'N/A';
+    final amountText = amount != null ? amount.toStringAsFixed(2) : 'N/A';
 
     return DataCell(
       SizedBox(
@@ -222,7 +221,7 @@ class SalesReturnTableCard extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: Colors.red.withValues(alpha: 0.1),
+              color: Colors.red.withOpacity(0.1),
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
@@ -251,7 +250,7 @@ class SalesReturnTableCard extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: statusColor.withValues(alpha: 0.1),
+              color: statusColor.withOpacity(0.1),
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
@@ -298,7 +297,7 @@ class SalesReturnTableCard extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: Colors.blue.withValues(alpha: 0.1),
+              color: Colors.blue.withOpacity(0.1),
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
@@ -323,21 +322,51 @@ class SalesReturnTableCard extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            // Status-based actions
+            if (salesReturn.status == 'pending') ...[
+              _buildActionButton(
+                icon: Icons.check,
+                color: Colors.green,
+                tooltip: 'Approve return',
+                onPressed: () => _confirmApprove(context, salesReturn),
+              ),
+              const SizedBox(width: 4),
+              _buildActionButton(
+                icon: Icons.close,
+                color: Colors.red,
+                tooltip: 'Reject return',
+                onPressed: () => _confirmReject(context, salesReturn),
+              ),
+              const SizedBox(width: 4),
+            ],
+
+            if (salesReturn.status == 'approved') ...[
+              _buildActionButton(
+                icon: Icons.done_all,
+                color: Colors.blue,
+                tooltip: 'Mark as completed',
+                onPressed: () => _confirmComplete(context, salesReturn),
+              ),
+              const SizedBox(width: 4),
+            ],
+
             // View Button
             _buildActionButton(
-              icon: HugeIcons.strokeRoundedView,
+              icon: Icons.visibility,
               color: Colors.green,
-              tooltip: 'View sales return details',
+              tooltip: 'View details',
               onPressed: () => _showViewDialog(context, salesReturn),
             ),
+            const SizedBox(width: 4),
 
-            // Delete Button
-            _buildActionButton(
-              icon: HugeIcons.strokeRoundedDeleteThrow,
-              color: Colors.red,
-              tooltip: 'Delete sales return',
-              onPressed: () => _confirmDelete(context, salesReturn),
-            ),
+            // Delete Button (only for pending/rejected)
+            if (salesReturn.status == 'pending' || salesReturn.status == 'rejected')
+              _buildActionButton(
+                icon: Icons.delete,
+                color: Colors.red,
+                tooltip: 'Delete return',
+                onPressed: () => _confirmDelete(context, salesReturn),
+              ),
           ],
         ),
       ),
@@ -383,7 +412,97 @@ class SalesReturnTableCard extends StatelessWidget {
     final shouldDelete = await showDeleteConfirmationDialog(context);
     if (shouldDelete && context.mounted) {
       context.read<SalesReturnBloc>().add(
-          DeleteSalesReturn(context,salesReturn.id.toString())
+          DeleteSalesReturn(
+            context: context,
+            id: salesReturn.id,
+          )
+      );
+    }
+  }
+
+  Future<void> _confirmApprove(BuildContext context, SalesReturnModel salesReturn) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Approve Sales Return'),
+        content: Text('Are you sure you want to approve sales return ${salesReturn.receiptNo ?? ''}?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Approve'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && context.mounted) {
+      context.read<SalesReturnBloc>().add(
+          SalesReturnApprove(
+            context: context,
+            id: salesReturn.id,
+          )
+      );
+    }
+  }
+
+  Future<void> _confirmReject(BuildContext context, SalesReturnModel salesReturn) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Reject Sales Return'),
+        content: Text('Are you sure you want to reject sales return ${salesReturn.receiptNo ?? ''}?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Reject'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && context.mounted) {
+      context.read<SalesReturnBloc>().add(
+          SalesReturnReject(
+            context: context,
+            id: salesReturn.id,
+          )
+      );
+    }
+  }
+
+  Future<void> _confirmComplete(BuildContext context, SalesReturnModel salesReturn) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Complete Sales Return'),
+        content: Text('Are you sure you want to mark sales return ${salesReturn.receiptNo ?? ''} as completed?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Complete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && context.mounted) {
+      context.read<SalesReturnBloc>().add(
+          SalesReturnComplete(
+            context: context,
+            id: salesReturn.id,
+          )
       );
     }
   }
@@ -393,6 +512,7 @@ class SalesReturnTableCard extends StatelessWidget {
       context: context,
       builder: (context) {
         return Dialog(
+          insetPadding: const EdgeInsets.all(20),
           child: Container(
             width: AppSizes.width(context) * 0.50,
             padding: const EdgeInsets.all(20),
@@ -402,12 +522,16 @@ class SalesReturnTableCard extends StatelessWidget {
               children: [
                 Text(
                   'Sales Return Details - ${salesReturn.receiptNo ?? "N/A"}',
-                  style: AppTextStyle.cardLevelHead(context),
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.primaryColor,
+                  ),
                 ),
                 const SizedBox(height: 16),
                 _buildDetailRow('Customer:', salesReturn.customerName ?? 'N/A'),
                 _buildDetailRow('Return Date:', _formatDate(salesReturn.returnDate)),
-                _buildDetailRow('Return Amount:', salesReturn.returnAmount?.toString() ?? "N/A"),
+                _buildDetailRow('Return Amount:', '৳${(salesReturn.returnAmount ?? 0).toStringAsFixed(2)}'),
                 _buildDetailRow('Status:', salesReturn.status?.toUpperCase() ?? 'N/A'),
                 _buildDetailRow('Payment Method:', salesReturn.paymentMethod ?? 'N/A'),
                 _buildDetailRow('Reason:', salesReturn.reason ?? 'No reason provided'),
@@ -427,7 +551,7 @@ class SalesReturnTableCard extends StatelessWidget {
                         margin: const EdgeInsets.only(bottom: 8),
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: Colors.grey.withValues(alpha: 0.05),
+                          color: Colors.grey.withOpacity(0.05),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Row(
@@ -439,9 +563,11 @@ class SalesReturnTableCard extends StatelessWidget {
                               ),
                             ),
                             Text('Qty: ${item.quantity ?? 0}'),
+                            const SizedBox(width: 8),
+                            Text('Damage: ${item.damageQuantity ?? 0}'),
                             const SizedBox(width: 16),
                             Text(
-                              item.total?.toString() ?? "0.00",
+                              '৳${item.total?.toStringAsFixed(2) ?? "0.00"}',
                               style: const TextStyle(
                                 fontWeight: FontWeight.w600,
                                 color: Colors.red,
@@ -506,7 +632,7 @@ class SalesReturnTableCard extends StatelessWidget {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.1),
+            color: Colors.grey.withOpacity(0.1),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -519,7 +645,7 @@ class SalesReturnTableCard extends StatelessWidget {
           Icon(
             Icons.assignment_return_outlined,
             size: 48,
-            color: Colors.grey.withValues(alpha: 0.5),
+            color: Colors.grey.withOpacity(0.5),
           ),
           const SizedBox(height: 16),
           Text(

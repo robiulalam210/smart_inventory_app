@@ -1,4 +1,9 @@
+import 'dart:developer';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
+import 'package:lottie/lottie.dart'; // Add this import
+
 import 'package:meherin_mart/core/configs/configs.dart';
 import 'package:meherin_mart/feature/supplier/data/model/supplier_active_model.dart';
 import 'package:meherin_mart/feature/supplier/presentation/bloc/supplier/supplier_list_bloc.dart';
@@ -35,11 +40,13 @@ class _PurchaseReturnScreenState extends State<PurchaseReturnScreen> {
     super.initState();
     startDate = DateTime(now.year, now.month - 1, now.day);
     endDate = DateTime(now.year, now.month, now.day);
-    // Load initial data
-    context.read<SupplierInvoiceBloc>().add(FetchSupplierActiveList(context));
 
-    context.read<SupplierListBloc>().add(FetchSupplierList(context));
-    _fetchPurchaseReturnList(from: startDate, to: endDate);
+    // Load initial data
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<SupplierInvoiceBloc>().add(FetchSupplierActiveList(context));
+      context.read<SupplierListBloc>().add(FetchSupplierList(context));
+      _fetchPurchaseReturnList(from: startDate, to: endDate);
+    });
   }
 
   void _fetchPurchaseReturnList({
@@ -47,29 +54,42 @@ class _PurchaseReturnScreenState extends State<PurchaseReturnScreen> {
     DateTime? from,
     DateTime? to,
     int pageNumber = 0,
+    String? supplierId,
   }) {
+    // Pass supplier ID if selected
+    final supplierIdToUse = _selectedSupplier?.id?.toString();
+
     context.read<PurchaseReturnBloc>().add(FetchPurchaseReturn(
-      context,
+       context,
       startDate: from,
       endDate: to,
-      filterText: filterText,
+      filterText: filterText.isNotEmpty ? filterText : null,
       pageNumber: pageNumber,
+      // supplierId: supplierIdToUse
     ));
+  }
+
+  void _clearFilters() {
+    setState(() {
+      filterTextController.clear();
+      _selectedSupplier = null;
+      selectedDateRange = null;
+      startDate = DateTime(now.year, now.month - 1, now.day);
+      endDate = DateTime(now.year, now.month, now.day);
+    });
+    _fetchPurchaseReturnList();
   }
 
   @override
   Widget build(BuildContext context) {
     final isBigScreen = Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
 
-    return Container(
-      color: AppColors.bg,
-      child: SafeArea(
-        child: ResponsiveRow(
-          children: [
-            if (isBigScreen) _buildSidebar(),
-            _buildContentArea(isBigScreen),
-          ],
-        ),
+    return SafeArea(
+      child: ResponsiveRow(
+        children: [
+          if (isBigScreen) _buildSidebar(),
+          _buildContentArea(isBigScreen),
+        ],
       ),
     );
   }
@@ -88,7 +108,10 @@ class _PurchaseReturnScreenState extends State<PurchaseReturnScreen> {
       xs: 12,
       lg: 10,
       child: RefreshIndicator(
-        onRefresh: () async => _fetchPurchaseReturnList(),
+        onRefresh: () async {
+          _fetchPurchaseReturnList();
+          return Future.delayed(const Duration(milliseconds: 500));
+        },
         child: Container(
           padding: AppTextStyle.getResponsivePaddingBody(context),
           child: BlocListener<PurchaseReturnBloc, PurchaseReturnState>(
@@ -96,7 +119,7 @@ class _PurchaseReturnScreenState extends State<PurchaseReturnScreen> {
               if (state is PurchaseReturnCreateLoading) {
                 appLoader(context, "Creating Purchase Return...");
               } else if (state is PurchaseReturnCreateSuccess) {
-                Navigator.pop(context);
+                Navigator.pop(context); // Close loader
                 _fetchPurchaseReturnList(from: startDate, to: endDate);
                 appAlertDialog(
                   context,
@@ -112,7 +135,7 @@ class _PurchaseReturnScreenState extends State<PurchaseReturnScreen> {
               } else if (state is PurchaseReturnDeleteLoading) {
                 appLoader(context, "Deleting Purchase Return...");
               } else if (state is PurchaseReturnDeleteSuccess) {
-                Navigator.pop(context);
+                Navigator.pop(context); // Close loader
                 _fetchPurchaseReturnList(from: startDate, to: endDate);
                 appAlertDialog(
                   context,
@@ -126,6 +149,10 @@ class _PurchaseReturnScreenState extends State<PurchaseReturnScreen> {
                   ],
                 );
               } else if (state is PurchaseReturnError) {
+                // Check if loader is showing before popping
+                if (Navigator.of(context, rootNavigator: true).canPop()) {
+                  Navigator.pop(context);
+                }
                 appAlertDialog(
                   context,
                   state.content,
@@ -138,10 +165,43 @@ class _PurchaseReturnScreenState extends State<PurchaseReturnScreen> {
                   ],
                 );
               }
+
+              // Handle status change events
+              if (state is PurchaseReturnApproveSuccess ||
+                  state is PurchaseReturnRejectSuccess ||
+                  state is PurchaseReturnCompleteSuccess) {
+                _fetchPurchaseReturnList(from: startDate, to: endDate);
+              }
             },
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Header with title
+                Row(
+                  children: [
+                    Text(
+                      'Purchase Returns',
+                      style: AppTextStyle.bodyLarge(context),
+                    ),
+                    const Spacer(),
+                    // Clear Filters Button
+                    if (filterTextController.text.isNotEmpty ||
+                        _selectedSupplier != null ||
+                        selectedDateRange != null)
+                      TextButton.icon(
+                        onPressed: _clearFilters,
+                        icon: const Icon(Icons.clear_all, size: 16),
+                        label: const Text('Clear Filters'),
+                        style: TextButton.styleFrom(
+                          foregroundColor: AppColors.primaryColor,
+                        ),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+
                 _buildFilterRow(),
+                const SizedBox(height: 16),
                 SizedBox(child: _buildDataTable()),
               ],
             ),
@@ -152,109 +212,155 @@ class _PurchaseReturnScreenState extends State<PurchaseReturnScreen> {
   }
 
   Widget _buildFilterRow() {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: [
-        // 🔍 Search Field
-        Expanded(
-          flex: 2,
-          child: CustomSearchTextFormField(
-            isRequiredLabel: false,
-            controller: filterTextController,
-            onChanged: (value) => _fetchPurchaseReturnList(filterText: value),
-            onClear: () {
-              filterTextController.clear();
-              _fetchPurchaseReturnList();
-            },
-            hintText: "by Receipt No, Supplier, or Reason",
-          ),
-        ),
-        const SizedBox(width: 6),
+    return Card(
+      elevation: 2,
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            // 🔍 Search Field
+            Expanded(
+              flex: 2,
+              child: CustomSearchTextFormField(
+                isRequiredLabel: false,
+                controller: filterTextController,
+                onChanged: (value) {
+                  if (value.length > 2 || value.isEmpty) {
+                    _fetchPurchaseReturnList(filterText: value);
+                  }
+                },
+                onClear: () {
+                  filterTextController.clear();
+                  _fetchPurchaseReturnList();
+                },
+                hintText: "Search by Receipt No, Supplier, or Reason",
+              ),
+            ),
+            const SizedBox(width: 12),
 
-        // 👤 Supplier Dropdown
-        Expanded(
-          flex: 1,
-          child: BlocBuilder<SupplierInvoiceBloc, SupplierInvoiceState>(
-            builder: (context, state) {
-              return AppDropdown<SupplierActiveModel>(
-                label: "Supplier",
-                context: context,
-                isSearch: true,
-                hint: _selectedSupplier?.name ?? "Select Supplier",
-                isNeedAll: true,
-                isRequired: false,
+            // 👤 Supplier Dropdown
+            Expanded(
+              flex: 1,
+              child: BlocBuilder<SupplierInvoiceBloc, SupplierInvoiceState>(
+                builder: (context, state) {
+                  List<SupplierActiveModel> suppliers = [];
+
+                  if (state is SupplierActiveListSuccess) {
+                    suppliers = state.list;
+                  } else if (state is SupplierInvoiceLoading) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  // Add "All Suppliers" option
+                  final allSuppliersList = [
+                    SupplierActiveModel(id: null, name: 'All Suppliers', phone: ''),
+                    ...suppliers
+                  ];
+
+                  return AppDropdown<SupplierActiveModel>(
+                    label: "Supplier",
+                    context: context,
+                    isSearch: true,
+                    hint: "Select Supplier",
+                    isNeedAll: false, // We handle "All" manually
+                    isRequired: false,
+                    isLabel: true,
+                    value: _selectedSupplier,
+                    itemList: allSuppliersList,
+                    onChanged: (newVal) {
+                      setState(() {
+                        _selectedSupplier = newVal?.id != null ? newVal : null;
+                      });
+                      _fetchPurchaseReturnList(
+                        from: selectedDateRange?.start ?? startDate,
+                        to: selectedDateRange?.end ?? endDate,
+                        supplierId: _selectedSupplier?.id?.toString(),
+                      );
+                    },
+                    itemBuilder: (item) {
+                      final isAllOption = item.id == null;
+                      return DropdownMenuItem<SupplierActiveModel>(
+                        value: item,
+                        child: Text(
+                          isAllOption ? 'All Suppliers' : '${item.name} (${item.phone})',
+                          style: TextStyle(
+                            color: isAllOption ? AppColors.primaryColor : AppColors.blackColor,
+                            fontFamily: 'Quicksand',
+                            fontWeight: isAllOption ? FontWeight.bold : FontWeight.w300,
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+            const SizedBox(width: 12),
+
+            // 📅 Date Range Picker
+            SizedBox(
+              width: 260,
+              child: CustomDateRangeField(
                 isLabel: true,
-                value: _selectedSupplier,
-                itemList: context.read<SupplierInvoiceBloc>().supplierActiveList,
-                onChanged: (newVal) {
-                  setState(() {
-                    _selectedSupplier = newVal;
-                  });
-                  _fetchPurchaseReturnList(
-                    from: selectedDateRange?.start,
-                    to: selectedDateRange?.end,
-                  );
+                // label: "Date Range",
+                selectedDateRange: selectedDateRange,
+                onDateRangeSelected: (value) {
+                  setState(() => selectedDateRange = value);
+                  if (value != null) {
+                    _fetchPurchaseReturnList(from: value.start, to: value.end);
+                  } else {
+                    // Reset to default dates when cleared
+                    _fetchPurchaseReturnList(
+                      from: startDate,
+                      to: endDate,
+                    );
+                  }
                 },
-                itemBuilder: (item) {
-                  final isAllOption = item.id == null;
-                  return DropdownMenuItem<SupplierActiveModel>(
-                    value: item,
-                    child: Text(
-                      isAllOption ? 'All Suppliers' : '${item.name} (${item.phone})',
-                      style: TextStyle(
-                        color: isAllOption ? AppColors.primaryColor : AppColors.blackColor,
-                        fontFamily: 'Quicksand',
-                        fontWeight: isAllOption ? FontWeight.bold : FontWeight.w300,
-                      ),
-                    ),
-                  );
-                },
-              );
-            },
-          ),
-        ),
-        const SizedBox(width: 6),
+              ),
+            ),
+            const SizedBox(width: 12),
 
-        // 📅 Date Range Picker
-        SizedBox(
-          width: 260,
-          child: CustomDateRangeField(
-            isLabel: false,
-            selectedDateRange: selectedDateRange,
-            onDateRangeSelected: (value) {
-              setState(() => selectedDateRange = value);
-              if (value != null) {
-                _fetchPurchaseReturnList(from: value.start, to: value.end);
-              }
-            },
-          ),
-        ),
-        const SizedBox(width: 6),
-        gapW16,
-        AppButton(
-          name: "Create Purchase Return",
-          onPressed: () {
-            showDialog(
-              context: context,
-              builder: (context) {
-                return Dialog(
-                  child: SizedBox(
-                    width: AppSizes.width(context) * 0.70,
-                    child: CreatePurchaseReturnScreen(),
-                  ),
-                );
+            // Create Button
+            AppButton(
+              name: "Create Purchase Return",
+              // icon: Icons.add,
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return Dialog(
+                      insetPadding: const EdgeInsets.all(20),
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          maxWidth: AppSizes.width(context) * 0.70,
+                          maxHeight: AppSizes.height(context) * 0.85,
+                        ),
+                        child: const CreatePurchaseReturnScreen(),
+                      ),
+                    );
+                  },
+                ).then((_) {
+                  // Refresh list after dialog closes
+                  _fetchPurchaseReturnList(from: startDate, to: endDate);
+                });
               },
-            );
-          },
+            ),
+            const SizedBox(width: 8),
+
+            // 🔄 Refresh Button
+            IconButton(
+              onPressed: () => _fetchPurchaseReturnList(),
+              icon: const Icon(Icons.refresh),
+              tooltip: "Refresh",
+              style: IconButton.styleFrom(
+                backgroundColor: AppColors.primaryColor.withOpacity(0.1),
+              ),
+            ),
+          ],
         ),
-        // 🔄 Refresh Button
-        IconButton(
-          onPressed: () => _fetchPurchaseReturnList(),
-          icon: const Icon(Icons.refresh),
-          tooltip: "Refresh",
-        ),
-      ],
+      ),
     );
   }
 
@@ -292,8 +398,8 @@ class _PurchaseReturnScreenState extends State<PurchaseReturnScreen> {
                 onPageChanged: (page) {
                   _fetchPurchaseReturnList(
                     pageNumber: page,
-                    from: selectedDateRange?.start,
-                    to: selectedDateRange?.end,
+                    from: selectedDateRange?.start ?? startDate,
+                    to: selectedDateRange?.end ?? endDate,
                   );
                 },
                 onPageSizeChanged: (newSize) {
@@ -310,42 +416,67 @@ class _PurchaseReturnScreenState extends State<PurchaseReturnScreen> {
     );
   }
 
-  Widget _noDataWidget(String message) => Center(
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Lottie.asset(AppImages.noData, width: 200, height: 200),
-        const SizedBox(height: 16),
-        Text(
-          message,
-          style: const TextStyle(fontSize: 16, color: Colors.grey),
-        ),
-        const SizedBox(height: 12),
-        ElevatedButton(
+  Widget _noDataWidget(String message) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Lottie.asset(
+            AppImages.noData,
+            width: 200,
+            height: 200,
+            repeat: false,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            message,
+            style: const TextStyle(
+              fontSize: 16,
+              color: Colors.grey,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 12),
+          ElevatedButton( // Now properly imported
             onPressed: () => _fetchPurchaseReturnList(),
-            child: const Text("Refresh")
-        ),
-      ],
-    ),
-  );
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primaryColor,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text("Refresh"),
+          ),
+        ],
+      ),
+    );
+  }
 
-  Widget _errorWidget(String error) => Center(
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const Icon(Icons.error_outline, size: 60, color: Colors.red),
-        const SizedBox(height: 16),
-        Text(
-          "Error: $error",
-          style: const TextStyle(fontSize: 16, color: Colors.red),
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: 12),
-        ElevatedButton(
+  Widget _errorWidget(String error) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.error_outline, size: 60, color: Colors.red),
+          const SizedBox(height: 16),
+          Text(
+            "Error: $error",
+            style: const TextStyle(
+              fontSize: 16,
+              color: Colors.red,
+              fontWeight: FontWeight.w500,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 12),
+          ElevatedButton( // Now properly imported
             onPressed: () => _fetchPurchaseReturnList(),
-            child: const Text("Retry")
-        ),
-      ],
-    ),
-  );
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text("Retry"),
+          ),
+        ],
+      ),
+    );
+  }
 }

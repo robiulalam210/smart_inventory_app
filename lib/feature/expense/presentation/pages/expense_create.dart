@@ -16,6 +16,7 @@ import '../bloc/expense_list/expense_bloc.dart';
 class ExpenseCreateScreen extends StatefulWidget {
   final String? id;
   final String? name;
+  final String? accountId;
   final ExpenseHeadModel? selectedExpenseHead;
   final ExpenseSubHeadModel? selectedExpenseSubHead;
 
@@ -23,6 +24,7 @@ class ExpenseCreateScreen extends StatefulWidget {
     super.key,
     this.id,
     this.name,
+    this.accountId,
     this.selectedExpenseHead,
     this.selectedExpenseSubHead,
   });
@@ -146,6 +148,21 @@ class _ExpenseCreateScreenState extends State<ExpenseCreateScreen> {
         // Create new expense
         context.read<ExpenseBloc>().add(AddExpense(body: body));
       } else {
+
+        final Map<String, dynamic> body = {
+          "account": widget.accountId,
+          "amount": context.read<ExpenseBloc>().amountTextController.text,
+          "expense_date": context
+              .read<ExpenseBloc>()
+              .dateExpenseTextController
+              .text,
+          "head": _selectedExpenseHead!.id.toString(),
+          "payment_method": backendPaymentMethod, // Use the mapped value
+          if (_selectedExpenseSubHead != null)
+            "subhead": _selectedExpenseSubHead!.id.toString(),
+          if (context.read<ExpenseBloc>().noteTextController.text.isNotEmpty)
+            "note": context.read<ExpenseBloc>().noteTextController.text,
+        };
         // Update existing expense
         context.read<ExpenseBloc>().add(
           UpdateExpense(body: body, id: widget.id!),

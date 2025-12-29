@@ -50,7 +50,32 @@ class _AccountTransferFormState extends State<AccountTransferForm> {
     isQuickTransfer.dispose();
     super.dispose();
   }
-
+  void _fetchApi({
+    String? fromAccountId,
+    String? toAccountId,
+    String? status,
+    String? transferType,
+    bool? isReversal,
+    DateTime? startDate,
+    DateTime? endDate,
+    int pageNumber = 1,
+    int pageSize = 10,
+  }) {
+    context.read<AccountTransferBloc>().add(
+      FetchAccountTransferList(
+        context: context,
+        fromAccountId: fromAccountId,
+        toAccountId: toAccountId,
+        status: status,
+        transferType: transferType,
+        isReversal: isReversal,
+        startDate: startDate,
+        endDate: endDate,
+        pageNumber: pageNumber,
+        pageSize: pageSize,
+      ),
+    );
+  }
   @override
   Widget build(BuildContext context) {
     final isBigScreen = Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
@@ -85,13 +110,14 @@ class _AccountTransferFormState extends State<AccountTransferForm> {
                 color: AppColors.bg,
                 child: BlocListener<AccountTransferBloc, AccountTransferState>(
                   listener: (context, state) {
+                    print(state);
                     if (state is AccountTransferAddLoading ||
                         state is QuickTransferLoading ||
                         state is ExecuteTransferLoading) {
                       appLoader(context, "Processing transfer, please wait...");
                     } else if (state is AccountTransferAddSuccess) {
                       Navigator.pop(context); // Close loader dialog
-
+_fetchApi();
                       context.read<DashboardBloc>().add(ChangeDashboardScreen(index: 38));
 
                       _showSuccessDialog(
@@ -110,6 +136,7 @@ class _AccountTransferFormState extends State<AccountTransferForm> {
                       );
                     } else if (state is ExecuteTransferSuccess) {
                       context.read<DashboardBloc>().add(ChangeDashboardScreen(index: 38));
+                      _fetchApi();
 
                       Navigator.pop(context); // Close loader dialog
 
@@ -180,26 +207,19 @@ class _AccountTransferFormState extends State<AccountTransferForm> {
                         padding: const EdgeInsets.all(20),
                         child: Column(
                           children: [
-                            const SizedBox(height: 8),
-                            const Text(
-                              "Transfer Details",
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 15,
-                              ),
-                            ),
+
                             const SizedBox(height: 16),
                             ResponsiveRow(
-                              spacing: 20,
-                              runSpacing: 10,
+                              spacing: 5,
+                              runSpacing: 5,
                               children: [
                                 // From Account
                                 ResponsiveCol(
                                   xs: 12,
-                                  sm: 6,
-                                  md: 6,
-                                  lg: 6,
-                                  xl: 6,
+                                  sm: 3,
+                                  md: 3,
+                                  lg: 3,
+                                  xl: 3,
                                   child: _buildAccountDropdown(
                                     context,
                                     isFromAccount: true,
@@ -208,10 +228,10 @@ class _AccountTransferFormState extends State<AccountTransferForm> {
                                 // To Account
                                 ResponsiveCol(
                                   xs: 12,
-                                  sm: 6,
-                                  md: 6,
-                                  lg: 6,
-                                  xl: 6,
+                                  sm: 3,
+                                  md: 3,
+                                  lg: 3,
+                                  xl: 3,
                                   child: _buildAccountDropdown(
                                     context,
                                     isFromAccount: false,
@@ -337,10 +357,10 @@ class _AccountTransferFormState extends State<AccountTransferForm> {
                                 // Description
                                 ResponsiveCol(
                                   xs: 12,
-                                  sm: 12,
-                                  md: 12,
-                                  lg: 12,
-                                  xl: 12,
+                                  sm: 4,
+                                  md: 4,
+                                  lg: 4,
+                                  xl: 4,
                                   child: AppTextField(
                                     isRequired: false,
                                     controller: transferBloc.descriptionController,
@@ -354,10 +374,10 @@ class _AccountTransferFormState extends State<AccountTransferForm> {
                                 // Remarks
                                 ResponsiveCol(
                                   xs: 12,
-                                  sm: 12,
-                                  md: 12,
-                                  lg: 12,
-                                  xl: 12,
+                                  sm: 4,
+                                  md: 4,
+                                  lg: 4,
+                                  xl: 4,
                                   child: AppTextField(
                                     isRequired: false,
                                     controller: transferBloc.remarksController,

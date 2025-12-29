@@ -1,12 +1,8 @@
 // lib/account_transfer/presentation/bloc/account_transfer/account_transfer_bloc.dart
-import 'dart:convert';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:meherin_mart/core/configs/configs.dart';
 import 'package:meherin_mart/core/repositories/get_response.dart';
 import 'package:meherin_mart/core/repositories/post_response.dart';
-import 'package:meherin_mart/core/repositories/patch_response.dart';
-import 'package:meherin_mart/core/repositories/delete_response.dart';
 
 import '../../../../accounts/data/model/account_active_model.dart';
 import '../../../../common/data/models/api_response_mod.dart';
@@ -54,7 +50,6 @@ class AccountTransferBloc extends Bloc<AccountTransferEvent, AccountTransferStat
     on<ResetForm>(_onResetForm);
     on<LoadMoreTransfers>(_onLoadMoreTransfers);
   }
-
   Future<void> _onFetchAccountTransferList(
       FetchAccountTransferList event,
       Emitter<AccountTransferState> emit,
@@ -62,83 +57,89 @@ class AccountTransferBloc extends Bloc<AccountTransferEvent, AccountTransferStat
     emit(AccountTransferListLoading());
 
     try {
-      // Build query parameters
-      Map<String, String> queryParams = {
+      /// -------------------------------
+      /// 1️⃣ Build Query Parameters
+      /// -------------------------------
+      final Map<String, String> queryParams = {
         'page': event.pageNumber.toString(),
         'page_size': event.pageSize.toString(),
       };
 
-      if (event.fromAccountId != null && event.fromAccountId!.isNotEmpty) {
+      if (event.fromAccountId?.isNotEmpty == true) {
         queryParams['from_account_id'] = event.fromAccountId!;
       }
-      if (event.toAccountId != null && event.toAccountId!.isNotEmpty) {
+      if (event.toAccountId?.isNotEmpty == true) {
         queryParams['to_account_id'] = event.toAccountId!;
       }
-      if (event.status != null && event.status!.isNotEmpty) {
+      if (event.status?.isNotEmpty == true) {
         queryParams['status'] = event.status!;
       }
-      if (event.transferType != null && event.transferType!.isNotEmpty) {
+      if (event.transferType?.isNotEmpty == true) {
         queryParams['transfer_type'] = event.transferType!;
       }
       if (event.isReversal != null) {
         queryParams['is_reversal'] = event.isReversal!.toString();
       }
-      // if (event.startDate != null && event.endDate != null) {
-      //   final format = DateTimeFormat('yyyy-MM-dd');
-      //   queryParams['start_date'] = format.format(event.startDate!);
-      //   queryParams['end_date'] = format.format(event.endDate!);
-      // }
 
-      final DateFormat formatter = DateFormat('yyyy-MM-dd');
-
+      final formatter = DateFormat('yyyy-MM-dd');
       if (event.startDate != null && event.endDate != null) {
         queryParams['start_date'] = formatter.format(event.startDate!);
         queryParams['end_date'] = formatter.format(event.endDate!);
       }
 
-      String baseUrl = '${AppUrls.baseUrl}/transfers/';
-      Uri uri = Uri.parse(baseUrl).replace(queryParameters: queryParams);
+      debugPrint("📌 Query Parameters: $queryParams");
 
+      final uri = Uri.parse('${AppUrls.baseUrl}/transfers/')
+          .replace(queryParameters: queryParams);
+      debugPrint("📌 Request URL: ${uri.toString()}");
+
+      /// -------------------------------
+      /// 2️⃣ API Call
+      /// -------------------------------
       final res = await getResponse(
         url: uri.toString(),
         context: event.context,
       );
+      debugPrint("📌 Raw API response: $res");
 
-      ApiResponse<Map<String, dynamic>> response = appParseJson<Map<String, dynamic>>(
-        res,
-            (data) => data,
-      );
+      /// -------------------------------
+      /// 3️⃣ Decode JSON
+      /// -------------------------------
+      final Map<String, dynamic> resData = jsonDecode(res) as Map<String, dynamic>;
 
-      final data = response.data;
+      final bool success = resData['status'] ?? false;
+      final String message = resData['message'] ?? '';
+      final Map<String, dynamic>? data =
+      resData['data'] as Map<String, dynamic>?;
 
-      if (data == null) {
-        emit(AccountTransferListSuccess(
-          list: [],
-          count: 0,
-          totalPages: 1,
-          currentPage: 1,
-          pageSize: event.pageSize,
-          from: 0,
-          to: 0,
+      debugPrint("📌 Success: $success");
+      debugPrint("📌 Message: $message");
+      debugPrint("📌 Data: $data");
+
+      if (!success || data == null) {
+        emit(AccountTransferListFailed(
+          title: "Failed",
+          content: message.isNotEmpty ? message : "Failed to load data",
         ));
         return;
       }
 
-      // Extract data from response structure
-      final responseData = data['data'] ?? data;
-      final results = responseData['results'] ?? [];
-      final count = responseData['count'] ?? results.length;
-      final next = responseData['next'];
-      final previous = responseData['previous'];
+      /// -------------------------------
+      /// 4️⃣ Extract Results & Map to Model
+      /// -------------------------------
+      final List results = (data['results'] as List?) ?? [];
+      final int count = data['count'] is int ? data['count'] : results.length;
+      final next = data['next'];
 
-      List<AccountTransferModel> transferList = [];
-      if (results is List) {
-        transferList = List<AccountTransferModel>.from(
-          results.map((x) => AccountTransferModel.fromJson(x)),
-        );
-      }
+      debugPrint("📌 Number of transfers in this page: ${results.length}");
+      if (results.isNotEmpty) debugPrint("📌 Sample transfer: ${results[0]}");
 
-      // Handle pagination
+      final List<AccountTransferModel> transferList =
+      results.map((e) => AccountTransferModel.fromJson(e)).toList();
+
+      /// -------------------------------
+      /// 5️⃣ Pagination & List Management
+      /// -------------------------------
       if (event.pageNumber == 1) {
         list = transferList;
       } else {
@@ -146,19 +147,24 @@ class AccountTransferBloc extends Bloc<AccountTransferEvent, AccountTransferStat
       }
 
       currentPage = event.pageNumber;
-      totalPages = (count / event.pageSize).ceil();
+      totalPages = event.pageSize > 0 ? (count / event.pageSize).ceil() : 1;
       hasMore = next != null;
 
-      // Calculate from/to for display
-      int from = (event.pageNumber - 1) * event.pageSize + 1;
-      int to = from + transferList.length - 1;
-      if (transferList.isEmpty) {
-        from = 0;
-        to = 0;
+      int from = 0;
+      int to = 0;
+      if (transferList.isNotEmpty) {
+        from = (event.pageNumber - 1) * event.pageSize + 1;
+        to = from + transferList.length - 1;
       }
 
+      debugPrint(
+          "📌 Pagination - from: $from, to: $to, currentPage: $currentPage, totalPages: $totalPages, hasMore: $hasMore");
+
+      /// -------------------------------
+      /// 6️⃣ Emit Success State
+      /// -------------------------------
       emit(AccountTransferListSuccess(
-        list: transferList,
+        list: list,
         count: count,
         totalPages: totalPages,
         currentPage: currentPage,
@@ -166,10 +172,12 @@ class AccountTransferBloc extends Bloc<AccountTransferEvent, AccountTransferStat
         from: from,
         to: to,
       ));
-    } catch (error) {
+    } catch (e, st) {
+      debugPrint("⚠️ Exception caught: $e");
+      debugPrint("⚠️ Stack trace: $st");
       emit(AccountTransferListFailed(
         title: "Error",
-        content: error.toString(),
+        content: e.toString(),
       ));
     }
   }
@@ -240,15 +248,14 @@ class AccountTransferBloc extends Bloc<AccountTransferEvent, AccountTransferStat
       }
       resetForm();
       emit(AccountTransferAddSuccess());
-    } catch (error, st) {
-      print(error);
-      print(st);
+    } catch (error) {
       emit(AccountTransferAddFailed(
         title: "Error",
         content: error.toString(),
       ));
     }
   }
+
 
   Future<void> _onExecuteTransfer(
       ExecuteTransfer event,
@@ -257,41 +264,93 @@ class AccountTransferBloc extends Bloc<AccountTransferEvent, AccountTransferStat
     emit(ExecuteTransferLoading());
 
     try {
+      debugPrint("📌 Executing transfer ID: ${event.transferId}");
+      final loginInfo = await LocalDB.getLoginInfo();
+      if (loginInfo == null || loginInfo['userId'] == null) {
+        throw Exception("User not logged in or userId missing");
+      }
+
+      final int userId = int.parse(loginInfo['userId']); // convert from String to int
+
+      final payload = {
+        "user_id": userId,
+      };
+
+      debugPrint("📌 Payload: $payload");
+      // -------------------------------
+      // 1️⃣ API Call (ensure payload is a JSON string)
+      // -------------------------------
       final res = await postResponse(
         url: '${AppUrls.baseUrl}/transfers/${event.transferId}/execute/',
-        payload: {},
-      );
-      final jsonString = jsonEncode(res);
+        payload: payload, // ✅ send nothing
 
-      ApiResponse response = appParseJson(
-        jsonString,
-            (data) => AccountTransferModel.fromJson(data),
       );
 
-      if (response.success == false) {
+      debugPrint("📌 Raw API response: $res");
+
+      // -------------------------------
+      // 2️⃣ Parse Response Safely
+      // -------------------------------
+      final Map<String, dynamic> resData;
+
+      if (res is String) {
+        // Decode JSON string
+        resData = res;
+      } else {
+        // Already a Map
+      resData = res;
+      }
+
+
+      debugPrint("📌 Parsed response: $resData");
+
+      debugPrint("📌 Parsed response: $resData");
+
+      final bool success = resData['status'] ?? false;
+      final String message = resData['message'] ?? '';
+      final dynamic data = resData['data'];
+
+      debugPrint("📌 Success: $success");
+      debugPrint("📌 Message: $message");
+      debugPrint("📌 Data: $data");
+
+      if (!success || data == null) {
         emit(ExecuteTransferFailed(
           title: 'Error',
-          content: response.message ?? "",
+          content: message.isNotEmpty ? message : "Failed to execute transfer",
         ));
         return;
       }
 
-      // Update the transfer in the list
-      final index = list.indexWhere((t) => t.id == event.transferId);
+      // -------------------------------
+      // 3️⃣ Update Transfer in List
+      // -------------------------------
+      final executedTransfer = AccountTransferModel.fromJson(data);
+
+      final index = list.indexWhere((t) => t.id.toString() == event.transferId);
       if (index != -1) {
-        list[index] = AccountTransferModel.fromJson(response.data!);
+        list[index] = executedTransfer;
+        debugPrint("📌 Updated transfer in list at index $index");
+      } else {
+        debugPrint("📌 Transfer ID ${event.transferId} not found in list");
       }
 
+      // -------------------------------
+      // 4️⃣ Emit Success
+      // -------------------------------
       emit(ExecuteTransferSuccess());
+      debugPrint("✅ Transfer executed successfully");
+
     } catch (error, st) {
-      print(error);
-      print(st);
+      debugPrint("⚠️ Exception caught: $error");
+      debugPrint("⚠️ Stack trace: $st");
       emit(ExecuteTransferFailed(
         title: "Error",
         content: error.toString(),
       ));
     }
   }
+
 
   Future<void> _onQuickTransfer(
       QuickTransfer event,
@@ -327,9 +386,7 @@ class AccountTransferBloc extends Bloc<AccountTransferEvent, AccountTransferStat
 
       // Add to list
 
-    } catch (error, st) {
-      print(error);
-      print(st);
+    } catch (error) {
       emit(QuickTransferFailed(
         title: "Error",
         content: error.toString(),
@@ -371,9 +428,7 @@ class AccountTransferBloc extends Bloc<AccountTransferEvent, AccountTransferStat
         emit(ReverseTransferSuccess());
 
       }
-    } catch (error, st) {
-      print(error);
-      print(st);
+    } catch (error) {
       emit(ReverseTransferFailed(
         title: "Error",
         content: error.toString(),

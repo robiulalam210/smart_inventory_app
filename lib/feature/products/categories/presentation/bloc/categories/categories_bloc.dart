@@ -35,41 +35,62 @@ class CategoriesBloc extends Bloc<CategoriesEvent, CategoriesState> {
   }
 
   Future<void> _onFetchCategoriesList(
-    FetchCategoriesList event,
-    Emitter<CategoriesState> emit,
-  ) async {
+      FetchCategoriesList event,
+      Emitter<CategoriesState> emit,
+      ) async {
     emit(CategoriesListLoading());
 
     try {
+      /// 1️⃣ API call
       final res = await getResponse(
         url: AppUrls.category,
         context: event.context,
-      ); // Use the correct API URL
+      );
 
-      ApiResponse<List<CategoryModel>> response =
-          appParseJson<List<CategoryModel>>(
-            res,
-            (data) => List<CategoryModel>.from(
-              data.map((x) => CategoryModel.fromJson(x)),
-            ),
-          );
-      final data = response.data;
-      if (data == null || data.isEmpty) {
-        emit(CategoriesListSuccess(list: []));
+      /// 2️⃣ Ensure response is String (important)
+      final String jsonString =
+      res is String ? res : json.encode(res);
 
+      /// 3️⃣ Parse API response safely
+      final ApiResponse<List<CategoryModel>> response =
+      appParseJson<List<CategoryModel>>(
+        jsonString,
+            (data) => (data as List)
+            .map((e) => CategoryModel.fromJson(e))
+            .toList(),
+      );
+
+      /// 4️⃣ Validate response
+      if (!response.success || response.data == null) {
+        emit(
+          CategoriesListFailed(
+            title: response.title ?? "Failed",
+            content:
+            response.message ?? "Unable to fetch category list",
+          ),
+        );
         return;
       }
-      // Store all warehouses for filtering and pagination
-      list = data;
 
-      // Apply filtering and pagination
-      final filteredData = _filterData(list, event.filterText, event.state);
+      /// 5️⃣ Store full list (for filtering)
+      list = response.data!;
 
+      /// 6️⃣ Apply filter
+      final filteredData =
+      _filterData(list, event.filterText, event.state);
+
+      /// 7️⃣ Emit success
       emit(CategoriesListSuccess(list: filteredData));
-    } catch (error) {
-      emit(CategoriesListFailed(title: "Error", content: error.toString()));
+    } catch (e) {
+      emit(
+        CategoriesListFailed(
+          title: "Error",
+          content: e.toString(),
+        ),
+      );
     }
   }
+
 
   List<CategoryModel> _filterData(
     List<CategoryModel> list,

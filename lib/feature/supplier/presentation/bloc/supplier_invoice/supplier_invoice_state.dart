@@ -29,6 +29,7 @@ final class SupplierInvoiceListFailed extends SupplierInvoiceState {
 
   SupplierInvoiceListFailed({required this.title, required this.content});
 }
+final class SupplierInvoiceLoading extends SupplierInvoiceState {}
 final class SupplierActiveListLoading extends SupplierInvoiceState {}
 
 final class SupplierActiveListSuccess extends SupplierInvoiceState {

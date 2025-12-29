@@ -14,6 +14,25 @@ import '../../../../products/product/presentation/widget/pagination.dart';
 import '../sales_return_bloc/sales_return_bloc.dart';
 import 'create_sales_return_screnn.dart';
 
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
+import 'package:lottie/lottie.dart';
+import 'package:meherin_mart/core/configs/configs.dart';
+import 'package:meherin_mart/feature/customer/data/model/customer_active_model.dart';
+import 'package:meherin_mart/feature/customer/presentation/bloc/customer/customer_bloc.dart';
+import 'package:meherin_mart/feature/products/product/presentation/widget/pagination.dart';
+import 'package:meherin_mart/feature/return/sales_return/presentation/page/widget/widget.dart';
+import '../../../../../core/shared/widgets/sideMenu/sidebar.dart';
+import '../../../../../core/widgets/app_alert_dialog.dart';
+import '../../../../../core/widgets/app_button.dart';
+import '../../../../../core/widgets/app_dropdown.dart';
+import '../../../../../core/widgets/app_loader.dart';
+import '../../../../../core/widgets/coustom_search_text_field.dart';
+import '../../../../../core/widgets/date_range.dart';
+import '../sales_return_bloc/sales_return_bloc.dart';
+import 'create_sales_return_screnn.dart';
+
 class SalesReturnScreen extends StatefulWidget {
   const SalesReturnScreen({super.key});
 
@@ -34,10 +53,10 @@ class _SalesReturnScreenState extends State<SalesReturnScreen> {
     super.initState();
     startDate = DateTime(now.year, now.month - 1, now.day);
     endDate = DateTime(now.year, now.month, now.day);
-    context.read<SalesReturnBloc>().add(FetchInvoiceList(context));
 
-    // // Load initial data
+    // Load initial data
     context.read<CustomerBloc>().add(FetchCustomerActiveList(context));
+    context.read<SalesReturnBloc>().add(FetchInvoiceList(context));
     _fetchSalesReturnList(from: startDate, to: endDate);
   }
 
@@ -48,14 +67,14 @@ class _SalesReturnScreenState extends State<SalesReturnScreen> {
     int pageNumber = 0,
   }) {
     context.read<SalesReturnBloc>().add(FetchSalesReturn(
-      context,
+      context: context,
       startDate: from,
       endDate: to,
+
       filterText: filterText,
       pageNumber: pageNumber,
     ));
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -93,52 +112,7 @@ class _SalesReturnScreenState extends State<SalesReturnScreen> {
           padding: AppTextStyle.getResponsivePaddingBody(context),
           child: BlocListener<SalesReturnBloc, SalesReturnState>(
             listener: (context, state) {
-              if (state is SalesReturnCreateLoading) {
-                appLoader(context, "Creating Sales Return...");
-              } else if (state is SalesReturnCreateSuccess) {
-                Navigator.pop(context);
-                _fetchSalesReturnList(from: startDate, to: endDate);
-                appAlertDialog(
-                  context,
-                  state.message,
-                  title: "Success",
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text("OK"),
-                    ),
-                  ],
-                );
-              } else if (state is SalesReturnDeleteLoading) {
-                appLoader(context, "Deleting Sales Return...");
-              } else if (state is SalesReturnDeleteSuccess) {
-                Navigator.pop(context);
-                _fetchSalesReturnList(from: startDate, to: endDate);
-                appAlertDialog(
-                  context,
-                  state.message,
-                  title: "Success",
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text("OK"),
-                    ),
-                  ],
-                );
-              } else if (state is SalesReturnError) {
-                // Navigator.pop(context);
-                appAlertDialog(
-                  context,
-                  state.content,
-                  title: state.title,
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text("Dismiss"),
-                    ),
-                  ],
-                );
-              }
+              _handleStateChanges(state);
             },
             child: Column(
               children: [
@@ -152,12 +126,67 @@ class _SalesReturnScreenState extends State<SalesReturnScreen> {
     );
   }
 
+  void _handleStateChanges(SalesReturnState state) {
+    if (state is SalesReturnCreateLoading ||
+        state is SalesReturnApproveLoading ||
+        state is SalesReturnRejectLoading ||
+        state is SalesReturnCompleteLoading ||
+        state is SalesReturnDeleteLoading) {
+      // Handle loading states
+      appLoader(context, "Processing...");
+    } else if (state is SalesReturnCreateSuccess ||
+        state is SalesReturnApproveSuccess ||
+        state is SalesReturnRejectSuccess ||
+        state is SalesReturnCompleteSuccess ||
+        state is SalesReturnDeleteSuccess) {
+      // Handle success states
+      Navigator.pop(context);
+      _fetchSalesReturnList(from: startDate, to: endDate);
+
+      String message = "";
+      String title = "Success";
+
+      if (state is SalesReturnCreateSuccess) message = state.message;
+      else if (state is SalesReturnApproveSuccess) message = state.message;
+      else if (state is SalesReturnRejectSuccess) message = state.message;
+      else if (state is SalesReturnCompleteSuccess) message = state.message;
+      else if (state is SalesReturnDeleteSuccess) message = state.message;
+
+      appAlertDialog(
+        context,
+        message,
+        title: title,
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("OK"),
+          ),
+        ],
+      );
+    } else if (state is SalesReturnError) {
+      // Handle error state
+      Navigator.pop(context);
+      appAlertDialog(
+        context,
+        state.content,
+        title: state.title,
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Dismiss"),
+          ),
+        ],
+      );
+      _fetchSalesReturnList(from: startDate, to: endDate);
+    }
+  }
+
   Widget _buildFilterRow() {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        // 🔍 Search Field
+        // Search Field
         Expanded(
           flex: 2,
           child: CustomSearchTextFormField(
@@ -173,7 +202,7 @@ class _SalesReturnScreenState extends State<SalesReturnScreen> {
         ),
         const SizedBox(width: 6),
 
-        // 👤 Customer Dropdown
+        // Customer Dropdown
         Expanded(
           flex: 1,
           child: BlocBuilder<CustomerBloc, CustomerState>(
@@ -217,7 +246,7 @@ class _SalesReturnScreenState extends State<SalesReturnScreen> {
         ),
         const SizedBox(width: 6),
 
-        // 📅 Date Range Picker
+        // Date Range Picker
         SizedBox(
           width: 260,
           child: CustomDateRangeField(
@@ -233,23 +262,32 @@ class _SalesReturnScreenState extends State<SalesReturnScreen> {
         ),
         const SizedBox(width: 6),
         gapW16,
+
+        // Create Sales Return Button
         AppButton(
-          name: "Create Sales Return", // Fixed button text
+          name: "Create Sales Return",
           onPressed: () {
             showDialog(
               context: context,
               builder: (context) {
                 return Dialog(
+                  insetPadding: const EdgeInsets.all(20),
                   child: SizedBox(
                     width: AppSizes.width(context) * 0.70,
-                    child: CreateSalesReturnScreen(),
+                    child: CreateSalesReturnScreen(
+                      onSuccess: () {
+                        Navigator.pop(context);
+                        _fetchSalesReturnList(from: startDate, to: endDate);
+                      },
+                    ),
                   ),
                 );
               },
             );
           },
         ),
-        // 🔄 Refresh Button
+
+        // Refresh Button
         IconButton(
           onPressed: () => _fetchSalesReturnList(),
           icon: const Icon(Icons.refresh),
@@ -261,14 +299,12 @@ class _SalesReturnScreenState extends State<SalesReturnScreen> {
 
   Widget _buildDataTable() {
     return BlocBuilder<SalesReturnBloc, SalesReturnState>(
-
       buildWhen: (previous, current) {
         return current is SalesReturnLoading ||
             current is SalesReturnSuccess ||
             current is SalesReturnError;
       },
-
-         builder: (context, state) {
+      builder: (context, state) {
         if (state is SalesReturnLoading) {
           return const Center(
             child: Column(
@@ -307,8 +343,7 @@ class _SalesReturnScreenState extends State<SalesReturnScreen> {
                 onPageSizeChanged: (newSize) {
                   // Reset to page 1 when changing page size
                   _fetchSalesReturnList(
-                    pageNumber: 1, // Changed from 0 to 1
-                    // pageSize: newSize,
+                    pageNumber: 0,
                     from: selectedDateRange?.start,
                     to: selectedDateRange?.end,
                   );
@@ -336,8 +371,8 @@ class _SalesReturnScreenState extends State<SalesReturnScreen> {
         ),
         const SizedBox(height: 12),
         ElevatedButton(
-            onPressed: () => _fetchSalesReturnList(),
-            child: const Text("Refresh")
+          onPressed: () => _fetchSalesReturnList(),
+          child: const Text("Refresh"),
         ),
       ],
     ),
@@ -356,8 +391,8 @@ class _SalesReturnScreenState extends State<SalesReturnScreen> {
         ),
         const SizedBox(height: 12),
         ElevatedButton(
-            onPressed: () => _fetchSalesReturnList(),
-            child: const Text("Retry")
+          onPressed: () => _fetchSalesReturnList(),
+          child: const Text("Retry"),
         ),
       ],
     ),

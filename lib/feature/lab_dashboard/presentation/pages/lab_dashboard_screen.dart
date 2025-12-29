@@ -20,7 +20,6 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   int selectedIndex = 1;
-  // String selectedSalesOverviewType = 'current_day';
   String selectedPurchaseOverviewType = 'current_day';
   final GlobalKey<ScaffoldState> drawerKey = GlobalKey<ScaffoldState>();
 
@@ -67,7 +66,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         decoration: BoxDecoration(
                           color: Colors.white,
                           border: Border.all(
-                            color: AppColors.border.withAlpha(128), // Fixed: changed withValues to withAlpha
+                            color: AppColors.border.withAlpha(128),
                             width: 0.5,
                           ),
                         ),
@@ -77,9 +76,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ResponsiveCol(
                     xs: 12,
                     sm: 12,
-                    md: 12,
-                    lg: 10,
-                    xl: 10,
+                    md: isBigScreen ? 11 : 12,
+                    lg: isBigScreen ? 10 : 12,
+                    xl: isBigScreen ? 10 : 12,
                     child: SizedBox(
                       height: AppSizes.height(context) * 0.90,
                       child: Scrollbar(
@@ -88,11 +87,27 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         thumbVisibility: true,
                         child: SingleChildScrollView(
                           controller: scrollController,
-                          padding: const EdgeInsets.all(12.0),
+                          padding: EdgeInsets.all(Responsive.isMobile(context) ? 8.0 : 12.0),
                           child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               // ==== HEADER AND FILTER ====
-                              Row(
+                              Responsive.isMobile(context)
+                                  ? Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    "Dashboard",
+                                    style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  _buildFilterSegmentedControl(),
+                                ],
+                              )
+                                  : Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
                                   const Text(
@@ -102,74 +117,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
-                                  SizedBox(
-                                    width: AppSizes.width(context) * 0.25,
-                                    child: CupertinoSegmentedControl<String>(
-                                      padding: EdgeInsets.zero,
-                                      children: {
-                                        'current_day': Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                            vertical: 4.0,
-                                            horizontal: 1.0,
-                                          ),
-                                          child: Text(
-                                            'Today',
-                                            style: TextStyle(
-                                              fontFamily: GoogleFonts.playfairDisplay().fontFamily,
-                                              color: selectedPurchaseOverviewType == 'current_day'
-                                                  ? Colors.white
-                                                  : Colors.black,
-                                            ),
-                                          ),
-                                        ),
-                                        'this_month': Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                            vertical: 0.0,
-                                            horizontal: 1.0,
-                                          ),
-                                          child: Text(
-                                            DateFormat('MMMM').format(DateTime.now()),
-                                            style: TextStyle(
-                                              fontFamily: GoogleFonts.playfairDisplay().fontFamily,
-                                              color: selectedPurchaseOverviewType == 'this_month'
-                                                  ? Colors.white
-                                                  : Colors.black,
-                                            ),
-                                          ),
-                                        ),
-                                        'lifeTime': Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                            vertical: 0.0,
-                                            horizontal: 2.0,
-                                          ),
-                                          child: Text(
-                                            'Life Time',
-                                            style: TextStyle(
-                                              fontFamily: GoogleFonts.playfairDisplay().fontFamily,
-                                              color: selectedPurchaseOverviewType == 'lifeTime'
-                                                  ? Colors.white
-                                                  : Colors.black,
-                                            ),
-                                          ),
-                                        ),
-                                      },
-                                      onValueChanged: (value) {
-                                        setState(() {
-                                          selectedPurchaseOverviewType = value;
-                                          context.read<DashboardBloc>().add(
-                                            FetchDashboardData(
-                                              dateFilter: value,
-                                              context: context,
-                                            ),
-                                          );
-                                        });
-                                      },
-                                      groupValue: selectedPurchaseOverviewType,
-                                      unselectedColor: Colors.white54,
-                                      selectedColor: AppColors.primaryColor,
-                                      borderColor: AppColors.primaryColor,
-                                    ),
-                                  ),
+                                  _buildFilterSegmentedControl(),
                                 ],
                               ),
                               const SizedBox(height: 16),
@@ -183,14 +131,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               // ==== DASHBOARD CARDS ====
                               if (state is DashboardLoaded) ...[
                                 _buildDashboardCards(state.dashboardData),
-                                const SizedBox(height: 24),
+                                const SizedBox(height: 12),
 
                                 // ==== SALES & PURCHASE OVERVIEW ====
                                 _buildSalesPurchaseOverview(state.dashboardData),
-                                const SizedBox(height: 16),
+                                const SizedBox(height: 100),
 
                                 // ==== RECENT ACTIVITIES ====
-                                // _buildRecentActivities(state.dashboardData),
                               ],
 
                               // ==== ERROR STATE ====
@@ -225,42 +172,124 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
+  Widget _buildFilterSegmentedControl() {
+    final isMobile = Responsive.isMobile(context);
+
+    return Container(
+      width: isMobile ? double.infinity : AppSizes.width(context) * 0.25,
+      child: CupertinoSegmentedControl<String>(
+        padding: EdgeInsets.zero,
+        children: {
+          'current_day': Padding(
+            padding: const EdgeInsets.symmetric(
+              vertical: 4.0,
+              horizontal: 4.0,
+            ),
+            child: Text(
+              'Today',
+              style: TextStyle(
+                fontFamily: GoogleFonts.playfairDisplay().fontFamily,
+                fontSize: isMobile ? 12 : 14,
+                color: selectedPurchaseOverviewType == 'current_day'
+                    ? Colors.white
+                    : Colors.black,
+              ),
+            ),
+          ),
+          'this_month': Padding(
+            padding: const EdgeInsets.symmetric(
+              vertical: 4.0,
+              horizontal: 4.0,
+            ),
+            child: Text(
+              isMobile ? DateFormat('MMM').format(DateTime.now()) : DateFormat('MMMM').format(DateTime.now()),
+              style: TextStyle(
+                fontFamily: GoogleFonts.playfairDisplay().fontFamily,
+                fontSize: isMobile ? 12 : 14,
+                color: selectedPurchaseOverviewType == 'this_month'
+                    ? Colors.white
+                    : Colors.black,
+              ),
+            ),
+          ),
+          'lifeTime': Padding(
+            padding: const EdgeInsets.symmetric(
+              vertical: 4.0,
+              horizontal: 4.0,
+            ),
+            child: Text(
+              isMobile ? 'All' : 'Life Time',
+              style: TextStyle(
+                fontFamily: GoogleFonts.playfairDisplay().fontFamily,
+                fontSize: isMobile ? 12 : 14,
+                color: selectedPurchaseOverviewType == 'lifeTime'
+                    ? Colors.white
+                    : Colors.black,
+              ),
+            ),
+          ),
+        },
+        onValueChanged: (value) {
+          setState(() {
+            selectedPurchaseOverviewType = value;
+            context.read<DashboardBloc>().add(
+              FetchDashboardData(
+                dateFilter: value,
+                context: context,
+              ),
+            );
+          });
+        },
+        groupValue: selectedPurchaseOverviewType,
+        unselectedColor: Colors.white54,
+        selectedColor: AppColors.primaryColor,
+        borderColor: AppColors.primaryColor,
+      ),
+    );
+  }
+
   Widget _buildDashboardCards(DashboardData data) {
-    return Wrap(
-      spacing: 10,
-      runSpacing: 10,
+    final isMobile = Responsive.isMobile(context);
+
+    return GridView.count(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      crossAxisCount: isMobile ? 2 : 5,
+      childAspectRatio: isMobile ? 2.2 : 1.5,
+      crossAxisSpacing: 5,
+      mainAxisSpacing: 5,
       children: [
         dashboardCardItem(
           title: "Total Sales",
-          value: data.todayMetrics?.sales?.total?.toDouble() ?? 0.0, // Fixed: null check and type conversion
+          value: data.todayMetrics?.sales?.total?.toDouble() ?? 0.0,
           icon: Icons.shopping_cart,
           color: Colors.green,
           isCurrency: true,
         ),
         dashboardCardItem(
           title: "Total Purchases",
-          value: data.todayMetrics?.purchases?.total?.toDouble() ?? 0.0, // Fixed: null check and type conversion
+          value: data.todayMetrics?.purchases?.total?.toDouble() ?? 0.0,
           icon: Icons.inventory_2,
           color: Colors.blue,
           isCurrency: true,
         ),
         dashboardCardItem(
           title: "Total Expenses",
-          value: data.todayMetrics?.expenses?.total?.toDouble() ?? 0.0, // Fixed: null check and type conversion
+          value: data.todayMetrics?.expenses?.total?.toDouble() ?? 0.0,
           icon: Icons.money_off,
           color: Colors.red,
           isCurrency: true,
         ),
         dashboardCardItem(
           title: "Net Profit",
-          value: data.profitLoss?.netProfit?.toDouble() ?? 0.0, // Fixed: null check and type conversion
+          value: data.profitLoss?.netProfit?.toDouble() ?? 0.0,
           icon: Icons.trending_up,
-          color: (data.profitLoss?.netProfit ?? 0) >= 0 ? Colors.green : Colors.red, // Fixed: null check
+          color: (data.profitLoss?.netProfit ?? 0) >= 0 ? Colors.green : Colors.red,
           isCurrency: true,
         ),
         dashboardCardItem(
           title: "Stock Alerts",
-          value: ((data.stockAlerts?.lowStock ?? 0) + (data.stockAlerts?.outOfStock ?? 0)).toDouble(), // Fixed: null check
+          value: ((data.stockAlerts?.lowStock ?? 0) + (data.stockAlerts?.outOfStock ?? 0)).toDouble(),
           icon: Icons.warning,
           color: Colors.orange,
         ),
@@ -269,18 +298,30 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildSalesPurchaseOverview(DashboardData data) {
-    return Row(
-      children: [
-        Expanded(child: _buildSalesOverview(data)),
-        const SizedBox(width: 16),
-        Expanded(child: _buildPurchaseOverview(data)),
-      ],
-    );
+    if (Responsive.isMobile(context)) {
+      return Column(
+        children: [
+          _buildSalesOverview(data),
+          const SizedBox(height: 16),
+          _buildPurchaseOverview(data),
+        ],
+      );
+    } else {
+      return Row(
+        children: [
+          Expanded(child: _buildSalesOverview(data)),
+          const SizedBox(width: 16),
+          Expanded(child: _buildPurchaseOverview(data)),
+        ],
+      );
+    }
   }
 
   Widget _buildSalesOverview(DashboardData data) {
+    final isMobile = Responsive.isMobile(context);
+
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 6.0),
+      padding: EdgeInsets.all(isMobile ? 8.0 : 12.0),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
         color: Colors.white,
@@ -295,47 +336,61 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 style: TextStyle(
                   fontFamily: GoogleFonts.playfairDisplay().fontFamily,
                   fontWeight: FontWeight.w500,
-                  fontSize: Responsive.isMobile(context) ? 14 : 18,
+                  fontSize: isMobile ? 14 : 18,
                 ),
               ),
-              _buildSegmentedControl('sales'),
+              if (!isMobile) _buildSegmentedControl('sales'),
             ],
           ),
-          const SizedBox(height: 5),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
+          if (isMobile) ...[
+            const SizedBox(height: 8),
+            _buildSegmentedControl('sales'),
+          ],
+          const SizedBox(height: 12),
+          Column(
             children: [
-              StatsCardMonthly(
-                title: "Total Sold Quantity\n",
-                count: data.todayMetrics?.sales?.totalQuantity?.toString() ?? "0", // Fixed: null check
-                color: Colors.pink,
-                icon: "assets/images/sold.png",
+              Row(
+                children: [
+                  Expanded(
+                    child: StatsCardMonthly(
+                      title: "Total Sold Quantity",
+                      count: data.todayMetrics?.sales?.totalQuantity?.toString() ?? "0",
+                      color: Colors.pink,
+                      icon: "assets/images/sold.png",
+                    ),
+                  ),
+                  SizedBox(width: isMobile ? 5 : 10),
+                  Expanded(
+                    child: StatsCardMonthly(
+                      title: "Total Amount",
+                      count: (data.todayMetrics?.sales?.total ?? 0).toStringAsFixed(2),
+                      color: Colors.purple,
+                      icon: "assets/images/gross.png",
+                    ),
+                  ),
+                ],
               ),
-              SizedBox(width: Responsive.isMobile(context) ? 5 : 10),
-              StatsCardMonthly(
-                title: "Total Amount",
-                count: (data.todayMetrics?.sales?.total ?? 0).toStringAsFixed(2), // Fixed: null check
-                color: Colors.purple,
-                icon: "assets/images/gross.png",
-              ),
-            ],
-          ),
-          const SizedBox(height: 5),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              StatsCardMonthly(
-                title: "Total Due",
-                count: (data.todayMetrics?.sales?.totalDue ?? 0).toStringAsFixed(2), // Fixed: null check
-                color: Colors.redAccent,
-                icon: "assets/images/cancel.png",
-              ),
-              SizedBox(width: Responsive.isMobile(context) ? 5 : 20),
-              StatsCardMonthly(
-                title: "Profit / Loss",
-                count: (data.profitLoss?.netProfit ?? 0).toStringAsFixed(2), // Fixed: null check
-                color: (data.profitLoss?.netProfit ?? 0) >= 0 ? Colors.green : Colors.red, // Fixed: null check
-                icon: "assets/images/expenses.png",
+               SizedBox(height: isMobile ? 8 : 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: StatsCardMonthly(
+                      title: "Total Due",
+                      count: (data.todayMetrics?.sales?.totalDue ?? 0).toStringAsFixed(2),
+                      color: Colors.redAccent,
+                      icon: "assets/images/cancel.png",
+                    ),
+                  ),
+                  SizedBox(width: isMobile ? 5 : 10),
+                  Expanded(
+                    child: StatsCardMonthly(
+                      title: "Profit / Loss",
+                      count: (data.profitLoss?.netProfit ?? 0).toStringAsFixed(2),
+                      color: (data.profitLoss?.netProfit ?? 0) >= 0 ? Colors.green : Colors.red,
+                      icon: "assets/images/expenses.png",
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -345,8 +400,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildPurchaseOverview(DashboardData data) {
+    final isMobile = Responsive.isMobile(context);
+
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 3.0),
+      padding: EdgeInsets.all(isMobile ? 8.0 : 12.0),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
         color: Colors.white,
@@ -361,47 +418,61 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 style: TextStyle(
                   fontFamily: GoogleFonts.playfairDisplay().fontFamily,
                   fontWeight: FontWeight.w600,
-                  fontSize: Responsive.isMobile(context) ? 12 : 18,
+                  fontSize: isMobile ? 14 : 18,
                 ),
               ),
-              _buildSegmentedControl('purchase'),
+              if (!isMobile) _buildSegmentedControl('purchase'),
             ],
           ),
-          const SizedBox(height: 10),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
+          if (isMobile) ...[
+            const SizedBox(height: 8),
+            _buildSegmentedControl('purchase'),
+          ],
+          const SizedBox(height: 12),
+          Column(
             children: [
-              StatsCardMonthly(
-                title: "Total Purchase \nQuantity",
-                count: data.todayMetrics?.purchases?.totalQuantity?.toString() ?? "0", // Fixed: null check
-                color: Colors.blue,
-                icon: "assets/images/buy.png",
+              Row(
+                children: [
+                  Expanded(
+                    child: StatsCardMonthly(
+                      title: "Total Purchase\nQuantity",
+                      count: data.todayMetrics?.purchases?.totalQuantity?.toString() ?? "0",
+                      color: Colors.blue,
+                      icon: "assets/images/buy.png",
+                    ),
+                  ),
+                  SizedBox(width: isMobile ? 5 : 10),
+                  Expanded(
+                    child: StatsCardMonthly(
+                      title: "Total Amount",
+                      count: (data.todayMetrics?.purchases?.total ?? 0).toStringAsFixed(2),
+                      color: Colors.green,
+                      icon: "assets/images/gross.png",
+                    ),
+                  ),
+                ],
               ),
-              SizedBox(width: Responsive.isMobile(context) ? 5 : 20),
-              StatsCardMonthly(
-                title: "Total Amount \n",
-                count: (data.todayMetrics?.purchases?.total ?? 0).toStringAsFixed(2), // Fixed: null check
-                color: Colors.green,
-                icon: "assets/images/gross.png",
-              ),
-            ],
-          ),
-          const SizedBox(height: 5),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              StatsCardMonthly(
-                title: "Total Due",
-                count: (data.todayMetrics?.purchases?.totalDue ?? 0).toStringAsFixed(2), // Fixed: null check
-                color: Colors.redAccent,
-                icon: "assets/images/cancel.png",
-              ),
-              SizedBox(width: Responsive.isMobile(context) ? 5 : 20),
-              StatsCardMonthly(
-                title: "Total Returns",
-                count: (data.todayMetrics?.purchaseReturns?.totalAmount ?? 0).toStringAsFixed(2), // Fixed: null check
-                color: Colors.black,
-                icon: "assets/images/product_return.png",
+               SizedBox(height: isMobile ? 8 : 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: StatsCardMonthly(
+                      title: "Total Due",
+                      count: (data.todayMetrics?.purchases?.totalDue ?? 0).toStringAsFixed(2),
+                      color: Colors.redAccent,
+                      icon: "assets/images/cancel.png",
+                    ),
+                  ),
+                  SizedBox(width: isMobile ? 5 : 10),
+                  Expanded(
+                    child: StatsCardMonthly(
+                      title: "Total Returns",
+                      count: (data.todayMetrics?.purchaseReturns?.totalAmount ?? 0).toStringAsFixed(2),
+                      color: Colors.black,
+                      icon: "assets/images/product_return.png",
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -411,42 +482,48 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildSegmentedControl(String type) {
-    return SizedBox(
-      width: AppSizes.width(context) * 0.20,
+    final isMobile = Responsive.isMobile(context);
+    final width = isMobile ? double.infinity : AppSizes.width(context) * 0.20;
+
+    return Container(
+      width: width,
       child: CupertinoSegmentedControl<String>(
         padding: EdgeInsets.zero,
         children: {
           'current_day': Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 1.0),
+            padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 4.0),
             child: Text(
               'Today',
               style: TextStyle(
                 fontFamily: GoogleFonts.playfairDisplay().fontFamily,
-                color: (type == 'sales' ? selectedPurchaseOverviewType : selectedPurchaseOverviewType) == 'current_day'
+                fontSize: isMobile ? 12 : 14,
+                color: selectedPurchaseOverviewType == 'current_day'
                     ? Colors.white
                     : Colors.black,
               ),
             ),
           ),
           'this_month': Padding(
-            padding: const EdgeInsets.symmetric(vertical: 0.0, horizontal: 1.0),
+            padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 4.0),
             child: Text(
-              DateFormat('MMMM').format(DateTime.now()),
+              isMobile ? DateFormat('MMM').format(DateTime.now()) : DateFormat('MMMM').format(DateTime.now()),
               style: TextStyle(
                 fontFamily: GoogleFonts.playfairDisplay().fontFamily,
-                color: (type == 'sales' ? selectedPurchaseOverviewType : selectedPurchaseOverviewType) == 'this_month'
+                fontSize: isMobile ? 12 : 14,
+                color: selectedPurchaseOverviewType == 'this_month'
                     ? Colors.white
                     : Colors.black,
               ),
             ),
           ),
           'lifeTime': Padding(
-            padding: const EdgeInsets.symmetric(vertical: 0.0, horizontal: 2.0),
+            padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 4.0),
             child: Text(
-              'Life Time',
+              isMobile ? 'All' : 'Life Time',
               style: TextStyle(
                 fontFamily: GoogleFonts.playfairDisplay().fontFamily,
-                color: (type == 'sales' ? selectedPurchaseOverviewType : selectedPurchaseOverviewType) == 'lifeTime'
+                fontSize: isMobile ? 12 : 14,
+                color: selectedPurchaseOverviewType == 'lifeTime'
                     ? Colors.white
                     : Colors.black,
               ),
@@ -455,27 +532,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
         },
         onValueChanged: (value) {
           setState(() {
-            if (type == 'sales') {
-              selectedPurchaseOverviewType = value;
-            } else {
-              selectedPurchaseOverviewType = value;
-            }
+            selectedPurchaseOverviewType = value;
             context.read<DashboardBloc>().add(
               FetchDashboardData(dateFilter: value, context: context),
             );
           });
         },
-        groupValue: type == 'sales' ? selectedPurchaseOverviewType : selectedPurchaseOverviewType,
+        groupValue: selectedPurchaseOverviewType,
         unselectedColor: Colors.white54,
         selectedColor: AppColors.primaryColor,
         borderColor: AppColors.primaryColor,
       ),
     );
   }
-
-
-
-
 }
 
 class StatsCardMonthly extends StatelessWidget {
@@ -494,90 +563,85 @@ class StatsCardMonthly extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: Container(
-        margin: const EdgeInsets.all(0),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(10),
-          boxShadow: const [
-            // BoxShadow(
-            //   color: Color.fromARGB(17, 0, 0, 0),
-            //   spreadRadius: 5,
-            //   blurRadius: 5,
-            // ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(10),
-          child: Stack(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(10.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: TextStyle(
-                        color: color,
-                        fontSize: Responsive.isMobile(context) ? 14 : 18,
-                        fontFamily: GoogleFonts.playfairDisplay().fontFamily,
-                        fontWeight: FontWeight.w600,
+    final isMobile = Responsive.isMobile(context);
+
+    return Container(
+      margin: const EdgeInsets.all(0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(10),
+        child: Stack(
+          children: [
+            Container(
+              padding: EdgeInsets.all(isMobile ? 8.0 : 12.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      color: color,
+                      fontSize: isMobile ? 12 : 16,
+                      fontFamily: GoogleFonts.playfairDisplay().fontFamily,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Container(
+                        width: isMobile ? 24 : 30,
+                        height: isMobile ? 24 : 30,
+                        decoration: BoxDecoration(
+                          color: color.withAlpha(128),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Image.asset(
+                          icon,
+                          color: Colors.white,
+                          width: isMobile ? 24 : 30,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 5),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Container(
-                          width: 30,
-                          height: 30,
-                          decoration: BoxDecoration(
-                            color: color.withAlpha(128), // Fixed: changed withValues to withAlpha
-                            shape: BoxShape.circle,
-                          ),
-                          child: Image.asset(
-                            icon,
-                            color: Colors.white,
-                            width: 30,
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          count.toString(),
+                          maxLines: 2,
+                          textAlign: TextAlign.right,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: color,
+                            fontFamily: GoogleFonts.playfairDisplay().fontFamily,
+                            fontSize: isMobile ? 14 : 18,
+                            fontWeight: FontWeight.w400,
                           ),
                         ),
-                        const SizedBox(width: 3),
-                        SizedBox(
-                          child: Text(
-                            count.toString(),
-                            maxLines: 2,
-                            style: TextStyle(
-                              color: color,
-                              fontFamily: GoogleFonts.playfairDisplay().fontFamily,
-                              fontSize: 18,
-                              fontWeight: FontWeight.w400,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
-              Positioned(
-                bottom: -40,
-                right: -40,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: Container(
-                    width: 120,
-                    height: 120,
-                    decoration: BoxDecoration(
-                      color: color.withAlpha(25), // Fixed: changed withValues to withAlpha
-                      shape: BoxShape.circle,
-                    ),
+            ),
+            Positioned(
+              bottom: -40,
+              right: -40,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Container(
+                  width: 120,
+                  height: 120,
+                  decoration: BoxDecoration(
+                    color: color.withAlpha(25),
+                    shape: BoxShape.circle,
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
