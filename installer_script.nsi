@@ -1,6 +1,6 @@
-!define APP_NAME        "Meherin Mart Release 1.0.1"
+!define APP_NAME        "Meherin Mart Release 1.0.2"
 !define REG_APP_KEY     "MeherinMart_App"
-!define APP_VERSION     "1.0.0"
+!define APP_VERSION     "1.0.2"
 !define EXE_NAME        "meherin_mart.exe"
 !define INSTALL_DIR     "$PROGRAMFILES64\${APP_NAME}"
 

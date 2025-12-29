@@ -141,39 +141,123 @@ class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
     if (value is double) return value.toInt();
     return defaultValue;
   }
+
+  String extractValidationMessage(dynamic response) {
+    if (response is! Map) return 'Unknown error';
+
+    // 1️⃣ Top-level message
+    String errorMessage =
+        response['message']?.toString() ?? 'Validation Error';
+
+    dynamic data = response['data'];
+
+    // 2️⃣ If data itself contains another data (nested API wrapper)
+    if (data is Map && data.containsKey('data')) {
+      data = data['data'];
+    }
+
+    // 3️⃣ Now extract field errors
+    if (data is Map) {
+      for (final entry in data.entries) {
+        final value = entry.value;
+
+        if (value is List && value.isNotEmpty) {
+          return value.first.toString();
+        }
+
+        if (value is String) {
+          return value;
+        }
+      }
+    }
+
+    return errorMessage;
+  }
+
   Future<void> _onCreateExpense(
-      AddExpense event, Emitter<ExpenseState> emit) async {
+      AddExpense event,
+      Emitter<ExpenseState> emit,
+      ) async {
     emit(ExpenseAddLoading());
 
     try {
-      // Debug log
-
       final res = await postResponse(
-          url: AppUrls.expense, payload: event.body);
-
-
-      final jsonString = jsonEncode(res);
-
-      ApiResponse response = appParseJson(
-        jsonString,
-            (data) => ExpenseModel.fromJson(data),
+        url: AppUrls.expense,
+        payload: event.body,
       );
 
-      if (response.success == false) {
-        emit(ExpenseAddFailed(
+      final Map jsonMap = res as Map;
+
+      debugPrint('RAW RESPONSE => $jsonMap');
+
+      if (jsonMap['status'] == false) {
+        final errorMessage = extractValidationMessage(jsonMap);
+
+        debugPrint('FINAL EXPENSE ERROR => $errorMessage');
+
+        emit(
+          ExpenseAddFailed(
             title: 'Error',
-            content: response.message ?? "Failed to create expense"
-        ));
+            content: errorMessage,
+          ),
+        );
         return;
       }
 
+      final ApiResponse<ExpenseModel> response = appParseJson(
+        jsonEncode(jsonMap),
+            (data) => ExpenseModel.fromJson(data),
+      );
+
       clearData();
       emit(ExpenseAddSuccess());
-    } catch (error) {
+    } catch (e, s) {
       clearData();
-      emit(ExpenseAddFailed(title: "Error", content: error.toString()));
+      debugPrintStack(stackTrace: s);
+
+      emit(
+        ExpenseAddFailed(
+          title: 'Error',
+          content: e.toString(),
+        ),
+      );
     }
   }
+
+
+  // Future<void> _onCreateExpense(
+  //     AddExpense event, Emitter<ExpenseState> emit) async {
+  //   emit(ExpenseAddLoading());
+  //
+  //   try {
+  //     // Debug log
+  //
+  //     final res = await postResponse(
+  //         url: AppUrls.expense, payload: event.body);
+  //
+  //
+  //     final jsonString = jsonEncode(res);
+  //
+  //     ApiResponse response = appParseJson(
+  //       jsonString,
+  //           (data) => ExpenseModel.fromJson(data),
+  //     );
+  //
+  //     if (response.success == false) {
+  //       emit(ExpenseAddFailed(
+  //           title: 'Error',
+  //           content: response.message ?? "Failed to create expense"
+  //       ));
+  //       return;
+  //     }
+  //
+  //     clearData();
+  //     emit(ExpenseAddSuccess());
+  //   } catch (error) {
+  //     clearData();
+  //     emit(ExpenseAddFailed(title: "Error", content: error.toString()));
+  //   }
+  // }
 
   Future<void> _onUpdateExpense(
       UpdateExpense event, Emitter<ExpenseState> emit) async {
