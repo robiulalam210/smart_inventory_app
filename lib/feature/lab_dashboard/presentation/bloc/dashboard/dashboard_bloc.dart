@@ -58,7 +58,6 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
 
     AppWrapper(child: CreatePosSalePage()),
     AppWrapper(child: SalesScreen()),
-
     AppWrapper(child: PosSaleScreen()),
 
     AppWrapper(child: MoneyReceiptForm()),
