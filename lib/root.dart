@@ -62,10 +62,10 @@ class _RootScreenState extends State<RootScreen> {
                 return Row(
                   children: [
                     // Permanent Sidebar
-                    const SizedBox(
-                      width: 300, // adjust as needed
-                      child: Sidebar(),
-                    ),
+                    // const SizedBox(
+                    //   width: 300, // adjust as needed
+                    //   child: Sidebar(),
+                    // ),
 
                     // Vertical divider (optional)
                     Container(width: 1, color: AppColors.border),
