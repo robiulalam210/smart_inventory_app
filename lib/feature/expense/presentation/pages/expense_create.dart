@@ -247,6 +247,31 @@ class _ExpenseCreateScreenState extends State<ExpenseCreateScreen> {
                   child: Column(
                     children: [
                       Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            widget.id == null
+                                ? 'Create Expense '
+                                : 'Update Expense',
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          GestureDetector(
+                            onTap: () => AppRoutes.pop(context),
+                            child: const Icon(
+                              Icons.close,
+                              color: Colors.red,
+                              size: 22,
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      SizedBox(height: AppSizes.height(context) * 0.01),
+
+                      Wrap(
                         children: [
                           // Expense Head Dropdown
                           Expanded(
@@ -346,7 +371,7 @@ class _ExpenseCreateScreenState extends State<ExpenseCreateScreen> {
                       ),
 
                       // Amount Field
-                      Row(
+                      Wrap(
                         children: [
                           Expanded(
                             child: widget.id == null
@@ -477,7 +502,7 @@ class _ExpenseCreateScreenState extends State<ExpenseCreateScreen> {
                       ),
 
                       // Payment Method (only for create)
-                      Row(
+                      Wrap(
                         children: [
                           Expanded(
                             child: CustomInputField(
