@@ -232,7 +232,7 @@ class _SupplierPaymentScreenState extends State<SupplierPaymentScreen> {
                             builder: (context) {
                               return Dialog(
                                 insetPadding: const EdgeInsets.all(16),
-                                child: SizedBox(
+                                child: Container(
                                   width: double.infinity,
                                   height: AppSizes.height(context) * 0.8,
                                   child: const SupplierPaymentForm(),

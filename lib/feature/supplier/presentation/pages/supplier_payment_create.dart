@@ -99,7 +99,7 @@ class _MoneyReceiptListScreenState extends State<SupplierPaymentForm> {
                 const SizedBox(height: 6),
 
                 Container(
-                  padding: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     color: AppColors.whiteColor,
                     borderRadius: BorderRadius.circular(8),
@@ -508,7 +508,7 @@ class _MoneyReceiptListScreenState extends State<SupplierPaymentForm> {
           return Column(
             children: [
               firstChild,
-              // const SizedBox(height: 12),
+              const SizedBox(height: 6),
               secondChild,
             ],
           );
