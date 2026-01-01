@@ -61,7 +61,7 @@ class _CreateSupplierScreenState extends State<CreateSupplierScreen> {
 
             child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
                   // Header with Cancel/Up Button
                   Container(
@@ -185,6 +185,7 @@ class _CreateSupplierScreenState extends State<CreateSupplierScreen> {
 
                   // Submit Button
                   AppButton(
+                    // size: 150,
                     name: widget.submitText.isEmpty ? "Create Supplier" : widget.submitText,
                     onPressed: () {
                       if (formKey.currentState!.validate()) {

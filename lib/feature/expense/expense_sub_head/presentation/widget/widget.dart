@@ -1,4 +1,8 @@
+import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hugeicons/hugeicons.dart';
+import 'package:iconsax/iconsax.dart';
+import 'package:lottie/lottie.dart';
 
 import '../../../../../core/configs/configs.dart';
 import '../../../../../core/widgets/delete_dialog.dart';
@@ -19,6 +23,338 @@ class ExpenseSubHeadTableCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isMobile = Responsive.isMobile(context);
+    final bool isTablet = Responsive.isTablet(context);
+
+    if (expenseSubHeads.isEmpty) {
+      return _buildEmptyState();
+    }
+
+    if (isMobile || isTablet) {
+      return _buildMobileCardView(context, isMobile);
+    } else {
+      return _buildDesktopDataTable();
+    }
+  }
+
+  Widget _buildMobileCardView(BuildContext context, bool isMobile) {
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const ClampingScrollPhysics(),
+      itemCount: expenseSubHeads.length,
+      itemBuilder: (context, index) {
+        final expenseSubHead = expenseSubHeads[index];
+        return _buildExpenseSubHeadCard(
+          expenseSubHead,
+          index + 1,
+          context,
+          isMobile,
+        );
+      },
+    );
+  }
+
+  Widget _buildExpenseSubHeadCard(
+    ExpenseSubHeadModel expenseSubHead,
+    int index,
+    BuildContext context,
+    bool isMobile,
+  ) {
+    return Container(
+      margin: EdgeInsets.symmetric(
+        horizontal: isMobile ? 6.0 : 12.0,
+        vertical: 8.0,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(AppSizes.radius),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withValues(alpha: 0.1),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+        border: Border.all(color: Colors.grey.shade200, width: 1),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header with Index and Status
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: (_getExpenseSubHeadStatus(expenseSubHead)
+                  ? Colors.green.withValues(alpha: 0.05)
+                  : Colors.red.withValues(alpha: 0.05)),
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(16),
+                topRight: Radius.circular(16),
+              ),
+            ),
+            child: Row(
+              children: [
+                /// 👈 LEFT SIDE (TAKES REMAINING SPACE)
+                Expanded(
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryColor,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          '#$index',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+
+                      /// ✅ Flexible (NOT Expanded)
+                      Flexible(
+                        fit: FlexFit.loose,
+                        child: Text(
+                          expenseSubHead.name?.capitalize() ?? "N/A",
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                /// 👉 RIGHT SIDE (FIXED WIDTH)
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: _getExpenseSubHeadStatus(expenseSubHead)
+                        ? Colors.green.withValues(alpha: 0.2)
+                        : Colors.red.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(AppSizes.radius),
+                    border: Border.all(
+                      color: _getExpenseSubHeadStatus(expenseSubHead)
+                          ? Colors.green
+                          : Colors.red,
+                    ),
+                  ),
+                  child: Text(
+                    _getExpenseSubHeadStatus(expenseSubHead)
+                        ? 'ACTIVE'
+                        : 'INACTIVE',
+                    style: TextStyle(
+                      color: _getExpenseSubHeadStatus(expenseSubHead)
+                          ? Colors.green
+                          : Colors.red,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 11,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Expense Sub Head Details
+          Padding(
+            padding: const EdgeInsets.all(10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Head Name
+                _buildDetailRow(
+                  icon: Iconsax.category,
+                  label: 'Parent Head',
+                  value: expenseSubHead.headName?.capitalize() ?? "N/A",
+                  isImportant: true,
+                ),
+
+                // Additional Info
+
+              ],
+            ),
+          ),
+
+          // Action Buttons - FIXED VERSION
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade50,
+              borderRadius: const BorderRadius.only(
+                bottomLeft: Radius.circular(16),
+                bottomRight: Radius.circular(16),
+              ),
+              border: Border(
+                top: BorderSide(color: Colors.grey.shade200, width: 1),
+              ),
+            ),
+            child: Row(
+              children: [
+                // Edit Button
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () => _showEditDialog(context, expenseSubHead),
+                    icon: const Icon(Iconsax.edit, size: 16),
+                    label: const Text('Edit'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.blue,
+                      side: BorderSide(color: Colors.blue.shade300),
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                // Delete Button
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () => _confirmDelete(context, expenseSubHead),
+                    icon: const Icon(
+                      HugeIcons.strokeRoundedDeleteThrow,
+                      size: 16,
+                    ),
+                    label: const Text('Delete'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.red,
+                      side: BorderSide(color: Colors.red.shade300),
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailRow({
+    required IconData icon,
+    required String label,
+    required String value,
+    bool isImportant = false,
+    VoidCallback? onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 18, color: Colors.grey.shade600),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey.shade700,
+                    fontSize: 13,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  value,
+                  style: TextStyle(
+                    fontWeight: isImportant ? FontWeight.w700 : FontWeight.w500,
+                    color: isImportant ? Colors.black : Colors.grey.shade800,
+                    fontSize: isImportant ? 15 : 14,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoCard({
+    required String label,
+    required String value,
+    required IconData icon,
+    required Color color,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color.withOpacity(0.2)),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, size: 16, color: color),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: Colors.grey.shade600,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: color,
+                    fontWeight: FontWeight.w700,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  bool _getExpenseSubHeadStatus(ExpenseSubHeadModel expenseSubHead) {
+    // Handle different possible status representations
+    if (expenseSubHead.isActive != null) {
+      if (expenseSubHead.isActive is bool) {
+        return expenseSubHead.isActive as bool;
+      }
+    }
+
+    // Fallback to isActive if available
+    return expenseSubHead.isActive ?? false;
+  }
+
+  // Keep your existing desktop DataTable code here
+  Widget _buildDesktopDataTable() {
     if (expenseSubHeads.isEmpty) {
       return _buildEmptyState();
     }
@@ -32,8 +368,10 @@ class ExpenseSubHeadTableCard extends StatelessWidget {
         const numColumns = 5; // No., Sub Head Name, Head Name, Status, Actions
         const minColumnWidth = 120.0;
 
-        final dynamicColumnWidth =
-        (totalWidth / numColumns).clamp(minColumnWidth, double.infinity);
+        final dynamicColumnWidth = (totalWidth / numColumns).clamp(
+          minColumnWidth,
+          double.infinity,
+        );
 
         return Container(
           decoration: BoxDecoration(
@@ -41,7 +379,7 @@ class ExpenseSubHeadTableCard extends StatelessWidget {
             color: Colors.white,
             boxShadow: [
               BoxShadow(
-                color: Colors.grey.withValues(alpha: 0.1),
+                color: Colors.grey.withOpacity(0.1),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -91,11 +429,28 @@ class ExpenseSubHeadTableCard extends StatelessWidget {
                             final expenseSubHead = entry.value;
                             return DataRow(
                               cells: [
-                                _buildDataCell('${entry.key + 1}', dynamicColumnWidth * 0.6),
-                                _buildDataCell(expenseSubHead.name?.capitalize() ?? "N/A", dynamicColumnWidth),
-                                _buildDataCell(expenseSubHead.headName?.capitalize() ?? "N/A", dynamicColumnWidth),
-                                _buildStatusCell(_getExpenseSubHeadStatus(expenseSubHead), dynamicColumnWidth),
-                                _buildActionCell(expenseSubHead, context, dynamicColumnWidth),
+                                _buildDataCell(
+                                  '${entry.key + 1}',
+                                  dynamicColumnWidth * 0.6,
+                                ),
+                                _buildDataCell(
+                                  expenseSubHead.name?.capitalize() ?? "N/A",
+                                  dynamicColumnWidth,
+                                ),
+                                _buildDataCell(
+                                  expenseSubHead.headName?.capitalize() ??
+                                      "N/A",
+                                  dynamicColumnWidth,
+                                ),
+                                _buildStatusCell(
+                                  _getExpenseSubHeadStatus(expenseSubHead),
+                                  dynamicColumnWidth,
+                                ),
+                                _buildActionCell(
+                                  expenseSubHead,
+                                  context,
+                                  dynamicColumnWidth,
+                                ),
                               ],
                             );
                           }).toList(),
@@ -165,18 +520,6 @@ class ExpenseSubHeadTableCard extends StatelessWidget {
     );
   }
 
-  bool _getExpenseSubHeadStatus(ExpenseSubHeadModel expenseSubHead) {
-    // Handle different possible status representations
-    if (expenseSubHead.isActive != null) {
-      if (expenseSubHead.isActive is bool) {
-        return expenseSubHead.isActive as bool;
-      }
-    }
-
-    // Fallback to isActive if available
-    return expenseSubHead.isActive ?? false;
-  }
-
   DataCell _buildStatusCell(bool isActive, double width) {
     return DataCell(
       SizedBox(
@@ -185,7 +528,9 @@ class ExpenseSubHeadTableCard extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: isActive ? Colors.green.withValues(alpha: 0.1) : Colors.red.withValues(alpha: 0.1),
+              color: isActive
+                  ? Colors.green.withOpacity(0.1)
+                  : Colors.red.withOpacity(0.1),
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
@@ -203,7 +548,11 @@ class ExpenseSubHeadTableCard extends StatelessWidget {
     );
   }
 
-  DataCell _buildActionCell(ExpenseSubHeadModel expenseSubHead, BuildContext context, double width) {
+  DataCell _buildActionCell(
+    ExpenseSubHeadModel expenseSubHead,
+    BuildContext context,
+    double width,
+  ) {
     return DataCell(
       SizedBox(
         width: width,
@@ -246,7 +595,10 @@ class ExpenseSubHeadTableCard extends StatelessWidget {
     );
   }
 
-  void _showLoadingDialog(BuildContext context, {String message = 'Deleting...'}) {
+  void _showLoadingDialog(
+    BuildContext context, {
+    String message = 'Deleting...',
+  }) {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -272,7 +624,10 @@ class ExpenseSubHeadTableCard extends StatelessWidget {
     );
   }
 
-  Future<void> _confirmDelete(BuildContext context, ExpenseSubHeadModel expenseSubHead) async {
+  Future<void> _confirmDelete(
+    BuildContext context,
+    ExpenseSubHeadModel expenseSubHead,
+  ) async {
     final shouldDelete = await showDeleteConfirmationDialog(context);
     if (!shouldDelete) return;
 
@@ -287,7 +642,10 @@ class ExpenseSubHeadTableCard extends StatelessWidget {
     }
   }
 
-  void _showEditDialog(BuildContext context, ExpenseSubHeadModel expenseSubHead) {
+  void _showEditDialog(
+    BuildContext context,
+    ExpenseSubHeadModel expenseSubHead,
+  ) {
     // Pre-fill the form
     final expenseSubHeadBloc = context.read<ExpenseSubHeadBloc>();
     expenseSubHeadBloc.name.text = expenseSubHead.name ?? "";
@@ -297,7 +655,12 @@ class ExpenseSubHeadTableCard extends StatelessWidget {
       builder: (context) {
         return Dialog(
           child: SizedBox(
-            width: AppSizes.width(context) * 0.50,
+            width: Responsive.isMobile(context)
+                ? double.infinity
+                : AppSizes.width(context) * 0.50,
+            height: Responsive.isMobile(context)
+                ? AppSizes.height(context) * 0.8
+                : null,
             child: ExpenseSubCreateScreen(
               id: expenseSubHead.id.toString(),
               name: expenseSubHead.name,
@@ -319,7 +682,7 @@ class ExpenseSubHeadTableCard extends StatelessWidget {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.1),
+            color: Colors.grey.withOpacity(0.1),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -332,7 +695,7 @@ class ExpenseSubHeadTableCard extends StatelessWidget {
           Icon(
             Icons.account_balance_wallet_outlined,
             size: 48,
-            color: Colors.grey.withValues(alpha: 0.5),
+            color: Colors.grey.withOpacity(0.5),
           ),
           const SizedBox(height: 16),
           Text(
