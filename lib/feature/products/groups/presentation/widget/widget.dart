@@ -187,7 +187,7 @@ class GroupsTableCard extends StatelessWidget {
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: () => _showEditDialog(context, group),
-                  icon: const Icon(Icons.edit, size: 16),
+                  icon: const Icon(Iconsax.edit, size: 16),
                   label: const Text('Edit'),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Colors.blue,
@@ -200,7 +200,7 @@ class GroupsTableCard extends StatelessWidget {
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: () => _confirmDelete(context, group),
-                  icon: const Icon(Icons.delete, size: 16),
+                  icon: const Icon(HugeIcons.strokeRoundedDeleteThrow, size: 16),
                   label: const Text('Delete'),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Colors.red,
@@ -336,7 +336,7 @@ class GroupsTableCard extends StatelessWidget {
           children: [
             // Edit Button
             _buildActionButton(
-              icon: Icons.edit,
+              icon: Iconsax.edit,
               color: Colors.blue,
               tooltip: 'Edit group',
               onPressed: () => _showEditDialog(context, group),
@@ -344,7 +344,7 @@ class GroupsTableCard extends StatelessWidget {
 
             // Delete Button
             _buildActionButton(
-              icon: Icons.delete,
+              icon: HugeIcons.strokeRoundedDeleteThrow,
               color: Colors.red,
               tooltip: 'Delete group',
               onPressed: () => _confirmDelete(context, group),
