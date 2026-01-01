@@ -5,7 +5,548 @@ import '../../../../../core/widgets/delete_dialog.dart';
 import '../../data/model/categories_model.dart';
 import '../bloc/categories/categories_bloc.dart';
 import '../pages/categories_create.dart';
+// categories_list_mobile.dart
+import 'package:flutter/material.dart';
 
+class CategoriesListMobile extends StatelessWidget {
+  final List<CategoryModel> categories;
+  final VoidCallback? onCategoryTap;
+
+  const CategoriesListMobile({
+    super.key,
+    required this.categories,
+    this.onCategoryTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return RefreshIndicator(
+      onRefresh: () async {
+        // Refresh data
+        context.read<CategoriesBloc>().add(
+          FetchCategoriesList(context, filterText: ''),
+        );
+      },
+      child: categories.isEmpty
+          ? _buildEmptyState(context)
+          : ListView.builder(
+        shrinkWrap: true,
+        padding: const EdgeInsets.only(
+          top: 8,
+          bottom: 20,
+          left: 4,
+          right: 4,
+        ),
+        itemCount: categories.length,
+        itemBuilder: (context, index) {
+          final category = categories[index];
+          return _buildCategoryCard(context, category, index + 1);
+        },
+      ),
+    );
+  }
+
+  Widget _buildCategoryCard(
+      BuildContext context, CategoryModel category, int index) {
+    final isActive = _getCategoryStatus(category);
+    final isSelected = false; // You can manage selection state if needed
+
+    return GestureDetector(
+      onTap: () {
+        if (onCategoryTap != null) {
+          onCategoryTap!();
+        }
+        // Optionally show category details
+        // _showCategoryDetails(context, category);
+      },
+      child: Card(
+        margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+        elevation: 1,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(
+            color: isSelected ? AppColors.primaryColor : Colors.grey.shade200,
+            width: isSelected ? 1.5 : 1,
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header row with serial number and actions
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Serial number
+                  Container(
+                    width: 28,
+                    height: 28,
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryColor.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Center(
+                      child: Text(
+                        '$index',
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.primaryColor,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  // Action buttons
+                  Row(
+                    children: [
+                      // Status indicator (as icon)
+                      Icon(
+                        isActive ? Icons.check_circle : Icons.circle,
+                        size: 20,
+                        color: isActive ? Colors.green : Colors.grey,
+                      ),
+                      const SizedBox(width: 12),
+
+                      // Edit button
+                      _buildActionButton(
+                        icon: Icons.edit_outlined,
+                        color: Colors.blue.shade600,
+                        onPressed: () => _showEditDialog(context, category),
+                        tooltip: 'Edit category',
+                      ),
+                      const SizedBox(width: 8),
+
+                      // Delete button
+                      _buildActionButton(
+                        icon: Icons.delete_outline,
+                        color: Colors.red.shade600,
+                        onPressed: () => _confirmDelete(context, category),
+                        tooltip: 'Delete category',
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 12),
+
+              // Category name
+              Text(
+                category.name?.capitalize() ?? "Unnamed Category",
+                style: GoogleFonts.inter(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+
+              const SizedBox(height: 8),
+
+              // Details row
+              Row(
+                children: [
+                  // Status badge
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: isActive
+                          ? Colors.green.withOpacity(0.1)
+                          : Colors.grey.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: isActive
+                            ? Colors.green.withOpacity(0.3)
+                            : Colors.grey.withOpacity(0.3),
+                        width: 1,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          isActive ? Icons.check_circle : Icons.circle,
+                          size: 12,
+                          color: isActive ? Colors.green : Colors.grey,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          isActive ? 'Active' : 'Inactive',
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: isActive ? Colors.green : Colors.grey,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+
+
+                ],
+              ),
+
+              // Description (if available)
+              if (category.description?.isNotEmpty == true)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 12),
+                    Text(
+                      category.description!,
+                      style: GoogleFonts.inter(
+                        fontSize: 13,
+                        color: Colors.grey.shade700,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActionButton({
+    required IconData icon,
+    required Color color,
+    required VoidCallback onPressed,
+    required String tooltip,
+  }) {
+    return Material(
+      shape: CircleBorder(),
+      color: Colors.transparent,
+      child: IconButton(
+        onPressed: onPressed,
+        icon: Icon(icon, size: 20),
+        color: color,
+        tooltip: tooltip,
+        splashRadius: 20,
+        padding: const EdgeInsets.all(4),
+        constraints: const BoxConstraints(
+          minWidth: 36,
+          minHeight: 36,
+        ),
+      ),
+    );
+  }
+
+  bool _getCategoryStatus(CategoryModel category) {
+    // Handle different status representations
+    if (category.isActive != null) {
+      if (category.isActive is bool) {
+        return category.isActive as bool;
+      } else if (category.isActive is String) {
+        return (category.isActive as String).toLowerCase() == 'active';
+      } else if (category.isActive is int) {
+        return (category.isActive as int) == 1;
+      }
+    }
+
+    // Fallback to isActive if available
+    return category.isActive ?? false;
+  }
+
+  String _formatDate(String dateString) {
+    try {
+      final date = DateTime.parse(dateString);
+      return '${date.day}/${date.month}/${date.year}';
+    } catch (e) {
+      return dateString;
+    }
+  }
+
+  Future<void> _confirmDelete(
+      BuildContext context, CategoryModel category) async {
+    final shouldDelete = await showDeleteConfirmationDialog(context,
+       );
+
+    if (shouldDelete && context.mounted) {
+      context.read<CategoriesBloc>().add(
+        DeleteCategories(id: category.id.toString()),
+      );
+    }
+  }
+
+  void _showEditDialog(BuildContext context, CategoryModel category) {
+    // Pre-fill the form
+    final categoriesBloc = context.read<CategoriesBloc>();
+    categoriesBloc.nameController.text = category.name ?? "";
+    categoriesBloc.selectedState = category.isActive == true ? "Active" : "Inactive";
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return Dialog(
+          insetPadding: const EdgeInsets.all(16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.9,
+            ),
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(4),
+                child: CategoriesCreate(
+                  id: category.id.toString(),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _showCategoryDetails(BuildContext context, CategoryModel category) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return SingleChildScrollView(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Drag handle
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // Header
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Category Details',
+                      style: GoogleFonts.inter(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(Icons.close),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+
+                // Details
+                _buildDetailRow('Name', category.name?.capitalize() ?? 'N/A'),
+                _buildDetailRow('Status',
+                    (category.isActive == true ? 'Active' : 'Inactive')),
+                if (category.description?.isNotEmpty == true)
+                  _buildDetailRow('Description', category.description!),
+
+                const SizedBox(height: 24),
+
+                // Action buttons
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.pop(context),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        child: const Text('Close'),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          _showEditDialog(context, category);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primaryColor,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        child: const Text(
+                          'Edit',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildDetailRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: GoogleFonts.inter(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              color: Colors.grey.shade600,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: GoogleFonts.inter(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: Colors.black87,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyState(BuildContext context) {
+    return SingleChildScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      child: SizedBox(
+        height: MediaQuery.of(context).size.height * 0.7,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Animated illustration or icon
+            Container(
+              width: 150,
+              height: 150,
+              decoration: BoxDecoration(
+                color: AppColors.primaryColor.withOpacity(0.05),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.category_outlined,
+                size: 80,
+                color: AppColors.primaryColor.withOpacity(0.3),
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            // Title
+            Text(
+              'No Categories Found',
+              style: GoogleFonts.inter(
+                fontSize: 20,
+                fontWeight: FontWeight.w600,
+                color: Colors.grey.shade700,
+              ),
+            ),
+            const SizedBox(height: 12),
+
+            // Description
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 40),
+              child: Text(
+                'Create your first category to organize your products',
+                style: GoogleFonts.inter(
+                  fontSize: 14,
+                  color: Colors.grey.shade600,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            // Create button
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 40),
+              child: ElevatedButton(
+                onPressed: () {
+                  // Navigate to create category
+                  showDialog(
+                    context: context,
+                    builder: (context) {
+                      return Dialog(
+                        insetPadding: const EdgeInsets.all(16),
+                        child: SingleChildScrollView(
+                          child: CategoriesCreate(),
+                        ),
+                      );
+                    },
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primaryColor,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 32,
+                    vertical: 14,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.add, color: Colors.white),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Create Category',
+                      style: GoogleFonts.inter(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
 class CategoriesTableCard extends StatelessWidget {
   final List<CategoryModel> categories;
   final VoidCallback? onCategoryTap;

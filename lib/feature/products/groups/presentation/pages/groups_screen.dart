@@ -17,7 +17,6 @@ import '../../../../../responsive.dart';
 import '../bloc/groups/groups_bloc.dart';
 import '../widget/widget.dart';
 
-
 class GroupsScreen extends StatefulWidget {
   const GroupsScreen({super.key});
 
@@ -32,10 +31,10 @@ class _GroupsScreenState extends State<GroupsScreen> {
     _fetchApi();
   }
 
-  void _fetchApi(
-      {String filterText = '', int pageNumber = 0}) {
+  void _fetchApi({String filterText = '', int pageNumber = 0}) {
     context.read<GroupsBloc>().add(
-      FetchGroupsList(context,
+      FetchGroupsList(
+        context,
         filterText: filterText,
         state: context.read<GroupsBloc>().selectedState == "All"
             ? ""
@@ -45,185 +44,238 @@ class _GroupsScreenState extends State<GroupsScreen> {
     );
   }
 
+  @override
+  Widget build(BuildContext context) {
+    final isBigScreen =
+        Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
+    final isMobile = Responsive.isMobile(context);
 
-    @override
-    Widget build(BuildContext context) {
-      final isBigScreen =
-          Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
-      return Container(
-        color: AppColors.bg,
-        child: SafeArea(
-          child: ResponsiveRow(
-            spacing: 0,
-            runSpacing: 0,
-            children: [
-              if (isBigScreen) _buildSidebar(),
-              _buildContentArea(isBigScreen),
-            ],
-          ),
+    return Container(
+      color: AppColors.bg,
+      child: SafeArea(
+        child: ResponsiveRow(
+          spacing: 0,
+          runSpacing: 0,
+          children: [
+            if (isBigScreen) _buildSidebar(),
+            _buildContentArea(isBigScreen, isMobile),
+          ],
         ),
-      );
-    }
+      ),
+    );
+  }
 
-    Widget _buildSidebar() {
-      return ResponsiveCol(
-        xs: 0,
-        sm: 1,
-        md: 1,
-        lg: 2,
-        xl: 2,
-        child: Container(
-          decoration: const BoxDecoration(color: Colors.white),
-          child: const Sidebar(),
-        ),
-      );
-    }
-
-    Widget _buildContentArea(bool isBigScreen) {
-      return ResponsiveCol(
-        xs: 12,
-        sm: 12,
-        md: 12,
-        lg: 10,
-        xl: 10,
-        child: Container(color: AppColors.bg, child: buildContent()),
-      );
-    }
-
-
-  Widget buildContent() {
-    return SizedBox(
-
+  Widget _buildSidebar() {
+    return ResponsiveCol(
+      xs: 0,
+      sm: 1,
+      md: 1,
+      lg: 2,
+      xl: 2,
       child: Container(
-        padding:AppTextStyle.getResponsivePaddingBody(context),
-        child: BlocListener<GroupsBloc, GroupsState>(
-          listener: (context, state) {
-            if (state is GroupsAddLoading) {
-              appLoader(context, "Creating Group, please wait...");
-            } else if (state is GroupsSwitchLoading) {
-              appLoader(context, "Update Group, please wait...");
-            }
-            else if (state is GroupDeleteLoading) {
-              appLoader(context, "Deleted Group, please wait...");
-            }
-            else if (state is GroupsAddSuccess) {
-              // Navigator.pop(context); // Close loader dialog
-              Navigator.pop(context); // Close loader dialog
-              _fetchApi(); // Reload warehouse list
-            }
+        decoration: const BoxDecoration(color: Colors.white),
+        child: const Sidebar(),
+      ),
+    );
+  }
 
-            else if (state is GroupsSwitchSuccess) {
-              Navigator.pop(context); // Close loader dialog
-              _fetchApi(); // Reload warehouse list
-            }
-
-            else if (state is GroupDeleteSuccess) {
-              showCustomToast(
-                context: context,
-                title: 'Success!',
-                description: state.message,
-                icon: Icons.check_circle,
-                primaryColor: Colors.green,
-              );
-
-              Navigator.pop(context); // Close loader dialog
-              _fetchApi(); // Reload warehouse list
-            }
-            else if (state is GroupsAddFailed) {
-              Navigator.pop(context); // Close loader dialog
-              Navigator.pop(context); // Close loader dialog
-              _fetchApi();
-              appAlertDialog(context, state.content,
-                  title: state.title,
-                  actions: [
-                    TextButton(
-                        onPressed: () => AppRoutes.pop(context),
-                        child: const Text("Dismiss"))
-                  ]);
-            } else if (state is GroupDeleteFailed) {
-              Navigator.pop(context); // Close loader dialog
-              _fetchApi();
-              appAlertDialog(context, state.content,
-                  title: state.title,
-                  actions: [
-                    TextButton(
-                        onPressed: () => AppRoutes.pop(context),
-                        child: const Text("Dismiss"))
-                  ]);
-            }
+  Widget _buildContentArea(bool isBigScreen, bool isMobile) {
+    return ResponsiveCol(
+      xs: 12,
+      sm: 12,
+      md: 12,
+      lg: 10,
+      xl: 10,
+      child: Container(
+        color: AppColors.bg,
+        child: RefreshIndicator(
+          onRefresh: () async {
+            _fetchApi();
           },
-          child: Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  SizedBox(
-                    width: 350,
-                      child: CustomSearchTextFormField(
-                        controller: context.read<GroupsBloc>().filterTextController,
-                        onChanged: (value) {
-                          _fetchApi(
-                            filterText: value,
-                          );
-                        },
-                        isRequiredLabel: false,
-                        hintText: "Name", // Pass dynamic hintText if needed
-                      )),
-                  
-                  
-                  gapW16,
-                  gapW16,
-                  AppButton(
-                    name: "Create Groups ",
-                    onPressed: () {
-                      showDialog(
-                        context: context,
-                        builder: (context) {
-                          return Dialog(child: GroupsCreate());
-                        },
-                      );
-                    },
-                  ),
-                ],
-              ),
-              gapH8,
-              SizedBox(
-                // height: 500,
-                child: BlocBuilder<GroupsBloc, GroupsState>(
-                  builder: (context, state) {
-                    if (state is GroupsListLoading) {
-                      return const Center(child: CircularProgressIndicator());
-                    } else if (state is GroupsListSuccess) {
-                      if (state.list.isEmpty) {
-                        return Center(
-                          child: Lottie.asset(AppImages.noData),
-                        );
-                      } else {
-                        return // In your parent widget
-                          GroupsTableCard(
-                            groups: state.list,
-                            onGroupTap: () {
-                              // Handle row tap if needed
-                            },
-                          );
-                      }
-                    } else if (state is GroupsListFailed) {
-                      return Center(
-                          child:
-                          Text('Failed to load group: ${state.content}'));
-                    } else {
-                      return Container();
-                    }
-                  },
-                ),
-              ),
-            ],
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: Container(
+              padding: isMobile
+                  ? const EdgeInsets.all(12)
+                  : AppTextStyle.getResponsivePaddingBody(context),
+              child: buildContent(isMobile),
+            ),
           ),
         ),
       ),
     );
-
   }
 
+  Widget buildContent(bool isMobile) {
+    return BlocListener<GroupsBloc, GroupsState>(
+      listener: (context, state) {
+        if (state is GroupsAddLoading) {
+          appLoader(context, "Creating Group, please wait...");
+        } else if (state is GroupsSwitchLoading) {
+          appLoader(context, "Update Group, please wait...");
+        } else if (state is GroupDeleteLoading) {
+          appLoader(context, "Deleted Group, please wait...");
+        } else if (state is GroupsAddSuccess) {
+          Navigator.pop(context);
+          Navigator.pop(context);
+          _fetchApi();
+        } else if (state is GroupsSwitchSuccess) {
+          Navigator.pop(context);
+          _fetchApi();
+        } else if (state is GroupDeleteSuccess) {
+          showCustomToast(
+            context: context,
+            title: 'Success!',
+            description: state.message,
+            icon: Icons.check_circle,
+            primaryColor: Colors.green,
+          );
+          Navigator.pop(context);
+          _fetchApi();
+        } else if (state is GroupsAddFailed) {
+          Navigator.pop(context);
+          Navigator.pop(context);
+          _fetchApi();
+          appAlertDialog(
+            context,
+            state.content,
+            title: state.title,
+            actions: [
+              TextButton(
+                onPressed: () => AppRoutes.pop(context),
+                child: const Text("Dismiss"),
+              ),
+            ],
+          );
+        } else if (state is GroupDeleteFailed) {
+          Navigator.pop(context);
+          _fetchApi();
+          appAlertDialog(
+            context,
+            state.content,
+            title: state.title,
+            actions: [
+              TextButton(
+                onPressed: () => AppRoutes.pop(context),
+                child: const Text("Dismiss"),
+              ),
+            ],
+          );
+        }
+      },
+      child: Column(
+        children: [
+          // Header Row
+          _buildHeaderRow(isMobile),
+          gapH16,
+          // Groups List
+          _buildGroupsList(),
+        ],
+      ),
+    );
+  }
 
+  Widget _buildHeaderRow(bool isMobile) {
+    if (isMobile) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Search Field
+          CustomSearchTextFormField(
+            controller: context.read<GroupsBloc>().filterTextController,
+            onChanged: (value) {
+              _fetchApi(filterText: value);
+            },
+            isRequiredLabel: false,
+            hintText: "Search group name",
+          ),
+          const SizedBox(height: 12),
+          // Create Button
+          SizedBox(
+            width: double.infinity,
+            child: AppButton(
+              name: "Create Group",
+              onPressed: () => _showCreateDialog(context),
+            ),
+          ),
+        ],
+      );
+    }
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        SizedBox(
+          width: 350,
+          child: CustomSearchTextFormField(
+            controller: context.read<GroupsBloc>().filterTextController,
+            onChanged: (value) {
+              _fetchApi(filterText: value);
+            },
+            isRequiredLabel: false,
+            hintText: "Search group name",
+          ),
+        ),
+        gapW16,
+        AppButton(
+          name: "Create Group",
+          onPressed: () => _showCreateDialog(context),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildGroupsList() {
+    return BlocBuilder<GroupsBloc, GroupsState>(
+      builder: (context, state) {
+        if (state is GroupsListLoading) {
+          return const Center(
+            child: Padding(
+              padding: EdgeInsets.all(20),
+              child: CircularProgressIndicator(),
+            ),
+          );
+        } else if (state is GroupsListSuccess) {
+          if (state.list.isEmpty) {
+            return Padding(
+              padding: const EdgeInsets.all(20),
+              child: Center(
+                child: Lottie.asset(AppImages.noData),
+              ),
+            );
+          } else {
+            return GroupsTableCard(
+              groups: state.list,
+              onGroupTap: () {},
+            );
+          }
+        } else if (state is GroupsListFailed) {
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Text('Failed to load groups: ${state.content}'),
+            ),
+          );
+        } else {
+          return Container();
+        }
+      },
+    );
+  }
+
+  void _showCreateDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          child: SizedBox(
+            width: Responsive.isMobile(context)
+                ? MediaQuery.of(context).size.width * 0.9
+                : MediaQuery.of(context).size.width * 0.5,
+            child: const GroupsCreate(),
+          ),
+        );
+      },
+    );
+  }
 }

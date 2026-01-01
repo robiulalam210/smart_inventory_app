@@ -1,5 +1,4 @@
 import 'package:google_fonts/google_fonts.dart';
-
 import '../../../../../core/configs/configs.dart';
 import '../../../../../core/widgets/delete_dialog.dart';
 import '../../data/model/groups.dart';
@@ -22,13 +21,16 @@ class GroupsTableCard extends StatelessWidget {
       return _buildEmptyState();
     }
 
-    final verticalScrollController = ScrollController();
-    final horizontalScrollController = ScrollController();
+    return Responsive.isMobile(context)
+        ? _buildMobileListView()
+        : _buildDesktopTable();
+  }
 
+  Widget _buildDesktopTable() {
     return LayoutBuilder(
       builder: (context, constraints) {
         final totalWidth = constraints.maxWidth;
-        const numColumns = 4; // No., Group Name, Status, Actions
+        const numColumns = 4;
         const minColumnWidth = 100.0;
 
         final dynamicColumnWidth =
@@ -47,18 +49,15 @@ class GroupsTableCard extends StatelessWidget {
             ],
           ),
           child: Scrollbar(
-            controller: verticalScrollController,
             thumbVisibility: true,
             child: SingleChildScrollView(
-              controller: verticalScrollController,
               scrollDirection: Axis.vertical,
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(10),
                 child: Scrollbar(
-                  controller: horizontalScrollController,
                   thumbVisibility: true,
+                  scrollbarOrientation: ScrollbarOrientation.bottom,
                   child: SingleChildScrollView(
-                    controller: horizontalScrollController,
                     scrollDirection: Axis.horizontal,
                     child: Padding(
                       padding: const EdgeInsets.only(bottom: 5),
@@ -77,7 +76,7 @@ class GroupsTableCard extends StatelessWidget {
                             fontWeight: FontWeight.w700,
                             fontFamily: GoogleFonts.inter().fontFamily,
                           ),
-                          headingRowColor: WidgetStateProperty.all(
+                          headingRowColor: MaterialStateProperty.all(
                             AppColors.primaryColor,
                           ),
                           dataTextStyle: TextStyle(
@@ -89,7 +88,6 @@ class GroupsTableCard extends StatelessWidget {
                           rows: groups.asMap().entries.map((entry) {
                             final group = entry.value;
                             return DataRow(
-
                               cells: [
                                 _buildDataCell('${entry.key + 1}', dynamicColumnWidth * 0.6),
                                 _buildDataCell(group.name?.capitalize() ?? "N/A", dynamicColumnWidth),
@@ -108,6 +106,142 @@ class GroupsTableCard extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildMobileListView() {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: ListView.separated(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: groups.length,
+        separatorBuilder: (context, index) => const Divider(height: 1),
+        itemBuilder: (context, index) {
+          final group = groups[index];
+          return _buildMobileGroupCard(context,group, index);
+        },
+      ),
+    );
+  }
+
+  Widget _buildMobileGroupCard(BuildContext context,GroupsModel group, int index) {
+    final isActive = _getGroupStatus(group);
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: index.isEven ? Colors.grey.withOpacity(0.03) : Colors.white,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header row with No. and Status
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  '${index + 1}',
+                  style: TextStyle(
+                    color: AppColors.primaryColor,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 12,
+                  ),
+                ),
+              ),
+              Text(
+                group.name?.capitalize() ?? "N/A",
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
+                ),
+              ),
+
+              _buildStatusChip(isActive),
+            ],
+          ),
+
+
+
+          // Action Buttons
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () => _showEditDialog(context, group),
+                  icon: const Icon(Icons.edit, size: 16),
+                  label: const Text('Edit'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.blue,
+                    side: BorderSide(color: Colors.blue.withOpacity(0.3)),
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () => _confirmDelete(context, group),
+                  icon: const Icon(Icons.delete, size: 16),
+                  label: const Text('Delete'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.red,
+                    side: BorderSide(color: Colors.red.withOpacity(0.3)),
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatusChip(bool isActive) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: isActive ? Colors.green.withOpacity(0.1) : Colors.red.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            isActive ? Icons.check_circle : Icons.cancel,
+            size: 14,
+            color: isActive ? Colors.green : Colors.red,
+          ),
+          const SizedBox(width: 4),
+          Text(
+            isActive ? 'Active' : 'Inactive',
+            style: TextStyle(
+              color: isActive ? Colors.green : Colors.red,
+              fontWeight: FontWeight.w600,
+              fontSize: 12,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -159,14 +293,11 @@ class GroupsTableCard extends StatelessWidget {
   }
 
   bool _getGroupStatus(GroupsModel group) {
-    // Handle different possible status representations
     if (group.isActive != null) {
       if (group.isActive is bool) {
         return group.isActive as bool;
       }
     }
-
-    // Fallback to isActive if available
     return group.isActive ?? false;
   }
 
@@ -205,7 +336,7 @@ class GroupsTableCard extends StatelessWidget {
           children: [
             // Edit Button
             _buildActionButton(
-              icon: Iconsax.edit,
+              icon: Icons.edit,
               color: Colors.blue,
               tooltip: 'Edit group',
               onPressed: () => _showEditDialog(context, group),
@@ -213,7 +344,7 @@ class GroupsTableCard extends StatelessWidget {
 
             // Delete Button
             _buildActionButton(
-              icon: HugeIcons.strokeRoundedDeleteThrow,
+              icon: Icons.delete,
               color: Colors.red,
               tooltip: 'Delete group',
               onPressed: () => _confirmDelete(context, group),
@@ -243,28 +374,25 @@ class GroupsTableCard extends StatelessWidget {
     final shouldDelete = await showDeleteConfirmationDialog(context);
     if (shouldDelete && context.mounted) {
       context.read<GroupsBloc>().add(
-          DeleteGroups( group.id.toString())
+        DeleteGroups(group.id.toString()),
       );
     }
   }
 
   void _showEditDialog(BuildContext context, GroupsModel group) {
-    // Pre-fill the form
     final groupsBloc = context.read<GroupsBloc>();
     groupsBloc.nameController.text = group.name ?? "";
     groupsBloc.selectedState = group.isActive == true ? "Active" : "Inactive";
-
-
 
     showDialog(
       context: context,
       builder: (context) {
         return Dialog(
           child: SizedBox(
-            width: AppSizes.width(context) * 0.50,
-            child: GroupsCreate(
-              id: group.id.toString(),
-            ),
+            width: Responsive.isMobile(context)
+                ? MediaQuery.of(context).size.width * 0.9
+                : MediaQuery.of(context).size.width * 0.5,
+            child: GroupsCreate(id: group.id.toString()),
           ),
         );
       },
@@ -317,3 +445,4 @@ class GroupsTableCard extends StatelessWidget {
     );
   }
 }
+
