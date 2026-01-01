@@ -73,9 +73,9 @@ class SupplierDataTableWidget extends StatelessWidget {
         children: [
           // Header with SL and Status
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
             decoration: BoxDecoration(
-              color: AppColors.primaryColor.withOpacity(0.05),
+              color: AppColors.primaryColor.withValues(alpha: 0.05),
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(16),
                 topRight: Radius.circular(16),
@@ -121,7 +121,7 @@ class SupplierDataTableWidget extends StatelessWidget {
 
           // Supplier Details
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(10),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -132,7 +132,7 @@ class SupplierDataTableWidget extends StatelessWidget {
                   value: supplier.name ?? '-',
                   isImportant: true,
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 6),
 
                 // Phone Row
                 _buildDetailRow(
@@ -145,7 +145,7 @@ class SupplierDataTableWidget extends StatelessWidget {
                   }
                       : null,
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 6),
 
                 // Address Row
                 if (supplier.address?.isNotEmpty == true)
@@ -183,13 +183,13 @@ class SupplierDataTableWidget extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 6),
                     ],
                   ),
 
                 // Financial Summary
                 Container(
-                  padding: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     color: Colors.grey.shade50,
                     borderRadius: BorderRadius.circular(12),
@@ -214,12 +214,12 @@ class SupplierDataTableWidget extends StatelessWidget {
                             style: TextStyle(
                               fontWeight: FontWeight.w700,
                               color: AppColors.primaryColor,
-                              fontSize: 13,
+                              fontSize: 12,
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 6),
 
                       // Financial Details Grid
                       GridView.count(
@@ -387,9 +387,9 @@ class SupplierDataTableWidget extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.05),
+        color: color.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.2)),
+        border: Border.all(color: color.withValues(alpha: 0.2)),
       ),
       child: Row(
         children: [
@@ -449,9 +449,9 @@ class SupplierDataTableWidget extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -503,7 +503,7 @@ class SupplierDataTableWidget extends StatelessWidget {
             color: Colors.white,
             boxShadow: [
               BoxShadow(
-                color: Colors.grey.withOpacity(0.1),
+                color: Colors.grey.withValues(alpha: 0.1),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
