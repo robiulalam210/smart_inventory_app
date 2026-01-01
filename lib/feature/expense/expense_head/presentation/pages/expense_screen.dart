@@ -31,10 +31,10 @@ class _ExpenseHeadScreenState extends State<ExpenseHeadScreen> {
 
   @override
   void dispose() {
-    _searchController.dispose();
-    if (dataBloc.filterTextController != null) {
-      dataBloc.filterTextController!.dispose();
-    }
+    // _searchController.dispose();
+    // if (dataBloc.filterTextController != null) {
+    //   dataBloc.filterTextController!.dispose();
+    // }
     super.dispose();
   }
 
