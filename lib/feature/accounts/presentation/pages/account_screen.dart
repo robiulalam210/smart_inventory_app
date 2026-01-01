@@ -1,3 +1,9 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:lottie/lottie.dart';
+import 'package:iconsax/iconsax.dart';
+import 'package:hugeicons/hugeicons.dart';
+
 import '../../../../core/configs/configs.dart';
 import '../../../../core/shared/widgets/sideMenu/sidebar.dart';
 import '../../../../core/widgets/app_alert_dialog.dart';
@@ -21,14 +27,23 @@ class AccountScreen extends StatefulWidget {
 }
 
 class _AccountScreenState extends State<AccountScreen> {
-  TextEditingController filterTextController = TextEditingController();
-  ValueNotifier<String?> selectedAccountTypeNotifier = ValueNotifier(null);
+  final TextEditingController filterTextController = TextEditingController();
+  final ValueNotifier<String?> selectedAccountTypeNotifier = ValueNotifier(null);
 
   @override
   void initState() {
     super.initState();
     filterTextController.clear();
-    _fetchApi();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _fetchApi();
+    });
+  }
+
+  @override
+  void dispose() {
+    filterTextController.dispose();
+    selectedAccountTypeNotifier.dispose();
+    super.dispose();
   }
 
   void _fetchApi({
@@ -37,6 +52,8 @@ class _AccountScreenState extends State<AccountScreen> {
     int pageNumber = 1,
     int pageSize = 10,
   }) {
+    if (!mounted) return;
+
     context.read<AccountBloc>().add(
       FetchAccountList(
         context,
@@ -104,167 +121,84 @@ class _AccountScreenState extends State<AccountScreen> {
         },
         child: Container(
           padding: AppTextStyle.getResponsivePaddingBody(context),
-          child: BlocListener<AccountBloc, AccountState>(
+          child: BlocConsumer<AccountBloc, AccountState>(
             listener: (context, state) {
-              if (state is AccountAddLoading) {
-                appLoader(context, "Processing account, please wait...");
-              } else if (state is AccountAddSuccess) {
-                Navigator.pop(context);
-                _fetchApi();
-              } else if (state is AccountAddFailed) {
-                Navigator.pop(context);
-                appAlertDialog(
-                  context,
-                  state.content,
-                  title: state.title,
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text("Dismiss"),
-                    ),
-                  ],
-                );
-              } else if (state is AccountDeleteLoading) {
-                appLoader(context, "Deleted Account, please wait...");
-              } else if (state is AccountDeleteSuccess) {
-                showCustomToast(
-                  context: context,
-                  title: 'Success!',
-                  description: state.message,
-                  icon: Icons.check_circle,
-                  primaryColor: Colors.green,
-                );
-
-                Navigator.pop(context); // Close loader dialog
-                _fetchApi(); // Reload warehouse list
-              } else if (state is AccountDeleteFailed) {
-                Navigator.pop(context); // Close loader dialog
-                _fetchApi();
-                appAlertDialog(
-                  context,
-                  state.content,
-                  title: state.title,
-                  actions: [
-                    TextButton(
-                      onPressed: () => AppRoutes.pop(context),
-                      child: const Text("Dismiss"),
-                    ),
-                  ],
-                );
-              }
+              _handleBlocState(state);
             },
-            child: Column(
-              children: [
-                _buildFilterRow(),
-                SizedBox(
-                  child: BlocBuilder<AccountBloc, AccountState>(
-                    builder: (context, state) {
-                      if (state is AccountListLoading) {
-                        return const Center(child: CircularProgressIndicator());
-                      } else if (state is AccountListSuccess) {
-                        if (state.list.isEmpty) {
-                          return Center(child: Lottie.asset(AppImages.noData));
-                        } else {
-                          return Column(
-                            children: [
-                              AccountCard(
-                                accounts: state.list,
-                                onEdit: (account) {
-                                  _showEditDialog(context, account);
-                                },
-                                onDelete: (account) async {
-                                  bool shouldDelete =
-                                      await showDeleteConfirmationDialog(
-                                        context,
-                                      );
-                                  if (!shouldDelete) return;
-
-                                  context.read<AccountBloc>().add(
-                                    DeleteAccount(account.id.toString()),
-                                  );
-                                },
-                              ),
-                              PaginationBar(
-                                count: state.count,
-                                totalPages: state.totalPages,
-                                currentPage: state.currentPage,
-                                pageSize: state.pageSize,
-                                from: state.from,
-                                to: state.to,
-                                onPageChanged: (page) => _fetchAccountList(
-                                  pageNumber: page,
-                                  pageSize: state.pageSize,
-                                ),
-                                onPageSizeChanged: (newSize) =>
-                                    _fetchAccountList(
-                                      pageNumber: 1,
-                                      pageSize: newSize,
-                                    ),
-                              ),
-                            ],
-                          );
-                        }
-                      } else if (state is AccountListFailed) {
-                        return Center(
-                          child: Text(
-                            'Failed to load accounts: ${state.content}',
-                          ),
-                        );
-                      } else {
-                        return Center(child: Lottie.asset(AppImages.noData));
-                      }
-                    },
+            builder: (context, state) {
+              return Column(
+                children: [
+                  if (isBigScreen)
+                    _buildDesktopHeader()
+                  else
+                    _buildMobileHeader(),
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    child: _buildAccountList(state),
                   ),
-                ),
-              ],
-            ),
+                ],
+              );
+            },
           ),
         ),
       ),
     );
   }
 
-  void _showEditDialog(BuildContext context, AccountModel account) {
-    // Clear existing data first
-    _clearAccountBlocData();
-
-    // Pre-fill the form with account data
-    final accountBloc = context.read<AccountBloc>();
-    accountBloc.accountNameController.text = account.name ?? "";
-    accountBloc.accountNumberController.text = account.acNumber ?? "";
-    accountBloc.bankNameController.text = account.bankName ?? "";
-    accountBloc.branchNameController.text = account.branch ?? "";
-    accountBloc.accountOpeningBalanceController.text =
-        account.balance?.toString() ?? "0.0";
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return Dialog(
-          child: SizedBox(
-            width: AppSizes.width(context) * 0.50,
-            child: CreateAccountScreen(
-              id: account.id.toString(),
-              submitText: "Update Account",
-              account: account, // Pass the account for pre-filling
+  void _handleBlocState(AccountState state) {
+    if (state is AccountAddLoading) {
+      appLoader(context, "Processing account, please wait...");
+    } else if (state is AccountAddSuccess) {
+      Navigator.pop(context);
+      _fetchApi();
+    } else if (state is AccountAddFailed) {
+      if (context.mounted) {
+        Navigator.pop(context);
+        appAlertDialog(
+          context,
+          state.content,
+          title: state.title,
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Dismiss"),
             ),
-          ),
+          ],
         );
-      },
-    );
+      }
+    } else if (state is AccountDeleteLoading) {
+      appLoader(context, "Deleting Account, please wait...");
+    } else if (state is AccountDeleteSuccess) {
+      if (context.mounted) {
+        showCustomToast(
+          context: context,
+          title: 'Success!',
+          description: state.message,
+          icon: Icons.check_circle,
+          primaryColor: Colors.green,
+        );
+        Navigator.pop(context);
+        _fetchApi();
+      }
+    } else if (state is AccountDeleteFailed) {
+      if (context.mounted) {
+        Navigator.pop(context);
+        appAlertDialog(
+          context,
+          state.content,
+          title: state.title,
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Dismiss"),
+            ),
+          ],
+        );
+      }
+    }
   }
 
-  void _clearAccountBlocData() {
-    final accountBloc = context.read<AccountBloc>();
-    accountBloc.accountNameController.clear();
-    accountBloc.accountNumberController.clear();
-    accountBloc.bankNameController.clear();
-    accountBloc.branchNameController.clear();
-    accountBloc.accountOpeningBalanceController.clear();
-    accountBloc.selectedState = "";
-  }
-
-  Widget _buildFilterRow() {
+  Widget _buildDesktopHeader() {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.center,
@@ -286,31 +220,36 @@ class _AccountScreenState extends State<AccountScreen> {
 
         // 🏦 Account Type Dropdown
         Expanded(
-          child: AppDropdown<String>(
-            context: context,
-            hint: "Select Account Type",
-            isNeedAll: true,
-            isLabel: false,
-            isRequired: false,
-            value: selectedAccountTypeNotifier.value,
-            itemList: ['Cash', 'Bank', 'Mobile Banking'],
-            onChanged: (newVal) {
-              selectedAccountTypeNotifier.value = newVal;
-              _fetchApi(accountType: newVal?.toLowerCase() ?? '');
-            },
-            validator: (value) => null,
-            itemBuilder: (item) => DropdownMenuItem<String>(
-              value: item,
-              child: Text(
-                item,
-                style: const TextStyle(
-                  color: AppColors.blackColor,
-                  fontFamily: 'Quicksand',
-                  fontWeight: FontWeight.w300,
+          child: ValueListenableBuilder<String?>(
+            valueListenable: selectedAccountTypeNotifier,
+            builder: (context, value, child) {
+              return AppDropdown<String>(
+                context: context,
+                hint: "Select Account Type",
+                isNeedAll: true,
+                isLabel: false,
+                isRequired: false,
+                value: value,
+                itemList: ['Cash', 'Bank', 'Mobile Banking'],
+                onChanged: (newVal) {
+                  selectedAccountTypeNotifier.value = newVal;
+                  _fetchApi(accountType: newVal?.toLowerCase() ?? '');
+                },
+                validator: (value) => null,
+                itemBuilder: (item) => DropdownMenuItem<String>(
+                  value: item,
+                  child: Text(
+                    item,
+                    style: const TextStyle(
+                      color: AppColors.blackColor,
+                      fontFamily: 'Quicksand',
+                      fontWeight: FontWeight.w300,
+                    ),
+                  ),
                 ),
-              ),
-            ),
-            label: '',
+                label: '',
+              );
+            },
           ),
         ),
         gapW16,
@@ -318,21 +257,7 @@ class _AccountScreenState extends State<AccountScreen> {
         // ➕ Create Account Button
         AppButton(
           name: "Create Account",
-          onPressed: () {
-            _clearAccountBlocData(); // Clear any existing data
-            showDialog(
-              context: context,
-              builder: (context) {
-                return Dialog(
-                  child: SizedBox(
-                    width: AppSizes.width(context) * 0.60,
-                    height: 350,
-                    child: const CreateAccountScreen(),
-                  ),
-                );
-              },
-            );
-          },
+          onPressed: () => _showCreateAccountDialog(context),
         ),
 
         gapW16,
@@ -344,6 +269,370 @@ class _AccountScreenState extends State<AccountScreen> {
           tooltip: "Refresh",
         ),
       ],
+    );
+  }
+
+  Widget _buildMobileHeader() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // Search Bar
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.1),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: CustomSearchTextFormField(
+                    isRequiredLabel: false,
+                    controller: filterTextController,
+                    onChanged: (value) => _fetchApi(filterText: value),
+                    onClear: () {
+                      filterTextController.clear();
+                      _fetchApi();
+                    },
+                    hintText: "Search accounts...",
+                  ),
+                ),
+              ),
+              IconButton(
+                icon: Icon(
+                  Iconsax.filter,
+                  color: AppColors.primaryColor,
+                ),
+                onPressed: () => _showMobileFilterSheet(context),
+              ),
+              IconButton(
+                onPressed: () => _fetchApi(),
+                icon: const Icon(Icons.refresh),
+                tooltip: "Refresh",
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+
+        // Filter Chips
+        ValueListenableBuilder<String?>(
+          valueListenable: selectedAccountTypeNotifier,
+          builder: (context, accountType, child) {
+            return Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                if (accountType != null && accountType != "All")
+                  Chip(
+                    label: Text(accountType),
+                    onDeleted: () {
+                      selectedAccountTypeNotifier.value = null;
+                      _fetchApi();
+                    },
+                  ),
+              ],
+            );
+          },
+        ),
+        const SizedBox(height: 12),
+
+        // Action Buttons
+        Row(
+          children: [
+            Expanded(
+              child: OutlinedButton.icon(
+                onPressed: () => _showMobileFilterSheet(context),
+                icon: const Icon(Iconsax.filter, size: 16),
+                label: const Text('Filter'),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: AppButton(
+                name: "Create Account",
+                onPressed: () => _showCreateAccountDialog(context),
+                padding: const EdgeInsets.symmetric(vertical: 12),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAccountList(AccountState state) {
+    if (state is AccountListLoading) {
+      return const Center(child: CircularProgressIndicator());
+    } else if (state is AccountListSuccess) {
+      if (state.list.isEmpty) {
+        return Center(child: Lottie.asset(AppImages.noData));
+      } else {
+        return Column(
+          children: [
+            SizedBox(
+              child: AccountCard(
+                accounts: state.list,
+                onEdit: (account) => _showEditDialog(context, account, false),
+                onDelete: (account) async {
+                  final shouldDelete = await showDeleteConfirmationDialog(context);
+                  if (!shouldDelete) return;
+
+                  if (context.mounted) {
+                    context.read<AccountBloc>().add(
+                      DeleteAccount(account.id.toString()),
+                    );
+                  }
+                },
+              ),
+            ),
+            const SizedBox(height: 16),
+            PaginationBar(
+              count: state.count,
+              totalPages: state.totalPages,
+              currentPage: state.currentPage,
+              pageSize: state.pageSize,
+              from: state.from,
+              to: state.to,
+              onPageChanged: (page) => _fetchAccountList(
+                pageNumber: page,
+                pageSize: state.pageSize,
+              ),
+              onPageSizeChanged: (newSize) => _fetchAccountList(
+                pageNumber: 1,
+                pageSize: newSize,
+              ),
+            ),
+          ],
+        );
+      }
+    } else if (state is AccountListFailed) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline, size: 60, color: Colors.red),
+            const SizedBox(height: 16),
+            Text(
+              'Failed to load accounts',
+              style: const TextStyle(fontSize: 16),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              state.content,
+              style: const TextStyle(fontSize: 14, color: Colors.grey),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            AppButton(
+              name: "Retry",
+              onPressed: () => _fetchApi(),
+            ),
+          ],
+        ),
+      );
+    } else {
+      return Center(child: Lottie.asset(AppImages.noData));
+    }
+  }
+
+  void _showCreateAccountDialog(BuildContext context) {
+    _clearAccountBlocData();
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          insetPadding: const EdgeInsets.all(20),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: Responsive.isMobile(context)
+                  ? AppSizes.width(context)
+                  : AppSizes.width(context) * 0.6,
+              maxHeight: Responsive.isMobile(context)
+                  ? AppSizes.height(context) * 0.8
+                  : 350,
+            ),
+            child: const CreateAccountScreen(),
+          ),
+        );
+      },
+    );
+  }
+
+  void _showEditDialog(BuildContext context, AccountModel account, bool isMobile) {
+    _clearAccountBlocData();
+
+    final accountBloc = context.read<AccountBloc>();
+    accountBloc.accountNameController.text = account.name ?? "";
+    accountBloc.accountNumberController.text = account.acNumber ?? "";
+    accountBloc.bankNameController.text = account.bankName ?? "";
+    accountBloc.branchNameController.text = account.branch ?? "";
+    accountBloc.accountOpeningBalanceController.text =
+        account.balance?.toString() ?? "0.0";
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          insetPadding: const EdgeInsets.all(20),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: isMobile
+                  ? AppSizes.width(context)
+                  : AppSizes.width(context) * 0.5,
+              maxHeight: isMobile
+                  ? AppSizes.height(context) * 0.8
+                  : AppSizes.height(context) * 0.7,
+            ),
+            child: CreateAccountScreen(
+              id: account.id.toString(),
+              submitText: "Update Account",
+              account: account,
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _clearAccountBlocData() {
+    final accountBloc = context.read<AccountBloc>();
+    accountBloc.accountNameController.clear();
+    accountBloc.accountNumberController.clear();
+    accountBloc.bankNameController.clear();
+    accountBloc.branchNameController.clear();
+    accountBloc.accountOpeningBalanceController.clear();
+    accountBloc.selectedState = "";
+  }
+
+  void _showMobileFilterSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return Container(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        "Filter Accounts",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Account Type Filter
+                  const Text(
+                    "Account Type",
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    children: ["All", "Cash", "Bank", "Mobile Banking"].map((type) {
+                      final bool isSelected =
+                          selectedAccountTypeNotifier.value == type ||
+                              (type == "All" && selectedAccountTypeNotifier.value == null);
+                      return FilterChip(
+                        label: Text(type),
+                        selected: isSelected,
+                        onSelected: (selected) {
+                          setState(() {
+                            selectedAccountTypeNotifier.value = selected ? type : null;
+                          });
+                        },
+                        selectedColor: AppColors.primaryColor.withOpacity(0.2),
+                        checkmarkColor: AppColors.primaryColor,
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Action Buttons
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () {
+                            setState(() {
+                              filterTextController.clear();
+                              selectedAccountTypeNotifier.value = null;
+                            });
+                            Navigator.pop(context);
+                            _fetchApi();
+                          },
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          child: const Text("Clear All"),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                            _fetchApi(
+                              filterText: filterTextController.text,
+                              accountType: selectedAccountTypeNotifier.value?.toLowerCase() ?? '',
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primaryColor,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          child: const Text("Apply Filters"),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: MediaQuery.of(context).viewInsets.bottom),
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }

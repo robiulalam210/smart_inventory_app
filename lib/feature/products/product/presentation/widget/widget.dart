@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:iconsax/iconsax.dart';
-import '../../../../../core/configs/app_colors.dart';
+
+import '../../../../../core/configs/configs.dart';
+import '../../../../../core/widgets/delete_dialog.dart';
 import '../../data/model/product_model.dart';
 
 class ProductDataTableWidget extends StatelessWidget {
@@ -18,13 +20,282 @@ class ProductDataTableWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isMobile = Responsive.isMobile(context);
+    final bool isTablet = Responsive.isTablet(context);
+
+    if (isMobile || isTablet) {
+      return _buildMobileCardView(context, isMobile);
+    } else {
+      return _buildDesktopDataTable();
+    }
+  }
+
+  Widget _buildMobileCardView(BuildContext context, bool isMobile) {
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: products.length,
+      itemBuilder: (context, index) {
+        final product = products[index];
+        return _buildProductCard(product, index + 1, context, isMobile);
+      },
+    );
+  }
+
+  Widget _buildProductCard(
+      ProductModel product,
+      int index,
+      BuildContext context,
+      bool isMobile,
+      ) {
+    return Container(
+      margin: EdgeInsets.symmetric(
+        horizontal: isMobile ? 8.0 : 16.0,
+        vertical: 8.0,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+        border: Border.all(
+          color: Colors.grey.shade200,
+          width: 1,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header with SL and Status
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: AppColors.primaryColor.withOpacity(0.05),
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(16),
+                topRight: Radius.circular(16),
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryColor,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    '#$index',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: (product.isActive ?? false)
+                        ? Colors.green.withOpacity(0.1)
+                        : Colors.red.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: (product.isActive ?? false) ? Colors.green : Colors.red,
+                      width: 1,
+                    ),
+                  ),
+                  child: Text(
+                    (product.isActive ?? false) ? 'Active' : 'Inactive',
+                    style: TextStyle(
+                      color: (product.isActive ?? false) ? Colors.green : Colors.red,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Product Details
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Product Name
+                _buildDetailRow(
+                  icon: Iconsax.box,
+                  label: 'Product Name',
+                  value: product.name ?? 'N/A',
+                  isImportant: true,
+                ),
+                const SizedBox(height: 8),
+
+                // SKU
+                _buildDetailRow(
+                  icon: Iconsax.tag,
+                  label: 'SKU',
+                  value: product.sku ?? 'N/A',
+                ),
+                const SizedBox(height: 8),
+
+                // Category
+                _buildDetailRow(
+                  icon: Iconsax.category,
+                  label: 'Category',
+                  value: product.categoryInfo?.name ?? 'N/A',
+                ),
+                const SizedBox(height: 8),
+
+                // Brand
+                _buildDetailRow(
+                  icon: Iconsax.building,
+                  label: 'Brand',
+                  value: product.brandInfo?.name ?? 'N/A',
+                ),
+                const SizedBox(height: 8),
+
+                // Unit
+                _buildDetailRow(
+                  icon: Iconsax.ruler,
+                  label: 'Unit',
+                  value: product.unitInfo?.name ?? 'N/A',
+                ),
+              ],
+            ),
+          ),
+
+          // Action Buttons
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade50,
+              borderRadius: const BorderRadius.only(
+                bottomLeft: Radius.circular(16),
+                bottomRight: Radius.circular(16),
+              ),
+              border: Border(
+                top: BorderSide(
+                  color: Colors.grey.shade200,
+                  width: 1,
+                ),
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                // Edit Button
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () => onEdit?.call(product),
+                    icon: const Icon(
+                      Iconsax.edit,
+                      size: 16,
+                    ),
+                    label: const Text('Edit'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.blue,
+                      side: BorderSide(color: Colors.blue.shade300),
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+
+                // Delete Button
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () => _showDeleteConfirmation(context, product),
+                    icon: const Icon(
+                      HugeIcons.strokeRoundedDeleteThrow,
+                      size: 16,
+                    ),
+                    label: const Text('Delete'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.red,
+                      side: BorderSide(color: Colors.red.shade300),
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailRow({
+    required IconData icon,
+    required String label,
+    required String value,
+    bool isImportant = false,
+  }) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(
+          icon,
+          size: 16,
+          color: Colors.grey.shade600,
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey.shade700,
+                  fontSize: 12,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                value,
+                style: TextStyle(
+                  fontWeight: isImportant ? FontWeight.w700 : FontWeight.w500,
+                  color: isImportant ? Colors.black : Colors.grey.shade800,
+                  fontSize: isImportant ? 14 : 13,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDesktopDataTable() {
     final verticalScrollController = ScrollController();
     final horizontalScrollController = ScrollController();
 
     return LayoutBuilder(
       builder: (context, constraints) {
         final totalWidth = constraints.maxWidth;
-        const numColumns = 8; // Added one column for actions
+        const numColumns = 8;
         const minColumnWidth = 100;
 
         final dynamicColumnWidth = (totalWidth / numColumns)
@@ -42,39 +313,41 @@ class ProductDataTableWidget extends StatelessWidget {
             child: SingleChildScrollView(
               controller: verticalScrollController,
               scrollDirection: Axis.vertical,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: Scrollbar(
+              child: Scrollbar(
+                controller: horizontalScrollController,
+                thumbVisibility: true,
+                child: SingleChildScrollView(
                   controller: horizontalScrollController,
-                  thumbVisibility: true,
-                  child: SingleChildScrollView(
-                    controller: horizontalScrollController,
-                    scrollDirection: Axis.horizontal,
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 5),
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(minWidth: totalWidth),
-                        child: DataTable(
-                          dataRowMinHeight: 40,
-                          headingRowHeight: 40,
-                          columnSpacing: 0,
-                          headingTextStyle: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          headingRowColor:
-                          WidgetStateProperty.all(
-                              AppColors.primaryColor
-                          ),
-                          columns: _buildColumns(dynamicColumnWidth),
-                          rows: products
-                              .asMap()
-                              .entries
-                              .map((entry) => _buildDataRow(entry.key + 1, entry.value, dynamicColumnWidth))
-                              .toList(),
-                        ),
+                  scrollDirection: Axis.horizontal,
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(minWidth: totalWidth),
+                    child: DataTable(
+                      dataRowMinHeight: 40,
+                      headingRowHeight: 40,
+                      columnSpacing: 0,
+                      headingTextStyle: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
                       ),
+                      headingRowColor: WidgetStateProperty.all(
+                        AppColors.primaryColor,
+                      ),
+                      dataRowColor: WidgetStateProperty.resolveWith<Color?>(
+                            (Set<WidgetState> states) {
+                          return Colors.white;
+                        },
+                      ),
+                      columns: _buildColumns(dynamicColumnWidth),
+                      rows: products
+                          .asMap()
+                          .entries
+                          .map((entry) => _buildDataRow(context,
+                        entry.key + 1,
+                        entry.value,
+                        dynamicColumnWidth,
+                      ))
+                          .toList(),
                     ),
                   ),
                 ),
@@ -102,17 +375,22 @@ class ProductDataTableWidget extends StatelessWidget {
         .map(
           (label) => DataColumn(
         label: Container(
-          width: label == 'SL' ? columnWidth * 0.6 :
-          label == 'Name' ? columnWidth * 1.2 :
-          label == 'Actions' ? columnWidth * 0.8 :
-          columnWidth,
+          width: label == 'SL'
+              ? columnWidth * 0.6
+              : label == 'Name'
+              ? columnWidth * 1.2
+              : label == 'Actions'
+              ? columnWidth * 0.8
+              : columnWidth,
           alignment: Alignment.center,
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
             child: Text(
               label,
               style: const TextStyle(
-                  fontSize: 11, fontWeight: FontWeight.w700),
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+              ),
               maxLines: 2,
               softWrap: true,
               textAlign: TextAlign.center,
@@ -124,36 +402,49 @@ class ProductDataTableWidget extends StatelessWidget {
         .toList();
   }
 
-  DataRow _buildDataRow(int index, ProductModel product, double columnWidth) {
+  DataRow _buildDataRow(BuildContext context,int index, ProductModel product, double columnWidth) {
     return DataRow(
       cells: [
-        _buildDataCell(index.toString(), columnWidth * 0.6),
-        _buildDataCell(product.name ?? 'N/A', columnWidth * 1.2),
-        _buildDataCell(product.sku ?? 'N/A', columnWidth),
-        _buildDataCell(product.categoryInfo?.name ?? 'N/A', columnWidth),
-        _buildDataCell(product.brandInfo?.name ?? 'N/A', columnWidth),
-        _buildDataCell(product.unitInfo?.name ?? 'N/A', columnWidth),
+        _buildDataCell(index.toString(), columnWidth * 0.6, TextAlign.center),
+        _buildDataCell(product.name ?? 'N/A', columnWidth * 1.2, TextAlign.center),
+        _buildDataCell(product.sku ?? 'N/A', columnWidth, TextAlign.center),
+        _buildDataCell(
+          product.categoryInfo?.name ?? 'N/A',
+          columnWidth,
+          TextAlign.center,
+        ),
+        _buildDataCell(
+          product.brandInfo?.name ?? 'N/A',
+          columnWidth,
+          TextAlign.center,
+        ),
+        _buildDataCell(
+          product.unitInfo?.name ?? 'N/A',
+          columnWidth,
+          TextAlign.center,
+        ),
         _buildStatusCell(product.isActive ?? false, columnWidth),
-        _buildActionsCell(product, columnWidth * 0.8),
+        _buildActionsCell(context,product, columnWidth * 0.8),
       ],
     );
   }
 
-  DataCell _buildDataCell(String text, double columnWidth) {
+  DataCell _buildDataCell(String text, double columnWidth, TextAlign align) {
     return DataCell(
       SizedBox(
         width: columnWidth,
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
-          child: SelectableText(
+          child: Text(
             text,
             style: const TextStyle(
               fontSize: 10,
               fontWeight: FontWeight.normal,
               color: Colors.black,
             ),
-            textAlign: TextAlign.center,
+            textAlign: align,
             maxLines: 3,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
       ),
@@ -171,7 +462,7 @@ class ProductDataTableWidget extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
+              color: color.withOpacity(0.1),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: color),
             ),
@@ -190,7 +481,7 @@ class ProductDataTableWidget extends StatelessWidget {
     );
   }
 
-  DataCell _buildActionsCell(ProductModel product, double columnWidth) {
+  DataCell _buildActionsCell(BuildContext context,ProductModel product, double columnWidth) {
     return DataCell(
       SizedBox(
         width: columnWidth,
@@ -200,7 +491,6 @@ class ProductDataTableWidget extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Edit Button
               IconButton(
                 icon: Icon(
                   Iconsax.edit,
@@ -212,15 +502,13 @@ class ProductDataTableWidget extends StatelessWidget {
                 constraints: const BoxConstraints(),
                 tooltip: 'Edit Product',
               ),
-
-              // Delete Button
               IconButton(
                 icon: Icon(
                   HugeIcons.strokeRoundedDeleteThrow,
                   size: 20,
                   color: Colors.red.shade600,
                 ),
-                onPressed: () => onDelete?.call(product),
+                onPressed: () => _showDeleteConfirmation(context, product),
                 padding: const EdgeInsets.all(4),
                 constraints: const BoxConstraints(),
                 tooltip: 'Delete Product',
@@ -230,5 +518,12 @@ class ProductDataTableWidget extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _showDeleteConfirmation(BuildContext context, ProductModel product) async {
+    final shouldDelete = await showDeleteConfirmationDialog(context);
+    if (!shouldDelete) return;
+
+    onDelete?.call(product);
   }
 }
