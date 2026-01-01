@@ -1,4 +1,7 @@
-// transactions/presentation/screens/transaction_screen.dart
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:lottie/lottie.dart';
+import 'package:iconsax/iconsax.dart';
 
 import '../../../../core/configs/configs.dart';
 import '../../../../core/shared/widgets/sideMenu/sidebar.dart';
@@ -17,10 +20,10 @@ class TransactionScreen extends StatefulWidget {
 }
 
 class _TransactionScreenState extends State<TransactionScreen> {
-  TextEditingController filterTextController = TextEditingController();
-  ValueNotifier<String?> selectedTransactionTypeNotifier = ValueNotifier(null);
-  ValueNotifier<String?> selectedStatusNotifier = ValueNotifier(null);
-  ValueNotifier<String?> selectedAccountNotifier = ValueNotifier(null);
+  final TextEditingController filterTextController = TextEditingController();
+  final ValueNotifier<String?> selectedTransactionTypeNotifier = ValueNotifier(null);
+  final ValueNotifier<String?> selectedStatusNotifier = ValueNotifier(null);
+  final ValueNotifier<String?> selectedAccountNotifier = ValueNotifier(null);
   DateTime? startDate;
   DateTime? endDate;
 
@@ -28,7 +31,18 @@ class _TransactionScreenState extends State<TransactionScreen> {
   void initState() {
     super.initState();
     filterTextController.clear();
-    _fetchTransactions();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _fetchTransactions();
+    });
+  }
+
+  @override
+  void dispose() {
+    filterTextController.dispose();
+    selectedTransactionTypeNotifier.dispose();
+    selectedStatusNotifier.dispose();
+    selectedAccountNotifier.dispose();
+    super.dispose();
   }
 
   void _fetchTransactions({
@@ -39,6 +53,8 @@ class _TransactionScreenState extends State<TransactionScreen> {
     int pageNumber = 1,
     int pageSize = 10,
   }) {
+    if (!mounted) return;
+
     context.read<TransactionBloc>().add(
       FetchTransactionList(
         context,
@@ -63,6 +79,16 @@ class _TransactionScreenState extends State<TransactionScreen> {
       status: selectedStatusNotifier.value?.toString() ?? '',
       accountId: selectedAccountNotifier.value?.toString() ?? '',
     );
+  }
+
+  void _clearFilters() {
+    filterTextController.clear();
+    selectedTransactionTypeNotifier.value = null;
+    selectedStatusNotifier.value = null;
+    selectedAccountNotifier.value = null;
+    startDate = null;
+    endDate = null;
+    _fetchTransactions();
   }
 
   Future<void> _selectDateRange(BuildContext context) async {
@@ -140,59 +166,13 @@ class _TransactionScreenState extends State<TransactionScreen> {
           padding: AppTextStyle.getResponsivePaddingBody(context),
           child: Column(
             children: [
-              _buildFilterRow(),
+              if (isBigScreen)
+                _buildDesktopHeader()
+              else
+                _buildMobileHeader(),
+              const SizedBox(height: 16),
               SizedBox(
-                child: BlocBuilder<TransactionBloc, TransactionState>(
-                  builder: (context, state) {
-                    if (state is TransactionListLoading) {
-                      return const Center(child: CircularProgressIndicator());
-                    } else if (state is TransactionListSuccess) {
-                      if (state.list.isEmpty) {
-                        return Center(child: Lottie.asset(AppImages.noData));
-                      } else {
-                        return Column(
-                          children: [
-                            TransactionCard(
-                              transactions: state.list,
-                              onReverse: (transaction) async {
-                                // bool shouldReverse = await showDeleteConfirmationDialog(
-                                //   context,
-                                //   title: "Reverse Transaction",
-                                //   content: "Are you sure you want to reverse this transaction?",
-                                // );
-                                // if (!shouldReverse) return;
-                                //
-                                // context.read<TransactionBloc>().add(
-                                //   ReverseTransaction(context, transaction.id.toString()),
-                                // );
-                              },
-                            ),
-                            PaginationBar(
-                              count: state.count,
-                              totalPages: state.totalPages,
-                              currentPage: state.currentPage,
-                              pageSize: state.pageSize,
-                              from: state.from,
-                              to: state.to,
-                              onPageChanged: (page) =>
-                                  _fetchTransactionList(pageNumber: page, pageSize: state.pageSize),
-                              onPageSizeChanged: (newSize) =>
-                                  _fetchTransactionList(pageNumber: 1, pageSize: newSize),
-                            ),
-                          ],
-                        );
-                      }
-                    } else if (state is TransactionListFailed) {
-                      return Center(
-                        child: Text(
-                          'Failed to load transactions: ${state.content}',
-                        ),
-                      );
-                    } else {
-                      return Center(child: Lottie.asset(AppImages.noData));
-                    }
-                  },
-                ),
+                child: _buildTransactionList(),
               ),
             ],
           ),
@@ -201,10 +181,9 @@ class _TransactionScreenState extends State<TransactionScreen> {
     );
   }
 
-  Widget _buildFilterRow() {
+  Widget _buildDesktopHeader() {
     return Column(
       children: [
-        // First Row - Search and Basic Filters
         Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.center,
@@ -226,66 +205,76 @@ class _TransactionScreenState extends State<TransactionScreen> {
 
             // 💰 Transaction Type Dropdown
             Expanded(
-              child: AppDropdown<String>(
-                context: context,
-                hint: "Transaction Type",
-                isNeedAll: true,
-                isLabel: false,
-                isRequired: false,
-                value: selectedTransactionTypeNotifier.value,
-                itemList: ['Credit', 'Debit'],
-                onChanged: (newVal) {
-                  selectedTransactionTypeNotifier.value = newVal;
-                  _fetchTransactions(
-                    transactionType: newVal?.toLowerCase() ?? '',
+              child: ValueListenableBuilder<String?>(
+                valueListenable: selectedTransactionTypeNotifier,
+                builder: (context, value, child) {
+                  return AppDropdown<String>(
+                    context: context,
+                    hint: "Transaction Type",
+                    isNeedAll: true,
+                    isLabel: false,
+                    isRequired: false,
+                    value: value,
+                    itemList: ['Credit', 'Debit'],
+                    onChanged: (newVal) {
+                      selectedTransactionTypeNotifier.value = newVal;
+                      _fetchTransactions(
+                        transactionType: newVal?.toLowerCase() ?? '',
+                      );
+                    },
+                    validator: (value) => null,
+                    itemBuilder: (item) => DropdownMenuItem<String>(
+                      value: item,
+                      child: Text(
+                        item,
+                        style: const TextStyle(
+                          color: AppColors.blackColor,
+                          fontFamily: 'Quicksand',
+                          fontWeight: FontWeight.w300,
+                        ),
+                      ),
+                    ),
+                    label: '',
                   );
                 },
-                validator: (value) => null,
-                itemBuilder: (item) => DropdownMenuItem<String>(
-                  value: item,
-                  child: Text(
-                    item,
-                    style: const TextStyle(
-                      color: AppColors.blackColor,
-                      fontFamily: 'Quicksand',
-                      fontWeight: FontWeight.w300,
-                    ),
-                  ),
-                ),
-                label: '',
               ),
             ),
             const SizedBox(width: 10),
 
             // 📊 Status Dropdown
             Expanded(
-              child: AppDropdown<String>(
-                context: context,
-                hint: "Status",
-                isNeedAll: true,
-                isLabel: false,
-                isRequired: false,
-                value: selectedStatusNotifier.value,
-                itemList: ['Completed', 'Pending', 'Failed'],
-                onChanged: (newVal) {
-                  selectedStatusNotifier.value = newVal;
-                  _fetchTransactions(
-                    status: newVal?.toLowerCase() ?? '',
+              child: ValueListenableBuilder<String?>(
+                valueListenable: selectedStatusNotifier,
+                builder: (context, value, child) {
+                  return AppDropdown<String>(
+                    context: context,
+                    hint: "Status",
+                    isNeedAll: true,
+                    isLabel: false,
+                    isRequired: false,
+                    value: value,
+                    itemList: ['Completed', 'Pending', 'Failed'],
+                    onChanged: (newVal) {
+                      selectedStatusNotifier.value = newVal;
+                      _fetchTransactions(
+                        status: newVal?.toLowerCase() ?? '',
+                      );
+                    },
+                    validator: (value) => null,
+                    itemBuilder: (item) => DropdownMenuItem<String>(
+                      value: item,
+                      child: Text(
+                        item,
+                        style: const TextStyle(
+                          color: AppColors.blackColor,
+                          fontFamily: 'Quicksand',
+                          fontWeight: FontWeight.w300,
+                        ),
+                      ),
+                    ),
+                    label: '',
                   );
                 },
-                validator: (value) => null,
-                itemBuilder: (item) => DropdownMenuItem<String>(
-                  value: item,
-                  child: Text(
-                    item,
-                    style: const TextStyle(
-                      color: AppColors.blackColor,
-                      fontFamily: 'Quicksand',
-                      fontWeight: FontWeight.w300,
-                    ),
-                  ),
-                ),
-                label: '',
               ),
             ),
             gapW16,
@@ -294,7 +283,6 @@ class _TransactionScreenState extends State<TransactionScreen> {
             AppButton(
               name: "Date Range",
               onPressed: () => _selectDateRange(context),
-              // backgroundColor: AppColors.primaryColor.withOpacity(0.1),
               textColor: AppColors.primaryColor,
             ),
 
@@ -308,10 +296,9 @@ class _TransactionScreenState extends State<TransactionScreen> {
             ),
           ],
         ),
-
         const SizedBox(height: 16),
 
-        // Second Row - Date Range Display and Clear Button
+        // Date Range Display
         if (startDate != null || endDate != null)
           Row(
             children: [
@@ -319,9 +306,9 @@ class _TransactionScreenState extends State<TransactionScreen> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   decoration: BoxDecoration(
-                    color: AppColors.primaryColor.withValues(alpha: 0.05),
+                    color: AppColors.primaryColor.withOpacity(0.05),
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: AppColors.primaryColor.withValues(alpha: 0.2)),
+                    border: Border.all(color: AppColors.primaryColor.withOpacity(0.2)),
                   ),
                   child: Row(
                     children: [
@@ -344,9 +331,351 @@ class _TransactionScreenState extends State<TransactionScreen> {
                   ),
                 ),
               ),
+              const SizedBox(width: 16),
+              TextButton(
+                onPressed: _clearFilters,
+                child: Text(
+                  'Clear All Filters',
+                  style: TextStyle(color: Colors.red),
+                ),
+              ),
             ],
           ),
       ],
+    );
+  }
+
+  Widget _buildMobileHeader() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // Search Bar
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.1),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: CustomSearchTextFormField(
+                    isRequiredLabel: false,
+                    controller: filterTextController,
+                    onChanged: (value) => _fetchTransactions(filterText: value),
+                    onClear: () {
+                      filterTextController.clear();
+                      _fetchTransactions();
+                    },
+                    hintText: "Search transactions...",
+                  ),
+                ),
+              ),
+              IconButton(
+                icon: Icon(
+                  Iconsax.filter,
+                  color: AppColors.primaryColor,
+                ),
+                onPressed: () => _showMobileFilterSheet(context),
+              ),
+              IconButton(
+                onPressed: () => _fetchTransactions(),
+                icon: const Icon(Icons.refresh),
+                tooltip: "Refresh",
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+
+        // Filter Chips
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            if (selectedTransactionTypeNotifier.value != null)
+              Chip(
+                label: Text(selectedTransactionTypeNotifier.value!),
+                onDeleted: () {
+                  selectedTransactionTypeNotifier.value = null;
+                  _fetchTransactions();
+                },
+              ),
+            if (selectedStatusNotifier.value != null)
+              Chip(
+                label: Text(selectedStatusNotifier.value!),
+                onDeleted: () {
+                  selectedStatusNotifier.value = null;
+                  _fetchTransactions();
+                },
+              ),
+            if (startDate != null || endDate != null)
+              Chip(
+                label: Text(
+                  '${startDate != null ? _formatDate(startDate!) : "Any"} - ${endDate != null ? _formatDate(endDate!) : "Any"}',
+                ),
+                onDeleted: _clearDateRange,
+              ),
+          ],
+        ),
+        const SizedBox(height: 12),
+
+        // Action Buttons
+        Row(
+          children: [
+            Expanded(
+              child: OutlinedButton.icon(
+                onPressed: () => _showMobileFilterSheet(context),
+                icon: const Icon(Iconsax.filter, size: 16),
+                label: const Text('More Filters'),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: OutlinedButton.icon(
+                onPressed: () => _selectDateRange(context),
+                icon: const Icon(Iconsax.calendar, size: 16),
+                label: const Text('Date Range'),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTransactionList() {
+    return BlocBuilder<TransactionBloc, TransactionState>(
+      builder: (context, state) {
+        if (state is TransactionListLoading) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (state is TransactionListSuccess) {
+          if (state.list.isEmpty) {
+            return Center(child: Lottie.asset(AppImages.noData));
+          } else {
+            return Column(
+              children: [
+                SizedBox(
+                  child: TransactionCard(
+                    transactions: state.list,
+                    onReverse: (transaction) async {
+                      // Implement reverse functionality
+                    },
+                  ),
+                ),
+                const SizedBox(height: 16),
+                PaginationBar(
+                  count: state.count,
+                  totalPages: state.totalPages,
+                  currentPage: state.currentPage,
+                  pageSize: state.pageSize,
+                  from: state.from,
+                  to: state.to,
+                  onPageChanged: (page) => _fetchTransactionList(
+                    pageNumber: page,
+                    pageSize: state.pageSize,
+                  ),
+                  onPageSizeChanged: (newSize) => _fetchTransactionList(
+                    pageNumber: 1,
+                    pageSize: newSize,
+                  ),
+                ),
+              ],
+            );
+          }
+        } else if (state is TransactionListFailed) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.error_outline, size: 60, color: Colors.red),
+                const SizedBox(height: 16),
+                Text(
+                  'Failed to load transactions',
+                  style: const TextStyle(fontSize: 16),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  state.content,
+                  style: const TextStyle(fontSize: 14, color: Colors.grey),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
+                AppButton(
+                  name: "Retry",
+                  onPressed: () => _fetchTransactions(),
+                ),
+              ],
+            ),
+          );
+        } else {
+          return Center(child: Lottie.asset(AppImages.noData));
+        }
+      },
+    );
+  }
+
+  void _showMobileFilterSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return Container(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        "Filter Transactions",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Transaction Type Filter
+                  const Text(
+                    "Transaction Type",
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    children: ["All", "Credit", "Debit"].map((type) {
+                      final bool isSelected =
+                          selectedTransactionTypeNotifier.value == type ||
+                              (type == "All" && selectedTransactionTypeNotifier.value == null);
+                      return FilterChip(
+                        label: Text(type),
+                        selected: isSelected,
+                        onSelected: (selected) {
+                          setState(() {
+                            selectedTransactionTypeNotifier.value = selected ? type : null;
+                          });
+                        },
+                        selectedColor: AppColors.primaryColor.withOpacity(0.2),
+                        checkmarkColor: AppColors.primaryColor,
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Status Filter
+                  const Text(
+                    "Status",
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    children: ["All", "Completed", "Pending", "Failed"].map((status) {
+                      final bool isSelected =
+                          selectedStatusNotifier.value == status ||
+                              (status == "All" && selectedStatusNotifier.value == null);
+                      return FilterChip(
+                        label: Text(status),
+                        selected: isSelected,
+                        onSelected: (selected) {
+                          setState(() {
+                            selectedStatusNotifier.value = selected ? status : null;
+                          });
+                        },
+                        selectedColor: AppColors.primaryColor.withOpacity(0.2),
+                        checkmarkColor: AppColors.primaryColor,
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Action Buttons
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () {
+                            setState(() {
+                              filterTextController.clear();
+                              selectedTransactionTypeNotifier.value = null;
+                              selectedStatusNotifier.value = null;
+                              selectedAccountNotifier.value = null;
+                              startDate = null;
+                              endDate = null;
+                            });
+                            Navigator.pop(context);
+                            _fetchTransactions();
+                          },
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          child: const Text("Clear All"),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                            _fetchTransactions();
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primaryColor,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          child: const Text("Apply Filters"),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: MediaQuery.of(context).viewInsets.bottom),
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
   }
 
