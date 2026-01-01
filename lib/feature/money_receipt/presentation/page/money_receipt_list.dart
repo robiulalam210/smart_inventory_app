@@ -1,4 +1,8 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
+import 'package:lottie/lottie.dart';
+import 'package:iconsax/iconsax.dart';
 
 import '../../../../core/configs/configs.dart';
 import '../../../../core/shared/widgets/sideMenu/sidebar.dart';
@@ -24,32 +28,66 @@ class MoneyReceiptScreen extends StatefulWidget {
 }
 
 class _MoneyReceiptScreenState extends State<MoneyReceiptScreen> {
-  TextEditingController filterTextController = TextEditingController();
+  final TextEditingController filterTextController = TextEditingController();
   DateRange? selectedDateRange;
+  DateTime now = DateTime.now();
 
-  // Add missing variables
-
+  final ValueNotifier<String?> selectedCustomerNotifier = ValueNotifier(null);
+  final ValueNotifier<String?> selectedSellerNotifier = ValueNotifier(null);
+  final ValueNotifier<String?> selectedPaymentMethodNotifier = ValueNotifier(null);
 
   @override
   void initState() {
     super.initState();
 
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      filterTextController.clear();
+      context.read<MoneyReceiptBloc>().selectUserModel = null;
+      context.read<MoneyReceiptBloc>().selectCustomerModel = null;
 
-    filterTextController.clear();
-    context.read<MoneyReceiptBloc>().selectUserModel = null;
-    context.read<MoneyReceiptBloc>().selectCustomerModel = null;
+      context.read<UserBloc>().add(
+        FetchUserList(context, dropdownFilter: "?status=1"),
+      );
+      context.read<CustomerBloc>().add(
+        FetchCustomerActiveList(context),
+      );
 
-    context.read<UserBloc>().add(
-      FetchUserList(context, dropdownFilter: "?status=1"),
-    );
-    context.read<CustomerBloc>().add(
-      FetchCustomerActiveList(context, ),
-    );
-    _fetchApi();
+      selectedDateRange = DateRange(
+        DateTime(now.year, now.month - 1, now.day),
+        DateTime(now.year, now.month, now.day),
+      );
+
+      _fetchApi();
+    });
   }
 
-  String selectedQuickOption = "";
-  ValueNotifier<String?> selectedPaymentMethodNotifier = ValueNotifier(null);
+  @override
+  void dispose() {
+    filterTextController.dispose();
+    selectedCustomerNotifier.dispose();
+    selectedSellerNotifier.dispose();
+    selectedPaymentMethodNotifier.dispose();
+    super.dispose();
+  }
+
+  void _clearFilters() {
+    setState(() {
+      selectedDateRange = DateRange(
+        DateTime(now.year, now.month - 1, now.day),
+        DateTime(now.year, now.month, now.day),
+      );
+    });
+    filterTextController.clear();
+    selectedCustomerNotifier.value = null;
+    selectedSellerNotifier.value = null;
+    selectedPaymentMethodNotifier.value = null;
+
+    // Clear bloc states
+    context.read<MoneyReceiptBloc>().selectCustomerModel = null;
+    context.read<MoneyReceiptBloc>().selectUserModel = null;
+
+    _fetchApi();
+  }
 
   void _fetchApi({
     String filterText = '',
@@ -58,9 +96,11 @@ class _MoneyReceiptScreenState extends State<MoneyReceiptScreen> {
     String paymentMethod = '',
     DateTime? from,
     DateTime? to,
-    int pageNumber = 1, // Changed from 0 to 1 for pagination
-    int pageSize = 10, // Added pageSize parameter
+    int pageNumber = 1,
+    int pageSize = 10,
   }) {
+    if (!mounted) return;
+
     context.read<MoneyReceiptBloc>().add(
       FetchMoneyReceiptList(
         context,
@@ -71,21 +111,21 @@ class _MoneyReceiptScreenState extends State<MoneyReceiptScreen> {
         startDate: from,
         endDate: to,
         pageNumber: pageNumber,
-        pageSize: pageSize, // Add pageSize
+        pageSize: pageSize,
       ),
     );
   }
 
-  // Fixed method name and parameters
   void _fetchMoneyReceiptList({int pageNumber = 1, int pageSize = 10}) {
     _fetchApi(
       pageNumber: pageNumber,
       pageSize: pageSize,
-      from: selectedDateRange?.start ,
+      filterText: filterTextController.text,
+      from: selectedDateRange?.start,
       to: selectedDateRange?.end,
-      customer: context.read<MoneyReceiptBloc>().selectCustomerModel?.id.toString() ?? '',
-      seller: context.read<MoneyReceiptBloc>().selectUserModel?.id.toString() ?? '',
-      paymentMethod: selectedPaymentMethodNotifier.value?.toString() ?? '',
+      customer: selectedCustomerNotifier.value ?? '',
+      seller: selectedSellerNotifier.value ?? '',
+      paymentMethod: selectedPaymentMethodNotifier.value ?? '',
     );
   }
 
@@ -132,280 +172,608 @@ class _MoneyReceiptScreenState extends State<MoneyReceiptScreen> {
       child: RefreshIndicator(
         color: AppColors.primaryColor,
         onRefresh: () async {
-          _fetchApi(
-
-            customer: context.read<MoneyReceiptBloc>().selectCustomerModel?.id.toString() ?? '',
-            seller: context.read<MoneyReceiptBloc>().selectUserModel?.id.toString() ?? '',
-            paymentMethod: selectedPaymentMethodNotifier.value?.toString() ?? '',
-          );
+          _fetchApi();
         },
         child: Container(
           padding: AppTextStyle.getResponsivePaddingBody(context),
-          child: BlocListener<MoneyReceiptBloc, MoneyReceiptState>(
+          child: BlocConsumer<MoneyReceiptBloc, MoneyReceiptState>(
             listener: (context, state) {
-              if (state is MoneyReceiptAddLoading) {
-                appLoader(context, "Money receipt, please wait...");
-              } else if (state is MoneyReceiptAddSuccess) {
-                Navigator.pop(context); // Close loader dialog
-                _fetchApi(
-
-                  customer: context.read<MoneyReceiptBloc>().selectCustomerModel?.id.toString() ?? '',
-                  seller: context.read<MoneyReceiptBloc>().selectUserModel?.id.toString() ?? '',
-                  paymentMethod: selectedPaymentMethodNotifier.value?.toString() ?? '',
-                );
-              } else if (state is MoneyReceiptDetailsSuccess) {
-                // AppRoutes.pop(context);
-              } else if (state is MoneyReceiptAddFailed) {
-                Navigator.pop(context); // Close loader dialog
-                _fetchApi(
-
-                  customer: context.read<MoneyReceiptBloc>().selectCustomerModel?.id.toString() ?? '',
-                  seller: context.read<MoneyReceiptBloc>().selectUserModel?.id.toString() ?? '',
-                  paymentMethod: selectedPaymentMethodNotifier.value?.toString() ?? '',
-                );
-                appAlertDialog(context, state.content,
-                    title: state.title,
-                    actions: [
-                      TextButton(
-                          onPressed: () => Navigator.pop(context),
-                          child: const Text("Dismiss"))
-                    ]);
-              } else if (state is MoneyReceiptDeleteLoading) {
-                appLoader(context, "Delete MoneyReceipt, please wait...");
-              } else if (state is MoneyReceiptDeleteSuccess) {
-                Navigator.pop(context); // Close loader dialog
-                _fetchApi(
-
-                  customer: context.read<MoneyReceiptBloc>().selectCustomerModel?.id.toString() ?? '',
-                  seller: context.read<MoneyReceiptBloc>().selectUserModel?.id.toString() ?? '',
-                  paymentMethod: selectedPaymentMethodNotifier.value?.toString() ?? '',
-                );
-              } else if (state is MoneyReceiptDeleteFailed) {
-                Navigator.pop(context); // Close loader dialog
-                _fetchApi(
-
-                  customer: context.read<MoneyReceiptBloc>().selectCustomerModel?.id.toString() ?? '',
-                  seller: context.read<MoneyReceiptBloc>().selectUserModel?.id.toString() ?? '',
-                  paymentMethod: selectedPaymentMethodNotifier.value?.toString() ?? '',
-                );
-                appAlertDialog(context, state.content,
-                    title: state.title,
-                    actions: [
-                      TextButton(
-                          onPressed: () => Navigator.pop(context),
-                          child: const Text("Dismiss"))
-                    ]);
-              }
+              _handleBlocState(state);
             },
-            child: Column(
-              children: [
-                _buildFilterRow(),
-                SizedBox(
-                  child: BlocBuilder<MoneyReceiptBloc, MoneyReceiptState>(
-                    builder: (context, state) {
-                      if (state is MoneyReceiptListLoading) {
-                        return const Center(child: CircularProgressIndicator());
-                      } else if (state is MoneyReceiptListSuccess) {
-                        if (state.list.isEmpty) {
-                          return Center(
-                            child: Lottie.asset(AppImages.noData),
-                          );
-                        } else {
-                          return Column(
-                            children: [
-                              SizedBox(
-                                child: MoneyReceiptDataTableWidget(sales: state.list),
-                              ),
-                              PaginationBar(
-                                count: state.count,
-                                totalPages: state.totalPages,
-                                currentPage: state.currentPage,
-                                pageSize: state.pageSize,
-                                from: state.from,
-                                to: state.to,
-                                onPageChanged: (page) =>
-                                    _fetchMoneyReceiptList(pageNumber: page, pageSize: state.pageSize),
-                                onPageSizeChanged: (newSize) =>
-                                    _fetchMoneyReceiptList(pageNumber: 1, pageSize: newSize),
-                              ),
-                            ],
-                          );
-                        }
-                      } else if (state is MoneyReceiptListFailed) {
-                        return Center(
-                          child: Text('Failed to load money receipt: ${state.content}'),
-                        );
-                      } else {
-                        return Center(
-                          child: Lottie.asset(AppImages.noData),
-                        );
-                      }
-                    },
+            builder: (context, state) {
+              return Column(
+                children: [
+                  if (isBigScreen)
+                    _buildDesktopHeader()
+                  else
+                    _buildMobileHeader(),
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    child: _buildMoneyReceiptList(state),
                   ),
-                ),
-              ],
-            ),
+                ],
+              );
+            },
           ),
         ),
       ),
     );
   }
 
-  Widget _buildFilterRow() {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.center,
+  void _handleBlocState(MoneyReceiptState state) {
+    if (state is MoneyReceiptAddLoading) {
+      appLoader(context, "Processing money receipt, please wait...");
+    } else if (state is MoneyReceiptAddSuccess) {
+      Navigator.pop(context);
+      _fetchApi();
+    } else if (state is MoneyReceiptAddFailed) {
+      if (context.mounted) {
+        Navigator.pop(context);
+        appAlertDialog(
+          context,
+          state.content,
+          title: state.title,
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Dismiss"),
+            ),
+          ],
+        );
+      }
+    } else if (state is MoneyReceiptDeleteLoading) {
+      appLoader(context, "Deleting money receipt, please wait...");
+    } else if (state is MoneyReceiptDeleteSuccess) {
+      Navigator.pop(context);
+      _fetchApi();
+    } else if (state is MoneyReceiptDeleteFailed) {
+      if (context.mounted) {
+        Navigator.pop(context);
+        appAlertDialog(
+          context,
+          state.content,
+          title: state.title,
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Dismiss"),
+            ),
+          ],
+        );
+      }
+    }
+  }
+
+  Widget _buildDesktopHeader() {
+    return Column(
       children: [
-        // 🔍 Search Field
-        Expanded(
-          flex: 2,
-          child: CustomSearchTextFormField(
-            controller: filterTextController,
-            onChanged: (value) => _fetchApi(filterText: value),
-            onClear: () {
-              filterTextController.clear();
-              _fetchApi();
-            },
-            hintText: "InvoiceNo, Name, or Phone",
-          ),
-        ),
-        const SizedBox(width: 5),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // 🔍 Search Field
+            Expanded(
+              flex: 2,
+              child: CustomSearchTextFormField(
+                controller: filterTextController,
+                onChanged: (value) => _fetchApi(filterText: value),
+                onClear: () {
+                  filterTextController.clear();
+                  _fetchApi();
+                },
+                hintText: "InvoiceNo, Name, or Phone",
+              ),
+            ),
+            const SizedBox(width: 5),
 
-        // 👤 Customer Dropdown
-        Expanded(
-          flex: 1,
-          child: BlocBuilder<CustomerBloc, CustomerState>(
-            builder: (context, state) {
-              return AppDropdown<CustomerActiveModel>(
-                label: "Customer",
-                context: context,
-                isSearch: true,
-                isLabel: true,
-                hint: context
-                    .read<MoneyReceiptBloc>()
-                    .selectCustomerModel
-                    ?.name
-                    ?.toString() ??
-                    "Select Customer",
-                isNeedAll: true,
-                isRequired: true,
-                value: context.read<MoneyReceiptBloc>().selectCustomerModel,
-                itemList: context.read<CustomerBloc>().activeCustomer,
-                onChanged: (newVal) {
+            // 👤 Customer Dropdown
+            Expanded(
+              flex: 1,
+              child: BlocBuilder<CustomerBloc, CustomerState>(
+                builder: (context, state) {
+                  return ValueListenableBuilder<String?>(
+                    valueListenable: selectedCustomerNotifier,
+                    builder: (context, customerId, child) {
+                      final selectedCustomer = context
+                          .read<MoneyReceiptBloc>()
+                          .selectCustomerModel;
 
-                  // Update bloc state
-                  context.read<MoneyReceiptBloc>().selectCustomerModel = newVal;
-
-                  _fetchApi(
-                    from: selectedDateRange?.start,
-                    to: selectedDateRange?.end,
-                    customer: newVal?.id.toString() ?? '', // Use newVal
-                    seller: context
-                        .read<MoneyReceiptBloc>()
-                        .selectUserModel
-                        ?.id.toString() ?? '',
+                      return AppDropdown<CustomerActiveModel>(
+                        label: "Customer",
+                        context: context,
+                        isSearch: true,
+                        isLabel: true,
+                        hint: selectedCustomer?.name ?? "Select Customer",
+                        isNeedAll: true,
+                        isRequired: false,
+                        value: selectedCustomer,
+                        itemList: context.read<CustomerBloc>().activeCustomer,
+                        onChanged: (newVal) {
+                          context.read<MoneyReceiptBloc>().selectCustomerModel = newVal;
+                          selectedCustomerNotifier.value = newVal?.id.toString();
+                          _fetchApi(
+                            customer: newVal?.id.toString() ?? '',
+                          );
+                        },
+                        itemBuilder: (item) => DropdownMenuItem<CustomerActiveModel>(
+                          value: item,
+                          child: Text(
+                            item.name ?? 'Unknown Customer',
+                            style: const TextStyle(
+                              color: AppColors.blackColor,
+                              fontFamily: 'Quicksand',
+                              fontWeight: FontWeight.w300,
+                            ),
+                          ),
+                        ),
+                      );
+                    },
                   );
                 },
-                validator: (value) {
-                  return value == null
-                      ? 'Please select Customer'
-                      : null;
-                },
-                itemBuilder: (item) => DropdownMenuItem<CustomerActiveModel>(
-                  value: item,
-                  child: Text(
-                    item.name ?? 'Unknown Customer',
-                    style: const TextStyle(
-                      color: AppColors.blackColor,
-                      fontFamily: 'Quicksand',
-                      fontWeight: FontWeight.w300,
-                    ),
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-        const SizedBox(width: 5),
+              ),
+            ),
+            const SizedBox(width: 5),
 
-        // 🧑‍💼 Seller Dropdown
-        Expanded(
-          flex: 1,
-          child: BlocBuilder<UserBloc, UserState>(
-            builder: (context, state) {
-              return AppDropdown<UsersListModel>( // Use UserModel instead of UsersListModel
-                label: "Seller",
-                context: context,
-                hint: context
-                    .read<MoneyReceiptBloc>()
-                    .selectUserModel
-                    ?.username
-                    ?.toString() ??
-                    "Select Seller",
-                isLabel: true,
-                isRequired: true,
-                isNeedAll: true,
-                value: context.read<MoneyReceiptBloc>().selectUserModel,
-                itemList: context.read<UserBloc>().list,
-                onChanged: (newVal) {
+            // 🧑‍💼 Seller Dropdown
+            Expanded(
+              flex: 1,
+              child: BlocBuilder<UserBloc, UserState>(
+                builder: (context, state) {
+                  return ValueListenableBuilder<String?>(
+                    valueListenable: selectedSellerNotifier,
+                    builder: (context, sellerId, child) {
+                      final selectedSeller = context.read<MoneyReceiptBloc>().selectUserModel;
 
-                  // Update bloc state - UNCOMMENT THIS
-                  context.read<MoneyReceiptBloc>().selectUserModel = newVal;
-
-                  _fetchApi(
-                    from: selectedDateRange?.start,
-                    to: selectedDateRange?.end,
-                    customer: context
-                        .read<MoneyReceiptBloc>()
-                        .selectCustomerModel
-                        ?.id.toString() ?? '',
-                    seller: newVal?.id.toString() ?? '', // Use newVal instead of old value
+                      return AppDropdown<UsersListModel>(
+                        label: "Seller",
+                        context: context,
+                        hint: selectedSeller?.username ?? "Select Seller",
+                        isLabel: true,
+                        isRequired: false,
+                        isNeedAll: true,
+                        value: selectedSeller,
+                        itemList: context.read<UserBloc>().list,
+                        onChanged: (newVal) {
+                          context.read<MoneyReceiptBloc>().selectUserModel = newVal;
+                          selectedSellerNotifier.value = newVal?.id.toString();
+                          _fetchApi(
+                            seller: newVal?.id.toString() ?? '',
+                          );
+                        },
+                        itemBuilder: (item) => DropdownMenuItem<UsersListModel>(
+                          value: item,
+                          child: Text(
+                            item.username ?? 'Unknown Seller',
+                            style: const TextStyle(
+                              color: AppColors.blackColor,
+                              fontFamily: 'Quicksand',
+                              fontWeight: FontWeight.w300,
+                            ),
+                          ),
+                        ),
+                      );
+                    },
                   );
                 },
-                validator: (value) {
-                  return value == null
-                      ? 'Please select Collected By'
-                      : null;
+              ),
+            ),
+            const SizedBox(width: 10),
+
+            // 📅 Date Range Picker
+            SizedBox(
+              width: 280,
+              child: CustomDateRangeField(
+                isLabel: false,
+                selectedDateRange: selectedDateRange,
+                onDateRangeSelected: (value) {
+                  setState(() => selectedDateRange = value);
+                  if (value != null) {
+                    _fetchApi(from: value.start, to: value.end);
+                  } else {
+                    _fetchApi();
+                  }
                 },
-                itemBuilder: (item) => DropdownMenuItem<UsersListModel>(
-                  value: item,
-                  child: Text(
-                    item.username ?? 'Unknown Seller', // Use username instead of toString()
-                    style: const TextStyle(
-                      color: AppColors.blackColor,
-                      fontFamily: 'Quicksand',
-                      fontWeight: FontWeight.w300,
-                    ),
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-        const SizedBox(width: 10),
+              ),
+            ),
+            const SizedBox(width: 10),
 
-        // 📅 Date Range Picker
-        SizedBox(
-          width: 280,
-          child: CustomDateRangeField(
-            isLabel: false,
-            selectedDateRange: selectedDateRange,
-            onDateRangeSelected: (value) {
-              setState(() => selectedDateRange = value);
-              if (value != null) {
-                _fetchApi(from: value.start, to: value.end);
-              }
-            },
-          ),
+            IconButton(
+              onPressed: () => _fetchApi(),
+              icon: const Icon(Icons.refresh),
+              tooltip: "Refresh",
+            ),
+          ],
         ),
-        const SizedBox(width: 10),
-
-        IconButton(
-          onPressed: _fetchApi,
-          icon: const Icon(Icons.refresh),
-          tooltip: "Refresh",
+        const SizedBox(height: 10),
+        Row(
+          children: [
+            TextButton(
+              onPressed: _clearFilters,
+              child: Text(
+                'Clear All Filters',
+                style: TextStyle(color: Colors.red),
+              ),
+            ),
+          ],
         ),
       ],
     );
+  }
+
+  Widget _buildMobileHeader() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // Search Bar
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.1),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: CustomSearchTextFormField(
+                    controller: filterTextController,
+                    onChanged: (value) => _fetchApi(filterText: value),
+                    onClear: () {
+                      filterTextController.clear();
+                      _fetchApi();
+                    },
+                    hintText: "Search money receipts...",
+                  ),
+                ),
+              ),
+              IconButton(
+                icon: Icon(
+                  Iconsax.filter,
+                  color: AppColors.primaryColor,
+                ),
+                onPressed: () => _showMobileFilterSheet(context),
+              ),
+              IconButton(
+                onPressed: () => _fetchApi(),
+                icon: const Icon(Icons.refresh),
+                tooltip: "Refresh",
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+
+        // Filter Chips
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            if (selectedCustomerNotifier.value != null)
+              Chip(
+                label: const Text('Customer Filtered'),
+                onDeleted: () {
+                  selectedCustomerNotifier.value = null;
+                  context.read<MoneyReceiptBloc>().selectCustomerModel = null;
+                  _fetchApi();
+                },
+              ),
+            if (selectedSellerNotifier.value != null)
+              Chip(
+                label: const Text('Seller Filtered'),
+                onDeleted: () {
+                  selectedSellerNotifier.value = null;
+                  context.read<MoneyReceiptBloc>().selectUserModel = null;
+                  _fetchApi();
+                },
+              ),
+            if (selectedDateRange != null)
+              Chip(
+                label: Text(
+                  '${_formatDate(selectedDateRange!.start)} - ${_formatDate(selectedDateRange!.end)}',
+                ),
+                onDeleted: () {
+                  setState(() => selectedDateRange = null);
+                  _fetchApi();
+                },
+              ),
+          ],
+        ),
+        const SizedBox(height: 12),
+
+        // Action Buttons
+        Row(
+          children: [
+            Expanded(
+              child: OutlinedButton.icon(
+                onPressed: () => _showMobileFilterSheet(context),
+                icon: const Icon(Iconsax.filter, size: 16),
+                label: const Text('More Filters'),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: OutlinedButton.icon(
+                onPressed: _clearFilters,
+                icon: const Icon(Icons.clear_all, size: 16),
+                label: const Text('Clear All'),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMoneyReceiptList(MoneyReceiptState state) {
+    if (state is MoneyReceiptListLoading) {
+      return const Center(child: CircularProgressIndicator());
+    } else if (state is MoneyReceiptListSuccess) {
+      if (state.list.isEmpty) {
+        return Center(child: Lottie.asset(AppImages.noData));
+      } else {
+        return Column(
+          children: [
+            SizedBox(
+              child: MoneyReceiptDataTableWidget(sales: state.list),
+            ),
+            const SizedBox(height: 16),
+            PaginationBar(
+              count: state.count,
+              totalPages: state.totalPages,
+              currentPage: state.currentPage,
+              pageSize: state.pageSize,
+              from: state.from,
+              to: state.to,
+              onPageChanged: (page) => _fetchMoneyReceiptList(
+                pageNumber: page,
+                pageSize: state.pageSize,
+              ),
+              onPageSizeChanged: (newSize) => _fetchMoneyReceiptList(
+                pageNumber: 1,
+                pageSize: newSize,
+              ),
+            ),
+          ],
+        );
+      }
+    } else if (state is MoneyReceiptListFailed) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline, size: 60, color: Colors.red),
+            const SizedBox(height: 16),
+            Text(
+              'Failed to load money receipts',
+              style: const TextStyle(fontSize: 16),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              state.content,
+              style: const TextStyle(fontSize: 14, color: Colors.grey),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () => _fetchApi(),
+              child: const Text("Retry"),
+            ),
+          ],
+        ),
+      );
+    } else {
+      return Center(child: Lottie.asset(AppImages.noData));
+    }
+  }
+
+  void _showMobileFilterSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return Container(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        "Filter Money Receipts",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Customer Filter
+                  BlocBuilder<CustomerBloc, CustomerState>(
+                    builder: (context, state) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            "Customer",
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 14,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          AppDropdown<CustomerActiveModel>(
+                            label: "",
+                            context: context,
+                            isSearch: true,
+                            isLabel: false,
+                            hint: "Select Customer",
+                            isNeedAll: true,
+                            isRequired: false,
+                            value: context.read<MoneyReceiptBloc>().selectCustomerModel,
+                            itemList: context.read<CustomerBloc>().activeCustomer,
+                            onChanged: (newVal) {
+                              setState(() {
+                                context.read<MoneyReceiptBloc>().selectCustomerModel = newVal;
+                                selectedCustomerNotifier.value = newVal?.id.toString();
+                              });
+                            },
+                            itemBuilder: (item) => DropdownMenuItem<CustomerActiveModel>(
+                              value: item,
+                              child: Text(item.name ?? 'Unknown Customer'),
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Seller Filter
+                  BlocBuilder<UserBloc, UserState>(
+                    builder: (context, state) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            "Seller",
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 14,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          AppDropdown<UsersListModel>(
+                            label: "",
+                            context: context,
+                            hint: "Select Seller",
+                            isLabel: false,
+                            isRequired: false,
+                            isNeedAll: true,
+                            value: context.read<MoneyReceiptBloc>().selectUserModel,
+                            itemList: context.read<UserBloc>().list,
+                            onChanged: (newVal) {
+                              setState(() {
+                                context.read<MoneyReceiptBloc>().selectUserModel = newVal;
+                                selectedSellerNotifier.value = newVal?.id.toString();
+                              });
+                            },
+                            itemBuilder: (item) => DropdownMenuItem<UsersListModel>(
+                              value: item,
+                              child: Text(item.username ?? 'Unknown Seller'),
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Date Range
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        "Date Range",
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      CustomDateRangeField(
+                        isLabel: false,
+                        selectedDateRange: selectedDateRange,
+                        onDateRangeSelected: (value) {
+                          setState(() => selectedDateRange = value);
+                        },
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Action Buttons
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () {
+                            setState(() {
+                              filterTextController.clear();
+                              context.read<MoneyReceiptBloc>().selectCustomerModel = null;
+                              context.read<MoneyReceiptBloc>().selectUserModel = null;
+                              selectedCustomerNotifier.value = null;
+                              selectedSellerNotifier.value = null;
+                              selectedDateRange = null;
+                            });
+                            Navigator.pop(context);
+                            _fetchApi();
+                          },
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          child: const Text("Clear All"),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                            _fetchApi();
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primaryColor,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          child: const Text("Apply Filters"),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: MediaQuery.of(context).viewInsets.bottom),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.day}/${date.month}/${date.year}';
   }
 }

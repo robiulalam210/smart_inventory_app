@@ -1,8 +1,10 @@
+import 'package:flutter/material.dart';
+import 'package:iconsax/iconsax.dart';
 import 'package:printing/printing.dart';
-import 'package:meherin_mart/feature/money_receipt/presentation/page/money_receipt_details.dart';
 
 import '../../../../core/configs/configs.dart';
 import '../../data/model/money_receipt_model/money_receipt_model.dart';
+import '../page/money_receipt_details.dart';
 import '../page/pdf/generate_money_receipt.dart';
 
 class MoneyReceiptDataTableWidget extends StatelessWidget {
@@ -12,18 +14,367 @@ class MoneyReceiptDataTableWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isMobile = Responsive.isMobile(context);
+    final bool isTablet = Responsive.isTablet(context);
+
+    if (isMobile || isTablet) {
+      return _buildMobileCardView(context, isMobile);
+    } else {
+      return _buildDesktopDataTable();
+    }
+  }
+
+  Widget _buildMobileCardView(BuildContext context, bool isMobile) {
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: sales.length,
+      itemBuilder: (context, index) {
+        final receipt = sales[index];
+        return _buildReceiptCard(receipt, index + 1, context, isMobile);
+      },
+    );
+  }
+
+  Widget _buildReceiptCard(
+      MoneyreceiptModel receipt,
+      int index,
+      BuildContext context,
+      bool isMobile,
+      ) {
+    final summary = receipt.paymentSummary;
+    final totalBefore = double.tryParse(summary?.beforePayment?.totalDue.toString() ?? "0") ?? 0;
+    final amount = double.tryParse(receipt.amount ?? '0') ?? 0;
+    final status = summary?.status ?? '-';
+    final statusColor = _getStatusColor(status);
+
+    return Container(
+      margin: EdgeInsets.symmetric(
+        horizontal: isMobile ? 8.0 : 16.0,
+        vertical: 8.0,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+        border: Border.all(
+          color: Colors.grey.shade200,
+          width: 1,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header with MR No and Status
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: AppColors.primaryColor.withOpacity(0.05),
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(16),
+                topRight: Radius.circular(16),
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryColor,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        '#$index',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        receipt.mrNo ?? '-',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        maxLines: 1,
+                      ),
+                    ),
+                  ],
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: statusColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: statusColor,
+                      width: 1,
+                    ),
+                  ),
+                  child: Text(
+                    status,
+                    style: TextStyle(
+                      color: statusColor,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Receipt Details
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Customer
+                _buildDetailRow(
+                  icon: Iconsax.user,
+                  label: 'Customer',
+                  value: receipt.customerName ?? '-',
+                ),
+                const SizedBox(height: 8),
+
+                // Seller
+                _buildDetailRow(
+                  icon: Iconsax.profile_2user,
+                  label: 'Seller',
+                  value: receipt.sellerName ?? '-',
+                ),
+                const SizedBox(height: 8),
+
+                // Payment Date
+                _buildDetailRow(
+                  icon: Iconsax.calendar,
+                  label: 'Payment Date',
+                  value: _formatDate(receipt.paymentDate),
+                ),
+                const SizedBox(height: 8),
+
+                // Payment Method
+                _buildDetailRow(
+                  icon: Iconsax.wallet,
+                  label: 'Payment Method',
+                  value: receipt.paymentMethod ?? '-',
+                ),
+                const SizedBox(height: 8),
+
+                // Phone
+                if (receipt.customerPhone != null && receipt.customerPhone!.isNotEmpty)
+                  Column(
+                    children: [
+                      _buildDetailRow(
+                        icon: Iconsax.call,
+                        label: 'Phone',
+                        value: receipt.customerPhone!,
+                      ),
+                      const SizedBox(height: 8),
+                    ],
+                  ),
+
+                // Financial Summary
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade50,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.grey.shade200),
+                  ),
+                  child: Column(
+                    children: [
+                      // Amount
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Amount:',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: Colors.grey.shade700,
+                              fontSize: 13,
+                            ),
+                          ),
+                          Text(
+                            '৳${amount.toStringAsFixed(2)}',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+
+                      // Total Before
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Total Before:',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: Colors.grey.shade700,
+                              fontSize: 13,
+                            ),
+                          ),
+                          Text(
+                            '৳${totalBefore.toStringAsFixed(2)}',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Action Buttons
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade50,
+              borderRadius: const BorderRadius.only(
+                bottomLeft: Radius.circular(16),
+                bottomRight: Radius.circular(16),
+              ),
+              border: Border(
+                top: BorderSide(
+                  color: Colors.grey.shade200,
+                  width: 1,
+                ),
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                // View Button
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () => _viewReceiptDetails(context, receipt),
+                    icon: const Icon(
+                      Iconsax.eye,
+                      size: 16,
+                    ),
+                    label: const Text('View'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.blue,
+                      side: BorderSide(color: Colors.blue.shade300),
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+
+                // PDF Button
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () => _generatePdf(context, receipt),
+                    icon: const Icon(
+                      Iconsax.document_download,
+                      size: 16,
+                    ),
+                    label: const Text('PDF'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.green,
+                      side: BorderSide(color: Colors.green.shade300),
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailRow({
+    required IconData icon,
+    required String label,
+    required String value,
+  }) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(
+          icon,
+          size: 16,
+          color: Colors.grey.shade600,
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey.shade700,
+                  fontSize: 13,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                value,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDesktopDataTable() {
     final verticalController = ScrollController();
     final horizontalController = ScrollController();
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final totalWidth = constraints.maxWidth-50;
-        const numColumns = 10;
+        final totalWidth = constraints.maxWidth - 50;
+        const numColumns = 11;
         const minColumnWidth = 100.0;
 
         final dynamicColumnWidth =
         (totalWidth / numColumns).clamp(minColumnWidth, double.infinity);
-
 
         return Container(
           decoration: BoxDecoration(
@@ -36,44 +387,39 @@ class MoneyReceiptDataTableWidget extends StatelessWidget {
             child: SingleChildScrollView(
               controller: verticalController,
               scrollDirection: Axis.vertical,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: Scrollbar(
+              child: Scrollbar(
+                controller: horizontalController,
+                thumbVisibility: true,
+                child: SingleChildScrollView(
                   controller: horizontalController,
-                  thumbVisibility: true,
-                  child: SingleChildScrollView(
-                    controller: horizontalController,
-                    scrollDirection: Axis.horizontal,
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 5),
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(minWidth: totalWidth),
-                        child: DataTable(
-                          columns: _buildColumns(dynamicColumnWidth),
-                          rows: sales
-                              .asMap()
-                              .entries
-                              .map(
-                                (entry) => _buildRow(context,
-                              entry.key + 1,
-                              entry.value,
-                              dynamicColumnWidth,
-                            ),
-                          )
-                              .toList(),
-                          headingRowColor: WidgetStateProperty.all(
-                            AppColors.primaryColor
-                          ),
-                          headingTextStyle: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12,
-                          ),
-                          dataRowMinHeight: 40,
-                          headingRowHeight: 40,
-                          columnSpacing: 0,
+                  scrollDirection: Axis.horizontal,
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(minWidth: totalWidth),
+                    child: DataTable(
+                      columns: _buildColumns(dynamicColumnWidth),
+                      rows: sales
+                          .asMap()
+                          .entries
+                          .map(
+                            (entry) => _buildRow(
+                          context,
+                          entry.key + 1,
+                          entry.value,
+                          dynamicColumnWidth,
                         ),
+                      )
+                          .toList(),
+                      headingRowColor: WidgetStateProperty.all(
+                        AppColors.primaryColor,
                       ),
+                      headingTextStyle: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                      dataRowMinHeight: 40,
+                      headingRowHeight: 40,
+                      columnSpacing: 0,
                     ),
                   ),
                 ),
@@ -98,7 +444,6 @@ class MoneyReceiptDataTableWidget extends StatelessWidget {
       "Total Before",
       "Status",
       "Actions",
-
     ];
 
     return labels
@@ -124,7 +469,12 @@ class MoneyReceiptDataTableWidget extends StatelessWidget {
         .toList();
   }
 
-  DataRow _buildRow(BuildContext context,int index, MoneyreceiptModel sale, double columnWidth) {
+  DataRow _buildRow(
+      BuildContext context,
+      int index,
+      MoneyreceiptModel sale,
+      double columnWidth,
+      ) {
     // Format date safely
     String formatDate(DateTime? date) {
       if (date == null) return '-';
@@ -150,25 +500,73 @@ class MoneyReceiptDataTableWidget extends StatelessWidget {
 
     return DataRow(
       cells: [
-        _buildDataCell(index.toString(), columnWidth),
-        _buildDataCell(formatText(sale.mrNo), columnWidth),
-        _buildDataCell(formatText(sale.customerName), columnWidth),
-        _buildDataCell(formatText(sale.sellerName), columnWidth),
-        _buildDataCell(formatDate(sale.paymentDate), columnWidth),
-        _buildDataCell(formatText(sale.paymentMethod), columnWidth),
-        _buildDataCell(formatText(sale.customerPhone?.toString()), columnWidth),
-        _buildDataCell(formatCurrency(amount), columnWidth),
-        _buildDataCell(formatCurrency(totalBefore), columnWidth),
-        _buildDataCell(
+        _buildDataCell(index.toString(), columnWidth, TextAlign.center),
+        _buildDataCell(formatText(sale.mrNo), columnWidth, TextAlign.center),
+        _buildDataCell(formatText(sale.customerName), columnWidth, TextAlign.center),
+        _buildDataCell(formatText(sale.sellerName), columnWidth, TextAlign.center),
+        _buildDataCell(formatDate(sale.paymentDate), columnWidth, TextAlign.center),
+        _buildDataCell(formatText(sale.paymentMethod), columnWidth, TextAlign.center),
+        _buildDataCell(formatText(sale.customerPhone?.toString()), columnWidth, TextAlign.center),
+        _buildDataCell(formatCurrency(amount), columnWidth, TextAlign.center),
+        _buildDataCell(formatCurrency(totalBefore), columnWidth, TextAlign.center),
+        _buildStatusCell(
           formatText(status),
           columnWidth,
           statusColor: _getStatusColor(status),
         ),
-
         _buildActionsCell(context, sale, columnWidth),
       ],
     );
   }
+
+  DataCell _buildDataCell(String text, double width, TextAlign align) {
+    return DataCell(
+      SizedBox(
+        width: width,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
+          child: Text(
+            text,
+            style: const TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w500,
+              color: Colors.black,
+            ),
+            textAlign: align,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ),
+    );
+  }
+
+  DataCell _buildStatusCell(String text, double width, {Color? statusColor}) {
+    return DataCell(
+      SizedBox(
+        width: width,
+        child: Center(
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: statusColor?.withOpacity(0.1) ?? Colors.grey.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: statusColor ?? Colors.grey),
+            ),
+            child: Text(
+              text,
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w600,
+                color: statusColor ?? Colors.black,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   DataCell _buildActionsCell(BuildContext context, MoneyreceiptModel sale, double width) {
     return DataCell(
       SizedBox(
@@ -178,94 +576,19 @@ class MoneyReceiptDataTableWidget extends StatelessWidget {
           children: [
             IconButton(
               icon: const Icon(Icons.visibility, size: 16),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => MoneyReceiptDetailsScreen(receipt: sale),
-                  ),
-                );
-              },
+              onPressed: () => _viewReceiptDetails(context, sale),
+              padding: const EdgeInsets.all(4),
+              constraints: const BoxConstraints(),
               tooltip: 'View Details',
             ),
             IconButton(
               icon: const Icon(Icons.picture_as_pdf, size: 16),
-              onPressed: () {
-
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => Scaffold(
-                      backgroundColor: Colors.red,
-                      body: PdfPreview.builder(
-                        useActions: true,
-                        allowSharing: false,
-                        canDebug: false,
-                        canChangeOrientation: false,
-                        canChangePageFormat: false,
-                        dynamicLayout: true,
-                        build: (format) => generateMoneyReceiptPdf(
-                          sale,
-
-                        ),
-                        pdfPreviewPageDecoration:
-                        BoxDecoration(color: AppColors.white),
-                        actionBarTheme: PdfActionBarTheme(
-                          backgroundColor: AppColors.primaryColor,
-                          iconColor: Colors.white,
-                          textStyle: const TextStyle(color: Colors.white),
-                        ),
-                        actions: [
-                          IconButton(
-                            onPressed: () => AppRoutes.pop(context),
-                            icon: const Icon(Icons.cancel, color: Colors.red),
-                          ),
-                        ],
-                        pagesBuilder: (context, pages) {
-                          debugPrint('Rendering ${pages.length} pages');
-                          return PageView.builder(
-                            itemCount: pages.length,
-                            scrollDirection: Axis.vertical,
-                            itemBuilder: (context, index) {
-                              final page = pages[index];
-                              return Container(
-                                color: Colors.grey,
-                                alignment: Alignment.center,
-                                padding: const EdgeInsets.all(8.0),
-                                child: Image(image: page.image, fit: BoxFit.contain),
-                              );
-                            },
-                          );
-                        },
-                      ),
-                    ),
-                  ),
-                );
-
-              },
+              onPressed: () => _generatePdf(context, sale),
+              padding: const EdgeInsets.all(4),
+              constraints: const BoxConstraints(),
               tooltip: 'Generate PDF',
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildDataCell(String text, double width, {Color? statusColor}) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
-          child: SelectableText(
-            text,
-            style: TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.w500,
-              color: statusColor ?? Colors.black,
-            ),
-            textAlign: TextAlign.center,
-          ),
         ),
       ),
     );
@@ -285,5 +608,56 @@ class MoneyReceiptDataTableWidget extends StatelessWidget {
       default:
         return Colors.black;
     }
+  }
+
+  String _formatDate(DateTime? date) {
+    if (date == null) return '-';
+    return "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
+  }
+
+  void _viewReceiptDetails(BuildContext context, MoneyreceiptModel receipt) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => MoneyReceiptDetailsScreen(receipt: receipt),
+      ),
+    );
+  }
+
+  void _generatePdf(BuildContext context, MoneyreceiptModel receipt) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => Scaffold(
+          appBar: AppBar(
+            title: const Text('Money Receipt'),
+            backgroundColor: AppColors.primaryColor,
+          ),
+          body: PdfPreview.builder(
+            useActions: true,
+            allowSharing: false,
+            canDebug: false,
+            canChangeOrientation: false,
+            canChangePageFormat: false,
+            dynamicLayout: true,
+            build: (format) => generateMoneyReceiptPdf(receipt),
+            pagesBuilder: (context, pages) {
+              return PageView.builder(
+                itemCount: pages.length,
+                scrollDirection: Axis.vertical,
+                itemBuilder: (context, index) {
+                  final page = pages[index];
+                  return Container(
+                    alignment: Alignment.center,
+                    padding: const EdgeInsets.all(8.0),
+                    child: Image(image: page.image, fit: BoxFit.contain),
+                  );
+                },
+              );
+            },
+          ),
+        ),
+      ),
+    );
   }
 }
