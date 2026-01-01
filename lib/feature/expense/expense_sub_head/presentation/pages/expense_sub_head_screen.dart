@@ -124,12 +124,63 @@ class _ExpenseHeadScreenState extends State<ExpenseSubHeadScreen> {
               },
               child: Column(
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      SizedBox(width: 350,
-                        child: CustomSearchTextFormField(
+
+                  if (Responsive.isDesktop(context))
+                  // Desktop layout
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                          width: 350,
+                          child: CustomSearchTextFormField(
+                            isRequiredLabel: false,
+                            controller: context
+                                .read<ExpenseSubHeadBloc>()
+                                .filterTextController,
+                            onChanged: (value) {
+                              _fetchApiData(
+                                filterText: value,
+                              );
+                            },
+                            onClear: () {
+                              context
+                                  .read<ExpenseSubHeadBloc>()
+                                  .filterTextController
+                                  .clear();
+                              _fetchApiData();
+                            },
+                            hintText: "Name",
+                          ),
+                        ),
+                        gapW16,
+                        AppButton(
+                          name: "Create Sub Expense Head",
+                          size: 100,
+                          onPressed: () {
+                            context.read<ExpenseSubHeadBloc>().clearData();
+                            showDialog(
+                              context: context,
+                              builder: (context) {
+                                return Dialog(
+                                  child: SizedBox(
+                                    width: AppSizes.width(context) * 0.50,
+                                    child: const ExpenseSubCreateScreen(),
+                                  ),
+                                );
+                              },
+                            );
+                          },
+                        ),
+                      ],
+                    )
+                  else
+                  // Mobile/Tablet layout
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        // Search Field
+                        CustomSearchTextFormField(
                           isRequiredLabel: false,
                           controller: context
                               .read<ExpenseSubHeadBloc>()
@@ -137,18 +188,8 @@ class _ExpenseHeadScreenState extends State<ExpenseSubHeadScreen> {
                           onChanged: (value) {
                             _fetchApiData(
                               filterText: value,
-                              state:
-                                  context
-                                          .read<ExpenseSubHeadBloc>()
-                                          .selectedState ==
-                                      "All"
-                                  ? ""
-                                  : context
-                                        .read<ExpenseSubHeadBloc>()
-                                        .selectedState,
                             );
                           },
-
                           onClear: () {
                             context
                                 .read<ExpenseSubHeadBloc>()
@@ -156,31 +197,40 @@ class _ExpenseHeadScreenState extends State<ExpenseSubHeadScreen> {
                                 .clear();
                             _fetchApiData();
                           },
-                          hintText:
-                              "Name", // Pass dynamic hintText if needed
+                          hintText: "expense sub heads...",
                         ),
-                      ),
-                      gapW16,
-                      AppButton(
-                        name: "Create Sub Expanse Head",
-                        onPressed: () {
-                          context
-                              .read<ExpenseSubHeadBloc>().clearData();
-                          showDialog(
-                            context: context,
-                            builder: (context) {
-                              return Dialog(
-                                child: SizedBox(
-                                  width: AppSizes.width(context) * 0.50,
-                                  child: ExpenseSubCreateScreen(),
-                                ),
-                              );
-                            },
-                          );
-                        },
-                      ),
-                    ],
-                  ),
+                        const SizedBox(height: 12),
+
+                        // Create Button
+                        AppButton(
+                          name: "Create",
+                          size: 100,
+                          width: 100,
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          onPressed: () {
+                            context.read<ExpenseSubHeadBloc>().clearData();
+                            showDialog(
+                              context: context,
+                              builder: (context) {
+                                return Dialog(
+                                  // insetPadding: const EdgeInsets.all(16),
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.rectangle,
+                                      color: AppColors.whiteColor,
+                                      borderRadius: BorderRadius.circular(AppSizes.borderRadiusSize),
+                                    ),
+                                    width: double.infinity,
+                                    height: AppSizes.height(context) * 0.3,
+                                    child: const ExpenseSubCreateScreen(),
+                                  ),
+                                );
+                              },
+                            );
+                          },
+                        ),
+                      ],
+                    ),
                   SizedBox(
                     child: BlocBuilder<ExpenseSubHeadBloc, ExpenseSubHeadState>(
                       builder: (context, state) {

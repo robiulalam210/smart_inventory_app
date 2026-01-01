@@ -128,13 +128,67 @@ class _SupplierPaymentScreenState extends State<SupplierPaymentScreen> {
       padding: const EdgeInsets.all(4),
       child: Column(
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              SizedBox(
-                width: 400,
-                child: CustomSearchTextFormField(
+          if (Responsive.isDesktop(context))
+          // Desktop layout
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                SizedBox(
+                  width: 400,
+                  child: CustomSearchTextFormField(
+                    isRequiredLabel: false,
+                    controller: _searchController,
+                    onClear: () {
+                      _searchController.clear();
+                      _fetchApi();
+                    },
+                    onChanged: (value) {
+                      _fetchApi(filterText: value);
+                    },
+                    hintText: "Search by supplier name or phone",
+                  ),
+                ),
+                const SizedBox(width: 16),
+                SizedBox(
+                  width: 260,
+                  child: CustomDateRangeField(
+                    isLabel: false,
+                    selectedDateRange: selectedDateRange,
+                    onDateRangeSelected: (value) {
+                      setState(() => selectedDateRange = value);
+                      if (value != null) {
+                        _fetchApi(from: value.start, to: value.end);
+                      }
+                    },
+                  ),
+                ),
+                const SizedBox(width: 16),
+                AppButton(
+                  name: "Create Payment",
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return Dialog(
+                          child: SizedBox(
+                            width: AppSizes.width(context) * 0.50,
+                            child: const SupplierPaymentForm(),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
+              ],
+            )
+          else
+          // Mobile layout
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Search Bar
+                CustomSearchTextFormField(
                   isRequiredLabel: false,
                   controller: _searchController,
                   onClear: () {
@@ -144,47 +198,59 @@ class _SupplierPaymentScreenState extends State<SupplierPaymentScreen> {
                   onChanged: (value) {
                     _fetchApi(filterText: value);
                   },
-                  hintText: "Search by supplier name or phone",
+                  hintText: "Search payments...",
                 ),
-              ),
-              const SizedBox(width: 16),
-              SizedBox(
-                width: 260,
-                child: CustomDateRangeField(
-                  isLabel: false,
-                  selectedDateRange: selectedDateRange,
-                  onDateRangeSelected: (value) {
-                    setState(() => selectedDateRange = value);
-                    if (value != null) {
-                      _fetchApi(from: value.start, to: value.end);
-                    }
-                  },
-                ),
-              ),
-              const SizedBox(width: 16),
-              AppButton(
-                name: "Create Payment",
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (context) {
-                      return Dialog(
-                        child: SizedBox(
-                          width: AppSizes.width(context) * 0.50,
-                          child: const SupplierPaymentForm(),
+                const SizedBox(height: 12),
+
+                // Date Range and Create Button Row
+                Row(
+                  children: [
+                    Expanded(
+                      child: SizedBox(
+                        // height: 50,
+                        child: CustomDateRangeField(
+                          isLabel: false,
+                          selectedDateRange: selectedDateRange,
+                          onDateRangeSelected: (value) {
+                            setState(() => selectedDateRange = value);
+                            if (value != null) {
+                              _fetchApi(from: value.start, to: value.end);
+                            }
+                          },
                         ),
-                      );
-                    },
-                  );
-                },
-              ),
-            ],
-          ),
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    SizedBox(
+                      width: 100,
+                      child: AppButton(
+                        name: "Create",
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (context) {
+                              return Dialog(
+                                insetPadding: const EdgeInsets.all(16),
+                                child: SizedBox(
+                                  width: double.infinity,
+                                  height: AppSizes.height(context) * 0.8,
+                                  child: const SupplierPaymentForm(),
+                                ),
+                              );
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
         ],
       ),
     );
   }
-
   Widget _buildSupplierPaymentList() {
     return SizedBox(
       child: BlocConsumer<SupplierPaymentBloc, SupplierPaymentState>(
