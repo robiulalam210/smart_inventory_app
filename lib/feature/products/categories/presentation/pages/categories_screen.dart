@@ -86,6 +86,9 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
   }
 
   Widget buildContent() {
+    final isMobile = Responsive.isMobile(context);
+    final isTablet = Responsive.isTablet(context);
+    final isDesktop = Responsive.isDesktop(context);
     return Padding(
       padding: AppTextStyle.getResponsivePaddingBody(context),
       child: BlocListener<CategoriesBloc, CategoriesState>(
@@ -121,40 +124,109 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
         },
         child: Column(
           children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
+            // Header with search and button
+            if (isMobile)
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Title for mobile
+                  Text(
+                    'Categories',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primaryColor,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
 
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                SizedBox(
-                  width: 350,
-                  child: CustomSearchTextFormField(
+                  // Search field
+                  CustomSearchTextFormField(
                     controller: dataBloc.filterTextController,
                     onChanged: (value) => _fetchApiData(filterText: value),
                     onClear: () {
                       dataBloc.filterTextController.clear();
                       _fetchApiData();
                     },
-                    hintText: "Name",
+                    hintText: "Search categories...",
                     isRequiredLabel: false,
                     labelText: "",
                   ),
-                ),
-                gapW16,
-                AppButton(
-                  name: "Create Categories ",
-                  onPressed: () {
-                    context.read<CategoriesBloc>().nameController.clear();
-                    showDialog(
-                      context: context,
-                      builder: (context) {
-                        return Dialog(child: CategoriesCreate());
+                  const SizedBox(height: 12),
+
+                  // Create button
+                  SizedBox(
+                    width: double.infinity,
+                    child: AppButton(
+                      name: "Create Category",
+                      onPressed: () {
+                        context.read<CategoriesBloc>().nameController.clear();
+                        showDialog(
+                          context: context,
+                          builder: (context) {
+                            return Dialog(
+                              insetPadding: const EdgeInsets.all(16),
+                              child: CategoriesCreate(),
+                            );
+                          },
+                        );
                       },
-                    );
-                  },
-                ),
-              ],
-            ),
+                    ),
+                  ),
+                ],
+              )
+            else
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // Title for desktop/tablet
+                  Text(
+                    'Categories',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primaryColor,
+                    ),
+                  ),
+
+                  Row(
+                    children: [
+                      SizedBox(
+                        width: 350,
+                        child: CustomSearchTextFormField(
+                          controller: dataBloc.filterTextController,
+                          onChanged: (value) => _fetchApiData(filterText: value),
+                          onClear: () {
+                            dataBloc.filterTextController.clear();
+                            _fetchApiData();
+                          },
+                          hintText: "Search categories...",
+                          isRequiredLabel: false,
+                          labelText: "",
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      AppButton(
+                        name: "Create Category",
+                        onPressed: () {
+                          context.read<CategoriesBloc>().nameController.clear();
+                          showDialog(
+                            context: context,
+                            builder: (context) {
+                              return Dialog(
+                                child: SizedBox(
+                                  width: MediaQuery.of(context).size.width * 0.5,
+                                  child: CategoriesCreate(),
+                                ),
+                              );
+                            },
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             const SizedBox(height: 10),
 
             /// 👇 Expanded fixes layout overflow
@@ -167,7 +239,9 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                     if (state.list.isEmpty) {
                       return Center(child: Lottie.asset(AppImages.noData));
                     } else {
-                      return CategoriesTableCard(categories: state.list);
+                      return isMobile
+                          ? CategoriesListMobile(categories: state.list)
+                          : CategoriesTableCard(categories: state.list);
                     }
                   } else if (state is CategoriesListFailed) {
                     return Center(
