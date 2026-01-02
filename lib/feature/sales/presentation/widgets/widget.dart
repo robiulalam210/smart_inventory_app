@@ -61,7 +61,7 @@ class PosSaleDataTableWidget extends StatelessWidget {
 
     return Container(
       margin: EdgeInsets.symmetric(
-        horizontal: isMobile ? 8.0 : 16.0,
+        horizontal: isMobile ? 0.0 : 8.0,
         vertical: 8.0,
       ),
       decoration: BoxDecoration(
@@ -69,7 +69,7 @@ class PosSaleDataTableWidget extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -84,9 +84,9 @@ class PosSaleDataTableWidget extends StatelessWidget {
         children: [
           // Header with Receipt No and Status
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
-              color: AppColors.primaryColor.withOpacity(0.05),
+              color: AppColors.primaryColor.withValues(alpha: 0.05),
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(16),
                 topRight: Radius.circular(16),
@@ -132,7 +132,7 @@ class PosSaleDataTableWidget extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: statusColor.withOpacity(0.1),
+                    color: statusColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: statusColor,
@@ -158,21 +158,32 @@ class PosSaleDataTableWidget extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Date
-                _buildDetailRow(
-                  icon: Iconsax.calendar,
-                  label: 'Date',
-                  value: _formatDate(sale.saleDate),
-                ),
-                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    // Date
+                    Expanded(
+                      child: _buildDetailRow(
+                        icon: Iconsax.calendar,
+                        label: 'Date',
+                        value: _formatDate(sale.saleDate),
+                      ),
+                    ),
 
-                // Customer
-                _buildDetailRow(
-                  icon: Iconsax.user,
-                  label: 'Customer',
-                  value: sale.customerName.toString(),
+                    const SizedBox(width: 8),
+
+                    // Customer
+                    Expanded(
+                      child: _buildDetailRow(
+                        icon: Iconsax.user,
+                        label: 'Customer',
+                        value: sale.customerName.toString(),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 8),
+
+
+                const SizedBox(height: 4),
 
                 // Sales By
                 _buildDetailRow(
@@ -184,7 +195,7 @@ class PosSaleDataTableWidget extends StatelessWidget {
 
                 // Financial Summary
                 Container(
-                  padding: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     color: Colors.grey.shade50,
                     borderRadius: BorderRadius.circular(12),
@@ -270,7 +281,7 @@ class PosSaleDataTableWidget extends StatelessWidget {
 
           // Action Buttons
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
               color: Colors.grey.shade50,
               borderRadius: const BorderRadius.only(
