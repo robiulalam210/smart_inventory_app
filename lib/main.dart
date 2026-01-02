@@ -10,8 +10,8 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
 
-  final dbHelper = DatabaseHelper();
-  await dbHelper.initDatabase();
+  // final dbHelper = DatabaseHelper();
+  // await dbHelper.initDatabase();
 
   // 🖥️ Desktop window setup (dynamic sizing)
   if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
@@ -66,7 +66,7 @@ void main() async {
   runApp(
     ToastificationWrapper(
       child: KeyboardGuard(
-        child: MyApp(dbHelper: dbHelper),
+        child: MyApp(),
       ),
     ),
   );
