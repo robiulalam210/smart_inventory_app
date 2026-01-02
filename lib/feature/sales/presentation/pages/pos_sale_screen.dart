@@ -41,6 +41,10 @@ class _PosSaleScreenState extends State<PosSaleScreen> {
     super.initState();
     filterTextController.clear();
 
+    selectedDateRange = DateRange(
+      DateTime(now.year, now.month - 1, now.day),
+      DateTime(now.year, now.month, now.day),
+    );
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<UserBloc>().add(
         FetchUserList(context, dropdownFilter: "?status=1"),
@@ -48,15 +52,13 @@ class _PosSaleScreenState extends State<PosSaleScreen> {
       context.read<CustomerBloc>().add(FetchCustomerActiveList(context));
       context.read<ProductsBloc>().add(FetchProductsStockList(context));
 
-      selectedDateRange = DateRange(
-        DateTime(now.year, now.month - 1, now.day),
-        DateTime(now.year, now.month, now.day),
-      );
+
 
       _fetchApi(
-        from: selectedDateRange?.start,
-        to: selectedDateRange?.end,
+
       );
+
+
     });
   }
 
@@ -372,7 +374,7 @@ class _PosSaleScreenState extends State<PosSaleScreen> {
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: Colors.grey.withOpacity(0.1),
+                color: Colors.grey.withValues(alpha: 0.1),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -382,7 +384,7 @@ class _PosSaleScreenState extends State<PosSaleScreen> {
             children: [
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
                   child: CustomSearchTextFormField(
                     controller: filterTextController,
                     onChanged: (value) => _fetchApi(filterText: value),
@@ -390,7 +392,7 @@ class _PosSaleScreenState extends State<PosSaleScreen> {
                       filterTextController.clear();
                       _fetchApi();
                     },
-                    hintText: "Search sales...",
+                    hintText: "sales...",
                   ),
                 ),
               ),
@@ -400,6 +402,16 @@ class _PosSaleScreenState extends State<PosSaleScreen> {
                   color: AppColors.primaryColor,
                 ),
                 onPressed: () => _showMobileFilterSheet(context),
+              ),
+              SizedBox(
+                child: OutlinedButton.icon(
+                  onPressed: _clearFilters,
+                  icon: const Icon(Icons.clear_all, size: 16),
+                  label: const Text('Clear All'),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 0,horizontal: 8),
+                  ),
+                ),
               ),
               IconButton(
                 onPressed: () => _fetchApi(),
@@ -434,6 +446,7 @@ class _PosSaleScreenState extends State<PosSaleScreen> {
                   _fetchApi();
                 },
               ),
+
             if (selectedDateRange != null)
               Chip(
                 label: Text(
@@ -446,34 +459,7 @@ class _PosSaleScreenState extends State<PosSaleScreen> {
               ),
           ],
         ),
-        const SizedBox(height: 12),
 
-        // Action Buttons
-        Row(
-          children: [
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: () => _showMobileFilterSheet(context),
-                icon: const Icon(Iconsax.filter, size: 16),
-                label: const Text('More Filters'),
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: _clearFilters,
-                icon: const Icon(Icons.clear_all, size: 16),
-                label: const Text('Clear All'),
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                ),
-              ),
-            ),
-          ],
-        ),
       ],
     );
   }
@@ -492,7 +478,7 @@ class _PosSaleScreenState extends State<PosSaleScreen> {
               SizedBox(
                 child: PosSaleDataTableWidget(sales: state.list),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 6),
               PaginationBar(
                 count: state.count,
                 totalPages: state.totalPages,

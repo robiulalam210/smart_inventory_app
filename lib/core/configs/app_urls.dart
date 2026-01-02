@@ -1,28 +1,8 @@
-import 'dart:io';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 final bool isLive = true; // Set to true for production environment
 
-// String getBaseUrl() {
-//   // If you set a compile-time constant via --dart-define, prefer that:
-//   // const envBaseUrl = String.fromEnvironment('BASE_URL', defaultValue: '');
-//   // if (envBaseUrl.isNotEmpty) return envBaseUrl;
-//
-//   if (kIsWeb) {
-//     return 'http://localhost:8000';
-//   }
-//   if (Platform.isAndroid) {
-//     // Android emulator (AVD)
-//     return 'http://10.0.2.2:8000';
-//   }
-//   if (Platform.isIOS) {
-//     // iOS simulator uses localhost
-//     return 'http://localhost:8000';
-//   }
-//   // Desktop or others
-//   return 'http://localhost:8000';
-// }
+
 class AppUrls {
 
 
