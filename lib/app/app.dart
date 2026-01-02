@@ -1,5 +1,4 @@
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:flutter_quill/flutter_quill.dart' as quill;
 import '/feature/account_transfer/presentation/bloc/account_transfer/account_transfer_bloc.dart';
 import '/feature/customer/presentation/bloc/customer/customer_bloc.dart';
 import '/feature/expense/expense_head/presentation/bloc/expense_head/expense_head_bloc.dart';
@@ -41,9 +40,8 @@ import '../feature/supplier/presentation/bloc/supplier_payment/supplier_payment_
 import '../feature/transactions/presentation/bloc/transactions/transaction_bloc.dart';
 
 class MyApp extends StatelessWidget {
-  final DatabaseHelper dbHelper;
 
-  const MyApp({super.key, required this.dbHelper});
+  const MyApp({super.key, });
 
   @override
   Widget build(BuildContext context) {
@@ -51,7 +49,7 @@ class MyApp extends StatelessWidget {
       providers: [
         BlocProvider(create: (context) => ConnectivityBloc()),
         BlocProvider(
-          create: (context) => DashboardBloc(dbHelper), // ✅ Pass the instance
+          create: (context) => DashboardBloc(), // ✅ Pass the instance
         ),
         BlocProvider(
           create: (context) => AuthBloc(
@@ -112,7 +110,7 @@ class MyApp extends StatelessWidget {
       child: Center(
         child: MaterialApp(
           localizationsDelegates: [
-            quill.FlutterQuillLocalizations.delegate, // <-- add this
+            // quill.FlutterQuillLocalizations.delegate, // <-- add this
             GlobalMaterialLocalizations.delegate,
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,

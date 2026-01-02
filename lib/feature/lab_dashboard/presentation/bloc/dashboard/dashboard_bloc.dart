@@ -52,7 +52,6 @@ part 'dashboard_event.dart';
 part 'dashboard_state.dart';
 
 class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
-  final DatabaseHelper dbHelper;
   final List<Widget> myScreens = [
     AppWrapper(child: DashboardScreen()),
 
@@ -117,7 +116,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
 
   ];
 
-  DashboardBloc(this.dbHelper) : super(DashboardScreenChanged(0)) {
+  DashboardBloc() : super(DashboardScreenChanged(0)) {
     // Register event handlers
     on<ChangeDashboardScreen>((event, emit) {
       emit(DashboardScreenChanged(event.index));
