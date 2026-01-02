@@ -1,10 +1,11 @@
+import 'dart:developer';
+
 import 'package:flutter/cupertino.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:meherin_mart/core/core.dart';
 import 'package:meherin_mart/feature/products/product/data/model/product_stock_model.dart';
 import 'package:meherin_mart/feature/users_list/presentation/bloc/users/user_bloc.dart';
-import 'dart:developer';
 
 import '../../../../accounts/data/model/account_active_model.dart';
 import '../../../../accounts/presentation/bloc/account/account_bloc.dart';
@@ -71,6 +72,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
       setDefaultSalesUser();
     });
   }
+
   Future<void> setDefaultSalesUser() async {
     final token = await LocalDB.getLoginInfo();
     final loginUserId = token?['userId'];
@@ -79,7 +81,6 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
       name: 'Walk-in-customer',
       id: -1,
     );
-
 
     // Get all users from Bloc
     final userList = context.read<UserBloc>().list;
@@ -150,6 +151,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
     }
     return totalSum;
   }
+
   double calculateSpecificDiscountTotal() {
     double discountSum = 0;
 
@@ -180,7 +182,6 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
     return discountSum;
   }
 
-
   double calculateDiscountTotal() {
     double total = calculateTotalForAllProducts();
     final bloc = context.read<CreatePosSaleBloc>();
@@ -190,9 +191,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
     if (selectedOverallDiscountType == 'percent') {
       discount = total * (discount / 100);
     }
-    total -= discount;
-
-    return total;
+    return discount;
   }
 
   double calculateVatTotal() {
@@ -204,9 +203,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
     if (selectedOverallVatType == 'percent') {
       vat = total * (vat / 100);
     }
-    total += vat;
-
-    return total;
+    return vat;
   }
 
   double calculateServiceChargeTotal() {
@@ -218,9 +215,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
     if (selectedOverallServiceChargeType == 'percent') {
       serviceCharge = total * (serviceCharge / 100);
     }
-    total += serviceCharge;
-
-    return total;
+    return serviceCharge;
   }
 
   double calculateDeliveryTotal() {
@@ -232,9 +227,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
     if (selectedOverallDeliveryType == 'percent') {
       deliveryCharge = total * (deliveryCharge / 100);
     }
-    total += deliveryCharge;
-
-    return total;
+    return deliveryCharge;
   }
 
   void updateTotal(int index) {
@@ -273,9 +266,9 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
 
     setState(() {});
   }
-  double calculateAllFinalTotal() {
-    double subtotal = calculateTotalForAllProducts(); // This should be sum of all product totals (after individual discounts)
 
+  double calculateAllFinalTotal() {
+    double subtotal = calculateTotalForAllProducts();
     final bloc = context.read<CreatePosSaleBloc>();
 
     // Apply overall discount
@@ -306,6 +299,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
 
     return finalTotal;
   }
+
   void onProductChanged(int index, ProductModelStockModel? newVal) {
     if (newVal == null) return;
 
@@ -347,8 +341,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
     products[index]["discount_type"] = newVal.discountType ?? "fixed";
     products[index]["discountApplied"] = newVal.discountApplied;
 
-    controllers[index]!["price"]!.text =
-        newVal.sellingPrice.toString();
+    controllers[index]!["price"]!.text = newVal.sellingPrice.toString();
 
     // ✅ Discount handling
     controllers[index]!["discount"]!.text =
@@ -358,207 +351,823 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
 
     updateTotal(index);
   }
-
   @override
   Widget build(BuildContext context) {
-    final isBigScreen = Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
+    final isBigScreen = Responsive.isDesktop(context) || Responsive.isMaxDesktop(context) || Responsive.isSmallDesktop(context);
 
     return Container(
       color: AppColors.bg,
       child: SafeArea(
-        child: ResponsiveRow(
-          spacing: 0,
-          runSpacing: 0,
-          children: [
-            if (isBigScreen) _buildSidebar(),
-            _buildContentArea(isBigScreen),
-          ],
+        child: isBigScreen ? _buildDesktopLayout() : _buildMobileLayout(),
+      ),
+    );
+  }
+
+  Widget _buildDesktopLayout() {
+    final isSmallScreen=  Responsive.isSmallDesktop(context);
+
+    return ResponsiveRow(
+      spacing: 0,
+      runSpacing: 0,
+      children: [
+        if(!isSmallScreen)
+        ResponsiveCol(
+          xs: 0, sm: 1, md: 1, lg: 2, xl: 2,
+          child: Container(
+            decoration: const BoxDecoration(color: Colors.white),
+            child: const Sidebar(),
+          ),
         ),
-      ),
+        ResponsiveCol(
+          xs: 12, sm: 11, md: 11, lg: 10, xl: 10,
+          child: _buildMainContent(),
+        ),
+      ],
     );
   }
 
-  Widget _buildSidebar() {
-    return ResponsiveCol(
-      xs: 0, sm: 1, md: 1, lg: 2, xl: 2,
-      child: Container(
-        decoration: const BoxDecoration(color: Colors.white),
-        child: const Sidebar(),
-      ),
+  Widget _buildMobileLayout() {
+    return Container(
+
+      child: _buildMobileStepperContent(),
     );
   }
 
-  Widget _buildContentArea(bool isBigScreen) {
+  Widget _buildMainContent() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16.0),
+      child: BlocConsumer<CreatePosSaleBloc, CreatePosSaleState>(
+        listener: (context, state) {
+          if (state is CreatePosSaleLoading) {
+            appLoader(context, "Creating PosSale, please wait...");
+          } else if (state is CreatePosSaleSuccess) {
+            Navigator.pop(context);
+            showCustomToast(
+              context: context,
+              title: 'Success!',
+              description: "Sale created successfully!",
+              icon: Icons.check_circle,
+              primaryColor: Colors.green,
+            );
 
-    return ResponsiveCol(
-      xs: 12, sm: 12, md: 12, lg: 10, xl: 10,
-      child: RefreshIndicator(
-        color: AppColors.primaryColor,
-        onRefresh: () async {
-          context.read<AccountBloc>().add(FetchAccountList(context));
-          context.read<CustomerBloc>().add(FetchCustomerList(context, dropdownFilter: "?status=1"));
+            changeAmountController.clear();
+            context.read<DashboardBloc>().add(ChangeDashboardScreen(index: 2));
+            setState(() {});
+          } else if (state is CreatePosSaleFailed) {
+            Navigator.pop(context);
+            appAlertDialog(
+              context,
+              state.content,
+              title: state.title,
+              actions: [
+                TextButton(
+                  onPressed: () => AppRoutes.pop(context),
+                  child: const Text("Dismiss"),
+                ),
+              ],
+            );
+          }
         },
-        child: BlocConsumer<CreatePosSaleBloc, CreatePosSaleState>(
-          listener: (context, state) {
-            if (state is CreatePosSaleLoading) {
-              appLoader(context, "Creating PosSale, please wait...");
-            } else if (state is CreatePosSaleSuccess) {
-              Navigator.pop(context);
-              showCustomToast(
-                context: context,
-                title: 'Success!',
-                description:
-                "Sale created successfully!",
-                icon: Icons.check_circle,
-                primaryColor: Colors.green,
-              );
+        builder: (context, state) {
+          final bloc = context.read<CreatePosSaleBloc>();
 
-              // Reset local state when form is cleared
-              changeAmountController.clear();
-              // bloc.add(ChangeDashboardScreen(index: 1));
-              context.read<DashboardBloc>().add(ChangeDashboardScreen(index: 2));
+          return Form(
+            key: formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildTopFormSection(bloc),
+                const SizedBox(height: 0),
+                _buildProductListSection(bloc),
+                const SizedBox(height: 16),
+                _buildChargesSection(bloc),
+                const SizedBox(height: 16),
+                _buildSummarySection(bloc),
+                const SizedBox(height: 20),
+                _buildActionButtons(),
+                const SizedBox(height: 20),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
 
-              // AppRoutes.push(context, RootScreen());
-              setState(() {});
-            } else if (state is CreatePosSaleFailed) {
-              Navigator.pop(context);
-              appAlertDialog(
-                context,
-                state.content,
-                title: state.title,
-                actions: [
-                  TextButton(
-                    onPressed: () => AppRoutes.pop(context),
-                    child: const Text("Dismiss"),
-                  ),
-                ],
-              );
-            }
-          },
-          builder: (context, state) {
-            final bloc = context.read<CreatePosSaleBloc>();
 
-            return Form(
-              key: formKey,
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+
+  Widget _buildMobileStepperContent() {
+    return BlocConsumer<CreatePosSaleBloc, CreatePosSaleState>(
+      listener: (context, state) {
+        if (state is CreatePosSaleLoading) {
+          appLoader(context, "Creating PosSale, please wait...");
+        } else if (state is CreatePosSaleSuccess) {
+          Navigator.pop(context);
+          showCustomToast(
+            context: context,
+            title: 'Success!',
+            description: "Sale created successfully!",
+            icon: Icons.check_circle,
+            primaryColor: Colors.green,
+          );
+
+          changeAmountController.clear();
+          context.read<DashboardBloc>().add(ChangeDashboardScreen(index: 2));
+          setState(() {});
+        } else if (state is CreatePosSaleFailed) {
+          Navigator.pop(context);
+          appAlertDialog(
+            context,
+            state.content,
+            title: state.title,
+            actions: [
+              TextButton(
+                onPressed: () => AppRoutes.pop(context),
+                child: const Text("Dismiss"),
+              ),
+            ],
+          );
+        }
+      },
+      builder: (context, state) {
+        final bloc = context.read<CreatePosSaleBloc>();
+        int currentStep = 0;
+
+        return Form(
+          key: formKey,
+          child: Stepper(
+            type: StepperType.vertical,
+            currentStep: currentStep,
+            onStepContinue: () {
+              if (currentStep < 3) {
+                setState(() {
+                  currentStep += 1;
+                });
+              }
+            },
+            onStepCancel: () {
+              if (currentStep > 0) {
+                setState(() {
+                  currentStep -= 1;
+                });
+              }
+            },
+            onStepTapped: (step) {
+              setState(() {
+                currentStep = step;
+              });
+            },
+            controlsBuilder: (context, details) {
+              return Padding(
+                padding: const EdgeInsets.only(top: 16.0),
+                child: Row(
                   children: [
-                    const SizedBox(height: 6),
-                    _buildTopFormSection(bloc),
-                    const SizedBox(height: 6),
-                    _buildProductListSection(bloc),
-                    const SizedBox(height: 6),
-                    _buildChargesSection(bloc),
-                    const SizedBox(height: 6),
-                    _buildSummarySection(bloc),
-                    const SizedBox(height: 6),
-                    gapH20,
-                    _buildActionButtons(),
+                    if (currentStep > 0)
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: details.onStepCancel,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.grey[300],
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                          ),
+                          child: const Text('Back', style: TextStyle(color: Colors.black)),
+                        ),
+                      ),
+                    if (currentStep > 0) const SizedBox(width: 8),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: details.onStepContinue,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primaryColor,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                        ),
+                        child: Text(
+                          currentStep < 3 ? 'Next' : 'Submit',
+                          style: const TextStyle(color: Colors.white),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
+              );
+            },
+            steps: [
+              // Step 1: Customer Information
+              Step(
+                title: Text('Customer Info', style: AppTextStyle.cardLevelHead(context)),
+                content: _buildMobileTopFormSection(bloc),
+                isActive: currentStep >= 0,
+                state: currentStep > 0 ? StepState.complete : StepState.indexed,
               ),
-            );
-          },
+
+              // Step 2: Products
+              Step(
+                title: Text('Products', style: AppTextStyle.cardLevelHead(context)),
+                content: _buildMobileProductListSection(bloc),
+                isActive: currentStep >= 1,
+                state: currentStep > 1 ? StepState.complete : StepState.indexed,
+              ),
+
+              // Step 3: Charges
+              Step(
+                title: Text('Charges', style: AppTextStyle.cardLevelHead(context)),
+                content: _buildMobileChargesSection(bloc),
+                isActive: currentStep >= 2,
+                state: currentStep > 2 ? StepState.complete : StepState.indexed,
+              ),
+
+              // Step 4: Summary & Payment
+              Step(
+                title: Text('Summary & Payment', style: AppTextStyle.cardLevelHead(context)),
+                content: Column(
+                  children: [
+                    // _buildMobileSummarySection(bloc),
+                    const SizedBox(height: 20),
+                    // Final submit button
+                    ElevatedButton(
+                      onPressed: _submitForm,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primaryColor,
+                        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: const Text(
+                        'Submit Sale',
+                        style: TextStyle(color: Colors.white, fontSize: 16),
+                      ),
+                    ),
+                  ],
+                ),
+                isActive: currentStep >= 3,
+                state: StepState.indexed,
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildMobileTopFormSection(CreatePosSaleBloc bloc) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Column(
+          children: [
+            BlocBuilder<CustomerBloc, CustomerState>(
+              builder: (context, state) {
+                return AppDropdown(
+                  context: context,
+                  label: "Customer",
+                  hint: bloc.selectClintModel?.name ?? "Select Customer",
+                  isSearch: true,
+                  isNeedAll: false,
+                  isRequired: true,
+                  value: bloc.selectClintModel,
+                  itemList: [
+                    CustomerActiveModel(name: 'Walk-in-customer', id: -1),
+                  ] + context.read<CustomerBloc>().activeCustomer,
+                  onChanged: (newVal) {
+                    bloc.selectClintModel = newVal;
+                    bloc.customType = (newVal?.id == -1) ? "Walking Customer" : "Saved Customer";
+                    setState(() {});
+                  },
+                  validator: (value) => value == null ? 'Please select Customer' : null,
+                  itemBuilder: (item) => DropdownMenuItem(
+                    value: item,
+                    child: Text(
+                      item.toString(),
+                      style: const TextStyle(
+                        color: AppColors.blackColor,
+                        fontFamily: 'Quicksand',
+                        fontWeight: FontWeight.w300,
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 12),
+            BlocBuilder<UserBloc, UserState>(
+              builder: (context, state) {
+                return AppDropdown(
+                  context: context,
+                  label: "Sales By",
+                  hint: bloc.selectSalesModel?.username ?? "Select Sales",
+                  isSearch: true,
+                  isNeedAll: false,
+                  isRequired: true,
+                  value: bloc.selectSalesModel,
+                  itemList: context.read<UserBloc>().list,
+                  onChanged: (newVal) {
+                    bloc.selectSalesModel = newVal;
+                    setState(() {});
+                  },
+                  validator: (value) => value == null ? 'Please select Sales' : null,
+                  itemBuilder: (item) => DropdownMenuItem(
+                    value: item,
+                    child: Text(
+                      item.toString(),
+                      style: const TextStyle(
+                        color: AppColors.blackColor,
+                        fontFamily: 'Quicksand',
+                        fontWeight: FontWeight.w300,
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 12),
+            CustomInputField(
+              radius: 8,
+              isRequired: true,
+              readOnly: true,
+              controller: bloc.dateEditingController,
+              hintText: 'Sale Date',
+              keyboardType: TextInputType.datetime,
+              autofillHints: AutofillHints.name,
+              bottom: 15.0,
+              fillColor: AppColors.whiteColor,
+              validator: (value) => value!.isEmpty ? 'Please enter date' : null,
+              onTap: _selectDate,
+            ),
+          ],
         ),
-      ),
+      ],
+    );
+  }
+
+  Widget _buildMobileProductListSection(CreatePosSaleBloc bloc) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(bottom: 12.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "Products",
+                style: AppTextStyle.cardLevelHead(context),
+              ),
+              IconButton(
+                icon: const Icon(Icons.add_circle, color: Colors.green),
+                onPressed: addProduct,
+              ),
+            ],
+          ),
+        ),
+        ...products.asMap().entries.map((entry) {
+          final index = entry.key;
+          final product = entry.value;
+          final discountApplied = product["discountApplied"] == true;
+
+          return Container(
+            margin: const EdgeInsets.only(bottom: 12),
+            padding: const EdgeInsets.all(12.0),
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey[300]!),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Product header
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Product ${index + 1}",
+                      style: AppTextStyle.cardLevelHead(context),
+                    ),
+                    if (index > 0)
+                      IconButton(
+                        icon: const Icon(Icons.delete, color: Colors.red, size: 20),
+                        onPressed: () => removeProduct(index),
+                        padding: EdgeInsets.zero,
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+
+                // Category
+                BlocBuilder<CategoriesBloc, CategoriesState>(
+                  builder: (context, state) {
+                    final selectedCategory = categoriesBloc.selectedState;
+                    final categoryList = categoriesBloc.list;
+
+                    return AppDropdown(
+                      label: "Category",
+                      context: context,
+                      hint: selectedCategory.isEmpty ? "Select Category" : selectedCategory,
+                      isRequired: false,
+                      isNeedAll: true,
+                      isLabel: true,
+                      isSearch: true,
+                      value: selectedCategory.isEmpty ? null : selectedCategory,
+                      itemList: categoryList.map((e) => e.name ?? "").toList(),
+                      onChanged: (newVal) {
+                        setState(() {
+                          categoriesBloc.selectedState = newVal.toString();
+                          final matchingCategory = categoryList.firstWhere(
+                                (category) => category.name.toString() == newVal.toString(),
+                            orElse: () => CategoryModel(),
+                          );
+                          categoriesBloc.selectedStateId = matchingCategory.id?.toString() ?? "";
+                          product["product"] = null;
+                          product["product_id"] = null;
+                          controllers[index]!["price"]!.text = "0";
+                          controllers[index]!["quantity"]!.text = "1";
+                          controllers[index]!["discount"]!.text = "0";
+                          updateTotal(index);
+                        });
+                      },
+                      itemBuilder: (item) => DropdownMenuItem(
+                        value: item,
+                        child: Text(item.toString()),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 12),
+
+                // Product
+                BlocBuilder<ProductsBloc, ProductsState>(
+                  builder: (context, state) {
+                    final selectedCategoryId = categoriesBloc.selectedStateId;
+                    final selectedProductIds = products
+                        .where((p) => p["product_id"] != null)
+                        .map<int>((p) => p["product_id"])
+                        .toList();
+
+                    final filteredProducts = context
+                        .read<ProductsBloc>()
+                        .productList
+                        .where((item) {
+                      final categoryMatch = selectedCategoryId.isEmpty
+                          ? true
+                          : item.category?.toString() == selectedCategoryId;
+                      final notDuplicate = !selectedProductIds.contains(item.id) ||
+                          item.id == product["product_id"];
+                      return categoryMatch && notDuplicate;
+                    }).toList();
+
+                    return AppDropdown<ProductModelStockModel>(
+                      context: context,
+                      isRequired: false,
+                      isLabel: true,
+                      isSearch: true,
+                      label: "Product",
+                      hint: selectedCategoryId.isEmpty ? "Select Category First" : "Select Product",
+                      value: product["product"],
+                      itemList: filteredProducts,
+                      onChanged: (newVal) => onProductChanged(index, newVal),
+                      validator: (value) => value == null ? 'Please select Product' : null,
+                      itemBuilder: (item) => DropdownMenuItem(
+                        value: item,
+                        child: Text(item.toString()),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 12),
+
+                // Price & Quantity Row
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text("Price", style: AppTextStyle.bodySmall(context)),
+                          const SizedBox(height: 4),
+                          TextFormField(
+                            style: AppTextStyle.cardLevelText(context),
+                            controller: controllers[index]?["price"],
+                            keyboardType: TextInputType.number,
+                            readOnly: true,
+                            decoration: InputDecoration(
+                              filled: true,
+                              fillColor: AppColors.whiteColor,
+                              contentPadding: const EdgeInsets.all(10),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(5),
+                                borderSide: BorderSide(color: AppColors.primaryColor.withOpacity(0.3)),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(5),
+                                borderSide: BorderSide(color: AppColors.primaryColor.withOpacity(0.3)),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text("Quantity", style: AppTextStyle.bodySmall(context)),
+                          const SizedBox(height: 4),
+                          Container(
+                            decoration: BoxDecoration(
+                              border: Border.all(color: AppColors.primaryColor.withOpacity(0.3)),
+                              borderRadius: BorderRadius.circular(5),
+                            ),
+                            child: Row(
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.remove, size: 18),
+                                  onPressed: () {
+                                    int? currentQuantity = int.tryParse(controllers[index]?["quantity"]?.text ?? "0");
+                                    if (currentQuantity != null && currentQuantity > 1) {
+                                      controllers[index]!["quantity"]!.text = (currentQuantity - 1).toString();
+                                      products[index]["quantity"] = controllers[index]!["quantity"]!.text;
+                                      updateTotal(index);
+                                    }
+                                  },
+                                  padding: EdgeInsets.zero,
+                                  constraints: const BoxConstraints(minWidth: 36),
+                                ),
+                                Expanded(
+                                  child: Text(
+                                    controllers[index]!["quantity"]!.text,
+                                    textAlign: TextAlign.center,
+                                    style: AppTextStyle.cardTitle(context),
+                                  ),
+                                ),
+                                IconButton(
+                                  padding: EdgeInsets.zero,
+                                  icon: const Icon(Icons.add, size: 18),
+                                  onPressed: () {
+                                    int currentQuantity = int.tryParse(controllers[index]!["quantity"]!.text) ?? 0;
+                                    controllers[index]!["quantity"]!.text = (currentQuantity + 1).toString();
+                                    products[index]["quantity"] = controllers[index]!["quantity"]!.text;
+                                    updateTotal(index);
+                                  },
+                                  constraints: const BoxConstraints(minWidth: 36),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+
+                // Discount Section
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text("Discount", style: AppTextStyle.bodySmall(context)),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: AbsorbPointer(
+                            absorbing: discountApplied,
+                            child: CupertinoSegmentedControl<String>(
+                              padding: EdgeInsets.zero,
+                              children: {
+                                'fixed': Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+                                  child: Text(
+                                    'TK',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontFamily: GoogleFonts.playfairDisplay().fontFamily,
+                                      color: product["discount_type"] == 'fixed' ? Colors.white : Colors.black,
+                                    ),
+                                  ),
+                                ),
+                                'percent': Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+                                  child: Text(
+                                    '%',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontFamily: GoogleFonts.playfairDisplay().fontFamily,
+                                      color: product["discount_type"] == 'percent' ? Colors.white : Colors.black,
+                                    ),
+                                  ),
+                                ),
+                              },
+                              onValueChanged: discountApplied ? (_) {} : (value) {
+                                setState(() {
+                                  product["discount_type"] = value;
+                                  updateTotal(index);
+                                });
+                              },
+                              groupValue: product["discount_type"],
+                              unselectedColor: Colors.grey[300],
+                              selectedColor: AppColors.primaryColor,
+                              borderColor: AppColors.primaryColor,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: TextFormField(
+                            controller: controllers[index]?["discount"],
+                            style: AppTextStyle.cardLevelText(context),
+                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                            readOnly: discountApplied,
+                            decoration: InputDecoration(
+                              filled: true,
+                              fillColor: AppColors.whiteColor,
+                              contentPadding: const EdgeInsets.all(10),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(5),
+                                borderSide: BorderSide(color: AppColors.primaryColor.withOpacity(0.3)),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(5),
+                                borderSide: BorderSide(color: AppColors.primaryColor.withOpacity(0.3)),
+                              ),
+                            ),
+                            onChanged: discountApplied ? null : (value) {
+                              products[index]["discount"] = double.tryParse(value) ?? 0.0;
+                              updateTotal(index);
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          );
+        }).toList(),
+      ],
+    );
+  }
+
+  Widget _buildMobileChargesSection(CreatePosSaleBloc bloc) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "Additional Charges",
+          style: AppTextStyle.cardLevelHead(context),
+        ),
+        const SizedBox(height: 12),
+        Column(
+          children: [
+            // _buildMobileChargeField("Overall Discount", selectedOverallDiscountType, bloc.discountOverAllController, (value) {
+            //   setState(() {
+            //     selectedOverallDiscountType = value;
+            //     bloc.selectedOverallDiscountType = value;
+            //   });
+            //   _updateChangeAmount();
+            // }),
+            // const SizedBox(height: 12),
+            // _buildMobileChargeField("Overall Vat", selectedOverallVatType, bloc.vatOverAllController, (value) {
+            //   setState(() {
+            //     selectedOverallVatType = value;
+            //     bloc.selectedOverallVatType = value;
+            //   });
+            //   _updateChangeAmount();
+            // }),
+            const SizedBox(height: 12),
+          //   _buildMobileChargeField("Service Charge", selectedOverallServiceChargeType, bloc.serviceChargeOverAllController, (value) {
+          //     setState(() {
+          //       selectedOverallServiceChargeType = value;
+          //       bloc.selectedOverallServiceChargeType = value;
+          //     });
+          //     _updateChangeAmount();
+          //   }),
+          //   const SizedBox(height: 12),
+          //   _buildMobileChargeField("Delivery Charge", selectedOverallDeliveryType, bloc.deliveryChargeOverAllController, (value) {
+          //     setState(() {
+          //       selectedOverallDeliveryType = value;
+          //       bloc.selectedOverallDeliveryType = value;
+          //     });
+          //     _updateChangeAmount();
+          //   }),
+          //
+          //
+          ],
+        ),
+      ],
     );
   }
 
   Widget _buildTopFormSection(CreatePosSaleBloc bloc) {
-    return ResponsiveRow(
-      spacing: 20,
-      runSpacing: 10,
-      children: [
-        ResponsiveCol(xs: 12, sm: 3, md: 3, lg: 3, xl: 3,
-          child: BlocBuilder<CustomerBloc, CustomerState>(
-            builder: (context, state) {
-              return AppDropdown(
-                context: context,
-                label: "Customer",
-                hint: bloc.selectClintModel?.name ?? "Select Customer",
-
-
-                isSearch: true,
-                isNeedAll: false,
-                isRequired: true,
-                value: bloc.selectClintModel,
-                itemList: [
-                  CustomerActiveModel(name: 'Walk-in-customer', id: -1),
-                ] + context.read<CustomerBloc>().activeCustomer,
-                onChanged: (newVal) {
-                  bloc.selectClintModel = newVal;
-                  bloc.customType = (newVal?.id == -1) ? "Walking Customer" : "Saved Customer";
-                  setState(() {});
-                },
-                validator: (value) => value == null ? 'Please select Customer' : null,
-                itemBuilder: (item) => DropdownMenuItem(
-                  value: item,
-                  child: Text(
-                    item.toString(),
-                    style: const TextStyle(
-                      color: AppColors.blackColor,
-                      fontFamily: 'Quicksand',
-                      fontWeight: FontWeight.w300,
-                    ),
-                  ),
+    return Padding(
+      padding: const EdgeInsets.all(0.0),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "Customer Information",
+            style: AppTextStyle.headerTitle(context)?.copyWith(fontSize: 14),
+          ),
+          const SizedBox(height: 6),
+          ResponsiveRow(
+            spacing: 20,
+            runSpacing: 10,
+            children: [
+              ResponsiveCol(
+                xs: 12, sm: 6, md: 3, lg: 3, xl: 3,
+                child: BlocBuilder<CustomerBloc, CustomerState>(
+                  builder: (context, state) {
+                    return AppDropdown(
+                      context: context,
+                      label: "Customer",
+                      hint: bloc.selectClintModel?.name ?? "Select Customer",
+                      isSearch: true,
+                      isNeedAll: false,
+                      isRequired: true,
+                      value: bloc.selectClintModel,
+                      itemList: [
+                        CustomerActiveModel(name: 'Walk-in-customer', id: -1),
+                      ] + context.read<CustomerBloc>().activeCustomer,
+                      onChanged: (newVal) {
+                        bloc.selectClintModel = newVal;
+                        bloc.customType = (newVal?.id == -1) ? "Walking Customer" : "Saved Customer";
+                        setState(() {});
+                      },
+                      validator: (value) => value == null ? 'Please select Customer' : null,
+                      itemBuilder: (item) => DropdownMenuItem(
+                        value: item,
+                        child: Text(
+                          item.toString(),
+                          style: const TextStyle(
+                            color: AppColors.blackColor,
+                            fontFamily: 'Quicksand',
+                            fontWeight: FontWeight.w300,
+                          ),
+                        ),
+                      ),
+                    );
+                  },
                 ),
-              );
-            },
-          ),
-        ),
-        ResponsiveCol(xs: 12, sm: 3, md: 3, lg: 3, xl: 3,
-          child: BlocBuilder<UserBloc, UserState>(
-            builder: (context, state) {
-              return AppDropdown(
-                context: context,
-                label: "Sales By",
-                // hint: "Select Sales",
-                hint: bloc.selectSalesModel?.username ?? "Select Sales",
-
-                isSearch: true,
-                isNeedAll: false,
-                isRequired: true,
-                value: bloc.selectSalesModel,
-                itemList: context.read<UserBloc>().list,
-                onChanged: (newVal) {
-                  bloc.selectSalesModel = newVal;
-                  setState(() {});
-                },
-                validator: (value) => value == null ? 'Please select Sales' : null,
-                itemBuilder: (item) => DropdownMenuItem(
-                  value: item,
-                  child: Text(
-                    item.toString(),
-                    style: const TextStyle(
-                      color: AppColors.blackColor,
-                      fontFamily: 'Quicksand',
-                      fontWeight: FontWeight.w300,
-                    ),
-                  ),
+              ),
+              ResponsiveCol(
+                xs: 12, sm: 6, md: 3, lg: 3, xl: 3,
+                child: BlocBuilder<UserBloc, UserState>(
+                  builder: (context, state) {
+                    return AppDropdown(
+                      context: context,
+                      label: "Sales By",
+                      hint: bloc.selectSalesModel?.username ?? "Select Sales",
+                      isSearch: true,
+                      isNeedAll: false,
+                      isRequired: true,
+                      value: bloc.selectSalesModel,
+                      itemList: context.read<UserBloc>().list,
+                      onChanged: (newVal) {
+                        bloc.selectSalesModel = newVal;
+                        setState(() {});
+                      },
+                      validator: (value) => value == null ? 'Please select Sales' : null,
+                      itemBuilder: (item) => DropdownMenuItem(
+                        value: item,
+                        child: Text(
+                          item.toString(),
+                          style: const TextStyle(
+                            color: AppColors.blackColor,
+                            fontFamily: 'Quicksand',
+                            fontWeight: FontWeight.w300,
+                          ),
+                        ),
+                      ),
+                    );
+                  },
                 ),
-              );
-            },
+              ),
+              ResponsiveCol(
+                xs: 12, sm: 6, md: 2, lg: 2, xl: 2,
+                child: CustomInputField(
+                  radius: 8,
+                  isRequired: true,
+                  readOnly: true,
+                  controller: bloc.dateEditingController,
+                  hintText: 'Sale Date',
+                  keyboardType: TextInputType.datetime,
+                  autofillHints: AutofillHints.name,
+                  bottom: 15.0,
+                  fillColor: AppColors.whiteColor,
+                  validator: (value) => value!.isEmpty ? 'Please enter date' : null,
+                  onTap: _selectDate,
+                ),
+              ),
+            ],
           ),
-        ),
-        ResponsiveCol(xs: 12, sm: 2, md: 2, lg: 2, xl: 2,
-          child: CustomInputField(
-            radius: 10,
-            isRequired: true,
-            readOnly: true,
-            controller: bloc.dateEditingController,
-            hintText: 'Sale Date',
-            keyboardType: TextInputType.datetime,
-            autofillHints: AutofillHints.name,
-            bottom: 15.0,
-            fillColor: AppColors.whiteColor,
-            validator: (value) => value!.isEmpty ? 'Please enter date' : null,
-            onTap: _selectDate,
-          ),
-        ),
-        ResponsiveCol(xs: 12, sm: 3, md: 3, lg: 3, xl: 3, child: SizedBox()),
-      ],
+        ],
+      ),
     );
   }
 
@@ -912,6 +1521,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
       }).toList(),
     );
   }
+
   Widget _buildChargesSection(CreatePosSaleBloc bloc) {
     return ResponsiveRow(
       spacing: 6,
@@ -1174,31 +1784,71 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
     );
   }
 
-  Widget _buildSummaryRow(String label, double value) {
+  Widget _buildSummaryRow(String label, double value, {bool isBold = false}) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2.5),
+      padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
         children: [
-          Expanded(flex: 4, child: Text(label, style: AppTextStyle.cardLevelHead(context))),
-          Expanded(flex: 2, child: Text(value.toStringAsFixed(2), style: AppTextStyle.cardLevelText(context))),
+          Expanded(
+            child: Text(
+              label,
+              style: isBold
+                  ? AppTextStyle.cardLevelHead(context)?.copyWith(fontWeight: FontWeight.bold)
+                  : AppTextStyle.cardLevelHead(context),
+            ),
+          ),
+          Text(
+            value.toStringAsFixed(2),
+            style: isBold
+                ? AppTextStyle.cardLevelText(context)?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: AppColors.primaryColor,
+            )
+                : AppTextStyle.cardLevelText(context),
+          ),
         ],
       ),
     );
   }
 
   Widget _buildActionButtons() {
-    return Row(
-      children: [
-        const SizedBox(width: 10),
-        AppButton(
-          name: 'Preview',
-          onPressed: () async {},
-          color: const Color(0xff800000),
-        ),
-        const SizedBox(width: 10),
-        AppButton(name: 'Submit', onPressed: _submitForm),
-        const SizedBox(width: 5),
-      ],
+    return Center(
+      child: Wrap(
+        spacing: 12,
+        runSpacing: 12,
+        children: [
+          ElevatedButton(
+            onPressed: () async {
+              // Preview functionality
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xff800000),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text(
+              'Preview',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: _submitForm,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primaryColor,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text(
+              'Submit',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -1231,7 +1881,6 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
 
       final selectedCustomer = bloc.selectClintModel;
       final isWalkInCustomer = selectedCustomer?.id == -1;
-      // 👉 Condition message
 
       Map<String, dynamic> body = {
         "type": "normal_sale",
@@ -1261,9 +1910,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
         body['customer_id'] = selectedCustomer?.id.toString() ?? '';
       }
 
-
       if (isWalkInCustomer) {
-        // For walk-in customers, ensure full payment
         final netTotal = calculateAllFinalTotal();
         final paidAmount = double.tryParse(bloc.payableAmount.text.trim()) ?? 0;
 
@@ -1271,41 +1918,20 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
           showCustomToast(
             context: context,
             title: 'Warning!',
-            description:
-            "Walk-in customer: Full payment required. No due allowed.",
+            description: "Walk-in customer: Full payment required. No due allowed.",
             icon: Icons.error,
             primaryColor: Colors.redAccent,
           );
-
-          return; // Don't proceed with submission
-        }
-
-        if (_isChecked == true) {
-          body['payment_method'] = bloc.selectedPaymentMethod;
-          body['account_id'] = bloc.accountModel?.id.toString() ?? '';
-
-          //
-          bloc.add(AddPosSale(body: body));
-
-        } else if (_isChecked == false) {
-          bloc.add(AddPosSale(body: body));
+          return;
         }
       }
 
-        else{
-        if (_isChecked == true) {
-          body['payment_method'] = bloc.selectedPaymentMethod;
-          body['account_id'] = bloc.accountModel?.id.toString() ?? '';
-
-          //
-          bloc.add(AddPosSale(body: body));
-
-        } else if (_isChecked == false) {
-          bloc.add(AddPosSale(body: body));
-        }
+      if (_isChecked) {
+        body['payment_method'] = bloc.selectedPaymentMethod;
+        body['account_id'] = bloc.accountModel?.id.toString() ?? '';
       }
 
-
+      bloc.add(AddPosSale(body: body));
       log(body.toString());
     }
   }
