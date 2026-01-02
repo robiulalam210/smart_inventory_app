@@ -58,8 +58,12 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
 
     // Initialize dates
     final bloc = context.read<CreatePosSaleBloc>();
-    bloc.dateEditingController.text = appWidgets.convertDateTimeDDMMYYYY(DateTime.now());
-    bloc.withdrawDateController.text = appWidgets.convertDateTimeDDMMYYYY(DateTime.now());
+    bloc.dateEditingController.text = appWidgets.convertDateTimeDDMMYYYY(
+      DateTime.now(),
+    );
+    bloc.withdrawDateController.text = appWidgets.convertDateTimeDDMMYYYY(
+      DateTime.now(),
+    );
 
     // Initialize charge types from BLoC
     selectedOverallVatType = bloc.selectedOverallVatType;
@@ -89,7 +93,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
 
     // Find matched user
     final matchedUser = userList.firstWhere(
-          (user) => user.id == loginUserId,
+      (user) => user.id == loginUserId,
       orElse: () => userList.first,
     );
 
@@ -210,7 +214,8 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
     double total = calculateTotalForAllProducts();
     final bloc = context.read<CreatePosSaleBloc>();
 
-    serviceCharge = double.tryParse(bloc.serviceChargeOverAllController.text) ?? 0.0;
+    serviceCharge =
+        double.tryParse(bloc.serviceChargeOverAllController.text) ?? 0.0;
 
     if (selectedOverallServiceChargeType == 'percent') {
       serviceCharge = total * (serviceCharge / 100);
@@ -222,7 +227,8 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
     double total = calculateTotalForAllProducts();
     final bloc = context.read<CreatePosSaleBloc>();
 
-    deliveryCharge = double.tryParse(bloc.deliveryChargeOverAllController.text) ?? 0.0;
+    deliveryCharge =
+        double.tryParse(bloc.deliveryChargeOverAllController.text) ?? 0.0;
 
     if (selectedOverallDeliveryType == 'percent') {
       deliveryCharge = total * (deliveryCharge / 100);
@@ -272,7 +278,8 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
     final bloc = context.read<CreatePosSaleBloc>();
 
     // Apply overall discount
-    double overallDiscount = double.tryParse(bloc.discountOverAllController.text) ?? 0.0;
+    double overallDiscount =
+        double.tryParse(bloc.discountOverAllController.text) ?? 0.0;
     if (selectedOverallDiscountType == 'percent') {
       overallDiscount = subtotal * (overallDiscount / 100);
     }
@@ -284,18 +291,24 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
       overallVat = subtotal * (overallVat / 100);
     }
 
-    double overallServiceCharge = double.tryParse(bloc.serviceChargeOverAllController.text) ?? 0.0;
+    double overallServiceCharge =
+        double.tryParse(bloc.serviceChargeOverAllController.text) ?? 0.0;
     if (selectedOverallServiceChargeType == 'percent') {
       overallServiceCharge = subtotal * (overallServiceCharge / 100);
     }
 
-    double overallDeliveryCharge = double.tryParse(bloc.deliveryChargeOverAllController.text) ?? 0.0;
+    double overallDeliveryCharge =
+        double.tryParse(bloc.deliveryChargeOverAllController.text) ?? 0.0;
     if (selectedOverallDeliveryType == 'percent') {
       overallDeliveryCharge = subtotal * (overallDeliveryCharge / 100);
     }
 
     // Calculate final total
-    double finalTotal = totalAfterDiscount + overallVat + overallServiceCharge + overallDeliveryCharge;
+    double finalTotal =
+        totalAfterDiscount +
+        overallVat +
+        overallServiceCharge +
+        overallDeliveryCharge;
 
     return finalTotal;
   }
@@ -305,8 +318,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
 
     // 🔴 Check if product already exists (except current index)
     final alreadyAdded = products.asMap().entries.any((entry) {
-      return entry.key != index &&
-          entry.value["product_id"] == newVal.id;
+      return entry.key != index && entry.value["product_id"] == newVal.id;
     });
 
     if (alreadyAdded) {
@@ -344,16 +356,21 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
     controllers[index]!["price"]!.text = newVal.sellingPrice.toString();
 
     // ✅ Discount handling
-    controllers[index]!["discount"]!.text =
-    newVal.discountApplied == true
+    controllers[index]!["discount"]!.text = newVal.discountApplied == true
         ? newVal.discountValue.toString()
         : "0";
 
     updateTotal(index);
   }
+
+  int currentStep = 0;
+
   @override
   Widget build(BuildContext context) {
-    final isBigScreen = Responsive.isDesktop(context) || Responsive.isMaxDesktop(context) || Responsive.isSmallDesktop(context);
+    final isBigScreen =
+        Responsive.isDesktop(context) ||
+        Responsive.isMaxDesktop(context) ||
+        Responsive.isSmallDesktop(context);
 
     return Container(
       color: AppColors.bg,
@@ -364,22 +381,30 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
   }
 
   Widget _buildDesktopLayout() {
-    final isSmallScreen=  Responsive.isSmallDesktop(context);
+    final isSmallScreen = Responsive.isSmallDesktop(context);
 
     return ResponsiveRow(
       spacing: 0,
       runSpacing: 0,
       children: [
-        if(!isSmallScreen)
-        ResponsiveCol(
-          xs: 0, sm: 1, md: 1, lg: 2, xl: 2,
-          child: Container(
-            decoration: const BoxDecoration(color: Colors.white),
-            child: const Sidebar(),
+        if (!isSmallScreen)
+          ResponsiveCol(
+            xs: 0,
+            sm: 1,
+            md: 1,
+            lg: 2,
+            xl: 2,
+            child: Container(
+              decoration: const BoxDecoration(color: Colors.white),
+              child: const Sidebar(),
+            ),
           ),
-        ),
         ResponsiveCol(
-          xs: 12, sm: 11, md: 11, lg: 10, xl: 10,
+          xs: 12,
+          sm: 11,
+          md: 11,
+          lg: 10,
+          xl: 10,
           child: _buildMainContent(),
         ),
       ],
@@ -387,10 +412,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
   }
 
   Widget _buildMobileLayout() {
-    return Container(
-
-      child: _buildMobileStepperContent(),
-    );
+    return Container(child: _buildMobileStepperContent());
   }
 
   Widget _buildMainContent() {
@@ -439,11 +461,11 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                 _buildTopFormSection(bloc),
                 const SizedBox(height: 0),
                 _buildProductListSection(bloc),
-                const SizedBox(height: 16),
+                const SizedBox(height: 8),
                 _buildChargesSection(bloc),
-                const SizedBox(height: 16),
+                const SizedBox(height: 8),
                 _buildSummarySection(bloc),
-                const SizedBox(height: 20),
+                const SizedBox(height: 8),
                 _buildActionButtons(),
                 const SizedBox(height: 20),
               ],
@@ -453,8 +475,6 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
       ),
     );
   }
-
-
 
   Widget _buildMobileStepperContent() {
     return BlocConsumer<CreatePosSaleBloc, CreatePosSaleState>(
@@ -491,11 +511,11 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
       },
       builder: (context, state) {
         final bloc = context.read<CreatePosSaleBloc>();
-        int currentStep = 0;
 
         return Form(
           key: formKey,
           child: Stepper(
+            physics: const ClampingScrollPhysics(), // 👈 important
             type: StepperType.vertical,
             currentStep: currentStep,
             onStepContinue: () {
@@ -503,8 +523,16 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                 setState(() {
                   currentStep += 1;
                 });
+
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  debugPrint("after rebuild currentStep: $currentStep");
+                });
+              } else {
+                // 👇 LAST STEP → SUBMIT
+                _submitForm();
               }
             },
+
             onStepCancel: () {
               if (currentStep > 0) {
                 setState(() {
@@ -519,32 +547,22 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
             },
             controlsBuilder: (context, details) {
               return Padding(
-                padding: const EdgeInsets.only(top: 16.0),
+                padding: const EdgeInsets.only(top: 8.0),
                 child: Row(
                   children: [
                     if (currentStep > 0)
                       Expanded(
-                        child: ElevatedButton(
+                        child: AppButton(
                           onPressed: details.onStepCancel,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.grey[300],
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                          ),
-                          child: const Text('Back', style: TextStyle(color: Colors.black)),
+                          name: "Back",
+                          color: AppColors.redColor,
                         ),
                       ),
                     if (currentStep > 0) const SizedBox(width: 8),
                     Expanded(
-                      child: ElevatedButton(
+                      child: AppButton(
                         onPressed: details.onStepContinue,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primaryColor,
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                        ),
-                        child: Text(
-                          currentStep < 3 ? 'Next' : 'Submit',
-                          style: const TextStyle(color: Colors.white),
-                        ),
+                        name: currentStep < 3 ? 'Next' : 'Submit',
                       ),
                     ),
                   ],
@@ -554,7 +572,10 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
             steps: [
               // Step 1: Customer Information
               Step(
-                title: Text('Customer Info', style: AppTextStyle.cardLevelHead(context)),
+                title: Text(
+                  'Customer Info',
+                  style: AppTextStyle.cardLevelHead(context),
+                ),
                 content: _buildMobileTopFormSection(bloc),
                 isActive: currentStep >= 0,
                 state: currentStep > 0 ? StepState.complete : StepState.indexed,
@@ -562,7 +583,10 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
 
               // Step 2: Products
               Step(
-                title: Text('Products', style: AppTextStyle.cardLevelHead(context)),
+                title: Text(
+                  'Products',
+                  style: AppTextStyle.cardLevelHead(context),
+                ),
                 content: _buildMobileProductListSection(bloc),
                 isActive: currentStep >= 1,
                 state: currentStep > 1 ? StepState.complete : StepState.indexed,
@@ -570,7 +594,10 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
 
               // Step 3: Charges
               Step(
-                title: Text('Charges', style: AppTextStyle.cardLevelHead(context)),
+                title: Text(
+                  'Charges',
+                  style: AppTextStyle.cardLevelHead(context),
+                ),
                 content: _buildMobileChargesSection(bloc),
                 isActive: currentStep >= 2,
                 state: currentStep > 2 ? StepState.complete : StepState.indexed,
@@ -578,26 +605,16 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
 
               // Step 4: Summary & Payment
               Step(
-                title: Text('Summary & Payment', style: AppTextStyle.cardLevelHead(context)),
+                title: Text(
+                  'Summary & Payment',
+                  style: AppTextStyle.cardLevelHead(context),
+                ),
                 content: Column(
                   children: [
-                    // _buildMobileSummarySection(bloc),
+                    _buildSummarySection(bloc),
                     const SizedBox(height: 20),
+
                     // Final submit button
-                    ElevatedButton(
-                      onPressed: _submitForm,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primaryColor,
-                        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      child: const Text(
-                        'Submit Sale',
-                        style: TextStyle(color: Colors.white, fontSize: 16),
-                      ),
-                    ),
                   ],
                 ),
                 isActive: currentStep >= 3,
@@ -627,15 +644,18 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                   isNeedAll: false,
                   isRequired: true,
                   value: bloc.selectClintModel,
-                  itemList: [
-                    CustomerActiveModel(name: 'Walk-in-customer', id: -1),
-                  ] + context.read<CustomerBloc>().activeCustomer,
+                  itemList:
+                      [CustomerActiveModel(name: 'Walk-in-customer', id: -1)] +
+                      context.read<CustomerBloc>().activeCustomer,
                   onChanged: (newVal) {
                     bloc.selectClintModel = newVal;
-                    bloc.customType = (newVal?.id == -1) ? "Walking Customer" : "Saved Customer";
+                    bloc.customType = (newVal?.id == -1)
+                        ? "Walking Customer"
+                        : "Saved Customer";
                     setState(() {});
                   },
-                  validator: (value) => value == null ? 'Please select Customer' : null,
+                  validator: (value) =>
+                      value == null ? 'Please select Customer' : null,
                   itemBuilder: (item) => DropdownMenuItem(
                     value: item,
                     child: Text(
@@ -666,7 +686,8 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                     bloc.selectSalesModel = newVal;
                     setState(() {});
                   },
-                  validator: (value) => value == null ? 'Please select Sales' : null,
+                  validator: (value) =>
+                      value == null ? 'Please select Sales' : null,
                   itemBuilder: (item) => DropdownMenuItem(
                     value: item,
                     child: Text(
@@ -706,30 +727,15 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.only(bottom: 12.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                "Products",
-                style: AppTextStyle.cardLevelHead(context),
-              ),
-              IconButton(
-                icon: const Icon(Icons.add_circle, color: Colors.green),
-                onPressed: addProduct,
-              ),
-            ],
-          ),
-        ),
+    
         ...products.asMap().entries.map((entry) {
           final index = entry.key;
           final product = entry.value;
           final discountApplied = product["discountApplied"] == true;
 
           return Container(
-            margin: const EdgeInsets.only(bottom: 12),
-            padding: const EdgeInsets.all(12.0),
+            margin: const EdgeInsets.only(bottom: 6),
+            padding: const EdgeInsets.all(6.0),
             decoration: BoxDecoration(
               border: Border.all(color: Colors.grey[300]!),
               borderRadius: BorderRadius.circular(8),
@@ -744,17 +750,30 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                   children: [
                     Text(
                       "Product ${index + 1}",
-                      style: AppTextStyle.cardLevelHead(context),
+                      style: AppTextStyle.cardTitle(context),
                     ),
                     if (index > 0)
                       IconButton(
-                        icon: const Icon(Icons.delete, color: Colors.red, size: 20),
+                        icon: const Icon(
+                          HugeIcons.strokeRoundedDelete02,
+                          color: Colors.red,
+                          size: 20,
+                        ),
                         onPressed: () => removeProduct(index),
                         padding: EdgeInsets.zero,
+                      )
+                    else
+                      IconButton(
+                        icon: const Icon(
+                          HugeIcons.strokeRoundedAddCircleHalfDot,
+                          color: Colors.green,
+                        ),
+                        onPressed: addProduct,
                       ),
+
                   ],
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 6),
 
                 // Category
                 BlocBuilder<CategoriesBloc, CategoriesState>(
@@ -765,7 +784,9 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                     return AppDropdown(
                       label: "Category",
                       context: context,
-                      hint: selectedCategory.isEmpty ? "Select Category" : selectedCategory,
+                      hint: selectedCategory.isEmpty
+                          ? "Select Category"
+                          : selectedCategory,
                       isRequired: false,
                       isNeedAll: true,
                       isLabel: true,
@@ -776,10 +797,12 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                         setState(() {
                           categoriesBloc.selectedState = newVal.toString();
                           final matchingCategory = categoryList.firstWhere(
-                                (category) => category.name.toString() == newVal.toString(),
+                            (category) =>
+                                category.name.toString() == newVal.toString(),
                             orElse: () => CategoryModel(),
                           );
-                          categoriesBloc.selectedStateId = matchingCategory.id?.toString() ?? "";
+                          categoriesBloc.selectedStateId =
+                              matchingCategory.id?.toString() ?? "";
                           product["product"] = null;
                           product["product_id"] = null;
                           controllers[index]!["price"]!.text = "0";
@@ -795,7 +818,6 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                     );
                   },
                 ),
-                const SizedBox(height: 12),
 
                 // Product
                 BlocBuilder<ProductsBloc, ProductsState>(
@@ -810,13 +832,15 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                         .read<ProductsBloc>()
                         .productList
                         .where((item) {
-                      final categoryMatch = selectedCategoryId.isEmpty
-                          ? true
-                          : item.category?.toString() == selectedCategoryId;
-                      final notDuplicate = !selectedProductIds.contains(item.id) ||
-                          item.id == product["product_id"];
-                      return categoryMatch && notDuplicate;
-                    }).toList();
+                          final categoryMatch = selectedCategoryId.isEmpty
+                              ? true
+                              : item.category?.toString() == selectedCategoryId;
+                          final notDuplicate =
+                              !selectedProductIds.contains(item.id) ||
+                              item.id == product["product_id"];
+                          return categoryMatch && notDuplicate;
+                        })
+                        .toList();
 
                     return AppDropdown<ProductModelStockModel>(
                       context: context,
@@ -824,11 +848,14 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                       isLabel: true,
                       isSearch: true,
                       label: "Product",
-                      hint: selectedCategoryId.isEmpty ? "Select Category First" : "Select Product",
+                      hint: selectedCategoryId.isEmpty
+                          ? "Select Category First"
+                          : "Select Product",
                       value: product["product"],
                       itemList: filteredProducts,
                       onChanged: (newVal) => onProductChanged(index, newVal),
-                      validator: (value) => value == null ? 'Please select Product' : null,
+                      validator: (value) =>
+                          value == null ? 'Please select Product' : null,
                       itemBuilder: (item) => DropdownMenuItem(
                         value: item,
                         child: Text(item.toString()),
@@ -836,7 +863,6 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                     );
                   },
                 ),
-                const SizedBox(height: 12),
 
                 // Price & Quantity Row
                 Row(
@@ -858,11 +884,19 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                               contentPadding: const EdgeInsets.all(10),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(5),
-                                borderSide: BorderSide(color: AppColors.primaryColor.withOpacity(0.3)),
+                                borderSide: BorderSide(
+                                  color: AppColors.primaryColor.withValues(
+                                    alpha: 0.3,
+                                  ),
+                                ),
                               ),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(5),
-                                borderSide: BorderSide(color: AppColors.primaryColor.withOpacity(0.3)),
+                                borderSide: BorderSide(
+                                  color: AppColors.primaryColor.withValues(
+                                    alpha: 0.3,
+                                  ),
+                                ),
                               ),
                             ),
                           ),
@@ -874,11 +908,18 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text("Quantity", style: AppTextStyle.bodySmall(context)),
+                          Text(
+                            "Quantity",
+                            style: AppTextStyle.bodySmall(context),
+                          ),
                           const SizedBox(height: 4),
                           Container(
                             decoration: BoxDecoration(
-                              border: Border.all(color: AppColors.primaryColor.withOpacity(0.3)),
+                              border: Border.all(
+                                color: AppColors.primaryColor.withValues(
+                                  alpha: 0.3,
+                                ),
+                              ),
                               borderRadius: BorderRadius.circular(5),
                             ),
                             child: Row(
@@ -886,15 +927,23 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                                 IconButton(
                                   icon: const Icon(Icons.remove, size: 18),
                                   onPressed: () {
-                                    int? currentQuantity = int.tryParse(controllers[index]?["quantity"]?.text ?? "0");
-                                    if (currentQuantity != null && currentQuantity > 1) {
-                                      controllers[index]!["quantity"]!.text = (currentQuantity - 1).toString();
-                                      products[index]["quantity"] = controllers[index]!["quantity"]!.text;
+                                    int? currentQuantity = int.tryParse(
+                                      controllers[index]?["quantity"]?.text ??
+                                          "0",
+                                    );
+                                    if (currentQuantity != null &&
+                                        currentQuantity > 1) {
+                                      controllers[index]!["quantity"]!.text =
+                                          (currentQuantity - 1).toString();
+                                      products[index]["quantity"] =
+                                          controllers[index]!["quantity"]!.text;
                                       updateTotal(index);
                                     }
                                   },
                                   padding: EdgeInsets.zero,
-                                  constraints: const BoxConstraints(minWidth: 36),
+                                  constraints: const BoxConstraints(
+                                    minWidth: 36,
+                                  ),
                                 ),
                                 Expanded(
                                   child: Text(
@@ -907,12 +956,20 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                                   padding: EdgeInsets.zero,
                                   icon: const Icon(Icons.add, size: 18),
                                   onPressed: () {
-                                    int currentQuantity = int.tryParse(controllers[index]!["quantity"]!.text) ?? 0;
-                                    controllers[index]!["quantity"]!.text = (currentQuantity + 1).toString();
-                                    products[index]["quantity"] = controllers[index]!["quantity"]!.text;
+                                    int currentQuantity =
+                                        int.tryParse(
+                                          controllers[index]!["quantity"]!.text,
+                                        ) ??
+                                        0;
+                                    controllers[index]!["quantity"]!.text =
+                                        (currentQuantity + 1).toString();
+                                    products[index]["quantity"] =
+                                        controllers[index]!["quantity"]!.text;
                                     updateTotal(index);
                                   },
-                                  constraints: const BoxConstraints(minWidth: 36),
+                                  constraints: const BoxConstraints(
+                                    minWidth: 36,
+                                  ),
                                 ),
                               ],
                             ),
@@ -922,7 +979,6 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
 
                 // Discount Section
                 Column(
@@ -930,7 +986,8 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                   children: [
                     Text("Discount", style: AppTextStyle.bodySmall(context)),
                     const SizedBox(height: 4),
-                    Row(
+                    Row(                  crossAxisAlignment: CrossAxisAlignment.start,
+
                       children: [
                         Expanded(
                           child: AbsorbPointer(
@@ -939,34 +996,49 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                               padding: EdgeInsets.zero,
                               children: {
                                 'fixed': Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 4,
+                                    vertical: 8,
+                                  ),
                                   child: Text(
                                     'TK',
                                     style: TextStyle(
                                       fontSize: 12,
-                                      fontFamily: GoogleFonts.playfairDisplay().fontFamily,
-                                      color: product["discount_type"] == 'fixed' ? Colors.white : Colors.black,
+                                      fontFamily: GoogleFonts.playfairDisplay()
+                                          .fontFamily,
+                                      color: product["discount_type"] == 'fixed'
+                                          ? Colors.white
+                                          : Colors.black,
                                     ),
                                   ),
                                 ),
                                 'percent': Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 4,
+                                    vertical: 8,
+                                  ),
                                   child: Text(
                                     '%',
                                     style: TextStyle(
                                       fontSize: 12,
-                                      fontFamily: GoogleFonts.playfairDisplay().fontFamily,
-                                      color: product["discount_type"] == 'percent' ? Colors.white : Colors.black,
+                                      fontFamily: GoogleFonts.playfairDisplay()
+                                          .fontFamily,
+                                      color:
+                                          product["discount_type"] == 'percent'
+                                          ? Colors.white
+                                          : Colors.black,
                                     ),
                                   ),
                                 ),
                               },
-                              onValueChanged: discountApplied ? (_) {} : (value) {
-                                setState(() {
-                                  product["discount_type"] = value;
-                                  updateTotal(index);
-                                });
-                              },
+                              onValueChanged: discountApplied
+                                  ? (_) {}
+                                  : (value) {
+                                      setState(() {
+                                        product["discount_type"] = value;
+                                        updateTotal(index);
+                                      });
+                                    },
                               groupValue: product["discount_type"],
                               unselectedColor: Colors.grey[300],
                               selectedColor: AppColors.primaryColor,
@@ -979,7 +1051,9 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                           child: TextFormField(
                             controller: controllers[index]?["discount"],
                             style: AppTextStyle.cardLevelText(context),
-                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                            keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true,
+                            ),
                             readOnly: discountApplied,
                             decoration: InputDecoration(
                               filled: true,
@@ -987,17 +1061,28 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                               contentPadding: const EdgeInsets.all(10),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(5),
-                                borderSide: BorderSide(color: AppColors.primaryColor.withOpacity(0.3)),
+                                borderSide: BorderSide(
+                                  color: AppColors.primaryColor.withValues(
+                                    alpha: 0.3,
+                                  ),
+                                ),
                               ),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(5),
-                                borderSide: BorderSide(color: AppColors.primaryColor.withOpacity(0.3)),
+                                borderSide: BorderSide(
+                                  color: AppColors.primaryColor.withValues(
+                                    alpha: 0.3,
+                                  ),
+                                ),
                               ),
                             ),
-                            onChanged: discountApplied ? null : (value) {
-                              products[index]["discount"] = double.tryParse(value) ?? 0.0;
-                              updateTotal(index);
-                            },
+                            onChanged: discountApplied
+                                ? null
+                                : (value) {
+                                    products[index]["discount"] =
+                                        double.tryParse(value) ?? 0.0;
+                                    updateTotal(index);
+                                  },
                           ),
                         ),
                       ],
@@ -1007,7 +1092,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
               ],
             ),
           );
-        }).toList(),
+        }),
       ],
     );
   }
@@ -1017,48 +1102,9 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          "Additional Charges",
-          style: AppTextStyle.cardLevelHead(context),
-        ),
+        Text("Additional Charges", style: AppTextStyle.cardLevelHead(context)),
         const SizedBox(height: 12),
-        Column(
-          children: [
-            // _buildMobileChargeField("Overall Discount", selectedOverallDiscountType, bloc.discountOverAllController, (value) {
-            //   setState(() {
-            //     selectedOverallDiscountType = value;
-            //     bloc.selectedOverallDiscountType = value;
-            //   });
-            //   _updateChangeAmount();
-            // }),
-            // const SizedBox(height: 12),
-            // _buildMobileChargeField("Overall Vat", selectedOverallVatType, bloc.vatOverAllController, (value) {
-            //   setState(() {
-            //     selectedOverallVatType = value;
-            //     bloc.selectedOverallVatType = value;
-            //   });
-            //   _updateChangeAmount();
-            // }),
-            const SizedBox(height: 12),
-          //   _buildMobileChargeField("Service Charge", selectedOverallServiceChargeType, bloc.serviceChargeOverAllController, (value) {
-          //     setState(() {
-          //       selectedOverallServiceChargeType = value;
-          //       bloc.selectedOverallServiceChargeType = value;
-          //     });
-          //     _updateChangeAmount();
-          //   }),
-          //   const SizedBox(height: 12),
-          //   _buildMobileChargeField("Delivery Charge", selectedOverallDeliveryType, bloc.deliveryChargeOverAllController, (value) {
-          //     setState(() {
-          //       selectedOverallDeliveryType = value;
-          //       bloc.selectedOverallDeliveryType = value;
-          //     });
-          //     _updateChangeAmount();
-          //   }),
-          //
-          //
-          ],
-        ),
+        _buildChargesSection(bloc),
       ],
     );
   }
@@ -1070,17 +1116,17 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            "Customer Information",
-            style: AppTextStyle.headerTitle(context)?.copyWith(fontSize: 14),
-          ),
-          const SizedBox(height: 6),
+
           ResponsiveRow(
-            spacing: 20,
-            runSpacing: 10,
+            spacing: 6,
+            runSpacing: 6,
             children: [
               ResponsiveCol(
-                xs: 12, sm: 6, md: 3, lg: 3, xl: 3,
+                xs: 12,
+                sm: 6,
+                md: 3,
+                lg: 3,
+                xl: 3,
                 child: BlocBuilder<CustomerBloc, CustomerState>(
                   builder: (context, state) {
                     return AppDropdown(
@@ -1091,15 +1137,23 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                       isNeedAll: false,
                       isRequired: true,
                       value: bloc.selectClintModel,
-                      itemList: [
-                        CustomerActiveModel(name: 'Walk-in-customer', id: -1),
-                      ] + context.read<CustomerBloc>().activeCustomer,
+                      itemList:
+                          [
+                            CustomerActiveModel(
+                              name: 'Walk-in-customer',
+                              id: -1,
+                            ),
+                          ] +
+                          context.read<CustomerBloc>().activeCustomer,
                       onChanged: (newVal) {
                         bloc.selectClintModel = newVal;
-                        bloc.customType = (newVal?.id == -1) ? "Walking Customer" : "Saved Customer";
+                        bloc.customType = (newVal?.id == -1)
+                            ? "Walking Customer"
+                            : "Saved Customer";
                         setState(() {});
                       },
-                      validator: (value) => value == null ? 'Please select Customer' : null,
+                      validator: (value) =>
+                          value == null ? 'Please select Customer' : null,
                       itemBuilder: (item) => DropdownMenuItem(
                         value: item,
                         child: Text(
@@ -1116,7 +1170,11 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                 ),
               ),
               ResponsiveCol(
-                xs: 12, sm: 6, md: 3, lg: 3, xl: 3,
+                xs: 12,
+                sm: 6,
+                md: 3,
+                lg: 3,
+                xl: 3,
                 child: BlocBuilder<UserBloc, UserState>(
                   builder: (context, state) {
                     return AppDropdown(
@@ -1132,7 +1190,8 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                         bloc.selectSalesModel = newVal;
                         setState(() {});
                       },
-                      validator: (value) => value == null ? 'Please select Sales' : null,
+                      validator: (value) =>
+                          value == null ? 'Please select Sales' : null,
                       itemBuilder: (item) => DropdownMenuItem(
                         value: item,
                         child: Text(
@@ -1149,7 +1208,11 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                 ),
               ),
               ResponsiveCol(
-                xs: 12, sm: 6, md: 2, lg: 2, xl: 2,
+                xs: 12,
+                sm: 6,
+                md: 2,
+                lg: 2,
+                xl: 2,
                 child: CustomInputField(
                   radius: 8,
                   isRequired: true,
@@ -1160,7 +1223,8 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                   autofillHints: AutofillHints.name,
                   bottom: 15.0,
                   fillColor: AppColors.whiteColor,
-                  validator: (value) => value!.isEmpty ? 'Please enter date' : null,
+                  validator: (value) =>
+                      value!.isEmpty ? 'Please enter date' : null,
                   onTap: _selectDate,
                 ),
               ),
@@ -1170,7 +1234,6 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
       ),
     );
   }
-
 
   Widget _buildProductListSection(CreatePosSaleBloc bloc) {
     return Column(
@@ -1188,18 +1251,17 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
             borderRadius: BorderRadius.circular(8),
           ),
           child: ResponsiveRow(
-            spacing: 5,
-            runSpacing: 6,
+            spacing: 4,
+            runSpacing: 0,
             children: [
               // ================= CATEGORY =================
-
               ResponsiveCol(
                 xs: 12,
                 sm: 2,
                 md: 2,
                 lg: 2,
                 xl: 2,
-                child:     BlocBuilder<CategoriesBloc, CategoriesState>(
+                child: BlocBuilder<CategoriesBloc, CategoriesState>(
                   builder: (context, state) {
                     final selectedCategory = categoriesBloc.selectedState;
                     final categoryList = categoriesBloc.list;
@@ -1214,19 +1276,15 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                       isNeedAll: true,
                       isLabel: true,
                       isSearch: true,
-                      value: selectedCategory.isEmpty
-                          ? null
-                          : selectedCategory,
-                      itemList:
-                      categoryList.map((e) => e.name ?? "").toList(),
+                      value: selectedCategory.isEmpty ? null : selectedCategory,
+                      itemList: categoryList.map((e) => e.name ?? "").toList(),
                       onChanged: (newVal) {
                         setState(() {
                           categoriesBloc.selectedState = newVal.toString();
 
                           final matchingCategory = categoryList.firstWhere(
-                                (category) =>
-                            category.name.toString() ==
-                                newVal.toString(),
+                            (category) =>
+                                category.name.toString() == newVal.toString(),
                             orElse: () => CategoryModel(),
                           );
 
@@ -1253,7 +1311,6 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                 ),
               ),
 
-
               // ================= PRODUCT =================
               ResponsiveCol(
                 xs: 12,
@@ -1263,8 +1320,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                 xl: 2.5,
                 child: BlocBuilder<ProductsBloc, ProductsState>(
                   builder: (context, state) {
-                    final selectedCategoryId =
-                        categoriesBloc.selectedStateId;
+                    final selectedCategoryId = categoriesBloc.selectedStateId;
 
                     // selected product ids (duplicate prevention)
                     final selectedProductIds = products
@@ -1277,18 +1333,17 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                         .read<ProductsBloc>()
                         .productList
                         .where((item) {
-                      final categoryMatch =
-                      selectedCategoryId.isEmpty
-                          ? true
-                          : item.id.toString() ==
-                          selectedCategoryId;
+                          final categoryMatch = selectedCategoryId.isEmpty
+                              ? true
+                              : item.id.toString() == selectedCategoryId;
 
-                      final notDuplicate =
-                          !selectedProductIds.contains(item.id) ||
+                          final notDuplicate =
+                              !selectedProductIds.contains(item.id) ||
                               item.id == product["product_id"];
 
-                      return categoryMatch && notDuplicate;
-                    }).toList();
+                          return categoryMatch && notDuplicate;
+                        })
+                        .toList();
 
                     return AppDropdown<ProductModelStockModel>(
                       context: context,
@@ -1301,10 +1356,9 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                           : "Select Product",
                       value: product["product"],
                       itemList: filteredProducts,
-                      onChanged: (newVal) =>
-                          onProductChanged(index, newVal),
+                      onChanged: (newVal) => onProductChanged(index, newVal),
                       validator: (value) =>
-                      value == null ? 'Please select Product' : null,
+                          value == null ? 'Please select Product' : null,
                       itemBuilder: (item) => DropdownMenuItem(
                         value: item,
                         child: Text(item.toString()),
@@ -1316,14 +1370,21 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
 
               // Price
               ResponsiveCol(
-                xs: 12, sm: 1, md: 1, lg: 1, xl: 1,
+                xs: 12,
+                sm: 1,
+                md: 1,
+                lg: 1,
+                xl: 1,
                 child: TextFormField(
                   style: AppTextStyle.cardLevelText(context),
                   controller: controllers[index]?["price"],
                   keyboardType: TextInputType.number,
                   readOnly: true,
                   decoration: InputDecoration(
-                    label: Text("Price", style: AppTextStyle.cardLevelText(context)),
+                    label: Text(
+                      "Price",
+                      style: AppTextStyle.cardLevelText(context),
+                    ),
                     fillColor: AppColors.whiteColor,
                     filled: true,
                     hintStyle: AppTextStyle.cardLevelText(context),
@@ -1342,7 +1403,11 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                         width: 0.5,
                       ),
                     ),
-                    contentPadding: const EdgeInsets.only(top: 13.0, bottom: 13.0, left: 12),
+                    contentPadding: const EdgeInsets.only(
+                      top: 13.0,
+                      bottom: 13.0,
+                      left: 12,
+                    ),
                     isDense: true,
                     hintText: "price",
                   ),
@@ -1351,29 +1416,45 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
 
               // Discount type
               ResponsiveCol(
-                xs: 12, sm: 1, md: 1, lg: 1, xl: 1,
+                xs: 12,
+                sm: 1,
+                md: 1,
+                lg: 1,
+                xl: 1,
                 child: AbsorbPointer(
                   absorbing: discountApplied,
                   child: CupertinoSegmentedControl<String>(
                     padding: EdgeInsets.zero,
                     children: {
                       'fixed': Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 2.0, vertical: 7),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 2.0,
+                          vertical: 7,
+                        ),
                         child: Text(
                           'TK',
                           style: TextStyle(
-                            fontFamily: GoogleFonts.playfairDisplay().fontFamily,
-                            color: product["discount_type"] == 'fixed' ? Colors.white : Colors.black,
+                            fontFamily:
+                                GoogleFonts.playfairDisplay().fontFamily,
+                            color: product["discount_type"] == 'fixed'
+                                ? Colors.white
+                                : Colors.black,
                           ),
                         ),
                       ),
                       'percent': Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 2.0, vertical: 7),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 2.0,
+                          vertical: 7,
+                        ),
                         child: Text(
                           '%',
                           style: TextStyle(
-                            fontFamily: GoogleFonts.playfairDisplay().fontFamily,
-                            color: product["discount_type"] == 'percent' ? Colors.white : Colors.black,
+                            fontFamily:
+                                GoogleFonts.playfairDisplay().fontFamily,
+                            color: product["discount_type"] == 'percent'
+                                ? Colors.white
+                                : Colors.black,
                           ),
                         ),
                       ),
@@ -1381,11 +1462,11 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                     onValueChanged: discountApplied
                         ? (_) {}
                         : (value) {
-                      setState(() {
-                        // product["discount_type"] = value;
-                        // updateTotal(index);
-                      });
-                    },
+                            setState(() {
+                              // product["discount_type"] = value;
+                              // updateTotal(index);
+                            });
+                          },
                     groupValue: product["discount_type"],
                     unselectedColor: Colors.grey[300],
                     selectedColor: AppColors.primaryColor,
@@ -1396,57 +1477,89 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
 
               // Discount input
               ResponsiveCol(
-                xs: 12, sm: 0.5, md: 0.5, lg: 0.5, xl: 0.5,
+                xs: 12,
+                sm: 0.7,
+                md: 0.7,
+                lg: 0.7,
+                xl: 0.7,
                 child: TextFormField(
                   controller: controllers[index]?["discount"],
                   style: AppTextStyle.cardLevelText(context),
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
                   readOnly: true,
                   decoration: InputDecoration(
                     fillColor: AppColors.whiteColor,
                     filled: true,
                     hintStyle: AppTextStyle.cardLevelText(context),
                     isCollapsed: true,
-                    enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(5)),
-                    focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(5)),
-                    contentPadding: const EdgeInsets.only(top: 13.0, bottom: 13.0, left: 10),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                    contentPadding: const EdgeInsets.only(
+                      top: 13.0,
+                      bottom: 13.0,
+                      left: 10,
+                    ),
                     isDense: true,
                     hintText: "Discount",
                   ),
                   onChanged: discountApplied
                       ? null
                       : (value) {
-                    products[index]["discount"] = double.tryParse(value) ?? 0.0;
-                    updateTotal(index);
-                  },
+                          products[index]["discount"] =
+                              double.tryParse(value) ?? 0.0;
+                          updateTotal(index);
+                        },
                 ),
               ),
 
               // Quantity controls
               ResponsiveCol(
-                xs: 12, sm: 1, md: 1, lg: 1.5, xl: 1.5,
+                xs: 12,
+                sm: 1,
+                md: 1.2,
+                lg: 1.2,
+                xl: 1.2,
                 child: Row(
                   children: [
                     IconButton(
                       icon: const Icon(Icons.remove),
                       onPressed: () {
-                        int? currentQuantity = int.tryParse(controllers[index]?["quantity"]?.text ?? "0");
+                        int? currentQuantity = int.tryParse(
+                          controllers[index]?["quantity"]?.text ?? "0",
+                        );
                         if (currentQuantity != null && currentQuantity > 1) {
-                          controllers[index]!["quantity"]!.text = (currentQuantity - 1).toString();
-                          products[index]["quantity"] = controllers[index]!["quantity"]!.text;
+                          controllers[index]!["quantity"]!.text =
+                              (currentQuantity - 1).toString();
+                          products[index]["quantity"] =
+                              controllers[index]!["quantity"]!.text;
                           updateTotal(index);
                         }
                       },
                       padding: EdgeInsets.zero,
                     ),
-                    Text(controllers[index]!["quantity"]!.text, style: AppTextStyle.cardTitle(context)),
+                    Text(
+                      controllers[index]!["quantity"]!.text,
+                      style: AppTextStyle.cardTitle(context),
+                    ),
                     IconButton(
                       padding: EdgeInsets.zero,
                       icon: const Icon(Icons.add),
                       onPressed: () {
-                        int currentQuantity = int.tryParse(controllers[index]!["quantity"]!.text) ?? 0;
-                        controllers[index]!["quantity"]!.text = (currentQuantity + 1).toString();
-                        products[index]["quantity"] = controllers[index]!["quantity"]!.text;
+                        int currentQuantity =
+                            int.tryParse(
+                              controllers[index]!["quantity"]!.text,
+                            ) ??
+                            0;
+                        controllers[index]!["quantity"]!.text =
+                            (currentQuantity + 1).toString();
+                        products[index]["quantity"] =
+                            controllers[index]!["quantity"]!.text;
                         updateTotal(index);
                       },
                     ),
@@ -1456,20 +1569,35 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
 
               // Ticket total (Before discount)
               ResponsiveCol(
-                xs: 12, sm: 1, md: 1, lg: 1, xl: 1,
+                xs: 12,
+                sm: 1,
+                md: 1,
+                lg: 1,
+                xl: 1,
                 child: TextFormField(
                   style: AppTextStyle.cardLevelText(context),
                   controller: controllers[index]?["ticket_total"],
                   readOnly: true,
                   decoration: InputDecoration(
-                    label: Text("Ticket Total", style: AppTextStyle.cardLevelText(context)),
+                    label: Text(
+                      "Ticket Total",
+                      style: AppTextStyle.cardLevelText(context),
+                    ),
                     fillColor: AppColors.whiteColor,
                     filled: true,
                     hintStyle: AppTextStyle.cardLevelText(context),
                     isCollapsed: true,
-                    enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(5)),
-                    focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(5)),
-                    contentPadding: const EdgeInsets.only(top: 13.0, bottom: 13.0, left: 12),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                    contentPadding: const EdgeInsets.only(
+                      top: 13.0,
+                      bottom: 13.0,
+                      left: 12,
+                    ),
                     isDense: true,
                     hintText: "ticket total",
                   ),
@@ -1478,20 +1606,35 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
 
               // Final total (After discount)
               ResponsiveCol(
-                xs: 12, sm: 1, md: 1, lg: 1, xl: 1,
+                xs: 12,
+                sm: 1,
+                md: 1,
+                lg: 1,
+                xl: 1,
                 child: TextFormField(
                   style: AppTextStyle.cardLevelText(context),
                   controller: controllers[index]?["total"],
                   readOnly: true,
                   decoration: InputDecoration(
-                    label: Text("Final Total", style: AppTextStyle.cardLevelText(context)),
+                    label: Text(
+                      "Final Total",
+                      style: AppTextStyle.cardLevelText(context),
+                    ),
                     fillColor: AppColors.whiteColor,
                     filled: true,
                     hintStyle: AppTextStyle.cardLevelText(context),
                     isCollapsed: true,
-                    enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(5)),
-                    focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(5)),
-                    contentPadding: const EdgeInsets.only(top: 13.0, bottom: 13.0, left: 12),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                    contentPadding: const EdgeInsets.only(
+                      top: 13.0,
+                      bottom: 13.0,
+                      left: 12,
+                    ),
                     isDense: true,
                     hintText: "final total",
                   ),
@@ -1500,10 +1643,17 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
 
               // Add/Remove button
               ResponsiveCol(
-                xs: 12, sm: 1, md: 1, lg: 1, xl: 1,
+                xs: 12,
+                sm: 1,
+                md: 0.5,
+                lg: 0.5,
+                xl: 0.5,
                 child: IconButton(
+                  padding: EdgeInsets.zero,
                   icon: Icon(
-                    product == products[products.length - 1] ? Icons.add : Icons.remove,
+                    product == products[products.length - 1]
+                        ? Icons.add
+                        : Icons.remove,
                     color: products.length == 1 ? Colors.green : Colors.red,
                   ),
                   onPressed: () {
@@ -1527,45 +1677,70 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
       spacing: 6,
       runSpacing: 6,
       children: [
-        _buildChargeField("Overall Discount", selectedOverallDiscountType, bloc.discountOverAllController, (value) {
-          setState(() {
-            selectedOverallDiscountType = value;
-            bloc.selectedOverallDiscountType = value;
-          });
-          _updateChangeAmount();
-        }),
-        _buildChargeField("Overall Vat", selectedOverallVatType, bloc.vatOverAllController, (value) {
-          setState(() {
-            selectedOverallVatType = value;
-            bloc.selectedOverallVatType = value;
-          });
-          _updateChangeAmount();
-        }),
-        _buildChargeField("Service Charge", selectedOverallServiceChargeType, bloc.serviceChargeOverAllController, (value) {
-          setState(() {
-            selectedOverallServiceChargeType = value;
-            bloc.selectedOverallServiceChargeType = value;
-          });
-          _updateChangeAmount();
-        }),
-        _buildChargeField("Delivery Charge", selectedOverallDeliveryType, bloc.deliveryChargeOverAllController, (value) {
-          setState(() {
-            selectedOverallDeliveryType = value;
-            bloc.selectedOverallDeliveryType = value;
-          });
-          _updateChangeAmount();
-        }),
+        _buildChargeField(
+          "Overall Discount",
+          selectedOverallDiscountType,
+          bloc.discountOverAllController,
+          (value) {
+            setState(() {
+              selectedOverallDiscountType = value;
+              bloc.selectedOverallDiscountType = value;
+            });
+            _updateChangeAmount();
+          },
+        ),
+        _buildChargeField(
+          "Overall Vat",
+          selectedOverallVatType,
+          bloc.vatOverAllController,
+          (value) {
+            setState(() {
+              selectedOverallVatType = value;
+              bloc.selectedOverallVatType = value;
+            });
+            _updateChangeAmount();
+          },
+        ),
+        _buildChargeField(
+          "Service Charge",
+          selectedOverallServiceChargeType,
+          bloc.serviceChargeOverAllController,
+          (value) {
+            setState(() {
+              selectedOverallServiceChargeType = value;
+              bloc.selectedOverallServiceChargeType = value;
+            });
+            _updateChangeAmount();
+          },
+        ),
+        _buildChargeField(
+          "Delivery Charge",
+          selectedOverallDeliveryType,
+          bloc.deliveryChargeOverAllController,
+          (value) {
+            setState(() {
+              selectedOverallDeliveryType = value;
+              bloc.selectedOverallDeliveryType = value;
+            });
+            _updateChangeAmount();
+          },
+        ),
       ],
     );
   }
 
   Widget _buildChargeField(
-      String label,
-      String selectedType,
-      TextEditingController controller,
-      Function(String) onTypeChanged,
-      ) {
-    return ResponsiveCol(xs: 12, sm: 2, md: 2, lg: 2, xl: 2,
+    String label,
+    String selectedType,
+    TextEditingController controller,
+    Function(String) onTypeChanged,
+  ) {
+    return ResponsiveCol(
+      xs: 12,
+      sm: 2,
+      md: 2,
+      lg: 2,
+      xl: 2,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1577,14 +1752,24 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                 child: CupertinoSegmentedControl<String>(
                   padding: EdgeInsets.zero,
                   children: {
-                    'fixed': Text('TK', style: TextStyle(
-                      fontFamily: GoogleFonts.playfairDisplay().fontFamily,
-                      color: selectedType == 'fixed' ? Colors.white : Colors.black,
-                    )),
-                    'percent': Text('%', style: TextStyle(
-                      fontFamily: GoogleFonts.playfairDisplay().fontFamily,
-                      color: selectedType == 'percent' ? Colors.white : Colors.black,
-                    )),
+                    'fixed': Text(
+                      'TK',
+                      style: TextStyle(
+                        fontFamily: GoogleFonts.playfairDisplay().fontFamily,
+                        color: selectedType == 'fixed'
+                            ? Colors.white
+                            : Colors.black,
+                      ),
+                    ),
+                    'percent': Text(
+                      '%',
+                      style: TextStyle(
+                        fontFamily: GoogleFonts.playfairDisplay().fontFamily,
+                        color: selectedType == 'percent'
+                            ? Colors.white
+                            : Colors.black,
+                      ),
+                    ),
                   },
                   onValueChanged: onTypeChanged,
                   groupValue: selectedType,
@@ -1601,7 +1786,9 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                   controller: controller,
                   hintText: label,
                   fillColor: Colors.white,
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
                   onChanged: (value) {
                     _updateChangeAmount();
                     setState(() {});
@@ -1627,7 +1814,12 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
       spacing: 20,
       runSpacing: 10,
       children: [
-        ResponsiveCol(xs: 12, sm: 5, md: 5, lg: 5, xl: 5,
+        ResponsiveCol(
+          xs: 12,
+          sm: 5,
+          md: 5,
+          lg: 5,
+          xl: 5,
           child: Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
@@ -1648,7 +1840,12 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
             ),
           ),
         ),
-        ResponsiveCol(xs: 12, sm: 5, md: 5, lg: 5, xl: 5,
+        ResponsiveCol(
+          xs: 12,
+          sm: 5,
+          md: 5,
+          lg: 5,
+          xl: 5,
           child: _buildPaymentSection(bloc),
         ),
       ],
@@ -1661,7 +1858,10 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
       children: [
         const SizedBox(height: 10),
         CheckboxListTile(
-          title: Text("With Money Receipt", style: AppTextStyle.headerTitle(context)),
+          title: Text(
+            "With Money Receipt",
+            style: AppTextStyle.headerTitle(context),
+          ),
           value: _isChecked,
           onChanged: (bool? newValue) {
             setState(() {
@@ -1679,17 +1879,22 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                 child: AppDropdown(
                   context: context,
                   label: "Payment Method",
-                  hint: bloc.selectedPaymentMethod.isEmpty ? "Select Payment Method" : bloc.selectedPaymentMethod,
+                  hint: bloc.selectedPaymentMethod.isEmpty
+                      ? "Select Payment Method"
+                      : bloc.selectedPaymentMethod,
                   isLabel: false,
                   isRequired: true,
                   isNeedAll: false,
-                  value: bloc.selectedPaymentMethod.isEmpty ? null : bloc.selectedPaymentMethod,
+                  value: bloc.selectedPaymentMethod.isEmpty
+                      ? null
+                      : bloc.selectedPaymentMethod,
                   itemList: [] + bloc.paymentMethod,
                   onChanged: (newVal) {
                     bloc.selectedPaymentMethod = newVal.toString();
                     setState(() {});
                   },
-                  validator: (value) => value == null ? 'Please select a payment method' : null,
+                  validator: (value) =>
+                      value == null ? 'Please select a payment method' : null,
                   itemBuilder: (item) => DropdownMenuItem(
                     value: item,
                     child: Text(item.toString()),
@@ -1705,17 +1910,22 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                     } else if (state is AccountActiveListSuccess) {
                       final filteredList = bloc.selectedPaymentMethod.isNotEmpty
                           ? state.list.where((item) {
-                        return item.acType?.toLowerCase() == bloc.selectedPaymentMethod.toLowerCase();
-                      }).toList()
+                              return item.acType?.toLowerCase() ==
+                                  bloc.selectedPaymentMethod.toLowerCase();
+                            }).toList()
                           : state.list;
 
-                      final selectedAccount = bloc.accountModel ?? (filteredList.isNotEmpty ? filteredList.first : null);
+                      final selectedAccount =
+                          bloc.accountModel ??
+                          (filteredList.isNotEmpty ? filteredList.first : null);
                       bloc.accountModel = selectedAccount;
 
                       return AppDropdown<AccountActiveModel>(
                         context: context,
                         label: "Account",
-                        hint: bloc.accountModel == null ? "Select Account" : bloc.accountModel!.name.toString(),
+                        hint: bloc.accountModel == null
+                            ? "Select Account"
+                            : bloc.accountModel!.name.toString(),
                         isLabel: false,
                         isRequired: true,
                         isNeedAll: false,
@@ -1725,7 +1935,8 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                           bloc.accountModel = newVal;
                           setState(() {});
                         },
-                        validator: (value) => value == null ? 'Please select an account' : null,
+                        validator: (value) =>
+                            value == null ? 'Please select an account' : null,
                         itemBuilder: (item) => DropdownMenuItem(
                           value: item,
                           child: Text(item.toString()),
@@ -1749,7 +1960,9 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                   controller: changeAmountController,
                   hintText: 'Change Amount',
                   // fillColor: Colors.white,
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
                   readOnly: true,
                 ),
               ),
@@ -1761,8 +1974,11 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                   controller: bloc.payableAmount,
                   hintText: 'Payable Amount',
                   // fillColor: Colors.white,
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  validator: (value) => value!.isEmpty ? 'Please enter Payable Amount' : null,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  validator: (value) =>
+                      value!.isEmpty ? 'Please enter Payable Amount' : null,
                   onChanged: (value) {
                     _updateChangeAmount();
                     setState(() {});
@@ -1778,7 +1994,8 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
           hintText: 'Remark',
           fillColor: Colors.white,
           validator: (value) => value!.isEmpty ? 'Please enter Remark' : null,
-          onChanged: (value) => setState(() {}), keyboardType: TextInputType.text,
+          onChanged: (value) => setState(() {}),
+          keyboardType: TextInputType.text,
         ),
       ],
     );
@@ -1793,17 +2010,19 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
             child: Text(
               label,
               style: isBold
-                  ? AppTextStyle.cardLevelHead(context)?.copyWith(fontWeight: FontWeight.bold)
+                  ? AppTextStyle.cardLevelHead(
+                      context,
+                    ).copyWith(fontWeight: FontWeight.bold)
                   : AppTextStyle.cardLevelHead(context),
             ),
           ),
           Text(
             value.toStringAsFixed(2),
             style: isBold
-                ? AppTextStyle.cardLevelText(context)?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: AppColors.primaryColor,
-            )
+                ? AppTextStyle.cardLevelText(context).copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.primaryColor,
+                  )
                 : AppTextStyle.cardLevelText(context),
           ),
         ],
@@ -1828,10 +2047,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
-            child: const Text(
-              'Preview',
-              style: TextStyle(color: Colors.white),
-            ),
+            child: const Text('Preview', style: TextStyle(color: Colors.white)),
           ),
           ElevatedButton(
             onPressed: _submitForm,
@@ -1842,10 +2058,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
-            child: const Text(
-              'Submit',
-              style: TextStyle(color: Colors.white),
-            ),
+            child: const Text('Submit', style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
@@ -1862,7 +2075,9 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
 
     if (pickedDate != null) {
       final bloc = context.read<CreatePosSaleBloc>();
-      bloc.dateEditingController.text = appWidgets.convertDateTimeDDMMYYYY(pickedDate);
+      bloc.dateEditingController.text = appWidgets.convertDateTimeDDMMYYYY(
+        pickedDate,
+      );
       setState(() {});
     }
   }
@@ -1871,13 +2086,17 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
     if (formKey.currentState!.validate()) {
       final bloc = context.read<CreatePosSaleBloc>();
 
-      var transferProducts = products.map((product) => {
-        "product_id": int.tryParse(product["product_id"].toString()),
-        "quantity": int.tryParse(product["quantity"].toString()),
-        "unit_price": double.tryParse(product["price"].toString()),
-        "discount": double.tryParse(product["discount"].toString()),
-        "discount_type": product["discount_type"].toString(),
-      }).toList();
+      var transferProducts = products
+          .map(
+            (product) => {
+              "product_id": int.tryParse(product["product_id"].toString()),
+              "quantity": int.tryParse(product["quantity"].toString()),
+              "unit_price": double.tryParse(product["price"].toString()),
+              "discount": double.tryParse(product["discount"].toString()),
+              "discount_type": product["discount_type"].toString(),
+            },
+          )
+          .toList();
 
       final selectedCustomer = bloc.selectClintModel;
       final isWalkInCustomer = selectedCustomer?.id == -1;
@@ -1885,18 +2104,28 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
       Map<String, dynamic> body = {
         "type": "normal_sale",
         "sale_date": appWidgets.convertDateTime(
-          DateFormat("dd-MM-yyyy").parse(bloc.dateEditingController.text.trim(), true),
+          DateFormat(
+            "dd-MM-yyyy",
+          ).parse(bloc.dateEditingController.text.trim(), true),
           "yyyy-MM-dd",
         ),
         "sale_by": bloc.selectSalesModel?.id.toString() ?? '',
         "overall_vat_type": selectedOverallVatType.toLowerCase(),
-        "vat": bloc.vatOverAllController.text.isEmpty ? 0 : double.tryParse(bloc.vatOverAllController.text),
+        "vat": bloc.vatOverAllController.text.isEmpty
+            ? 0
+            : double.tryParse(bloc.vatOverAllController.text),
         "overall_service_type": selectedOverallServiceChargeType.toLowerCase(),
-        "service_charge": bloc.serviceChargeOverAllController.text.isEmpty ? 0 : double.tryParse(bloc.serviceChargeOverAllController.text),
+        "service_charge": bloc.serviceChargeOverAllController.text.isEmpty
+            ? 0
+            : double.tryParse(bloc.serviceChargeOverAllController.text),
         "overall_delivery_type": selectedOverallDeliveryType.toLowerCase(),
-        "delivery_charge": bloc.deliveryChargeOverAllController.text.isEmpty ? 0 : double.tryParse(bloc.deliveryChargeOverAllController.text),
+        "delivery_charge": bloc.deliveryChargeOverAllController.text.isEmpty
+            ? 0
+            : double.tryParse(bloc.deliveryChargeOverAllController.text),
         "overall_discount_type": selectedOverallDiscountType.toLowerCase(),
-        "overall_discount": bloc.discountOverAllController.text.isEmpty ? 0.0 : double.tryParse(bloc.discountOverAllController.text),
+        "overall_discount": bloc.discountOverAllController.text.isEmpty
+            ? 0.0
+            : double.tryParse(bloc.discountOverAllController.text),
         "remark": bloc.remarkController.text,
         "items": transferProducts,
         "customer_type": isWalkInCustomer ? "walk_in" : "saved_customer",
@@ -1918,7 +2147,8 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
           showCustomToast(
             context: context,
             title: 'Warning!',
-            description: "Walk-in customer: Full payment required. No due allowed.",
+            description:
+                "Walk-in customer: Full payment required. No due allowed.",
             icon: Icons.error,
             primaryColor: Colors.redAccent,
           );

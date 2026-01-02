@@ -65,7 +65,7 @@ class AppDropdown<T> extends FormField<T> {
             if (!isLabel) const SizedBox(height: 2),
 
             SizedBox(
-              height: 37,
+              height: 40,
               child: Container(
                 padding: EdgeInsets.all(5),
                 decoration: BoxDecoration(
