@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
 import 'package:lottie/lottie.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:meherinMart/core/widgets/app_scaffold.dart';
 
 import '../../../../core/configs/configs.dart';
 import '../../../../core/shared/widgets/sideMenu/sidebar.dart';
@@ -127,9 +128,10 @@ class _PosSaleScreenState extends State<MobilePosSaleScreen> {
   Widget build(BuildContext context) {
 
 
-    return Scaffold(
-      appBar: AppBar(),
-      backgroundColor: AppColors.bg,
+    return AppScaffold(
+      appBar: AppBar(
+        title: Text("Sales List",style: AppTextStyle.titleMedium(context),),
+      ),
       body: SafeArea(
         child:ResponsiveCol(
           xs: 12,
