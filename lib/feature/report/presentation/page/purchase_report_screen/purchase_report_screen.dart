@@ -2,11 +2,11 @@
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:printing/printing.dart';
-import 'package:meherin_mart/core/core.dart';
-import 'package:meherin_mart/core/widgets/date_range.dart';
-import 'package:meherin_mart/feature/report/presentation/page/purchase_report_screen/pdf.dart';
-import 'package:meherin_mart/feature/supplier/data/model/supplier_active_model.dart';
-import 'package:meherin_mart/feature/supplier/presentation/bloc/supplier_invoice/supplier_invoice_bloc.dart';
+import '/core/core.dart';
+import '/core/widgets/date_range.dart';
+import '/feature/report/presentation/page/purchase_report_screen/pdf.dart';
+import '/feature/supplier/data/model/supplier_active_model.dart';
+import '/feature/supplier/presentation/bloc/supplier_invoice/supplier_invoice_bloc.dart';
 
 import '../../../data/model/purchase_report_model.dart';
 import '../../bloc/purchase_report/purchase_report_bloc.dart';

@@ -1,6 +1,6 @@
 // lib/feature/report/presentation/bloc/supplier_ledger_bloc/supplier_ledger_bloc.dart
 
-import 'package:meherin_mart/core/core.dart';
+import '/core/core.dart';
 
 import '../../../data/model/supplier_ledger_model.dart';
 

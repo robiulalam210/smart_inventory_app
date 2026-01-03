@@ -1,4 +1,4 @@
-import 'package:meherin_mart/feature/expense/data/model/expense.dart';
+import '/feature/expense/data/model/expense.dart';
 import '../../../../../core/configs/configs.dart';
 import '../../../../../core/repositories/delete_response.dart';
 import '../../../../../core/repositories/get_response.dart';

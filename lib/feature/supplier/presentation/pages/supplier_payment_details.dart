@@ -1,5 +1,5 @@
 import 'package:printing/printing.dart';
-import 'package:meherin_mart/feature/supplier/presentation/pages/pdf/generate_supplier_payment.dart';
+import '/feature/supplier/presentation/pages/pdf/generate_supplier_payment.dart';
 import '../../../../core/configs/configs.dart';
 import '../../data/model/supplier_payment/suppler_payment_model.dart';
 

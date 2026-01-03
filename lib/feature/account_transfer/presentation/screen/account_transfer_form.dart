@@ -2,8 +2,8 @@
 
 
 import 'package:intl/intl.dart';
-import 'package:meherin_mart/core/core.dart';
-import 'package:meherin_mart/feature/accounts/presentation/bloc/account/account_bloc.dart';
+import '/core/core.dart';
+import '/feature/accounts/presentation/bloc/account/account_bloc.dart';
 import '../../../accounts/data/model/account_active_model.dart';
 import '../../../lab_dashboard/presentation/bloc/dashboard/dashboard_bloc.dart';
 import '../bloc/account_transfer/account_transfer_bloc.dart';

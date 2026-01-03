@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
-import 'package:meherin_mart/feature/purchase/presentation/page/purchase_details.dart';
+import '/feature/purchase/presentation/page/purchase_details.dart';
 import 'package:printing/printing.dart';
 
 import '../../../../core/configs/configs.dart';
