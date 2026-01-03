@@ -1,5 +1,13 @@
+import 'package:meherinMart/feature/mobile_root_screen.dart';
+import 'package:meherinMart/feature/sales/presentation/pages/mobile_pos_sale_screen.dart';
+
 import '../../../../feature/auth/presentation/pages/login_scr.dart';
 import '../../../../feature/lab_dashboard/presentation/bloc/dashboard/dashboard_bloc.dart';
+import '../../../../feature/money_receipt/presentation/page/mobile_monery_receipt_create.dart';
+import '../../../../feature/money_receipt/presentation/page/mobile_money_receipt_list.dart';
+import '../../../../feature/purchase/presentation/page/mobile_create_purchase_screen.dart';
+import '../../../../feature/sales/presentation/pages/create_pos_sale/mobile_create_pos_sale.dart';
+import '../../../../feature/sales/presentation/pages/create_pos_sale/mobile_create_sales_pos.dart';
 import '../../../configs/configs.dart';
 import 'menu_tile.dart';
 
@@ -185,7 +193,7 @@ class MobileTabSidebar extends StatelessWidget {
                             title: section.title,
                             isSelected: currentIndex == item.index,
                             onPressed: () {
-                              _handleMenuSelection(bloc, item.index, context);
+                              _handleMenuSelection( item.index, context);
                             },
                           );
                         } else {
@@ -210,7 +218,7 @@ class MobileTabSidebar extends StatelessWidget {
                                 title: item.title,
                                 isSelected: currentIndex == item.index,
                                 onPressed: () {
-                                  _handleMenuSelection(bloc, item.index, context);
+                                  _handleMenuSelection( item.index, context);
                                 },
                               );
                             }).toList(),
@@ -251,17 +259,37 @@ class MobileTabSidebar extends StatelessWidget {
     );
   }
 
-  void _handleMenuSelection(DashboardBloc bloc, int index, BuildContext context) {
-    bloc.add(ChangeDashboardScreen(index: index));
+  void _handleMenuSelection(int index, BuildContext context) {
+    switch (index) {
+      case 0: // POS Sale
+      AppRoutes.pop(context);
+        break;
+      case 1: // Sale
+        AppRoutes.push(context, MobileCreatePosSale());
+        break;
+        case 2: // Sale
+        AppRoutes.push(context, MobileSalesScreen());
+        break;
+      case 3: // Sale List
+        AppRoutes.push(context, MobileCreatePosSale());
+        break;
 
-    // Handle special cases
-    if (index == 0) {
-      bloc.add(FetchDashboardData( context: context));
-    }
+        case 4: // Sale List
+        AppRoutes.push(context, MobileMoneyReceiptForm());
+        break;
+      case 5: // Sale List
+        AppRoutes.push(context, MobileMoneyReceiptList());
+        break;     case 6: // Sale List
+        AppRoutes.push(context, MobileCreatePurchaseScreen());
+        break;
+      case 7: // Sale List
+        AppRoutes.push(context, MobileCreatePurchaseScreen());
+        break;
 
-    // Close drawer on tablet/mobile
-    if (Responsive.isTablet(context) || Responsive.isMobile(context)) {
-      Navigator.pop(context);
+    // Add more cases for other menu items
+      default:
+      // Fallback: do nothing or show a snack bar
+        break;
     }
   }
 

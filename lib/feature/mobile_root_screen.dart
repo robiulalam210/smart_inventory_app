@@ -1,14 +1,10 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'package:meherinMart/feature/auth/presentation/pages/mobile_login_scr.dart';
 import 'package:meherinMart/feature/feature.dart';
-import 'package:meherinMart/feature/splash/presentation/bloc/connectivity_bloc/connectivity_bloc.dart';
 import 'package:meherinMart/feature/splash/presentation/bloc/connectivity_bloc/connectivity_state.dart';
 
 import '../core/configs/configs.dart';
-import '../core/shared/widgets/header.dart';
 import '../core/shared/widgets/sideMenu/mobile_tab_sidebar.dart';
-import '../core/shared/widgets/sideMenu/tab_sidebar.dart';
 import '../core/widgets/app_button.dart';
 
 
@@ -32,9 +28,6 @@ class _RootScreenState extends State<MobileRootScreen> {
 
   @override
   Widget build(BuildContext context) {
-
-    final isBigScreen =
-        Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
 
     return SafeArea(
       child: Scaffold(
@@ -70,14 +63,7 @@ class _RootScreenState extends State<MobileRootScreen> {
                 child: ListView(
                   padding: EdgeInsets.zero,
                   children: [
-                    if (isBigScreen) Header(drawerKey: _drawerKey),
-                    // Padding(
-                    //   padding: EdgeInsets.symmetric(
-                    //     horizontal: AppSizes.bodyPadding *
-                    //         (Responsive.isMobile(context) ? 0.5 : 1.5),
-                    //   ),
-                    //   child: bloc.myScreens[currentIndex],
-                    // ),
+
                     Padding(
                       padding: EdgeInsets.symmetric(
                         horizontal: AppSizes.bodyPadding *
