@@ -271,7 +271,7 @@ class MobileTabSidebar extends StatelessWidget {
         AppRoutes.push(context, MobileSalesScreen());
         break;
       case 3: // Sale List
-        AppRoutes.push(context, MobileCreatePosSale());
+        AppRoutes.push(context, MobilePosSaleScreen());
         break;
 
         case 4: // Sale List
