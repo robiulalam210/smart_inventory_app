@@ -1,13 +1,12 @@
 import 'dart:async';
 import 'package:equatable/equatable.dart';
-import 'package:meherin_mart/core/configs/configs.dart';
-import 'package:meherin_mart/core/repositories/delete_response.dart';
-import 'package:meherin_mart/core/repositories/get_response.dart';
-import 'package:meherin_mart/core/repositories/post_response.dart';
-import 'package:meherin_mart/feature/accounts/data/model/account_active_model.dart';
-import 'package:meherin_mart/feature/return/purchase_return/data/model/purchase_return_model.dart';
+import '/core/configs/configs.dart';
+import '/core/repositories/delete_response.dart';
+import '/core/repositories/get_response.dart';
+import '/core/repositories/post_response.dart';
+import '/feature/accounts/data/model/account_active_model.dart';
+import '/feature/return/purchase_return/data/model/purchase_return_model.dart';
 
-import '../../../../../supplier/data/model/supplier_active_model.dart';
 import '../../../data/model/purchase_invoice_model.dart';
 import '../../../data/model/purchase_return_create.dart';
 

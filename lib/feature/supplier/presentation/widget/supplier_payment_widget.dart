@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:printing/printing.dart';
-import 'package:meherin_mart/core/configs/app_colors.dart';
-import 'package:meherin_mart/feature/supplier/data/model/supplier_payment/suppler_payment_model.dart';
-import 'package:meherin_mart/feature/supplier/presentation/pages/supplier_payment_details.dart';
+import '/core/configs/app_colors.dart';
+import '/feature/supplier/data/model/supplier_payment/suppler_payment_model.dart';
+import '/feature/supplier/presentation/pages/supplier_payment_details.dart';
 
 import '../../../../core/configs/app_routes.dart';
 import '../../../../core/configs/configs.dart';

@@ -92,10 +92,10 @@ class AccountTransferCard extends StatelessWidget {
                         rows: transfers.asMap().entries.map((entry) {
                           final transfer = entry.value;
                           return DataRow(
-                            color: MaterialStateProperty.resolveWith<Color?>(
-                                  (Set<MaterialState> states) {
+                            color: WidgetStateProperty.resolveWith<Color?>(
+                                  (Set<WidgetState> states) {
                                 if (entry.key.isEven) {
-                                  return Colors.grey.withOpacity(0.03);
+                                  return Colors.grey.withValues(alpha: 0.03);
                                 }
                                 return null;
                               },

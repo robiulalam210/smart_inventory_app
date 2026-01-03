@@ -1,5 +1,5 @@
 // lib/feature/report/presentation/bloc/top_products_bloc/top_products_bloc.dart
-import 'package:meherin_mart/core/core.dart';
+import '/core/core.dart';
 import '../../../data/model/top_products_model.dart';
 
 part 'top_products_event.dart';

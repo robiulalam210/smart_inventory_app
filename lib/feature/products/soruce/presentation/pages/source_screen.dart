@@ -1,4 +1,4 @@
-import 'package:meherin_mart/feature/products/soruce/presentation/pages/soruce_create.dart';
+import '/feature/products/soruce/presentation/pages/soruce_create.dart';
 
 import '../../../../../core/configs/configs.dart';
 import '../../../../../core/shared/widgets/sideMenu/sidebar.dart';

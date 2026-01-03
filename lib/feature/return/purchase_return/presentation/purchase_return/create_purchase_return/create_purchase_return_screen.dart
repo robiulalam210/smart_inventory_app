@@ -2,9 +2,9 @@ import 'package:hugeicons/hugeicons.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:meherin_mart/feature/return/purchase_return/data/model/purchase_invoice_model.dart';
-import 'package:meherin_mart/feature/supplier/data/model/supplier_active_model.dart';
-import 'package:meherin_mart/feature/supplier/presentation/bloc/supplier_invoice/supplier_invoice_bloc.dart';
+import '/feature/return/purchase_return/data/model/purchase_invoice_model.dart';
+import '/feature/supplier/data/model/supplier_active_model.dart';
+import '/feature/supplier/presentation/bloc/supplier_invoice/supplier_invoice_bloc.dart';
 
 import '../../../../../../core/configs/app_colors.dart';
 import '../../../../../../core/widgets/app_alert_dialog.dart';
@@ -217,12 +217,10 @@ class _CreatePurchaseReturnScreenState
                       child: BlocBuilder<SupplierInvoiceBloc, SupplierInvoiceState>(
                         builder: (context, state) {
                           List<SupplierActiveModel> suppliers = [];
-                          bool isLoading = false;
 
                           if (state is SupplierActiveListSuccess) {
                             suppliers = state.list;
                           } else if (state is SupplierInvoiceLoading) {
-                            isLoading = true;
                           }
 
                           return AppDropdown<SupplierActiveModel>(
@@ -271,10 +269,8 @@ class _CreatePurchaseReturnScreenState
                       child: BlocBuilder<PurchaseReturnBloc, PurchaseReturnState>(
                         builder: (context, state) {
                           final bloc = context.read<PurchaseReturnBloc>();
-                          bool isLoading = false;
 
                           if (state is PurchaseInvoiceListLoading) {
-                            isLoading = true;
                           }
 
                           // Check if invoice list is empty

@@ -1,5 +1,5 @@
 import 'package:printing/printing.dart';
-import 'package:meherin_mart/feature/money_receipt/presentation/page/pdf/generate_money_receipt.dart';
+import '/feature/money_receipt/presentation/page/pdf/generate_money_receipt.dart';
 import '../../../../core/configs/configs.dart';
 import '../../data/model/money_receipt_model/money_receipt_model.dart';
 

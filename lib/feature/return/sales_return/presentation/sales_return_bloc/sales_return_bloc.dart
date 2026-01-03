@@ -1,12 +1,11 @@
-import 'package:meherin_mart/feature/accounts/data/model/account_active_model.dart';
-import 'package:meherin_mart/feature/return/sales_return/data/model/sales_invoice_model.dart';
+import '/feature/accounts/data/model/account_active_model.dart';
+import '/feature/return/sales_return/data/model/sales_invoice_model.dart';
 import '../../../../../core/configs/configs.dart';
 import '../../../../../core/repositories/delete_response.dart';
 import '../../../../../core/repositories/get_response.dart';
 import '../../../../../core/repositories/post_response.dart';
 import '../../data/model/sales_return_create_model.dart';
 import '../../data/model/sales_return_model.dart';
-import '../../data/sales_return_create_model.dart';
 
 part 'sales_return_event.dart';
 part 'sales_return_state.dart';

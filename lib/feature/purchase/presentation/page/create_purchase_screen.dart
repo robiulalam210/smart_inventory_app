@@ -1,12 +1,11 @@
-import 'dart:developer';
 
 import 'package:flutter/cupertino.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import 'package:meherin_mart/feature/accounts/data/model/account_active_model.dart';
-import 'package:meherin_mart/feature/products/product/presentation/bloc/products/products_bloc.dart';
-import 'package:meherin_mart/feature/supplier/data/model/supplier_active_model.dart';
-import 'package:meherin_mart/feature/supplier/presentation/bloc/supplier_invoice/supplier_invoice_bloc.dart';
+import '/feature/accounts/data/model/account_active_model.dart';
+import '/feature/products/product/presentation/bloc/products/products_bloc.dart';
+import '/feature/supplier/data/model/supplier_active_model.dart';
+import '/feature/supplier/presentation/bloc/supplier_invoice/supplier_invoice_bloc.dart';
 
 import '../../../../../core/configs/configs.dart';
 import '../../../../../core/shared/widgets/sideMenu/sidebar.dart';

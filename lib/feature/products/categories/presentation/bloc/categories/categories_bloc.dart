@@ -49,7 +49,7 @@ class CategoriesBloc extends Bloc<CategoriesEvent, CategoriesState> {
 
       /// 2️⃣ Ensure response is String (important)
       final String jsonString =
-      res is String ? res : json.encode(res);
+      res;
 
       /// 3️⃣ Parse API response safely
       final ApiResponse<List<CategoryModel>> response =

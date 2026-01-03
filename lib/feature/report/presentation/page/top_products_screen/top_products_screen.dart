@@ -2,10 +2,10 @@
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:printing/printing.dart';
-import 'package:meherin_mart/core/core.dart';
-import 'package:meherin_mart/core/widgets/date_range.dart';
-import 'package:meherin_mart/feature/report/presentation/bloc/top_products_bloc/top_products_bloc.dart';
-import 'package:meherin_mart/feature/report/presentation/page/top_products_screen/pdf.dart';
+import '/core/core.dart';
+import '/core/widgets/date_range.dart';
+import '/feature/report/presentation/bloc/top_products_bloc/top_products_bloc.dart';
+import '/feature/report/presentation/page/top_products_screen/pdf.dart';
 
 import '../../../data/model/top_products_model.dart';
 

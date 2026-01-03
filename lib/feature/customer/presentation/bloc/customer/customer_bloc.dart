@@ -1,4 +1,4 @@
-import 'package:meherin_mart/feature/customer/data/model/customer_active_model.dart';
+import '/feature/customer/data/model/customer_active_model.dart';
 
 import '../../../../../core/configs/configs.dart';
 import '../../../../../core/repositories/delete_response.dart';

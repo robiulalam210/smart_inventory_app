@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lottie/lottie.dart';
 import 'package:iconsax/iconsax.dart';
-import 'package:meherin_mart/core/core.dart';
+import '/core/core.dart';
 
 import '../../../../../core/widgets/coustom_search_text_field.dart';
 import '../bloc/expense_head/expense_head_bloc.dart';
@@ -40,7 +40,6 @@ class _ExpenseHeadScreenState extends State<ExpenseHeadScreen> {
 
   void _fetchApiData({
     String filterText = '',
-    String state = '',
     int pageNumber = 0,
   }) {
     if (!mounted) return;
@@ -158,16 +157,13 @@ class _ExpenseHeadScreenState extends State<ExpenseHeadScreen> {
           width: 350,
           child: CustomSearchTextFormField(
             isRequiredLabel: false,
-            controller: context.read<ExpenseHeadBloc>().filterTextController ??
-                (_searchController..text = ''),
+            controller: context.read<ExpenseHeadBloc>().filterTextController,
             onChanged: (value) {
               _fetchApiData(filterText: value);
             },
             onClear: () {
-              if (context.read<ExpenseHeadBloc>().filterTextController != null) {
-                context.read<ExpenseHeadBloc>().filterTextController!.clear();
-              }
-              _searchController.clear();
+              context.read<ExpenseHeadBloc>().filterTextController.clear();
+                          _searchController.clear();
               _fetchApiData();
             },
             hintText: "Search expense head...",
@@ -206,16 +202,13 @@ class _ExpenseHeadScreenState extends State<ExpenseHeadScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   child: CustomSearchTextFormField(
                     isRequiredLabel: false,
-                    controller: context.read<ExpenseHeadBloc>().filterTextController ??
-                        (_searchController..text = ''),
+                    controller: context.read<ExpenseHeadBloc>().filterTextController,
                     onChanged: (value) {
                       _fetchApiData(filterText: value);
                     },
                     onClear: () {
-                      if (context.read<ExpenseHeadBloc>().filterTextController != null) {
-                        context.read<ExpenseHeadBloc>().filterTextController!.clear();
-                      }
-                      _searchController.clear();
+                      context.read<ExpenseHeadBloc>().filterTextController.clear();
+                                          _searchController.clear();
                       _fetchApiData();
                     },
                     hintText: "Search expense head...",

@@ -1,4 +1,4 @@
-package com.meherin.meherin_mart
+package com.meherin.meherinMart
 
 import io.flutter.embedding.android.FlutterActivity
 

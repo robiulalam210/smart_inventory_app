@@ -1,4 +1,4 @@
-import 'package:meherin_mart/core/core.dart';
+import '/core/core.dart';
 
 import '../../../../customer/data/model/customer_active_model.dart';
 import '../../../../users_list/data/model/user_model.dart';

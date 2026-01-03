@@ -1,8 +1,8 @@
 // lib/account_transfer/presentation/bloc/account_transfer/account_transfer_bloc.dart
 import 'package:intl/intl.dart';
-import 'package:meherin_mart/core/configs/configs.dart';
-import 'package:meherin_mart/core/repositories/get_response.dart';
-import 'package:meherin_mart/core/repositories/post_response.dart';
+import '/core/configs/configs.dart';
+import '/core/repositories/get_response.dart';
+import '/core/repositories/post_response.dart';
 
 import '../../../../accounts/data/model/account_active_model.dart';
 import '../../../../common/data/models/api_response_mod.dart';

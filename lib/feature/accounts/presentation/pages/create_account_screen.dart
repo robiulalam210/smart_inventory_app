@@ -1,4 +1,4 @@
-import 'package:meherin_mart/core/core.dart';
+import '/core/core.dart';
 
 import '../../data/model/account_model.dart';
 import '../bloc/account/account_bloc.dart';

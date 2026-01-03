@@ -87,8 +87,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
 
   Widget buildContent() {
     final isMobile = Responsive.isMobile(context);
-    final isTablet = Responsive.isTablet(context);
-    final isDesktop = Responsive.isDesktop(context);
+
     return Padding(
       padding: AppTextStyle.getResponsivePaddingBody(context),
       child: BlocListener<CategoriesBloc, CategoriesState>(

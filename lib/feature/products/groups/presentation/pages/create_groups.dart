@@ -1,4 +1,4 @@
-import 'package:meherin_mart/feature/products/groups/presentation/bloc/groups/groups_bloc.dart';
+import '/feature/products/groups/presentation/bloc/groups/groups_bloc.dart';
 import '../../../../../core/configs/configs.dart';
 import '../../../../../core/widgets/app_button.dart';
 import '../../../../../core/widgets/app_dropdown.dart';

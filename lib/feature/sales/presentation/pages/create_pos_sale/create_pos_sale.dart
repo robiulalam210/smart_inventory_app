@@ -3,9 +3,9 @@ import 'dart:developer';
 import 'package:flutter/cupertino.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import 'package:meherin_mart/core/core.dart';
-import 'package:meherin_mart/feature/products/product/data/model/product_stock_model.dart';
-import 'package:meherin_mart/feature/users_list/presentation/bloc/users/user_bloc.dart';
+import '/core/core.dart';
+import '/feature/products/product/data/model/product_stock_model.dart';
+import '/feature/users_list/presentation/bloc/users/user_bloc.dart';
 
 import '../../../../accounts/data/model/account_active_model.dart';
 import '../../../../accounts/presentation/bloc/account/account_bloc.dart';

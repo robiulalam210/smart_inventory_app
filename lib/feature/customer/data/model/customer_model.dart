@@ -251,7 +251,7 @@ class Details {
 class AdvanceReceipt {
   final int? id;
   final String? receiptNo;
-  final dynamic? amount;
+  final dynamic amount;
   final DateTime? date;
   final String? type;
   final String? paymentType;
@@ -299,7 +299,7 @@ class AdvanceReceipt {
 class DueSale {
   final int? id;
   final String? invoiceNo;
-  final dynamic? dueAmount;
+  final dynamic dueAmount;
   final DateTime? date;
 
   DueSale({
@@ -327,9 +327,9 @@ class DueSale {
 class PaidSale {
   final int? id;
   final String? invoiceNo;
-  final dynamic? grandTotal;
-  final dynamic? paidAmount;
-  final dynamic? overpayment;
+  final dynamic grandTotal;
+  final dynamic paidAmount;
+  final dynamic overpayment;
   final DateTime? date;
 
   PaidSale({
@@ -385,7 +385,7 @@ class Summary {
 }
 
 class Advance {
-  final dynamic? total;
+  final dynamic total;
   final Breakdown? breakdown;
   final int? count;
 
@@ -409,9 +409,9 @@ class Advance {
 }
 
 class Breakdown {
-  final dynamic? fromSalesOverpayment;
-  final dynamic? fromAdvanceReceipts;
-  final dynamic? storedInDb;
+  final dynamic fromSalesOverpayment;
+  final dynamic fromAdvanceReceipts;
+  final dynamic storedInDb;
   final dynamic totalCalculated;
 
   Breakdown({
@@ -437,7 +437,7 @@ class Breakdown {
 }
 
 class Due {
-  final dynamic? total;
+  final dynamic total;
   final int? count;
 
   Due({
@@ -458,7 +458,7 @@ class Due {
 
 class SyncInfo {
   final bool? wasSynced;
-  final dynamic? previousValue;
+  final dynamic previousValue;
 
   SyncInfo({
     this.wasSynced,

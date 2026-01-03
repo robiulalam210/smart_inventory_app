@@ -1,7 +1,7 @@
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
-import 'package:meherin_mart/core/configs/configs.dart';
-import 'package:meherin_mart/feature/customer/data/model/customer_active_model.dart';
-import 'package:meherin_mart/feature/return/sales_return/presentation/page/widget/widget.dart';
+import '/core/configs/configs.dart';
+import '/feature/customer/data/model/customer_active_model.dart';
+import '/feature/return/sales_return/presentation/page/widget/widget.dart';
 import '../../../../../core/shared/widgets/sideMenu/sidebar.dart';
 import '../../../../../core/widgets/app_alert_dialog.dart';
 import '../../../../../core/widgets/app_button.dart';
@@ -14,24 +14,6 @@ import '../../../../products/product/presentation/widget/pagination.dart';
 import '../sales_return_bloc/sales_return_bloc.dart';
 import 'create_sales_return_screnn.dart';
 
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
-import 'package:lottie/lottie.dart';
-import 'package:meherin_mart/core/configs/configs.dart';
-import 'package:meherin_mart/feature/customer/data/model/customer_active_model.dart';
-import 'package:meherin_mart/feature/customer/presentation/bloc/customer/customer_bloc.dart';
-import 'package:meherin_mart/feature/products/product/presentation/widget/pagination.dart';
-import 'package:meherin_mart/feature/return/sales_return/presentation/page/widget/widget.dart';
-import '../../../../../core/shared/widgets/sideMenu/sidebar.dart';
-import '../../../../../core/widgets/app_alert_dialog.dart';
-import '../../../../../core/widgets/app_button.dart';
-import '../../../../../core/widgets/app_dropdown.dart';
-import '../../../../../core/widgets/app_loader.dart';
-import '../../../../../core/widgets/coustom_search_text_field.dart';
-import '../../../../../core/widgets/date_range.dart';
-import '../sales_return_bloc/sales_return_bloc.dart';
-import 'create_sales_return_screnn.dart';
 
 class SalesReturnScreen extends StatefulWidget {
   const SalesReturnScreen({super.key});

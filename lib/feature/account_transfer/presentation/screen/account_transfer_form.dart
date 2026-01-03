@@ -2,8 +2,8 @@
 
 
 import 'package:intl/intl.dart';
-import 'package:meherin_mart/core/core.dart';
-import 'package:meherin_mart/feature/accounts/presentation/bloc/account/account_bloc.dart';
+import '/core/core.dart';
+import '/feature/accounts/presentation/bloc/account/account_bloc.dart';
 import '../../../accounts/data/model/account_active_model.dart';
 import '../../../lab_dashboard/presentation/bloc/dashboard/dashboard_bloc.dart';
 import '../bloc/account_transfer/account_transfer_bloc.dart';
@@ -110,7 +110,6 @@ class _AccountTransferFormState extends State<AccountTransferForm> {
                 color: AppColors.bg,
                 child: BlocListener<AccountTransferBloc, AccountTransferState>(
                   listener: (context, state) {
-                    print(state);
                     if (state is AccountTransferAddLoading ||
                         state is QuickTransferLoading ||
                         state is ExecuteTransferLoading) {
@@ -447,7 +446,7 @@ _fetchApi();
           return const Center(child: CircularProgressIndicator());
         } else if (state is AccountActiveListFailed) {
           return Text(
-            state.content ?? "Failed to load accounts",
+            state.content,
             style: const TextStyle(color: Colors.red),
           );
         } else if (state is AccountActiveListSuccess) {

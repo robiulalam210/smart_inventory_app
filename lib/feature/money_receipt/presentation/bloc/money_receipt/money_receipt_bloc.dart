@@ -1,5 +1,5 @@
 
-import 'package:meherin_mart/feature/accounts/data/model/account_active_model.dart';
+import '/feature/accounts/data/model/account_active_model.dart';
 
 import '../../../../../core/configs/configs.dart';
 import '../../../../../core/repositories/delete_response.dart';
