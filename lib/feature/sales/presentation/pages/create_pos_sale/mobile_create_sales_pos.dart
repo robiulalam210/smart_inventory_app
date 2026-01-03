@@ -463,6 +463,9 @@ class _SalesScreenState extends State<MobileSalesScreen> {
                       bloc.customType = (newVal?.id == -1)
                           ? "Walking Customer"
                           : "Saved Customer";
+                      if(  newVal?.id == -1){
+                        _isChecked=true;
+                      }
                       setState(() {});
                     },
                     validator: (value) =>

@@ -556,6 +556,9 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                     bloc.customType = (newVal?.id == -1)
                         ? "Walking Customer"
                         : "Saved Customer";
+                    if(  newVal?.id == -1){
+                      _isChecked=true;
+                    }
                     setState(() {});
                   },
                   validator: (value) =>
