@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../../../../../core/widgets/app_scaffold.dart';
+import '../mobile_pos_sale_screen.dart';
 import '/core/core.dart';
 import '/feature/products/product/data/model/product_stock_model.dart';
 import '/feature/users_list/presentation/bloc/users/user_bloc.dart';
@@ -12,7 +13,6 @@ import '../../../../accounts/data/model/account_active_model.dart';
 import '../../../../accounts/presentation/bloc/account/account_bloc.dart';
 import '../../../../customer/data/model/customer_active_model.dart';
 import '../../../../customer/presentation/bloc/customer/customer_bloc.dart';
-import '../../../../lab_dashboard/presentation/bloc/dashboard/dashboard_bloc.dart';
 import '../../../../products/categories/data/model/categories_model.dart';
 import '../../../../products/categories/presentation/bloc/categories/categories_bloc.dart';
 import '../../../../products/product/presentation/bloc/products/products_bloc.dart';
@@ -386,7 +386,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
         if (state is CreatePosSaleLoading) {
           appLoader(context, "Creating PosSale, please wait...");
         } else if (state is CreatePosSaleSuccess) {
-          Navigator.pop(context);
+          // Navigator.pop(context);
           showCustomToast(
             context: context,
             title: 'Success!',
@@ -396,7 +396,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
           );
 
           changeAmountController.clear();
-          context.read<DashboardBloc>().add(ChangeDashboardScreen(index: 2));
+          AppRoutes.pushReplacement(context, MobilePosSaleScreen());
           setState(() {});
         } else if (state is CreatePosSaleFailed) {
           Navigator.pop(context);

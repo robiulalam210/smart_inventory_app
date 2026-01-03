@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 
+import '../mobile_pos_sale_screen.dart';
 import '/core/core.dart';
 import '/feature/products/product/data/model/product_stock_model.dart';
 import '/feature/users_list/presentation/bloc/users/user_bloc.dart';
@@ -1354,176 +1355,6 @@ class _SalesScreenState extends State<MobileSalesScreen> {
   }
 
 
-  // Widget _buildProductCard(ProductModelStockModel p) {
-  //   return InkWell(
-  //     onTap: () {
-  //       final bloc = context.read<CreatePosSaleBloc>();
-  //
-  //       // 1️⃣ Check if product already exists
-  //       final existingIndex = bloc.products.indexWhere(
-  //             (row) => row["product_id"] == p.id,
-  //       );
-  //
-  //       if (existingIndex != -1) {
-  //         // ✅ Product already added → increase quantity
-  //         final qtyController = controllers[existingIndex]?["quantity"];
-  //         final currentQty = int.tryParse(qtyController?.text ?? "1") ?? 1;
-  //
-  //         qtyController?.text = (currentQty + 1).toString();
-  //         bloc.products[existingIndex]["quantity"] = currentQty + 1;
-  //         updateTotal(existingIndex);
-  //
-  //         setState(() {});
-  //         Navigator.pop(context);
-  //         return;
-  //       }
-  //
-  //       // 2️⃣ Find empty row
-  //       final emptyIndex = bloc.products.indexWhere(
-  //             (row) => row["product_id"] == null,
-  //       );
-  //
-  //       final targetIndex =
-  //       emptyIndex != -1 ? emptyIndex : bloc.products.length;
-  //
-  //       // 3️⃣ If no empty row → add new row
-  //       if (emptyIndex == -1) {
-  //         bloc.addProduct();
-  //       }
-  //
-  //       // 4️⃣ Assign product
-  //       onProductChanged(targetIndex, p);
-  //
-  //       controllers.putIfAbsent(
-  //         targetIndex,
-  //             () => {
-  //           "price": TextEditingController(),
-  //           "discount": TextEditingController(),
-  //           "quantity": TextEditingController(text: "1"),
-  //           "ticket_total": TextEditingController(),
-  //           "total": TextEditingController(),
-  //         },
-  //       );
-  //
-  //       bloc.products[targetIndex]["quantity"] = 1;
-  //       updateTotal(targetIndex);
-  //
-  //       setState(() {});
-  //       // Navigator.pop(context);
-  //     },
-  //     child: Container(
-  //       decoration: BoxDecoration(
-  //         color: Colors.white,
-  //         borderRadius: BorderRadius.circular(10),
-  //         border: Border.all(color: Colors.grey.shade200),
-  //         boxShadow: [
-  //           BoxShadow(
-  //             color: Colors.black.withValues(alpha: 0.02),
-  //             blurRadius: 6,
-  //             offset: const Offset(0, 2),
-  //           ),
-  //         ],
-  //       ),
-  //       child: Column(
-  //         crossAxisAlignment: CrossAxisAlignment.start,
-  //         children: [
-  //           /// IMAGE
-  //           AspectRatio(
-  //             aspectRatio: 2,
-  //             child: p.image != null
-  //                 ? ClipRRect(
-  //               borderRadius: const BorderRadius.vertical(
-  //                 top: Radius.circular(10),
-  //               ),
-  //               child: Image.network(
-  //                 p.image!,
-  //                 fit: BoxFit.cover,
-  //                 width: double.infinity,
-  //               ),
-  //             )
-  //                 : Container(
-  //               decoration: const BoxDecoration(
-  //                 borderRadius: BorderRadius.vertical(
-  //                   top: Radius.circular(10),
-  //                 ),
-  //                 color: Color(0xfff5f5f5),
-  //               ),
-  //               child: const Center(
-  //                 child: Icon(
-  //                   Icons.image_not_supported,
-  //                   size: 36,
-  //                   color: Colors.black26,
-  //                 ),
-  //               ),
-  //             ),
-  //           ),
-  //
-  //           Padding(
-  //             padding: const EdgeInsets.all(8),
-  //             child: Column(
-  //               crossAxisAlignment: CrossAxisAlignment.start,
-  //               children: [
-  //                 Text(
-  //                   '৳ ${_toDouble(p.sellingPrice).toStringAsFixed(2)}',
-  //                   style: const TextStyle(
-  //                     fontSize: 14,
-  //                     fontWeight: FontWeight.bold,
-  //                   ),
-  //                 ),
-  //                 const SizedBox(height: 6),
-  //                 Text(
-  //                   p.toString(),
-  //                   maxLines: 2,
-  //                   overflow: TextOverflow.ellipsis,
-  //                   style: const TextStyle(
-  //                     fontSize: 12,
-  //                     fontWeight: FontWeight.w500,
-  //                   ),
-  //                 ),
-  //                 const SizedBox(height: 6),
-  //                 Text(
-  //                   '${p.brandInfo?.name ?? ''} • ${p.categoryInfo?.name ?? ''}',
-  //                   maxLines: 1,
-  //                   overflow: TextOverflow.ellipsis,
-  //                   style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
-  //                 ),
-  //                 const SizedBox(height: 6),
-  //                 Row(
-  //                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  //                   children: [
-  //                     Container(
-  //                       padding: const EdgeInsets.symmetric(
-  //                         horizontal: 6,
-  //                         vertical: 4,
-  //                       ),
-  //                       decoration: BoxDecoration(
-  //                         color: p.stockQty == 0
-  //                             ? Colors.grey
-  //                             : Colors.redAccent,
-  //                         borderRadius: BorderRadius.circular(20),
-  //                       ),
-  //                       child: Text(
-  //                         'Stock ${p.stockQty ?? 0}',
-  //                         style: const TextStyle(
-  //                           color: Colors.white,
-  //                           fontSize: 11,
-  //                         ),
-  //                       ),
-  //                     ),
-  //                     Icon(
-  //                       Icons.add_circle_outline,
-  //                       color: AppColors.primaryColor,
-  //                     ),
-  //                   ],
-  //                 ),
-  //               ],
-  //             ),
-  //           ),
-  //         ],
-  //       ),
-  //     ),
-  //   );
-  // }
   Widget _buildProductCard(ProductModelStockModel p) {
     return InkWell(
       // ➕ ADD PRODUCT / INCREASE QTY
@@ -1621,7 +1452,7 @@ class _SalesScreenState extends State<MobileSalesScreen> {
           children: [
             /// IMAGE
             AspectRatio(
-              aspectRatio: 2,
+              aspectRatio: 3,
               child: p.image != null
                   ? ClipRRect(
                 borderRadius: const BorderRadius.vertical(
@@ -1865,7 +1696,7 @@ class _SalesScreenState extends State<MobileSalesScreen> {
               if (state is CreatePosSaleLoading) {
                 appLoader(context, "Creating PosSale, please wait...");
               } else if (state is CreatePosSaleSuccess) {
-                Navigator.pop(context);
+                // Navigator.pop(context);
                 showCustomToast(
                   context: context,
                   title: 'Success!',
@@ -1874,9 +1705,8 @@ class _SalesScreenState extends State<MobileSalesScreen> {
                   primaryColor: Colors.green,
                 );
                 changeAmountController.clear();
-                context.read<DashboardBloc>().add(
-                  ChangeDashboardScreen(index: 2),
-                );
+                AppRoutes.pushReplacement(context, MobilePosSaleScreen());
+
                 setState(() {});
               } else if (state is CreatePosSaleFailed) {
                 Navigator.pop(context);
@@ -1897,7 +1727,8 @@ class _SalesScreenState extends State<MobileSalesScreen> {
               final bloc = context.read<CreatePosSaleBloc>();
 
               return SingleChildScrollView(
-                padding: const EdgeInsets.all(8),
+                padding: AppTextStyle.getResponsivePaddingBody(context),
+
                 child: ConstrainedBox(
                   constraints: BoxConstraints(minHeight: availableHeight),
                   child: Form(
