@@ -2,8 +2,15 @@ import 'package:meherinMart/feature/expense/expense_head/presentation/pages/mobi
 import 'package:meherinMart/feature/expense/expense_sub_head/presentation/pages/mobile_expense_sub_head_screen.dart';
 import 'package:meherinMart/feature/expense/presentation/pages/mobile_expense_list_screen.dart';
 import 'package:meherinMart/feature/mobile_root_screen.dart';
+import 'package:meherinMart/feature/products/brand/presentation/pages/mobile_brand_screen.dart';
+import 'package:meherinMart/feature/products/categories/presentation/pages/mobile_categories_screen.dart';
+import 'package:meherinMart/feature/products/groups/presentation/pages/mobile_groups_screen.dart';
+import 'package:meherinMart/feature/products/soruce/presentation/pages/mobile_source_screen.dart';
+import 'package:meherinMart/feature/products/unit/presentation/pages/mobile_unit_screen.dart';
 import 'package:meherinMart/feature/sales/presentation/pages/mobile_pos_sale_screen.dart';
 
+import '../../../../feature/account_transfer/presentation/screen/mobile_account_transfer_form.dart';
+import '../../../../feature/account_transfer/presentation/screen/mobile_account_transfer_screen.dart';
 import '../../../../feature/accounts/presentation/pages/account_screen.dart';
 import '../../../../feature/accounts/presentation/pages/mobile_account_screen.dart';
 import '../../../../feature/auth/presentation/pages/login_scr.dart';
@@ -12,6 +19,7 @@ import '../../../../feature/lab_dashboard/presentation/bloc/dashboard/dashboard_
 import '../../../../feature/money_receipt/presentation/page/mobile_monery_receipt_create.dart';
 import '../../../../feature/money_receipt/presentation/page/mobile_money_receipt_list.dart';
 import '../../../../feature/products/product/presentation/pages/mobile_product_screen.dart';
+import '../../../../feature/profile/presentation/pages/moble_profile_screen.dart';
 import '../../../../feature/purchase/presentation/page/mobile_create_purchase_screen.dart';
 import '../../../../feature/purchase/presentation/page/mobile_purchase_screen.dart';
 import '../../../../feature/return/bad_stock/mobile_bad_stock_screen.dart';
@@ -21,6 +29,8 @@ import '../../../../feature/sales/presentation/pages/create_pos_sale/mobile_crea
 import '../../../../feature/sales/presentation/pages/create_pos_sale/mobile_create_sales_pos.dart';
 import '../../../../feature/supplier/presentation/pages/mobile_supplier_list_screen.dart';
 import '../../../../feature/supplier/presentation/pages/mobile_supplier_payment_list_screen.dart';
+import '../../../../feature/transactions/presentation/pages/mobile_transaction_screen.dart';
+import '../../../../feature/users_list/presentation/pages/moblie_users_screen.dart';
 import '../../../configs/configs.dart';
 import 'menu_tile.dart';
 
@@ -144,6 +154,7 @@ class MobileTabSidebar extends StatelessWidget {
 
             return Column(
               children: [
+
                 /// Drawer Header
                 DrawerHeader(
                   margin: EdgeInsets.zero,
@@ -169,7 +180,9 @@ class MobileTabSidebar extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
-                            color: Theme.of(context).primaryColor,
+                            color: Theme
+                                .of(context)
+                                .primaryColor,
                           ),
                         );
                       },
@@ -204,16 +217,20 @@ class MobileTabSidebar extends StatelessWidget {
                           // Multiple items (with expansion)
                           return ExpansionTile(
                             initiallyExpanded: section.items.any(
-                              (item) => currentIndex == item.index,
+                                  (item) => currentIndex == item.index,
                             ),
                             title: Text(
                               section.title,
                               style: TextStyle(
                                 fontWeight: FontWeight.w600,
                                 fontSize: 14,
-                                color: Theme.of(
+                                color: Theme
+                                    .of(
                                   context,
-                                ).textTheme.bodyMedium!.color,
+                                )
+                                    .textTheme
+                                    .bodyMedium!
+                                    .color,
                               ),
                             ),
                             children: section.items.map((item) {
@@ -324,11 +341,74 @@ class MobileTabSidebar extends StatelessWidget {
       case 18: // Sale List
         AppRoutes.push(context, MobilePurchaseReturnScreen());
         break;
-
-
-    // Add more cases for other menu items
+      case 19: // Sale List
+      // AppRoutes.push(context, MobilePurchaseReturnScreen());
+        break;
+      case 20: // Sale List
+      // AppRoutes.push(context, MobilePurchaseReturnScreen());
+        break;
+      case 21: // Sale List
+      // AppRoutes.push(context, MobilePurchaseReturnScreen());
+        break;
+      case 22: // Sale List
+      // AppRoutes.push(context, MobilePurchaseReturnScreen());
+        break;
+      case 23: // Sale List
+      // AppRoutes.push(context, MobilePurchaseReturnScreen());
+        break;
+      case 24: // Sale List
+      // AppRoutes.push(context, MobilePurchaseReturnScreen());
+        break;
+      case 25: // Sale List
+      // AppRoutes.push(context, MobilePurchaseReturnScreen());
+        break;
+      case 26: // Sale List
+      // AppRoutes.push(context, MobilePurchaseReturnScreen());
+        break;
+      case 27: // Sale List
+      // AppRoutes.push(context, MobilePurchaseReturnScreen());
+        break;
+      case 28: // Sale List
+      // AppRoutes.push(context, MobilePurchaseReturnScreen());
+        break;
+      case 29: // Sale List
+      // AppRoutes.push(context, MobilePurchaseReturnScreen());
+        break;
+      case 30: // Sale List
+      // AppRoutes.push(context, MobilePurchaseReturnScreen());
+        break;
+      case 31: // Sale List
+        AppRoutes.push(context, MoblieUsersScreen());
+        break;
+      case 32: // Sale List
+        AppRoutes.push(context, MobileSourceScreen());
+        break;
+      case 33: // Sale List
+        AppRoutes.push(context, MobileUnitScreen());
+        break;
+      case 34: // Sale List
+        AppRoutes.push(context, MobileBrandScreen());
+        break;
+      case 35: // Sale List
+        AppRoutes.push(context, MobileCategoriesScreen());
+        break;
+      case 36: // Sale List
+        AppRoutes.push(context, MobileGroupsScreen());
+        break;
+      case 37: // Sale List
+        AppRoutes.push(context, MobileProfileScreen());
+        break;
+      case 38: // Sale List
+        AppRoutes.push(context, MobileAccountTransferForm());
+        break;
+      case 39: // Sale List
+        AppRoutes.push(context, MobileAccountTransferScreen());
+        break;
+      case 40 :// Sale List
+        AppRoutes.push(context, MobileTransactionScreen());
+        break;
       default:
-        // Fallback: do nothing or show a snack bar
+      // Fallback: do nothing or show a snack bar
         break;
     }
   }
@@ -352,7 +432,7 @@ class MobileTabSidebar extends StatelessWidget {
                 Navigator.pushAndRemoveUntil(
                   context,
                   MaterialPageRoute(builder: (context) => LogInScreen()),
-                  (route) => false,
+                      (route) => false,
                 );
               },
               child: const Text("Logout", style: TextStyle(color: Colors.red)),
