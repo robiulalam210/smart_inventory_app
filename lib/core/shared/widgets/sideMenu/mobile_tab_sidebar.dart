@@ -1,3 +1,6 @@
+import 'package:meherinMart/feature/expense/expense_head/presentation/pages/mobile_expense_head_screen.dart';
+import 'package:meherinMart/feature/expense/expense_sub_head/presentation/pages/mobile_expense_sub_head_screen.dart';
+import 'package:meherinMart/feature/expense/presentation/pages/mobile_expense_list_screen.dart';
 import 'package:meherinMart/feature/mobile_root_screen.dart';
 import 'package:meherinMart/feature/sales/presentation/pages/mobile_pos_sale_screen.dart';
 
@@ -11,8 +14,13 @@ import '../../../../feature/money_receipt/presentation/page/mobile_money_receipt
 import '../../../../feature/products/product/presentation/pages/mobile_product_screen.dart';
 import '../../../../feature/purchase/presentation/page/mobile_create_purchase_screen.dart';
 import '../../../../feature/purchase/presentation/page/mobile_purchase_screen.dart';
+import '../../../../feature/return/bad_stock/mobile_bad_stock_screen.dart';
+import '../../../../feature/return/purchase_return/presentation/purchase_return/mobile_purchase_return_screen.dart';
+import '../../../../feature/return/sales_return/presentation/page/mobile_sales_return_page.dart';
 import '../../../../feature/sales/presentation/pages/create_pos_sale/mobile_create_pos_sale.dart';
 import '../../../../feature/sales/presentation/pages/create_pos_sale/mobile_create_sales_pos.dart';
+import '../../../../feature/supplier/presentation/pages/mobile_supplier_list_screen.dart';
+import '../../../../feature/supplier/presentation/pages/mobile_supplier_payment_list_screen.dart';
 import '../../../configs/configs.dart';
 import 'menu_tile.dart';
 
@@ -292,13 +300,33 @@ class MobileTabSidebar extends StatelessWidget {
         AppRoutes.push(context, MobileCustomerScreen());
         break;
       case 11: // Sale List
-        AppRoutes.push(context, MobileCustomerScreen());
+        AppRoutes.push(context, MobileSupplierListScreen());
         break;
       case 12: // Sale List
-        AppRoutes.push(context, MobileCustomerScreen());
+        AppRoutes.push(context, MobileSupplierPaymentListScreen());
+        break;
+      case 13: // Sale List
+        AppRoutes.push(context, MobileExpenseListScreen());
+        break;
+      case 14: // Sale List
+        AppRoutes.push(context, MobileExpenseHeadScreen());
+        break;
+      case 15: // Sale List
+        AppRoutes.push(context, MobileExpenseSubHeadScreen());
         break;
 
-      // Add more cases for other menu items
+      case 16: // Sale List
+        AppRoutes.push(context, MobileSalesReturnPage());
+        break;
+      case 17: // Sale List
+        AppRoutes.push(context, MobileBadStockScreen());
+        break;
+      case 18: // Sale List
+        AppRoutes.push(context, MobilePurchaseReturnScreen());
+        break;
+
+
+    // Add more cases for other menu items
       default:
         // Fallback: do nothing or show a snack bar
         break;
