@@ -132,59 +132,43 @@ class _MoneyReceiptScreenState extends State<MobileMoneyReceiptList> {
   @override
   Widget build(BuildContext context) {
 
-    return Container(
-      color: AppColors.bg,
-      child: Scaffold(
-        appBar: AppBar(),
-        body: SafeArea(
-          child: ResponsiveRow(
-            spacing: 0,
-            runSpacing: 0,
-            children: [
-              _buildContentArea(),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+    return Scaffold(
+      appBar: AppBar(title: Text("Money receipt"),),
+      body: SafeArea(
+        child: RefreshIndicator(
+          color: AppColors.primaryColor,
+          onRefresh: () async {
+            _fetchApi();
+          },
+          child: Container(
+            padding: AppTextStyle.getResponsivePaddingBody(context),
+            child: BlocConsumer<MoneyReceiptBloc, MoneyReceiptState>(
+              listener: (context, state) {
+                _handleBlocState(state);
+              },
+              builder: (context, state) {
+                return SingleChildScrollView(
+                  child: Column(
+                    children: [
 
-
-  Widget _buildContentArea() {
-    return ResponsiveCol(
-      xs: 12,
-      sm: 12,
-      md: 12,
-      lg: 10,
-      xl: 10,
-      child: RefreshIndicator(
-        color: AppColors.primaryColor,
-        onRefresh: () async {
-          _fetchApi();
-        },
-        child: Container(
-          padding: AppTextStyle.getResponsivePaddingBody(context),
-          child: BlocConsumer<MoneyReceiptBloc, MoneyReceiptState>(
-            listener: (context, state) {
-              _handleBlocState(state);
-            },
-            builder: (context, state) {
-              return Column(
-                children: [
-
-                    _buildMobileHeader(),
-                  const SizedBox(height: 16),
-                  SizedBox(
-                    child: _buildMoneyReceiptList(state),
+                      _buildMobileHeader(),
+                      const SizedBox(height: 8),
+                      SizedBox(
+                        child: _buildMoneyReceiptList(state),
+                      ),
+                    ],
                   ),
-                ],
-              );
-            },
+                );
+              },
+            ),
           ),
         ),
       ),
     );
   }
+
+
+
 
   void _handleBlocState(MoneyReceiptState state) {
     if (state is MoneyReceiptAddLoading) {

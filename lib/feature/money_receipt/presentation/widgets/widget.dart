@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-import 'package:iconsax/iconsax.dart';
 import 'package:printing/printing.dart';
 
 import '../../../../core/configs/configs.dart';
@@ -105,7 +103,7 @@ class MoneyReceiptDataTableWidget extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 12),
-                    Expanded(
+                    SizedBox(
                       child: Text(
                         receipt.mrNo ?? '-',
                         style: const TextStyle(
@@ -147,36 +145,43 @@ class MoneyReceiptDataTableWidget extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Row(children: [
+                  Expanded(child: _buildDetailRow(
+                    icon: Iconsax.user,
+                    label: 'Customer',
+                    value: receipt.customerName ?? '-',
+                  ),),
+                  SizedBox(width: 8,),
+                  Expanded(child:  _buildDetailRow(
+                    icon: Iconsax.profile_2user,
+                    label: 'Seller',
+                    value: receipt.sellerName ?? '-',
+                  ),),
+
+                ],),
                 // Customer
-                _buildDetailRow(
-                  icon: Iconsax.user,
-                  label: 'Customer',
-                  value: receipt.customerName ?? '-',
-                ),
-                const SizedBox(height: 8),
+
 
                 // Seller
-                _buildDetailRow(
-                  icon: Iconsax.profile_2user,
-                  label: 'Seller',
-                  value: receipt.sellerName ?? '-',
-                ),
-                const SizedBox(height: 8),
 
+                const SizedBox(height: 8),
+                Row(children: [
+                  Expanded(child:  _buildDetailRow(
+                    icon: Iconsax.calendar,
+                    label: 'Payment Date',
+                    value: _formatDate(receipt.paymentDate),
+                  ),),
+                  SizedBox(width: 8,),
+                  Expanded(child:  _buildDetailRow(
+                    icon: Iconsax.wallet,
+                    label: 'Payment Method',
+                    value: receipt.paymentMethod ?? '-',
+                  ),),
+
+                ],),
                 // Payment Date
-                _buildDetailRow(
-                  icon: Iconsax.calendar,
-                  label: 'Payment Date',
-                  value: _formatDate(receipt.paymentDate),
-                ),
-                const SizedBox(height: 8),
 
-                // Payment Method
-                _buildDetailRow(
-                  icon: Iconsax.wallet,
-                  label: 'Payment Method',
-                  value: receipt.paymentMethod ?? '-',
-                ),
+
                 const SizedBox(height: 8),
 
                 // Phone
@@ -223,7 +228,7 @@ class MoneyReceiptDataTableWidget extends StatelessWidget {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: 3),
 
                       // Total Before
                       Row(
@@ -255,7 +260,7 @@ class MoneyReceiptDataTableWidget extends StatelessWidget {
 
           // Action Buttons
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
             decoration: BoxDecoration(
               color: Colors.grey.shade50,
               borderRadius: const BorderRadius.only(

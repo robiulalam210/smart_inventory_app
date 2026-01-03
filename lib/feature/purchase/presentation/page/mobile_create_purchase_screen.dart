@@ -1,13 +1,13 @@
 import 'package:flutter/cupertino.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:meherinMart/core/widgets/app_scaffold.dart';
 import '/feature/accounts/data/model/account_active_model.dart';
 import '/feature/products/product/presentation/bloc/products/products_bloc.dart';
 import '/feature/supplier/data/model/supplier_active_model.dart';
 import '/feature/supplier/presentation/bloc/supplier_invoice/supplier_invoice_bloc.dart';
 
 import '../../../../../core/configs/configs.dart';
-import '../../../../../core/shared/widgets/sideMenu/sidebar.dart';
 import '../../../../../core/widgets/app_alert_dialog.dart';
 import '../../../../../core/widgets/app_button.dart';
 import '../../../../../core/widgets/app_dropdown.dart';
@@ -15,7 +15,6 @@ import '../../../../../core/widgets/app_loader.dart';
 import '../../../../../core/widgets/input_field.dart';
 import '../../../../core/widgets/show_custom_toast.dart';
 import '../../../accounts/presentation/bloc/account/account_bloc.dart';
-import '../../../lab_dashboard/presentation/bloc/dashboard/dashboard_bloc.dart';
 import '../../../products/categories/data/model/categories_model.dart';
 import '../../../products/categories/presentation/bloc/categories/categories_bloc.dart';
 import '../../../products/product/data/model/product_stock_model.dart';
@@ -351,187 +350,14 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
   @override
   Widget build(BuildContext context) {
 
-    return Container(
-      color: AppColors.bg,
-      child: SafeArea(
-        child: Scaffold(
-        appBar: AppBar(),
-          body: _buildContentArea(),
-        ),
+    return SafeArea(
+      child: AppScaffold(
+      appBar: AppBar(title: Text("Purchase",style: AppTextStyle.titleMedium(context),),),
+        body: _buildMobileLayout(),
       ),
     );
   }
 
-  Widget _buildSidebar() {
-    return ResponsiveCol(
-      xs: 0,
-      sm: 1,
-      md: 1,
-      lg: 2,
-      xl: 2,
-      child: Container(
-        decoration: const BoxDecoration(color: Colors.white),
-        child: const Sidebar(),
-      ),
-    );
-  }
-
-  Widget _buildContentArea() {
-    // If mobile, show mobile stepper layout instead of desktop SingleChildScrollView
-
-
-    return ResponsiveCol(
-      xs: 12,
-      sm: 12,
-      md: 12,
-      lg: 10,
-      xl: 10,
-      child: RefreshIndicator(
-        color: AppColors.primaryColor,
-        onRefresh: () async {
-          // Implement refresh logic here
-        },
-        child: BlocConsumer<CreatePurchaseBloc, CreatePurchaseState>(
-          listener: (context, state) {
-            if (state is CreatePurchaseLoading) {
-              appLoader(context, "Creating Purchase, please wait...");
-            } else if (state is CreatePurchaseSuccess) {
-              Navigator.pop(context);
-              context.read<DashboardBloc>().add(
-                ChangeDashboardScreen(index: 6),
-              );
-            } else if (state is CreatePurchaseFailed) {
-              Navigator.pop(context);
-              appAlertDialog(
-                context,
-                state.content,
-                title: state.title,
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text("Dismiss"),
-                  ),
-                ],
-              );
-            }
-          },
-          builder: (context, state) {
-            return SingleChildScrollView(
-              child: Form(
-                key: formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 10),
-                    ResponsiveRow(
-                      spacing: 20,
-                      runSpacing: 10,
-                      children: [
-                        ResponsiveCol(
-                          xs: 12,
-                          sm: 3,
-                          md: 3,
-                          lg: 3,
-                          xl: 3,
-                          child:
-                          BlocBuilder<
-                              SupplierInvoiceBloc,
-                              SupplierInvoiceState
-                          >(
-                            builder: (context, state) {
-                              return AppDropdown<SupplierActiveModel>(
-                                label: "Supplier",
-                                context: context,
-                                hint: "Select Supplier",
-                                isLabel: false,
-                                isRequired: true,
-                                isNeedAll: false,
-                                value: context
-                                    .read<CreatePurchaseBloc>()
-                                    .supplierListModel,
-                                itemList: context
-                                    .read<SupplierInvoiceBloc>()
-                                    .supplierActiveList,
-                                onChanged: (newVal) {
-                                  context
-                                      .read<CreatePurchaseBloc>()
-                                      .supplierListModel =
-                                      newVal;
-                                },
-                                validator: (value) {
-                                  return value == null
-                                      ? 'Please select Supplier'
-                                      : null;
-                                },
-                                itemBuilder: (item) => DropdownMenuItem(
-                                  value: item,
-                                  child: Text(
-                                    item.toString(),
-                                    style: const TextStyle(
-                                      color: AppColors.blackColor,
-                                      fontFamily: 'Quicksand',
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                        ResponsiveCol(
-                          xs: 12,
-                          sm: 3,
-                          md: 3,
-                          lg: 3,
-                          xl: 3,
-                          child: CustomInputField(
-                            radius: 10,
-                            isRequired: true,
-                            readOnly: true,
-                            controller: context
-                                .read<CreatePurchaseBloc>()
-                                .dateEditingController,
-                            hintText: 'Purchase Date',
-                            keyboardType: TextInputType.datetime,
-                            bottom: 15.0,
-                            fillColor: AppColors.whiteColor,
-                            validator: (value) {
-                              return value!.isEmpty
-                                  ? 'Please enter date'
-                                  : null;
-                            },
-                            onTap: _selectDate,
-                          ),
-                        ),
-                        // Add VAT field placeholder for desktop (already present)
-                        ResponsiveCol(
-                          xs: 12,
-                          sm: 3,
-                          md: 3,
-                          lg: 3,
-                          xl: 3,
-                          child: Container(), // kept for alignment
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                    _buildProductRows(),
-                    const SizedBox(height: 10),
-                    _buildChargesSection(),
-                    const SizedBox(height: 10),
-                    _buildSummarySection(),
-
-                    const SizedBox(height: 20),
-                    _buildActionButtons(),
-                  ],
-                ),
-              ),
-            );
-          },
-        ),
-      ),
-    );
-  }
 
   // -----------------------
   // Mobile layout & stepper
@@ -550,9 +376,7 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
             appLoader(context, "Creating Purchase, please wait...");
           } else if (state is CreatePurchaseSuccess) {
             Navigator.pop(context);
-            context.read<DashboardBloc>().add(
-              ChangeDashboardScreen(index: 6),
-            );
+
           } else if (state is CreatePurchaseFailed) {
             Navigator.pop(context);
             appAlertDialog(
@@ -1987,25 +1811,8 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
         totalCharges += vat;
       }
 
-      double grandTotal = netAfterDiscount + totalCharges;
 
-      // Debug logging
-      print("=== PURCHASE CALCULATION DEBUG ===");
-      print("Subtotal: $subtotal");
-      print(
-        "Overall Discount: $overallDiscount (${selectedOverallDiscountType})",
-      );
-      print("Net after discount: $netAfterDiscount");
-      print(
-        "Service Charge: $serviceCharge (${selectedOverallServiceChargeType})",
-      );
-      print(
-        "Delivery Charge: $deliveryCharge (${selectedOverallDeliveryType})",
-      );
-      print("VAT: $vat (${selectedVatType})");
-      print("Total Charges: $totalCharges");
-      print("Grand Total: $grandTotal");
-      print("================================");
+
 
       Map<String, dynamic> body = {
         "instant_pay": _isChecked,

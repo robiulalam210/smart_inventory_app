@@ -6,6 +6,7 @@ import '../../../../feature/lab_dashboard/presentation/bloc/dashboard/dashboard_
 import '../../../../feature/money_receipt/presentation/page/mobile_monery_receipt_create.dart';
 import '../../../../feature/money_receipt/presentation/page/mobile_money_receipt_list.dart';
 import '../../../../feature/purchase/presentation/page/mobile_create_purchase_screen.dart';
+import '../../../../feature/purchase/presentation/page/mobile_purchase_screen.dart';
 import '../../../../feature/sales/presentation/pages/create_pos_sale/mobile_create_pos_sale.dart';
 import '../../../../feature/sales/presentation/pages/create_pos_sale/mobile_create_sales_pos.dart';
 import '../../../configs/configs.dart';
@@ -15,12 +16,10 @@ class MobileTabSidebar extends StatelessWidget {
   const MobileTabSidebar({super.key});
 
   // Same menu structure as Sidebar for consistency
-  final List<MenuSection> menuSections =const [
+  final List<MenuSection> menuSections = const [
     MenuSection(
       title: "My Dashboard",
-      items: [
-        MenuItem(title: "My Dashboard", index: 0),
-      ],
+      items: [MenuItem(title: "My Dashboard", index: 0)],
     ),
     MenuSection(
       title: "Sales",
@@ -46,21 +45,15 @@ class MobileTabSidebar extends StatelessWidget {
     ),
     MenuSection(
       title: "Products",
-      items: [
-        MenuItem(title: "Product", index: 8),
-      ],
+      items: [MenuItem(title: "Product", index: 8)],
     ),
     MenuSection(
       title: "Accounts",
-      items: [
-        MenuItem(title: "Accounts", index: 9),
-      ],
+      items: [MenuItem(title: "Accounts", index: 9)],
     ),
     MenuSection(
       title: "Customers",
-      items: [
-        MenuItem(title: "Customer", index: 10),
-      ],
+      items: [MenuItem(title: "Customer", index: 10)],
     ),
     MenuSection(
       title: "Supplier",
@@ -120,7 +113,6 @@ class MobileTabSidebar extends StatelessWidget {
         MenuItem(title: "Account Transfer From", index: 38),
         MenuItem(title: "Account Transfer List", index: 39),
         MenuItem(title: "Translation", index: 40),
-
       ],
     ),
   ];
@@ -193,23 +185,23 @@ class MobileTabSidebar extends StatelessWidget {
                             title: section.title,
                             isSelected: currentIndex == item.index,
                             onPressed: () {
-                              _handleMenuSelection( item.index, context);
+                              _handleMenuSelection(item.index, context);
                             },
                           );
                         } else {
                           // Multiple items (with expansion)
                           return ExpansionTile(
-                            initiallyExpanded: section.items
-                                .any((item) => currentIndex == item.index),
+                            initiallyExpanded: section.items.any(
+                              (item) => currentIndex == item.index,
+                            ),
                             title: Text(
                               section.title,
                               style: TextStyle(
                                 fontWeight: FontWeight.w600,
                                 fontSize: 14,
-                                color: Theme.of(context)
-                                    .textTheme
-                                    .bodyMedium!
-                                    .color,
+                                color: Theme.of(
+                                  context,
+                                ).textTheme.bodyMedium!.color,
                               ),
                             ),
                             children: section.items.map((item) {
@@ -218,7 +210,7 @@ class MobileTabSidebar extends StatelessWidget {
                                 title: item.title,
                                 isSelected: currentIndex == item.index,
                                 onPressed: () {
-                                  _handleMenuSelection( item.index, context);
+                                  _handleMenuSelection(item.index, context);
                                 },
                               );
                             }).toList(),
@@ -262,33 +254,34 @@ class MobileTabSidebar extends StatelessWidget {
   void _handleMenuSelection(int index, BuildContext context) {
     switch (index) {
       case 0: // POS Sale
-      AppRoutes.pop(context);
+        AppRoutes.pop(context);
         break;
       case 1: // Sale
         AppRoutes.push(context, MobileCreatePosSale());
         break;
-        case 2: // Sale
+      case 2: // Sale
         AppRoutes.push(context, MobileSalesScreen());
         break;
       case 3: // Sale List
         AppRoutes.push(context, MobilePosSaleScreen());
         break;
 
-        case 4: // Sale List
+      case 4: // Sale List
         AppRoutes.push(context, MobileMoneyReceiptForm());
         break;
       case 5: // Sale List
         AppRoutes.push(context, MobileMoneyReceiptList());
-        break;     case 6: // Sale List
+        break;
+      case 6: // Sale List
         AppRoutes.push(context, MobileCreatePurchaseScreen());
         break;
       case 7: // Sale List
-        AppRoutes.push(context, MobileCreatePurchaseScreen());
+        AppRoutes.push(context, MobilePurchaseScreen());
         break;
 
-    // Add more cases for other menu items
+      // Add more cases for other menu items
       default:
-      // Fallback: do nothing or show a snack bar
+        // Fallback: do nothing or show a snack bar
         break;
     }
   }
@@ -312,13 +305,10 @@ class MobileTabSidebar extends StatelessWidget {
                 Navigator.pushAndRemoveUntil(
                   context,
                   MaterialPageRoute(builder: (context) => LogInScreen()),
-                      (route) => false,
+                  (route) => false,
                 );
               },
-              child: const Text(
-                "Logout",
-                style: TextStyle(color: Colors.red),
-              ),
+              child: const Text("Logout", style: TextStyle(color: Colors.red)),
             ),
           ],
         );

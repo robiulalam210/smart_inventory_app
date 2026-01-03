@@ -9,6 +9,7 @@ import '../../../sales/presentation/bloc/possale/possale_bloc.dart';
 import '../../../users_list/presentation/bloc/users/user_bloc.dart';
 import '../bloc/money_receipt/money_receipt_bloc.dart';
 import '../bloc/money_receipt/money_receipt_state.dart';
+import 'mobile_money_receipt_list.dart';
 
 class MobileMoneyReceiptForm extends StatefulWidget {
   const MobileMoneyReceiptForm({super.key});
@@ -98,7 +99,7 @@ class _MoneyReceiptListScreenState extends State<MobileMoneyReceiptForm> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(),
+        appBar: AppBar(title: Text("Money receipt",style: AppTextStyle.titleMedium(context),),),
         body: SafeArea(child: _buildMobileLayout()));
   }
 
@@ -125,7 +126,8 @@ class _MoneyReceiptListScreenState extends State<MobileMoneyReceiptForm> {
             context.read<MoneyReceiptBloc>().selectUserModel?.id.toString() ?? '',
             paymentMethod: selectedPaymentMethodNotifier.value?.toString() ?? '',
           );
-          context.read<DashboardBloc>().add(ChangeDashboardScreen(index: 4));
+          AppRoutes.pushReplacement(context, MobileMoneyReceiptList());
+          // context.read<DashboardBloc>().add(ChangeDashboardScreen(index: 4));
         } else if (state is MoneyReceiptAddFailed) {
           Navigator.pop(context);
           appAlertDialog(
