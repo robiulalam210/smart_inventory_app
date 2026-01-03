@@ -73,9 +73,9 @@ class ProductDataTableWidget extends StatelessWidget {
         children: [
           // Header with SL and Status
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 7),
             decoration: BoxDecoration(
-              color: AppColors.primaryColor.withOpacity(0.05),
+              color: AppColors.primaryColor.withValues(alpha: 0.05),
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(16),
                 topRight: Radius.circular(16),
@@ -86,7 +86,7 @@ class ProductDataTableWidget extends StatelessWidget {
               children: [
                 Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
+                    horizontal: 5,
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
@@ -106,8 +106,8 @@ class ProductDataTableWidget extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
                     color: (product.isActive ?? false)
-                        ? Colors.green.withOpacity(0.1)
-                        : Colors.red.withOpacity(0.1),
+                        ? Colors.green.withValues(alpha: 0.1)
+                        : Colors.red.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: (product.isActive ?? false) ? Colors.green : Colors.red,
@@ -129,7 +129,7 @@ class ProductDataTableWidget extends StatelessWidget {
 
           // Product Details
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(8),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -141,37 +141,43 @@ class ProductDataTableWidget extends StatelessWidget {
                   isImportant: true,
                 ),
                 const SizedBox(height: 8),
+                Row(children: [
+                  Expanded(child:  _buildDetailRow(
+                    icon: Iconsax.tag,
+                    label: 'SKU',
+                    value: product.sku ?? 'N/A',
+                  ),),
+                  SizedBox(width: 8,),
+                  Expanded(child:   _buildDetailRow(
+                    icon: Iconsax.category,
+                    label: 'Category',
+                    value: product.categoryInfo?.name ?? 'N/A',
+                  ),),
+                ],),
+
 
                 // SKU
-                _buildDetailRow(
-                  icon: Iconsax.tag,
-                  label: 'SKU',
-                  value: product.sku ?? 'N/A',
-                ),
-                const SizedBox(height: 8),
 
+                const SizedBox(height: 8),
+                Row(children: [
+                  Expanded(child:  _buildDetailRow(
+                    icon: Iconsax.building,
+                    label: 'Brand',
+                    value: product.brandInfo?.name ?? 'N/A',
+                  ),),
+                  SizedBox(width: 8,),
+                  Expanded(child: _buildDetailRow(
+                    icon: Iconsax.ruler,
+                    label: 'Unit',
+                    value: product.unitInfo?.name ?? 'N/A',
+                  ),),
+                ],),
                 // Category
-                _buildDetailRow(
-                  icon: Iconsax.category,
-                  label: 'Category',
-                  value: product.categoryInfo?.name ?? 'N/A',
-                ),
-                const SizedBox(height: 8),
 
-                // Brand
-                _buildDetailRow(
-                  icon: Iconsax.building,
-                  label: 'Brand',
-                  value: product.brandInfo?.name ?? 'N/A',
-                ),
-                const SizedBox(height: 8),
+
 
                 // Unit
-                _buildDetailRow(
-                  icon: Iconsax.ruler,
-                  label: 'Unit',
-                  value: product.unitInfo?.name ?? 'N/A',
-                ),
+
               ],
             ),
           ),

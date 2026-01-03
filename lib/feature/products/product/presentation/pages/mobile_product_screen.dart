@@ -1,7 +1,3 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:lottie/lottie.dart';
-import 'package:iconsax/iconsax.dart';
 
 import '../../../../../core/configs/configs.dart';
 import '../../../../../core/shared/widgets/sideMenu/sidebar.dart';
@@ -18,14 +14,14 @@ import '../widget/pagination.dart';
 import '../widget/widget.dart';
 import 'product_create.dart';
 
-class ProductsScreen extends StatefulWidget {
-  const ProductsScreen({super.key});
+class MobileProductScreen extends StatefulWidget {
+  const MobileProductScreen({super.key});
 
   @override
-  State<ProductsScreen> createState() => _ProductsScreenState();
+  State<MobileProductScreen> createState() => _ProductsScreenState();
 }
 
-class _ProductsScreenState extends State<ProductsScreen> {
+class _ProductsScreenState extends State<MobileProductScreen> {
   final TextEditingController _searchController = TextEditingController();
 
   @override
@@ -71,38 +67,18 @@ class _ProductsScreenState extends State<ProductsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isBigScreen =
-        Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
-    return Container(
-      color: AppColors.bg,
-      child: SafeArea(
-        child: ResponsiveRow(
-          spacing: 0,
-          runSpacing: 0,
-          children: [
-            if (isBigScreen) _buildSidebar(),
-            _buildContentArea(isBigScreen),
-          ],
-        ),
+
+    return Scaffold(
+      appBar: AppBar(title: Text("Product",style: AppTextStyle.titleMedium(context),),),
+floatingActionButton: FloatingActionButton( onPressed: () => _showCreateProductDialog(context),child: Icon(Icons.add),),
+      body: SafeArea(
+        child:  _buildContentArea(),
       ),
     );
   }
 
-  Widget _buildSidebar() {
-    return ResponsiveCol(
-      xs: 0,
-      sm: 1,
-      md: 1,
-      lg: 2,
-      xl: 2,
-      child: Container(
-        decoration: const BoxDecoration(color: Colors.white),
-        child: const Sidebar(),
-      ),
-    );
-  }
 
-  Widget _buildContentArea(bool isBigScreen) {
+  Widget _buildContentArea() {
     return ResponsiveCol(
       xs: 12,
       sm: 12,
@@ -121,17 +97,17 @@ class _ProductsScreenState extends State<ProductsScreen> {
               _handleBlocState(state);
             },
             builder: (context, state) {
-              return Column(
-                children: [
-                  if (isBigScreen)
-                    _buildDesktopHeader()
-                  else
-                    _buildMobileHeader(),
-                  const SizedBox(height: 16),
-                  SizedBox(
-                    child: _buildProductList(state),
-                  ),
-                ],
+              return SingleChildScrollView(
+                child: Column(
+                  children: [
+
+                      _buildMobileHeader(),
+                    const SizedBox(height: 8),
+                    SizedBox(
+                      child: _buildProductList(state),
+                    ),
+                  ],
+                ),
               );
             },
           ),
@@ -247,14 +223,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
             ],
           ),
         ),
-        const SizedBox(height: 12),
-
-        // Create Button
-        AppButton(
-          name: "Create Product",
-          onPressed: () => _showCreateProductDialog(context),
-          padding: const EdgeInsets.symmetric(vertical: 12),
-        ),
+    
       ],
     );
   }
@@ -286,7 +255,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
                 },
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 8),
             PaginationBar(
               count: state.count,
               totalPages: state.totalPages,
