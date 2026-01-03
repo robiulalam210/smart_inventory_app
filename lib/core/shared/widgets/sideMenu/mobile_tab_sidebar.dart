@@ -1,10 +1,14 @@
 import 'package:meherinMart/feature/mobile_root_screen.dart';
 import 'package:meherinMart/feature/sales/presentation/pages/mobile_pos_sale_screen.dart';
 
+import '../../../../feature/accounts/presentation/pages/account_screen.dart';
+import '../../../../feature/accounts/presentation/pages/mobile_account_screen.dart';
 import '../../../../feature/auth/presentation/pages/login_scr.dart';
+import '../../../../feature/customer/presentation/pages/mobile_customer_screen.dart';
 import '../../../../feature/lab_dashboard/presentation/bloc/dashboard/dashboard_bloc.dart';
 import '../../../../feature/money_receipt/presentation/page/mobile_monery_receipt_create.dart';
 import '../../../../feature/money_receipt/presentation/page/mobile_money_receipt_list.dart';
+import '../../../../feature/products/product/presentation/pages/mobile_product_screen.dart';
 import '../../../../feature/purchase/presentation/page/mobile_create_purchase_screen.dart';
 import '../../../../feature/purchase/presentation/page/mobile_purchase_screen.dart';
 import '../../../../feature/sales/presentation/pages/create_pos_sale/mobile_create_pos_sale.dart';
@@ -277,6 +281,21 @@ class MobileTabSidebar extends StatelessWidget {
         break;
       case 7: // Sale List
         AppRoutes.push(context, MobilePurchaseScreen());
+        break;
+      case 8: // Sale List
+        AppRoutes.push(context, MobileProductScreen());
+        break;
+      case 9: // Sale List
+        AppRoutes.push(context, MobileAccountScreen());
+        break;
+      case 10: // Sale List
+        AppRoutes.push(context, MobileCustomerScreen());
+        break;
+      case 11: // Sale List
+        AppRoutes.push(context, MobileCustomerScreen());
+        break;
+      case 12: // Sale List
+        AppRoutes.push(context, MobileCustomerScreen());
         break;
 
       // Add more cases for other menu items

@@ -12,14 +12,14 @@ import '../bloc/customer/customer_bloc.dart';
 import '../widget/widget.dart';
 import 'create_customer_screen.dart';
 
-class CustomerScreen extends StatefulWidget {
-  const CustomerScreen({super.key});
+class MobileCustomerScreen extends StatefulWidget {
+  const MobileCustomerScreen({super.key});
 
   @override
-  State<CustomerScreen> createState() => _CustomerScreenState();
+  State<MobileCustomerScreen> createState() => _CustomerScreenState();
 }
 
-class _CustomerScreenState extends State<CustomerScreen> {
+class _CustomerScreenState extends State<MobileCustomerScreen> {
   final TextEditingController filterTextController = TextEditingController();
   final ValueNotifier<String?> selectedStatusNotifier = ValueNotifier(null);
   final ScrollController _scrollController = ScrollController();
@@ -71,38 +71,18 @@ class _CustomerScreenState extends State<CustomerScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isBigScreen =
-        Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
-    return Container(
-      color: AppColors.bg,
-      child: SafeArea(
-        child: ResponsiveRow(
-          spacing: 0,
-          runSpacing: 0,
-          children: [
-            if (isBigScreen) _buildSidebar(),
-            _buildContentArea(isBigScreen),
-          ],
-        ),
+
+    return Scaffold(
+      floatingActionButton: FloatingActionButton(  onPressed: () => _showCreateCustomerDialog(context),child: Icon(Icons.add),),
+      appBar: AppBar(title: Text("Customer",style: AppTextStyle.titleMedium(context),),),
+      body: SafeArea(
+        child:   _buildContentArea(),
       ),
     );
   }
 
-  Widget _buildSidebar() {
-    return ResponsiveCol(
-      xs: 0,
-      sm: 1,
-      md: 1,
-      lg: 2,
-      xl: 2,
-      child: Container(
-        decoration: const BoxDecoration(color: Colors.white),
-        child: const Sidebar(),
-      ),
-    );
-  }
 
-  Widget _buildContentArea(bool isBigScreen) {
+  Widget _buildContentArea() {
     return ResponsiveCol(
       xs: 12,
       sm: 12,
@@ -123,11 +103,9 @@ class _CustomerScreenState extends State<CustomerScreen> {
             builder: (context, state) {
               return Column(
                 children: [
-                  if (isBigScreen)
-                    _buildDesktopHeader()
-                  else
+
                     _buildMobileHeader(),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 8),
                   SizedBox(
                     child: _buildCustomerList(state),
                   ),
@@ -198,77 +176,6 @@ class _CustomerScreenState extends State<CustomerScreen> {
     }
   }
 
-  Widget _buildDesktopHeader() {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        // 🔍 Search Field
-        Expanded(
-          child: CustomSearchTextFormField(
-            controller: filterTextController,
-            onChanged: (value) => _fetchApi(filterText: value),
-            onClear: () {
-              filterTextController.clear();
-              selectedStatusNotifier.value = null;
-              _fetchApi();
-            },
-            isRequiredLabel: false,
-            hintText: "Customer Name, Phone, or Email",
-          ),
-        ),
-        const SizedBox(width: 10),
-
-        // 📊 Status Dropdown
-        Expanded(
-          child: ValueListenableBuilder<String?>(
-            valueListenable: selectedStatusNotifier,
-            builder: (context, value, child) {
-              return AppDropdown<String>(
-                context: context,
-                isLabel: false,
-                hint: "Select Status",
-                label: "",
-                isNeedAll: true,
-                isRequired: false,
-                value: value,
-                itemList: ['Active', 'Inactive'],
-                onChanged: (newVal) {
-                  selectedStatusNotifier.value = newVal;
-                  _fetchApi(status: newVal?.toLowerCase() ?? '');
-                },
-                validator: (value) => null,
-                itemBuilder: (item) => DropdownMenuItem<String>(
-                  value: item,
-                  child: Text(
-                    item,
-                    style: const TextStyle(
-                      color: AppColors.blackColor,
-                      fontFamily: 'Quicksand',
-                      fontWeight: FontWeight.w300,
-                    ),
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-        gapW16,
-        AppButton(
-          name: "Create Customer",
-          onPressed: () => _showCreateCustomerDialog(context),
-        ),
-        gapW16,
-
-        // 🔄 Refresh Button
-        IconButton(
-          onPressed: () => _fetchApi(),
-          icon: const Icon(Icons.refresh),
-          tooltip: "Refresh",
-        ),
-      ],
-    );
-  }
 
   Widget _buildMobileHeader() {
     return Column(
@@ -342,31 +249,8 @@ class _CustomerScreenState extends State<CustomerScreen> {
             );
           },
         ),
-        const SizedBox(height: 12),
 
-        // Action Buttons
-        Row(
-          children: [
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: () => _showMobileFilterSheet(context),
-                icon: const Icon(Iconsax.filter, size: 16),
-                label: const Text('Filter'),
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: AppButton(
-                name: "Create Customer",
-                onPressed: () => _showCreateCustomerDialog(context),
-                padding: const EdgeInsets.symmetric(vertical: 12),
-              ),
-            ),
-          ],
-        ),
+
       ],
     );
   }

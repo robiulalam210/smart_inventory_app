@@ -14,14 +14,14 @@ import '../bloc/account/account_bloc.dart';
 import '../widget/widget.dart';
 import 'create_account_screen.dart';
 
-class AccountScreen extends StatefulWidget {
-  const AccountScreen({super.key});
+class MobileAccountScreen extends StatefulWidget {
+  const MobileAccountScreen({super.key});
 
   @override
-  State<AccountScreen> createState() => _AccountScreenState();
+  State<MobileAccountScreen> createState() => _AccountScreenState();
 }
 
-class _AccountScreenState extends State<AccountScreen> {
+class _AccountScreenState extends State<MobileAccountScreen> {
   final TextEditingController filterTextController = TextEditingController();
   final ValueNotifier<String?> selectedAccountTypeNotifier = ValueNotifier(null);
 
@@ -71,38 +71,18 @@ class _AccountScreenState extends State<AccountScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isBigScreen =
-        Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
-    return Container(
-      color: AppColors.bg,
-      child: SafeArea(
-        child: ResponsiveRow(
-          spacing: 0,
-          runSpacing: 0,
-          children: [
-            if (isBigScreen) _buildSidebar(),
-            _buildContentArea(isBigScreen),
-          ],
-        ),
+
+    return Scaffold(
+      floatingActionButton: FloatingActionButton(  onPressed: () => _showCreateAccountDialog(context),child: Icon(Icons.add),),
+     appBar: AppBar(title: Text("Account",style: AppTextStyle.titleMedium(context),),),
+      body: SafeArea(
+        child: _buildContentArea(),
       ),
     );
   }
 
-  Widget _buildSidebar() {
-    return ResponsiveCol(
-      xs: 0,
-      sm: 1,
-      md: 1,
-      lg: 2,
-      xl: 2,
-      child: Container(
-        decoration: const BoxDecoration(color: Colors.white),
-        child: const Sidebar(),
-      ),
-    );
-  }
 
-  Widget _buildContentArea(bool isBigScreen) {
+  Widget _buildContentArea() {
     return ResponsiveCol(
       xs: 12,
       sm: 12,
@@ -121,18 +101,16 @@ class _AccountScreenState extends State<AccountScreen> {
               _handleBlocState(state);
             },
             builder: (context, state) {
-              return Column(
+              return SingleChildScrollView(child: Column(
                 children: [
-                  if (isBigScreen)
-                    _buildDesktopHeader()
-                  else
-                    _buildMobileHeader(),
-                  const SizedBox(height: 16),
+
+                  _buildMobileHeader(),
+                  const SizedBox(height: 8),
                   SizedBox(
                     child: _buildAccountList(state),
                   ),
                 ],
-              );
+              ),);
             },
           ),
         ),
@@ -193,79 +171,6 @@ class _AccountScreenState extends State<AccountScreen> {
     }
   }
 
-  Widget _buildDesktopHeader() {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        // 🔍 Search Field
-        Expanded(
-          child: CustomSearchTextFormField(
-            isRequiredLabel: false,
-            controller: filterTextController,
-            onChanged: (value) => _fetchApi(filterText: value),
-            onClear: () {
-              filterTextController.clear();
-              _fetchApi();
-            },
-            hintText: "Search Account Name or Number",
-          ),
-        ),
-        const SizedBox(width: 10),
-
-        // 🏦 Account Type Dropdown
-        Expanded(
-          child: ValueListenableBuilder<String?>(
-            valueListenable: selectedAccountTypeNotifier,
-            builder: (context, value, child) {
-              return AppDropdown<String>(
-                context: context,
-                hint: "Select Account Type",
-                isNeedAll: true,
-                isLabel: false,
-                isRequired: false,
-                value: value,
-                itemList: ['Cash', 'Bank', 'Mobile Banking'],
-                onChanged: (newVal) {
-                  selectedAccountTypeNotifier.value = newVal;
-                  _fetchApi(accountType: newVal?.toLowerCase() ?? '');
-                },
-                validator: (value) => null,
-                itemBuilder: (item) => DropdownMenuItem<String>(
-                  value: item,
-                  child: Text(
-                    item,
-                    style: const TextStyle(
-                      color: AppColors.blackColor,
-                      fontFamily: 'Quicksand',
-                      fontWeight: FontWeight.w300,
-                    ),
-                  ),
-                ),
-                label: '',
-              );
-            },
-          ),
-        ),
-        gapW16,
-
-        // ➕ Create Account Button
-        AppButton(
-          name: "Create Account",
-          onPressed: () => _showCreateAccountDialog(context),
-        ),
-
-        gapW16,
-
-        // 🔄 Refresh Button
-        IconButton(
-          onPressed: () => _fetchApi(),
-          icon: const Icon(Icons.refresh),
-          tooltip: "Refresh",
-        ),
-      ],
-    );
-  }
 
   Widget _buildMobileHeader() {
     return Column(
@@ -338,31 +243,7 @@ class _AccountScreenState extends State<AccountScreen> {
             );
           },
         ),
-        const SizedBox(height: 12),
-
-        // Action Buttons
-        Row(
-          children: [
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: () => _showMobileFilterSheet(context),
-                icon: const Icon(Iconsax.filter, size: 16),
-                label: const Text('Filter'),
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: AppButton(
-                name: "Create Account",
-                onPressed: () => _showCreateAccountDialog(context),
-                padding: const EdgeInsets.symmetric(vertical: 12),
-              ),
-            ),
-          ],
-        ),
+     
       ],
     );
   }
@@ -392,7 +273,7 @@ class _AccountScreenState extends State<AccountScreen> {
                 },
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 8),
             PaginationBar(
               count: state.count,
               totalPages: state.totalPages,
