@@ -13,6 +13,8 @@ import '../../../../feature/purchase/presentation/page/mobile_create_purchase_sc
 import '../../../../feature/purchase/presentation/page/mobile_purchase_screen.dart';
 import '../../../../feature/sales/presentation/pages/create_pos_sale/mobile_create_pos_sale.dart';
 import '../../../../feature/sales/presentation/pages/create_pos_sale/mobile_create_sales_pos.dart';
+import '../../../../feature/supplier/presentation/pages/mobile_supplier_list_screen.dart';
+import '../../../../feature/supplier/presentation/pages/mobile_supplier_payment_list_screen.dart';
 import '../../../configs/configs.dart';
 import 'menu_tile.dart';
 
@@ -292,10 +294,16 @@ class MobileTabSidebar extends StatelessWidget {
         AppRoutes.push(context, MobileCustomerScreen());
         break;
       case 11: // Sale List
-        AppRoutes.push(context, MobileCustomerScreen());
+        AppRoutes.push(context, MobileSupplierListScreen());
         break;
       case 12: // Sale List
-        AppRoutes.push(context, MobileCustomerScreen());
+        AppRoutes.push(context, MobileSupplierPaymentListScreen());
+        break;
+      case 13: // Sale List
+        AppRoutes.push(context, MobileSupplierListScreen());
+        break;
+      case 14: // Sale List
+        AppRoutes.push(context, MobileSupplierPaymentListScreen());
         break;
 
       // Add more cases for other menu items
