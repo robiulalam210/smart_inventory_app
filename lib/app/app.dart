@@ -1,4 +1,5 @@
 import 'package:flutter_localizations/flutter_localizations.dart';
+import '../feature/splash/presentation/pages/mobile_splash_screen.dart';
 import '/feature/account_transfer/presentation/bloc/account_transfer/account_transfer_bloc.dart';
 import '/feature/customer/presentation/bloc/customer/customer_bloc.dart';
 import '/feature/expense/expense_head/presentation/bloc/expense_head/expense_head_bloc.dart';
@@ -122,8 +123,8 @@ class MyApp extends StatelessWidget {
           title: AppConstants.appName,
           debugShowCheckedModeBanner: false,
           theme: AppTheme.light(context),
-          // home: const BarcodeScanScreen(),
-          home: const SplashScreen(),
+          home: Responsive.isMobile(context) ? MobileSplashScreen():SplashScreen(),
+
         ),
       ),
     );

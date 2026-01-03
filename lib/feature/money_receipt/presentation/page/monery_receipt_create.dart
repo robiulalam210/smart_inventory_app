@@ -46,11 +46,14 @@ class _MoneyReceiptListScreenState extends State<MoneyReceiptForm> {
     'Over All',
   );
   ValueNotifier<PosSaleModel?> selectPosSaleModel =
-      ValueNotifier<PosSaleModel?>(null);
+  ValueNotifier<PosSaleModel?>(null);
   ValueNotifier<String?> selectedPaymentMethodNotifier = ValueNotifier<String?>(
     "Cash",
   );
   ValueNotifier<String?> selectedAccountNotifier = ValueNotifier<String?>(null);
+
+  // Stepper state for mobile
+  int currentStep = 0;
 
   @override
   void didChangeDependencies() {
@@ -124,590 +127,1031 @@ class _MoneyReceiptListScreenState extends State<MoneyReceiptForm> {
           md: 12,
           lg: 10,
           xl: 10,
-          child: Form(
-            key: formKey,
-            child: Container(
-              padding: const EdgeInsets.all(10),
-              color: AppColors.bg,
-              child: BlocListener<MoneyReceiptBloc, MoneyReceiptState>(
-                listener: (context, state) {
-                  if (state is MoneyReceiptAddLoading) {
-                    appLoader(context, "Money receipt, please wait...");
-                  } else if (state is MoneyReceiptAddSuccess) {
-                    Navigator.pop(context); // Close loader dialog
-                    _fetchApi(
-                      customer:
-                          context
-                              .read<MoneyReceiptBloc>()
-                              .selectCustomerModel
-                              ?.id
-                              .toString() ??
-                          '',
-                      seller:
-                          context
-                              .read<MoneyReceiptBloc>()
-                              .selectUserModel
-                              ?.id
-                              .toString() ??
-                          '',
-                      paymentMethod:
-                          selectedPaymentMethodNotifier.value?.toString() ?? '',
-                    );
+          child: isBigScreen ? _buildDesktopContent() : _buildMobileLayout(),
+        ),
+      ],
+    );
+  }
 
-                    context.read<DashboardBloc>().add(
-                      ChangeDashboardScreen(index: 4),
-                    );
-                  } else if (state is MoneyReceiptDetailsSuccess) {
-                    // AppRoutes.pop(context);
-                  } else if (state is MoneyReceiptAddFailed) {
-                    Navigator.pop(context); // Close loader dialog
-                    _fetchApi(
-                      customer:
-                          context
-                              .read<MoneyReceiptBloc>()
-                              .selectCustomerModel
-                              ?.id
-                              .toString() ??
-                          '',
-                      seller:
-                          context
-                              .read<MoneyReceiptBloc>()
-                              .selectUserModel
-                              ?.id
-                              .toString() ??
-                          '',
-                      paymentMethod:
-                          selectedPaymentMethodNotifier.value?.toString() ?? '',
-                    );
-                    appAlertDialog(
-                      context,
-                      state.content,
-                      title: state.title,
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(context),
-                          child: const Text("Dismiss"),
+  // ----------------------------
+  // Desktop content (unchanged)
+  // ----------------------------
+  Widget _buildDesktopContent() {
+    final moneyBloc = context.read<MoneyReceiptBloc>();
+
+    return Form(
+      key: formKey,
+      child: Container(
+        padding: const EdgeInsets.all(10),
+        color: AppColors.bg,
+        child: BlocListener<MoneyReceiptBloc, MoneyReceiptState>(
+          listener: (context, state) {
+            if (state is MoneyReceiptAddLoading) {
+              appLoader(context, "Money receipt, please wait...");
+            } else if (state is MoneyReceiptAddSuccess) {
+              Navigator.pop(context); // Close loader dialog
+              _fetchApi(
+                customer:
+                context
+                    .read<MoneyReceiptBloc>()
+                    .selectCustomerModel
+                    ?.id
+                    .toString() ??
+                    '',
+                seller:
+                context
+                    .read<MoneyReceiptBloc>()
+                    .selectUserModel
+                    ?.id
+                    .toString() ??
+                    '',
+                paymentMethod:
+                selectedPaymentMethodNotifier.value?.toString() ?? '',
+              );
+
+              context.read<DashboardBloc>().add(
+                ChangeDashboardScreen(index: 4),
+              );
+            } else if (state is MoneyReceiptDetailsSuccess) {
+              // AppRoutes.pop(context);
+            } else if (state is MoneyReceiptAddFailed) {
+              Navigator.pop(context); // Close loader dialog
+              _fetchApi(
+                customer:
+                context
+                    .read<MoneyReceiptBloc>()
+                    .selectCustomerModel
+                    ?.id
+                    .toString() ??
+                    '',
+                seller:
+                context
+                    .read<MoneyReceiptBloc>()
+                    .selectUserModel
+                    ?.id
+                    .toString() ??
+                    '',
+                paymentMethod:
+                selectedPaymentMethodNotifier.value?.toString() ?? '',
+              );
+              appAlertDialog(
+                context,
+                state.content,
+                title: state.title,
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text("Dismiss"),
+                  ),
+                ],
+              );
+            }
+          },
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 8),
+              const Text(
+                "Create Money Receipt",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  children: [
+                    ResponsiveRow(
+                      spacing: 29,
+                      runSpacing: 10,
+                      children: [
+                        ResponsiveCol(
+                          xs: 12,
+                          sm: 3,
+                          md: 3,
+                          lg: 3,
+                          xl: 3,
+                          child:
+                          BlocBuilder<CustomerBloc, CustomerState>(
+                            builder: (context, state) {
+                              final customerBloc = context.read<CustomerBloc>();
+                              return AppDropdown(
+                                label: "Customer",
+                                context: context,
+                                isSearch: true,
+                                hint: moneyBloc.selectCustomerModel?.name
+                                    ?.toString() ??
+                                    "Select Customer",
+                                isNeedAll: false,
+                                isRequired: true,
+                                value: moneyBloc.selectCustomerModel,
+                                itemList: customerBloc.activeCustomer,
+                                onChanged: (newVal) {
+                                  setState(() {
+                                    moneyBloc.selectCustomerModel = newVal;
+                                  });
+
+                                  if (newVal != null) {
+                                    context.read<PosSaleBloc>().add(
+                                      FetchCustomerSaleList(
+                                        context,
+                                        dropdownFilter:
+                                        "/due/?customer_id=${newVal.id.toString()}&due=true",
+                                      ),
+                                    );
+                                  }
+                                },
+                                validator: (value) {
+                                  return value == null
+                                      ? 'Please select Customer'
+                                      : null;
+                                },
+                                itemBuilder: (item) => DropdownMenuItem(
+                                  value: item,
+                                  child: Text(
+                                    item.toString(),
+                                    style: const TextStyle(
+                                      color: AppColors.blackColor,
+                                      fontFamily: 'Quicksand',
+                                      fontWeight: FontWeight.w300,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                        ResponsiveCol(
+                          xs: 12,
+                          sm: 3,
+                          md: 3,
+                          lg: 3,
+                          xl: 3,
+                          child: BlocBuilder<UserBloc, UserState>(
+                            builder: (context, state) {
+                              final userBloc = context.read<UserBloc>();
+                              final userList = userBloc.list;
+
+                              // Set default user if none is selected and list is available
+                              if (userList.isNotEmpty &&
+                                  moneyBloc.selectUserModel == null) {
+                                moneyBloc.selectUserModel = userList.first;
+                              }
+
+                              return AppDropdown(
+                                label: "Collected By",
+                                context: context,
+                                hint: moneyBloc.selectUserModel?.username
+                                    ?.toString() ??
+                                    "Select Collected By",
+                                isLabel: false,
+                                isRequired: true,
+                                isNeedAll: false,
+                                value: moneyBloc.selectUserModel,
+                                itemList: userList,
+                                onChanged: (newVal) {
+                                  setState(() {
+                                    moneyBloc.selectUserModel = newVal;
+                                  });
+                                },
+                                validator: (value) {
+                                  return value == null
+                                      ? 'Please select Collected By'
+                                      : null;
+                                },
+                                itemBuilder: (item) => DropdownMenuItem(
+                                  value: item,
+                                  child: Text(
+                                    item.username ?? "Unknown",
+                                    style: const TextStyle(
+                                      color: AppColors.blackColor,
+                                      fontFamily: 'Quicksand',
+                                      fontWeight: FontWeight.w300,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                        ResponsiveCol(
+                          xs: 12,
+                          sm: 2,
+                          md: 2,
+                          lg: 2,
+                          xl: 2,
+                          child: ValueListenableBuilder<String>(
+                            valueListenable: selectedPaymentToState,
+                            builder: (context, selectedPaymentTo, child) {
+                              return AppDropdown<String>(
+                                label: "Payment To",
+                                context: context,
+                                hint: selectedPaymentTo.isNotEmpty
+                                    ? selectedPaymentTo
+                                    : "Select Payment To",
+                                isLabel: false,
+                                isRequired: true,
+                                isNeedAll: false,
+                                value: selectedPaymentTo,
+                                itemList: moneyBloc.paymentTo,
+                                onChanged: (newVal) {
+                                  selectedPaymentToState.value =
+                                      newVal.toString();
+                                  // Clear invoice selection when payment type changes
+                                  if (newVal != "Specific") {
+                                    selectPosSaleModel.value = null;
+                                  }
+                                  setState(() {});
+                                },
+                                validator: (value) {
+                                  return value == null
+                                      ? 'Please select Payment To'
+                                      : null;
+                                },
+                                itemBuilder: (item) => DropdownMenuItem(
+                                  value: item,
+                                  child: Text(
+                                    item.toString(),
+                                    style: const TextStyle(
+                                      color: AppColors.blackColor,
+                                      fontFamily: 'Quicksand',
+                                      fontWeight: FontWeight.w300,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                        ResponsiveCol(
+                          xs: 12,
+                          sm: 3,
+                          md: 3,
+                          lg: 3,
+                          xl: 3,
+                          child: ValueListenableBuilder<String>(
+                            valueListenable: selectedPaymentToState,
+                            builder: (context, selectedPaymentTo, child) {
+                              return selectedPaymentTo == "Specific"
+                                  ? ValueListenableBuilder<PosSaleModel?>(
+                                valueListenable: selectPosSaleModel,
+                                builder: (context, selectedPosSale, child) {
+                                  return BlocBuilder<PosSaleBloc,
+                                      PosSaleState>(
+                                    builder: (context, state) {
+                                      final posSaleBloc =
+                                      context.read<PosSaleBloc>();
+                                      return AppDropdown<PosSaleModel>(
+                                        label: "Invoice",
+                                        context: context,
+                                        hint: selectedPosSale
+                                            ?.invoiceNo
+                                            ?.toString() ??
+                                            "Select Invoice",
+                                        isNeedAll: false,
+                                        isRequired: true,
+                                        value: selectedPosSale,
+                                        itemList: posSaleBloc.list,
+                                        onChanged: (newVal) {
+                                          selectPosSaleModel.value = newVal;
+                                          if (newVal != null) {
+                                            moneyBloc.amountController.text =
+                                                newVal.dueAmount.toString();
+                                          }
+                                          setState(() {});
+                                        },
+                                        validator: (value) {
+                                          return value == null
+                                              ? 'Please select Invoice'
+                                              : null;
+                                        },
+                                        itemBuilder: (item) =>
+                                            DropdownMenuItem(
+                                              value: item,
+                                              child: Text(
+                                                item.toString(),
+                                                style: const TextStyle(
+                                                  color: AppColors.blackColor,
+                                                  fontFamily: 'Quicksand',
+                                                  fontWeight: FontWeight.w300,
+                                                ),
+                                              ),
+                                            ),
+                                      );
+                                    },
+                                  );
+                                },
+                              )
+                                  : const SizedBox.shrink();
+                            },
+                          ),
+                        ),
+                        ResponsiveCol(
+                          xs: 12,
+                          sm: 2,
+                          md: 2,
+                          lg: 2,
+                          xl: 2,
+                          child: CustomInputField(
+                            isRequiredLable: true,
+                            isRequired: false,
+                            controller: moneyBloc.dateController,
+                            hintText: 'Date',
+                            fillColor: const Color.fromARGB(
+                              255,
+                              255,
+                              255,
+                              255,
+                            ),
+                            readOnly: true,
+                            keyboardType: TextInputType.text,
+                            validator: (value) {
+                              return value!.isEmpty ? 'Please enter Date' : null;
+                            },
+                            onTap: () async {
+                              FocusScope.of(context).requestFocus(FocusNode());
+                              DateTime? pickedDate = await showDatePicker(
+                                context: context,
+                                initialDate: DateTime.now(),
+                                firstDate: DateTime(1900),
+                                lastDate: DateTime.now(),
+                              );
+                              if (pickedDate != null) {
+                                setState(() {
+                                  moneyBloc.dateController.text =
+                                      appWidgets.convertDateTimeDDMMYYYY(pickedDate);
+                                });
+                              }
+                            },
+                            onChanged: (value) {},
+                          ),
                         ),
                       ],
-                    );
-                  }
-                },
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const SizedBox(height: 8),
-                    const Text(
-                      "Create Money Receipt",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                    const SizedBox(height: 010),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      padding: const EdgeInsets.all(20),
-                      child: Column(
-                        children: [
-                          ResponsiveRow(
-                            spacing: 29,
-                            runSpacing: 10,
-                            children: [
-                              ResponsiveCol(
-                                xs: 12,
-                                sm: 3,
-                                md: 3,
-                                lg: 3,
-                                xl: 3,
-                                child: BlocBuilder<CustomerBloc, CustomerState>(
-                                  builder: (context, state) {
-                                    final customerBloc = context
-                                        .read<CustomerBloc>();
-                                    return AppDropdown(
-                                      label: "Customer",
-                                      context: context,
-                                      isSearch: true,
-                                      hint:
-                                          moneyBloc.selectCustomerModel?.name
-                                              ?.toString() ??
-                                          "Select Customer",
-                                      isNeedAll: false,
-                                      isRequired: true,
-                                      value: moneyBloc.selectCustomerModel,
-                                      itemList: customerBloc.activeCustomer,
-                                      onChanged: (newVal) {
-                                        setState(() {
-                                          moneyBloc.selectCustomerModel =
-                                              newVal;
-                                        });
-
-                                        if (newVal != null) {
-                                          context.read<PosSaleBloc>().add(
-                                            FetchCustomerSaleList(
-                                              context,
-                                              dropdownFilter:
-                                                  "/due/?customer_id=${newVal.id.toString()}&due=true",
-                                            ),
-                                          );
-                                        }
-                                      },
-                                      validator: (value) {
-                                        return value == null
-                                            ? 'Please select Customer'
-                                            : null;
-                                      },
-                                      itemBuilder: (item) => DropdownMenuItem(
-                                        value: item,
-                                        child: Text(
-                                          item.toString(),
-                                          style: const TextStyle(
-                                            color: AppColors.blackColor,
-                                            fontFamily: 'Quicksand',
-                                            fontWeight: FontWeight.w300,
-                                          ),
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ),
-                              ResponsiveCol(
-                                xs: 12,
-                                sm: 3,
-                                md: 3,
-                                lg: 3,
-                                xl: 3,
-                                child: BlocBuilder<UserBloc, UserState>(
-                                  builder: (context, state) {
-                                    final userBloc = context.read<UserBloc>();
-                                    final userList = userBloc.list;
-
-                                    // Set default user if none is selected and list is available
-                                    if (userList.isNotEmpty &&
-                                        moneyBloc.selectUserModel == null) {
-                                      moneyBloc.selectUserModel =
-                                          userList.first;
-                                    }
-
-                                    return AppDropdown(
-                                      label: "Collected By",
-                                      context: context,
-                                      hint:
-                                          moneyBloc.selectUserModel?.username
-                                              ?.toString() ??
-                                          "Select Collected By",
-                                      isLabel: false,
-                                      isRequired: true,
-                                      isNeedAll: false,
-                                      value: moneyBloc.selectUserModel,
-                                      itemList: userList,
-                                      onChanged: (newVal) {
-                                        setState(() {
-                                          moneyBloc.selectUserModel = newVal;
-                                        });
-                                      },
-                                      validator: (value) {
-                                        return value == null
-                                            ? 'Please select Collected By'
-                                            : null;
-                                      },
-                                      itemBuilder: (item) => DropdownMenuItem(
-                                        value: item,
-                                        child: Text(
-                                          item.username ?? "Unknown",
-                                          style: const TextStyle(
-                                            color: AppColors.blackColor,
-                                            fontFamily: 'Quicksand',
-                                            fontWeight: FontWeight.w300,
-                                          ),
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ),
-                              ResponsiveCol(
-                                xs: 12,
-                                sm: 2,
-                                md: 2,
-                                lg: 2,
-                                xl: 2,
-                                child: ValueListenableBuilder<String>(
-                                  valueListenable: selectedPaymentToState,
-                                  builder: (context, selectedPaymentTo, child) {
-                                    return AppDropdown<String>(
-                                      label: "Payment To",
-                                      context: context,
-                                      hint: selectedPaymentTo.isNotEmpty
-                                          ? selectedPaymentTo
-                                          : "Select Payment To",
-                                      isLabel: false,
-                                      isRequired: true,
-                                      isNeedAll: false,
-                                      value: selectedPaymentTo,
-                                      itemList: moneyBloc.paymentTo,
-                                      onChanged: (newVal) {
-                                        selectedPaymentToState.value = newVal
-                                            .toString();
-                                        // Clear invoice selection when payment type changes
-                                        if (newVal != "Specific") {
-                                          selectPosSaleModel.value = null;
-                                        }
-                                        setState(() {});
-                                      },
-                                      validator: (value) {
-                                        return value == null
-                                            ? 'Please select Payment To'
-                                            : null;
-                                      },
-                                      itemBuilder: (item) => DropdownMenuItem(
-                                        value: item,
-                                        child: Text(
-                                          item.toString(),
-                                          style: const TextStyle(
-                                            color: AppColors.blackColor,
-                                            fontFamily: 'Quicksand',
-                                            fontWeight: FontWeight.w300,
-                                          ),
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ),
-                              ResponsiveCol(
-                                xs: 12,
-                                sm: 3,
-                                md: 3,
-                                lg: 3,
-                                xl: 3,
-                                child: ValueListenableBuilder<String>(
-                                  valueListenable: selectedPaymentToState,
-                                  builder: (context, selectedPaymentTo, child) {
-                                    return selectedPaymentTo == "Specific"
-                                        ? ValueListenableBuilder<PosSaleModel?>(
-                                            valueListenable: selectPosSaleModel,
-                                            builder: (context, selectedPosSale, child) {
-                                              return BlocBuilder<
-                                                PosSaleBloc,
-                                                PosSaleState
-                                              >(
-                                                builder: (context, state) {
-                                                  final posSaleBloc = context
-                                                      .read<PosSaleBloc>();
-                                                  return AppDropdown<
-                                                    PosSaleModel
-                                                  >(
-                                                    label: "Invoice",
-                                                    context: context,
-                                                    hint:
-                                                        selectedPosSale
-                                                            ?.invoiceNo
-                                                            ?.toString() ??
-                                                        "Select Invoice",
-                                                    isNeedAll: false,
-                                                    isRequired: true,
-                                                    value: selectedPosSale,
-                                                    itemList: posSaleBloc.list,
-                                                    onChanged: (newVal) {
-                                                      selectPosSaleModel.value =
-                                                          newVal;
-                                                      if (newVal != null) {
-                                                        moneyBloc
-                                                            .amountController
-                                                            .text = newVal
-                                                            .dueAmount
-                                                            .toString();
-                                                      }
-                                                      setState(() {});
-                                                    },
-                                                    validator: (value) {
-                                                      return value == null
-                                                          ? 'Please select Invoice'
-                                                          : null;
-                                                    },
-                                                    itemBuilder: (item) =>
-                                                        DropdownMenuItem(
-                                                          value: item,
-                                                          child: Text(
-                                                            item.toString(),
-                                                            style: const TextStyle(
-                                                              color: AppColors
-                                                                  .blackColor,
-                                                              fontFamily:
-                                                                  'Quicksand',
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w300,
-                                                            ),
-                                                          ),
-                                                        ),
-                                                  );
-                                                },
-                                              );
-                                            },
-                                          )
-                                        : const SizedBox.shrink();
-                                  },
-                                ),
-                              ),
-                              ResponsiveCol(
-                                xs: 12,
-                                sm: 2,
-                                md: 2,
-                                lg: 2,
-                                xl: 2,
-                                child: CustomInputField(
-                                  isRequiredLable: true,
-                                  isRequired: false,
-                                  controller: moneyBloc.dateController,
-                                  hintText: 'Date',
-                                  fillColor: const Color.fromARGB(
-                                    255,
-                                    255,
-                                    255,
-                                    255,
-                                  ),
-                                  readOnly: true,
-                                  keyboardType: TextInputType.text,
-                                  validator: (value) {
-                                    return value!.isEmpty
-                                        ? 'Please enter Date'
-                                        : null;
-                                  },
-                                  onTap: () async {
-                                    FocusScope.of(
-                                      context,
-                                    ).requestFocus(FocusNode());
-                                    DateTime? pickedDate = await showDatePicker(
-                                      context: context,
-                                      initialDate: DateTime.now(),
-                                      firstDate: DateTime(1900),
-                                      lastDate: DateTime.now(),
-                                    );
-                                    if (pickedDate != null) {
-                                      setState(() {
-                                        moneyBloc.dateController.text =
-                                            appWidgets.convertDateTimeDDMMYYYY(
-                                              pickedDate,
-                                            );
-                                      });
-                                    }
-                                  },
-                                  onChanged: (value) {},
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      padding: const EdgeInsets.all(20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: const [
-                              Text(
-                                "Payment Information",
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 15,
-                                ),
-                              ),
-                              SizedBox(width: 4),
-                              Icon(
-                                Icons.credit_card,
-                                size: 17,
-                                color: Colors.amber,
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 16),
-                          ResponsiveRow(
-                            spacing: 20,
-                            runSpacing: 10,
-                            children: [
-                              ResponsiveCol(
-                                xs: 12,
-                                sm: 3,
-                                md: 3,
-                                lg: 3,
-                                xl: 3,
-                                child: ValueListenableBuilder<String?>(
-                                  valueListenable:
-                                      selectedPaymentMethodNotifier,
-                                  builder: (context, selectedPaymentMethod, child) {
-                                    if (!mounted) return Container();
-
-                                    return AppDropdown<String>(
-                                      label: "Payment Method",
-                                      context: context,
-                                      hint:
-                                          selectedPaymentMethod ??
-                                          "Select Payment Method",
-                                      isLabel: false,
-                                      isRequired: true,
-                                      isNeedAll: false,
-                                      value: selectedPaymentMethod,
-                                      itemList: moneyBloc.paymentMethod,
-                                      onChanged: (newVal) {
-                                        selectedPaymentMethodNotifier.value =
-                                            newVal.toString();
-                                        // Clear selected account when payment method changes
-                                        moneyBloc.accountModel = null;
-                                        moneyBloc.selectedAccountId = "";
-                                        setState(() {});
-                                      },
-                                      validator: (value) {
-                                        return value == null
-                                            ? 'Please select a payment method'
-                                            : null;
-                                      },
-                                      itemBuilder: (item) => DropdownMenuItem(
-                                        value: item,
-                                        child: Text(
-                                          item.toString(),
-                                          style: const TextStyle(
-                                            color: AppColors.blackColor,
-                                            fontFamily: 'Quicksand',
-                                            fontWeight: FontWeight.w300,
-                                          ),
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ),
-                              ResponsiveCol(
-                                xs: 12,
-                                sm: 3,
-                                md: 3,
-                                lg: 3,
-                                xl: 3,
-                                child: SizedBox(
-                                  child: BlocBuilder<AccountBloc, AccountState>(
-                                    builder: (context, state) {
-                                      // Debug current state
-                                      debugPrint(
-                                        "Current Account State: ${state.runtimeType}",
-                                      );
-
-                                      if (state is AccountActiveListLoading) {
-                                        return const Center(
-                                          child: CircularProgressIndicator(),
-                                        );
-                                      } else if (state
-                                          is AccountActiveListSuccess) {
-                                        return _buildAccountDropdown(
-                                          context,
-                                          state.list,
-                                        );
-                                      } else if (state
-                                          is AccountActiveListFailed) {
-                                        return Text('Error: ${state.content}');
-                                      } else {
-                                        return const Text(
-                                          'No accounts available',
-                                        );
-                                      }
-                                    },
-                                  ),
-                                ),
-                              ),
-                              ResponsiveCol(
-                                xs: 12,
-                                sm: 2,
-                                md: 2,
-                                lg: 2,
-                                xl: 2,
-                                child: Center(
-                                  child: AppTextField(
-                                    // isRequiredLable: true,
-                                    isRequired: true,
-                                    controller: moneyBloc.amountController,
-                                    hintText: 'Amount',
-                                    // fillColor: const Color.fromARGB(
-                                    //   255,
-                                    //   255,
-                                    //   255,
-                                    //   255,
-                                    // ),
-                                    keyboardType: TextInputType.number,
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Please enter amount';
-                                      }
-                                      final amount = double.tryParse(value);
-                                      if (amount == null || amount <= 0) {
-                                        return 'Please enter a valid amount';
-                                      }
-                                      return null;
-                                    },
-                                    onChanged: (value) {
-                                      setState(() {});
-                                    },
-                                    textInputAction: TextInputAction.done,
-                                  ),
-                                ),
-                              ),
-                              ResponsiveCol(
-                                xs: 12,
-                                sm: 3,
-                                md: 3,
-                                lg: 3,
-                                xl: 3,
-                                child: AppTextField(
-                                  isRequired: false,
-                                  controller: moneyBloc.remarkController,
-                                  hintText: 'Remark',
-
-                                  keyboardType: TextInputType.text,
-                                  onChanged: (value) {
-                                    setState(() {});
-                                  },
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: AppButton(
-                        size: 200,
-                        name: "Create",
-                        onPressed: () {
-                          _createMoneyReceipt();
-                        },
-                      ),
                     ),
                   ],
                 ),
               ),
-            ),
+              const SizedBox(height: 16),
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: const [
+                        Text(
+                          "Payment Information",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                          ),
+                        ),
+                        SizedBox(width: 4),
+                        Icon(
+                          Icons.credit_card,
+                          size: 17,
+                          color: Colors.amber,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    ResponsiveRow(
+                      spacing: 20,
+                      runSpacing: 10,
+                      children: [
+                        ResponsiveCol(
+                          xs: 12,
+                          sm: 3,
+                          md: 3,
+                          lg: 3,
+                          xl: 3,
+                          child: ValueListenableBuilder<String?>(
+                            valueListenable: selectedPaymentMethodNotifier,
+                            builder: (context, selectedPaymentMethod, child) {
+                              if (!mounted) return Container();
+
+                              return AppDropdown<String>(
+                                label: "Payment Method",
+                                context: context,
+                                hint: selectedPaymentMethod ??
+                                    "Select Payment Method",
+                                isLabel: false,
+                                isRequired: true,
+                                isNeedAll: false,
+                                value: selectedPaymentMethod,
+                                itemList: moneyBloc.paymentMethod,
+                                onChanged: (newVal) {
+                                  selectedPaymentMethodNotifier.value =
+                                      newVal.toString();
+                                  // Clear selected account when payment method changes
+                                  moneyBloc.accountModel = null;
+                                  moneyBloc.selectedAccountId = "";
+                                  setState(() {});
+                                },
+                                validator: (value) {
+                                  return value == null
+                                      ? 'Please select a payment method'
+                                      : null;
+                                },
+                                itemBuilder: (item) => DropdownMenuItem(
+                                  value: item,
+                                  child: Text(
+                                    item.toString(),
+                                    style: const TextStyle(
+                                      color: AppColors.blackColor,
+                                      fontFamily: 'Quicksand',
+                                      fontWeight: FontWeight.w300,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                        ResponsiveCol(
+                          xs: 12,
+                          sm: 3,
+                          md: 3,
+                          lg: 3,
+                          xl: 3,
+                          child: SizedBox(
+                            child: BlocBuilder<AccountBloc, AccountState>(
+                              builder: (context, state) {
+                                // Debug current state
+                                debugPrint(
+                                  "Current Account State: ${state.runtimeType}",
+                                );
+
+                                if (state is AccountActiveListLoading) {
+                                  return const Center(
+                                    child: CircularProgressIndicator(),
+                                  );
+                                } else if (state is AccountActiveListSuccess) {
+                                  return _buildAccountDropdown(
+                                    context,
+                                    state.list,
+                                  );
+                                } else if (state is AccountActiveListFailed) {
+                                  return Text('Error: ${state.content}');
+                                } else {
+                                  return const Text(
+                                    'No accounts available',
+                                  );
+                                }
+                              },
+                            ),
+                          ),
+                        ),
+                        ResponsiveCol(
+                          xs: 12,
+                          sm: 2,
+                          md: 2,
+                          lg: 2,
+                          xl: 2,
+                          child: Center(
+                            child: AppTextField(
+                              // isRequiredLable: true,
+                              isRequired: true,
+                              controller: moneyBloc.amountController,
+                              hintText: 'Amount',
+                              keyboardType: TextInputType.number,
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter amount';
+                                }
+                                final amount = double.tryParse(value);
+                                if (amount == null || amount <= 0) {
+                                  return 'Please enter a valid amount';
+                                }
+                                return null;
+                              },
+                              onChanged: (value) {
+                                setState(() {});
+                              },
+                              textInputAction: TextInputAction.done,
+                            ),
+                          ),
+                        ),
+                        ResponsiveCol(
+                          xs: 12,
+                          sm: 3,
+                          md: 3,
+                          lg: 3,
+                          xl: 3,
+                          child: AppTextField(
+                            isRequired: false,
+                            controller: moneyBloc.remarkController,
+                            hintText: 'Remark',
+                            keyboardType: TextInputType.text,
+                            onChanged: (value) {
+                              setState(() {});
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: AppButton(
+                  size: 200,
+                  name: "Create",
+                  onPressed: () {
+                    _createMoneyReceipt();
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ----------------------------
+  // Mobile layout (stepper)
+  // ----------------------------
+  Widget _buildMobileLayout() {
+    return BlocConsumer<MoneyReceiptBloc, MoneyReceiptState>(
+      listener: (context, state) {
+        if (state is MoneyReceiptAddLoading) {
+          appLoader(context, "Money receipt, please wait...");
+        } else if (state is MoneyReceiptAddSuccess) {
+          Navigator.pop(context); // close loader
+          _fetchApi(
+            customer:
+            context.read<MoneyReceiptBloc>().selectCustomerModel?.id.toString() ?? '',
+            seller:
+            context.read<MoneyReceiptBloc>().selectUserModel?.id.toString() ?? '',
+            paymentMethod: selectedPaymentMethodNotifier.value?.toString() ?? '',
+          );
+          context.read<DashboardBloc>().add(ChangeDashboardScreen(index: 4));
+        } else if (state is MoneyReceiptAddFailed) {
+          Navigator.pop(context);
+          appAlertDialog(
+            context,
+            state.content,
+            title: state.title,
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text("Dismiss"),
+              ),
+            ],
+          );
+        }
+      },
+      builder: (context, state) {
+        return SingleChildScrollView(
+          padding: const EdgeInsets.all(12.0),
+          child: Form(
+            key: formKey,
+            child: _buildMobileStepperContent(),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildMobileStepperContent() {
+    final bloc = context.read<MoneyReceiptBloc>();
+
+    return Stepper(
+      physics: const ClampingScrollPhysics(),
+      type: StepperType.vertical,
+      currentStep: currentStep,
+      onStepContinue: () {
+        if (currentStep < 3) {
+          setState(() => currentStep += 1);
+        } else {
+          _createMoneyReceipt();
+        }
+      },
+      onStepCancel: () {
+        if (currentStep > 0) setState(() => currentStep -= 1);
+      },
+      onStepTapped: (step) => setState(() => currentStep = step),
+      controlsBuilder: (context, details) {
+        return Padding(
+          padding: const EdgeInsets.only(top: 8.0),
+          child: Row(
+            children: [
+              if (currentStep > 0)
+                Expanded(
+                  child: AppButton(
+                    onPressed: details.onStepCancel,
+                    name: "Back",
+                    color: AppColors.redColor,
+                  ),
+                ),
+              if (currentStep > 0) const SizedBox(width: 8),
+              Expanded(
+                child: AppButton(
+                  onPressed: details.onStepContinue,
+                  name: currentStep < 3 ? 'Next' : 'Submit',
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+      steps: [
+        Step(
+          title: Text('Customer & Date', style: AppTextStyle.cardLevelHead(context)),
+          content: _buildMobileTopFormSection(),
+          isActive: currentStep >= 0,
+          state: currentStep > 0 ? StepState.complete : StepState.indexed,
+        ),
+        Step(
+          title: Text('Payment To / Invoice', style: AppTextStyle.cardLevelHead(context)),
+          content: _buildMobilePaymentToSection(),
+          isActive: currentStep >= 1,
+          state: currentStep > 1 ? StepState.complete : StepState.indexed,
+        ),
+        Step(
+          title: Text('Payment Info', style: AppTextStyle.cardLevelHead(context)),
+          content: _buildMobilePaymentSection(),
+          isActive: currentStep >= 2,
+          state: currentStep > 2 ? StepState.complete : StepState.indexed,
+        ),
+        Step(
+          title: Text('Review & Create', style: AppTextStyle.cardLevelHead(context)),
+          content: _buildMobileSummarySection(),
+          isActive: currentStep >= 3,
+          state: StepState.indexed,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMobileTopFormSection() {
+    final moneyBloc = context.read<MoneyReceiptBloc>();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        BlocBuilder<CustomerBloc, CustomerState>(
+          builder: (context, state) {
+            final customerBloc = context.read<CustomerBloc>();
+            return AppDropdown(
+              label: "Customer",
+              context: context,
+              isSearch: true,
+              hint: moneyBloc.selectCustomerModel?.name?.toString() ?? "Select Customer",
+              isNeedAll: false,
+              isRequired: true,
+              value: moneyBloc.selectCustomerModel,
+              itemList: customerBloc.activeCustomer,
+              onChanged: (newVal) {
+                setState(() {
+                  moneyBloc.selectCustomerModel = newVal;
+                });
+
+                if (newVal != null) {
+                  context.read<PosSaleBloc>().add(
+                    FetchCustomerSaleList(
+                      context,
+                      dropdownFilter: "/due/?customer_id=${newVal.id.toString()}&due=true",
+                    ),
+                  );
+                }
+              },
+              validator: (value) {
+                return value == null ? 'Please select Customer' : null;
+              },
+              itemBuilder: (item) => DropdownMenuItem(
+                value: item,
+                child: Text(
+                  item.toString(),
+                  style: const TextStyle(
+                    color: AppColors.blackColor,
+                    fontFamily: 'Quicksand',
+                    fontWeight: FontWeight.w300,
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+        const SizedBox(height: 12),
+        BlocBuilder<UserBloc, UserState>(
+          builder: (context, state) {
+            final userBloc = context.read<UserBloc>();
+            final userList = userBloc.list;
+
+            if (userList.isNotEmpty && moneyBloc.selectUserModel == null) {
+              moneyBloc.selectUserModel = userList.first;
+            }
+
+            return AppDropdown(
+              label: "Collected By",
+              context: context,
+              hint: moneyBloc.selectUserModel?.username?.toString() ?? "Select Collected By",
+              isLabel: false,
+              isRequired: true,
+              isNeedAll: false,
+              value: moneyBloc.selectUserModel,
+              itemList: userList,
+              onChanged: (newVal) {
+                setState(() {
+                  moneyBloc.selectUserModel = newVal;
+                });
+              },
+              validator: (value) {
+                return value == null ? 'Please select Collected By' : null;
+              },
+              itemBuilder: (item) => DropdownMenuItem(
+                value: item,
+                child: Text(
+                  item.username ?? "Unknown",
+                  style: const TextStyle(
+                    color: AppColors.blackColor,
+                    fontFamily: 'Quicksand',
+                    fontWeight: FontWeight.w300,
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+        const SizedBox(height: 12),
+        CustomInputField(
+          isRequiredLable: true,
+          isRequired: false,
+          controller: moneyBloc.dateController,
+          hintText: 'Date',
+          fillColor: Colors.white,
+          readOnly: true,
+          keyboardType: TextInputType.text,
+          validator: (value) {
+            return value!.isEmpty ? 'Please enter Date' : null;
+          },
+          onTap: () async {
+            FocusScope.of(context).requestFocus(FocusNode());
+            DateTime? pickedDate = await showDatePicker(
+              context: context,
+              initialDate: DateTime.now(),
+              firstDate: DateTime(1900),
+              lastDate: DateTime.now(),
+            );
+            if (pickedDate != null) {
+              setState(() {
+                moneyBloc.dateController.text =
+                    appWidgets.convertDateTimeDDMMYYYY(pickedDate);
+              });
+            }
+          },
+          onChanged: (value) {},
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMobilePaymentToSection() {
+    final moneyBloc = context.read<MoneyReceiptBloc>();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ValueListenableBuilder<String>(
+          valueListenable: selectedPaymentToState,
+          builder: (context, selectedPaymentTo, child) {
+            return AppDropdown<String>(
+              label: "Payment To",
+              context: context,
+              hint: selectedPaymentTo.isNotEmpty ? selectedPaymentTo : "Select Payment To",
+              isLabel: false,
+              isRequired: true,
+              isNeedAll: false,
+              value: selectedPaymentTo,
+              itemList: moneyBloc.paymentTo,
+              onChanged: (newVal) {
+                selectedPaymentToState.value = newVal.toString();
+                if (newVal != "Specific") {
+                  selectPosSaleModel.value = null;
+                }
+                setState(() {});
+              },
+              validator: (value) {
+                return value == null ? 'Please select Payment To' : null;
+              },
+              itemBuilder: (item) => DropdownMenuItem(
+                value: item,
+                child: Text(
+                  item.toString(),
+                  style: const TextStyle(
+                    color: AppColors.blackColor,
+                    fontFamily: 'Quicksand',
+                    fontWeight: FontWeight.w300,
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+        const SizedBox(height: 12),
+        ValueListenableBuilder<String>(
+          valueListenable: selectedPaymentToState,
+          builder: (context, selectedPaymentTo, child) {
+            return selectedPaymentTo == "Specific"
+                ? ValueListenableBuilder<PosSaleModel?>(
+              valueListenable: selectPosSaleModel,
+              builder: (context, selectedPosSale, child) {
+                return BlocBuilder<PosSaleBloc, PosSaleState>(
+                  builder: (context, state) {
+                    final posSaleBloc = context.read<PosSaleBloc>();
+                    return AppDropdown<PosSaleModel>(
+                      label: "Invoice",
+                      context: context,
+                      hint: selectedPosSale?.invoiceNo?.toString() ?? "Select Invoice",
+                      isNeedAll: false,
+                      isRequired: true,
+                      value: selectedPosSale,
+                      itemList: posSaleBloc.list,
+                      onChanged: (newVal) {
+                        selectPosSaleModel.value = newVal;
+                        if (newVal != null) {
+                          moneyBloc.amountController.text = newVal.dueAmount.toString();
+                        }
+                        setState(() {});
+                      },
+                      validator: (value) {
+                        return value == null ? 'Please select Invoice' : null;
+                      },
+                      itemBuilder: (item) => DropdownMenuItem(
+                        value: item,
+                        child: Text(
+                          item.toString(),
+                          style: const TextStyle(
+                            color: AppColors.blackColor,
+                            fontFamily: 'Quicksand',
+                            fontWeight: FontWeight.w300,
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+            )
+                : const SizedBox.shrink();
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMobilePaymentSection() {
+    final moneyBloc = context.read<MoneyReceiptBloc>();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ValueListenableBuilder<String?>(
+          valueListenable: selectedPaymentMethodNotifier,
+          builder: (context, selectedPaymentMethod, child) {
+            return AppDropdown<String>(
+              label: "Payment Method",
+              context: context,
+              hint: selectedPaymentMethod ?? "Select Payment Method",
+              isLabel: false,
+              isRequired: true,
+              isNeedAll: false,
+              value: selectedPaymentMethod,
+              itemList: moneyBloc.paymentMethod,
+              onChanged: (newVal) {
+                selectedPaymentMethodNotifier.value = newVal.toString();
+                // Clear selected account when payment method changes
+                moneyBloc.accountModel = null;
+                moneyBloc.selectedAccountId = "";
+                setState(() {});
+              },
+              validator: (value) {
+                return value == null ? 'Please select a payment method' : null;
+              },
+              itemBuilder: (item) => DropdownMenuItem(
+                value: item,
+                child: Text(
+                  item.toString(),
+                  style: const TextStyle(
+                    color: AppColors.blackColor,
+                    fontFamily: 'Quicksand',
+                    fontWeight: FontWeight.w300,
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+        const SizedBox(height: 12),
+        BlocBuilder<AccountBloc, AccountState>(
+          builder: (context, state) {
+            if (state is AccountActiveListLoading) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (state is AccountActiveListSuccess) {
+              return _buildAccountDropdown(context, state.list);
+            } else if (state is AccountActiveListFailed) {
+              return Text('Error: ${state.content}');
+            } else {
+              return const Text('No accounts available');
+            }
+          },
+        ),
+        const SizedBox(height: 12),
+        AppTextField(
+          isRequired: true,
+          controller: moneyBloc.amountController,
+          hintText: 'Amount',
+          keyboardType: TextInputType.number,
+          validator: (value) {
+            if (value == null || value.isEmpty) return 'Please enter amount';
+            final amount = double.tryParse(value);
+            if (amount == null || amount <= 0) return 'Please enter a valid amount';
+            return null;
+          },
+          onChanged: (value) => setState(() {}),
+        ),
+        const SizedBox(height: 12),
+        AppTextField(
+          controller: moneyBloc.remarkController,
+          hintText: 'Remark',
+          keyboardType: TextInputType.text,
+          onChanged: (value) => setState(() {}),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMobileSummarySection() {
+    final moneyBloc = context.read<MoneyReceiptBloc>();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text("Review", style: AppTextStyle.cardLevelHead(context)),
+              const SizedBox(height: 8),
+              _reviewRow("Customer", moneyBloc.selectCustomerModel?.name ?? "-"),
+              _reviewRow("Collected By", moneyBloc.selectUserModel?.username ?? "-"),
+              _reviewRow("Payment To", selectedPaymentToState.value),
+              if (selectedPaymentToState.value == "Specific")
+                _reviewRow("Invoice", selectPosSaleModel.value?.invoiceNo ?? "-"),
+              _reviewRow("Payment Method", selectedPaymentMethodNotifier.value ?? "-"),
+              _reviewRow("Account", moneyBloc.accountModel?.name ?? "-"),
+              _reviewRow("Amount", moneyBloc.amountController.text.trim()),
+              _reviewRow("Remark", moneyBloc.remarkController.text.trim().isEmpty ? "-" : moneyBloc.remarkController.text.trim()),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+        Center(
+          child: AppButton(
+            name: "Create",
+            onPressed: _createMoneyReceipt,
           ),
         ),
       ],
     );
   }
 
+  Widget _reviewRow(String label, String? value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        children: [
+          Expanded(child: Text(label, style: AppTextStyle.cardLevelHead(context))),
+          Text(value ?? "-", style: AppTextStyle.cardLevelText(context)),
+        ],
+      ),
+    );
+  }
+
   Widget _buildAccountDropdown(
-    BuildContext context,
-    List<AccountActiveModel> accounts,
-  ) {
+      BuildContext context,
+      List<AccountActiveModel> accounts,
+      ) {
     final moneyBloc = context.read<MoneyReceiptBloc>();
     final selectedPaymentMethod = selectedPaymentMethodNotifier.value;
 
@@ -734,7 +1178,6 @@ class _MoneyReceiptListScreenState extends State<MoneyReceiptForm> {
           'cash': 'cash',
           'mobile banking': 'mobile banking',
           'mobile': 'mobile banking',
-
           'other': 'other',
         };
 
@@ -772,7 +1215,7 @@ class _MoneyReceiptListScreenState extends State<MoneyReceiptForm> {
     // Clear selection if selected account is not in filtered list
     if (moneyBloc.accountModel != null &&
         !filteredList.any(
-          (account) => account.id == moneyBloc.accountModel!.id,
+              (account) => account.id == moneyBloc.accountModel!.id,
         )) {
       moneyBloc.accountModel = null;
       moneyBloc.selectedAccountId = "";
@@ -785,8 +1228,8 @@ class _MoneyReceiptListScreenState extends State<MoneyReceiptForm> {
       hint: filteredList.isEmpty
           ? "No accounts available"
           : (moneyBloc.accountModel == null
-                ? "Select Account"
-                : "${moneyBloc.accountModel!.name}${moneyBloc.accountModel!.acNumber != null ? ' - ${moneyBloc.accountModel!.acNumber}' : ''}"),
+          ? "Select Account"
+          : "${moneyBloc.accountModel!.name}${moneyBloc.accountModel!.acNumber != null ? ' - ${moneyBloc.accountModel!.acNumber}' : ''}"),
       isLabel: false,
       isRequired: true,
       isNeedAll: false,
