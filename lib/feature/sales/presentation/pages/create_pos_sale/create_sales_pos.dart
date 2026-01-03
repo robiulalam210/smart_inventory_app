@@ -1,7 +1,9 @@
 // NOTE: adjust imports paths to match your project structure
 import 'dart:developer';
+import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
@@ -54,6 +56,9 @@ class _SalesScreenState extends State<SalesScreen> {
   final String jwtToken =
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzYyNjg2MTI1LCJpYXQiOjE3NjI1OTk3MjUsImp0aSI6ImRiNjAzMmFjOWFkOTQ2NzRiNTE5Njk5OGI0ZWI0OTMzIiwidXNlcl9pZCI6IjIifQ.LJv3l53GjkdDWHKT-YPiCpuNQfBK8NorsWN56WirY8s";
 
+  // Mobile stepper
+  int currentStep = 0;
+
   @override
   void initState() {
     super.initState();
@@ -102,8 +107,10 @@ class _SalesScreenState extends State<SalesScreen> {
       brandBloc.add(FetchBrandList(context));
       _ensureControllersForExistingProducts();
 
-      // Request keyboard focus so RawKeyboardListener receives scanner input
-      FocusScope.of(context).requestFocus(_focusNode);
+      // Request keyboard focus so RawKeyboardListener receives scanner input (desktop only)
+      if (Responsive.isDesktop(context) || Responsive.isMaxDesktop(context)) {
+        FocusScope.of(context).requestFocus(_focusNode);
+      }
     });
   }
 
@@ -187,11 +194,11 @@ class _SalesScreenState extends State<SalesScreen> {
   double calculateAllFinalTotal() {
     final bloc = context.read<CreatePosSaleBloc>();
     final productList = products;
-    double _ = productList.fold(0.0, (p, e) => p + _toDouble(e["ticket_total"]));
-    double _ = productList.fold(0.0, (p, e) {
+    double specificDiscountSum = productList.fold(0.0, (p, e) {
       final disc = _toDouble(e["discount"]);
       final ticket = _toDouble(e["ticket_total"]);
-      return p + ((e["discount_type"] == 'percent') ? (ticket * (disc / 100.0)) : disc);
+      return p +
+          ((e["discount_type"] == 'percent') ? (ticket * (disc / 100.0)) : disc);
     });
     double subTotal = productList.fold(0.0, (p, e) => p + _toDouble(e["total"]));
     double overallDiscount =
@@ -737,7 +744,8 @@ class _SalesScreenState extends State<SalesScreen> {
                             // allow decimal input but convert to int for storage
                             final parsed = double.tryParse(value) ?? 0.0;
                             products[index]["quantity"] = parsed.toInt();
-                            controllers[index]!["quantity"]!.text = parsed.toInt().toString();
+                            controllers[index]!["quantity"]!.text =
+                                parsed.toInt().toString();
                             updateTotal(index);
                           },
                         ),
@@ -983,7 +991,6 @@ class _SalesScreenState extends State<SalesScreen> {
             ),
           );
         }).toList(),
-
       ],
     );
   }
@@ -1388,7 +1395,6 @@ class _SalesScreenState extends State<SalesScreen> {
                         keyboardType: const TextInputType.numberWithOptions(decimal: true),
                         onChanged: (v) => setState(() {
                           _updateChangeAmount();
-
                         }),
                       ),
                     ),
@@ -1609,7 +1615,7 @@ class _SalesScreenState extends State<SalesScreen> {
         }
         setState(() {});
       },
-      child:Container(
+      child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(10),
@@ -1654,9 +1660,7 @@ class _SalesScreenState extends State<SalesScreen> {
                       padding:
                       const EdgeInsets.symmetric(horizontal: 3, vertical: 3),
                       decoration: BoxDecoration(
-                        color: p.stockQty == 0
-                            ? Colors.grey
-                            : Colors.redAccent,
+                        color: p.stockQty == 0 ? Colors.grey : Colors.redAccent,
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
@@ -1718,9 +1722,7 @@ class _SalesScreenState extends State<SalesScreen> {
             ],
           ),
         ),
-      )
-
-
+      ),
     );
   }
 
@@ -1815,6 +1817,112 @@ class _SalesScreenState extends State<SalesScreen> {
     log(body.toString());
   }
 
+  // -------------------
+  // Mobile layout/stepper
+  // -------------------
+  Widget _buildMobileLayout() {
+    // Use a Stepper on mobile to break the form into manageable steps
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Create Sale'),
+          backgroundColor: AppColors.primaryColor,
+        ),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(12),
+          child: Form(
+            key: formKey,
+            child: Stepper(
+              physics: const ClampingScrollPhysics(),
+              type: StepperType.vertical,
+              currentStep: currentStep,
+              onStepContinue: () {
+                if (currentStep < 3) {
+                  setState(() => currentStep += 1);
+                } else {
+                  _submitForm();
+                }
+              },
+              onStepCancel: () {
+                if (currentStep > 0) setState(() => currentStep -= 1);
+              },
+              onStepTapped: (s) => setState(() => currentStep = s),
+              controlsBuilder: (context, details) {
+                return Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: Row(
+                    children: [
+                      if (currentStep > 0)
+                        Expanded(
+                          child: AppButton(
+                            onPressed: details.onStepCancel,
+                            name: "Back",
+                            color: AppColors.redColor,
+                          ),
+                        ),
+                      if (currentStep > 0) const SizedBox(width: 8),
+                      Expanded(
+                        child: AppButton(
+                          onPressed: details.onStepContinue,
+                          name: currentStep < 3 ? 'Next' : 'Submit',
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+              steps: [
+                Step(
+                  title: Text('Customer & Date', style: AppTextStyle.cardLevelHead(context)),
+                  content: _buildTopFormSection(context.read<CreatePosSaleBloc>()),
+                  isActive: currentStep >= 0,
+                  state: currentStep > 0 ? StepState.complete : StepState.indexed,
+                ),
+                Step(
+                  title: Text('Products', style: AppTextStyle.cardLevelHead(context)),
+                  content: Column(
+                    children: [
+                      SizedBox(
+                        height: 360,
+                        child: Column(
+                          children: [
+                            Expanded(child: _buildProductBrowser()),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      _buildProductListSection(context.read<CreatePosSaleBloc>()),
+                    ],
+                  ),
+                  isActive: currentStep >= 1,
+                  state: currentStep > 1 ? StepState.complete : StepState.indexed,
+                ),
+                Step(
+                  title: Text('Charges', style: AppTextStyle.cardLevelHead(context)),
+                  content: _buildChargesSection(context.read<CreatePosSaleBloc>()),
+                  isActive: currentStep >= 2,
+                  state: currentStep > 2 ? StepState.complete : StepState.indexed,
+                ),
+                Step(
+                  title: Text('Summary & Payment', style: AppTextStyle.cardLevelHead(context)),
+                  content: Column(
+                    children: [
+                      _buildSummaryAndPayment(context.read<CreatePosSaleBloc>()),
+                      const SizedBox(height: 8),
+                      _buildActionButtons(),
+                    ],
+                  ),
+                  isActive: currentStep >= 3,
+                  state: StepState.indexed,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final isBigScreen = Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
@@ -1822,114 +1930,119 @@ class _SalesScreenState extends State<SalesScreen> {
     // Constrain the main content height so internal Expanded widgets can layout properly.
     final availableHeight = MediaQuery.of(context).size.height - kToolbarHeight - 24;
 
-    // Wrap the whole content in a RawKeyboardListener so barcode scanners (keyboard emulators) can send input.
-    return RawKeyboardListener(
-      focusNode: _focusNode,
-      autofocus: true,
-      onKey: _handleKey,
-      child: Container(
-        color: AppColors.bg,
-        child: SafeArea(
-          child: ResponsiveRow(
-            spacing: 0,
-            runSpacing: 0,
-            children: [
-              if (isBigScreen)
-                ResponsiveCol(
-                  xs: 0,
-                  sm: 1,
-                  md: 1,
-                  lg: 2,
-                  xl: 2,
-                  child: Container(
-                    decoration: const BoxDecoration(color: Colors.white),
-                    child: const Sidebar(),
+    // Desktop / large screens: keep RawKeyboardListener for scanner support
+    if (isBigScreen) {
+      return RawKeyboardListener(
+        focusNode: _focusNode,
+        autofocus: true,
+        onKey: _handleKey,
+        child: Container(
+          color: AppColors.bg,
+          child: SafeArea(
+            child: ResponsiveRow(
+              spacing: 0,
+              runSpacing: 0,
+              children: [
+                if (isBigScreen)
+                  ResponsiveCol(
+                    xs: 0,
+                    sm: 1,
+                    md: 1,
+                    lg: 2,
+                    xl: 2,
+                    child: Container(
+                      decoration: const BoxDecoration(color: Colors.white),
+                      child: const Sidebar(),
+                    ),
                   ),
-                ),
-              ResponsiveCol(
-                xs: 12,
-                sm: 12,
-                md: 12,
-                lg: 10,
-                xl: 10,
-                child: SizedBox(
-                  height: availableHeight,
-                  child: BlocConsumer<CreatePosSaleBloc, CreatePosSaleState>(
-                    listener: (context, state) {
-                      if (state is CreatePosSaleLoading) {
-                        appLoader(context, "Creating PosSale, please wait...");
-                      } else if (state is CreatePosSaleSuccess) {
-                        Navigator.pop(context);
-                        showCustomToast(
-                          context: context,
-                          title: 'Success!',
-                          description: "Sale created successfully!",
-                          icon: Icons.check_circle,
-                          primaryColor: Colors.green,
-                        );
-                        changeAmountController.clear();
-                        context.read<DashboardBloc>().add(
-                          ChangeDashboardScreen(index: 2),
-                        );
-                        setState(() {});
-                      } else if (state is CreatePosSaleFailed) {
-                        Navigator.pop(context);
-                        appAlertDialog(
-                          context,
-                          state.content,
-                          title: state.title,
-                          actions: [
-                            TextButton(
-                              onPressed: () => AppRoutes.pop(context),
-                              child: const Text("Dismiss"),
-                            ),
-                          ],
-                        );
-                      }
-                    },
-                    builder: (context, state) {
-                      final bloc = context.read<CreatePosSaleBloc>();
+                ResponsiveCol(
+                  xs: 12,
+                  sm: 12,
+                  md: 12,
+                  lg: 10,
+                  xl: 10,
+                  child: SizedBox(
+                    height: availableHeight,
+                    child: BlocConsumer<CreatePosSaleBloc, CreatePosSaleState>(
+                      listener: (context, state) {
+                        if (state is CreatePosSaleLoading) {
+                          appLoader(context, "Creating PosSale, please wait...");
+                        } else if (state is CreatePosSaleSuccess) {
+                          Navigator.pop(context);
+                          showCustomToast(
+                            context: context,
+                            title: 'Success!',
+                            description: "Sale created successfully!",
+                            icon: Icons.check_circle,
+                            primaryColor: Colors.green,
+                          );
+                          changeAmountController.clear();
+                          context.read<DashboardBloc>().add(
+                            ChangeDashboardScreen(index: 2),
+                          );
+                          setState(() {});
+                        } else if (state is CreatePosSaleFailed) {
+                          Navigator.pop(context);
+                          appAlertDialog(
+                            context,
+                            state.content,
+                            title: state.title,
+                            actions: [
+                              TextButton(
+                                onPressed: () => AppRoutes.pop(context),
+                                child: const Text("Dismiss"),
+                              ),
+                            ],
+                          );
+                        }
+                      },
+                      builder: (context, state) {
+                        final bloc = context.read<CreatePosSaleBloc>();
 
-                      return Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // LEFT: Sales form (~65%)
-                          Expanded(
-                            child: SingleChildScrollView(
-                              child: Form(
-                                key: formKey,
-                                child: Padding(
-                                  padding: const EdgeInsets.all(6.0),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      _buildTopFormSection(bloc),
-                                      _buildProductListSection(bloc),
-                                      _buildChargesSection(bloc),
-                                      const SizedBox(height: 4),
-                                      _buildSummaryAndPayment(bloc),
-                                      gapH8,
-                                      _buildActionButtons(),
-                                    ],
+                        return Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // LEFT: Sales form (~65%)
+                            Expanded(
+                              child: SingleChildScrollView(
+                                child: Form(
+                                  key: formKey,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(6.0),
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        _buildTopFormSection(bloc),
+                                        _buildProductListSection(bloc),
+                                        _buildChargesSection(bloc),
+                                        const SizedBox(height: 4),
+                                        _buildSummaryAndPayment(bloc),
+                                        gapH8,
+                                        _buildActionButtons(),
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
-                          ),
 
-                          SizedBox(width: 280, child: _buildProductBrowser()),
-                        ],
-                      );
-                    },
+                            SizedBox(width: 280, child: _buildProductBrowser()),
+                          ],
+                        );
+                      },
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
-      ),
-    );
+      );
+    }
+
+    // Mobile: stepper layout
+    return _buildMobileLayout();
   }
 }
