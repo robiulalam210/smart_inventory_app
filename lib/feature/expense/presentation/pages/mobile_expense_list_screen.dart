@@ -18,14 +18,14 @@ import '../bloc/expense_list/expense_bloc.dart';
 import '../widget/widget.dart';
 import 'expense_create.dart';
 
-class ExpenseListScreen extends StatefulWidget {
-  const ExpenseListScreen({super.key});
+class MobileExpenseListScreen extends StatefulWidget {
+  const MobileExpenseListScreen({super.key});
 
   @override
-  State<ExpenseListScreen> createState() => _ExpenseListScreenState();
+  State<MobileExpenseListScreen> createState() => _ExpenseListScreenState();
 }
 
-class _ExpenseListScreenState extends State<ExpenseListScreen> {
+class _ExpenseListScreenState extends State<MobileExpenseListScreen> {
   DateRange? selectedDateRange;
   DateTime now = DateTime.now();
   ExpenseHeadModel? _selectedExpenseHead;
@@ -122,38 +122,17 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isBigScreen =
-        Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
-    return Container(
-      color: AppColors.bg,
-      child: SafeArea(
-        child: ResponsiveRow(
-          spacing: 0,
-          runSpacing: 0,
-          children: [
-            if (isBigScreen) _buildSidebar(),
-            _buildContentArea(isBigScreen),
-          ],
-        ),
+
+    return Scaffold(
+     appBar: AppBar(title: Text("Expense List"),),
+      body: SafeArea(
+        child:    _buildContentArea(),
       ),
     );
   }
 
-  Widget _buildSidebar() {
-    return ResponsiveCol(
-      xs: 0,
-      sm: 1,
-      md: 1,
-      lg: 2,
-      xl: 2,
-      child: Container(
-        decoration: const BoxDecoration(color: Colors.white),
-        child: const Sidebar(),
-      ),
-    );
-  }
 
-  Widget _buildContentArea(bool isBigScreen) {
+  Widget _buildContentArea() {
     return ResponsiveCol(
       xs: 12,
       sm: 12,
@@ -169,11 +148,9 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
           builder: (context, state) {
             return Column(
               children: [
-                if (isBigScreen)
-                  _buildDesktopHeader(context)
-                else
+
                   _buildMobileHeader(context),
-                const SizedBox(height: 16),
+                const SizedBox(height: 8),
                 SizedBox(
                   child: _buildExpenseList(state),
                 ),
@@ -229,129 +206,6 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
     }
   }
 
-  Widget _buildDesktopHeader(BuildContext context) {
-    return Column(
-      children: [
-        Row(
-          children: [
-            Expanded(
-              child: CustomSearchTextFormField(
-                controller: dataBloc.filterTextController ?? TextEditingController(),
-                onChanged: (value) {
-                  _fetchApi(filterText: value);
-                },
-                onClear: () {
-                  if (dataBloc.filterTextController != null) {
-                    dataBloc.filterTextController!.clear();
-                  }
-                  _fetchApi();
-                },
-                hintText: "Search by description, amount, etc.",
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: BlocBuilder<ExpenseHeadBloc, ExpenseHeadState>(
-                builder: (context, state) {
-                  return AppDropdown<ExpenseHeadModel>(
-                    context: context,
-                    label: "Expense Head",
-                    hint: _selectedExpenseHead?.name ?? "Select Expense Head",
-                    isNeedAll: true,
-                    isRequired: false,
-                    value: _selectedExpenseHead,
-                    itemList: context.read<ExpenseHeadBloc>().list,
-                    onChanged: _onExpenseHeadChanged,
-                    validator: (value) => null,
-                    itemBuilder: (item) => DropdownMenuItem<ExpenseHeadModel>(
-                      value: item,
-                      child: Text(
-                        item.name ?? 'Unnamed Head',
-                        style: const TextStyle(
-                          color: AppColors.blackColor,
-                          fontFamily: 'Quicksand',
-                          fontWeight: FontWeight.w300,
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-            const SizedBox(width: 16),
-            SizedBox(
-              width: 260,
-              child: CustomDateRangeField(
-                isLabel: false,
-                selectedDateRange: selectedDateRange,
-                onDateRangeSelected: (value) {
-                  setState(() => selectedDateRange = value);
-                  if (value != null) {
-                    _fetchApi(from: value.start, to: value.end);
-                  } else {
-                    _fetchApi();
-                  }
-                },
-              ),
-            ),
-            const SizedBox(width: 16),
-            TextButton(
-              onPressed: _clearFilters,
-              child: Text(
-                'Clear All',
-                style: TextStyle(
-                  color: Colors.red,
-                  fontSize: 14,
-                ),
-              ),
-            ),
-            const SizedBox(width: 16),
-            AppButton(
-              name: "Create Expense",
-              onPressed: () => _showCreateDialog(context),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        BlocBuilder<ExpenseSubHeadBloc, ExpenseSubHeadState>(
-          builder: (context, state) {
-            if (_selectedExpenseHead == null) return const SizedBox();
-
-            return Row(
-              children: [
-                Expanded(
-                  child: AppDropdown<ExpenseSubHeadModel>(
-                    context: context,
-                    label: "Expense Sub Head",
-                    hint: _selectedExpenseSubHead?.name ?? "Select Sub Head",
-                    isNeedAll: true,
-                    isRequired: false,
-                    value: _selectedExpenseSubHead,
-                    itemList: context.read<ExpenseSubHeadBloc>().list
-                        .where((subHead) => subHead.id == _selectedExpenseHead?.id)
-                        .toList(),
-                    onChanged: _onExpenseSubHeadChanged,
-                    validator: (value) => null,
-                    itemBuilder: (item) => DropdownMenuItem<ExpenseSubHeadModel>(
-                      value: item,
-                      child: Text(
-                        item.name ?? 'Unnamed Sub Head',
-                        style: const TextStyle(
-                          color: AppColors.blackColor,
-                          fontFamily: 'Quicksand',
-                          fontWeight: FontWeight.w300,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            );
-          },
-        ),
-      ],
-    );
-  }
 
   Widget _buildMobileHeader(BuildContext context) {
     return Column(
