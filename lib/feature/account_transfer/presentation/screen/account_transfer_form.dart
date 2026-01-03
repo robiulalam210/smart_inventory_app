@@ -110,7 +110,6 @@ class _AccountTransferFormState extends State<AccountTransferForm> {
                 color: AppColors.bg,
                 child: BlocListener<AccountTransferBloc, AccountTransferState>(
                   listener: (context, state) {
-                    print(state);
                     if (state is AccountTransferAddLoading ||
                         state is QuickTransferLoading ||
                         state is ExecuteTransferLoading) {
@@ -447,7 +446,7 @@ _fetchApi();
           return const Center(child: CircularProgressIndicator());
         } else if (state is AccountActiveListFailed) {
           return Text(
-            state.content ?? "Failed to load accounts",
+            state.content,
             style: const TextStyle(color: Colors.red),
           );
         } else if (state is AccountActiveListSuccess) {

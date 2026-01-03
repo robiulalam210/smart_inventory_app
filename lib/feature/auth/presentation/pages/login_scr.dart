@@ -1,9 +1,5 @@
 import 'dart:async';
 import 'dart:ui';
-import 'package:date_format/date_format.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:lottie/lottie.dart';
 import '../../../../core/core.dart';
 import '../../../../core/database/login_local_storage.dart';
 import '../../../../root.dart';

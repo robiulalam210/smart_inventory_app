@@ -149,7 +149,7 @@ class PurchaseDataTableWidget extends StatelessWidget {
                 _buildDetailRow(
                   icon: Iconsax.calendar,
                   label: 'Date',
-                  value: _formatDate(purchase.purchaseDate.toString() ?? ''),
+                  value: _formatDate(purchase.purchaseDate.toString()),
                 ),
                 const SizedBox(height: 8),
 
@@ -482,7 +482,7 @@ class PurchaseDataTableWidget extends StatelessWidget {
         _buildDataCell(index.toString(), columnWidth, TextAlign.center),
         _buildDataCell(sale.invoiceNo ?? '-', columnWidth, TextAlign.center),
         _buildDataCell(
-          _formatDate(sale.purchaseDate.toString() ?? ''),
+          _formatDate(sale.purchaseDate.toString()),
           columnWidth,
           TextAlign.center,
         ),

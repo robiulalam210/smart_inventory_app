@@ -26,7 +26,6 @@ class SalesReturnSuccess extends SalesReturnState {
     required this.to,
   });
 
-  @override
   List<Object?> get props => [
     list,
     count,
@@ -49,7 +48,6 @@ class SalesReturnCreateSuccess extends SalesReturnState {
     this.salesReturn,
   });
 
-  @override
   List<Object?> get props => [message, salesReturn];
 }
 
@@ -63,7 +61,6 @@ class SalesReturnApproveSuccess extends SalesReturnState {
     required this.salesReturn,
   });
 
-  @override
   List<Object?> get props => [message, salesReturn];
 }
 
@@ -77,7 +74,6 @@ class SalesReturnRejectSuccess extends SalesReturnState {
     required this.salesReturn,
   });
 
-  @override
   List<Object?> get props => [message, salesReturn];
 }
 
@@ -91,7 +87,6 @@ class SalesReturnCompleteSuccess extends SalesReturnState {
     required this.salesReturn,
   });
 
-  @override
   List<Object?> get props => [message, salesReturn];
 }
 
@@ -101,7 +96,6 @@ class SalesReturnDetailsLoaded extends SalesReturnState {
 
    SalesReturnDetailsLoaded(this.salesReturn);
 
-  @override
   List<Object?> get props => [salesReturn];
 }
 
@@ -111,7 +105,6 @@ class SalesReturnDeleteSuccess extends SalesReturnState {
 
    SalesReturnDeleteSuccess({required this.message});
 
-  @override
   List<Object?> get props => [message];
 }
 
@@ -121,7 +114,6 @@ class InvoiceListSuccess extends SalesReturnState {
 
    InvoiceListSuccess({required this.list});
 
-  @override
   List<Object?> get props => [list];
 }
 
@@ -134,7 +126,6 @@ class SalesReturnError extends SalesReturnState {
     required this.content,
   });
 
-  @override
   List<Object?> get props => [title, content];
 }
 
@@ -147,7 +138,6 @@ class InvoiceError extends SalesReturnState {
     required this.content,
   });
 
-  @override
   List<Object?> get props => [title, content];
 }
 

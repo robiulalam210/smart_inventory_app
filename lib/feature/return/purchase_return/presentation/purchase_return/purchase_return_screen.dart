@@ -1,8 +1,5 @@
-import 'dart:developer';
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
-import 'package:lottie/lottie.dart'; // Add this import
 
 import '/core/configs/configs.dart';
 import '/feature/supplier/data/model/supplier_active_model.dart';
@@ -57,7 +54,6 @@ class _PurchaseReturnScreenState extends State<PurchaseReturnScreen> {
     String? supplierId,
   }) {
     // Pass supplier ID if selected
-    final supplierIdToUse = _selectedSupplier?.id?.toString();
 
     context.read<PurchaseReturnBloc>().add(FetchPurchaseReturn(
        context,

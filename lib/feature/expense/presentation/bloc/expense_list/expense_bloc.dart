@@ -204,7 +204,7 @@ class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
         return;
       }
 
-      final ApiResponse<ExpenseModel> response = appParseJson(
+      final ApiResponse<ExpenseModel> _ = appParseJson(
         jsonEncode(jsonMap),
             (data) => ExpenseModel.fromJson(data),
       );

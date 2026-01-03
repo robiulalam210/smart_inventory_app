@@ -37,7 +37,7 @@ class Data {
   final String? acName;
   final String? acType;
   final String? acNumber;
-  final dynamic? balance;
+  final dynamic balance;
   final String? bankName;
   final String? branch;
   final dynamic openingBalance;

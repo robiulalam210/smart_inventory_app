@@ -114,7 +114,7 @@ class ExpenseHeadTableCard extends StatelessWidget {
                     const SizedBox(width: 12),
                     FittedBox(
                       child: Text(
-                        expenseHead.name.toString().capitalize() ?? 'Unnamed',
+                        expenseHead.name.toString().capitalize(),
                         style: const TextStyle(
                           fontWeight: FontWeight.w600,
                           fontSize: 14,

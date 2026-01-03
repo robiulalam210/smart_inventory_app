@@ -4,7 +4,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:iconsax/iconsax.dart';
 import '../../../../../core/configs/app_colors.dart';
-import '../../../../../core/configs/app_sizes.dart';
 import '../../../../../core/widgets/delete_dialog.dart';
 import '../../../../../responsive.dart';
 import '../../data/model/brand_model.dart';

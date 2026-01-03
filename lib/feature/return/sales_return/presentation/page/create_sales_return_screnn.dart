@@ -1,11 +1,9 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+
 import 'package:intl/intl.dart';
 import '/feature/accounts/data/model/account_active_model.dart';
 import '/feature/accounts/presentation/bloc/account/account_bloc.dart';
 import '/feature/expense/presentation/bloc/expense_list/expense_bloc.dart';
 import '/feature/return/sales_return/data/model/sales_invoice_model.dart';
-import '/feature/return/sales_return/data/sales_return_create_model.dart';
 
 import '../../../../../core/configs/configs.dart';
 import '../../../../../core/widgets/app_button.dart';
@@ -1033,8 +1031,6 @@ mainAxisAlignment: MainAxisAlignment.start,                  children: [
     }).toList();
 
     // Get calculated amounts
-    double subtotal = double.tryParse(subtotalController.text) ?? 0.0;
-    double returnChargeAmount = double.tryParse(returnChargeAmountController.text) ?? 0.0;
     double totalAmount = double.tryParse(totalAmountController.text) ?? 0.0;
 
     // Create request body

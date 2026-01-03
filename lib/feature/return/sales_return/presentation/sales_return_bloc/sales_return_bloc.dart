@@ -6,7 +6,6 @@ import '../../../../../core/repositories/get_response.dart';
 import '../../../../../core/repositories/post_response.dart';
 import '../../data/model/sales_return_create_model.dart';
 import '../../data/model/sales_return_model.dart';
-import '../../data/sales_return_create_model.dart';
 
 part 'sales_return_event.dart';
 part 'sales_return_state.dart';

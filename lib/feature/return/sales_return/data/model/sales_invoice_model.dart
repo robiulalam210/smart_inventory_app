@@ -24,13 +24,13 @@ class SalesInvoiceModel {
   final dynamic paidAmount;
   final dynamic dueAmount;
   final dynamic changeAmount;
-  final dynamic? overallDiscount;
+  final dynamic overallDiscount;
   final String? overallDiscountType;
-  final dynamic? overallDeliveryCharge;
+  final dynamic overallDeliveryCharge;
   final String? overallDeliveryType;
-  final dynamic? overallServiceCharge;
+  final dynamic overallServiceCharge;
   final String? overallServiceType;
-  final dynamic? overallVatAmount;
+  final dynamic overallVatAmount;
   final String? overallVatType;
   final String? paymentMethod;
   final int? accountId;
@@ -152,7 +152,7 @@ class Item {
   final String? productName;
   final int? quantity;
   final dynamic unitPrice;
-  final dynamic? discount;
+  final dynamic discount;
   final String? discountType;
   final dynamic subtotal;
 

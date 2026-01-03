@@ -1,8 +1,3 @@
-import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:iconsax/iconsax.dart';
-import 'package:hugeicons/hugeicons.dart';
-
 import '../../../../core/configs/configs.dart';
 import '../../../accounts/data/model/account_model.dart';
 

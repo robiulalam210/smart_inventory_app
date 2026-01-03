@@ -22,7 +22,6 @@ class FetchSalesReturn extends SalesReturnEvent {
     this.pageSize,
   });
 
-  @override
   List<Object?> get props => [
     context,
     filterText,
@@ -36,14 +35,13 @@ class FetchSalesReturn extends SalesReturnEvent {
 
 class SalesReturnCreate extends SalesReturnEvent {
   final BuildContext? context;
-   SalesReturnCreateModel body;
+  final SalesReturnCreateModel body;
 
    SalesReturnCreate({
     this.context,
     required this.body,
   });
 
-  @override
   List<Object?> get props => [context, body];
 }
 
@@ -56,7 +54,6 @@ class SalesReturnApprove extends SalesReturnEvent {
     required this.id,
   });
 
-  @override
   List<Object?> get props => [context, id];
 }
 
@@ -69,7 +66,6 @@ class SalesReturnReject extends SalesReturnEvent {
     required this.id,
   });
 
-  @override
   List<Object?> get props => [context, id];
 }
 
@@ -82,7 +78,6 @@ class SalesReturnComplete extends SalesReturnEvent {
     required this.id,
   });
 
-  @override
   List<Object?> get props => [context, id];
 }
 
@@ -95,7 +90,6 @@ class ViewSalesReturnDetails extends SalesReturnEvent {
     required this.id,
   });
 
-  @override
   List<Object?> get props => [context, id];
 }
 
@@ -108,7 +102,6 @@ class DeleteSalesReturn extends SalesReturnEvent {
     required this.id,
   });
 
-  @override
   List<Object?> get props => [context, id];
 }
 
@@ -117,7 +110,6 @@ class FetchInvoiceList extends SalesReturnEvent {
 
    FetchInvoiceList(this.context);
 
-  @override
   List<Object?> get props => [context];
 }
 

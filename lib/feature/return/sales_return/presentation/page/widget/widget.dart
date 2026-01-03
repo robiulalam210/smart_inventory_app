@@ -536,7 +536,7 @@ class SalesReturnTableCard extends StatelessWidget {
                 _buildDetailRow('Payment Method:', salesReturn.paymentMethod ?? 'N/A'),
                 _buildDetailRow('Reason:', salesReturn.reason ?? 'No reason provided'),
 
-                if (salesReturn.items?.isNotEmpty ?? false) ...[
+                if (salesReturn.items.isNotEmpty) ...[
                   const SizedBox(height: 16),
                   const Text(
                     'Returned Items:',
@@ -546,7 +546,7 @@ class SalesReturnTableCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  ...salesReturn.items!.map((item) =>
+                  ...salesReturn.items.map((item) =>
                       Container(
                         margin: const EdgeInsets.only(bottom: 8),
                         padding: const EdgeInsets.all(8),
@@ -562,9 +562,9 @@ class SalesReturnTableCard extends StatelessWidget {
                                 style: const TextStyle(fontWeight: FontWeight.w500),
                               ),
                             ),
-                            Text('Qty: ${item.quantity ?? 0}'),
+                            Text('Qty: ${item.quantity}'),
                             const SizedBox(width: 8),
-                            Text('Damage: ${item.damageQuantity ?? 0}'),
+                            Text('Damage: ${item.damageQuantity}'),
                             const SizedBox(width: 16),
                             Text(
                               '৳${item.total?.toStringAsFixed(2) ?? "0.00"}',

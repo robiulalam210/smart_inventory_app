@@ -37,7 +37,6 @@ class _ExpenseHeadScreenState extends State<ExpenseSubHeadScreen> {
 
   void _fetchApiData({
     String filterText = '',
-    String state = '',
     int pageNumber = 0,
   }) {
     context.read<ExpenseSubHeadBloc>().add(

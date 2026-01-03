@@ -7,7 +7,6 @@ import '/core/repositories/post_response.dart';
 import '/feature/accounts/data/model/account_active_model.dart';
 import '/feature/return/purchase_return/data/model/purchase_return_model.dart';
 
-import '../../../../../supplier/data/model/supplier_active_model.dart';
 import '../../../data/model/purchase_invoice_model.dart';
 import '../../../data/model/purchase_return_create.dart';
 

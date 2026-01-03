@@ -217,12 +217,10 @@ class _CreatePurchaseReturnScreenState
                       child: BlocBuilder<SupplierInvoiceBloc, SupplierInvoiceState>(
                         builder: (context, state) {
                           List<SupplierActiveModel> suppliers = [];
-                          bool isLoading = false;
 
                           if (state is SupplierActiveListSuccess) {
                             suppliers = state.list;
                           } else if (state is SupplierInvoiceLoading) {
-                            isLoading = true;
                           }
 
                           return AppDropdown<SupplierActiveModel>(
@@ -271,10 +269,8 @@ class _CreatePurchaseReturnScreenState
                       child: BlocBuilder<PurchaseReturnBloc, PurchaseReturnState>(
                         builder: (context, state) {
                           final bloc = context.read<PurchaseReturnBloc>();
-                          bool isLoading = false;
 
                           if (state is PurchaseInvoiceListLoading) {
-                            isLoading = true;
                           }
 
                           // Check if invoice list is empty

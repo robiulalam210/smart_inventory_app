@@ -306,9 +306,9 @@ class _TransactionScreenState extends State<TransactionScreen> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   decoration: BoxDecoration(
-                    color: AppColors.primaryColor.withOpacity(0.05),
+                    color: AppColors.primaryColor.withValues(alpha: 0.05),
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: AppColors.primaryColor.withOpacity(0.2)),
+                    border: Border.all(color: AppColors.primaryColor.withValues(alpha: 0.2)),
                   ),
                   child: Row(
                     children: [
@@ -587,7 +587,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                             selectedTransactionTypeNotifier.value = selected ? type : null;
                           });
                         },
-                        selectedColor: AppColors.primaryColor.withOpacity(0.2),
+                        selectedColor: AppColors.primaryColor.withValues(alpha: 0.2),
                         checkmarkColor: AppColors.primaryColor,
                       );
                     }).toList(),
