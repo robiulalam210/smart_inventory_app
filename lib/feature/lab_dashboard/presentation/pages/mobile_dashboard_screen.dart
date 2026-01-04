@@ -10,6 +10,7 @@ import '../../../../responsive.dart';
 import '../../data/models/dashboard/dashboard_model.dart';
 import '../bloc/dashboard/dashboard_bloc.dart';
 import '../widgets/dashboard_card.dart';
+import '../widgets/stats_card_monthly.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -32,8 +33,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isBigScreen =
-        Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
+
     final ScrollController scrollController = ScrollController();
 
     return BlocConsumer<DashboardBloc, DashboardState>(
@@ -55,30 +55,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 spacing: 0,
                 runSpacing: 0,
                 children: [
-                  if (isBigScreen)
-                    ResponsiveCol(
-                      xs: 0,
-                      sm: 1,
-                      md: 1,
-                      lg: 2,
-                      xl: 2,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          border: Border.all(
-                            color: AppColors.border.withAlpha(128),
-                            width: 0.5,
-                          ),
-                        ),
-                        child: isBigScreen ? const Sidebar() : null,
-                      ),
-                    ),
+
                   ResponsiveCol(
                     xs: 12,
                     sm: 12,
-                    md: isBigScreen ? 11 : 12,
-                    lg: isBigScreen ? 10 : 12,
-                    xl: isBigScreen ? 10 : 12,
+                    md: 12,
+                    lg:  12,
+                    xl: 12,
                     child: SizedBox(
                       height: AppSizes.height(context) * 0.90,
                       child: Scrollbar(
@@ -547,103 +530,3 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 }
 
-class StatsCardMonthly extends StatelessWidget {
-  final String title;
-  final String count;
-  final Color color;
-  final String icon;
-
-  const StatsCardMonthly({
-    super.key,
-    required this.title,
-    required this.count,
-    required this.color,
-    required this.icon,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final isMobile = Responsive.isMobile(context);
-
-    return Container(
-      margin: const EdgeInsets.all(0),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(10),
-        child: Stack(
-          children: [
-            Container(
-              padding: EdgeInsets.all(isMobile ? 8.0 : 12.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      color: color,
-                      fontSize: isMobile ? 12 : 16,
-                      fontFamily: GoogleFonts.playfairDisplay().fontFamily,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Container(
-                        width: isMobile ? 24 : 30,
-                        height: isMobile ? 24 : 30,
-                        decoration: BoxDecoration(
-                          color: color.withAlpha(128),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Image.asset(
-                          icon,
-                          color: Colors.white,
-                          width: isMobile ? 24 : 30,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      Expanded(
-                        child: Text(
-                          count.toString(),
-                          maxLines: 2,
-                          textAlign: TextAlign.right,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            color: color,
-                            fontFamily: GoogleFonts.playfairDisplay().fontFamily,
-                            fontSize: isMobile ? 14 : 18,
-                            fontWeight: FontWeight.w400,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            Positioned(
-              bottom: -40,
-              right: -40,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: Container(
-                  width: 120,
-                  height: 120,
-                  decoration: BoxDecoration(
-                    color: color.withAlpha(25),
-                    shape: BoxShape.circle,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}

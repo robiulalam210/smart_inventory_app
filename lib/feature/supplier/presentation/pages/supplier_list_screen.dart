@@ -506,7 +506,7 @@ class _SupplierScreenState extends State<SupplierScreen> {
                             dataBloc.selectedState = selected ? status : "";
                           });
                         },
-                        selectedColor: AppColors.primaryColor.withOpacity(0.2),
+                        selectedColor: AppColors.primaryColor.withValues(alpha: 0.2),
                         checkmarkColor: AppColors.primaryColor,
                       );
                     }).toList(),
