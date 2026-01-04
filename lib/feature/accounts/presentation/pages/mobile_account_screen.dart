@@ -1,4 +1,3 @@
-
 import '../../../../core/configs/configs.dart';
 import '../../../../core/shared/widgets/sideMenu/sidebar.dart';
 import '../../../../core/widgets/app_alert_dialog.dart';
@@ -13,6 +12,7 @@ import '../../data/model/account_model.dart';
 import '../bloc/account/account_bloc.dart';
 import '../widget/widget.dart';
 import 'create_account_screen.dart';
+import 'mobile_create_account_screen.dart';
 
 class MobileAccountScreen extends StatefulWidget {
   const MobileAccountScreen({super.key});
@@ -23,7 +23,9 @@ class MobileAccountScreen extends StatefulWidget {
 
 class _AccountScreenState extends State<MobileAccountScreen> {
   final TextEditingController filterTextController = TextEditingController();
-  final ValueNotifier<String?> selectedAccountTypeNotifier = ValueNotifier(null);
+  final ValueNotifier<String?> selectedAccountTypeNotifier = ValueNotifier(
+    null,
+  );
 
   @override
   void initState() {
@@ -71,16 +73,17 @@ class _AccountScreenState extends State<MobileAccountScreen> {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
-      floatingActionButton: FloatingActionButton(  onPressed: () => _showCreateAccountDialog(context),child: Icon(Icons.add),),
-     appBar: AppBar(title: Text("Account",style: AppTextStyle.titleMedium(context),),),
-      body: SafeArea(
-        child: _buildContentArea(),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _showCreateAccountDialog(context),
+        child: Icon(Icons.add),
       ),
+      appBar: AppBar(
+        title: Text("Account", style: AppTextStyle.titleMedium(context)),
+      ),
+      body: SafeArea(child: _buildContentArea()),
     );
   }
-
 
   Widget _buildContentArea() {
     return ResponsiveCol(
@@ -101,16 +104,15 @@ class _AccountScreenState extends State<MobileAccountScreen> {
               _handleBlocState(state);
             },
             builder: (context, state) {
-              return SingleChildScrollView(child: Column(
-                children: [
-
-                  _buildMobileHeader(),
-                  const SizedBox(height: 8),
-                  SizedBox(
-                    child: _buildAccountList(state),
-                  ),
-                ],
-              ),);
+              return SingleChildScrollView(
+                child: Column(
+                  children: [
+                    _buildMobileHeader(),
+                    const SizedBox(height: 8),
+                    SizedBox(child: _buildAccountList(state)),
+                  ],
+                ),
+              );
             },
           ),
         ),
@@ -171,7 +173,6 @@ class _AccountScreenState extends State<MobileAccountScreen> {
     }
   }
 
-
   Widget _buildMobileHeader() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -207,10 +208,7 @@ class _AccountScreenState extends State<MobileAccountScreen> {
                 ),
               ),
               IconButton(
-                icon: Icon(
-                  Iconsax.filter,
-                  color: AppColors.primaryColor,
-                ),
+                icon: Icon(Iconsax.filter, color: AppColors.primaryColor),
                 onPressed: () => _showMobileFilterSheet(context),
               ),
               IconButton(
@@ -243,7 +241,6 @@ class _AccountScreenState extends State<MobileAccountScreen> {
             );
           },
         ),
-     
       ],
     );
   }
@@ -262,7 +259,9 @@ class _AccountScreenState extends State<MobileAccountScreen> {
                 accounts: state.list,
                 onEdit: (account) => _showEditDialog(context, account, false),
                 onDelete: (account) async {
-                  final shouldDelete = await showDeleteConfirmationDialog(context);
+                  final shouldDelete = await showDeleteConfirmationDialog(
+                    context,
+                  );
                   if (!shouldDelete) return;
 
                   if (context.mounted) {
@@ -281,14 +280,10 @@ class _AccountScreenState extends State<MobileAccountScreen> {
               pageSize: state.pageSize,
               from: state.from,
               to: state.to,
-              onPageChanged: (page) => _fetchAccountList(
-                pageNumber: page,
-                pageSize: state.pageSize,
-              ),
-              onPageSizeChanged: (newSize) => _fetchAccountList(
-                pageNumber: 1,
-                pageSize: newSize,
-              ),
+              onPageChanged: (page) =>
+                  _fetchAccountList(pageNumber: page, pageSize: state.pageSize),
+              onPageSizeChanged: (newSize) =>
+                  _fetchAccountList(pageNumber: 1, pageSize: newSize),
             ),
           ],
         );
@@ -312,10 +307,7 @@ class _AccountScreenState extends State<MobileAccountScreen> {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
-            AppButton(
-              name: "Retry",
-              onPressed: () => _fetchApi(),
-            ),
+            AppButton(name: "Retry", onPressed: () => _fetchApi()),
           ],
         ),
       );
@@ -329,26 +321,23 @@ class _AccountScreenState extends State<MobileAccountScreen> {
 
     showDialog(
       context: context,
-      builder: (context) {
+      barrierDismissible: false,
+      builder: (_) {
         return Dialog(
-          insetPadding: const EdgeInsets.all(20),
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              maxWidth: Responsive.isMobile(context)
-                  ? AppSizes.width(context)
-                  : AppSizes.width(context) * 0.6,
-              maxHeight: Responsive.isMobile(context)
-                  ? AppSizes.height(context) * 0.8
-                  : 350,
-            ),
-            child: const CreateAccountScreen(),
-          ),
+          insetPadding: const EdgeInsets.all(12),
+          child: const MobileCreateAccountScreen(),
         );
       },
     );
   }
 
-  void _showEditDialog(BuildContext context, AccountModel account, bool isMobile) {
+
+
+  void _showEditDialog(
+    BuildContext context,
+    AccountModel account,
+    bool isMobile,
+  ) {
     _clearAccountBlocData();
 
     final accountBloc = context.read<AccountBloc>();
@@ -364,15 +353,8 @@ class _AccountScreenState extends State<MobileAccountScreen> {
       builder: (context) {
         return Dialog(
           insetPadding: const EdgeInsets.all(20),
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              maxWidth: isMobile
-                  ? AppSizes.width(context)
-                  : AppSizes.width(context) * 0.5,
-              maxHeight: isMobile
-                  ? AppSizes.height(context) * 0.8
-                  : AppSizes.height(context) * 0.7,
-            ),
+          child: SizedBox(
+
             child: CreateAccountScreen(
               id: account.id.toString(),
               submitText: "Update Account",
@@ -431,24 +413,26 @@ class _AccountScreenState extends State<MobileAccountScreen> {
                   // Account Type Filter
                   const Text(
                     "Account Type",
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                    ),
+                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
                   ),
                   const SizedBox(height: 8),
                   Wrap(
                     spacing: 8,
-                    children: ["All", "Cash", "Bank", "Mobile Banking"].map((type) {
+                    children: ["All", "Cash", "Bank", "Mobile Banking"].map((
+                      type,
+                    ) {
                       final bool isSelected =
                           selectedAccountTypeNotifier.value == type ||
-                              (type == "All" && selectedAccountTypeNotifier.value == null);
+                          (type == "All" &&
+                              selectedAccountTypeNotifier.value == null);
                       return FilterChip(
                         label: Text(type),
                         selected: isSelected,
                         onSelected: (selected) {
                           setState(() {
-                            selectedAccountTypeNotifier.value = selected ? type : null;
+                            selectedAccountTypeNotifier.value = selected
+                                ? type
+                                : null;
                           });
                         },
                         selectedColor: AppColors.primaryColor.withOpacity(0.2),
@@ -487,7 +471,10 @@ class _AccountScreenState extends State<MobileAccountScreen> {
                             Navigator.pop(context);
                             _fetchApi(
                               filterText: filterTextController.text,
-                              accountType: selectedAccountTypeNotifier.value?.toLowerCase() ?? '',
+                              accountType:
+                                  selectedAccountTypeNotifier.value
+                                      ?.toLowerCase() ??
+                                  '',
                             );
                           },
                           style: ElevatedButton.styleFrom(

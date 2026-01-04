@@ -16,6 +16,7 @@ import '../../data/model/supplier_list_model.dart';
 import '../bloc/supplier/supplier_list_bloc.dart';
 import '../widget/widget.dart';
 import 'create_supplierr_screen.dart';
+import 'mobile_create_supplier_screen.dart';
 
 class MobileSupplierListScreen extends StatefulWidget {
   const MobileSupplierListScreen({super.key});
@@ -135,206 +136,208 @@ class _SupplierScreenState extends State<MobileSupplierListScreen> {
                 );
               }
             },
-            child: Column(
-              children: [
-                // Mobile/Tablet layout
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // Search Bar with Icon Button
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withOpacity(0.1),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                              ),
-                              child: CustomSearchTextFormField(
-                                controller: filterTextController,
-                                forSearch: true,
-                                isRequiredLabel: false,
-                                onClear: () {
-                                  filterTextController.clear();
-                                  _fetchApi();
-                                },
-                                onChanged: (value) {
-                                  _fetchApi(filterText: value);
-                                },
-                                hintText: "Search suppliers...",
-                              ),
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  // Mobile/Tablet layout
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // Search Bar with Icon Button
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.1),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
                             ),
-                          ),
-                          // Filter Icon Button
-                          Container(
-                            margin: const EdgeInsets.only(right: 8),
-                            decoration: BoxDecoration(
-                              color: AppColors.primaryColor.withValues(
-                                alpha: 0.1,
-                              ),
-                              shape: BoxShape.circle,
-                            ),
-                            child: IconButton(
-                              icon: Icon(
-                                Iconsax.filter,
-                                color: AppColors.primaryColor,
-                                size: 20,
-                              ),
-                              onPressed: () {
-                                _showMobileFilterSheet(context);
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Filter Chips and Create Button
-                    Row(
-                      children: [
-                        // Filter Chip
-                        if (dataBloc.selectedState.isNotEmpty &&
-                            dataBloc.selectedState != "All")
-                          Container(
-                            margin: const EdgeInsets.only(right: 8),
-                            child: Chip(
-                              label: Text(dataBloc.selectedState),
-                              backgroundColor: AppColors.primaryColor
-                                  .withOpacity(0.1),
-                              deleteIcon: const Icon(Icons.close, size: 16),
-                              onDeleted: () {
-                                setState(() {
-                                  dataBloc.selectedState = "";
-                                });
-                                _fetchApi(
-                                  filterText: filterTextController.text,
-                                );
-                              },
-                            ),
-                          ),
-                        const Spacer(),
-                        // Create Button
-                        AppButton(
-                          onPressed: () {
-                            showDialog(
-                              context: context,
-                              builder: (context) {
-                                return Dialog(
-                                  insetPadding: const EdgeInsets.all(20),
-                                  child: SizedBox(
-                                    // width: AppSizes.width(context) * 0.5,
-                                    height: AppSizes.height(context) * 0.5,
-                                    child: const CreateSupplierScreen(),
-                                  ),
-                                );
-                              },
-                            );
-                          },
-                          size: 150,
-                          name: 'New Supplier',
+                          ],
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                  ],
-                ),
-                SizedBox(
-                  child: BlocBuilder<SupplierListBloc, SupplierListState>(
-                    builder: (context, state) {
-                      if (state is SupplierListLoading) {
-                        return const Center(child: CircularProgressIndicator());
-                      } else if (state is SupplierListSuccess) {
-                        if (state.list.isEmpty) {
-                          return Center(child: Lottie.asset(AppImages.noData));
-                        } else {
-                          return Column(
-                            children: [
-                              SizedBox(
-                                child: SupplierDataTableWidget(
-                                  suppliers: state.list,
-                                  onEdit: (v) {
-                                    context
-                                            .read<SupplierListBloc>()
-                                            .customerNameController
-                                            .text =
-                                        v.name ?? "";
-                                    context
-                                            .read<SupplierListBloc>()
-                                            .customerNumberController
-                                            .text =
-                                        v.phone ?? "";
-                                    context
-                                            .read<SupplierListBloc>()
-                                            .addressController
-                                            .text =
-                                        v.address ?? "";
-                                    context
-                                            .read<SupplierListBloc>()
-                                            .customerEmailController
-                                            .text =
-                                        v.email ?? "";
-                                    context
-                                        .read<SupplierListBloc>()
-                                        .selectedState = v.isActive == true
-                                        ? "Active"
-                                        : "Inactive";
-                                    _showEditDialog(context, v);
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                ),
+                                child: CustomSearchTextFormField(
+                                  controller: filterTextController,
+                                  forSearch: true,
+                                  isRequiredLabel: false,
+                                  onClear: () {
+                                    filterTextController.clear();
+                                    _fetchApi();
                                   },
-                                  onDelete: (v) async {
-                                    bool shouldDelete =
-                                        await showDeleteConfirmationDialog(
-                                          context,
-                                        );
-                                    if (!shouldDelete) return;
-
-                                    context.read<SupplierListBloc>().add(
-                                      DeleteSupplierList(v.id.toString()),
-                                    );
+                                  onChanged: (value) {
+                                    _fetchApi(filterText: value);
                                   },
+                                  hintText: "Search suppliers...",
                                 ),
                               ),
-                              // Add pagination
-                              PaginationBar(
-                                count: state.count,
-                                totalPages: state.totalPages,
-                                currentPage: state.currentPage,
-                                pageSize: state.pageSize,
-                                from: state.from,
-                                to: state.to,
-                                onPageChanged: (page) =>
-                                    _fetchSupplierList(pageNumber: page),
-                                onPageSizeChanged: (newSize) =>
-                                    _fetchSupplierList(pageSize: newSize),
+                            ),
+                            // Filter Icon Button
+                            Container(
+                              margin: const EdgeInsets.only(right: 8),
+                              decoration: BoxDecoration(
+                                color: AppColors.primaryColor.withValues(
+                                  alpha: 0.1,
+                                ),
+                                shape: BoxShape.circle,
                               ),
-                            ],
-                          );
-                        }
-                      } else if (state is SupplierListFailed) {
-                        return Center(
-                          child: Text(
-                            'Failed to load suppliers: ${state.content}',
+                              child: IconButton(
+                                icon: Icon(
+                                  Iconsax.filter,
+                                  color: AppColors.primaryColor,
+                                  size: 20,
+                                ),
+                                onPressed: () {
+                                  _showMobileFilterSheet(context);
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Filter Chips and Create Button
+                      Row(
+                        children: [
+                          // Filter Chip
+                          if (dataBloc.selectedState.isNotEmpty &&
+                              dataBloc.selectedState != "All")
+                            Container(
+                              margin: const EdgeInsets.only(right: 8),
+                              child: Chip(
+                                label: Text(dataBloc.selectedState),
+                                backgroundColor: AppColors.primaryColor
+                                    .withOpacity(0.1),
+                                deleteIcon: const Icon(Icons.close, size: 16),
+                                onDeleted: () {
+                                  setState(() {
+                                    dataBloc.selectedState = "";
+                                  });
+                                  _fetchApi(
+                                    filterText: filterTextController.text,
+                                  );
+                                },
+                              ),
+                            ),
+                          const Spacer(),
+                          // Create Button
+                          AppButton(
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (context) {
+                                  return Dialog(
+                                    insetPadding: const EdgeInsets.all(20),
+                                    child: SizedBox(
+                                      // width: AppSizes.width(context) * 0.5,
+                                      height: AppSizes.height(context) * 0.5,
+                                      child: const MobileCreateSupplierScreen(),
+                                    ),
+                                  );
+                                },
+                              );
+                            },
+                            size: 150,
+                            name: 'New Supplier',
                           ),
-                        );
-                      } else {
-                        return Center(child: Lottie.asset(AppImages.noData));
-                      }
-                    },
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                    ],
                   ),
-                ),
-              ],
+                  SizedBox(
+                    child: BlocBuilder<SupplierListBloc, SupplierListState>(
+                      builder: (context, state) {
+                        if (state is SupplierListLoading) {
+                          return const Center(child: CircularProgressIndicator());
+                        } else if (state is SupplierListSuccess) {
+                          if (state.list.isEmpty) {
+                            return Center(child: Lottie.asset(AppImages.noData));
+                          } else {
+                            return Column(
+                              children: [
+                                SizedBox(
+                                  child: SupplierDataTableWidget(
+                                    suppliers: state.list,
+                                    onEdit: (v) {
+                                      context
+                                              .read<SupplierListBloc>()
+                                              .customerNameController
+                                              .text =
+                                          v.name ?? "";
+                                      context
+                                              .read<SupplierListBloc>()
+                                              .customerNumberController
+                                              .text =
+                                          v.phone ?? "";
+                                      context
+                                              .read<SupplierListBloc>()
+                                              .addressController
+                                              .text =
+                                          v.address ?? "";
+                                      context
+                                              .read<SupplierListBloc>()
+                                              .customerEmailController
+                                              .text =
+                                          v.email ?? "";
+                                      context
+                                          .read<SupplierListBloc>()
+                                          .selectedState = v.isActive == true
+                                          ? "Active"
+                                          : "Inactive";
+                                      _showEditDialog(context, v);
+                                    },
+                                    onDelete: (v) async {
+                                      bool shouldDelete =
+                                          await showDeleteConfirmationDialog(
+                                            context,
+                                          );
+                                      if (!shouldDelete) return;
+
+                                      context.read<SupplierListBloc>().add(
+                                        DeleteSupplierList(v.id.toString()),
+                                      );
+                                    },
+                                  ),
+                                ),
+                                // Add pagination
+                                PaginationBar(
+                                  count: state.count,
+                                  totalPages: state.totalPages,
+                                  currentPage: state.currentPage,
+                                  pageSize: state.pageSize,
+                                  from: state.from,
+                                  to: state.to,
+                                  onPageChanged: (page) =>
+                                      _fetchSupplierList(pageNumber: page),
+                                  onPageSizeChanged: (newSize) =>
+                                      _fetchSupplierList(pageSize: newSize),
+                                ),
+                              ],
+                            );
+                          }
+                        } else if (state is SupplierListFailed) {
+                          return Center(
+                            child: Text(
+                              'Failed to load suppliers: ${state.content}',
+                            ),
+                          );
+                        } else {
+                          return Center(child: Lottie.asset(AppImages.noData));
+                        }
+                      },
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

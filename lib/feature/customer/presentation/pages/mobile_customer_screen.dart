@@ -11,6 +11,7 @@ import '../../../products/product/presentation/widget/pagination.dart';
 import '../bloc/customer/customer_bloc.dart';
 import '../widget/widget.dart';
 import 'create_customer_screen.dart';
+import 'mobile_create_customer_screen.dart';
 
 class MobileCustomerScreen extends StatefulWidget {
   const MobileCustomerScreen({super.key});
@@ -101,15 +102,17 @@ class _CustomerScreenState extends State<MobileCustomerScreen> {
               _handleBlocState(state);
             },
             builder: (context, state) {
-              return Column(
-                children: [
-
-                    _buildMobileHeader(),
-                  const SizedBox(height: 8),
-                  SizedBox(
-                    child: _buildCustomerList(state),
-                  ),
-                ],
+              return SingleChildScrollView(
+                child: Column(
+                  children: [
+                
+                      _buildMobileHeader(),
+                    const SizedBox(height: 8),
+                    SizedBox(
+                      child: _buildCustomerList(state),
+                    ),
+                  ],
+                ),
               );
             },
           ),
@@ -331,12 +334,12 @@ class _CustomerScreenState extends State<MobileCustomerScreen> {
           insetPadding: const EdgeInsets.all(20),
           child: ConstrainedBox(
             constraints: BoxConstraints(
-              maxWidth: Responsive.isMobile(context)
-                  ? AppSizes.width(context)
-                  : AppSizes.width(context) * 0.55,
-              maxHeight: AppSizes.height(context) * 0.8,
+              // maxWidth: Responsive.isMobile(context)
+              //     ? AppSizes.width(context)
+              //     : AppSizes.width(context) * 0.55,
+              // maxHeight: AppSizes.height(context) * 0.8,
             ),
-            child: const CreateCustomerScreen(),
+            child: const MobileCreateCustomerScreen(),
           ),
         );
       },
