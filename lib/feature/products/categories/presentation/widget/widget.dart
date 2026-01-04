@@ -59,6 +59,7 @@ class CategoriesListMobile extends StatelessWidget {
         // _showCategoryDetails(context, category);
       },
       child: Card(
+        color: Colors.white,
         margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
         elevation: 1,
         shape: RoundedRectangleBorder(
@@ -97,59 +98,17 @@ class CategoriesListMobile extends StatelessWidget {
                       ),
                     ),
                   ),
-
-                  // Action buttons
-                  Row(
-                    children: [
-                      // Status indicator (as icon)
-                      Icon(
-                        isActive ? Icons.check_circle : Icons.circle,
-                        size: 20,
-                        color: isActive ? Colors.green : Colors.grey,
-                      ),
-                      const SizedBox(width: 12),
-
-                      // Edit button
-                      _buildActionButton(
-                        icon: Icons.edit_outlined,
-                        color: Colors.blue.shade600,
-                        onPressed: () => _showEditDialog(context, category),
-                        tooltip: 'Edit category',
-                      ),
-                      const SizedBox(width: 8),
-
-                      // Delete button
-                      _buildActionButton(
-                        icon: Icons.delete_outline,
-                        color: Colors.red.shade600,
-                        onPressed: () => _confirmDelete(context, category),
-                        tooltip: 'Delete category',
-                      ),
-                    ],
+                  Text(
+                    category.name?.capitalize() ?? "Unnamed Category",
+                    style: GoogleFonts.inter(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black87,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ],
-              ),
-
-              const SizedBox(height: 12),
-
-              // Category name
-              Text(
-                category.name?.capitalize() ?? "Unnamed Category",
-                style: GoogleFonts.inter(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black87,
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-
-              const SizedBox(height: 8),
-
-              // Details row
-              Row(
-                children: [
-                  // Status badge
+                  // Action buttons
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 12,
@@ -187,11 +146,44 @@ class CategoriesListMobile extends StatelessWidget {
                       ],
                     ),
                   ),
-
-
-
                 ],
               ),
+
+              const SizedBox(height: 6),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () => _showEditDialog(context, category),
+                      icon: const Icon(Iconsax.edit, size: 16),
+                      label: const Text('Edit'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.blue,
+                        side: BorderSide(color: Colors.blue.withOpacity(0.3)),
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () => _confirmDelete(context, category),
+                      icon: const Icon(HugeIcons.strokeRoundedDeleteThrow, size: 16),
+                      label: const Text('Delete'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.red,
+                        side: BorderSide(color: Colors.red.withOpacity(0.3)),
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+
+
+
+
 
               // Description (if available)
               if (category.description?.isNotEmpty == true)
