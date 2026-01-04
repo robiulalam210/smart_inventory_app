@@ -1,6 +1,9 @@
 // lib/account_transfer/presentation/screens/account_transfer_screen.dart
+import 'package:flutter/material.dart';
+import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:lottie/lottie.dart';
 import '../../../../core/configs/configs.dart';
 import '../../../../core/shared/widgets/sideMenu/sidebar.dart';
 import '../../../../core/widgets/app_alert_dialog.dart';
@@ -8,6 +11,7 @@ import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_dropdown.dart';
 import '../../../../core/widgets/app_loader.dart';
 import '../../../../core/widgets/coustom_search_text_field.dart';
+import '../../../../core/widgets/date_range.dart';
 import '../../../../core/widgets/show_custom_toast.dart';
 import '../../../products/product/presentation/widget/pagination.dart';
 import '../../data/model/account_transfer_model.dart';
@@ -19,24 +23,41 @@ class MobileAccountTransferScreen extends StatefulWidget {
   const MobileAccountTransferScreen({super.key});
 
   @override
-  State<MobileAccountTransferScreen> createState() => _AccountTransferScreenState();
+  State<MobileAccountTransferScreen> createState() => _MobileAccountTransferScreenState();
 }
 
-class _AccountTransferScreenState extends State<MobileAccountTransferScreen> {
-  TextEditingController filterTextController = TextEditingController();
-  ValueNotifier<String?> selectedStatusNotifier = ValueNotifier(null);
-  ValueNotifier<String?> selectedTransferTypeNotifier = ValueNotifier(null);
-  ValueNotifier<bool?> isReversalNotifier = ValueNotifier(null);
-  ValueNotifier<String?> selectedFromAccountNotifier = ValueNotifier(null);
-  ValueNotifier<String?> selectedToAccountNotifier = ValueNotifier(null);
-  DateTime? startDate;
-  DateTime? endDate;
+class _MobileAccountTransferScreenState extends State<MobileAccountTransferScreen> {
+  final TextEditingController filterTextController = TextEditingController();
+  final ValueNotifier<String?> selectedStatusNotifier = ValueNotifier(null);
+  final ValueNotifier<String?> selectedTransferTypeNotifier = ValueNotifier(null);
+  final ValueNotifier<bool?> isReversalNotifier = ValueNotifier(null);
+  final ValueNotifier<String?> selectedFromAccountNotifier = ValueNotifier(null);
+  final ValueNotifier<String?> selectedToAccountNotifier = ValueNotifier(null);
+
+  DateRange? selectedDateRange;
 
   @override
   void initState() {
     super.initState();
+    // Initialize with default date range (last month)
+    DateTime now = DateTime.now();
+    selectedDateRange = DateRange(
+      DateTime(now.year, now.month - 1, 1),
+      DateTime(now.year, now.month, 0), // Last day of previous month
+    );
     filterTextController.clear();
     _fetchApi();
+  }
+
+  @override
+  void dispose() {
+    filterTextController.dispose();
+    selectedStatusNotifier.dispose();
+    selectedTransferTypeNotifier.dispose();
+    isReversalNotifier.dispose();
+    selectedFromAccountNotifier.dispose();
+    selectedToAccountNotifier.dispose();
+    super.dispose();
   }
 
   void _fetchApi({
@@ -46,11 +67,11 @@ class _AccountTransferScreenState extends State<MobileAccountTransferScreen> {
     String? status,
     String? transferType,
     bool? isReversal,
-    DateTime? startDate,
-    DateTime? endDate,
     int pageNumber = 1,
     int pageSize = 10,
   }) {
+    if (!mounted) return;
+
     context.read<AccountTransferBloc>().add(
       FetchAccountTransferList(
         context: context,
@@ -59,8 +80,8 @@ class _AccountTransferScreenState extends State<MobileAccountTransferScreen> {
         status: status,
         transferType: transferType,
         isReversal: isReversal,
-        startDate: startDate,
-        endDate: endDate,
+        startDate: selectedDateRange?.start, // Use DateRange values
+        endDate: selectedDateRange?.end,     // Use DateRange values
         pageNumber: pageNumber,
         pageSize: pageSize,
       ),
@@ -77,249 +98,527 @@ class _AccountTransferScreenState extends State<MobileAccountTransferScreen> {
       isReversal: isReversalNotifier.value,
       fromAccountId: selectedFromAccountNotifier.value,
       toAccountId: selectedToAccountNotifier.value,
-      startDate: startDate,
-      endDate: endDate,
     );
-  }
-
-  Future<void> _showDateRangePicker(BuildContext context) async {
-    final DateTimeRange? picked = await showDateRangePicker(
-      context: context,
-      firstDate: DateTime(2020),
-      lastDate: DateTime.now(),
-      currentDate: DateTime.now(),
-      saveText: 'Select',
-      helpText: 'Select Date Range',
-      confirmText: 'Done',
-      cancelText: 'Cancel',
-      initialDateRange: startDate != null && endDate != null
-          ? DateTimeRange(start: startDate!, end: endDate!)
-          : DateTimeRange(
-        start: DateTime.now().subtract(const Duration(days: 30)),
-        end: DateTime.now(),
-      ),
-    );
-
-    if (picked != null) {
-      setState(() {
-        startDate = picked.start;
-        endDate = picked.end;
-      });
-      _fetchTransferList();
-    }
   }
 
   void _clearDateFilter() {
     setState(() {
-      startDate = null;
-      endDate = null;
+      selectedDateRange = null;
     });
     _fetchTransferList();
   }
 
+  void _clearAllFilters() {
+    filterTextController.clear();
+    selectedStatusNotifier.value = null;
+    selectedTransferTypeNotifier.value = null;
+    isReversalNotifier.value = null;
+    selectedFromAccountNotifier.value = null;
+    selectedToAccountNotifier.value = null;
+    setState(() {
+      selectedDateRange = null;
+    });
+    _fetchApi();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final isBigScreen =
-        Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
-
     return Scaffold(
-      body: SafeArea(
-        child: ResponsiveRow(
-          spacing: 0,
-          runSpacing: 0,
+      appBar: AppBar(
+        title: const Text("Account Transfers"),
+        actions: [
+          IconButton(
+            onPressed: () => _fetchApi(),
+            icon: const Icon(Icons.refresh),
+            tooltip: "Refresh",
+          ),
+          IconButton(
+            onPressed: () => _showMobileFilterSheet(context),
+            icon: const Icon(Icons.filter_alt),
+            tooltip: "Filters",
+          ),
+        ],
+      ),
+      body: _buildContentArea(),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const AccountTransferForm(),
+              fullscreenDialog: true,
+            ),
+          );
+        },
+        backgroundColor: AppColors.primaryColor,
+        child: const Icon(Icons.add, color: Colors.white),
+      ),
+    );
+  }
+
+  Widget _buildContentArea() {
+    return RefreshIndicator(
+      color: AppColors.primaryColor,
+      onRefresh: () async {
+        _fetchApi();
+      },
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
           children: [
-            if (isBigScreen) _buildSidebar(),
-            _buildContentArea(isBigScreen),
+            _buildMobileHeader(),
+            const SizedBox(height: 16),
+            _buildFilterChips(),
+            const SizedBox(height: 16),
+            _buildTransferList(),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildSidebar() {
-    return ResponsiveCol(
-      xs: 0,
-      sm: 1,
-      md: 1,
-      lg: 2,
-      xl: 2,
-      child: Container(
-        decoration: const BoxDecoration(color: Colors.white),
-        child: const Sidebar(),
+  Widget _buildMobileHeader() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: CustomSearchTextFormField(
+                isRequiredLabel: false,
+                controller: filterTextController,
+                onChanged: (value) => _fetchApi(filterText: value),
+                onClear: () {
+                  filterTextController.clear();
+                  _fetchApi();
+                },
+                hintText: "Search transfers...",
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildContentArea(bool isBigScreen) {
-    return ResponsiveCol(
-      xs: 12,
-      sm: 12,
-      md: 12,
-      lg: 10,
-      xl: 10,
-      child: RefreshIndicator(
-        color: AppColors.primaryColor,
-        onRefresh: () async {
-          _fetchApi();
-        },
-        child: Container(
-          padding: AppTextStyle.getResponsivePaddingBody(context),
-          child: BlocListener<AccountTransferBloc, AccountTransferState>(
-            listener: (context, state) {
-              if (state is ExecuteTransferLoading) {
-                appLoader(context, "Executing transfer, please wait...");
-              } else if (state is ExecuteTransferSuccess) {
-
-                Navigator.pop(context);
-                showCustomToast(
-                  context: context,
-                  title: 'Success!',
-                  description: 'Transfer executed successfully',
-                  icon: Icons.check_circle,
-                  primaryColor: Colors.green,
-                );
-                _fetchApi();
-              } else if (state is ExecuteTransferFailed) {
-                Navigator.pop(context);                _fetchApi();
-
-                appAlertDialog(
-                  context,
-                  state.content,
-                  title: state.title,
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text("Dismiss"),
-                    ),
-                  ],
-                );
-              } else if (state is ReverseTransferLoading) {
-                appLoader(context, "Reversing transfer, please wait...");
-              } else if (state is ReverseTransferSuccess) {
-                Navigator.pop(context);
-                showCustomToast(
-                  context: context,
-                  title: 'Success!',
-                  description: 'Transfer reversed successfully',
-                  icon: Icons.refresh,
-                  primaryColor: Colors.orange,
-                );
-                _fetchApi();
-              } else if (state is ReverseTransferFailed) {
-                Navigator.pop(context);
-                _fetchApi();
-
-                appAlertDialog(
-                  context,
-                  state.content,
-                  title: state.title,
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text("Dismiss"),
-                    ),
-                  ],
-                );
-              } else if (state is CancelTransferLoading) {
-                appLoader(context, "Cancelling transfer, please wait...");
-              } else if (state is CancelTransferSuccess) {
-                Navigator.pop(context);
-                showCustomToast(
-                  context: context,
-                  title: 'Success!',
-                  description: 'Transfer cancelled successfully',
-                  icon: Icons.cancel,
-                  primaryColor: Colors.grey,
-                );
-                _fetchApi();
-              } else if (state is CancelTransferFailed) {
-                Navigator.pop(context);
-                _fetchApi();
-
-                appAlertDialog(
-                  context,
-                  state.content,
-                  title: state.title,
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text("Dismiss"),
-                    ),
-                  ],
-                );
-              }
+  Widget _buildFilterChips() {
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: [
+        if (selectedStatusNotifier.value != null)
+          Chip(
+            label: Text(selectedStatusNotifier.value!.toUpperCase()),
+            onDeleted: () {
+              selectedStatusNotifier.value = null;
+              _fetchApi();
             },
-            child: Column(
-              children: [
-                _buildFilterRow(),
-                const SizedBox(height: 16),
-                _buildDateFilterRow(),
-                const SizedBox(height: 16),
-                SizedBox(
-                  child: BlocBuilder<AccountTransferBloc, AccountTransferState>(
-                    builder: (context, state) {
-                      if (state is AccountTransferListLoading) {
-                        return const Center(child: CircularProgressIndicator());
-                      } else if (state is AccountTransferListSuccess) {
-                        if (state.list.isEmpty) {
-                          return Center(child: Lottie.asset(AppImages.noData));
-                        } else {
-                          return Column(
-                            children: [
-                              AccountTransferCard(
-                                transfers: state.list,
-                                onExecute: (transfer) {
-                                  context.read<AccountTransferBloc>().add(
-                                    ExecuteTransfer(
-                                      context: context,
-                                      transferId: transfer.id.toString(),
-                                    ),
-                                  );
-                                },
-                                onReverse: (transfer) {
-                                  _showReverseDialog(context, transfer);
-                                },
-                                onCancel: (transfer) {
-                                  _showCancelDialog(context, transfer);
-                                },
-                              ),
-                              PaginationBar(
-                                count: state.count,
-                                totalPages: state.totalPages,
-                                currentPage: state.currentPage,
-                                pageSize: state.pageSize,
-                                from: state.from,
-                                to: state.to,
-                                onPageChanged: (page) => _fetchTransferList(
-                                  pageNumber: page,
-                                  pageSize: state.pageSize,
-                                ),
-                                onPageSizeChanged: (newSize) =>
-                                    _fetchTransferList(
-                                      pageNumber: 1,
-                                      pageSize: newSize,
-                                    ),
-                              ),
-                            ],
-                          );
-                        }
-                      } else if (state is AccountTransferListFailed) {
-                        return Center(
-                          child: Text(
-                            'Failed to load transfers: ${state.content}',
-                          ),
-                        );
-                      } else {
-                        return Center(child: Lottie.asset(AppImages.noData));
-                      }
+          ),
+        if (selectedTransferTypeNotifier.value != null)
+          Chip(
+            label: Text(selectedTransferTypeNotifier.value!.toUpperCase()),
+            onDeleted: () {
+              selectedTransferTypeNotifier.value = null;
+              _fetchApi();
+            },
+          ),
+        if (isReversalNotifier.value == true)
+          Chip(
+            label: const Text('REVERSAL'),
+            onDeleted: () {
+              isReversalNotifier.value = null;
+              _fetchApi();
+            },
+          ),
+        if (selectedDateRange != null)
+          Chip(
+            label: Text(
+              '${DateFormat('dd/MM').format(selectedDateRange!.start)} - ${DateFormat('dd/MM/yy').format(selectedDateRange!.end)}',
+            ),
+            onDeleted: _clearDateFilter,
+          ),
+      ],
+    );
+  }
+
+  Widget _buildTransferList() {
+    return BlocListener<AccountTransferBloc, AccountTransferState>(
+      listener: (context, state) {
+        if (state is ExecuteTransferLoading) {
+          appLoader(context, "Executing transfer, please wait...");
+        } else if (state is ExecuteTransferSuccess) {
+          Navigator.pop(context);
+          showCustomToast(
+            context: context,
+            title: 'Success!',
+            description: 'Transfer executed successfully',
+            icon: Icons.check_circle,
+            primaryColor: Colors.green,
+          );
+          _fetchApi();
+        } else if (state is ExecuteTransferFailed) {
+          Navigator.pop(context);
+          appAlertDialog(
+            context,
+            state.content,
+            title: state.title,
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text("Dismiss"),
+              ),
+            ],
+          );
+        } else if (state is ReverseTransferLoading) {
+          appLoader(context, "Reversing transfer, please wait...");
+        } else if (state is ReverseTransferSuccess) {
+          Navigator.pop(context);
+          showCustomToast(
+            context: context,
+            title: 'Success!',
+            description: 'Transfer reversed successfully',
+            icon: Icons.refresh,
+            primaryColor: Colors.orange,
+          );
+          _fetchApi();
+        } else if (state is ReverseTransferFailed) {
+          Navigator.pop(context);
+          appAlertDialog(
+            context,
+            state.content,
+            title: state.title,
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text("Dismiss"),
+              ),
+            ],
+          );
+        } else if (state is CancelTransferLoading) {
+          appLoader(context, "Cancelling transfer, please wait...");
+        } else if (state is CancelTransferSuccess) {
+          Navigator.pop(context);
+          showCustomToast(
+            context: context,
+            title: 'Success!',
+            description: 'Transfer cancelled successfully',
+            icon: Icons.cancel,
+            primaryColor: Colors.grey,
+          );
+          _fetchApi();
+        } else if (state is CancelTransferFailed) {
+          Navigator.pop(context);
+          appAlertDialog(
+            context,
+            state.content,
+            title: state.title,
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text("Dismiss"),
+              ),
+            ],
+          );
+        }
+      },
+      child: BlocBuilder<AccountTransferBloc, AccountTransferState>(
+        builder: (context, state) {
+          if (state is AccountTransferListLoading) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (state is AccountTransferListSuccess) {
+            if (state.list.isEmpty) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Lottie.asset(AppImages.noData, height: 200),
+                    const SizedBox(height: 16),
+                    Text(
+                      'No transfers found',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    AppButton(
+                      name: "Clear Filters",
+                      onPressed: _clearAllFilters,
+                      color: AppColors.primaryColor.withOpacity(0.8),
+                    ),
+                  ],
+                ),
+              );
+            } else {
+              return Column(
+                children: [
+                  MobileAccountTransferCard(
+                    transfers: state.list,
+                    onExecute: (transfer) {
+                      context.read<AccountTransferBloc>().add(
+                        ExecuteTransfer(
+                          context: context,
+                          transferId: transfer.id.toString(),
+                        ),
+                      );
+                    },
+                    onReverse: (transfer) {
+                      _showReverseDialog(context, transfer);
+                    },
+                    onCancel: (transfer) {
+                      _showCancelDialog(context, transfer);
                     },
                   ),
-                ),
-              ],
-            ),
-          ),
-        ),
+                  const SizedBox(height: 16),
+                  PaginationBar(
+                    count: state.count,
+                    totalPages: state.totalPages,
+                    currentPage: state.currentPage,
+                    pageSize: state.pageSize,
+                    from: state.from,
+                    to: state.to,
+                    onPageChanged: (page) => _fetchTransferList(
+                      pageNumber: page,
+                      pageSize: state.pageSize,
+                    ),
+                    onPageSizeChanged: (newSize) => _fetchTransferList(
+                      pageNumber: 1,
+                      pageSize: newSize,
+                    ),
+                  ),
+                ],
+              );
+            }
+          } else if (state is AccountTransferListFailed) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.error_outline, size: 60, color: Colors.red),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Failed to load transfers',
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    state.content,
+                    style: const TextStyle(fontSize: 14, color: Colors.grey),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  AppButton(
+                    name: "Retry",
+                    onPressed: () => _fetchApi(),
+                  ),
+                ],
+              ),
+            );
+          } else {
+            return Center(child: Lottie.asset(AppImages.noData));
+          }
+        },
       ),
+    );
+  }
+
+  void _showMobileFilterSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return Container(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        "Filter Transfers",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        "Date Range",
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      CustomDateRangeField(
+                        isLabel: false,
+                        selectedDateRange: selectedDateRange,
+                        onDateRangeSelected: (value) {
+                          setState(() {
+                            selectedDateRange = value;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Status Filter
+                  const Text(
+                    "Status",
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    children: ["All", "pending", "completed", "failed", "cancelled"].map((status) {
+                      final bool isSelected =
+                          selectedStatusNotifier.value == status ||
+                              (status == "All" && selectedStatusNotifier.value == null);
+                      return FilterChip(
+                        label: Text(status.toUpperCase()),
+                        selected: isSelected,
+                        onSelected: (selected) {
+                          setState(() {
+                            selectedStatusNotifier.value = selected ? (status == "All" ? null : status) : null;
+                          });
+                        },
+                        selectedColor: AppColors.primaryColor.withOpacity(0.2),
+                        checkmarkColor: AppColors.primaryColor,
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Transfer Type Filter
+                  const Text(
+                    "Transfer Type",
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    children: ["All", "internal", "external", "adjustment"].map((type) {
+                      final bool isSelected =
+                          selectedTransferTypeNotifier.value == type ||
+                              (type == "All" && selectedTransferTypeNotifier.value == null);
+                      return FilterChip(
+                        label: Text(type.toUpperCase()),
+                        selected: isSelected,
+                        onSelected: (selected) {
+                          setState(() {
+                            selectedTransferTypeNotifier.value = selected ? (type == "All" ? null : type) : null;
+                          });
+                        },
+                        selectedColor: AppColors.primaryColor.withOpacity(0.2),
+                        checkmarkColor: AppColors.primaryColor,
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Reversal Filter
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        "Reversal Only",
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                        ),
+                      ),
+                      Switch(
+                        value: isReversalNotifier.value ?? false,
+                        onChanged: (value) {
+                          setState(() {
+                            isReversalNotifier.value = value;
+                          });
+                        },
+                        activeColor: AppColors.primaryColor,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Action Buttons
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                            _clearAllFilters();
+                          },
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          child: const Text("Clear All"),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                            _fetchApi();
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primaryColor,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          child: const Text("Apply Filters"),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: MediaQuery.of(context).viewInsets.bottom),
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
   }
 
@@ -613,163 +912,5 @@ class _AccountTransferScreenState extends State<MobileAccountTransferScreen> {
       default:
         return Colors.grey;
     }
-  }
-
-  Widget _buildFilterRow() {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        // 🔍 Search Field
-        Expanded(
-          child: CustomSearchTextFormField(
-            isRequiredLabel: false,
-            controller: filterTextController,
-            onChanged: (value) => _fetchApi(filterText: value),
-            onClear: () {
-              filterTextController.clear();
-              _fetchApi();
-            },
-            hintText: "Search Transfer No or Description",
-          ),
-        ),
-        const SizedBox(width: 10),
-
-        // 📋 Status Dropdown
-        Expanded(
-          child: AppDropdown<String>(
-            context: context,
-            hint: "Select Status",
-            isNeedAll: true,
-            isLabel: false,
-            isRequired: false,
-            value: selectedStatusNotifier.value,
-            itemList: ['pending', 'completed', 'failed', 'cancelled'],
-            onChanged: (newVal) {
-              selectedStatusNotifier.value = newVal;
-              _fetchApi(status: newVal);
-            },
-            validator: (value) => null,
-            itemBuilder: (item) => DropdownMenuItem<String>(
-              value: item,
-              child: Text(
-                item.toUpperCase(),
-                style: const TextStyle(
-                  color: AppColors.blackColor,
-                  fontFamily: 'Quicksand',
-                  fontWeight: FontWeight.w300,
-                ),
-              ),
-            ),
-            label: '',
-          ),
-        ),
-        const SizedBox(width: 10),
-
-        // 🔄 Transfer Type Dropdown
-        Expanded(
-          child: AppDropdown<String>(
-            context: context,
-            hint: "Transfer Type",
-            isNeedAll: true,
-            isLabel: false,
-            isRequired: false,
-            value: selectedTransferTypeNotifier.value,
-            itemList: ['internal', 'external', 'adjustment'],
-            onChanged: (newVal) {
-              selectedTransferTypeNotifier.value = newVal;
-              _fetchApi(transferType: newVal);
-            },
-            validator: (value) => null,
-            itemBuilder: (item) => DropdownMenuItem<String>(
-              value: item,
-              child: Text(
-                item.replaceAll('_', ' ').toUpperCase(),
-                style: const TextStyle(
-                  color: AppColors.blackColor,
-                  fontFamily: 'Quicksand',
-                  fontWeight: FontWeight.w300,
-                ),
-              ),
-            ),
-            label: '',
-          ),
-        ),
-        const SizedBox(width: 10),
-
-        // ➕ Create Transfer Button
-        AppButton(
-          name: "Create Transfer",
-          onPressed: () {
-            showDialog(
-              context: context,
-              builder: (context) {
-                return Dialog(
-                  child: SizedBox(
-                    width: AppSizes.width(context) * 0.60,
-                    height: 550,
-                    child: const AccountTransferForm(),
-                  ),
-                );
-              },
-            );
-          },
-        ),
-
-        const SizedBox(width: 10),
-
-        // 🔄 Refresh Button
-        IconButton(
-          onPressed: () => _fetchApi(),
-          icon: const Icon(Icons.refresh),
-          tooltip: "Refresh",
-        ),
-      ],
-    );
-  }
-
-  Widget _buildDateFilterRow() {
-    return Row(
-      children: [
-        // Date Range Picker Button
-        AppButton(
-          name: startDate != null && endDate != null
-              ? "${DateFormat('dd/MM/yyyy').format(startDate!)} - ${DateFormat('dd/MM/yyyy').format(endDate!)}"
-              : "Select Date Range",
-          onPressed: () => _showDateRangePicker(context),
-          color: startDate != null && endDate != null
-              ? AppColors.primaryColor.withValues(alpha: 0.8)
-              : AppColors.primaryColor,
-        ),
-
-        // Clear Date Button (only shown when date is selected)
-        if (startDate != null && endDate != null) ...[
-          const SizedBox(width: 10),
-          AppButton(
-            name: "Clear Date",
-            color: AppColors.secondary,
-            onPressed: _clearDateFilter,
-          ),
-        ],
-
-        const Spacer(),
-
-        // Reversal Filter
-        Row(
-          children: [
-            const Text("Reversal Only:"),
-            const SizedBox(width: 8),
-            Switch(
-              value: isReversalNotifier.value ?? false,
-              onChanged: (value) {
-                isReversalNotifier.value = value;
-                _fetchApi(isReversal: value);
-              },
-              activeThumbColor: AppColors.primaryColor,
-            ),
-          ],
-        ),
-      ],
-    );
   }
 }
