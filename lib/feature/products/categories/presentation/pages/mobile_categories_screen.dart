@@ -25,7 +25,6 @@ class _CategoriesScreenState extends State<MobileCategoriesScreen> {
     super.initState();
   }
 
-
   void _fetchApiData({
     String filterText = '',
     String state = '',
@@ -43,46 +42,34 @@ class _CategoriesScreenState extends State<MobileCategoriesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isBigScreen =
-        Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
+
     return Scaffold(
+      appBar: AppBar(
+        title: Text("Categories", style: AppTextStyle.titleMedium(context)),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          context.read<CategoriesBloc>().nameController.clear();
+          showDialog(
+            context: context,
+            builder: (context) {
+              return Dialog(
+                insetPadding: const EdgeInsets.all(16),
+                child: CategoriesCreate(),
+              );
+            },
+          );
+        },
+        child: Icon(Icons.add),
+      ),
       body: SafeArea(
-        child: ResponsiveRow(
-          spacing: 0,
-          runSpacing: 0,
-          children: [
-            if (isBigScreen) _buildSidebar(),
-            _buildContentArea(isBigScreen),
-          ],
-        ),
+        child: buildContent()
       ),
     );
   }
 
-  Widget _buildSidebar() {
-    return ResponsiveCol(
-      xs: 0,
-      sm: 1,
-      md: 1,
-      lg: 2,
-      xl: 2,
-      child: Container(
-        decoration: const BoxDecoration(color: Colors.white),
-        child: const Sidebar(),
-      ),
-    );
-  }
 
-  Widget _buildContentArea(bool isBigScreen) {
-    return ResponsiveCol(
-      xs: 12,
-      sm: 12,
-      md: 12,
-      lg: 10,
-      xl: 10,
-      child: Container(color: AppColors.bg, child: buildContent()),
-    );
-  }
+
 
   Widget buildContent() {
     final isMobile = Responsive.isMobile(context);
@@ -102,12 +89,12 @@ class _CategoriesScreenState extends State<MobileCategoriesScreen> {
               state is CategoriesDeleteSuccess) {
             if (state is CategoriesDeleteSuccess) {
               showCustomToast(
-              context: context,
-              title: 'Success!',
-              description: state.message,
-              icon: Icons.check_circle,
-              primaryColor: Colors.green,
-            );
+                context: context,
+                title: 'Success!',
+                description: state.message,
+                icon: Icons.check_circle,
+                primaryColor: Colors.green,
+              );
             }
             // Navigator.pop(context);
             if (state is CategoriesAddSuccess) Navigator.pop(context);
@@ -120,143 +107,60 @@ class _CategoriesScreenState extends State<MobileCategoriesScreen> {
             _fetchApiData();
           }
         },
-        child: Column(
-          children: [
-            // Header with search and button
-            if (isMobile)
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Title for mobile
-                  Text(
-                    'Categories',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.primaryColor,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              // Header with search and button
 
-                  // Search field
-                  CustomSearchTextFormField(
-                    controller: dataBloc.filterTextController,
-                    onChanged: (value) => _fetchApiData(filterText: value),
-                    onClear: () {
-                      dataBloc.filterTextController.clear();
-                      _fetchApiData();
-                    },
-                    hintText: "Search categories...",
-                    isRequiredLabel: false,
-                    labelText: "",
-                  ),
-                  const SizedBox(height: 12),
-
-                  // Create button
-                  SizedBox(
-                    width: double.infinity,
-                    child: AppButton(
-                      name: "Create Category",
-                      onPressed: () {
-                        context.read<CategoriesBloc>().nameController.clear();
-                        showDialog(
-                          context: context,
-                          builder: (context) {
-                            return Dialog(
-                              insetPadding: const EdgeInsets.all(16),
-                              child: CategoriesCreate(),
-                            );
-                          },
-                        );
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Search field
+                    CustomSearchTextFormField(
+                      controller: dataBloc.filterTextController,
+                      onChanged: (value) => _fetchApiData(filterText: value),
+                      onClear: () {
+                        dataBloc.filterTextController.clear();
+                        _fetchApiData();
                       },
+                      hintText: "Search categories...",
+                      isRequiredLabel: false,
+                      labelText: "",
                     ),
-                  ),
-                ],
-              )
-            else
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  // Title for desktop/tablet
-                  Text(
-                    'Categories',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.primaryColor,
-                    ),
-                  ),
+                  ],
+                ),
 
-                  Row(
-                    children: [
-                      SizedBox(
-                        width: 350,
-                        child: CustomSearchTextFormField(
-                          controller: dataBloc.filterTextController,
-                          onChanged: (value) => _fetchApiData(filterText: value),
-                          onClear: () {
-                            dataBloc.filterTextController.clear();
-                            _fetchApiData();
-                          },
-                          hintText: "Search categories...",
-                          isRequiredLabel: false,
-                          labelText: "",
+
+              /// 👇 Expanded fixes layout overflow
+              SizedBox(
+                child: BlocBuilder<CategoriesBloc, CategoriesState>(
+                  builder: (context, state) {
+                    if (state is CategoriesListLoading) {
+                      return const Center(child: CircularProgressIndicator());
+                    } else if (state is CategoriesListSuccess) {
+                      if (state.list.isEmpty) {
+                        return Center(child: Lottie.asset(AppImages.noData));
+                      } else {
+                        return isMobile
+                            ? CategoriesListMobile(categories: state.list)
+                            : CategoriesTableCard(categories: state.list);
+                      }
+                    } else if (state is CategoriesListFailed) {
+                      return Center(
+                        child: Text(
+                          'Failed to load categories: ${state.content}',
                         ),
-                      ),
-                      const SizedBox(width: 16),
-                      AppButton(
-                        name: "Create Category",
-                        onPressed: () {
-                          context.read<CategoriesBloc>().nameController.clear();
-                          showDialog(
-                            context: context,
-                            builder: (context) {
-                              return Dialog(
-                                child: SizedBox(
-                                  width: MediaQuery.of(context).size.width * 0.5,
-                                  child: CategoriesCreate(),
-                                ),
-                              );
-                            },
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            const SizedBox(height: 10),
-
-            /// 👇 Expanded fixes layout overflow
-            SizedBox(
-              child: BlocBuilder<CategoriesBloc, CategoriesState>(
-                builder: (context, state) {
-                  if (state is CategoriesListLoading) {
-                    return const Center(child: CircularProgressIndicator());
-                  } else if (state is CategoriesListSuccess) {
-                    if (state.list.isEmpty) {
-                      return Center(child: Lottie.asset(AppImages.noData));
+                      );
                     } else {
-                      return isMobile
-                          ? CategoriesListMobile(categories: state.list)
-                          : CategoriesTableCard(categories: state.list);
+                      return const SizedBox.shrink();
                     }
-                  } else if (state is CategoriesListFailed) {
-                    return Center(
-                      child: Text(
-                        'Failed to load categories: ${state.content}',
-                      ),
-                    );
-                  } else {
-                    return const SizedBox.shrink();
-                  }
-                },
+                  },
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
-
 }

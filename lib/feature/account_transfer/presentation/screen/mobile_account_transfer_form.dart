@@ -1,7 +1,7 @@
 // lib/account_transfer/presentation/screens/account_transfer_form.dart
-
-
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:meherinMart/core/widgets/app_scaffold.dart';
 import '/core/core.dart';
 import '/feature/accounts/presentation/bloc/account/account_bloc.dart';
 import '../../../accounts/data/model/account_active_model.dart';
@@ -12,10 +12,10 @@ class MobileAccountTransferForm extends StatefulWidget {
   const MobileAccountTransferForm({super.key});
 
   @override
-  State<MobileAccountTransferForm> createState() => _AccountTransferFormState();
+  State<MobileAccountTransferForm> createState() => _MobileAccountTransferFormState();
 }
 
-class _AccountTransferFormState extends State<MobileAccountTransferForm> {
+class _MobileAccountTransferFormState extends State<MobileAccountTransferForm> {
   @override
   void initState() {
     _initializeData();
@@ -25,7 +25,9 @@ class _AccountTransferFormState extends State<MobileAccountTransferForm> {
   void _initializeData() {
     // Fetch available accounts
     context.read<AccountBloc>().add(FetchAccountActiveList(context));
-    context.read<AccountTransferBloc>().add(FetchAvailableAccounts(context: context));
+    context.read<AccountTransferBloc>().add(
+      FetchAvailableAccounts(context: context),
+    );
 
     // Set default date
     final transferBloc = context.read<AccountTransferBloc>();
@@ -36,8 +38,8 @@ class _AccountTransferFormState extends State<MobileAccountTransferForm> {
 
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   late AccountTransferBloc transferBloc;
-
   ValueNotifier<bool> isQuickTransfer = ValueNotifier<bool>(false);
+  final _scrollController = ScrollController();
 
   @override
   void didChangeDependencies() {
@@ -48,414 +50,262 @@ class _AccountTransferFormState extends State<MobileAccountTransferForm> {
   @override
   void dispose() {
     isQuickTransfer.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
-  void _fetchApi({
-    String? fromAccountId,
-    String? toAccountId,
-    String? status,
-    String? transferType,
-    bool? isReversal,
-    DateTime? startDate,
-    DateTime? endDate,
-    int pageNumber = 1,
-    int pageSize = 10,
-  }) {
+
+  void _fetchApi() {
     context.read<AccountTransferBloc>().add(
       FetchAccountTransferList(
         context: context,
-        fromAccountId: fromAccountId,
-        toAccountId: toAccountId,
-        status: status,
-        transferType: transferType,
-        isReversal: isReversal,
-        startDate: startDate,
-        endDate: endDate,
-        pageNumber: pageNumber,
-        pageSize: pageSize,
+        pageNumber: 1,
+        pageSize: 10,
       ),
     );
   }
+
   @override
   Widget build(BuildContext context) {
-    final isBigScreen = Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
-
-    return Scaffold(
-        body: SafeArea(
-      child: ResponsiveRow(
-        spacing: 0,
-        runSpacing: 0,
-        children: [
-          if (isBigScreen)
-            ResponsiveCol(
-              xs: 0,
-              sm: 1,
-              md: 1,
-              lg: 2,
-              xl: 2,
-              child: Container(
-                decoration: BoxDecoration(color: AppColors.whiteColor),
-                child: isBigScreen ? const Sidebar() : const SizedBox.shrink(),
-              ),
-            ),
-          ResponsiveCol(
-            xs: 12,
-            sm: 12,
-            md: 12,
-            lg: 10,
-            xl: 10,
-            child: Form(
-              key: formKey,
-              child: Container(
-                padding: const EdgeInsets.all(10),
-                color: AppColors.bg,
-                child: BlocListener<AccountTransferBloc, AccountTransferState>(
-                  listener: (context, state) {
-                    if (state is AccountTransferAddLoading ||
-                        state is QuickTransferLoading ||
-                        state is ExecuteTransferLoading) {
-                      appLoader(context, "Processing transfer, please wait...");
-                    } else if (state is AccountTransferAddSuccess) {
-                      Navigator.pop(context); // Close loader dialog
-_fetchApi();
-                      context.read<DashboardBloc>().add(ChangeDashboardScreen(index: 38));
-
-                      _showSuccessDialog(
-                        "Transfer Created",
-                        "Transfer request created successfully. Use execute option to complete it.",
-                      );
-
-
-                    } else if (state is QuickTransferSuccess) {
-                      context.read<DashboardBloc>().add(ChangeDashboardScreen(index: 38));
-
-                      Navigator.pop(context); // Close loader dialog
-                      _showSuccessDialog(
-                        "Transfer Completed",
-                        "Transfer completed successfully.",
-                      );
-                    } else if (state is ExecuteTransferSuccess) {
-                      context.read<DashboardBloc>().add(ChangeDashboardScreen(index: 38));
-                      _fetchApi();
-
-                      Navigator.pop(context); // Close loader dialog
-
-
-
-                      _showSuccessDialog(
-                        "Transfer Executed",
-                        "Transfer executed successfully.",
-                      );
-                    } else if (state is AccountTransferAddFailed ||
-                        state is QuickTransferFailed ||
-                        state is ExecuteTransferFailed ||
-                        state is AvailableAccountsFailed) {
-                      Navigator.pop(context); // Close loader dialog
-                      // appAlertDialog(
-                      //   context,
-                      //   state.content,
-                      //   title: state.title,
-                      //   actions: [
-                      //     TextButton(
-                      //       onPressed: () => Navigator.pop(context),
-                      //       child: const Text("Dismiss"),
-                      //     ),
-                      //   ],
-                      // );
-                    }
-                  },
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(height: 8),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text(
-                            "Account Transfer",
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
-                          ),
-                          ValueListenableBuilder<bool>(
-                            valueListenable: isQuickTransfer,
-                            builder: (context, isQuick, child) {
-                              return Row(
-                                children: [
-                                  const Text("Quick Transfer:"),
-                                  const SizedBox(width: 8),
-                                  Switch(
-                                    value: isQuick,
-                                    onChanged: (value) {
-                                      isQuickTransfer.value = value;
-                                    },
-                                    activeColor: AppColors.primaryColor,
-                                  ),
-                                ],
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        padding: const EdgeInsets.all(20),
-                        child: Column(
-                          children: [
-
-                            const SizedBox(height: 16),
-                            ResponsiveRow(
-                              spacing: 5,
-                              runSpacing: 5,
-                              children: [
-                                // From Account
-                                ResponsiveCol(
-                                  xs: 12,
-                                  sm: 3,
-                                  md: 3,
-                                  lg: 3,
-                                  xl: 3,
-                                  child: _buildAccountDropdown(
-                                    context,
-                                    isFromAccount: true,
-                                  ),
-                                ),
-                                // To Account
-                                ResponsiveCol(
-                                  xs: 12,
-                                  sm: 3,
-                                  md: 3,
-                                  lg: 3,
-                                  xl: 3,
-                                  child: _buildAccountDropdown(
-                                    context,
-                                    isFromAccount: false,
-                                  ),
-                                ),
-                                // Amount
-                                ResponsiveCol(
-                                  xs: 12,
-                                  sm: 3,
-                                  md: 3,
-                                  lg: 3,
-                                  xl: 3,
-                                  child: AppTextField(
-                                    isRequired: true,
-                                    controller: transferBloc.amountController,
-                                    hintText: 'Amount',
-                                    keyboardType: TextInputType.number,
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Please enter amount';
-                                      }
-                                      final amount = double.tryParse(value);
-                                      if (amount == null || amount <= 0) {
-                                        return 'Please enter a valid amount';
-                                      }
-                                      return null;
-                                    },
-                                    onChanged: (value) {
-                                      setState(() {});
-                                    },
-                                  ),
-                                ),
-                                // Transfer Type
-                                ResponsiveCol(
-                                  xs: 12,
-                                  sm: 3,
-                                  md: 3,
-                                  lg: 3,
-                                  xl: 3,
-                                  child: AppDropdown<String>(
-                                    context: context,
-                                    label: "Transfer Type",
-                                    hint: transferBloc.selectedTransferType
-                                        .toUpperCase(),
-                                    isLabel: false,
-                                    isRequired: true,
-                                    isNeedAll: false,
-                                    value: transferBloc.selectedTransferType,
-                                    itemList: transferBloc.transferTypes,
-                                    onChanged: (newVal) {
-                                      setState(() {
-                                        transferBloc.selectedTransferType = newVal.toString();
-                                      });
-                                    },
-                                    itemBuilder: (item) => DropdownMenuItem(
-                                      value: item,
-                                      child: Text(
-                                        item.replaceAll('_', ' ').toUpperCase(),
-                                        style: const TextStyle(
-                                          color: AppColors.blackColor,
-                                          fontFamily: 'Quicksand',
-                                          fontWeight: FontWeight.w300,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                // Date
-                                ResponsiveCol(
-                                  xs: 12,
-                                  sm: 3,
-                                  md: 3,
-                                  lg: 3,
-                                  xl: 3,
-                                  child: CustomInputField(
-                                    isRequired: true,
-                                    controller: transferBloc.dateController,
-                                    hintText: 'Transfer Date',
-                                    fillColor: const Color.fromARGB(
-                                      255, 255, 255, 255,
-                                    ),
-                                    readOnly: true,
-                                    keyboardType: TextInputType.text,
-                                    validator: (value) {
-                                      return value!.isEmpty
-                                          ? 'Please select date'
-                                          : null;
-                                    },
-                                    onTap: () async {
-                                      FocusScope.of(context).requestFocus(FocusNode());
-                                      DateTime? pickedDate = await showDatePicker(
-                                        context: context,
-                                        initialDate: DateTime.now(),
-                                        firstDate: DateTime(1900),
-                                        lastDate: DateTime.now(),
-                                      );
-                                      if (pickedDate != null) {
-                                        setState(() {
-                                          transferBloc.dateController.text =
-                                              appWidgets.convertDateTimeDDMMYYYY(pickedDate);
-                                        });
-                                      }
-                                    },
-                                  ),
-                                ),
-                                // Reference No
-                                ResponsiveCol(
-                                  xs: 12,
-                                  sm: 3,
-                                  md: 3,
-                                  lg: 3,
-                                  xl: 3,
-                                  child: AppTextField(
-                                    isRequired: false,
-                                    controller: transferBloc.referenceNoController,
-                                    hintText: 'Reference No',
-                                    onChanged: (value) {
-                                      setState(() {});
-                                    },
-                                    keyboardType: TextInputType.text,
-                                  ),
-                                ),
-                                // Description
-                                ResponsiveCol(
-                                  xs: 12,
-                                  sm: 4,
-                                  md: 4,
-                                  lg: 4,
-                                  xl: 4,
-                                  child: AppTextField(
-                                    isRequired: false,
-                                    controller: transferBloc.descriptionController,
-                                    hintText: 'Description',
-                                    onChanged: (value) {
-                                      setState(() {});
-                                    },
-                                    keyboardType: TextInputType.text,
-                                  ),
-                                ),
-                                // Remarks
-                                ResponsiveCol(
-                                  xs: 12,
-                                  sm: 4,
-                                  md: 4,
-                                  lg: 4,
-                                  xl: 4,
-                                  child: AppTextField(
-                                    isRequired: false,
-                                    controller: transferBloc.remarksController,
-                                    hintText: 'Remarks',
-                                    onChanged: (value) {
-                                      setState(() {});
-                                    },
-                                    keyboardType: TextInputType.text,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      Row(
-                        children: [
-                          ValueListenableBuilder<bool>(
-                            valueListenable: isQuickTransfer,
-                            builder: (context, isQuick, child) {
-                              return AppButton(
-                                width: 200,
-                                name: isQuick ? "Quick Transfer" : "Create Transfer",
-                                onPressed: () {
-                                  if (isQuick) {
-                                    _createQuickTransfer();
-                                  } else {
-                                    _createTransfer();
-                                  }
-                                },
-                              );
-                            },
-                          ),
-                          const SizedBox(width: 16),
-                          AppButton(
-                            width: 100,
-
-                            color: AppColors.secondary,
-                            onPressed: () {
-                              transferBloc.add(ResetForm());
-                              setState(() {});
-                            }, name: 'Reset',
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
+    return AppScaffold(
+      appBar: AppBar(
+        title: const Text(
+          "Account Transfer",
+          style: TextStyle(fontWeight: FontWeight.w600),
+        ),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: () {
+              transferBloc.add(ResetForm());
+              setState(() {});
+            },
           ),
         ],
       ),
-    ));
+      body: SafeArea(
+        child: Form(
+          key: formKey,
+          child: BlocListener<AccountTransferBloc, AccountTransferState>(
+            listener: (context, state) {
+              if (state is AccountTransferAddLoading ||
+                  state is QuickTransferLoading ||
+                  state is ExecuteTransferLoading) {
+                appLoader(context, "Processing transfer...");
+              } else if (state is AccountTransferAddSuccess) {
+                Navigator.pop(context);
+                _showSuccessDialog(
+                  "Transfer Created",
+                  "Transfer request created successfully. Use execute option to complete it.",
+                );
+              } else if (state is QuickTransferSuccess) {
+                Navigator.pop(context);
+                _showSuccessDialog(
+                  "Transfer Completed",
+                  "Transfer completed successfully.",
+                );
+              } else if (state is AccountTransferAddFailed ||
+                  state is QuickTransferFailed ||
+                  state is ExecuteTransferFailed) {
+                Navigator.pop(context);
+                // ScaffoldMessenger.of(context).showSnackBar(
+                //   SnackBar(
+                //     content: Text(state.),
+                //     backgroundColor: Colors.red,
+                //   ),
+                // );
+              }
+            },
+            child: SingleChildScrollView(
+              controller: _scrollController,
+              padding: const EdgeInsets.all(8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Quick Transfer Toggle
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withValues(alpha: 0.1),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Quick Transfer",
+                              style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14,
+                                color: AppColors.primaryColor,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              "Complete transfer immediately",
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey.shade600,
+                              ),
+                            ),
+                          ],
+                        ),
+                        ValueListenableBuilder<bool>(
+                          valueListenable: isQuickTransfer,
+                          builder: (context, isQuick, child) {
+                            return Switch(
+                              value: isQuick,
+                              onChanged: (value) {
+                                isQuickTransfer.value = value;
+                              },
+                              activeColor: AppColors.primaryColor,
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+
+                  // From Account
+                  _buildAccountSection(
+                    title: "From Account",
+                    isFromAccount: true,
+                  ),
+                  const SizedBox(height: 8),
+
+                  // To Account
+                  _buildAccountSection(
+                    title: "To Account",
+                    isFromAccount: false,
+                  ),
+                  const SizedBox(height: 8),
+
+                  // Transfer Details Card
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withValues(alpha: 0.1),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    padding: const EdgeInsets.all(8),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Transfer Details",
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 16,
+                            color: AppColors.primaryColor,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+
+                        // Amount
+                        _buildAmountField(),
+                        const SizedBox(height: 8),
+
+                        // Transfer Type
+                        _buildTransferTypeField(),
+                        const SizedBox(height: 8),
+
+                        // Date
+                        _buildDateField(),
+                        const SizedBox(height: 8),
+
+                        // Reference No
+                        _buildReferenceField(),
+                        const SizedBox(height: 8),
+
+                        // Description
+                        _buildDescriptionField(),
+                        const SizedBox(height: 8),
+
+                        // Remarks
+                        _buildRemarksField(),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+
+                  // Action Buttons
+                  _buildActionButtons(),
+                  const SizedBox(height: 20),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
-  Widget _buildAccountDropdown(
-      BuildContext context, {
-        required bool isFromAccount,
-      }) {
-    final transferBloc = context.read<AccountTransferBloc>();
+  Widget _buildAccountSection({
+    required String title,
+    required bool isFromAccount,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 14,
+              color: AppColors.primaryColor,
+            ),
+          ),
+          const SizedBox(height: 12),
+          _buildAccountDropdown(isFromAccount: isFromAccount),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAccountDropdown({required bool isFromAccount}) {
+    final selectedAccount = isFromAccount
+        ? transferBloc.fromAccountModel
+        : transferBloc.toAccountModel;
 
     return BlocBuilder<AccountBloc, AccountState>(
       builder: (context, state) {
         if (state is AccountActiveListLoading) {
-          return const Center(child: CircularProgressIndicator());
-        } else if (state is AccountActiveListFailed) {
-          return Text(
-            state.content,
-            style: const TextStyle(color: Colors.red),
+          return Container(
+            height: 50,
+            alignment: Alignment.center,
+            child: const CircularProgressIndicator(strokeWidth: 2),
           );
         } else if (state is AccountActiveListSuccess) {
-          final selectedAccount = isFromAccount
-              ? transferBloc.fromAccountModel
-              : transferBloc.toAccountModel;
-
-          // Filter out the opposite account to prevent self-transfer
           final filteredAccounts = state.list.where((account) {
             if (isFromAccount) {
               return account.id != transferBloc.toAccountModel?.id;
@@ -464,73 +314,480 @@ _fetchApi();
             }
           }).toList();
 
-          return AppDropdown<AccountActiveModel>(
-            context: context,
-            label: isFromAccount ? "From Account" : "To Account",
-            hint: selectedAccount == null
-                ? "Select ${isFromAccount ? 'From' : 'To'} Account"
-                : "${selectedAccount.name}${selectedAccount.acNumber != null && selectedAccount.acNumber!.isNotEmpty ? ' - ${selectedAccount.acNumber}' : ''}",
-            isLabel: false,
-            isRequired: true,
-            isNeedAll: false,
-            value: selectedAccount,
-            itemList: filteredAccounts,
-            onChanged: (newVal) {
-              setState(() {
-                if (isFromAccount) {
-                  transferBloc.fromAccountModel = newVal;
-                } else {
-                  transferBloc.toAccountModel = newVal;
-                }
-              });
+          return GestureDetector(
+            onTap: () {
+              _showAccountSelector(
+                context,
+                filteredAccounts,
+                isFromAccount,
+              );
             },
-            validator: (value) {
-              if (value == null) {
-                return 'Please select ${isFromAccount ? 'from' : 'to'} account';
-              }
-              if (isFromAccount &&
-                  transferBloc.toAccountModel != null &&
-                  value.id == transferBloc.toAccountModel!.id) {
-                return 'Cannot transfer to the same account';
-              }
-              return null;
-            },
-            itemBuilder: (item) => DropdownMenuItem(
-              value: item,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.grey.shade300),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    item.name ?? "Unknown",
-                    style: const TextStyle(
-                      color: Colors.black,
-                      fontWeight: FontWeight.w500,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          selectedAccount?.name ?? "Select Account",
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: selectedAccount != null
+                                ? Colors.black87
+                                : Colors.grey.shade600,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        if (selectedAccount != null && selectedAccount.acNumber != null)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 4),
+                            child: Text(
+                              "Acc. No: ${selectedAccount.acNumber}",
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    "Balance: ${item.balance ?? '0.00'} | Type: ${item.acType?.toUpperCase() ?? 'Unknown'}",
-                    style: const TextStyle(
-                      color: Colors.grey,
-                      fontSize: 12,
-                    ),
+                  Icon(
+                    Icons.arrow_drop_down,
+                    color: Colors.grey.shade600,
                   ),
                 ],
               ),
             ),
           );
-        } else {
-          return const SizedBox.shrink();
         }
+        return const SizedBox.shrink();
       },
     );
   }
 
+  void _showAccountSelector(
+      BuildContext context,
+      List<AccountActiveModel> accounts,
+      bool isFromAccount,
+      ) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return Container(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                "Select ${isFromAccount ? 'From' : 'To'} Account",
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Expanded(
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: accounts.length,
+                  itemBuilder: (context, index) {
+                    final account = accounts[index];
+                    return ListTile(
+                      onTap: () {
+                        setState(() {
+                          if (isFromAccount) {
+                            transferBloc.fromAccountModel = account;
+                          } else {
+                            transferBloc.toAccountModel = account;
+                          }
+                        });
+                        Navigator.pop(context);
+                      },
+                      leading: Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryColor.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Icon(
+                          Icons.account_balance_wallet,
+                          color: AppColors.primaryColor,
+                          size: 20,
+                        ),
+                      ),
+                      title: Text(
+                        account.name ?? "Unknown",
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w500,
+                          fontSize: 14,
+                        ),
+                      ),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (account.acNumber != null)
+                            Text(
+                              "Acc. No: ${account.acNumber}",
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                          Text(
+                            "Balance: ${account.balance ?? '0.00'}",
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Colors.green,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildAmountField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "Amount *",
+          style: TextStyle(
+            fontWeight: FontWeight.w500,
+            fontSize: 14,
+            color: Colors.grey.shade700,
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: transferBloc.amountController,
+          keyboardType: TextInputType.number,
+          decoration: InputDecoration(
+            hintText: "Enter amount",
+            prefixIcon: const Icon(Icons.currency_rupee, size: 20),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: Colors.grey.shade300),
+            ),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 12,
+            ),
+          ),
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Please enter amount';
+            }
+            final amount = double.tryParse(value);
+            if (amount == null || amount <= 0) {
+              return 'Please enter a valid amount';
+            }
+            return null;
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTransferTypeField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "Transfer Type *",
+          style: TextStyle(
+            fontWeight: FontWeight.w500,
+            fontSize: 14,
+            color: Colors.grey.shade700,
+          ),
+        ),
+        const SizedBox(height: 8),
+        DropdownButtonFormField<String>(
+          value: transferBloc.selectedTransferType,
+          items: transferBloc.transferTypes.map((type) {
+            return DropdownMenuItem(
+              value: type,
+              child: Text(
+                type.replaceAll('_', ' ').toUpperCase(),
+                style: const TextStyle(fontSize: 14),
+              ),
+            );
+          }).toList(),
+          onChanged: (value) {
+            setState(() {
+              transferBloc.selectedTransferType = value!;
+            });
+          },
+          decoration: InputDecoration(
+            hintText: "Select type",
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: Colors.grey.shade300),
+            ),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 12,
+            ),
+          ),
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Please select transfer type';
+            }
+            return null;
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDateField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "Transfer Date *",
+          style: TextStyle(
+            fontWeight: FontWeight.w500,
+            fontSize: 14,
+            color: Colors.grey.shade700,
+          ),
+        ),
+        const SizedBox(height: 8),
+        GestureDetector(
+          onTap: () async {
+            FocusScope.of(context).requestFocus(FocusNode());
+            DateTime? pickedDate = await showDatePicker(
+              context: context,
+              initialDate: DateTime.now(),
+              firstDate: DateTime(1900),
+              lastDate: DateTime.now(),
+              builder: (context, child) {
+                return Theme(
+                  data: ThemeData.light().copyWith(
+                    primaryColor: AppColors.primaryColor,
+                    colorScheme: ColorScheme.light(
+                      primary: AppColors.primaryColor,
+                    ),
+                    buttonTheme: const ButtonThemeData(
+                      textTheme: ButtonTextTheme.primary,
+                    ),
+                  ),
+                  child: child!,
+                );
+              },
+            );
+            if (pickedDate != null) {
+              setState(() {
+                transferBloc.dateController.text =
+                    appWidgets.convertDateTimeDDMMYYYY(pickedDate);
+              });
+            }
+          },
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.grey.shade300),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.calendar_today, size: 20, color: Colors.grey.shade600),
+                const SizedBox(width: 12),
+                Text(
+                  transferBloc.dateController.text.isNotEmpty
+                      ? transferBloc.dateController.text
+                      : "Select date",
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: transferBloc.dateController.text.isNotEmpty
+                        ? Colors.black87
+                        : Colors.grey.shade600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildReferenceField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "Reference No",
+          style: TextStyle(
+            fontWeight: FontWeight.w500,
+            fontSize: 14,
+            color: Colors.grey.shade700,
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: transferBloc.referenceNoController,
+          decoration: InputDecoration(
+            hintText: "Enter reference number",
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: Colors.grey.shade300),
+            ),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 12,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDescriptionField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "Description",
+          style: TextStyle(
+            fontWeight: FontWeight.w500,
+            fontSize: 14,
+            color: Colors.grey.shade700,
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: transferBloc.descriptionController,
+          maxLines: 2,
+          decoration: InputDecoration(
+            hintText: "Enter description",
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: Colors.grey.shade300),
+            ),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 12,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildRemarksField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "Remarks",
+          style: TextStyle(
+            fontWeight: FontWeight.w500,
+            fontSize: 14,
+            color: Colors.grey.shade700,
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: transferBloc.remarksController,
+          maxLines: 2,
+          decoration: InputDecoration(
+            hintText: "Enter remarks",
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: Colors.grey.shade300),
+            ),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 12,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildActionButtons() {
+    return Row(
+      children: [
+      Expanded(child:   ValueListenableBuilder<bool>(
+        valueListenable: isQuickTransfer,
+        builder: (context, isQuick, child) {
+          return SizedBox(
+            width: double.infinity,
+            child: AppButton(
+              onPressed: () {
+                if (isQuick) {
+                  _createQuickTransfer();
+                } else {
+                  _createTransfer();
+                }
+              },
+             name:    isQuick ? "QUICK TRANSFER" : "CREATE TRANSFER",
+
+            ),
+          );
+        },
+      ),),
+        const SizedBox(width: 12),
+     Expanded(child:    SizedBox(
+       width: double.infinity,
+       child: OutlinedButton(
+         onPressed: () {
+           transferBloc.add(ResetForm());
+           setState(() {});
+         },
+         style: OutlinedButton.styleFrom(
+           padding: const EdgeInsets.symmetric(vertical: 0),
+           shape: RoundedRectangleBorder(
+             borderRadius: BorderRadius.circular(12),
+           ),
+           side: BorderSide(color: AppColors.primaryColor),
+         ),
+         child: Text(
+           "RESET FORM",
+           style: TextStyle(
+             fontWeight: FontWeight.w600,
+             fontSize: 14,
+             color: AppColors.primaryColor,
+           ),
+         ),
+       ),
+     ),)
+      ],
+    );
+  }
 
   void _createTransfer() {
     if (!formKey.currentState!.validate()) return;
-
-    final transferBloc = context.read<AccountTransferBloc>();
 
     // Validate accounts
     if (transferBloc.fromAccountModel == null) {
@@ -556,14 +813,18 @@ _fetchApi();
     }
 
     // Check if from account has sufficient balance
-    final fromBalance = double.tryParse(transferBloc.fromAccountModel?.balance.toString() ?? '0') ?? 0.0;
-    final transferAmount = double.tryParse(transferBloc.amountController.text.trim()) ?? 0;
+    final fromBalance = transferBloc.fromAccountModel?.balance is String
+        ? double.tryParse(transferBloc.fromAccountModel?.balance) ?? 0.0
+        : (transferBloc.fromAccountModel?.balance ?? 0.0);
+
+    final transferAmount =
+        double.tryParse(transferBloc.amountController.text.trim()) ?? 0;
 
     if (transferAmount > fromBalance) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Insufficient balance. Available: $fromBalance, Required: $transferAmount',
+            'Insufficient balance. Available: $fromBalance',
           ),
         ),
       );
@@ -596,17 +857,12 @@ _fetchApi();
       "transfer_date": formattedDate,
     };
 
-    transferBloc.add(CreateAccountTransfer(
-      context: context,
-      body: body,
-    ));
+    transferBloc.add(CreateAccountTransfer(context: context, body: body));
   }
 
   void _createQuickTransfer() {
     if (!formKey.currentState!.validate()) return;
 
-    final transferBloc = context.read<AccountTransferBloc>();
-
     // Validate accounts
     if (transferBloc.fromAccountModel == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -631,18 +887,18 @@ _fetchApi();
     }
 
     // Check if from account has sufficient balance
-
     final fromBalance = transferBloc.fromAccountModel?.balance is String
         ? double.tryParse(transferBloc.fromAccountModel?.balance) ?? 0.0
         : (transferBloc.fromAccountModel?.balance ?? 0.0);
 
-    final transferAmount = double.tryParse(transferBloc.amountController.text.trim()) ?? 0;
+    final transferAmount =
+        double.tryParse(transferBloc.amountController.text.trim()) ?? 0;
 
     if (transferAmount > fromBalance) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Insufficient balance. Available: $fromBalance, Required: $transferAmount',
+            'Insufficient balance. Available: $fromBalance',
           ),
         ),
       );
@@ -675,10 +931,7 @@ _fetchApi();
       "transfer_date": formattedDate,
     };
 
-    transferBloc.add(QuickTransfer(
-      context: context,
-      body: body,
-    ));
+    transferBloc.add(QuickTransfer(context: context, body: body));
   }
 
   void _showSuccessDialog(String title, String message) {
@@ -690,13 +943,19 @@ _fetchApi();
         actions: [
           TextButton(
             onPressed: () {
-              Navigator.pop(context); // Close dialog
+              Navigator.pop(context);
               transferBloc.add(ResetForm());
               setState(() {});
             },
-            child: const Text("OK"),
+            child: Text(
+              "OK",
+              style: TextStyle(color: AppColors.primaryColor),
+            ),
           ),
         ],
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
       ),
     );
   }

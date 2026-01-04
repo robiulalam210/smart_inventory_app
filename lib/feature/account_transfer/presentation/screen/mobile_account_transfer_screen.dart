@@ -1,14 +1,10 @@
 // lib/account_transfer/presentation/screens/account_transfer_screen.dart
-import 'package:flutter/material.dart';
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import 'package:lottie/lottie.dart';
 import '../../../../core/configs/configs.dart';
-import '../../../../core/shared/widgets/sideMenu/sidebar.dart';
 import '../../../../core/widgets/app_alert_dialog.dart';
 import '../../../../core/widgets/app_button.dart';
-import '../../../../core/widgets/app_dropdown.dart';
 import '../../../../core/widgets/app_loader.dart';
 import '../../../../core/widgets/coustom_search_text_field.dart';
 import '../../../../core/widgets/date_range.dart';
@@ -17,6 +13,7 @@ import '../../../products/product/presentation/widget/pagination.dart';
 import '../../data/model/account_transfer_model.dart';
 import '../bloc/account_transfer/account_transfer_bloc.dart';
 import 'account_transfer_form.dart';
+import 'mobile_account_transfer_form.dart';
 import 'widget/account_transfer_card.dart';
 
 class MobileAccountTransferScreen extends StatefulWidget {
@@ -125,7 +122,7 @@ class _MobileAccountTransferScreenState extends State<MobileAccountTransferScree
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Account Transfers"),
+        title:  Text("Account Transfers",style: AppTextStyle.titleMedium(context),),
         actions: [
           IconButton(
             onPressed: () => _fetchApi(),
@@ -142,11 +139,11 @@ class _MobileAccountTransferScreenState extends State<MobileAccountTransferScree
       body: _buildContentArea(),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
+
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => const AccountTransferForm(),
-              fullscreenDialog: true,
+              builder: (context) => const MobileAccountTransferForm(),
             ),
           );
         },

@@ -41,8 +41,9 @@ class MobileAccountTransferCard extends StatelessWidget {
 
   Widget _buildTransferCard(BuildContext context, AccountTransferModel transfer) {
     return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      elevation: 2,
+      color: AppColors.whiteColor,
+      margin: const EdgeInsets.only(bottom: 8),
+      elevation: 1,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
@@ -50,7 +51,7 @@ class MobileAccountTransferCard extends StatelessWidget {
         onTap: () => _showTransferDetails(context, transfer),
         borderRadius: BorderRadius.circular(12),
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(8),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

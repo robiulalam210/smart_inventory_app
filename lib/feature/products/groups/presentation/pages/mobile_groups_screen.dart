@@ -46,66 +46,41 @@ class _GroupsScreenState extends State<MobileGroupsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isBigScreen =
-        Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
-    final isMobile = Responsive.isMobile(context);
+
 
     return Scaffold(
+      appBar: AppBar(title: Text("Group",style: AppTextStyle.titleMedium(context),),),
+      floatingActionButton: FloatingActionButton( onPressed: () => _showCreateDialog(context),child: Icon(Icons.add),),
       body: SafeArea(
-        child: ResponsiveRow(
-          spacing: 0,
-          runSpacing: 0,
-          children: [
-            if (isBigScreen) _buildSidebar(),
-            _buildContentArea(isBigScreen, isMobile),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSidebar() {
-    return ResponsiveCol(
-      xs: 0,
-      sm: 1,
-      md: 1,
-      lg: 2,
-      xl: 2,
-      child: Container(
-        decoration: const BoxDecoration(color: Colors.white),
-        child: const Sidebar(),
-      ),
-    );
-  }
-
-  Widget _buildContentArea(bool isBigScreen, bool isMobile) {
-    return ResponsiveCol(
-      xs: 12,
-      sm: 12,
-      md: 12,
-      lg: 10,
-      xl: 10,
-      child: Container(
-        color: AppColors.bg,
-        child: RefreshIndicator(
-          onRefresh: () async {
-            _fetchApi();
-          },
-          child: SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            child: Container(
-              padding: isMobile
-                  ? const EdgeInsets.all(12)
-                  : AppTextStyle.getResponsivePaddingBody(context),
-              child: buildContent(isMobile),
+        child:ResponsiveCol(
+          xs: 12,
+          sm: 12,
+          md: 12,
+          lg: 10,
+          xl: 10,
+          child: Container(
+            color: AppColors.bg,
+            child: RefreshIndicator(
+              onRefresh: () async {
+                _fetchApi();
+              },
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: Container(
+                  padding: const EdgeInsets.all(12)
+                  ,
+                  child: buildContent(),
+                ),
+              ),
             ),
           ),
-        ),
+        )
       ),
     );
   }
 
-  Widget buildContent(bool isMobile) {
+
+  Widget buildContent() {
     return BlocListener<GroupsBloc, GroupsState>(
       listener: (context, state) {
         if (state is GroupsAddLoading) {
@@ -162,20 +137,22 @@ class _GroupsScreenState extends State<MobileGroupsScreen> {
           );
         }
       },
-      child: Column(
-        children: [
-          // Header Row
-          _buildHeaderRow(isMobile),
-          gapH16,
-          // Groups List
-          _buildGroupsList(),
-        ],
+      child: SingleChildScrollView(
+        child: Column(
+          children: [
+            // Header Row
+            _buildHeaderRow(),
+            gapH8,
+            // Groups List
+            _buildGroupsList(),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildHeaderRow(bool isMobile) {
-    if (isMobile) {
+  Widget _buildHeaderRow() {
+
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -188,40 +165,12 @@ class _GroupsScreenState extends State<MobileGroupsScreen> {
             isRequiredLabel: false,
             hintText: "Search group name",
           ),
-          const SizedBox(height: 12),
-          // Create Button
-          SizedBox(
-            width: double.infinity,
-            child: AppButton(
-              name: "Create Group",
-              onPressed: () => _showCreateDialog(context),
-            ),
-          ),
+         
         ],
       );
-    }
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        SizedBox(
-          width: 350,
-          child: CustomSearchTextFormField(
-            controller: context.read<GroupsBloc>().filterTextController,
-            onChanged: (value) {
-              _fetchApi(filterText: value);
-            },
-            isRequiredLabel: false,
-            hintText: "Search group name",
-          ),
-        ),
-        gapW16,
-        AppButton(
-          name: "Create Group",
-          onPressed: () => _showCreateDialog(context),
-        ),
-      ],
-    );
+
+
   }
 
   Widget _buildGroupsList() {
