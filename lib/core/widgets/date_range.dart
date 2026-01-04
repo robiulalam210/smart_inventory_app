@@ -43,78 +43,77 @@ class _CustomDateRangeFieldState extends State<CustomDateRangeField> {
   Widget datePickerBuilder(
       BuildContext context, void Function(DateRange?) onDateRangeChanged,
       [bool doubleMonth = true]) {
-    return DateRangePickerWidget(
-      firstDayOfWeek: 1,
-      doubleMonth: doubleMonth,
-      maximumDateRangeLength: 10,
-      quickDateRanges: [
-        QuickDateRange(dateRange: null, label: "Remove date range"),
-        QuickDateRange(
-          label: 'Last 3 days',
-          dateRange: DateRange(
-            DateTime.now().subtract(const Duration(days: 3)),
-            DateTime.now(),
+    return SizedBox(
+      height: 320, // Fixed height to prevent overflow
+      child: DateRangePickerWidget(
+        firstDayOfWeek: 1,
+        doubleMonth: doubleMonth,
+        maximumDateRangeLength: 10,
+        quickDateRanges: [
+          QuickDateRange(dateRange: null, label: "Remove date range"),
+          QuickDateRange(
+            label: 'Last 3 days',
+            dateRange: DateRange(
+              DateTime.now().subtract(const Duration(days: 3)),
+              DateTime.now(),
+            ),
           ),
-        ),
-        QuickDateRange(
-          label: 'Last 7 days',
-          dateRange: DateRange(
-            DateTime.now().subtract(const Duration(days: 7)),
-            DateTime.now(),
+          QuickDateRange(
+            label: 'Last 7 days',
+            dateRange: DateRange(
+              DateTime.now().subtract(const Duration(days: 7)),
+              DateTime.now(),
+            ),
           ),
-        ),
-        QuickDateRange(
-          label: 'Last 30 days',
-          dateRange: DateRange(
-            DateTime.now().subtract(const Duration(days: 30)),
-            DateTime.now(),
+          QuickDateRange(
+            label: 'Last 30 days',
+            dateRange: DateRange(
+              DateTime.now().subtract(const Duration(days: 30)),
+              DateTime.now(),
+            ),
           ),
-        ),
-        QuickDateRange(
-          label: 'Last 3 Months',
-          dateRange: DateRange(
-            DateTime.now().subtract(const Duration(days: 90)),
-            DateTime.now(),
+          QuickDateRange(
+            label: 'Last 3 Months',
+            dateRange: DateRange(
+              DateTime.now().subtract(const Duration(days: 90)),
+              DateTime.now(),
+            ),
           ),
-        ),
-        QuickDateRange(
-          label: 'Last 6 Months',
-          dateRange: DateRange(
-            DateTime.now().subtract(const Duration(days: 180)),
-            DateTime.now(),
+          QuickDateRange(
+            label: 'Last 6 Months',
+            dateRange: DateRange(
+              DateTime.now().subtract(const Duration(days: 180)),
+              DateTime.now(),
+            ),
           ),
-        ),
-        QuickDateRange(
-          label: 'Last 1 Year',
-          dateRange: DateRange(
-            DateTime.now().subtract(const Duration(days: 365)),
-            DateTime.now(),
+          QuickDateRange(
+            label: 'Last 1 Year',
+            dateRange: DateRange(
+              DateTime.now().subtract(const Duration(days: 365)),
+              DateTime.now(),
+            ),
           ),
+        ],
+        minimumDateRangeLength: 3,
+        initialDateRange: selectedDateRange,
+        disabledDates: [],
+        maxDate: DateTime.now().add(const Duration(days: 365 * 2)),
+        initialDisplayedDate: selectedDateRange?.start ?? DateTime.now(),
+        onDateRangeChanged: onDateRangeChanged,
+        theme: const CalendarTheme(
+          selectedColor: Colors.blue,
+          dayNameTextStyle: TextStyle(color: Colors.black45, fontSize: 10),
+          inRangeColor: Color(0xFFD9EDFA),
+          inRangeTextStyle: TextStyle(color: Colors.blue),
+          selectedTextStyle: TextStyle(color: Colors.white),
+          todayTextStyle: TextStyle(fontWeight: FontWeight.bold),
+          defaultTextStyle: TextStyle(color: Colors.black, fontSize: 12),
+          radius: 10,
+          tileSize: 32, // Reduced tile size for better fit
+          disabledTextStyle: TextStyle(color: Colors.grey),
+          quickDateRangeBackgroundColor: Colors.white,
+          selectedQuickDateRangeColor: Colors.blue,
         ),
-      ],
-      minimumDateRangeLength: 3,
-      initialDateRange: selectedDateRange,
-      disabledDates: [
-        // Example disabled dates, change or remove as needed:
-        // DateTime.now().subtract(const Duration(days: 5)),
-        // DateTime.now().subtract(const Duration(days: 10)),
-      ],
-      maxDate: DateTime.now().add(const Duration(days: 365*2)),
-      initialDisplayedDate: selectedDateRange?.start ?? DateTime.now(),
-      onDateRangeChanged: onDateRangeChanged,
-      theme: const CalendarTheme(
-        selectedColor: Colors.blue,
-        dayNameTextStyle: TextStyle(color: Colors.black45, fontSize: 10),
-        inRangeColor: Color(0xFFD9EDFA),
-        inRangeTextStyle: TextStyle(color: Colors.blue),
-        selectedTextStyle: TextStyle(color: Colors.white),
-        todayTextStyle: TextStyle(fontWeight: FontWeight.bold),
-        defaultTextStyle: TextStyle(color: Colors.black, fontSize: 12),
-        radius: 10,
-        tileSize: 40,
-        disabledTextStyle: TextStyle(color: Colors.grey),
-        quickDateRangeBackgroundColor: Colors.white,
-        selectedQuickDateRangeColor: Colors.blue,
       ),
     );
   }
@@ -208,62 +207,89 @@ class _CustomDateRangeFieldState extends State<CustomDateRangeField> {
     return showModalBottomSheet<DateRange>(
       context: context,
       isScrollControlled: true,
-      constraints: const BoxConstraints(maxWidth: 800),
+      backgroundColor: Colors.transparent,
       builder: (context) {
-        return ClipRRect(
-          borderRadius: BorderRadius.circular(10),
-          child: Padding(
-            padding: MediaQuery.of(context).viewInsets,
-            child: SingleChildScrollView(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const SizedBox(height: 12),
-                    const Text(
-                      'Select Date Range',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+        return Container(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.85, // Limit to 85% of screen height
+          ),
+          child: ClipRRect(
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(20),
+              topRight: Radius.circular(20),
+            ),
+            child: Container(
+              color: Colors.white,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Draggable handle
+                  Container(
+                    margin: const EdgeInsets.only(top: 8),
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(2),
                     ),
-                    const SizedBox(height: 12),
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'Select Date Range',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
+                  const SizedBox(height: 12),
 
-                    SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(
-                          minWidth: MediaQuery.of(context).size.width,
-                        ),
+                  // Single month view for mobile (removed doubleMonth)
+                  Expanded( // Use Expanded to take available space
+                    child: SingleChildScrollView(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: datePickerBuilder(context, (range) {
                           tempRange = range;
-                        }),
+                        }, false), // Use single month view for mobile
                       ),
                     ),
+                  ),
 
-                    const SizedBox(height: 16),
-                    Row(
+                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[50],
+                      border: Border(
+                        top: BorderSide(color: Colors.grey[200]!),
+                      ),
+                    ),
+                    child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
-                        ElevatedButton.icon(
-                          style: ButtonStyle(
-                            backgroundColor: WidgetStateProperty.all(Colors.redAccent),
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: () => Navigator.pop(context, null),
+                            icon: const Icon(Icons.clear, size: 18),
+                            label: const Text("Clear"),
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                            ),
                           ),
-                          onPressed: () => Navigator.pop(context, null),
-                          icon: const Icon(Icons.clear),
-                          label: const Text("Clear"),
                         ),
-                        ElevatedButton.icon(
-                          onPressed: () => Navigator.pop(context, tempRange),
-                          icon: const Icon(Icons.check),
-                          label: const Text("Apply"),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            onPressed: () => Navigator.pop(context, tempRange),
+                            icon: const Icon(Icons.check, size: 18),
+                            label: const Text("Apply"),
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                            ),
+                          ),
                         ),
                       ],
                     ),
-                  ],
-                ),
+                  ),
+                  SizedBox(height: MediaQuery.of(context).viewInsets.bottom),
+                ],
               ),
             ),
           ),

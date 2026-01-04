@@ -193,12 +193,12 @@ class _RootScreenState extends State<MobileRootScreen> {
           color: (data.profitLoss?.netProfit ?? 0) >= 0 ? Colors.green : Colors.red,
           isCurrency: true,
         ),
-        dashboardCardItem(
-          title: "Stock Alerts",
-          value: ((data.stockAlerts?.lowStock ?? 0) + (data.stockAlerts?.outOfStock ?? 0)).toDouble(),
-          icon: Icons.warning,
-          color: Colors.orange,
-        ),
+        // dashboardCardItem(
+        //   title: "Stock Alerts",
+        //   value: ((data.stockAlerts?.lowStock ?? 0) + (data.stockAlerts?.outOfStock ?? 0)).toDouble(),
+        //   icon: Icons.warning,
+        //   color: Colors.orange,
+        // ),
       ],
     );
   }
@@ -400,16 +400,12 @@ class _RootScreenState extends State<MobileRootScreen> {
           },
           child: BlocBuilder<DashboardBloc, DashboardState>(
             builder: (context, state) {
-              int currentIndex = 0;
-              if (state is DashboardScreenChanged) {
-                currentIndex = state.index;
-              }
+
 
               return RefreshIndicator(
                 onRefresh: () async {
-                  context.read<DashboardBloc>().add(
-                    ChangeDashboardScreen(index: currentIndex),
-                  );
+                  context.read<DashboardBloc>().add(FetchDashboardData(context: context));
+
                 },
                 child: ListView(
                   padding: EdgeInsets.zero,

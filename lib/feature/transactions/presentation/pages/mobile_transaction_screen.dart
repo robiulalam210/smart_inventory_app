@@ -1,12 +1,15 @@
-
+import 'package:flutter/material.dart';
+import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
+import 'package:lottie/lottie.dart';
 import '../../../../core/configs/configs.dart';
 import '../../../../core/shared/widgets/sideMenu/sidebar.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_dropdown.dart';
 import '../../../../core/widgets/coustom_search_text_field.dart';
+import '../../../../core/widgets/date_range.dart';
 import '../../../products/product/presentation/widget/pagination.dart';
-import '../bloc/transactions/transaction_bloc.dart';
-import '../widget/widget.dart';
+import '../../../transactions/presentation/bloc/transactions/transaction_bloc.dart';
+import '../../../transactions/presentation/widget/widget.dart';
 
 class MobileTransactionScreen extends StatefulWidget {
   const MobileTransactionScreen({super.key});
@@ -20,13 +23,22 @@ class _TransactionScreenState extends State<MobileTransactionScreen> {
   final ValueNotifier<String?> selectedTransactionTypeNotifier = ValueNotifier(null);
   final ValueNotifier<String?> selectedStatusNotifier = ValueNotifier(null);
   final ValueNotifier<String?> selectedAccountNotifier = ValueNotifier(null);
-  DateTime? startDate;
-  DateTime? endDate;
+
+  // Use DateRange instead of separate DateTime variables
+  DateRange? selectedDateRange;
 
   @override
   void initState() {
     super.initState();
     filterTextController.clear();
+
+    // Initialize with default date range (last month)
+    DateTime now = DateTime.now();
+    selectedDateRange = DateRange(
+      DateTime(now.year, now.month - 1, 1),
+      DateTime(now.year, now.month, 0), // Last day of previous month
+    );
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _fetchTransactions();
     });
@@ -58,8 +70,9 @@ class _TransactionScreenState extends State<MobileTransactionScreen> {
         transactionType: transactionType,
         status: status,
         accountId: accountId,
-        startDate: startDate,
-        endDate: endDate,
+        // Use DateRange values
+        startDate: selectedDateRange?.start,
+        endDate: selectedDateRange?.end,
         pageNumber: pageNumber,
         pageSize: pageSize,
       ),
@@ -82,70 +95,30 @@ class _TransactionScreenState extends State<MobileTransactionScreen> {
     selectedTransactionTypeNotifier.value = null;
     selectedStatusNotifier.value = null;
     selectedAccountNotifier.value = null;
-    startDate = null;
-    endDate = null;
+    setState(() {
+      selectedDateRange = null;
+    });
     _fetchTransactions();
-  }
-
-  Future<void> _selectDateRange(BuildContext context) async {
-    final DateTimeRange? picked = await showDateRangePicker(
-      context: context,
-      firstDate: DateTime(2020),
-      lastDate: DateTime(2030),
-      currentDate: DateTime.now(),
-      saveText: 'Apply',
-    );
-
-    if (picked != null) {
-      setState(() {
-        startDate = picked.start;
-        endDate = picked.end;
-      });
-      _fetchTransactions();
-    }
   }
 
   void _clearDateRange() {
     setState(() {
-      startDate = null;
-      endDate = null;
+      selectedDateRange = null;
     });
     _fetchTransactions();
   }
 
   @override
   Widget build(BuildContext context) {
-    final isBigScreen =
-        Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
     return Scaffold(
+      appBar: AppBar(title: const Text("Transaction")),
       body: SafeArea(
-        child: ResponsiveRow(
-          spacing: 0,
-          runSpacing: 0,
-          children: [
-            if (isBigScreen) _buildSidebar(),
-            _buildContentArea(isBigScreen),
-          ],
-        ),
+        child: _buildContentArea(),
       ),
     );
   }
 
-  Widget _buildSidebar() {
-    return ResponsiveCol(
-      xs: 0,
-      sm: 1,
-      md: 1,
-      lg: 2,
-      xl: 2,
-      child: Container(
-        decoration: const BoxDecoration(color: Colors.white),
-        child: const Sidebar(),
-      ),
-    );
-  }
-
-  Widget _buildContentArea(bool isBigScreen) {
+  Widget _buildContentArea() {
     return ResponsiveCol(
       xs: 12,
       sm: 12,
@@ -157,15 +130,12 @@ class _TransactionScreenState extends State<MobileTransactionScreen> {
         onRefresh: () async {
           _fetchTransactions();
         },
-        child: Container(
+        child: SingleChildScrollView(
           padding: AppTextStyle.getResponsivePaddingBody(context),
           child: Column(
             children: [
-              if (isBigScreen)
-                _buildDesktopHeader()
-              else
-                _buildMobileHeader(),
-              const SizedBox(height: 16),
+              _buildMobileHeader(),
+              const SizedBox(height: 8),
               SizedBox(
                 child: _buildTransactionList(),
               ),
@@ -173,170 +143,6 @@ class _TransactionScreenState extends State<MobileTransactionScreen> {
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildDesktopHeader() {
-    return Column(
-      children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // 🔍 Search Field
-            Expanded(
-              child: CustomSearchTextFormField(
-                isRequiredLabel: false,
-                controller: filterTextController,
-                onChanged: (value) => _fetchTransactions(filterText: value),
-                onClear: () {
-                  filterTextController.clear();
-                  _fetchTransactions();
-                },
-                hintText: "Search Transaction No, Description, or Account",
-              ),
-            ),
-            const SizedBox(width: 10),
-
-            // 💰 Transaction Type Dropdown
-            Expanded(
-              child: ValueListenableBuilder<String?>(
-                valueListenable: selectedTransactionTypeNotifier,
-                builder: (context, value, child) {
-                  return AppDropdown<String>(
-                    context: context,
-                    hint: "Transaction Type",
-                    isNeedAll: true,
-                    isLabel: false,
-                    isRequired: false,
-                    value: value,
-                    itemList: ['Credit', 'Debit'],
-                    onChanged: (newVal) {
-                      selectedTransactionTypeNotifier.value = newVal;
-                      _fetchTransactions(
-                        transactionType: newVal?.toLowerCase() ?? '',
-                      );
-                    },
-                    validator: (value) => null,
-                    itemBuilder: (item) => DropdownMenuItem<String>(
-                      value: item,
-                      child: Text(
-                        item,
-                        style: const TextStyle(
-                          color: AppColors.blackColor,
-                          fontFamily: 'Quicksand',
-                          fontWeight: FontWeight.w300,
-                        ),
-                      ),
-                    ),
-                    label: '',
-                  );
-                },
-              ),
-            ),
-            const SizedBox(width: 10),
-
-            // 📊 Status Dropdown
-            Expanded(
-              child: ValueListenableBuilder<String?>(
-                valueListenable: selectedStatusNotifier,
-                builder: (context, value, child) {
-                  return AppDropdown<String>(
-                    context: context,
-                    hint: "Status",
-                    isNeedAll: true,
-                    isLabel: false,
-                    isRequired: false,
-                    value: value,
-                    itemList: ['Completed', 'Pending', 'Failed'],
-                    onChanged: (newVal) {
-                      selectedStatusNotifier.value = newVal;
-                      _fetchTransactions(
-                        status: newVal?.toLowerCase() ?? '',
-                      );
-                    },
-                    validator: (value) => null,
-                    itemBuilder: (item) => DropdownMenuItem<String>(
-                      value: item,
-                      child: Text(
-                        item,
-                        style: const TextStyle(
-                          color: AppColors.blackColor,
-                          fontFamily: 'Quicksand',
-                          fontWeight: FontWeight.w300,
-                        ),
-                      ),
-                    ),
-                    label: '',
-                  );
-                },
-              ),
-            ),
-            gapW16,
-
-            // 📅 Date Range Button
-            AppButton(
-              name: "Date Range",
-              onPressed: () => _selectDateRange(context),
-              textColor: AppColors.primaryColor,
-            ),
-
-            gapW16,
-
-            // 🔄 Refresh Button
-            IconButton(
-              onPressed: () => _fetchTransactions(),
-              icon: const Icon(Icons.refresh),
-              tooltip: "Refresh",
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-
-        // Date Range Display
-        if (startDate != null || endDate != null)
-          Row(
-            children: [
-              Expanded(
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryColor.withValues(alpha: 0.05),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: AppColors.primaryColor.withValues(alpha: 0.2)),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.calendar_today, size: 16, color: AppColors.primaryColor),
-                      const SizedBox(width: 8),
-                      Text(
-                        '${startDate != null ? _formatDate(startDate!) : "Any"} - ${endDate != null ? _formatDate(endDate!) : "Any"}',
-                        style: TextStyle(
-                          color: AppColors.primaryColor,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      const Spacer(),
-                      IconButton(
-                        icon: Icon(Icons.clear, size: 16, color: AppColors.primaryColor),
-                        onPressed: _clearDateRange,
-                        tooltip: "Clear Date Range",
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(width: 16),
-              TextButton(
-                onPressed: _clearFilters,
-                child: Text(
-                  'Clear All Filters',
-                  style: TextStyle(color: Colors.red),
-                ),
-              ),
-            ],
-          ),
-      ],
     );
   }
 
@@ -389,7 +195,7 @@ class _TransactionScreenState extends State<MobileTransactionScreen> {
             ],
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 6),
 
         // Filter Chips
         Wrap(
@@ -412,43 +218,16 @@ class _TransactionScreenState extends State<MobileTransactionScreen> {
                   _fetchTransactions();
                 },
               ),
-            if (startDate != null || endDate != null)
+            if (selectedDateRange != null)
               Chip(
                 label: Text(
-                  '${startDate != null ? _formatDate(startDate!) : "Any"} - ${endDate != null ? _formatDate(endDate!) : "Any"}',
+                  '${_formatDate(selectedDateRange!.start)} - ${_formatDate(selectedDateRange!.end)}',
                 ),
                 onDeleted: _clearDateRange,
               ),
           ],
         ),
-        const SizedBox(height: 12),
-
-        // Action Buttons
-        Row(
-          children: [
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: () => _showMobileFilterSheet(context),
-                icon: const Icon(Iconsax.filter, size: 16),
-                label: const Text('More Filters'),
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: () => _selectDateRange(context),
-                icon: const Icon(Iconsax.calendar, size: 16),
-                label: const Text('Date Range'),
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                ),
-              ),
-            ),
-          ],
-        ),
+        const SizedBox(height: 6),
       ],
     );
   }
@@ -559,6 +338,31 @@ class _TransactionScreenState extends State<MobileTransactionScreen> {
                   ),
                   const SizedBox(height: 20),
 
+                  // Date Range Picker - Using CustomDateRangeField
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        "Date Range",
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      CustomDateRangeField(
+                        isLabel: false,
+                        selectedDateRange: selectedDateRange,
+                        onDateRangeSelected: (value) {
+                          setState(() {
+                            selectedDateRange = value;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+
                   // Transaction Type Filter
                   const Text(
                     "Transaction Type",
@@ -587,7 +391,7 @@ class _TransactionScreenState extends State<MobileTransactionScreen> {
                       );
                     }).toList(),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 8),
 
                   // Status Filter
                   const Text(
@@ -623,43 +427,31 @@ class _TransactionScreenState extends State<MobileTransactionScreen> {
                   Row(
                     children: [
                       Expanded(
-                        child: OutlinedButton(
+                        child: AppButton(
+                          color: AppColors.error,
                           onPressed: () {
                             setState(() {
                               filterTextController.clear();
                               selectedTransactionTypeNotifier.value = null;
                               selectedStatusNotifier.value = null;
                               selectedAccountNotifier.value = null;
-                              startDate = null;
-                              endDate = null;
+                              selectedDateRange = null;
                             });
                             Navigator.pop(context);
                             _fetchTransactions();
                           },
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          child: const Text("Clear All"),
+                          name: "Clear All",
                         ),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
-                        child: ElevatedButton(
+                        child: AppButton(
                           onPressed: () {
                             Navigator.pop(context);
                             _fetchTransactions();
                           },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primaryColor,
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          child: const Text("Apply Filters"),
+
+                         name: "Apply Filters",
                         ),
                       ),
                     ],
