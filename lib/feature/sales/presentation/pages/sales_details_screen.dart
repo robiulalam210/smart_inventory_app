@@ -1,6 +1,5 @@
 // sales_details_screen.dart
 
-import 'package:flutter/material.dart';
 import 'package:printing/printing.dart';
 
 import '../../../../core/configs/configs.dart';

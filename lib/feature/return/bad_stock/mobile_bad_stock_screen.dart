@@ -2,7 +2,6 @@ import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../../core/configs/configs.dart';
-import '../../../../../core/shared/widgets/sideMenu/sidebar.dart';
 import '../../../../../core/widgets/coustom_search_text_field.dart';
 import '../../../../../core/widgets/date_range.dart';
 import '../../../../../core/widgets/delete_dialog.dart';
@@ -53,7 +52,6 @@ class _BadStockScreenState extends State<MobileBadStockScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isBigScreen = Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
 
     return Scaffold(
       appBar: AppBar(title: Text("Bad Stock",style: AppTextStyle.titleMedium(context),),),

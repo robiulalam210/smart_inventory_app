@@ -1,7 +1,6 @@
 import 'package:meherinMart/feature/expense/expense_head/presentation/pages/mobile_expense_head_screen.dart';
 import 'package:meherinMart/feature/expense/expense_sub_head/presentation/pages/mobile_expense_sub_head_screen.dart';
 import 'package:meherinMart/feature/expense/presentation/pages/mobile_expense_list_screen.dart';
-import 'package:meherinMart/feature/mobile_root_screen.dart';
 import 'package:meherinMart/feature/products/brand/presentation/pages/mobile_brand_screen.dart';
 import 'package:meherinMart/feature/products/categories/presentation/pages/mobile_categories_screen.dart';
 import 'package:meherinMart/feature/products/groups/presentation/pages/mobile_groups_screen.dart';
@@ -11,7 +10,6 @@ import 'package:meherinMart/feature/sales/presentation/pages/mobile_pos_sale_scr
 
 import '../../../../feature/account_transfer/presentation/screen/mobile_account_transfer_form.dart';
 import '../../../../feature/account_transfer/presentation/screen/mobile_account_transfer_screen.dart';
-import '../../../../feature/accounts/presentation/pages/account_screen.dart';
 import '../../../../feature/accounts/presentation/pages/mobile_account_screen.dart';
 import '../../../../feature/auth/presentation/pages/login_scr.dart';
 import '../../../../feature/customer/presentation/pages/mobile_customer_screen.dart';
@@ -145,7 +143,6 @@ class MobileTabSidebar extends StatelessWidget {
       child: SafeArea(
         child: BlocBuilder<DashboardBloc, DashboardState>(
           builder: (context, state) {
-            final bloc = context.read<DashboardBloc>();
             int currentIndex = 0;
 
             if (state is DashboardScreenChanged) {

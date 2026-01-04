@@ -1,9 +1,5 @@
-import 'package:flutter/material.dart';
-import 'package:hugeicons/hugeicons.dart';
-import 'package:iconsax/iconsax.dart';
 import '/feature/supplier/data/model/supplier_list_model.dart';
 
-import '../../../../core/configs/app_colors.dart';
 import '../../../../core/configs/configs.dart';
 
 class SupplierDataTableWidget extends StatelessWidget {

@@ -79,7 +79,7 @@ class TransactionCard extends StatelessWidget {
                           fontWeight: FontWeight.w700,
                           fontFamily: GoogleFonts.inter().fontFamily,
                         ),
-                        headingRowColor: MaterialStateProperty.all(
+                        headingRowColor: WidgetStateProperty.all(
                           AppColors.primaryColor,
                         ),
                         dataTextStyle: TextStyle(
@@ -91,10 +91,10 @@ class TransactionCard extends StatelessWidget {
                         rows: transactions.asMap().entries.map((entry) {
                           final transaction = entry.value;
                           return DataRow(
-                            color: MaterialStateProperty.resolveWith<Color?>(
-                                  (Set<MaterialState> states) {
+                            color: WidgetStateProperty.resolveWith<Color?>(
+                                  (Set<WidgetState> states) {
                                 if (entry.key.isEven) {
-                                  return Colors.grey.withOpacity(0.03);
+                                  return Colors.grey.withValues(alpha: 0.03);
                                 }
                                 return null;
                               },
@@ -133,7 +133,7 @@ class TransactionCard extends StatelessWidget {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),

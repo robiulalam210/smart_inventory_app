@@ -141,11 +141,6 @@ class _CreateSalesReturnScreenState extends State<CreateSalesReturnScreen> {
           // Extract product ID - handle different field names
           int? productId = item.productId ?? item.id;
 
-          if (productId == null) {
-            // Log warning but still add the item
-            print("⚠️ WARNING: Could not find productId for ${item.productName}");
-          }
-
           products.add(
             Item(
               productId: productId ?? 0,
@@ -748,7 +743,7 @@ mainAxisAlignment: MainAxisAlignment.start,                  children: [
           const SizedBox(height: 4),
           Container(
             decoration: BoxDecoration(
-              border: Border.all(color: color.withOpacity(0.3)),
+              border: Border.all(color: color.withValues(alpha: 0.3)),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Row(
@@ -1052,12 +1047,6 @@ mainAxisAlignment: MainAxisAlignment.start,                  children: [
     }
 
     // Log for debugging
-    print("📦 Submitting sales return:");
-    print("Account ID: ${_selectedAccount!.id}");
-    print("Payment Method: $_selectedPaymentMethod");
-    print("Return Charge: ${body["return_charge"]} (${_returnChargeType})");
-    print("Return Amount: $totalAmount");
-    print("Items count: ${returnItems.length}");
 
     // Dispatch the event
     context.read<SalesReturnBloc>().add(

@@ -1,11 +1,6 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
-import 'package:lottie/lottie.dart';
-import 'package:iconsax/iconsax.dart';
 
 import '../../../../core/configs/configs.dart';
-import '../../../../core/shared/widgets/sideMenu/sidebar.dart';
 import '../../../../core/widgets/app_alert_dialog.dart';
 import '../../../../core/widgets/app_dropdown.dart';
 import '../../../../core/widgets/app_loader.dart';
@@ -214,161 +209,6 @@ class _MoneyReceiptScreenState extends State<MobileMoneyReceiptList> {
     }
   }
 
-  Widget _buildDesktopHeader() {
-    return Column(
-      children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // 🔍 Search Field
-            Expanded(
-              flex: 2,
-              child: CustomSearchTextFormField(
-                controller: filterTextController,
-                onChanged: (value) => _fetchApi(filterText: value),
-                onClear: () {
-                  filterTextController.clear();
-                  _fetchApi();
-                },
-                hintText: "InvoiceNo, Name, or Phone",
-              ),
-            ),
-            const SizedBox(width: 5),
-
-            // 👤 Customer Dropdown
-            Expanded(
-              flex: 1,
-              child: BlocBuilder<CustomerBloc, CustomerState>(
-                builder: (context, state) {
-                  return ValueListenableBuilder<String?>(
-                    valueListenable: selectedCustomerNotifier,
-                    builder: (context, customerId, child) {
-                      final selectedCustomer = context
-                          .read<MoneyReceiptBloc>()
-                          .selectCustomerModel;
-
-                      return AppDropdown<CustomerActiveModel>(
-                        label: "Customer",
-                        context: context,
-                        isSearch: true,
-                        isLabel: true,
-                        hint: selectedCustomer?.name ?? "Select Customer",
-                        isNeedAll: true,
-                        isRequired: false,
-                        value: selectedCustomer,
-                        itemList: context.read<CustomerBloc>().activeCustomer,
-                        onChanged: (newVal) {
-                          context.read<MoneyReceiptBloc>().selectCustomerModel = newVal;
-                          selectedCustomerNotifier.value = newVal?.id.toString();
-                          _fetchApi(
-                            customer: newVal?.id.toString() ?? '',
-                          );
-                        },
-                        itemBuilder: (item) => DropdownMenuItem<CustomerActiveModel>(
-                          value: item,
-                          child: Text(
-                            item.name ?? 'Unknown Customer',
-                            style: const TextStyle(
-                              color: AppColors.blackColor,
-                              fontFamily: 'Quicksand',
-                              fontWeight: FontWeight.w300,
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  );
-                },
-              ),
-            ),
-            const SizedBox(width: 5),
-
-            // 🧑‍💼 Seller Dropdown
-            Expanded(
-              flex: 1,
-              child: BlocBuilder<UserBloc, UserState>(
-                builder: (context, state) {
-                  return ValueListenableBuilder<String?>(
-                    valueListenable: selectedSellerNotifier,
-                    builder: (context, sellerId, child) {
-                      final selectedSeller = context.read<MoneyReceiptBloc>().selectUserModel;
-
-                      return AppDropdown<UsersListModel>(
-                        label: "Seller",
-                        context: context,
-                        hint: selectedSeller?.username ?? "Select Seller",
-                        isLabel: true,
-                        isRequired: false,
-                        isNeedAll: true,
-                        value: selectedSeller,
-                        itemList: context.read<UserBloc>().list,
-                        onChanged: (newVal) {
-                          context.read<MoneyReceiptBloc>().selectUserModel = newVal;
-                          selectedSellerNotifier.value = newVal?.id.toString();
-                          _fetchApi(
-                            seller: newVal?.id.toString() ?? '',
-                          );
-                        },
-                        itemBuilder: (item) => DropdownMenuItem<UsersListModel>(
-                          value: item,
-                          child: Text(
-                            item.username ?? 'Unknown Seller',
-                            style: const TextStyle(
-                              color: AppColors.blackColor,
-                              fontFamily: 'Quicksand',
-                              fontWeight: FontWeight.w300,
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  );
-                },
-              ),
-            ),
-            const SizedBox(width: 10),
-
-            // 📅 Date Range Picker
-            SizedBox(
-              width: 280,
-              child: CustomDateRangeField(
-                isLabel: false,
-                selectedDateRange: selectedDateRange,
-                onDateRangeSelected: (value) {
-                  setState(() => selectedDateRange = value);
-                  if (value != null) {
-                    _fetchApi(from: value.start, to: value.end);
-                  } else {
-                    _fetchApi();
-                  }
-                },
-              ),
-            ),
-            const SizedBox(width: 10),
-
-            IconButton(
-              onPressed: () => _fetchApi(),
-              icon: const Icon(Icons.refresh),
-              tooltip: "Refresh",
-            ),
-          ],
-        ),
-        const SizedBox(height: 10),
-        Row(
-          children: [
-            TextButton(
-              onPressed: _clearFilters,
-              child: Text(
-                'Clear All Filters',
-                style: TextStyle(color: Colors.red),
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
 
   Widget _buildMobileHeader() {
     return Column(
@@ -381,7 +221,7 @@ class _MoneyReceiptScreenState extends State<MobileMoneyReceiptList> {
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: Colors.grey.withOpacity(0.1),
+                color: Colors.grey.withValues(alpha: 0.1),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -399,7 +239,7 @@ class _MoneyReceiptScreenState extends State<MobileMoneyReceiptList> {
                       filterTextController.clear();
                       _fetchApi();
                     },
-                    hintText: "Search money receipts...",
+                    hintText: " money receipts...",
                   ),
                 ),
               ),

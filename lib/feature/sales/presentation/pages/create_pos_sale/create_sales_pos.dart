@@ -962,8 +962,8 @@ class _SalesScreenState extends State<SalesScreen> {
                         padding: const EdgeInsets.all(6),
                         decoration: BoxDecoration(
                           color: product == products.last
-                              ? Colors.green.withOpacity(0.08)
-                              : Colors.red.withOpacity(0.08),
+                              ? Colors.green.withValues(alpha: 0.08)
+                              : Colors.red.withValues(alpha: 0.08),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
                             color: product == products.last
@@ -985,7 +985,7 @@ class _SalesScreenState extends State<SalesScreen> {
               ],
             ),
           );
-        }).toList(),
+        }),
 
       ],
     );
@@ -1618,7 +1618,7 @@ class _SalesScreenState extends State<SalesScreen> {
           borderRadius: BorderRadius.circular(10),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 6,
               offset: const Offset(0, 2),
             ),

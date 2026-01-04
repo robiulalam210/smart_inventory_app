@@ -1,11 +1,7 @@
-import 'package:flutter/material.dart';
-import 'package:iconsax/iconsax.dart';
 import 'package:printing/printing.dart';
-import '/core/configs/app_colors.dart';
 import '/feature/supplier/data/model/supplier_payment/suppler_payment_model.dart';
 import '/feature/supplier/presentation/pages/supplier_payment_details.dart';
 
-import '../../../../core/configs/app_routes.dart';
 import '../../../../core/configs/configs.dart';
 import '../pages/pdf/generate_supplier_payment.dart';
 
@@ -73,7 +69,7 @@ class SupplierPaymentWidget extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -140,7 +136,7 @@ class SupplierPaymentWidget extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: _getStatusColors(getStatus(payment.paymentSummary)).$1.withOpacity(0.2),
+                      color: _getStatusColors(getStatus(payment.paymentSummary)).$1.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
                         color: _getStatusColors(getStatus(payment.paymentSummary)).$1,

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lottie/lottie.dart';
-import '../../../../../core/configs/app_colors.dart';
 import '../../../../../core/configs/app_images.dart';
 import '../../../../../core/configs/app_routes.dart';
 import '../../../../../core/configs/app_text.dart';

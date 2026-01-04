@@ -19,7 +19,6 @@ void main() async {
     final display = await screenRetriever.getPrimaryDisplay();
     final width = display.size.width;
 
-    print(width);
     Size windowSize;
     Size minSize;
     bool shouldMaximize = false;

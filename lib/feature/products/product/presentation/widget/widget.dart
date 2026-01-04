@@ -1,6 +1,3 @@
-import 'package:flutter/material.dart';
-import 'package:hugeicons/hugeicons.dart';
-import 'package:iconsax/iconsax.dart';
 
 import '../../../../../core/configs/configs.dart';
 import '../../../../../core/widgets/delete_dialog.dart';
@@ -58,7 +55,7 @@ class ProductDataTableWidget extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -468,7 +465,7 @@ class ProductDataTableWidget extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: color),
             ),

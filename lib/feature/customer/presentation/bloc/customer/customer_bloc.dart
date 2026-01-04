@@ -188,9 +188,7 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
           to: to,
         ),
       );
-    } catch (error,st) {
-      print(st);
-      print(error);
+    } catch (error) {
       emit(CustomerListFailed(title: "Error", content: error.toString()));
     }
   }

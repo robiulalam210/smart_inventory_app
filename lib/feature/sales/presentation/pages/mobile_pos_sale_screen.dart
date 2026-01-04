@@ -1,10 +1,7 @@
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
-import 'package:meherinMart/core/widgets/app_scaffold.dart';
 
 import '../../../../core/configs/configs.dart';
-import '../../../../core/widgets/app_alert_dialog.dart';
 import '../../../../core/widgets/app_dropdown.dart';
-import '../../../../core/widgets/app_loader.dart';
 import '../../../../core/widgets/coustom_search_text_field.dart';
 import '../../../../core/widgets/date_range.dart';
 import '../../../customer/data/model/customer_active_model.dart';
@@ -13,7 +10,6 @@ import '../../../products/product/presentation/bloc/products/products_bloc.dart'
 import '../../../products/product/presentation/widget/pagination.dart';
 import '../../../users_list/data/model/user_model.dart';
 import '../../../users_list/presentation/bloc/users/user_bloc.dart';
-import '../bloc/possale/crate_pos_sale/create_pos_sale_bloc.dart';
 import '../bloc/possale/possale_bloc.dart';
 import '../widgets/widget.dart';
 

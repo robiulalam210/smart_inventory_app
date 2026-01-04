@@ -6,7 +6,6 @@ import '../../data/model/categories_model.dart';
 import '../bloc/categories/categories_bloc.dart';
 import '../pages/categories_create.dart';
 // categories_list_mobile.dart
-import 'package:flutter/material.dart';
 
 class CategoriesListMobile extends StatelessWidget {
   final List<CategoryModel> categories;
@@ -84,7 +83,7 @@ class CategoriesListMobile extends StatelessWidget {
                     width: 28,
                     height: 28,
                     decoration: BoxDecoration(
-                      color: AppColors.primaryColor.withOpacity(0.1),
+                      color: AppColors.primaryColor.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Center(
@@ -158,13 +157,13 @@ class CategoriesListMobile extends StatelessWidget {
                     ),
                     decoration: BoxDecoration(
                       color: isActive
-                          ? Colors.green.withOpacity(0.1)
-                          : Colors.grey.withOpacity(0.1),
+                          ? Colors.green.withValues(alpha: 0.1)
+                          : Colors.grey.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
                         color: isActive
-                            ? Colors.green.withOpacity(0.3)
-                            : Colors.grey.withOpacity(0.3),
+                            ? Colors.green.withValues(alpha: 0.3)
+                            : Colors.grey.withValues(alpha: 0.3),
                         width: 1,
                       ),
                     ),

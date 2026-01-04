@@ -175,7 +175,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget _buildFilterSegmentedControl() {
     final isMobile = Responsive.isMobile(context);
 
-    return Container(
+    return SizedBox(
       width: isMobile ? double.infinity : AppSizes.width(context) * 0.25,
       child: CupertinoSegmentedControl<String>(
         padding: EdgeInsets.zero,
@@ -485,7 +485,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final isMobile = Responsive.isMobile(context);
     final width = isMobile ? double.infinity : AppSizes.width(context) * 0.20;
 
-    return Container(
+    return SizedBox(
       width: width,
       child: CupertinoSegmentedControl<String>(
         padding: EdgeInsets.zero,

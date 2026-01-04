@@ -50,17 +50,14 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
     emit(AccountActiveListLoading());
     try {
       final res = await getResponse(url: AppUrls.accountActive, context: event.context);
-      print("API Raw Response: $res");
 
       ApiResponse response = appParseJson(
         res,
             (data) {
-          print("Raw data: $data");
           return List<AccountActiveModel>.from(data.map((x) => AccountActiveModel.fromJson(x)));
         },
       );
 
-      print("Parsed Response: success=${response.success}, data=${response.data}");
 
       if (response.success == true) {
         final List<AccountActiveModel> accountList = response.data ?? [];
@@ -72,9 +69,7 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
           content: response.message ?? "Unknown Error",
         ));
       }
-    } catch (error, stacktrace) {
-      print("Exception caught: $error");
-      print("Stacktrace: $stacktrace");
+    } catch (error) {
       emit(AccountActiveListFailed(title: "Error", content: error.toString()));
     }
 
@@ -186,16 +181,14 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
             (data) => CreateAccountModel.fromJson(data),
       );
 
-      print(response.data);
-      print(response.success);
+
       if (response.success == false) {
         emit(AccountAddFailed(title: 'Error', content: response.message ?? ""));
         return;
       }
       clearData();
       emit(AccountAddSuccess());
-    } catch (error,st) {
-      print(st);
+    } catch (error) {
 
       clearData();
       emit(AccountAddFailed(title: "Error", content: error.toString()));

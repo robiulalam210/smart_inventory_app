@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-import 'package:iconsax/iconsax.dart';
 import 'package:printing/printing.dart';
 
 import '../../../../core/configs/configs.dart';
@@ -593,7 +591,7 @@ class PosSaleDataTableWidget extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: color),
             ),

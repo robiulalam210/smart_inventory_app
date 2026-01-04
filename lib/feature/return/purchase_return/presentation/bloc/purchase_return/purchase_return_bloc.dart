@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
 import '/core/configs/configs.dart';
 import '/core/repositories/delete_response.dart';
 import '/core/repositories/get_response.dart';
@@ -709,7 +710,9 @@ class PurchaseReturnBloc extends Bloc<PurchaseReturnEvent, PurchaseReturnState> 
                 final invoice = PurchaseInvoiceModel.fromJson(item);
                 invoiceData.add(invoice);
               } catch (e) {
-                print("Error parsing invoice $i: $e");
+                if (kDebugMode) {
+                  print("Error parsing invoice $i: $e");
+                }
               }
             }
 

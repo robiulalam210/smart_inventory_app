@@ -2,7 +2,6 @@ import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
 
 
 import '../../../../core/configs/configs.dart';
-import '../../../../core/shared/widgets/sideMenu/sidebar.dart';
 import '../../../../core/widgets/app_alert_dialog.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_dropdown.dart';
@@ -30,7 +29,7 @@ class _ExpenseListScreenState extends State<MobileExpenseListScreen> {
   DateTime now = DateTime.now();
   ExpenseHeadModel? _selectedExpenseHead;
   ExpenseSubHeadModel? _selectedExpenseSubHead;
-  late var dataBloc;
+  late ExpenseBloc dataBloc;
   final TextEditingController _searchController = TextEditingController();
 
   @override
@@ -52,34 +51,17 @@ class _ExpenseListScreenState extends State<MobileExpenseListScreen> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     dataBloc = context.read<ExpenseBloc>();
-    if (dataBloc.filterTextController == null) {
-      dataBloc.filterTextController = TextEditingController();
-    }
+    dataBloc.filterTextController;
   }
 
   @override
   void dispose() {
     _searchController.dispose();
-    if (dataBloc.filterTextController != null) {
-      dataBloc.filterTextController!.dispose();
-    }
-    super.dispose();
+    dataBloc.filterTextController.dispose();
+      super.dispose();
   }
 
-  void _onExpenseHeadChanged(ExpenseHeadModel? value) {
-    setState(() {
-      _selectedExpenseHead = value;
-      _selectedExpenseSubHead = null;
-    });
-    _fetchApi();
-  }
 
-  void _onExpenseSubHeadChanged(ExpenseSubHeadModel? value) {
-    setState(() {
-      _selectedExpenseSubHead = value;
-    });
-    _fetchApi();
-  }
 
   void _fetchApi({
     String filterText = '',
@@ -104,21 +86,6 @@ class _ExpenseListScreenState extends State<MobileExpenseListScreen> {
     );
   }
 
-  void _clearFilters() {
-    setState(() {
-      selectedDateRange = DateRange(
-        DateTime(now.year, now.month - 1, now.day),
-        DateTime(now.year, now.month, now.day),
-      );
-      _selectedExpenseHead = null;
-      _selectedExpenseSubHead = null;
-    });
-    if (dataBloc.filterTextController != null) {
-      dataBloc.filterTextController!.clear();
-    }
-    _searchController.clear();
-    _fetchApi();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -218,7 +185,7 @@ class _ExpenseListScreenState extends State<MobileExpenseListScreen> {
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: Colors.grey.withOpacity(0.1),
+                color: Colors.grey.withValues(alpha: 0.1),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -230,15 +197,13 @@ class _ExpenseListScreenState extends State<MobileExpenseListScreen> {
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   child: CustomSearchTextFormField(
-                    controller: dataBloc.filterTextController ?? TextEditingController(),
+                    controller: dataBloc.filterTextController,
                     onChanged: (value) {
                       _fetchApi(filterText: value);
                     },
                     onClear: () {
-                      if (dataBloc.filterTextController != null) {
-                        dataBloc.filterTextController!.clear();
-                      }
-                      _fetchApi();
+                      dataBloc.filterTextController.clear();
+                                          _fetchApi();
                     },
                     hintText: "Search expenses...",
                   ),

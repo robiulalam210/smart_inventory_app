@@ -3,7 +3,6 @@ import '/core/core.dart';
 import '../../../accounts/data/model/account_active_model.dart';
 import '../../../accounts/presentation/bloc/account/account_bloc.dart';
 import '../../../customer/presentation/bloc/customer/customer_bloc.dart';
-import '../../../lab_dashboard/presentation/bloc/dashboard/dashboard_bloc.dart';
 import '../../../sales/data/models/pos_sale_model.dart';
 import '../../../sales/presentation/bloc/possale/possale_bloc.dart';
 import '../../../users_list/presentation/bloc/users/user_bloc.dart';
@@ -156,7 +155,6 @@ class _MoneyReceiptListScreenState extends State<MobileMoneyReceiptForm> {
   }
 
   Widget _buildMobileStepperContent() {
-    final bloc = context.read<MoneyReceiptBloc>();
 
     return Stepper(
       physics: const ClampingScrollPhysics(),

@@ -15,7 +15,6 @@ import '../../../../accounts/data/model/account_active_model.dart';
 import '../../../../accounts/presentation/bloc/account/account_bloc.dart';
 import '../../../../customer/data/model/customer_active_model.dart';
 import '../../../../customer/presentation/bloc/customer/customer_bloc.dart';
-import '../../../../lab_dashboard/presentation/bloc/dashboard/dashboard_bloc.dart';
 import '../../../../products/brand/presentation/bloc/brand/brand_bloc.dart';
 import '../../../../products/categories/presentation/bloc/categories/categories_bloc.dart';
 import '../../../../products/product/presentation/bloc/products/products_bloc.dart';

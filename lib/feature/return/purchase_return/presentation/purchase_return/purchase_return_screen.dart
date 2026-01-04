@@ -351,7 +351,7 @@ class _PurchaseReturnScreenState extends State<PurchaseReturnScreen> {
               icon: const Icon(Icons.refresh),
               tooltip: "Refresh",
               style: IconButton.styleFrom(
-                backgroundColor: AppColors.primaryColor.withOpacity(0.1),
+                backgroundColor: AppColors.primaryColor.withValues(alpha: 0.1),
               ),
             ),
           ],

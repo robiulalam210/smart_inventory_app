@@ -128,8 +128,9 @@ class _SalesReturnScreenState extends State<SalesReturnScreen> {
       String message = "";
       String title = "Success";
 
-      if (state is SalesReturnCreateSuccess) message = state.message;
-      else if (state is SalesReturnApproveSuccess) message = state.message;
+      if (state is SalesReturnCreateSuccess) {
+        message = state.message;
+      } else if (state is SalesReturnApproveSuccess) message = state.message;
       else if (state is SalesReturnRejectSuccess) message = state.message;
       else if (state is SalesReturnCompleteSuccess) message = state.message;
       else if (state is SalesReturnDeleteSuccess) message = state.message;

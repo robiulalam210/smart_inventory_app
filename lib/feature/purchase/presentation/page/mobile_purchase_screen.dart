@@ -1,7 +1,6 @@
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
 
 import '../../../../core/configs/configs.dart';
-import '../../../../core/shared/widgets/sideMenu/sidebar.dart';
 import '../../../../core/widgets/app_alert_dialog.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_dropdown.dart';
@@ -196,7 +195,7 @@ class _PurchaseScreenState extends State<MobilePurchaseScreen> {
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: Colors.grey.withOpacity(0.1),
+                color: Colors.grey.withValues(alpha: 0.1),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -468,7 +467,7 @@ class _PurchaseScreenState extends State<MobilePurchaseScreen> {
                                 selectedPaymentMethodNotifier.value = selected ? status : null;
                               });
                             },
-                            selectedColor: AppColors.primaryColor.withOpacity(0.2),
+                            selectedColor: AppColors.primaryColor.withValues(alpha: 0.2),
                             checkmarkColor: AppColors.primaryColor,
                           );
                         }).toList(),

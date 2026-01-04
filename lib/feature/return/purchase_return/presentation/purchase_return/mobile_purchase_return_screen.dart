@@ -5,7 +5,6 @@ import '/core/configs/configs.dart';
 import '/feature/supplier/data/model/supplier_active_model.dart';
 import '/feature/supplier/presentation/bloc/supplier/supplier_list_bloc.dart';
 import '/feature/supplier/presentation/bloc/supplier_invoice/supplier_invoice_bloc.dart';
-import '../../../../../core/shared/widgets/sideMenu/sidebar.dart';
 import '../../../../../core/widgets/app_alert_dialog.dart';
 import '../../../../../core/widgets/app_button.dart';
 import '../../../../../core/widgets/app_dropdown.dart';
@@ -339,7 +338,7 @@ class _PurchaseReturnScreenState extends State<MobilePurchaseReturnScreen> {
               icon: const Icon(Icons.refresh),
               tooltip: "Refresh",
               style: IconButton.styleFrom(
-                backgroundColor: AppColors.primaryColor.withOpacity(0.1),
+                backgroundColor: AppColors.primaryColor.withValues(alpha: 0.1),
               ),
             ),
           ],
