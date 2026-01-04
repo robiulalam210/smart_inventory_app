@@ -37,27 +37,25 @@ class ApiResponse<T> {
       Map<String, dynamic> json,
       T Function(dynamic data) fromJsonT,
       ) {
-    final bool outerStatus = json['status'] == true;
-
     final dynamic inner = json['data'];
 
+    /// ✅ STATUS PRIORITY LOGIC
+    /// 1️⃣ outer `status`
+    /// 2️⃣ inner `data.status`
+    /// 3️⃣ default false
     final bool finalStatus =
-    inner is Map && inner['status'] is bool
-        ? inner['status']
-        : outerStatus;
+    json['status'] is bool
+        ? json['status'] as bool
+        : (inner is Map && inner['status'] is bool
+        ? inner['status'] as bool
+        : false);
 
     return ApiResponse<T>(
       success: finalStatus,
       total: _parseInt(json['total']),
       title: json['title']?.toString(),
-      message: (inner is Map && inner['message'] != null)
-          ? inner['message'].toString()
-          : json['message']?.toString(),
-      data: (inner is Map && inner['data'] != null)
-          ? fromJsonT(inner['data'])
-          : (inner is List || inner is Map)
-          ? fromJsonT(inner)
-          : null,
+      message: json['message']?.toString(),
+      data: inner != null ? fromJsonT(inner) : null,
     );
   }
 

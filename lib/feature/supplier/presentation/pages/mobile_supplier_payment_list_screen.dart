@@ -11,6 +11,7 @@ import '../../../../core/widgets/show_custom_toast.dart';
 import '../../../products/product/presentation/widget/pagination.dart';
 import '../bloc/supplier_payment/supplier_payment_bloc.dart';
 import '../widget/supplier_payment_widget.dart';
+import 'mobile_supplier_payment_create.dart';
 import 'supplier_payment_create.dart';
 
 class MobileSupplierPaymentListScreen extends StatefulWidget {
@@ -157,10 +158,10 @@ class _SupplierPaymentScreenState extends State<MobileSupplierPaymentListScreen>
                             builder: (context) {
                               return Dialog(
                                 insetPadding: const EdgeInsets.all(16),
-                                child: Container(
+                                child: SizedBox(
                                   width: double.infinity,
                                   height: AppSizes.height(context) * 0.8,
-                                  child: const SupplierPaymentForm(),
+                                  child: const MobileSupplierPaymentCreate(),
                                 ),
                               );
                             },
@@ -183,15 +184,16 @@ class _SupplierPaymentScreenState extends State<MobileSupplierPaymentListScreen>
           if (state is SupplierPaymentAddLoading) {
             appLoader(context, "Creating payment, please wait...");
           } else if (state is SupplierPaymentAddSuccess) {
+            // Navigator.pop(context);
             Navigator.pop(context);
-            Navigator.pop(context);
-            Navigator.pop(context);
+            // Navigator.pop(context);
             _fetchApi();
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Payment created successfully')),
             );
           } else if (state is SupplierPaymentAddFailed) {
             Navigator.pop(context);
+            _fetchApi();
             appAlertDialog(
               context,
               state.content,
@@ -261,13 +263,15 @@ class _SupplierPaymentScreenState extends State<MobileSupplierPaymentListScreen>
                 ),
               );
             } else {
-              return Column(
-                children: [
-                  SizedBox(
-                    child: SupplierPaymentWidget(suppliers: state.list),
-                  ),
-                  _buildPagination(state),
-                ],
+              return SingleChildScrollView(
+                child: Column(
+                  children: [
+                    SizedBox(
+                      child: SupplierPaymentWidget(suppliers: state.list),
+                    ),
+                    _buildPagination(state),
+                  ],
+                ),
               );
             }
           } else if (state is SupplierPaymentListFailed) {

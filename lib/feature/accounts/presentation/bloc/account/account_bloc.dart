@@ -186,13 +186,16 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
             (data) => CreateAccountModel.fromJson(data),
       );
 
+      print(response.data);
+      print(response.success);
       if (response.success == false) {
         emit(AccountAddFailed(title: 'Error', content: response.message ?? ""));
         return;
       }
       clearData();
       emit(AccountAddSuccess());
-    } catch (error) {
+    } catch (error,st) {
+      print(st);
 
       clearData();
       emit(AccountAddFailed(title: "Error", content: error.toString()));
