@@ -77,7 +77,7 @@ class PurchaseReturnTableCard extends StatelessWidget {
                             fontWeight: FontWeight.w700,
                             fontFamily: GoogleFonts.inter().fontFamily,
                           ),
-                          headingRowColor: MaterialStateProperty.all( // FIXED: MaterialStateProperty instead of WidgetStateProperty
+                          headingRowColor: WidgetStateProperty.all( // FIXED: MaterialStateProperty instead of WidgetStateProperty
                             AppColors.primaryColor,
                           ),
                           dataTextStyle: TextStyle(
@@ -102,7 +102,7 @@ class PurchaseReturnTableCard extends StatelessWidget {
                                   dynamicColumnWidth,
                                 ),
                                 _buildDataCell(
-                                  '${purchaseReturn.returnAmount?.toString() ?? "0.00"}',
+                                  purchaseReturn.returnAmount?.toString() ?? "0.00",
                                   dynamicColumnWidth,
                                 ),
                                 _buildReasonCell(purchaseReturn.reason, dynamicColumnWidth),
@@ -464,7 +464,7 @@ class PurchaseReturnTableCard extends StatelessWidget {
                     margin: const EdgeInsets.only(bottom: 8),
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Colors.grey.withOpacity(0.05), // FIXED
+                      color: Colors.grey.withValues(alpha: 0.05), // FIXED
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Row(
@@ -585,7 +585,7 @@ class PurchaseReturnTableCard extends StatelessWidget {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1), // FIXED
+            color: Colors.grey.withValues(alpha: 0.1), // FIXED
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),

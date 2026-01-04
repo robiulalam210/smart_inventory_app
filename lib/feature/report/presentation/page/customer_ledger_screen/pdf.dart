@@ -440,7 +440,7 @@ pw.Widget _buildLedgerTable(List<CustomerLedgerTransaction> transactions, Custom
               // Table Rows
               ...transactions.asMap().entries.map((entry) =>
                   _buildTableRow(entry.value, runningBalances[entry.key])
-              ).toList(),
+              ),
             ],
           ),
         ),

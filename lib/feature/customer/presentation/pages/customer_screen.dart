@@ -281,7 +281,7 @@ class _CustomerScreenState extends State<CustomerScreen> {
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: Colors.grey.withOpacity(0.1),
+                color: Colors.grey.withValues(alpha: 0.1),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -516,7 +516,7 @@ class _CustomerScreenState extends State<CustomerScreen> {
                             selectedStatusNotifier.value = selected ? status : null;
                           });
                         },
-                        selectedColor: AppColors.primaryColor.withOpacity(0.2),
+                        selectedColor: AppColors.primaryColor.withValues(alpha: 0.2),
                         checkmarkColor: AppColors.primaryColor,
                       );
                     }).toList(),

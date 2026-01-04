@@ -403,7 +403,6 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
   }
 
   Widget _buildMobileStepperContent() {
-    final bloc = context.read<CreatePurchaseBloc>();
 
     return Form(
       key: formKey,
@@ -1776,39 +1775,29 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
       double vat = double.tryParse(vatController.text) ?? 0.0;
 
       // Apply overall discount
-      double netAfterDiscount = subtotal;
       if (selectedOverallDiscountType == 'percentage' && overallDiscount > 0) {
-        double discountAmount = subtotal * (overallDiscount / 100);
-        netAfterDiscount = subtotal - discountAmount;
+        double _ = subtotal * (overallDiscount / 100);
       } else if (selectedOverallDiscountType == 'fixed' &&
           overallDiscount > 0) {
-        netAfterDiscount = subtotal - overallDiscount;
       }
 
       // Apply charges
-      double totalCharges = 0.0;
 
       // Service charge
       if (selectedOverallServiceChargeType == 'percentage' &&
           serviceCharge > 0) {
-        totalCharges += netAfterDiscount * (serviceCharge / 100);
       } else if (selectedOverallServiceChargeType == 'fixed' &&
           serviceCharge > 0) {
-        totalCharges += serviceCharge;
       }
 
       // Delivery charge
       if (selectedOverallDeliveryType == 'percentage' && deliveryCharge > 0) {
-        totalCharges += netAfterDiscount * (deliveryCharge / 100);
       } else if (selectedOverallDeliveryType == 'fixed' && deliveryCharge > 0) {
-        totalCharges += deliveryCharge;
       }
 
       // VAT
       if (selectedVatType == 'percentage' && vat > 0) {
-        totalCharges += netAfterDiscount * (vat / 100);
       } else if (selectedVatType == 'fixed' && vat > 0) {
-        totalCharges += vat;
       }
 
 
@@ -1856,7 +1845,6 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
       }
 
       // Log the request body for debugging
-      print("Purchase Request Body: $body");
 
       // Send the request
       context.read<CreatePurchaseBloc>().add(AddPurchase(body: body));

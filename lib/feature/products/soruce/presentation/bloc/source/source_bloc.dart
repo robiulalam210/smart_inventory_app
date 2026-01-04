@@ -205,7 +205,7 @@ class SourceBloc extends Bloc<SourceEvent, SourceState> {
     }
   }
 
-  clearData(){
+  void clearData(){
     nameController.clear();
   }
 

@@ -1,7 +1,3 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:lottie/lottie.dart';
-import 'package:iconsax/iconsax.dart';
 import '/core/core.dart';
 
 import '../../../../../core/widgets/coustom_search_text_field.dart';
@@ -138,7 +134,7 @@ class _ExpenseHeadScreenState extends State<MobileExpenseHeadScreen> {
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: Colors.grey.withOpacity(0.1),
+                color: Colors.grey.withValues(alpha: 0.1),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),

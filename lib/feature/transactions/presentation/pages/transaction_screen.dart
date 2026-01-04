@@ -1,7 +1,3 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:lottie/lottie.dart';
-import 'package:iconsax/iconsax.dart';
 
 import '../../../../core/configs/configs.dart';
 import '../../../../core/shared/widgets/sideMenu/sidebar.dart';
@@ -356,7 +352,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: Colors.grey.withOpacity(0.1),
+                color: Colors.grey.withValues(alpha: 0.1),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -617,7 +613,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                             selectedStatusNotifier.value = selected ? status : null;
                           });
                         },
-                        selectedColor: AppColors.primaryColor.withOpacity(0.2),
+                        selectedColor: AppColors.primaryColor.withValues(alpha: 0.2),
                         checkmarkColor: AppColors.primaryColor,
                       );
                     }).toList(),

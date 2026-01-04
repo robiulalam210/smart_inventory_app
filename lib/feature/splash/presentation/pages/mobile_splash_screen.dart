@@ -1,10 +1,8 @@
 import '../../../auth/presentation/pages/mobile_login_scr.dart';
 import '../../../mobile_root_screen.dart';
-import '/root.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/configs/configs.dart';
-import '../../../auth/presentation/pages/login_scr.dart';
 import '../bloc/splash/splash_bloc.dart';
 
 class MobileSplashScreen extends StatefulWidget {

@@ -92,7 +92,7 @@ class _MobileCreateAccountScreenState
                 /// ACCOUNT TYPE
                 ValueListenableBuilder<String>(
                   valueListenable: selectedAccountType,
-                  builder: (_, type, __) {
+                  builder: (_, type, _) {
                     return AppDropdown(
                       context: context,
                       label: "Account Type",
@@ -155,7 +155,7 @@ class _MobileCreateAccountScreenState
                 /// ACCOUNT NUMBER
                 ValueListenableBuilder<String>(
                   valueListenable: selectedAccountType,
-                  builder: (_, type, __) {
+                  builder: (_, type, _) {
                     if (type.isEmpty) {
                       return const SizedBox.shrink();
                     }
@@ -182,7 +182,7 @@ class _MobileCreateAccountScreenState
                 /// BANK DETAILS
                 ValueListenableBuilder<String>(
                   valueListenable: selectedAccountType,
-                  builder: (_, type, __) {
+                  builder: (_, type, _) {
                     if (type != "Bank") {
                       return const SizedBox.shrink();
                     }

@@ -1,8 +1,6 @@
 import '../../../../core/configs/configs.dart';
-import '../../../../core/shared/widgets/sideMenu/sidebar.dart';
 import '../../../../core/widgets/app_alert_dialog.dart';
 import '../../../../core/widgets/app_button.dart';
-import '../../../../core/widgets/app_dropdown.dart';
 import '../../../../core/widgets/app_loader.dart';
 import '../../../../core/widgets/coustom_search_text_field.dart';
 import '../../../../core/widgets/delete_dialog.dart';
@@ -184,7 +182,7 @@ class _AccountScreenState extends State<MobileAccountScreen> {
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: Colors.grey.withOpacity(0.1),
+                color: Colors.grey.withValues(alpha: 0.1),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -435,7 +433,7 @@ class _AccountScreenState extends State<MobileAccountScreen> {
                                 : null;
                           });
                         },
-                        selectedColor: AppColors.primaryColor.withOpacity(0.2),
+                        selectedColor: AppColors.primaryColor.withValues(alpha: 0.2),
                         checkmarkColor: AppColors.primaryColor,
                       );
                     }).toList(),

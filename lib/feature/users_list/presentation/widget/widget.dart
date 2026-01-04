@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/configs/configs.dart';
@@ -75,7 +74,7 @@ class UserTableCard extends StatelessWidget {
                             fontWeight: FontWeight.w700,
                             fontFamily: GoogleFonts.inter().fontFamily,
                           ),
-                          headingRowColor: MaterialStateProperty.all(
+                          headingRowColor: WidgetStateProperty.all(
                             AppColors.primaryColor,
                           ),
                           dataTextStyle: TextStyle(
@@ -205,8 +204,8 @@ class UserTableCard extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
               color: isActive
-                  ? Colors.green.withOpacity(0.1)
-                  : Colors.red.withOpacity(0.1),
+                  ? Colors.green.withValues(alpha: 0.1)
+                  : Colors.red.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(

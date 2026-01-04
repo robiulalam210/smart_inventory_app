@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-import 'package:iconsax/iconsax.dart';
 import '/feature/purchase/presentation/page/purchase_details.dart';
 import 'package:printing/printing.dart';
 
@@ -56,7 +54,7 @@ class PurchaseDataTableWidget extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -73,7 +71,7 @@ class PurchaseDataTableWidget extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color: AppColors.primaryColor.withOpacity(0.05),
+              color: AppColors.primaryColor.withValues(alpha: 0.05),
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(16),
                 topRight: Radius.circular(16),
@@ -119,7 +117,7 @@ class PurchaseDataTableWidget extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: _getPaymentStatusColor(purchase.paymentStatus??"").withOpacity(0.1),
+                    color: _getPaymentStatusColor(purchase.paymentStatus??"").withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: _getPaymentStatusColor(purchase.paymentStatus??""),

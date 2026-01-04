@@ -103,7 +103,6 @@ class _MoneyReceiptListScreenState extends State<MoneyReceiptForm> {
   Widget _buildMainContent() {
     final isBigScreen =
         Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
-    final moneyBloc = context.read<MoneyReceiptBloc>();
 
     return ResponsiveRow(
       spacing: 0,
@@ -728,7 +727,6 @@ class _MoneyReceiptListScreenState extends State<MoneyReceiptForm> {
   }
 
   Widget _buildMobileStepperContent() {
-    final bloc = context.read<MoneyReceiptBloc>();
 
     return Stepper(
       physics: const ClampingScrollPhysics(),

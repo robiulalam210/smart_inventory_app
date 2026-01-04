@@ -1,6 +1,5 @@
 
 import '../../../../../core/configs/configs.dart';
-import '../../../../../core/shared/widgets/sideMenu/sidebar.dart';
 import '../../../../../core/widgets/app_alert_dialog.dart';
 import '../../../../../core/widgets/app_button.dart';
 import '../../../../../core/widgets/app_loader.dart';
@@ -149,33 +148,6 @@ floatingActionButton: FloatingActionButton( onPressed: () => _showCreateProductD
     }
   }
 
-  Widget _buildDesktopHeader() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        SizedBox(
-          width: 400,
-          child: CustomSearchTextFormField(
-            controller: context.read<ProductsBloc>().filterTextController,
-            onChanged: (value) {
-              _fetchProductList(filterText: value);
-            },
-            isRequiredLabel: false,
-            onClear: () {
-              context.read<ProductsBloc>().filterTextController.clear();
-              _fetchProductList();
-            },
-            hintText: "Search products...",
-          ),
-        ),
-        gapW16,
-        AppButton(
-          name: "Create Product",
-          onPressed: () => _showCreateProductDialog(context),
-        ),
-      ],
-    );
-  }
 
   Widget _buildMobileHeader() {
     return Column(
@@ -188,7 +160,7 @@ floatingActionButton: FloatingActionButton( onPressed: () => _showCreateProductD
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: Colors.grey.withOpacity(0.1),
+                color: Colors.grey.withValues(alpha: 0.1),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),

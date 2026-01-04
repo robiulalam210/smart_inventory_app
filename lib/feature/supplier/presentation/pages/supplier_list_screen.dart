@@ -259,7 +259,7 @@ class _SupplierScreenState extends State<SupplierScreen> {
                         borderRadius: BorderRadius.circular(12),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.grey.withOpacity(0.1),
+                            color: Colors.grey.withValues(alpha: 0.1),
                             blurRadius: 8,
                             offset: const Offset(0, 2),
                           ),
@@ -323,7 +323,7 @@ class _SupplierScreenState extends State<SupplierScreen> {
                             child: Chip(
                               label: Text(dataBloc.selectedState),
                               backgroundColor: AppColors.primaryColor
-                                  .withOpacity(0.1),
+                                  .withValues(alpha: 0.1),
                               deleteIcon: const Icon(Icons.close, size: 16),
                               onDeleted: () {
                                 setState(() {

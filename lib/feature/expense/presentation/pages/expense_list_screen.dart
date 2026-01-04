@@ -30,7 +30,7 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
   DateTime now = DateTime.now();
   ExpenseHeadModel? _selectedExpenseHead;
   ExpenseSubHeadModel? _selectedExpenseSubHead;
-  late var dataBloc;
+  late ExpenseBloc dataBloc;
   final TextEditingController _searchController = TextEditingController();
 
   @override
@@ -52,18 +52,14 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     dataBloc = context.read<ExpenseBloc>();
-    if (dataBloc.filterTextController == null) {
-      dataBloc.filterTextController = TextEditingController();
-    }
+    dataBloc.filterTextController;
   }
 
   @override
   void dispose() {
     _searchController.dispose();
-    if (dataBloc.filterTextController != null) {
-      dataBloc.filterTextController!.dispose();
-    }
-    super.dispose();
+    dataBloc.filterTextController.dispose();
+      super.dispose();
   }
 
   void _onExpenseHeadChanged(ExpenseHeadModel? value) {
@@ -113,10 +109,8 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
       _selectedExpenseHead = null;
       _selectedExpenseSubHead = null;
     });
-    if (dataBloc.filterTextController != null) {
-      dataBloc.filterTextController!.clear();
-    }
-    _searchController.clear();
+    dataBloc.filterTextController.clear();
+      _searchController.clear();
     _fetchApi();
   }
 
@@ -236,15 +230,13 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
           children: [
             Expanded(
               child: CustomSearchTextFormField(
-                controller: dataBloc.filterTextController ?? TextEditingController(),
+                controller: dataBloc.filterTextController,
                 onChanged: (value) {
                   _fetchApi(filterText: value);
                 },
                 onClear: () {
-                  if (dataBloc.filterTextController != null) {
-                    dataBloc.filterTextController!.clear();
-                  }
-                  _fetchApi();
+                  dataBloc.filterTextController.clear();
+                                  _fetchApi();
                 },
                 hintText: "Search by description, amount, etc.",
               ),
@@ -364,7 +356,7 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: Colors.grey.withOpacity(0.1),
+                color: Colors.grey.withValues(alpha: 0.1),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -376,15 +368,13 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   child: CustomSearchTextFormField(
-                    controller: dataBloc.filterTextController ?? TextEditingController(),
+                    controller: dataBloc.filterTextController,
                     onChanged: (value) {
                       _fetchApi(filterText: value);
                     },
                     onClear: () {
-                      if (dataBloc.filterTextController != null) {
-                        dataBloc.filterTextController!.clear();
-                      }
-                      _fetchApi();
+                      dataBloc.filterTextController.clear();
+                                          _fetchApi();
                     },
                     hintText: "Search expenses...",
                   ),

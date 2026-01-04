@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '/feature/return/sales_return/data/model/sales_return_model.dart';
 
@@ -40,7 +39,7 @@ class SalesReturnTableCard extends StatelessWidget {
             color: Colors.white,
             boxShadow: [
               BoxShadow(
-                color: Colors.grey.withOpacity(0.1),
+                color: Colors.grey.withValues(alpha: 0.1),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -77,7 +76,7 @@ class SalesReturnTableCard extends StatelessWidget {
                             fontWeight: FontWeight.w700,
                             fontFamily: GoogleFonts.inter().fontFamily,
                           ),
-                          headingRowColor: MaterialStateProperty.all(
+                          headingRowColor: WidgetStateProperty.all(
                             AppColors.primaryColor,
                           ),
                           dataTextStyle: TextStyle(
@@ -171,9 +170,9 @@ class SalesReturnTableCard extends StatelessWidget {
       final salesReturn = entry.value;
 
       return DataRow(
-        color: MaterialStateProperty.resolveWith<Color>(
-              (Set<MaterialState> states) {
-            return index % 2 == 0 ? Colors.grey.withOpacity(0.03) : Colors.transparent;
+        color: WidgetStateProperty.resolveWith<Color>(
+              (Set<WidgetState> states) {
+            return index % 2 == 0 ? Colors.grey.withValues(alpha: 0.03) : Colors.transparent;
           },
         ),
         onSelectChanged: onSalesReturnTap != null ? (_) => onSalesReturnTap!() : null,

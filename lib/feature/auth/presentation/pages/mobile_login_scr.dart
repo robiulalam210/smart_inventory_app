@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:ui';
 import '../../../../core/core.dart';
 import '../../../../core/database/login_local_storage.dart';
-import '../../../../root.dart';
 import '../../../feature.dart';
 import '../../../mobile_root_screen.dart';
 

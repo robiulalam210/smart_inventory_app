@@ -121,7 +121,7 @@ class AccountCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: balanceColor.withOpacity(0.1),
+                    color: balanceColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: balanceColor,
@@ -442,7 +442,7 @@ class AccountCard extends StatelessWidget {
                           color: WidgetStateProperty.resolveWith<Color?>(
                                 (Set<WidgetState> states) {
                               if (entry.key.isEven) {
-                                return Colors.grey.withOpacity(0.03);
+                                return Colors.grey.withValues(alpha: 0.03);
                               }
                               return null;
                             },

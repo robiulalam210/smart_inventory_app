@@ -254,7 +254,7 @@ pw.Widget _buildPaymentDetails(MoneyreceiptModel receipt, double amount) {
           child: pw.Column(
             children: [
               pw.Text(
-                '${amount.toStringAsFixed(2)}',
+                amount.toStringAsFixed(2),
                 style: pw.TextStyle(
                   fontSize: 16,
                   fontWeight: pw.FontWeight.bold,
