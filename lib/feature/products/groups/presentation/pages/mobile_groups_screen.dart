@@ -163,7 +163,7 @@ class _GroupsScreenState extends State<MobileGroupsScreen> {
               _fetchApi(filterText: value);
             },
             isRequiredLabel: false,
-            hintText: "Search group name",
+            hintText: "group name",
           ),
          
         ],

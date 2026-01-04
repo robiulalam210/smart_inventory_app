@@ -40,63 +40,33 @@ class _BrandScreenState extends State<MobileBrandScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isBigScreen =
-        Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
-    final isMobile = Responsive.isMobile(context);
+
 
     return Scaffold(
+      appBar: AppBar(title: Text("Brand",style: AppTextStyle.titleMedium(context),),),
+      floatingActionButton: FloatingActionButton( onPressed: () => _showCreateDialog(context),child: Icon(Icons.add),),
       body: SafeArea(
-        child: ResponsiveRow(
-          spacing: 0,
-          runSpacing: 0,
-          children: [
-            if (isBigScreen) _buildSidebar(),
-            _buildContentArea(isBigScreen, isMobile),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSidebar() {
-    return ResponsiveCol(
-      xs: 0,
-      sm: 1,
-      md: 1,
-      lg: 2,
-      xl: 2,
-      child: Container(
-        decoration: const BoxDecoration(color: Colors.white),
-        child: const Sidebar(),
-      ),
-    );
-  }
-
-  Widget _buildContentArea(bool isBigScreen, bool isMobile) {
-    return ResponsiveCol(
-      xs: 12,
-      sm: 12,
-      md: 12,
-      lg: 10,
-      xl: 10,
-      child: RefreshIndicator(
-        onRefresh: () async {
-          _fetchApi();
-        },
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          child: Container(
-            padding: isMobile
-                ? const EdgeInsets.all(12)
-                : AppTextStyle.getResponsivePaddingBody(context),
-            child: buildContent(isMobile),
+        child: RefreshIndicator(
+          onRefresh: () async {
+            _fetchApi();
+          },
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: Container(
+              padding:const EdgeInsets.all(12)
+                  ,
+              child: buildContent(),
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget buildContent(bool isMobile) {
+
+
+
+  Widget buildContent() {
     return BlocListener<BrandBloc, BrandState>(
       listener: (context, state) {
         if (state is BrandAddLoading) {
@@ -136,16 +106,16 @@ class _BrandScreenState extends State<MobileBrandScreen> {
       },
       child: Column(
         children: [
-          _buildHeaderRow(isMobile),
-          const SizedBox(height: 16),
+          _buildHeaderRow(),
+          const SizedBox(height: 8),
           _buildBrandsList(),
         ],
       ),
     );
   }
 
-  Widget _buildHeaderRow(bool isMobile) {
-    if (isMobile) {
+  Widget _buildHeaderRow() {
+
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -159,47 +129,13 @@ class _BrandScreenState extends State<MobileBrandScreen> {
             onChanged: (value) {
               _fetchApi(filterText: value);
             },
-            hintText: "Search brand name",
+            hintText: "brand name",
             isRequiredLabel: false,
           ),
-          const SizedBox(height: 12),
-          // Create Button
-          SizedBox(
-            width: double.infinity,
-            child: AppButton(
-              name: "Create Brand",
-              onPressed: () => _showCreateDialog(context),
-            ),
-          ),
+
         ],
       );
-    }
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        SizedBox(
-          width: 350,
-          child: CustomSearchTextFormField(
-            controller: dataBloc.filterTextController,
-            onClear: () {
-              dataBloc.filterTextController.clear();
-              _fetchApi();
-            },
-            onChanged: (value) {
-              _fetchApi(filterText: value);
-            },
-            hintText: "Search brand name",
-            isRequiredLabel: false,
-          ),
-        ),
-        gapW16,
-        AppButton(
-          name: "Create Brand",
-          onPressed: () => _showCreateDialog(context),
-        ),
-      ],
-    );
   }
 
   Widget _buildBrandsList() {

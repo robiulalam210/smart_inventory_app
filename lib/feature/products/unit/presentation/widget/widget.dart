@@ -6,6 +6,283 @@ import '../../data/model/unit_model.dart';
 import '../bloc/unit/unti_bloc.dart';
 import '../pages/unit_create.dart';
 
+
+class MobileUnitTableCard extends StatelessWidget {
+  final List<UnitsModel> units;
+  final VoidCallback? onUnitTap;
+
+  const MobileUnitTableCard({
+    super.key,
+    required this.units,
+    this.onUnitTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (units.isEmpty) {
+      return _buildEmptyState();
+    }
+
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: units.length,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      itemBuilder: (context, index) {
+        final unit = units[index];
+        return _buildUnitCard(context, unit, index + 1);
+      },
+    );
+  }
+
+  Widget _buildUnitCard(BuildContext context, UnitsModel unit, int index) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      elevation: 1,
+      color: AppColors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: InkWell(
+        onTap: () => onUnitTap?.call(),
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(10),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header Row
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryColor.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      '$index ',
+                      style: TextStyle(
+                        color: AppColors.primaryColor,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 8,),
+                  Expanded(
+                    child: Text(
+                      unit.name?.capitalize() ?? 'Unnamed Unit',
+                      style: GoogleFonts.inter(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16,
+                        color: Colors.black87,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  _buildStatusChip(unit.isActive ?? false),
+                ],
+              ),
+              const SizedBox(height: 4),
+
+              // Unit Details
+              _buildDetailRow('Code:', unit.code?.capitalize() ?? 'N/A'),
+
+              // Action Buttons
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  // Edit Button
+                  _buildActionButton(
+                    context,
+                    'Edit',
+                    Icons.edit,
+                    Colors.blue,
+                        () => _showEditDialog(context, unit),
+                  ),
+
+                  // Delete Button
+                  _buildActionButton(
+                    context,
+                    'Delete',
+                    Icons.delete,
+                    Colors.red,
+                        () => _confirmDelete(context, unit),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDetailRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 40,
+            child: Text(
+              label,
+              style: GoogleFonts.inter(
+                fontSize: 12,
+                color: Colors.grey.shade600,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              value,
+              style: GoogleFonts.inter(
+                fontSize: 12,
+                color: Colors.black87,
+                fontWeight: FontWeight.w400,
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatusChip(bool isActive) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: isActive ? Colors.green.withOpacity(0.1) : Colors.red.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isActive ? Colors.green.withOpacity(0.3) : Colors.red.withOpacity(0.3),
+        ),
+      ),
+      child: Text(
+        isActive ? 'Active' : 'Inactive',
+        style: TextStyle(
+          color: isActive ? Colors.green : Colors.red,
+          fontWeight: FontWeight.w600,
+          fontSize: 10,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActionButton(
+      BuildContext context,
+      String text,
+      IconData icon,
+      Color color,
+      VoidCallback onPressed,
+      ) {
+    return Expanded(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4),
+        child: TextButton.icon(
+          onPressed: onPressed,
+          icon: Icon(icon, size: 16, color: color),
+          label: Text(
+            text,
+            style: GoogleFonts.inter(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: color,
+            ),
+          ),
+          style: TextButton.styleFrom(
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+              side: BorderSide(color: color.withOpacity(0.3)),
+            ),
+            backgroundColor: color.withOpacity(0.05),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _confirmDelete(BuildContext context, UnitsModel unit) async {
+    final shouldDelete = await showDeleteConfirmationDialog(context);
+    if (shouldDelete && context.mounted) {
+      context.read<UnitBloc>().add(
+        DeleteUnit(unit.id.toString()),
+      );
+    }
+  }
+
+  void _showEditDialog(BuildContext context, UnitsModel unit) {
+    // Pre-fill the form
+    final unitBloc = context.read<UnitBloc>();
+    unitBloc.nameController.text = unit.name ?? "";
+    unitBloc.shortNameController.text = unit.code ?? "";
+    unitBloc.selectedState = unit.isActive == true ? "Active" : "Inactive";
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return UnitCreate(id: unit.id.toString());
+      },
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(40),
+      margin: const EdgeInsets.all(16),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.square_foot,
+            size: 64,
+            color: Colors.grey.withOpacity(0.5),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'No Units Found',
+            style: GoogleFonts.inter(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Create your first unit to get started',
+            style: GoogleFonts.inter(
+              fontSize: 14,
+              fontWeight: FontWeight.w400,
+              color: Colors.grey,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+}
 class UnitTableCard extends StatelessWidget {
   final List<UnitsModel> units;
   final VoidCallback? onUnitTap;

@@ -6,6 +6,304 @@ import '../../data/model/source_model.dart';
 import '../bloc/source/source_bloc.dart';
 import '../pages/soruce_create.dart';
 
+class MobileSourceTableCard extends StatelessWidget {
+  final List<SourceModel> sources;
+  final VoidCallback? onSourceTap;
+
+  const MobileSourceTableCard({
+    super.key,
+    required this.sources,
+    this.onSourceTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (sources.isEmpty) {
+      return _buildEmptyState();
+    }
+
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: sources.length,
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+      itemBuilder: (context, index) {
+        final source = sources[index];
+        return _buildSourceCard(context, source, index + 1);
+      },
+    );
+  }
+
+  Widget _buildSourceCard(BuildContext context, SourceModel source, int index) {
+    final isActive = _getSourceStatus(source);
+
+    return Card(
+      color: AppColors.white,
+      margin: const EdgeInsets.only(bottom: 6),
+      elevation: 1,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: InkWell(
+        onTap: () => onSourceTap?.call(),
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header Row
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryColor.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      '$index ',
+                      style: TextStyle(
+                        color: AppColors.primaryColor,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 8,),
+                  Expanded(
+                    child: Text(
+                      source.name?.capitalize() ?? 'Unnamed Source',
+                      style: GoogleFonts.inter(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16,
+                        color: Colors.black87,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  _buildStatusChip(isActive),
+                ],
+              ),
+
+              // Action Buttons
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  // Edit Button
+                  _buildActionButton(
+                    context,
+                    'Edit',
+                    Icons.edit,
+                    Colors.blue,
+                        () => _showEditDialog(context, source),
+                  ),
+
+                  // Delete Button
+                  _buildActionButton(
+                    context,
+                    'Delete',
+                    Icons.delete,
+                    Colors.red,
+                        () => _confirmDelete(context, source),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDetailRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 90,
+            child: Text(
+              label,
+              style: GoogleFonts.inter(
+                fontSize: 12,
+                color: Colors.grey.shade600,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              value,
+              style: GoogleFonts.inter(
+                fontSize: 12,
+                color: Colors.black87,
+                fontWeight: FontWeight.w400,
+              ),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 2,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatusChip(bool isActive) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: isActive ? Colors.green.withOpacity(0.1) : Colors.red.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isActive ? Colors.green.withOpacity(0.3) : Colors.red.withOpacity(0.3),
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            isActive ? Icons.check_circle : Icons.cancel,
+            size: 12,
+            color: isActive ? Colors.green : Colors.red,
+          ),
+          const SizedBox(width: 4),
+          Text(
+            isActive ? 'Active' : 'Inactive',
+            style: TextStyle(
+              color: isActive ? Colors.green : Colors.red,
+              fontWeight: FontWeight.w600,
+              fontSize: 10,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionButton(
+      BuildContext context,
+      String text,
+      IconData icon,
+      Color color,
+      VoidCallback onPressed,
+      ) {
+    return Expanded(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4),
+        child: TextButton.icon(
+          onPressed: onPressed,
+          icon: Icon(icon, size: 16, color: color),
+          label: Text(
+            text,
+            style: GoogleFonts.inter(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: color,
+            ),
+          ),
+          style: TextButton.styleFrom(
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+              side: BorderSide(color: color.withOpacity(0.3)),
+            ),
+            backgroundColor: color.withOpacity(0.05),
+          ),
+        ),
+      ),
+    );
+  }
+
+  bool _getSourceStatus(SourceModel source) {
+    // Handle different possible status representations
+    if (source.isActive != null) {
+      if (source.isActive is bool) {
+        return source.isActive as bool;
+      }
+    }
+
+    // Fallback to isActive if available
+    return source.isActive ?? false;
+  }
+
+  Future<void> _confirmDelete(BuildContext context, SourceModel source) async {
+    final shouldDelete = await showDeleteConfirmationDialog(context);
+    if (shouldDelete && context.mounted) {
+      context.read<SourceBloc>().add(
+        DeleteSource(source.id.toString()),
+      );
+    }
+  }
+
+  void _showEditDialog(BuildContext context, SourceModel source) {
+    // Pre-fill the form
+    final sourceBloc = context.read<SourceBloc>();
+    sourceBloc.nameController.text = source.name ?? "";
+    sourceBloc.selectedState = source.isActive == true ? "Active" : "Inactive";
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return SourceCreate(id: source.id.toString());
+      },
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(40),
+      margin: const EdgeInsets.all(16),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.source_outlined,
+            size: 64,
+            color: Colors.grey.withOpacity(0.5),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'No Sources Found',
+            style: GoogleFonts.inter(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Create your first source to get started',
+            style: GoogleFonts.inter(
+              fontSize: 14,
+              fontWeight: FontWeight.w400,
+              color: Colors.grey,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+}
 class SourceTableCard extends StatelessWidget {
   final List<SourceModel> sources;
   final VoidCallback? onSourceTap;
