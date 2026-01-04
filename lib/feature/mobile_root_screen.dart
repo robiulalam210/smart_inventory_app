@@ -45,10 +45,9 @@ class _RootScreenState extends State<MobileRootScreen> {
   }
 
   Widget _buildFilterSegmentedControl() {
-    final isMobile = Responsive.isMobile(context);
 
     return SizedBox(
-      width: isMobile ? double.infinity : AppSizes.width(context) * 0.25,
+      width:  double.infinity ,
       child: CupertinoSegmentedControl<String>(
         padding: EdgeInsets.zero,
         children: {
@@ -61,7 +60,7 @@ class _RootScreenState extends State<MobileRootScreen> {
               'Today',
               style: TextStyle(
                 fontFamily: GoogleFonts.playfairDisplay().fontFamily,
-                fontSize: isMobile ? 12 : 14,
+                fontSize: 12,
                 color: selectedPurchaseOverviewType == 'current_day'
                     ? Colors.white
                     : Colors.black,
@@ -74,10 +73,10 @@ class _RootScreenState extends State<MobileRootScreen> {
               horizontal: 4.0,
             ),
             child: Text(
-              isMobile ? DateFormat('MMM').format(DateTime.now()) : DateFormat('MMMM').format(DateTime.now()),
+              DateFormat('MMMM').format(DateTime.now()),
               style: TextStyle(
                 fontFamily: GoogleFonts.playfairDisplay().fontFamily,
-                fontSize: isMobile ? 12 : 14,
+                fontSize: 12,
                 color: selectedPurchaseOverviewType == 'this_month'
                     ? Colors.white
                     : Colors.black,
@@ -90,10 +89,10 @@ class _RootScreenState extends State<MobileRootScreen> {
               horizontal: 4.0,
             ),
             child: Text(
-              isMobile ? 'All' : 'Life Time',
+              'Life Time',
               style: TextStyle(
                 fontFamily: GoogleFonts.playfairDisplay().fontFamily,
-                fontSize: isMobile ? 12 : 14,
+                fontSize: 12,
                 color: selectedPurchaseOverviewType == 'lifeTime'
                     ? Colors.white
                     : Colors.black,
@@ -133,7 +132,7 @@ class _RootScreenState extends State<MobileRootScreen> {
       child: Row(
         children: [
           CircleAvatar(
-            backgroundColor: color.withOpacity(0.12),
+            backgroundColor: color.withValues(alpha: 0.12),
             child: Icon(icon, color: color, size: 20),
           ),
           const SizedBox(width: 8),
@@ -246,13 +245,9 @@ class _RootScreenState extends State<MobileRootScreen> {
                   fontSize: isMobile ? 14 : 18,
                 ),
               ),
-              if (!isMobile) _buildSegmentedControl('sales'),
             ],
           ),
-          if (isMobile) ...[
-            const SizedBox(height: 8),
-            _buildSegmentedControl('sales'),
-          ],
+
           const SizedBox(height: 12),
           Column(
             children: [
@@ -328,13 +323,9 @@ class _RootScreenState extends State<MobileRootScreen> {
                   fontSize: isMobile ? 14 : 18,
                 ),
               ),
-              if (!isMobile) _buildSegmentedControl('purchase'),
             ],
           ),
-          if (isMobile) ...[
-            const SizedBox(height: 8),
-            _buildSegmentedControl('purchase'),
-          ],
+
           const SizedBox(height: 12),
           Column(
             children: [
@@ -388,70 +379,6 @@ class _RootScreenState extends State<MobileRootScreen> {
     );
   }
 
-  Widget _buildSegmentedControl(String type) {
-    final isMobile = Responsive.isMobile(context);
-    final width = isMobile ? double.infinity : AppSizes.width(context) * 0.20;
-
-    return SizedBox(
-      width: width,
-      child: CupertinoSegmentedControl<String>(
-        padding: EdgeInsets.zero,
-        children: {
-          'current_day': Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 4.0),
-            child: Text(
-              'Today',
-              style: TextStyle(
-                fontFamily: GoogleFonts.playfairDisplay().fontFamily,
-                fontSize: isMobile ? 12 : 14,
-                color: selectedPurchaseOverviewType == 'current_day'
-                    ? Colors.white
-                    : Colors.black,
-              ),
-            ),
-          ),
-          'this_month': Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 4.0),
-            child: Text(
-              isMobile ? DateFormat('MMM').format(DateTime.now()) : DateFormat('MMMM').format(DateTime.now()),
-              style: TextStyle(
-                fontFamily: GoogleFonts.playfairDisplay().fontFamily,
-                fontSize: isMobile ? 12 : 14,
-                color: selectedPurchaseOverviewType == 'this_month'
-                    ? Colors.white
-                    : Colors.black,
-              ),
-            ),
-          ),
-          'lifeTime': Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 4.0),
-            child: Text(
-              isMobile ? 'All' : 'Life Time',
-              style: TextStyle(
-                fontFamily: GoogleFonts.playfairDisplay().fontFamily,
-                fontSize: isMobile ? 12 : 14,
-                color: selectedPurchaseOverviewType == 'lifeTime'
-                    ? Colors.white
-                    : Colors.black,
-              ),
-            ),
-          ),
-        },
-        onValueChanged: (value) {
-          setState(() {
-            selectedPurchaseOverviewType = value;
-            context.read<DashboardBloc>().add(
-              FetchDashboardData(dateFilter: value, context: context),
-            );
-          });
-        },
-        groupValue: selectedPurchaseOverviewType,
-        unselectedColor: Colors.white54,
-        selectedColor: AppColors.primaryColor,
-        borderColor: AppColors.primaryColor,
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -528,14 +455,13 @@ class _RootScreenState extends State<MobileRootScreen> {
                                               crossAxisAlignment: CrossAxisAlignment.start,
                                               children: [
                                                 // ==== HEADER AND FILTER ====
-                                                Responsive.isMobile(context)
-                                                    ? Column(
+                                               Column(
                                                   crossAxisAlignment: CrossAxisAlignment.start,
                                                   children: [
                                                     const Text(
                                                       "Dashboard",
                                                       style: TextStyle(
-                                                        fontSize: 20,
+                                                        fontSize: 16,
                                                         fontWeight: FontWeight.bold,
                                                       ),
                                                     ),
@@ -543,19 +469,7 @@ class _RootScreenState extends State<MobileRootScreen> {
                                                     _buildFilterSegmentedControl(),
                                                   ],
                                                 )
-                                                    : Row(
-                                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                  children: [
-                                                    const Text(
-                                                      "Dashboard",
-                                                      style: TextStyle(
-                                                        fontSize: 20,
-                                                        fontWeight: FontWeight.bold,
-                                                      ),
-                                                    ),
-                                                    _buildFilterSegmentedControl(),
-                                                  ],
-                                                ),
+                                                   ,
                                                 const SizedBox(height: 16),
 
                                                 // ==== LOADING STATE ====
