@@ -123,7 +123,7 @@ class _CategoriesScreenState extends State<MobileCategoriesScreen> {
                         dataBloc.filterTextController.clear();
                         _fetchApiData();
                       },
-                      hintText: "Search categories...",
+                      hintText: "categories...",
                       isRequiredLabel: false,
                       labelText: "",
                     ),
