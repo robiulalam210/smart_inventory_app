@@ -34,10 +34,7 @@ class _ExpenseHeadScreenState extends State<ExpenseHeadScreen> {
     super.dispose();
   }
 
-  void _fetchApiData({
-    String filterText = '',
-    int pageNumber = 0,
-  }) {
+  void _fetchApiData({String filterText = '', int pageNumber = 0}) {
     if (!mounted) return;
 
     context.read<ExpenseHeadBloc>().add(
@@ -104,11 +101,7 @@ class _ExpenseHeadScreenState extends State<ExpenseHeadScreen> {
               builder: (context, state) {
                 return Column(
                   children: [
-                    if (isBigScreen)
-                      _buildDesktopHeader(context)
-                    else
-                      _buildMobileHeader(context),
-                    const SizedBox(height: 16),
+                    _buildDesktopHeader(context),
                     _buildExpenseHeadList(state),
                   ],
                 );
@@ -159,7 +152,7 @@ class _ExpenseHeadScreenState extends State<ExpenseHeadScreen> {
             },
             onClear: () {
               context.read<ExpenseHeadBloc>().filterTextController.clear();
-                          _searchController.clear();
+              _searchController.clear();
               _fetchApiData();
             },
             hintText: "Search expense head...",
@@ -198,13 +191,18 @@ class _ExpenseHeadScreenState extends State<ExpenseHeadScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   child: CustomSearchTextFormField(
                     isRequiredLabel: false,
-                    controller: context.read<ExpenseHeadBloc>().filterTextController,
+                    controller: context
+                        .read<ExpenseHeadBloc>()
+                        .filterTextController,
                     onChanged: (value) {
                       _fetchApiData(filterText: value);
                     },
                     onClear: () {
-                      context.read<ExpenseHeadBloc>().filterTextController.clear();
-                                          _searchController.clear();
+                      context
+                          .read<ExpenseHeadBloc>()
+                          .filterTextController
+                          .clear();
+                      _searchController.clear();
                       _fetchApiData();
                     },
                     hintText: "Search expense head...",
@@ -212,10 +210,7 @@ class _ExpenseHeadScreenState extends State<ExpenseHeadScreen> {
                 ),
               ),
               IconButton(
-                icon: Icon(
-                  Iconsax.filter,
-                  color: AppColors.primaryColor,
-                ),
+                icon: Icon(Iconsax.filter, color: AppColors.primaryColor),
                 onPressed: () => _showMobileFilterOptions(context),
               ),
             ],
@@ -233,28 +228,17 @@ class _ExpenseHeadScreenState extends State<ExpenseHeadScreen> {
 
   Widget _buildExpenseHeadList(ExpenseHeadState state) {
     if (state is ExpenseHeadListLoading) {
-      return const Expanded(
-        child: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
+      return const Expanded(child: Center(child: CircularProgressIndicator()));
     } else if (state is ExpenseHeadListSuccess) {
       if (state.list.isEmpty) {
-        return Expanded(
-          child: Center(
-            child: Lottie.asset(AppImages.noData),
-          ),
-        );
-      } else {
-        return SizedBox(
-          child: ExpenseHeadTableCard(
-            expenseHeads: state.list,
-            onExpenseHeadTap: () {
-              // Handle expense head tap if needed
-            },
-          ),
-        );
+        return Expanded(child: Center(child: Lottie.asset(AppImages.noData)));
       }
+      return Expanded(
+        child: ExpenseHeadTableCard(
+          expenseHeads: state.list,
+          onExpenseHeadTap: () {},
+        ),
+      );
     } else if (state is ExpenseHeadListFailed) {
       return Expanded(
         child: Center(
@@ -265,11 +249,7 @@ class _ExpenseHeadScreenState extends State<ExpenseHeadScreen> {
         ),
       );
     } else {
-      return Expanded(
-        child: Center(
-          child: Lottie.asset(AppImages.noData),
-        ),
-      );
+      return Expanded(child: Center(child: Lottie.asset(AppImages.noData)));
     }
   }
 
@@ -310,10 +290,7 @@ class _ExpenseHeadScreenState extends State<ExpenseHeadScreen> {
                 children: [
                   const Text(
                     'Filter Options',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   IconButton(
                     icon: const Icon(Icons.close),

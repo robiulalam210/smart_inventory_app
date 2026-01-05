@@ -179,10 +179,9 @@ class _MoneyReceiptScreenState extends State<MoneyReceiptScreen> {
             builder: (context, state) {
               return Column(
                 children: [
-                  if (isBigScreen)
-                    _buildDesktopHeader()
-                  else
-                    _buildMobileHeader(),
+
+                    _buildDesktopHeader(),
+
                   const SizedBox(height: 16),
                   SizedBox(
                     child: _buildMoneyReceiptList(state),
@@ -374,144 +373,21 @@ class _MoneyReceiptScreenState extends State<MoneyReceiptScreen> {
             const SizedBox(width: 10),
 
             IconButton(
+              onPressed: _clearFilters,
+              icon:  Icon(HugeIcons.strokeRoundedCancelCircle,color: AppColors.redAccent,),
+              tooltip: "Cancel",
+            ), IconButton(
               onPressed: () => _fetchApi(),
               icon: const Icon(Icons.refresh),
               tooltip: "Refresh",
             ),
           ],
         ),
-        const SizedBox(height: 10),
-        Row(
-          children: [
-            TextButton(
-              onPressed: _clearFilters,
-              child: Text(
-                'Clear All Filters',
-                style: TextStyle(color: Colors.red),
-              ),
-            ),
-          ],
-        ),
+
       ],
     );
   }
 
-  Widget _buildMobileHeader() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        // Search Bar
-        Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withValues(alpha: 0.1),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: CustomSearchTextFormField(
-                    controller: filterTextController,
-                    onChanged: (value) => _fetchApi(filterText: value),
-                    onClear: () {
-                      filterTextController.clear();
-                      _fetchApi();
-                    },
-                    hintText: "Search money receipts...",
-                  ),
-                ),
-              ),
-              IconButton(
-                icon: Icon(
-                  Iconsax.filter,
-                  color: AppColors.primaryColor,
-                ),
-                onPressed: () => _showMobileFilterSheet(context),
-              ),
-              IconButton(
-                onPressed: () => _fetchApi(),
-                icon: const Icon(Icons.refresh),
-                tooltip: "Refresh",
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 12),
-
-        // Filter Chips
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            if (selectedCustomerNotifier.value != null)
-              Chip(
-                label: const Text('Customer Filtered'),
-                onDeleted: () {
-                  selectedCustomerNotifier.value = null;
-                  context.read<MoneyReceiptBloc>().selectCustomerModel = null;
-                  _fetchApi();
-                },
-              ),
-            if (selectedSellerNotifier.value != null)
-              Chip(
-                label: const Text('Seller Filtered'),
-                onDeleted: () {
-                  selectedSellerNotifier.value = null;
-                  context.read<MoneyReceiptBloc>().selectUserModel = null;
-                  _fetchApi();
-                },
-              ),
-            if (selectedDateRange != null)
-              Chip(
-                label: Text(
-                  '${_formatDate(selectedDateRange!.start)} - ${_formatDate(selectedDateRange!.end)}',
-                ),
-                onDeleted: () {
-                  setState(() => selectedDateRange = null);
-                  _fetchApi();
-                },
-              ),
-          ],
-        ),
-        const SizedBox(height: 12),
-
-        // Action Buttons
-        Row(
-          children: [
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: () => _showMobileFilterSheet(context),
-                icon: const Icon(Iconsax.filter, size: 16),
-                label: const Text('More Filters'),
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: _clearFilters,
-                icon: const Icon(Icons.clear_all, size: 16),
-                label: const Text('Clear All'),
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
 
   Widget _buildMoneyReceiptList(MoneyReceiptState state) {
     if (state is MoneyReceiptListLoading) {
@@ -576,200 +452,5 @@ class _MoneyReceiptScreenState extends State<MoneyReceiptScreen> {
     }
   }
 
-  void _showMobileFilterSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return Container(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        "Filter Money Receipts",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
 
-                  // Customer Filter
-                  BlocBuilder<CustomerBloc, CustomerState>(
-                    builder: (context, state) {
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            "Customer",
-                            style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 14,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          AppDropdown<CustomerActiveModel>(
-                            label: "",
-                            context: context,
-                            isSearch: true,
-                            isLabel: false,
-                            hint: "Select Customer",
-                            isNeedAll: true,
-                            isRequired: false,
-                            value: context.read<MoneyReceiptBloc>().selectCustomerModel,
-                            itemList: context.read<CustomerBloc>().activeCustomer,
-                            onChanged: (newVal) {
-                              setState(() {
-                                context.read<MoneyReceiptBloc>().selectCustomerModel = newVal;
-                                selectedCustomerNotifier.value = newVal?.id.toString();
-                              });
-                            },
-                            itemBuilder: (item) => DropdownMenuItem<CustomerActiveModel>(
-                              value: item,
-                              child: Text(item.name ?? 'Unknown Customer'),
-                            ),
-                          ),
-                        ],
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Seller Filter
-                  BlocBuilder<UserBloc, UserState>(
-                    builder: (context, state) {
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            "Seller",
-                            style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 14,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          AppDropdown<UsersListModel>(
-                            label: "",
-                            context: context,
-                            hint: "Select Seller",
-                            isLabel: false,
-                            isRequired: false,
-                            isNeedAll: true,
-                            value: context.read<MoneyReceiptBloc>().selectUserModel,
-                            itemList: context.read<UserBloc>().list,
-                            onChanged: (newVal) {
-                              setState(() {
-                                context.read<MoneyReceiptBloc>().selectUserModel = newVal;
-                                selectedSellerNotifier.value = newVal?.id.toString();
-                              });
-                            },
-                            itemBuilder: (item) => DropdownMenuItem<UsersListModel>(
-                              value: item,
-                              child: Text(item.username ?? 'Unknown Seller'),
-                            ),
-                          ),
-                        ],
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Date Range
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        "Date Range",
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 14,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      CustomDateRangeField(
-                        isLabel: false,
-                        selectedDateRange: selectedDateRange,
-                        onDateRangeSelected: (value) {
-                          setState(() => selectedDateRange = value);
-                        },
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Action Buttons
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton(
-                          onPressed: () {
-                            setState(() {
-                              filterTextController.clear();
-                              context.read<MoneyReceiptBloc>().selectCustomerModel = null;
-                              context.read<MoneyReceiptBloc>().selectUserModel = null;
-                              selectedCustomerNotifier.value = null;
-                              selectedSellerNotifier.value = null;
-                              selectedDateRange = null;
-                            });
-                            Navigator.pop(context);
-                            _fetchApi();
-                          },
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          child: const Text("Clear All"),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: () {
-                            Navigator.pop(context);
-                            _fetchApi();
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primaryColor,
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          child: const Text("Apply Filters"),
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: MediaQuery.of(context).viewInsets.bottom),
-                ],
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-
-  String _formatDate(DateTime date) {
-    return '${date.day}/${date.month}/${date.year}';
-  }
 }

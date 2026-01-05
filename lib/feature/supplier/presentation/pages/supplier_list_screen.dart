@@ -167,9 +167,10 @@ class _SupplierScreenState extends State<SupplierScreen> {
           },
           child: Column(
             children: [
-              if (Responsive.isDesktop(context))
+
                 // Desktop layout
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
                       flex: 4,
@@ -245,122 +246,8 @@ class _SupplierScreenState extends State<SupplierScreen> {
                       name: 'New Supplier',
                     ),
                   ],
-                )
-              else
-                // Mobile/Tablet layout
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // Search Bar with Icon Button
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withValues(alpha: 0.1),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                              ),
-                              child: CustomSearchTextFormField(
-                                controller: filterTextController,
-                                forSearch: true,
-                                isRequiredLabel: false,
-                                onClear: () {
-                                  filterTextController.clear();
-                                  _fetchApi();
-                                },
-                                onChanged: (value) {
-                                  _fetchApi(filterText: value);
-                                },
-                                hintText: "Search suppliers...",
-                              ),
-                            ),
-                          ),
-                          // Filter Icon Button
-                          Container(
-                            margin: const EdgeInsets.only(right: 8),
-                            decoration: BoxDecoration(
-                              color: AppColors.primaryColor.withValues(
-                                alpha: 0.1,
-                              ),
-                              shape: BoxShape.circle,
-                            ),
-                            child: IconButton(
-                              icon: Icon(
-                                Iconsax.filter,
-                                color: AppColors.primaryColor,
-                                size: 20,
-                              ),
-                              onPressed: () {
-                                _showMobileFilterSheet(context);
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Filter Chips and Create Button
-                    Row(
-                      children: [
-                        // Filter Chip
-                        if (dataBloc.selectedState.isNotEmpty &&
-                            dataBloc.selectedState != "All")
-                          Container(
-                            margin: const EdgeInsets.only(right: 8),
-                            child: Chip(
-                              label: Text(dataBloc.selectedState),
-                              backgroundColor: AppColors.primaryColor
-                                  .withValues(alpha: 0.1),
-                              deleteIcon: const Icon(Icons.close, size: 16),
-                              onDeleted: () {
-                                setState(() {
-                                  dataBloc.selectedState = "";
-                                });
-                                _fetchApi(
-                                  filterText: filterTextController.text,
-                                );
-                              },
-                            ),
-                          ),
-                        const Spacer(),
-                        // Create Button
-                        AppButton(
-                          onPressed: () {
-                            showDialog(
-                              context: context,
-                              builder: (context) {
-                                return Dialog(
-                                  insetPadding: const EdgeInsets.all(20),
-                                  child: SizedBox(
-                                    // width: AppSizes.width(context) * 0.5,
-                                    height: AppSizes.height(context) * 0.5,
-                                    child: const CreateSupplierScreen(),
-                                  ),
-                                );
-                              },
-                            );
-                          },
-                          size: 150,
-                          name: 'New Supplier',
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                  ],
                 ),
+
               SizedBox(
                 child: BlocBuilder<SupplierListBloc, SupplierListState>(
                   builder: (context, state) {

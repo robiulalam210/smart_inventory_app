@@ -19,6 +19,7 @@ import '../widgets/widget.dart';
 
 class PosSaleScreen extends StatefulWidget {
   const PosSaleScreen({super.key, this.posSale});
+
   final String? posSale;
 
   @override
@@ -48,13 +49,7 @@ class _PosSaleScreenState extends State<PosSaleScreen> {
       context.read<CustomerBloc>().add(FetchCustomerActiveList(context));
       context.read<ProductsBloc>().add(FetchProductsStockList(context));
 
-
-
-      _fetchApi(
-
-      );
-
-
+      _fetchApi();
     });
   }
 
@@ -82,7 +77,8 @@ class _PosSaleScreenState extends State<PosSaleScreen> {
     if (customer.isNotEmpty) filter += "&customer=$customer";
     if (seller.isNotEmpty) filter += "&seller=$seller";
     if (from != null && to != null) {
-      filter += "&start_date=${from.toIso8601String()}&end_date=${to.toIso8601String()}";
+      filter +=
+          "&start_date=${from.toIso8601String()}&end_date=${to.toIso8601String()}";
     }
 
     context.read<PosSaleBloc>().add(
@@ -186,13 +182,9 @@ class _PosSaleScreenState extends State<PosSaleScreen> {
             child: Column(
               children: [
                 if (isBigScreen)
-                  _buildDesktopHeader()
-                else
-                  _buildMobileHeader(),
-                const SizedBox(height: 16),
-                SizedBox(
-                  child: _buildDataTable(),
-                ),
+                  _buildDesktopHeader(),
+
+                SizedBox(child: _buildDataTable()),
               ],
             ),
           ),
@@ -246,24 +238,25 @@ class _PosSaleScreenState extends State<PosSaleScreen> {
                         value: selectedCustomer,
                         itemList: context.read<CustomerBloc>().activeCustomer,
                         onChanged: (newVal) {
-                          context.read<PosSaleBloc>().selectCustomerModel = newVal;
-                          selectedCustomerNotifier.value = newVal?.id.toString();
-                          _fetchApi(
-                            customer: newVal?.id.toString() ?? '',
-                          );
+                          context.read<PosSaleBloc>().selectCustomerModel =
+                              newVal;
+                          selectedCustomerNotifier.value = newVal?.id
+                              .toString();
+                          _fetchApi(customer: newVal?.id.toString() ?? '');
                         },
                         validator: (value) => null,
-                        itemBuilder: (item) => DropdownMenuItem<CustomerActiveModel>(
-                          value: item,
-                          child: Text(
-                            item.name ?? 'Unknown Customer',
-                            style: const TextStyle(
-                              color: AppColors.blackColor,
-                              fontFamily: 'Quicksand',
-                              fontWeight: FontWeight.w300,
+                        itemBuilder: (item) =>
+                            DropdownMenuItem<CustomerActiveModel>(
+                              value: item,
+                              child: Text(
+                                item.name ?? 'Unknown Customer',
+                                style: const TextStyle(
+                                  color: AppColors.blackColor,
+                                  fontFamily: 'Quicksand',
+                                  fontWeight: FontWeight.w300,
+                                ),
+                              ),
                             ),
-                          ),
-                        ),
                       );
                     },
                   );
@@ -280,7 +273,9 @@ class _PosSaleScreenState extends State<PosSaleScreen> {
                   return ValueListenableBuilder<String?>(
                     valueListenable: selectedSellerNotifier,
                     builder: (context, sellerId, child) {
-                      final selectedSeller = context.read<PosSaleBloc>().selectUserModel;
+                      final selectedSeller = context
+                          .read<PosSaleBloc>()
+                          .selectUserModel;
 
                       return AppDropdown<UsersListModel>(
                         label: "Seller",
@@ -294,9 +289,7 @@ class _PosSaleScreenState extends State<PosSaleScreen> {
                         onChanged: (newVal) {
                           context.read<PosSaleBloc>().selectUserModel = newVal;
                           selectedSellerNotifier.value = newVal?.id.toString();
-                          _fetchApi(
-                            seller: newVal?.id.toString() ?? '',
-                          );
+                          _fetchApi(seller: newVal?.id.toString() ?? '');
                         },
                         validator: (value) => null,
                         itemBuilder: (item) => DropdownMenuItem<UsersListModel>(
@@ -337,128 +330,21 @@ class _PosSaleScreenState extends State<PosSaleScreen> {
             const SizedBox(width: 5),
 
             IconButton(
+              onPressed: () => _clearFilters,
+              icon:  Icon(HugeIcons.strokeRoundedCancelCircle,color: AppColors.redAccent,),
+              tooltip: "Cancel",
+            ),   IconButton(
               onPressed: () => _fetchApi(),
               icon: const Icon(Icons.refresh),
               tooltip: "Refresh",
             ),
           ],
         ),
-        const SizedBox(height: 10),
-        Row(
-          children: [
-            TextButton(
-              onPressed: _clearFilters,
-              child: Text(
-                'Clear All Filters',
-                style: TextStyle(color: Colors.red),
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildMobileHeader() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        // Search Bar
-        Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withValues(alpha: 0.1),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  child: CustomSearchTextFormField(
-                    controller: filterTextController,
-                    onChanged: (value) => _fetchApi(filterText: value),
-                    onClear: () {
-                      filterTextController.clear();
-                      _fetchApi();
-                    },
-                    hintText: "sales...",
-                  ),
-                ),
-              ),
-              IconButton(
-                icon: Icon(
-                  Iconsax.filter,
-                  color: AppColors.primaryColor,
-                ),
-                onPressed: () => _showMobileFilterSheet(context),
-              ),
-              SizedBox(
-                child: OutlinedButton.icon(
-                  onPressed: _clearFilters,
-                  icon: const Icon(Icons.clear_all, size: 16),
-                  label: const Text('Clear All'),
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 0,horizontal: 8),
-                  ),
-                ),
-              ),
-              IconButton(
-                onPressed: () => _fetchApi(),
-                icon: const Icon(Icons.refresh),
-                tooltip: "Refresh",
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 12),
-
-        // Filter Chips
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            if (selectedCustomerNotifier.value != null)
-              Chip(
-                label: const Text('Customer Filtered'),
-                onDeleted: () {
-                  selectedCustomerNotifier.value = null;
-                  context.read<PosSaleBloc>().selectCustomerModel = null;
-                  _fetchApi();
-                },
-              ),
-            if (selectedSellerNotifier.value != null)
-              Chip(
-                label: const Text('Seller Filtered'),
-                onDeleted: () {
-                  selectedSellerNotifier.value = null;
-                  context.read<PosSaleBloc>().selectUserModel = null;
-                  _fetchApi();
-                },
-              ),
-
-            if (selectedDateRange != null)
-              Chip(
-                label: Text(
-                  '${_formatDate(selectedDateRange!.start)} - ${_formatDate(selectedDateRange!.end)}',
-                ),
-                onDeleted: () {
-                  setState(() => selectedDateRange = null);
-                  _fetchApi();
-                },
-              ),
-          ],
-        ),
 
       ],
     );
   }
+
 
   Widget _buildDataTable() {
     return BlocBuilder<PosSaleBloc, PosSaleState>(
@@ -471,9 +357,7 @@ class _PosSaleScreenState extends State<PosSaleScreen> {
           }
           return Column(
             children: [
-              SizedBox(
-                child: PosSaleDataTableWidget(sales: state.list),
-              ),
+              SizedBox(child: PosSaleDataTableWidget(sales: state.list)),
               const SizedBox(height: 6),
               PaginationBar(
                 count: state.count,
@@ -486,10 +370,8 @@ class _PosSaleScreenState extends State<PosSaleScreen> {
                   pageNumber: page,
                   pageSize: state.pageSize,
                 ),
-                onPageSizeChanged: (newSize) => _fetchProductList(
-                  pageNumber: 1,
-                  pageSize: newSize,
-                ),
+                onPageSizeChanged: (newSize) =>
+                    _fetchProductList(pageNumber: 1, pageSize: newSize),
               ),
             ],
           );
@@ -525,200 +407,5 @@ class _PosSaleScreenState extends State<PosSaleScreen> {
     );
   }
 
-  void _showMobileFilterSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return Container(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        "Filter POS Sales",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
 
-                  // Customer Filter
-                  BlocBuilder<CustomerBloc, CustomerState>(
-                    builder: (context, state) {
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            "Customer",
-                            style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 14,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          AppDropdown<CustomerActiveModel>(
-                            label: "",
-                            context: context,
-                            hint: "Select Customer",
-                            isSearch: true,
-                            isLabel: false,
-                            isRequired: false,
-                            isNeedAll: true,
-                            value: context.read<PosSaleBloc>().selectCustomerModel,
-                            itemList: context.read<CustomerBloc>().activeCustomer,
-                            onChanged: (newVal) {
-                              setState(() {
-                                context.read<PosSaleBloc>().selectCustomerModel = newVal;
-                                selectedCustomerNotifier.value = newVal?.id.toString();
-                              });
-                            },
-                            itemBuilder: (item) => DropdownMenuItem<CustomerActiveModel>(
-                              value: item,
-                              child: Text(item.name ?? 'Unknown Customer'),
-                            ),
-                          ),
-                        ],
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Seller Filter
-                  BlocBuilder<UserBloc, UserState>(
-                    builder: (context, state) {
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            "Seller",
-                            style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 14,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          AppDropdown<UsersListModel>(
-                            label: "",
-                            context: context,
-                            hint: "Select Seller",
-                            isLabel: false,
-                            isRequired: false,
-                            isNeedAll: true,
-                            value: context.read<PosSaleBloc>().selectUserModel,
-                            itemList: context.read<UserBloc>().list,
-                            onChanged: (newVal) {
-                              setState(() {
-                                context.read<PosSaleBloc>().selectUserModel = newVal;
-                                selectedSellerNotifier.value = newVal?.id.toString();
-                              });
-                            },
-                            itemBuilder: (item) => DropdownMenuItem<UsersListModel>(
-                              value: item,
-                              child: Text(item.username ?? 'Unknown Seller'),
-                            ),
-                          ),
-                        ],
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Date Range
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        "Date Range",
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 14,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      CustomDateRangeField(
-                        isLabel: false,
-                        selectedDateRange: selectedDateRange,
-                        onDateRangeSelected: (value) {
-                          setState(() => selectedDateRange = value);
-                        },
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Action Buttons
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton(
-                          onPressed: () {
-                            setState(() {
-                              filterTextController.clear();
-                              context.read<PosSaleBloc>().selectCustomerModel = null;
-                              context.read<PosSaleBloc>().selectUserModel = null;
-                              selectedCustomerNotifier.value = null;
-                              selectedSellerNotifier.value = null;
-                              selectedDateRange = null;
-                            });
-                            Navigator.pop(context);
-                            _fetchApi();
-                          },
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          child: const Text("Clear All"),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: () {
-                            Navigator.pop(context);
-                            _fetchApi();
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primaryColor,
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          child: const Text("Apply Filters"),
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: MediaQuery.of(context).viewInsets.bottom),
-                ],
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-
-  String _formatDate(DateTime date) {
-    return '${date.day}/${date.month}/${date.year}';
-  }
 }

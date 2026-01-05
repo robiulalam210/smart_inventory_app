@@ -424,6 +424,7 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
           },
           builder: (context, state) {
             return SingleChildScrollView(
+              padding: EdgeInsets.all(AppSizes.paddingInside),
               child: Form(
                 key: formKey,
                 child: Column(
@@ -929,10 +930,10 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
               // ================= PRODUCT =================
               ResponsiveCol(
                 xs: 12,
-                sm: 4,
-                md: 4,
-                lg: 4,
-                xl: 4,
+                sm:  3,
+                md: 3,
+                lg:  3,
+                xl: 3,
                 child: BlocBuilder<ProductsBloc, ProductsState>(
                   builder: (context, state) {
                     final selectedCategoryId = categoriesBloc.selectedStateId;
@@ -1443,8 +1444,9 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                   ),
                   onChanged: (value) {
                     if (label.contains('Discount')) calculateDiscountTotal();
-                    if (label.contains('Service'))
+                    if (label.contains('Service')) {
                       calculateServiceChargeTotal();
+                    }
                     if (label.contains('Delivery')) calculateDeliveryTotal();
                     _updatePaymentCalculations();
                     setState(() {});

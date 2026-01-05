@@ -5,7 +5,7 @@ class AppSizes{
   static const double bodyTabPadding     = 45;
   static const double preferredBottom = 25;
   static const double borderRadiusSize = 4;
-  static const double radius = 5;
+  static const double radius = 12;
 
   static double height(BuildContext context) => MediaQuery.sizeOf(context).height;
   static double width(BuildContext context)  => MediaQuery.sizeOf(context).width;

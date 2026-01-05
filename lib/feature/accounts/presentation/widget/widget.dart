@@ -389,75 +389,77 @@ class AccountCard extends StatelessWidget {
 
         return Container(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(AppSizes.radius),
             color: Colors.white,
             boxShadow: [
               BoxShadow(
-                color: Colors.grey.withOpacity(0.1),
+                color: Colors.grey.withValues(alpha: 0.1),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
             ],
           ),
-          child: Scrollbar(
-            controller: verticalScrollController,
-            thumbVisibility: true,
-            child: SingleChildScrollView(
+          child: ClipRRect( borderRadius: BorderRadius.circular(AppSizes.radius),
+            child: Scrollbar(
               controller: verticalScrollController,
-              scrollDirection: Axis.vertical,
-              child: Scrollbar(
-                controller: horizontalScrollController,
-                thumbVisibility: true,
-                child: SingleChildScrollView(
+              thumbVisibility: true,
+              child: SingleChildScrollView(
+                controller: verticalScrollController,
+                scrollDirection: Axis.vertical,
+                child: Scrollbar(
                   controller: horizontalScrollController,
-                  scrollDirection: Axis.horizontal,
-                  child: Container(
-                    constraints: BoxConstraints(
-                      minWidth: totalTableWidth,
-                      minHeight: 200,
-                    ),
-                    child: DataTable(
-                      dataRowMinHeight: 50,
-                      dataRowMaxHeight: 60,
-                      columnSpacing: columnSpacing,
-                      horizontalMargin: horizontalMargin,
-                      dividerThickness: 0.5,
-                      headingRowHeight: 50,
-                      headingTextStyle: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
+                  thumbVisibility: true,
+                  child: SingleChildScrollView(
+                    controller: horizontalScrollController,
+                    scrollDirection: Axis.horizontal,
+                    child: Container(
+                      constraints: BoxConstraints(
+                        minWidth: totalTableWidth,
+                        minHeight: 200,
                       ),
-                      headingRowColor: WidgetStateProperty.all(
-                        AppColors.primaryColor,
+                      child: DataTable(
+                        dataRowMinHeight: 50,
+                        dataRowMaxHeight: 60,
+                        columnSpacing: columnSpacing,
+                        horizontalMargin: horizontalMargin,
+                        dividerThickness: 0.5,
+                        headingRowHeight: 50,
+                        headingTextStyle: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                        ),
+                        headingRowColor: WidgetStateProperty.all(
+                          AppColors.primaryColor,
+                        ),
+                        dataTextStyle: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        columns: _buildColumns(minColumnWidth),
+                        rows: accounts.asMap().entries.map((entry) {
+                          final account = entry.value;
+                          return DataRow(
+                            color: WidgetStateProperty.resolveWith<Color?>(
+                                  (Set<WidgetState> states) {
+                                if (entry.key.isEven) {
+                                  return Colors.grey.withValues(alpha: 0.03);
+                                }
+                                return null;
+                              },
+                            ),
+                            cells: [
+                              _buildDataCell(account.acNo ?? "N/A", minColumnWidth * 1.2, TextAlign.center),
+                              _buildDataCell(account.name ?? "N/A", minColumnWidth * 1.2, TextAlign.center),
+                              _buildDataCell(account.acType ?? "N/A", minColumnWidth, TextAlign.center),
+                              _buildDataCell(account.acNumber ?? "-", minColumnWidth, TextAlign.center),
+                              _buildBankCell(account.bankName, account.branch, minColumnWidth * 1.3),
+                              _buildBalanceCell(account.balance, minColumnWidth),
+                              _buildActionsCell(context,account, minColumnWidth * 0.8),
+                            ],
+                          );
+                        }).toList(),
                       ),
-                      dataTextStyle: const TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w500,
-                      ),
-                      columns: _buildColumns(minColumnWidth),
-                      rows: accounts.asMap().entries.map((entry) {
-                        final account = entry.value;
-                        return DataRow(
-                          color: WidgetStateProperty.resolveWith<Color?>(
-                                (Set<WidgetState> states) {
-                              if (entry.key.isEven) {
-                                return Colors.grey.withValues(alpha: 0.03);
-                              }
-                              return null;
-                            },
-                          ),
-                          cells: [
-                            _buildDataCell(account.acNo ?? "N/A", minColumnWidth * 1.2, TextAlign.center),
-                            _buildDataCell(account.name ?? "N/A", minColumnWidth * 1.2, TextAlign.center),
-                            _buildDataCell(account.acType ?? "N/A", minColumnWidth, TextAlign.center),
-                            _buildDataCell(account.acNumber ?? "-", minColumnWidth, TextAlign.center),
-                            _buildBankCell(account.bankName, account.branch, minColumnWidth * 1.3),
-                            _buildBalanceCell(account.balance, minColumnWidth),
-                            _buildActionsCell(context,account, minColumnWidth * 0.8),
-                          ],
-                        );
-                      }).toList(),
                     ),
                   ),
                 ),

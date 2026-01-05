@@ -125,9 +125,8 @@ class _AccountScreenState extends State<AccountScreen> {
                 children: [
                   if (isBigScreen)
                     _buildDesktopHeader()
-                  else
-                    _buildMobileHeader(),
-                  const SizedBox(height: 16),
+               ,
+
                   SizedBox(
                     child: _buildAccountList(state),
                   ),

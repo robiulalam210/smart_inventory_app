@@ -164,10 +164,8 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
             return Column(
               children: [
                 if (isBigScreen)
-                  _buildDesktopHeader(context)
-                else
-                  _buildMobileHeader(context),
-                const SizedBox(height: 16),
+                  _buildDesktopHeader(context),
+
                 SizedBox(
                   child: _buildExpenseList(state),
                 ),
