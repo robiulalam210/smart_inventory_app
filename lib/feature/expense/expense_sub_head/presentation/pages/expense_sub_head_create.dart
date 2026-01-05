@@ -160,7 +160,7 @@ class _ExpenseSubCreateScreenState extends State<ExpenseSubCreateScreen> {
             decoration: BoxDecoration(
               shape: BoxShape.rectangle,
               color: AppColors.whiteColor,
-              borderRadius: BorderRadius.circular(AppSizes.borderRadiusSize),
+              borderRadius: BorderRadius.circular(AppSizes.radius),
             ),
             child: Padding(
               padding: const EdgeInsets.only(left: 10.0, right: 10.0, top: 8.0),
@@ -180,7 +180,7 @@ class _ExpenseSubCreateScreenState extends State<ExpenseSubCreateScreen> {
                                 ? 'Create Expense Sub Head'
                                 : 'Update Expense Sub Head',
                             style: const TextStyle(
-                              fontSize: 20,
+                              fontSize: 16,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -244,7 +244,6 @@ class _ExpenseSubCreateScreenState extends State<ExpenseSubCreateScreen> {
                         },
                       ),
 
-                      SizedBox(height: AppSizes.height(context) * 0.02),
 
                       // Name Input Field
                       CustomInputField(

@@ -34,10 +34,7 @@ class _ExpenseHeadScreenState extends State<MobileExpenseHeadScreen> {
     super.dispose();
   }
 
-  void _fetchApiData({
-    String filterText = '',
-    int pageNumber = 0,
-  }) {
+  void _fetchApiData({String filterText = '', int pageNumber = 0}) {
     if (!mounted) return;
 
     context.read<ExpenseHeadBloc>().add(
@@ -51,16 +48,17 @@ class _ExpenseHeadScreenState extends State<MobileExpenseHeadScreen> {
 
   @override
   Widget build(BuildContext context) {
-
-    return Scaffold
-      (
-      appBar: AppBar(title: Text("Expense Head",style: AppTextStyle.titleMedium(context),),),
-      body: SafeArea(
-        child: _buildContentArea()
+    return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        child: Icon(Icons.add),
+        onPressed: () => _showCreateDialog(context),
       ),
+      appBar: AppBar(
+        title: Text("Expense Head", style: AppTextStyle.titleMedium(context)),
+      ),
+      body: SafeArea(child: _buildContentArea()),
     );
   }
-
 
   Widget _buildContentArea() {
     return ResponsiveCol(
@@ -84,8 +82,7 @@ class _ExpenseHeadScreenState extends State<MobileExpenseHeadScreen> {
               builder: (context, state) {
                 return Column(
                   children: [
-
-                      _buildMobileHeader(context),
+                    _buildMobileHeader(context),
                     const SizedBox(height: 8),
                     _buildExpenseHeadList(state),
                   ],
@@ -102,6 +99,7 @@ class _ExpenseHeadScreenState extends State<MobileExpenseHeadScreen> {
     if (state is ExpenseHeadAddLoading) {
       appLoader(context, "Creating Expense Head, please wait...");
     } else if (state is ExpenseHeadAddSuccess) {
+      Navigator.pop(context); // Close loader dialog
       Navigator.pop(context); // Close loader dialog
       _fetchApiData(); // Reload expense head list
     } else if (state is ExpenseHeadAddFailed) {
@@ -121,7 +119,6 @@ class _ExpenseHeadScreenState extends State<MobileExpenseHeadScreen> {
       }
     }
   }
-
 
   Widget _buildMobileHeader(BuildContext context) {
     return Column(
@@ -147,13 +144,18 @@ class _ExpenseHeadScreenState extends State<MobileExpenseHeadScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   child: CustomSearchTextFormField(
                     isRequiredLabel: false,
-                    controller: context.read<ExpenseHeadBloc>().filterTextController,
+                    controller: context
+                        .read<ExpenseHeadBloc>()
+                        .filterTextController,
                     onChanged: (value) {
                       _fetchApiData(filterText: value);
                     },
                     onClear: () {
-                      context.read<ExpenseHeadBloc>().filterTextController.clear();
-                                          _searchController.clear();
+                      context
+                          .read<ExpenseHeadBloc>()
+                          .filterTextController
+                          .clear();
+                      _searchController.clear();
                       _fetchApiData();
                     },
                     hintText: "Search expense head...",
@@ -161,20 +163,11 @@ class _ExpenseHeadScreenState extends State<MobileExpenseHeadScreen> {
                 ),
               ),
               IconButton(
-                icon: Icon(
-                  Iconsax.filter,
-                  color: AppColors.primaryColor,
-                ),
+                icon: Icon(Iconsax.filter, color: AppColors.primaryColor),
                 onPressed: () => _showMobileFilterOptions(context),
               ),
             ],
           ),
-        ),
-        const SizedBox(height: 12),
-        // Create Button
-        AppButton(
-          name: "Create Expense Head",
-          onPressed: () => _showCreateDialog(context),
         ),
       ],
     );
@@ -182,18 +175,10 @@ class _ExpenseHeadScreenState extends State<MobileExpenseHeadScreen> {
 
   Widget _buildExpenseHeadList(ExpenseHeadState state) {
     if (state is ExpenseHeadListLoading) {
-      return const Expanded(
-        child: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
+      return const Expanded(child: Center(child: CircularProgressIndicator()));
     } else if (state is ExpenseHeadListSuccess) {
       if (state.list.isEmpty) {
-        return Expanded(
-          child: Center(
-            child: Lottie.asset(AppImages.noData),
-          ),
-        );
+        return Expanded(child: Center(child: Lottie.asset(AppImages.noData)));
       } else {
         return SizedBox(
           child: ExpenseHeadTableCard(
@@ -214,11 +199,7 @@ class _ExpenseHeadScreenState extends State<MobileExpenseHeadScreen> {
         ),
       );
     } else {
-      return Expanded(
-        child: Center(
-          child: Lottie.asset(AppImages.noData),
-        ),
-      );
+      return Expanded(child: Center(child: Lottie.asset(AppImages.noData)));
     }
   }
 
@@ -228,14 +209,17 @@ class _ExpenseHeadScreenState extends State<MobileExpenseHeadScreen> {
       builder: (context) {
         return Dialog(
           insetPadding: const EdgeInsets.all(20),
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              maxWidth: Responsive.isMobile(context)
-                  ? AppSizes.width(context)
-                  : AppSizes.width(context) * 0.5,
-              maxHeight: AppSizes.height(context) * 0.7,
+          child: ClipRRect(
+            borderRadius: BorderRadiusGeometry.circular(AppSizes.radius),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: Responsive.isMobile(context)
+                    ? AppSizes.width(context)
+                    : AppSizes.width(context) * 0.5,
+                maxHeight: AppSizes.height(context) * 0.7,
+              ),
+              child: const ExpenseHeadCreate(),
             ),
-            child: const ExpenseHeadCreate(),
           ),
         );
       },
@@ -259,10 +243,7 @@ class _ExpenseHeadScreenState extends State<MobileExpenseHeadScreen> {
                 children: [
                   const Text(
                     'Filter Options',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   IconButton(
                     icon: const Icon(Icons.close),

@@ -51,6 +51,34 @@ class _ExpenseHeadScreenState extends State<MobileExpenseSubHeadScreen> {
   Widget build(BuildContext context) {
 
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+
+        child: Icon(Icons.add),
+        onPressed: () {
+          context.read<ExpenseSubHeadBloc>().clearData();
+          showDialog(
+            context: context,
+            builder: (context) {
+              return Dialog(
+                // insetPadding: const EdgeInsets.all(16),
+                child: ClipRRect(
+                  borderRadius: BorderRadiusGeometry.circular(AppSizes.radius),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.rectangle,
+                      color: AppColors.whiteColor,
+                      borderRadius: BorderRadius.circular(AppSizes.radius),
+                    ),
+                    width: double.infinity,
+                    height: AppSizes.height(context) * 0.3,
+                    child: const ExpenseSubCreateScreen(),
+                  ),
+                ),
+              );
+            },
+          );
+        },
+      ),
       appBar: AppBar(title: Text("Expense Sub Head"),),
 
       body: SafeArea(
@@ -128,36 +156,7 @@ class _ExpenseHeadScreenState extends State<MobileExpenseSubHeadScreen> {
                           },
                           hintText: "expense sub heads...",
                         ),
-                        const SizedBox(height: 12),
 
-                        // Create Button
-                        AppButton(
-                          name: "Create",
-                          size: 100,
-                          width: 100,
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          onPressed: () {
-                            context.read<ExpenseSubHeadBloc>().clearData();
-                            showDialog(
-                              context: context,
-                              builder: (context) {
-                                return Dialog(
-                                  // insetPadding: const EdgeInsets.all(16),
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.rectangle,
-                                      color: AppColors.whiteColor,
-                                      borderRadius: BorderRadius.circular(AppSizes.borderRadiusSize),
-                                    ),
-                                    width: double.infinity,
-                                    height: AppSizes.height(context) * 0.3,
-                                    child: const ExpenseSubCreateScreen(),
-                                  ),
-                                );
-                              },
-                            );
-                          },
-                        ),
                       ],
                     ),
                   SizedBox(
