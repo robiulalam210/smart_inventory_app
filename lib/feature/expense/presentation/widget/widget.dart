@@ -632,9 +632,10 @@ class ExpenseTableCard extends StatelessWidget {
               maxWidth: isMobile
                   ? AppSizes.width(context)
                   : AppSizes.width(context) * 0.5,
-              maxHeight: AppSizes.height(context) * 0.8,
+              // maxHeight: AppSizes.height(context) * 0.8,
             ),
             child: ExpenseCreateScreen(
+              expenseModel: expense,
               id: expense.id.toString(),
               accountId: expense.account.toString(),
               name: "Update",

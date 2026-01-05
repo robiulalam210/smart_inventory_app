@@ -1,3 +1,4 @@
+import '../../data/model/expense.dart';
 import '/feature/expense/expense_head/data/model/expense_head_model.dart';
 import '/feature/expense/expense_sub_head/data/model/expense_sub_head_model.dart';
 
@@ -17,6 +18,7 @@ class ExpenseCreateScreen extends StatefulWidget {
   final String? id;
   final String? name;
   final String? accountId;
+  final ExpenseModel? expenseModel;
   final ExpenseHeadModel? selectedExpenseHead;
   final ExpenseSubHeadModel? selectedExpenseSubHead;
 
@@ -24,6 +26,7 @@ class ExpenseCreateScreen extends StatefulWidget {
     super.key,
     this.id,
     this.name,
+    this.expenseModel,
     this.accountId,
     this.selectedExpenseHead,
     this.selectedExpenseSubHead,
@@ -45,6 +48,14 @@ class _ExpenseCreateScreenState extends State<ExpenseCreateScreen> {
     // Initialize with existing values if in edit mode
     _selectedExpenseHead = widget.selectedExpenseHead;
     _selectedExpenseSubHead = widget.selectedExpenseSubHead;
+
+    if(widget.expenseModel!=null){
+      context.read<ExpenseBloc>().noteTextController.text=widget.expenseModel?.note??"";
+      context.read<ExpenseBloc>().amountTextController.text=widget.expenseModel?.account.toString()??"";
+      context.read<ExpenseBloc>().dateExpenseTextController.text=widget.expenseModel?.expenseDate.toString()??"";
+
+
+    }
 
     // Fetch expense heads
     context.read<ExpenseHeadBloc>().add(FetchExpenseHeadList(context));
