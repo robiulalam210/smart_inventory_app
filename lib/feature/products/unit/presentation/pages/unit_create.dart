@@ -120,7 +120,7 @@ class _UnitCreateState extends State<UnitCreate> {
 
   Widget _buildDialogContent() {
     return Container(
-      width: AppSizes.width(context) * 0.40,
+      // width: AppSizes.width(context) * 0.40,
       padding: const EdgeInsets.all(20),
       child: Form(
         key: formKey,

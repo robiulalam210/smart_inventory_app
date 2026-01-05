@@ -157,10 +157,10 @@ class MobileUnitTableCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: isActive ? Colors.green.withOpacity(0.1) : Colors.red.withOpacity(0.1),
+        color: isActive ? Colors.green.withValues(alpha: 0.1) : Colors.red.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isActive ? Colors.green.withOpacity(0.3) : Colors.red.withOpacity(0.3),
+          color: isActive ? Colors.green.withValues(alpha: 0.3) : Colors.red.withValues(alpha: 0.3),
         ),
       ),
       child: Text(
@@ -199,9 +199,9 @@ class MobileUnitTableCard extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),
-              side: BorderSide(color: color.withOpacity(0.3)),
+              side: BorderSide(color: color.withValues(alpha: 0.3)),
             ),
-            backgroundColor: color.withOpacity(0.05),
+            backgroundColor: color.withValues(alpha: 0.05),
           ),
         ),
       ),
@@ -223,17 +223,20 @@ class MobileUnitTableCard extends StatelessWidget {
     unitBloc.nameController.text = unit.name ?? "";
     unitBloc.shortNameController.text = unit.code ?? "";
     unitBloc.selectedState = unit.isActive == true ? "Active" : "Inactive";
-
-    showModalBottomSheet(
+    showDialog(
       context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
       builder: (context) {
-        return UnitCreate(id: unit.id.toString());
+        return Dialog(
+          child: SizedBox(
+            width: Responsive.isMobile(context)
+                ? MediaQuery.of(context).size.width * 0.9
+                : MediaQuery.of(context).size.width * 0.5,
+            child: UnitCreate(id: unit.id.toString()),
+          ),
+        );
       },
     );
+
   }
 
   Widget _buildEmptyState() {
@@ -243,7 +246,7 @@ class MobileUnitTableCard extends StatelessWidget {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -257,7 +260,7 @@ class MobileUnitTableCard extends StatelessWidget {
           Icon(
             Icons.square_foot,
             size: 64,
-            color: Colors.grey.withOpacity(0.5),
+            color: Colors.grey.withValues(alpha: 0.5),
           ),
           const SizedBox(height: 16),
           Text(
