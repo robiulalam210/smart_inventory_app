@@ -128,11 +128,11 @@ class _SupplierPaymentScreenState extends State<SupplierPaymentScreen> {
       padding: const EdgeInsets.all(4),
       child: Column(
         children: [
-          if (Responsive.isDesktop(context))
+
           // Desktop layout
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 SizedBox(
                   width: 400,
@@ -151,7 +151,7 @@ class _SupplierPaymentScreenState extends State<SupplierPaymentScreen> {
                 ),
                 const SizedBox(width: 16),
                 SizedBox(
-                  width: 260,
+                  width: 300,
                   child: CustomDateRangeField(
                     isLabel: false,
                     selectedDateRange: selectedDateRange,
@@ -182,71 +182,7 @@ class _SupplierPaymentScreenState extends State<SupplierPaymentScreen> {
                 ),
               ],
             )
-          else
-          // Mobile layout
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Search Bar
-                CustomSearchTextFormField(
-                  isRequiredLabel: false,
-                  controller: _searchController,
-                  onClear: () {
-                    _searchController.clear();
-                    _fetchApi();
-                  },
-                  onChanged: (value) {
-                    _fetchApi(filterText: value);
-                  },
-                  hintText: "Search payments...",
-                ),
-                const SizedBox(height: 12),
 
-                // Date Range and Create Button Row
-                Row(
-                  children: [
-                    Expanded(
-                      child: SizedBox(
-                        // height: 50,
-                        child: CustomDateRangeField(
-                          isLabel: false,
-                          selectedDateRange: selectedDateRange,
-                          onDateRangeSelected: (value) {
-                            setState(() => selectedDateRange = value);
-                            if (value != null) {
-                              _fetchApi(from: value.start, to: value.end);
-                            }
-                          },
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    SizedBox(
-                      width: 100,
-                      child: AppButton(
-                        name: "Create",
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        onPressed: () {
-                          showDialog(
-                            context: context,
-                            builder: (context) {
-                              return Dialog(
-                                insetPadding: const EdgeInsets.all(16),
-                                child: SizedBox(
-                                  width: double.infinity,
-                                  height: AppSizes.height(context) * 0.8,
-                                  child: const SupplierPaymentForm(),
-                                ),
-                              );
-                            },
-                          );
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
         ],
       ),
     );

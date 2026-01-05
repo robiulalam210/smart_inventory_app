@@ -124,10 +124,8 @@ class _CustomerScreenState extends State<CustomerScreen> {
               return Column(
                 children: [
                   if (isBigScreen)
-                    _buildDesktopHeader()
-                  else
-                    _buildMobileHeader(),
-                  const SizedBox(height: 16),
+                    _buildDesktopHeader(),
+
                   SizedBox(
                     child: _buildCustomerList(state),
                   ),

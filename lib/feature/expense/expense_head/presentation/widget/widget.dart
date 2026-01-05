@@ -23,12 +23,13 @@ class ExpenseHeadTableCard extends StatelessWidget {
     }
 
     final bool isMobile = Responsive.isMobile(context);
-    final bool isTablet = Responsive.isTablet(context);
 
-    if (isMobile || isTablet) {
+    if (isMobile) {
       return _buildMobileCardView(context, isMobile);
     } else {
-      return _buildDesktopDataTable();
+      return  SizedBox(child: SizedBox.shrink(),
+        // child: _buildDesktopDataTable(),
+      );
     }
   }
 
@@ -232,7 +233,7 @@ class ExpenseHeadTableCard extends StatelessWidget {
             color: Colors.white,
             boxShadow: [
               BoxShadow(
-                color: Colors.grey.withOpacity(0.1),
+                color: Colors.grey.withValues(alpha: 0.1),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),

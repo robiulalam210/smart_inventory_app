@@ -310,47 +310,49 @@ class ProductDataTableWidget extends StatelessWidget {
             borderRadius: BorderRadius.circular(10),
             color: Colors.white,
           ),
-          child: Scrollbar(
-            controller: verticalScrollController,
-            thumbVisibility: true,
-            child: SingleChildScrollView(
+          child: ClipRRect( borderRadius: BorderRadius.circular(AppSizes.radius),
+            child: Scrollbar(
               controller: verticalScrollController,
-              scrollDirection: Axis.vertical,
-              child: Scrollbar(
-                controller: horizontalScrollController,
-                thumbVisibility: true,
-                child: SingleChildScrollView(
+              thumbVisibility: true,
+              child: SingleChildScrollView(
+                controller: verticalScrollController,
+                scrollDirection: Axis.vertical,
+                child: Scrollbar(
                   controller: horizontalScrollController,
-                  scrollDirection: Axis.horizontal,
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(minWidth: totalWidth),
-                    child: DataTable(
-                      dataRowMinHeight: 40,
-                      headingRowHeight: 40,
-                      columnSpacing: 0,
-                      headingTextStyle: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
+                  thumbVisibility: true,
+                  child: SingleChildScrollView(
+                    controller: horizontalScrollController,
+                    scrollDirection: Axis.horizontal,
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(minWidth: totalWidth),
+                      child: DataTable(
+                        dataRowMinHeight: 40,
+                        headingRowHeight: 40,
+                        columnSpacing: 0,
+                        headingTextStyle: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        headingRowColor: WidgetStateProperty.all(
+                          AppColors.primaryColor,
+                        ),
+                        dataRowColor: WidgetStateProperty.resolveWith<Color?>(
+                              (Set<WidgetState> states) {
+                            return Colors.white;
+                          },
+                        ),
+                        columns: _buildColumns(dynamicColumnWidth),
+                        rows: products
+                            .asMap()
+                            .entries
+                            .map((entry) => _buildDataRow(context,
+                          entry.key + 1,
+                          entry.value,
+                          dynamicColumnWidth,
+                        ))
+                            .toList(),
                       ),
-                      headingRowColor: WidgetStateProperty.all(
-                        AppColors.primaryColor,
-                      ),
-                      dataRowColor: WidgetStateProperty.resolveWith<Color?>(
-                            (Set<WidgetState> states) {
-                          return Colors.white;
-                        },
-                      ),
-                      columns: _buildColumns(dynamicColumnWidth),
-                      rows: products
-                          .asMap()
-                          .entries
-                          .map((entry) => _buildDataRow(context,
-                        entry.key + 1,
-                        entry.value,
-                        dynamicColumnWidth,
-                      ))
-                          .toList(),
                     ),
                   ),
                 ),

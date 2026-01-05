@@ -119,7 +119,7 @@ class MoneyReceiptDataTableWidget extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: statusColor.withOpacity(0.1),
+                    color: statusColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: statusColor,
@@ -383,48 +383,50 @@ class MoneyReceiptDataTableWidget extends StatelessWidget {
 
         return Container(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(AppSizes.radius),
             color: Colors.white,
           ),
-          child: Scrollbar(
-            controller: verticalController,
-            thumbVisibility: true,
-            child: SingleChildScrollView(
+          child: ClipRRect( borderRadius: BorderRadius.circular(AppSizes.radius),
+            child: Scrollbar(
               controller: verticalController,
-              scrollDirection: Axis.vertical,
-              child: Scrollbar(
-                controller: horizontalController,
-                thumbVisibility: true,
-                child: SingleChildScrollView(
+              thumbVisibility: true,
+              child: SingleChildScrollView(
+                controller: verticalController,
+                scrollDirection: Axis.vertical,
+                child: Scrollbar(
                   controller: horizontalController,
-                  scrollDirection: Axis.horizontal,
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(minWidth: totalWidth),
-                    child: DataTable(
-                      columns: _buildColumns(dynamicColumnWidth),
-                      rows: sales
-                          .asMap()
-                          .entries
-                          .map(
-                            (entry) => _buildRow(
-                          context,
-                          entry.key + 1,
-                          entry.value,
-                          dynamicColumnWidth,
+                  thumbVisibility: true,
+                  child: SingleChildScrollView(
+                    controller: horizontalController,
+                    scrollDirection: Axis.horizontal,
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(minWidth: totalWidth),
+                      child: DataTable(
+                        columns: _buildColumns(dynamicColumnWidth),
+                        rows: sales
+                            .asMap()
+                            .entries
+                            .map(
+                              (entry) => _buildRow(
+                            context,
+                            entry.key + 1,
+                            entry.value,
+                            dynamicColumnWidth,
+                          ),
+                        )
+                            .toList(),
+                        headingRowColor: WidgetStateProperty.all(
+                          AppColors.primaryColor,
                         ),
-                      )
-                          .toList(),
-                      headingRowColor: WidgetStateProperty.all(
-                        AppColors.primaryColor,
+                        headingTextStyle: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                        ),
+                        dataRowMinHeight: 40,
+                        headingRowHeight: 40,
+                        columnSpacing: 0,
                       ),
-                      headingTextStyle: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
-                      ),
-                      dataRowMinHeight: 40,
-                      headingRowHeight: 40,
-                      columnSpacing: 0,
                     ),
                   ),
                 ),
@@ -553,7 +555,7 @@ class MoneyReceiptDataTableWidget extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: statusColor?.withOpacity(0.1) ?? Colors.grey.withOpacity(0.1),
+              color: statusColor?.withValues(alpha: 0.1) ?? Colors.grey.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: statusColor ?? Colors.grey),
             ),
