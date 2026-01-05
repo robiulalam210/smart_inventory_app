@@ -244,17 +244,20 @@ class MobileSourceTableCard extends StatelessWidget {
     final sourceBloc = context.read<SourceBloc>();
     sourceBloc.nameController.text = source.name ?? "";
     sourceBloc.selectedState = source.isActive == true ? "Active" : "Inactive";
-
-    showModalBottomSheet(
+    showDialog(
       context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
       builder: (context) {
-        return SourceCreate(id: source.id.toString());
+        return Dialog(
+          child: SizedBox(
+            width: Responsive.isMobile(context)
+                ? MediaQuery.of(context).size.width * 0.9
+                : MediaQuery.of(context).size.width * 0.5,
+            child: SourceCreate(id: source.id.toString()),
+          ),
+        );
       },
     );
+
   }
 
   Widget _buildEmptyState() {

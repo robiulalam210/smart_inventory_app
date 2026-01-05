@@ -91,7 +91,6 @@ class _GroupsScreenState extends State<MobileGroupsScreen> {
           appLoader(context, "Deleted Group, please wait...");
         } else if (state is GroupsAddSuccess) {
           Navigator.pop(context);
-          Navigator.pop(context);
           _fetchApi();
         } else if (state is GroupsSwitchSuccess) {
           Navigator.pop(context);
@@ -107,7 +106,6 @@ class _GroupsScreenState extends State<MobileGroupsScreen> {
           Navigator.pop(context);
           _fetchApi();
         } else if (state is GroupsAddFailed) {
-          Navigator.pop(context);
           Navigator.pop(context);
           _fetchApi();
           appAlertDialog(
