@@ -136,7 +136,7 @@ class _ExpenseHeadCreateState extends State<ExpenseHeadCreate> {
             decoration: BoxDecoration(
               shape: BoxShape.rectangle,
               color: AppColors.whiteColor,
-              borderRadius: BorderRadius.circular(AppSizes.borderRadiusSize),
+              borderRadius: BorderRadius.circular(AppSizes.radius),
             ),
             child: Padding(
               padding: const EdgeInsets.only(left: 10.0, right: 10.0, top: 8.0),
@@ -156,7 +156,7 @@ class _ExpenseHeadCreateState extends State<ExpenseHeadCreate> {
                                 ? 'Create Expense Head'
                                 : 'Update Expense Head',
                             style: const TextStyle(
-                              fontSize: 20,
+                              fontSize: 16,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -198,15 +198,17 @@ class _ExpenseHeadCreateState extends State<ExpenseHeadCreate> {
                       SizedBox(height: AppSizes.height(context) * 0.03),
 
                       // Submit Button
-                      BlocBuilder<ExpenseHeadBloc, ExpenseHeadState>(
-                        builder: (context, state) {
-                          return AppButton(
-                            name: widget.id == null ? 'Create' : 'Update',
-                            onPressed: state is ExpenseHeadAddLoading
-                                ? null
-                                : _showConfirmationDialog,
-                          );
-                        },
+                      Center(
+                        child: BlocBuilder<ExpenseHeadBloc, ExpenseHeadState>(
+                          builder: (context, state) {
+                            return AppButton(
+                              name: widget.id == null ? 'Create' : 'Update',
+                              onPressed: state is ExpenseHeadAddLoading
+                                  ? null
+                                  : _showConfirmationDialog,
+                            );
+                          },
+                        ),
                       ),
                     ],
                   ),
