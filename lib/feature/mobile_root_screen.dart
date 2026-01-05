@@ -204,7 +204,6 @@ class _RootScreenState extends State<MobileRootScreen> {
   }
 
   Widget _buildSalesPurchaseOverview(DashboardData data) {
-    if (Responsive.isMobile(context)) {
       return Column(
         children: [
           _buildSalesOverview(data),
@@ -212,15 +211,7 @@ class _RootScreenState extends State<MobileRootScreen> {
           _buildPurchaseOverview(data),
         ],
       );
-    } else {
-      return Row(
-        children: [
-          Expanded(child: _buildSalesOverview(data)),
-          const SizedBox(width: 16),
-          Expanded(child: _buildPurchaseOverview(data)),
-        ],
-      );
-    }
+
   }
 
   Widget _buildSalesOverview(DashboardData data) {
@@ -524,8 +515,6 @@ class _RootScreenState extends State<MobileRootScreen> {
           ),
         ),
 
-        // FAB not needed on desktop since sidebar is permanent.
-        floatingActionButton: null,
       ),
     );
   }
