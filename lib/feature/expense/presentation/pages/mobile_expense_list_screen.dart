@@ -91,6 +91,9 @@ class _ExpenseListScreenState extends State<MobileExpenseListScreen> {
   Widget build(BuildContext context) {
 
     return Scaffold(
+      floatingActionButton: FloatingActionButton(                onPressed: () => _showCreateDialog(context),
+      child: Icon(Icons.add),
+      ),
      appBar: AppBar(title: Text("Expense List"),),
       body: SafeArea(
         child:    _buildContentArea(),
@@ -113,15 +116,17 @@ class _ExpenseListScreenState extends State<MobileExpenseListScreen> {
             _handleBlocState(state);
           },
           builder: (context, state) {
-            return Column(
-              children: [
+            return SingleChildScrollView(
+              child: Column(
+                children: [
 
-                  _buildMobileHeader(context),
-                const SizedBox(height: 8),
-                SizedBox(
-                  child: _buildExpenseList(state),
-                ),
-              ],
+                    _buildMobileHeader(context),
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    child: _buildExpenseList(state),
+                  ),
+                ],
+              ),
             );
           },
         ),
@@ -134,9 +139,11 @@ class _ExpenseListScreenState extends State<MobileExpenseListScreen> {
       appLoader(context, "Creating Expense, please wait...");
     } else if (state is ExpenseAddSuccess) {
       Navigator.pop(context);
+      Navigator.pop(context);
       _fetchApi();
     } else if (state is ExpenseAddFailed) {
       if (context.mounted) {
+        Navigator.pop(context);
         Navigator.pop(context);
         appAlertDialog(
           context,
@@ -219,7 +226,6 @@ class _ExpenseListScreenState extends State<MobileExpenseListScreen> {
             ],
           ),
         ),
-        const SizedBox(height: 12),
 
         // Filter Chips
         Wrap(
@@ -257,31 +263,8 @@ class _ExpenseListScreenState extends State<MobileExpenseListScreen> {
               ),
           ],
         ),
-        const SizedBox(height: 12),
 
-        // Action Buttons
-        Row(
-          children: [
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: () => _showMobileFilterSheet(context),
-                icon: const Icon(Iconsax.filter, size: 16),
-                label: const Text('More Filters'),
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: AppButton(
-                name: "Create",
-                onPressed: () => _showCreateDialog(context),
-                padding: const EdgeInsets.symmetric(vertical: 12),
-              ),
-            ),
-          ],
-        ),
+
       ],
     );
   }
