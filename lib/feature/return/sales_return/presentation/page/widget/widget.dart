@@ -4,6 +4,7 @@ import '/feature/return/sales_return/data/model/sales_return_model.dart';
 import '../../../../../../core/configs/configs.dart';
 import '../../../../../../core/widgets/delete_dialog.dart';
 import '../../sales_return_bloc/sales_return_bloc.dart';
+import 'package:flutter/material.dart';
 
 class SalesReturnTableCard extends StatelessWidget {
   final List<SalesReturnModel> salesReturns;
@@ -21,6 +22,14 @@ class SalesReturnTableCard extends StatelessWidget {
       return _buildEmptyState();
     }
 
+    final width = MediaQuery.of(context).size.width;
+    final isMobile = width < 600; // threshold for mobile view
+
+    if (isMobile) {
+      return _buildMobileList(context);
+    }
+
+    // Existing desktop/table layout
     final verticalScrollController = ScrollController();
     final horizontalScrollController = ScrollController();
 
@@ -99,6 +108,226 @@ class SalesReturnTableCard extends StatelessWidget {
     );
   }
 
+  // MOBILE VIEW
+  Widget _buildMobileList(BuildContext context) {
+    return ListView.separated(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: salesReturns.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 8),
+      itemBuilder: (context, index) {
+        final salesReturn = salesReturns[index];
+        final statusColor = _getStatusColor(salesReturn.status ?? '');
+        return Card(
+          margin: const EdgeInsets.symmetric(vertical: 4),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          elevation: 1,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 18,
+                      backgroundColor: AppColors.primaryColor.withOpacity(0.1),
+                      child: Text(
+                        '${index + 1}',
+                        style: TextStyle(
+                          color: AppColors.primaryColor,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            salesReturn.receiptNo ?? 'N/A',
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            salesReturn.customerName ?? 'N/A',
+                            style: const TextStyle(fontSize: 12, color: Colors.black54),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          '৳${(salesReturn.returnAmount ?? 0).toStringAsFixed(2)}',
+                          style: const TextStyle(
+                            color: Colors.red,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: statusColor.withOpacity(0.12),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Text(
+                            (salesReturn.status ?? 'N/A').toUpperCase(),
+                            style: TextStyle(
+                              color: statusColor,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                ExpansionTile(
+                  tilePadding: EdgeInsets.zero,
+                  title: Row(
+                    children: [
+                      const Icon(Icons.calendar_today, size: 14, color: Colors.grey),
+                      const SizedBox(width: 6),
+                      Text(
+                        _formatDate(salesReturn.returnDate),
+                        style: const TextStyle(fontSize: 12, color: Colors.black54),
+                      ),
+                    ],
+                  ),
+                  childrenPadding: const EdgeInsets.only(top: 8),
+                  children: [
+                    if ((salesReturn.reason ?? '').isNotEmpty) ...[
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          'Reason:',
+                          style: TextStyle(fontWeight: FontWeight.w700, color: AppColors.blackColor),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          salesReturn.reason ?? 'No reason provided',
+                          style: const TextStyle(fontSize: 13),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                    ],
+                    if ((salesReturn.items ?? []).isNotEmpty) ...[
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          'Returned Items (${salesReturn.items?.length ?? 0}):',
+                          style: TextStyle(fontWeight: FontWeight.w700, color: AppColors.blackColor),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      ...?salesReturn.items?.map((item) => Padding(
+                        padding: const EdgeInsets.only(bottom: 6),
+                        child: Row(
+                          children: [
+                            Expanded(child: Text(item.productName ?? 'Unknown')),
+                            const SizedBox(width: 8),
+                            Text('Qty: ${item.quantity}'),
+                            const SizedBox(width: 12),
+                            Text('৳${item.total?.toStringAsFixed(2) ?? "0.00"}',
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.w700, color: Colors.red)),
+                          ],
+                        ),
+                      )),
+                    ],
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: _mobileActionButtons(context, salesReturn),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  List<Widget> _mobileActionButtons(BuildContext context, SalesReturnModel salesReturn) {
+    final List<Widget> actions = [];
+
+    if (salesReturn.status == 'pending') {
+      actions.add(_mobileIconButton(
+        icon: Icons.check,
+        color: Colors.green,
+        tooltip: 'Approve',
+        onPressed: () => _confirmApprove(context, salesReturn),
+      ));
+      actions.add(const SizedBox(width: 8));
+      actions.add(_mobileIconButton(
+        icon: Icons.close,
+        color: Colors.red,
+        tooltip: 'Reject',
+        onPressed: () => _confirmReject(context, salesReturn),
+      ));
+      actions.add(const SizedBox(width: 8));
+    }
+
+    if (salesReturn.status == 'approved') {
+      actions.add(_mobileIconButton(
+        icon: Icons.done_all,
+        color: Colors.blue,
+        tooltip: 'Complete',
+        onPressed: () => _confirmComplete(context, salesReturn),
+      ));
+      actions.add(const SizedBox(width: 8));
+    }
+
+    actions.add(_mobileIconButton(
+      icon: Icons.visibility,
+      color: Colors.green,
+      tooltip: 'View',
+      onPressed: () => _showViewDialog(context, salesReturn),
+    ));
+    actions.add(const SizedBox(width: 8));
+
+    if (salesReturn.status == 'pending' || salesReturn.status == 'rejected') {
+      actions.add(_mobileIconButton(
+        icon: Icons.delete,
+        color: Colors.red,
+        tooltip: 'Delete',
+        onPressed: () => _confirmDelete(context, salesReturn),
+      ));
+    }
+
+    return actions;
+  }
+
+  Widget _mobileIconButton({
+    required IconData icon,
+    required Color color,
+    required String tooltip,
+    required VoidCallback onPressed,
+  }) {
+    return IconButton(
+      onPressed: onPressed,
+      icon: Icon(icon, size: 20, color: color),
+      tooltip: tooltip,
+      padding: EdgeInsets.zero,
+      constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+    );
+  }
+
+  // ----- EXISTING TABLE BUILDERS -----
   List<DataColumn> _buildColumns(double columnWidth) {
     return [
       DataColumn(
@@ -411,10 +640,10 @@ class SalesReturnTableCard extends StatelessWidget {
     final shouldDelete = await showDeleteConfirmationDialog(context);
     if (shouldDelete && context.mounted) {
       context.read<SalesReturnBloc>().add(
-          DeleteSalesReturn(
-            context: context,
-            id: salesReturn.id,
-          )
+        DeleteSalesReturn(
+          context: context,
+          id: salesReturn.id,
+        ),
       );
     }
   }
@@ -440,10 +669,10 @@ class SalesReturnTableCard extends StatelessWidget {
 
     if (confirmed == true && context.mounted) {
       context.read<SalesReturnBloc>().add(
-          SalesReturnApprove(
-            context: context,
-            id: salesReturn.id,
-          )
+        SalesReturnApprove(
+          context: context,
+          id: salesReturn.id,
+        ),
       );
     }
   }
@@ -469,10 +698,10 @@ class SalesReturnTableCard extends StatelessWidget {
 
     if (confirmed == true && context.mounted) {
       context.read<SalesReturnBloc>().add(
-          SalesReturnReject(
-            context: context,
-            id: salesReturn.id,
-          )
+        SalesReturnReject(
+          context: context,
+          id: salesReturn.id,
+        ),
       );
     }
   }
@@ -498,10 +727,10 @@ class SalesReturnTableCard extends StatelessWidget {
 
     if (confirmed == true && context.mounted) {
       context.read<SalesReturnBloc>().add(
-          SalesReturnComplete(
-            context: context,
-            id: salesReturn.id,
-          )
+        SalesReturnComplete(
+          context: context,
+          id: salesReturn.id,
+        ),
       );
     }
   }
@@ -515,78 +744,76 @@ class SalesReturnTableCard extends StatelessWidget {
           child: Container(
             width: AppSizes.width(context) * 0.50,
             padding: const EdgeInsets.all(20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Sales Return Details - ${salesReturn.receiptNo ?? "N/A"}',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.primaryColor,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                _buildDetailRow('Customer:', salesReturn.customerName ?? 'N/A'),
-                _buildDetailRow('Return Date:', _formatDate(salesReturn.returnDate)),
-                _buildDetailRow('Return Amount:', '৳${(salesReturn.returnAmount ?? 0).toStringAsFixed(2)}'),
-                _buildDetailRow('Status:', salesReturn.status?.toUpperCase() ?? 'N/A'),
-                _buildDetailRow('Payment Method:', salesReturn.paymentMethod ?? 'N/A'),
-                _buildDetailRow('Reason:', salesReturn.reason ?? 'No reason provided'),
-
-                if (salesReturn.items.isNotEmpty) ...[
-                  const SizedBox(height: 16),
-                  const Text(
-                    'Returned Items:',
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Sales Return Details - ${salesReturn.receiptNo ?? "N/A"}',
                     style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primaryColor,
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  ...salesReturn.items.map((item) =>
-                      Container(
-                        margin: const EdgeInsets.only(bottom: 8),
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.grey.withOpacity(0.05),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                item.productName ?? 'Unknown Product',
-                                style: const TextStyle(fontWeight: FontWeight.w500),
-                              ),
+                  const SizedBox(height: 16),
+                  _buildDetailRow('Customer:', salesReturn.customerName ?? 'N/A'),
+                  _buildDetailRow('Return Date:', _formatDate(salesReturn.returnDate)),
+                  _buildDetailRow('Return Amount:', '৳${(salesReturn.returnAmount ?? 0).toStringAsFixed(2)}'),
+                  _buildDetailRow('Status:', salesReturn.status?.toUpperCase() ?? 'N/A'),
+                  _buildDetailRow('Payment Method:', salesReturn.paymentMethod ?? 'N/A'),
+                  _buildDetailRow('Reason:', salesReturn.reason ?? 'No reason provided'),
+                  if (salesReturn.items.isNotEmpty) ...[
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Returned Items:',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    ...salesReturn.items.map((item) => Container(
+                      margin: const EdgeInsets.only(bottom: 8),
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.withOpacity(0.05),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              item.productName ?? 'Unknown Product',
+                              style: const TextStyle(fontWeight: FontWeight.w500),
                             ),
-                            Text('Qty: ${item.quantity}'),
-                            const SizedBox(width: 8),
-                            Text('Damage: ${item.damageQuantity}'),
-                            const SizedBox(width: 16),
-                            Text(
-                              '৳${item.total?.toStringAsFixed(2) ?? "0.00"}',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w600,
-                                color: Colors.red,
-                              ),
+                          ),
+                          Text('Qty: ${item.quantity}'),
+                          const SizedBox(width: 8),
+                          Text('Damage: ${item.damageQuantity}'),
+                          const SizedBox(width: 16),
+                          Text(
+                            '৳${item.total?.toStringAsFixed(2) ?? "0.00"}',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: Colors.red,
                             ),
-                          ],
-                        ),
-                      )
+                          ),
+                        ],
+                      ),
+                    )),
+                  ],
+                  const SizedBox(height: 20),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: const Text('Close'),
+                    ),
                   ),
                 ],
-
-                const SizedBox(height: 20),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('Close'),
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
         );

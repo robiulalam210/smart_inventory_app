@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -52,15 +53,15 @@ class _BadStockScreenState extends State<MobileBadStockScreen> {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
-      appBar: AppBar(title: Text("Bad Stock",style: AppTextStyle.titleMedium(context),),),
+      appBar: AppBar(
+        title: Text("Bad Stock", style: AppTextStyle.titleMedium(context)),
+      ),
       body: SafeArea(
-        child:   _buildContentArea(),
+        child: _buildContentArea(),
       ),
     );
   }
-
 
   Widget _buildContentArea() {
     return ResponsiveCol(
@@ -83,28 +84,103 @@ class _BadStockScreenState extends State<MobileBadStockScreen> {
   }
 
   Widget _buildFilterRow() {
+    final width = MediaQuery.of(context).size.width;
+    final isMobile = width < 600; // adjust breakpoint if needed
+
+    void _refreshWithCurrentFilters() {
+      _fetchBadStockList(
+        filterText: filterTextController.text,
+        from: selectedDateRange?.start ?? startDate,
+        to: selectedDateRange?.end ?? endDate,
+      );
+    }
+
+    if (isMobile) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Search Field - full width on mobile
+          CustomSearchTextFormField(
+            isRequiredLabel: false,
+            controller: filterTextController,
+            onChanged: (value) => _fetchBadStockList(
+              filterText: value,
+              from: selectedDateRange?.start ?? startDate,
+              to: selectedDateRange?.end ?? endDate,
+            ),
+            onClear: () {
+              filterTextController.clear();
+              _fetchBadStockList(
+                filterText: '',
+                from: selectedDateRange?.start ?? startDate,
+                to: selectedDateRange?.end ?? endDate,
+              );
+            },
+            hintText: "by Product Name, Reason, or Reference",
+          ),
+          const SizedBox(height: 8),
+
+          // Date range + refresh on same row
+          Row(
+            children: [
+              Expanded(
+                child: CustomDateRangeField(
+                  isLabel: false,
+                  selectedDateRange: selectedDateRange,
+                  onDateRangeSelected: (value) {
+                    setState(() => selectedDateRange = value);
+                    if (value != null) {
+                      _fetchBadStockList(
+                        filterText: filterTextController.text,
+                        from: value.start,
+                        to: value.end,
+                      );
+                    } else {
+                      _refreshWithCurrentFilters();
+                    }
+                  },
+                ),
+              ),
+              const SizedBox(width: 8),
+              IconButton(
+                onPressed: _refreshWithCurrentFilters,
+                icon: const Icon(Icons.refresh),
+                tooltip: "Refresh",
+              ),
+            ],
+          ),
+        ],
+      );
+    }
+
+    // Desktop / wide: original horizontal layout but preserving filters
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        // 🔍 Search Field
         SizedBox(
           width: 350,
-
           child: CustomSearchTextFormField(
             isRequiredLabel: false,
             controller: filterTextController,
-            onChanged: (value) => _fetchBadStockList(filterText: value),
+            onChanged: (value) => _fetchBadStockList(
+              filterText: value,
+              from: selectedDateRange?.start ?? startDate,
+              to: selectedDateRange?.end ?? endDate,
+            ),
             onClear: () {
               filterTextController.clear();
-              _fetchBadStockList();
+              _fetchBadStockList(
+                filterText: '',
+                from: selectedDateRange?.start ?? startDate,
+                to: selectedDateRange?.end ?? endDate,
+              );
             },
             hintText: "by Product Name, Reason, or Reference",
           ),
         ),
         const SizedBox(width: 12),
 
-        // 📅 Date Range Picker
         SizedBox(
           width: 260,
           child: CustomDateRangeField(
@@ -113,23 +189,27 @@ class _BadStockScreenState extends State<MobileBadStockScreen> {
             onDateRangeSelected: (value) {
               setState(() => selectedDateRange = value);
               if (value != null) {
-                _fetchBadStockList(from: value.start, to: value.end);
+                _fetchBadStockList(
+                  filterText: filterTextController.text,
+                  from: value.start,
+                  to: value.end,
+                );
+              } else {
+                _refreshWithCurrentFilters();
               }
             },
           ),
         ),
         const SizedBox(width: 12),
 
-        // 🔄 Refresh Button
         IconButton(
-          onPressed: () => _fetchBadStockList(),
+          onPressed: _refreshWithCurrentFilters,
           icon: const Icon(Icons.refresh),
           tooltip: "Refresh",
         ),
       ],
     );
   }
-
   Widget _buildDataTable() {
     return BlocBuilder<BadStockListBloc, BadStockListState>(
       buildWhen: (previous, current) {
@@ -210,6 +290,7 @@ class _BadStockScreenState extends State<MobileBadStockScreen> {
               fontWeight: FontWeight.w400,
               color: Colors.grey,
             ),
+            textAlign: TextAlign.center,
           ),
           const SizedBox(height: 16),
           ElevatedButton(
@@ -269,6 +350,14 @@ class BadStockTableCard extends StatelessWidget {
       return _buildEmptyState();
     }
 
+    final width = MediaQuery.of(context).size.width;
+    final isMobile = width < 600; // adjust breakpoint as needed
+
+    if (isMobile) {
+      return _buildMobileList(context);
+    }
+
+    // Desktop / Tablet: existing DataTable layout
     final verticalScrollController = ScrollController();
     final horizontalScrollController = ScrollController();
 
@@ -362,6 +451,119 @@ class BadStockTableCard extends StatelessWidget {
     );
   }
 
+  // MOBILE LIST
+  Widget _buildMobileList(BuildContext context) {
+    return ListView.separated(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: badStocks.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 8),
+      itemBuilder: (context, index) {
+        final badStock = badStocks[index];
+        return Card(
+          margin: const EdgeInsets.symmetric(vertical: 4),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          elevation: 1,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 20,
+                      backgroundColor: AppColors.primaryColor.withOpacity(0.1),
+                      child: Text(
+                        '${index + 1}',
+                        style: TextStyle(
+                          color: AppColors.primaryColor,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            badStock.productName ?? 'Unknown Product',
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Qty: ${badStock.quantity ?? 0}',
+                            style: const TextStyle(fontSize: 12, color: Colors.black54),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          _formatDate(badStock.date),
+                          style: const TextStyle(fontSize: 12, color: Colors.black54),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          badStock.referenceType != null
+                              ? '${badStock.referenceType} #${badStock.referenceId}'
+                              : 'No Ref',
+                          style: const TextStyle(fontSize: 11, color: Colors.black45),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                if ((badStock.reason ?? '').isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'Reason:',
+                      style: TextStyle(fontWeight: FontWeight.w700, color: AppColors.blackColor),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      badStock.reason ?? 'No reason provided',
+                      style: const TextStyle(fontSize: 13),
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    IconButton(
+                      onPressed: () => _showViewDialog(context, badStock),
+                      icon: Icon(HugeIcons.strokeRoundedView, color: Colors.green, size: 20),
+                      tooltip: 'View bad stock details',
+                    ),
+                    const SizedBox(width: 8),
+                    IconButton(
+                      onPressed: () => _confirmDelete(context, badStock),
+                      icon: Icon(HugeIcons.strokeRoundedDeleteThrow, color: Colors.red, size: 20),
+                      tooltip: 'Delete bad stock',
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  // ----- EXISTING TABLE HELPERS -----
   List<DataColumn> _buildColumns(double columnWidth) {
     return [
       DataColumn(
@@ -420,7 +622,6 @@ class BadStockTableCard extends StatelessWidget {
       ),
     );
   }
-
 
   DataCell _buildReasonCell(String? reason, double width) {
     return DataCell(
@@ -545,31 +746,32 @@ class BadStockTableCard extends StatelessWidget {
           child: Container(
             width: AppSizes.width(context) * 0.40,
             padding: const EdgeInsets.all(20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Bad Stock Details',
-                  style: AppTextStyle.cardLevelHead(context),
-                ),
-                const SizedBox(height: 16),
-                _buildDetailRow('Product:', badStock.productName ?? 'N/A'),
-                _buildDetailRow('Quantity:', badStock.quantity?.toString() ?? '0'),
-                _buildDetailRow('Reason:', badStock.reason ?? 'No reason provided'),
-                _buildDetailRow('Date:', _formatDate(badStock.date)),
-                _buildDetailRow('Reference Type:', badStock.referenceType ?? 'N/A'),
-                _buildDetailRow('Reference ID:', badStock.referenceId?.toString() ?? 'N/A'),
-
-                const SizedBox(height: 20),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('Close'),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Bad Stock Details',
+                    style: AppTextStyle.cardLevelHead(context),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 16),
+                  _buildDetailRow('Product:', badStock.productName ?? 'N/A'),
+                  _buildDetailRow('Quantity:', badStock.quantity?.toString() ?? '0'),
+                  _buildDetailRow('Reason:', badStock.reason ?? 'No reason provided'),
+                  _buildDetailRow('Date:', _formatDate(badStock.date)),
+                  _buildDetailRow('Reference Type:', badStock.referenceType ?? 'N/A'),
+                  _buildDetailRow('Reference ID:', badStock.referenceId?.toString() ?? 'N/A'),
+                  const SizedBox(height: 20),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: const Text('Close'),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         );
@@ -614,7 +816,7 @@ class BadStockTableCard extends StatelessWidget {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.1),
+            color: Colors.grey.withOpacity(0.1),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),

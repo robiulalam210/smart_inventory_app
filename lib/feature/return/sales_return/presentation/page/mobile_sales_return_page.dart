@@ -1,4 +1,5 @@
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
+import 'package:meherinMart/feature/return/sales_return/presentation/page/mobile_create_sales_return_screnn.dart';
 import '/core/configs/configs.dart';
 import '/feature/customer/data/model/customer_active_model.dart';
 import '/feature/return/sales_return/presentation/page/widget/widget.dart';
@@ -33,13 +34,24 @@ class _SalesReturnScreenState extends State<MobileSalesReturnPage> {
   @override
   void initState() {
     super.initState();
-    startDate = DateTime(now.year, now.month - 1, now.day);
+
+    // Use a safe "last 30 days" default instead of subtracting a month index (which can be invalid for January)
     endDate = DateTime(now.year, now.month, now.day);
+    startDate = endDate!.subtract(const Duration(days: 30));
+
+    // Optionally keep the selectedDateRange null initially — UI will show placeholders until user picks.
+    // selectedDateRange = DateRange(startDate, endDate); // uncomment if your DateRange constructor matches
 
     // Load initial data
     context.read<CustomerBloc>().add(FetchCustomerActiveList(context));
     context.read<SalesReturnBloc>().add(FetchInvoiceList(context));
     _fetchSalesReturnList(from: startDate, to: endDate);
+  }
+
+  @override
+  void dispose() {
+    filterTextController.dispose();
+    super.dispose();
   }
 
   void _fetchSalesReturnList({
@@ -52,7 +64,6 @@ class _SalesReturnScreenState extends State<MobileSalesReturnPage> {
       context: context,
       startDate: from,
       endDate: to,
-
       filterText: filterText,
       pageNumber: pageNumber,
     ));
@@ -60,37 +71,54 @@ class _SalesReturnScreenState extends State<MobileSalesReturnPage> {
 
   @override
   Widget build(BuildContext context) {
-    final isBigScreen = Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
 
     return Scaffold(
+      floatingActionButton: FloatingActionButton(  onPressed: () {
+        showDialog(
+          context: context,
+          builder: (context) {
+            return Dialog(
+              insetPadding: const EdgeInsets.all(20),
+              child: SizedBox(
+                // width: AppSizes.width(context) * 0.70,
+                child: MobileCreateSalesReturnScrenn(
+                  onSuccess: () {
+                    if (Navigator.canPop(context)) Navigator.pop(context);
+                    _fetchSalesReturnList(
+                      filterText: filterTextController.text,
+                      from: selectedDateRange?.start ?? startDate,
+                      to: selectedDateRange?.end ?? endDate,
+                    );
+                  },
+                ),
+              ),
+            );
+          },
+        );
+      },child: Icon(Icons.add),),
       appBar: AppBar(title: Text("Sales Return",style: AppTextStyle.titleMedium(context),),),
 
       body: SafeArea(
         child: ResponsiveRow(
           children: [
-            if (isBigScreen) _buildSidebar(),
-            _buildContentArea(isBigScreen),
+            _buildContentArea(),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildSidebar() => ResponsiveCol(
-    xs: 0,
-    sm: 1,
-    md: 1,
-    lg: 2,
-    xl: 2,
-    child: Container(color: Colors.white, child: const Sidebar()),
-  );
 
-  Widget _buildContentArea(bool isBigScreen) {
+  Widget _buildContentArea() {
     return ResponsiveCol(
       xs: 12,
       lg: 10,
       child: RefreshIndicator(
-        onRefresh: () async => _fetchSalesReturnList(),
+        onRefresh: () async => _fetchSalesReturnList(
+          filterText: filterTextController.text,
+          from: selectedDateRange?.start ?? startDate,
+          to: selectedDateRange?.end ?? endDate,
+        ),
         child: Container(
           padding: AppTextStyle.getResponsivePaddingBody(context),
           child: BlocListener<SalesReturnBloc, SalesReturnState>(
@@ -122,9 +150,13 @@ class _SalesReturnScreenState extends State<MobileSalesReturnPage> {
         state is SalesReturnRejectSuccess ||
         state is SalesReturnCompleteSuccess ||
         state is SalesReturnDeleteSuccess) {
-      // Handle success states
-      Navigator.pop(context);
-      _fetchSalesReturnList(from: startDate, to: endDate);
+      // Close loader/dialog if present
+      if (Navigator.canPop(context)) Navigator.pop(context);
+      _fetchSalesReturnList(
+        filterText: filterTextController.text,
+        from: selectedDateRange?.start ?? startDate,
+        to: selectedDateRange?.end ?? endDate,
+      );
 
       String message = "";
       String title = "Success";
@@ -141,91 +173,103 @@ class _SalesReturnScreenState extends State<MobileSalesReturnPage> {
         title: title,
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () {
+              if (Navigator.canPop(context)) Navigator.pop(context);
+            },
             child: const Text("OK"),
           ),
         ],
       );
     } else if (state is SalesReturnError) {
-      // Handle error state
-      Navigator.pop(context);
+      // Close loader if present
+      if (Navigator.canPop(context)) Navigator.pop(context);
       appAlertDialog(
         context,
         state.content,
         title: state.title,
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () {
+              if (Navigator.canPop(context)) Navigator.pop(context);
+            },
             child: const Text("Dismiss"),
           ),
         ],
       );
-      _fetchSalesReturnList(from: startDate, to: endDate);
+      _fetchSalesReturnList(
+        filterText: filterTextController.text,
+        from: selectedDateRange?.start ?? startDate,
+        to: selectedDateRange?.end ?? endDate,
+      );
     }
   }
 
   Widget _buildFilterRow() {
-    return Row(
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         // Search Field
-        Expanded(
-          flex: 2,
-          child: CustomSearchTextFormField(
-            controller: filterTextController,
-            isRequiredLabel: false,
-            onChanged: (value) => _fetchSalesReturnList(filterText: value),
-            onClear: () {
-              filterTextController.clear();
-              _fetchSalesReturnList();
-            },
-            hintText: "by Receipt No, Customer, or Reason",
+        CustomSearchTextFormField(
+          controller: filterTextController,
+          isRequiredLabel: false,
+          onChanged: (value) => _fetchSalesReturnList(
+            filterText: value,
+            from: selectedDateRange?.start ?? startDate,
+            to: selectedDateRange?.end ?? endDate,
           ),
+          onClear: () {
+            filterTextController.clear();
+            _fetchSalesReturnList(
+              filterText: '',
+              from: selectedDateRange?.start ?? startDate,
+              to: selectedDateRange?.end ?? endDate,
+            );
+          },
+          hintText: "by Receipt No, Customer, or Reason",
         ),
         const SizedBox(width: 6),
 
         // Customer Dropdown
-        Expanded(
-          flex: 1,
-          child: BlocBuilder<CustomerBloc, CustomerState>(
-            builder: (context, state) {
-              return AppDropdown<CustomerActiveModel>(
-                label: "Customer",
-                context: context,
-                isSearch: true,
-                hint: _selectedCustomer?.name ?? "Select Customer",
-                isNeedAll: true,
-                isRequired: false,
-                isLabel: true,
-                value: _selectedCustomer,
-                itemList: context.read<CustomerBloc>().activeCustomer,
-                onChanged: (newVal) {
-                  setState(() {
-                    _selectedCustomer = newVal;
-                  });
-                  _fetchSalesReturnList(
-                    from: selectedDateRange?.start,
-                    to: selectedDateRange?.end,
-                  );
-                },
-                itemBuilder: (item) {
-                  final isAllOption = item.id == null;
-                  return DropdownMenuItem<CustomerActiveModel>(
-                    value: item,
-                    child: Text(
-                      isAllOption ? 'All Customers' : '${item.name} (${item.phone})',
-                      style: TextStyle(
-                        color: isAllOption ? AppColors.primaryColor : AppColors.blackColor,
-                        fontFamily: 'Quicksand',
-                        fontWeight: isAllOption ? FontWeight.bold : FontWeight.w300,
-                      ),
+        BlocBuilder<CustomerBloc, CustomerState>(
+          builder: (context, state) {
+            return AppDropdown<CustomerActiveModel>(
+              label: "Customer",
+              context: context,
+              isSearch: true,
+              hint: _selectedCustomer?.name ?? "Select Customer",
+              isNeedAll: true,
+              isRequired: false,
+              isLabel: true,
+              value: _selectedCustomer,
+              itemList: context.read<CustomerBloc>().activeCustomer,
+              onChanged: (newVal) {
+                setState(() {
+                  _selectedCustomer = newVal;
+                });
+                // Preserve other filters when fetching
+                _fetchSalesReturnList(
+                  filterText: filterTextController.text,
+                  from: selectedDateRange?.start ?? startDate,
+                  to: selectedDateRange?.end ?? endDate,
+                );
+              },
+              itemBuilder: (item) {
+                final isAllOption = item.id == null;
+                return DropdownMenuItem<CustomerActiveModel>(
+                  value: item,
+                  child: Text(
+                    isAllOption ? 'All Customers' : '${item.name} (${item.phone})',
+                    style: TextStyle(
+                      color: isAllOption ? AppColors.primaryColor : AppColors.blackColor,
+                      fontFamily: 'Quicksand',
+                      fontWeight: isAllOption ? FontWeight.bold : FontWeight.w300,
                     ),
-                  );
-                },
-              );
-            },
-          ),
+                  ),
+                );
+              },
+            );
+          },
         ),
         const SizedBox(width: 6),
 
@@ -238,7 +282,11 @@ class _SalesReturnScreenState extends State<MobileSalesReturnPage> {
             onDateRangeSelected: (value) {
               setState(() => selectedDateRange = value);
               if (value != null) {
-                _fetchSalesReturnList(from: value.start, to: value.end);
+                _fetchSalesReturnList(
+                  filterText: filterTextController.text,
+                  from: value.start,
+                  to: value.end,
+                );
               }
             },
           ),
@@ -247,32 +295,15 @@ class _SalesReturnScreenState extends State<MobileSalesReturnPage> {
         gapW16,
 
         // Create Sales Return Button
-        AppButton(
-          name: "Create Sales Return",
-          onPressed: () {
-            showDialog(
-              context: context,
-              builder: (context) {
-                return Dialog(
-                  insetPadding: const EdgeInsets.all(20),
-                  child: SizedBox(
-                    width: AppSizes.width(context) * 0.70,
-                    child: CreateSalesReturnScreen(
-                      onSuccess: () {
-                        Navigator.pop(context);
-                        _fetchSalesReturnList(from: startDate, to: endDate);
-                      },
-                    ),
-                  ),
-                );
-              },
-            );
-          },
-        ),
+
 
         // Refresh Button
         IconButton(
-          onPressed: () => _fetchSalesReturnList(),
+          onPressed: () => _fetchSalesReturnList(
+            filterText: filterTextController.text,
+            from: selectedDateRange?.start ?? startDate,
+            to: selectedDateRange?.end ?? endDate,
+          ),
           icon: const Icon(Icons.refresh),
           tooltip: "Refresh",
         ),
@@ -319,16 +350,18 @@ class _SalesReturnScreenState extends State<MobileSalesReturnPage> {
                 onPageChanged: (page) {
                   _fetchSalesReturnList(
                     pageNumber: page,
-                    from: selectedDateRange?.start,
-                    to: selectedDateRange?.end,
+                    filterText: filterTextController.text,
+                    from: selectedDateRange?.start ?? startDate,
+                    to: selectedDateRange?.end ?? endDate,
                   );
                 },
                 onPageSizeChanged: (newSize) {
                   // Reset to page 1 when changing page size
                   _fetchSalesReturnList(
                     pageNumber: 0,
-                    from: selectedDateRange?.start,
-                    to: selectedDateRange?.end,
+                    filterText: filterTextController.text,
+                    from: selectedDateRange?.start ?? startDate,
+                    to: selectedDateRange?.end ?? endDate,
                   );
                 },
               ),
@@ -354,7 +387,11 @@ class _SalesReturnScreenState extends State<MobileSalesReturnPage> {
         ),
         const SizedBox(height: 12),
         ElevatedButton(
-          onPressed: () => _fetchSalesReturnList(),
+          onPressed: () => _fetchSalesReturnList(
+            filterText: filterTextController.text,
+            from: selectedDateRange?.start ?? startDate,
+            to: selectedDateRange?.end ?? endDate,
+          ),
           child: const Text("Refresh"),
         ),
       ],
@@ -374,7 +411,11 @@ class _SalesReturnScreenState extends State<MobileSalesReturnPage> {
         ),
         const SizedBox(height: 12),
         ElevatedButton(
-          onPressed: () => _fetchSalesReturnList(),
+          onPressed: () => _fetchSalesReturnList(
+            filterText: filterTextController.text,
+            from: selectedDateRange?.start ?? startDate,
+            to: selectedDateRange?.end ?? endDate,
+          ),
           child: const Text("Retry"),
         ),
       ],
