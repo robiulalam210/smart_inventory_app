@@ -167,64 +167,6 @@ class _ExpenseHeadScreenState extends State<ExpenseHeadScreen> {
     );
   }
 
-  Widget _buildMobileHeader(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        // Search Bar
-        Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withValues(alpha: 0.1),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: CustomSearchTextFormField(
-                    isRequiredLabel: false,
-                    controller: context
-                        .read<ExpenseHeadBloc>()
-                        .filterTextController,
-                    onChanged: (value) {
-                      _fetchApiData(filterText: value);
-                    },
-                    onClear: () {
-                      context
-                          .read<ExpenseHeadBloc>()
-                          .filterTextController
-                          .clear();
-                      _searchController.clear();
-                      _fetchApiData();
-                    },
-                    hintText: "Search expense head...",
-                  ),
-                ),
-              ),
-              IconButton(
-                icon: Icon(Iconsax.filter, color: AppColors.primaryColor),
-                onPressed: () => _showMobileFilterOptions(context),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 12),
-        // Create Button
-        AppButton(
-          name: "Create Expense Head",
-          onPressed: () => _showCreateDialog(context),
-        ),
-      ],
-    );
-  }
 
   Widget _buildExpenseHeadList(ExpenseHeadState state) {
     if (state is ExpenseHeadListLoading) {
@@ -273,46 +215,4 @@ class _ExpenseHeadScreenState extends State<ExpenseHeadScreen> {
     );
   }
 
-  void _showMobileFilterOptions(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) {
-        return Container(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Filter Options',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  // Apply filters
-                },
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 50),
-                ),
-                child: const Text('Apply Filters'),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
 }

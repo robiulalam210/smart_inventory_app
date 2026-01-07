@@ -1,6 +1,9 @@
-import '/root.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:lottie/lottie.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '/root.dart';
 import '../../../../core/configs/configs.dart';
 import '../../../auth/presentation/pages/login_scr.dart';
 import '../bloc/splash/splash_bloc.dart';
@@ -9,49 +12,47 @@ class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
   @override
-  SplashScreenState createState() => SplashScreenState();
+  State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class SplashScreenState extends State<SplashScreen>
+class _SplashScreenState extends State<SplashScreen>
     with SingleTickerProviderStateMixin {
-  late AnimationController animationController;
-  late Animation<double> animation;
-
-  @override
-  void dispose() {
-    animationController.dispose(); // Dispose of the AnimationController
-    super.dispose();
-  }
+  late final AnimationController _controller;
 
   @override
   void initState() {
     super.initState();
-    final splashBloc = context.read<SplashBloc>();
 
-    animationController =
-        AnimationController(vsync: this, duration: const Duration(seconds: 4));
-    animation =
-        CurvedAnimation(parent: animationController, curve: Curves.easeOut);
-    animationController.forward();
+    // For desktop/web/large layouts we only need to check login status here.
+    // The mobile flow (version checks etc.) is handled in MobileSplashScreen.
+    context.read<SplashBloc>().add(CheckLoginStatusEvent());
 
-    // Trigger visibility event after 500ms
-    Future.delayed(const Duration(milliseconds: 900), () {
-      splashBloc.add(ToggleVisibilityEvent());
-    });
+    _controller =
+    AnimationController(vsync: this, duration: const Duration(seconds: 4))
+      ..forward();
+  }
 
-    // Trigger login data fetch
-    context.read<SplashBloc>().add(GetLoginData());
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Future<void> _launchInBrowser(Uri url) async {
+    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+      // swallow or log error in release; throwing during UI navigation is not ideal
+      debugPrint('Could not launch $url');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final Uri toLaunch = Uri(
+    final developerUrl = Uri(
       scheme: 'https',
       host: 'robi.meherinmart.xyz',
     );
 
     return Scaffold(
-      backgroundColor: Colors.white,
       body: BlocListener<SplashBloc, SplashState>(
         listener: (context, state) {
           if (state is SplashNavigateToLogin) {
@@ -60,83 +61,65 @@ class SplashScreenState extends State<SplashScreen>
             AppRoutes.pushAndRemoveUntil(context, const RootScreen());
           }
         },
-        child: BlocBuilder<SplashBloc, SplashState>(
-          builder: (context, state) {
-            if (state is VisibilityChanged) {
-// Update visibility when state changes
-            }
-            return Container(
-              decoration:  BoxDecoration(
-                  gradient:AppColors.primaryGradient,
-                  color: AppColors.whiteColor),
-              child: Stack(
-                fit: StackFit.expand,
-                children: <Widget>[
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 20.0),
-                        child: TextButton(
-                          onPressed: () => _launchInBrowser(toLaunch),
-                          child: const Text.rich(
-                            TextSpan(
-                              text: 'Developed by ',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.white,
-                              ),
-                              children: [
-                                TextSpan(
-                                  text: "Meherin Mart",
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: 12,
-                                    color: Colors.red,
-                                  ),
-                                ),
-                              ],
+        child: Container(
+          decoration: BoxDecoration(gradient: AppColors.primaryGradient),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              // Bottom credit
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 20),
+                  child: TextButton(
+                    onPressed: () => _launchInBrowser(developerUrl),
+                    child: const Text.rich(
+                      TextSpan(
+                        text: 'Developed by ',
+                        style: TextStyle(color: Colors.white, fontSize: 12),
+                        children: [
+                          TextSpan(
+                            text: 'Meherin Mart',
+                            style: TextStyle(
+                              color: Colors.red,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
-                        ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Hero(
-                        tag: 1,
-                        child: Lottie.asset(AppImages.splashLottie,
-                            width: Responsive.isMobile(context)
-                                ? AppSizes.width(context) * 0.80
-                                : AppSizes.width(context) * 0.42),
-                      ),
+                ),
+              ),
 
-                      Text(
-                        AppConstants.appName,
-                        style: TextStyle(fontSize: 30,color: AppColors.white),
-                      ),
-                      // ),
-                    ],
+              // Center animation + app name
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Hero(
+                    tag: 1,
+                    child: Lottie.asset(
+                      AppImages.splashLottie,
+                      width: Responsive.isMobile(context)
+                          ? AppSizes.width(context) * 0.8
+                          : AppSizes.width(context) * 0.42,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    AppConstants.appName,
+                    style: const TextStyle(
+                      fontSize: 30,
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ],
               ),
-            );
-          },
+            ],
+          ),
         ),
       ),
     );
-  }
-
-  Future<void> _launchInBrowser(Uri url) async {
-    if (!await launchUrl(
-      url,
-      mode: LaunchMode.externalApplication,
-    )) {
-      throw 'Could not launch $url';
-    }
   }
 }

@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../../../core/configs/configs.dart';
@@ -44,7 +43,7 @@ class PurchaseReturnTableCard extends StatelessWidget {
             color: Colors.white,
             boxShadow: [
               BoxShadow(
-                color: Colors.grey.withOpacity(0.1),
+                color: Colors.grey.withValues(alpha: 0.1),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -132,7 +131,7 @@ class PurchaseReturnTableCard extends StatelessWidget {
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       itemCount: purchaseReturns.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 8),
+      separatorBuilder: (_, _) => const SizedBox(height: 8),
       itemBuilder: (context, index) {
         final pr = purchaseReturns[index];
         final statusColor = _getStatusColor(pr.status ?? '');
@@ -148,7 +147,7 @@ class PurchaseReturnTableCard extends StatelessWidget {
                   children: [
                     CircleAvatar(
                       radius: 18,
-                      backgroundColor: AppColors.primaryColor.withOpacity(0.1),
+                      backgroundColor: AppColors.primaryColor.withValues(alpha: 0.1),
                       child: Text(
                         '${index + 1}',
                         style: TextStyle(

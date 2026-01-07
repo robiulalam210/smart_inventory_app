@@ -1,11 +1,8 @@
-// lib/account_transfer/presentation/screens/account_transfer_form.dart
-import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:meherinMart/core/widgets/app_scaffold.dart';
 import '/core/core.dart';
 import '/feature/accounts/presentation/bloc/account/account_bloc.dart';
 import '../../../accounts/data/model/account_active_model.dart';
-import '../../../lab_dashboard/presentation/bloc/dashboard/dashboard_bloc.dart';
 import '../bloc/account_transfer/account_transfer_bloc.dart';
 
 class MobileAccountTransferForm extends StatefulWidget {
@@ -94,6 +91,7 @@ class _MobileAccountTransferFormState extends State<MobileAccountTransferForm> {
                 appLoader(context, "Processing transfer...");
               } else if (state is AccountTransferAddSuccess) {
                 Navigator.pop(context);
+                _fetchApi();
                 _showSuccessDialog(
                   "Transfer Created",
                   "Transfer request created successfully. Use execute option to complete it.",
@@ -108,12 +106,7 @@ class _MobileAccountTransferFormState extends State<MobileAccountTransferForm> {
                   state is QuickTransferFailed ||
                   state is ExecuteTransferFailed) {
                 Navigator.pop(context);
-                // ScaffoldMessenger.of(context).showSnackBar(
-                //   SnackBar(
-                //     content: Text(state.),
-                //     backgroundColor: Colors.red,
-                //   ),
-                // );
+
               }
             },
             child: SingleChildScrollView(
@@ -267,7 +260,7 @@ class _MobileAccountTransferFormState extends State<MobileAccountTransferForm> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),

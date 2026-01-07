@@ -12,7 +12,6 @@ import 'package:meherinMart/feature/sales/presentation/pages/mobile_pos_sale_scr
 import '../../../../feature/account_transfer/presentation/screen/mobile_account_transfer_form.dart';
 import '../../../../feature/account_transfer/presentation/screen/mobile_account_transfer_screen.dart';
 import '../../../../feature/accounts/presentation/pages/mobile_account_screen.dart';
-import '../../../../feature/auth/presentation/pages/login_scr.dart';
 import '../../../../feature/customer/presentation/pages/mobile_customer_screen.dart';
 import '../../../../feature/lab_dashboard/presentation/bloc/dashboard/dashboard_bloc.dart';
 import '../../../../feature/money_receipt/presentation/page/mobile_monery_receipt_create.dart';

@@ -47,7 +47,7 @@ class BrandTableCard extends StatelessWidget {
             color: Colors.white,
             boxShadow: [
               BoxShadow(
-                color: Colors.grey.withOpacity(0.1),
+                color: Colors.grey.withValues(alpha: 0.1),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -149,7 +149,7 @@ class BrandTableCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: index.isEven ? Colors.grey.withOpacity(0.03) : Colors.white,
+        color: index.isEven ? Colors.grey.withValues(alpha: 0.03) : Colors.white,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -202,7 +202,7 @@ class BrandTableCard extends StatelessWidget {
                   label: const Text('Edit'),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Colors.blue,
-                    side: BorderSide(color: Colors.blue.withOpacity(0.3)),
+                    side: BorderSide(color: Colors.blue.withValues(alpha: 0.3)),
                     padding: const EdgeInsets.symmetric(vertical: 8),
                   ),
                 ),
@@ -215,7 +215,7 @@ class BrandTableCard extends StatelessWidget {
                   label: const Text('Delete'),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Colors.red,
-                    side: BorderSide(color: Colors.red.withOpacity(0.3)),
+                    side: BorderSide(color: Colors.red.withValues(alpha: 0.3)),
                     padding: const EdgeInsets.symmetric(vertical: 8),
                   ),
                 ),
@@ -231,7 +231,7 @@ class BrandTableCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: isActive ? Colors.green.withOpacity(0.1) : Colors.red.withOpacity(0.1),
+        color: isActive ? Colors.green.withValues(alpha: 0.1) : Colors.red.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
@@ -311,7 +311,7 @@ class BrandTableCard extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: isActive ? Colors.green.withOpacity(0.1) : Colors.red.withOpacity(0.1),
+              color: isActive ? Colors.green.withValues(alpha: 0.1) : Colors.red.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
@@ -408,7 +408,7 @@ class BrandTableCard extends StatelessWidget {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -421,7 +421,7 @@ class BrandTableCard extends StatelessWidget {
           Icon(
             Icons.branding_watermark_outlined,
             size: 48,
-            color: Colors.grey.withOpacity(0.5),
+            color: Colors.grey.withValues(alpha: 0.5),
           ),
           const SizedBox(height: 16),
           Text(

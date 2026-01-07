@@ -12,7 +12,6 @@ import '../../../../core/widgets/show_custom_toast.dart';
 import '../../../products/product/presentation/widget/pagination.dart';
 import '../../data/model/account_transfer_model.dart';
 import '../bloc/account_transfer/account_transfer_bloc.dart';
-import 'account_transfer_form.dart';
 import 'mobile_account_transfer_form.dart';
 import 'widget/account_transfer_card.dart';
 
@@ -181,7 +180,7 @@ class _MobileAccountTransferScreenState extends State<MobileAccountTransferScree
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -352,7 +351,7 @@ class _MobileAccountTransferScreenState extends State<MobileAccountTransferScree
                     AppButton(
                       name: "Clear Filters",
                       onPressed: _clearAllFilters,
-                      color: AppColors.primaryColor.withOpacity(0.8),
+                      color: AppColors.primaryColor.withValues(alpha: 0.8),
                     ),
                   ],
                 ),
@@ -511,7 +510,7 @@ class _MobileAccountTransferScreenState extends State<MobileAccountTransferScree
                             selectedStatusNotifier.value = selected ? (status == "All" ? null : status) : null;
                           });
                         },
-                        selectedColor: AppColors.primaryColor.withOpacity(0.2),
+                        selectedColor: AppColors.primaryColor.withValues(alpha: 0.2),
                         checkmarkColor: AppColors.primaryColor,
                       );
                     }).toList(),
@@ -541,7 +540,7 @@ class _MobileAccountTransferScreenState extends State<MobileAccountTransferScree
                             selectedTransferTypeNotifier.value = selected ? (type == "All" ? null : type) : null;
                           });
                         },
-                        selectedColor: AppColors.primaryColor.withOpacity(0.2),
+                        selectedColor: AppColors.primaryColor.withValues(alpha: 0.2),
                         checkmarkColor: AppColors.primaryColor,
                       );
                     }).toList(),

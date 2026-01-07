@@ -418,7 +418,6 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
 
           // Check if we're at the last step (step 3, since steps are 0-indexed)
           if (currentStep == 3) {
-            print("object");
             // Last step -> submit
             _submitForm();
           } else {
