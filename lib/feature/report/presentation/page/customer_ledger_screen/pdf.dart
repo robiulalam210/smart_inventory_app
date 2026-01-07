@@ -771,9 +771,15 @@ Map<String, dynamic> _analyzePeriod(List<CustomerLedgerTransaction> transactions
   final transactionsPerDay = transactions.length / daysInPeriod;
 
   String activityLevel;
-  if (transactionsPerDay > 2) activityLevel = 'High';
-  else if (transactionsPerDay > 0.5) activityLevel = 'Medium';
-  else activityLevel = 'Low';
+  if (transactionsPerDay > 2) {
+    activityLevel = 'High';
+  }
+  else if (transactionsPerDay > 0.5) {
+    activityLevel = 'Medium';
+  }
+  else {
+    activityLevel = 'Low';
+  }
 
   return {
     'transactionsPerDay': transactionsPerDay,
@@ -793,9 +799,15 @@ Map<String, dynamic> _analyzeBalanceMovement(List<CustomerLedgerTransaction> tra
   final closingBalance = transactions.last.due;
 
   String trend;
-  if (closingBalance > openingBalance * 1.1) trend = 'Increasing';
-  else if (closingBalance < openingBalance * 0.9) trend = 'Decreasing';
-  else trend = 'Stable';
+  if (closingBalance > openingBalance * 1.1) {
+    trend = 'Increasing';
+  }
+  else if (closingBalance < openingBalance * 0.9) {
+    trend = 'Decreasing';
+  }
+  else {
+    trend = 'Stable';
+  }
 
   final largestTransaction = transactions.fold(0.0, (max, t) {
     final amount = t.debit > t.credit ? t.debit : t.credit;

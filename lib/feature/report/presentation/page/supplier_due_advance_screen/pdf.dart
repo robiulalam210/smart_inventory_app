@@ -802,10 +802,18 @@ Map<String, dynamic> _analyzeBalances(List<SupplierDueAdvance> suppliers) {
 
   final totalDue = suppliers.fold(0.0, (sum, s) => sum + s.presentDue);
   String paymentPriority;
-  if (totalDue > 20000) paymentPriority = 'High';
-  else if (totalDue > 10000) paymentPriority = 'Medium';
-  else if (totalDue > 5000) paymentPriority = 'Low';
-  else paymentPriority = 'Normal';
+  if (totalDue > 20000) {
+    paymentPriority = 'High';
+  }
+  else if (totalDue > 10000) {
+    paymentPriority = 'Medium';
+  }
+  else if (totalDue > 5000) {
+    paymentPriority = 'Low';
+  }
+  else {
+    paymentPriority = 'Normal';
+  }
 
   return {
     'categories': categories,

@@ -811,9 +811,15 @@ Map<String, dynamic> _analyzeStockHealth(List<StockProduct> products) {
   String turnoverRating;
   if (healthScore >= 80) {
     turnoverRating = 'Excellent';
-  } else if (healthScore >= 60) turnoverRating = 'Good';
-  else if (healthScore >= 40) turnoverRating = 'Fair';
-  else turnoverRating = "Poor";
+  } else if (healthScore >= 60) {
+    turnoverRating = 'Good';
+  }
+  else if (healthScore >= 40) {
+    turnoverRating = 'Fair';
+  }
+  else {
+    turnoverRating = "Poor";
+  }
 
   return {
     'statusDistribution': statusDistribution,

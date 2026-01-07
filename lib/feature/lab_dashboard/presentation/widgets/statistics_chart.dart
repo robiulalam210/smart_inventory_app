@@ -117,7 +117,7 @@
 // //             barWidth: 3,
 // //             belowBarData: BarAreaData(
 // //               show: true,
-// //               color: Colors.blue.withOpacity(0.3),
+// //               color: Colors.blue.withValues(alpha:0.3),
 // //             ),
 // //           ),
 // //           LineChartBarData(
@@ -133,7 +133,7 @@
 // //             barWidth: 3,
 // //             belowBarData: BarAreaData(
 // //               show: false,
-// //               color: Colors.green.withOpacity(0.3),
+// //               color: Colors.green.withValues(alpha:0.3),
 // //             ),
 // //           ),
 // //         ],

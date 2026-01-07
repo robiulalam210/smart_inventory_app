@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:ui';
 import '../../../../core/core.dart';
 import '../../../../core/database/login_local_storage.dart';
 import '../../../feature.dart';
@@ -9,19 +8,19 @@ class MobileLoginScr extends StatefulWidget {
   const MobileLoginScr({super.key});
 
   @override
-  State<MobileLoginScr> createState() => _LogInScreenState();
+  State<MobileLoginScr> createState() => _MobileLoginScrState();
 }
 
-class _LogInScreenState extends State<MobileLoginScr> {
-  final TextEditingController emailCon = TextEditingController();
-  final TextEditingController passwordCon = TextEditingController();
+class _MobileLoginScrState extends State<MobileLoginScr> {
+  final _formKey = GlobalKey<FormState>();
 
-  // Focus nodes for better keyboard navigation on mobile
+  final emailCon = TextEditingController();
+  final passwordCon = TextEditingController();
+
   final FocusNode _emailFocus = FocusNode();
   final FocusNode _passwordFocus = FocusNode();
 
   bool hidePassword = true;
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool _visible = false;
 
   @override
@@ -30,22 +29,14 @@ class _LogInScreenState extends State<MobileLoginScr> {
     _loadSavedLogin();
 
     Future.delayed(const Duration(milliseconds: 200), () {
-      if (mounted) {
-        setState(() {
-          _visible = true;
-        });
-      }
+      if (mounted) setState(() => _visible = true);
     });
   }
 
   Future<void> _loadSavedLogin() async {
     final data = await LoginLocalStorage.getSavedLogin();
-    if (mounted) {
-      setState(() {
-        emailCon.text = data['username'] ?? "";
-        passwordCon.text = data['password'] ?? "";
-      });
-    }
+    emailCon.text = data['username'] ?? "";
+    passwordCon.text = data['password'] ?? "";
   }
 
   @override
@@ -57,15 +48,8 @@ class _LogInScreenState extends State<MobileLoginScr> {
     super.dispose();
   }
 
-  void _dismissLoaderIfOpen() {
-    if (Navigator.of(context).canPop()) {
-      Navigator.of(context).pop();
-    }
-  }
-
-  void _submitLoginForm() {
-    final currentState = _formKey.currentState;
-    if (currentState != null && currentState.validate()) {
+  void _submit() {
+    if (_formKey.currentState!.validate()) {
       context.read<AuthBloc>().add(
         LoginRequested(
           username: emailCon.text.trim(),
@@ -75,216 +59,212 @@ class _LogInScreenState extends State<MobileLoginScr> {
     }
   }
 
-  double _getFormWidth(double screenWidth) {
-    if (screenWidth >= 1200) return 500.0; // Desktop
-    if (screenWidth >= 800) return 350.0; // Tablet
-    return screenWidth * 0.9; // Mobile
-  }
-
-  double getImageWidth(double screenWidth, double keyboardInset) {
-    // shrink image when keyboard is visible on mobile
-    final base = screenWidth >= 1200
-        ? 600.0
-        : screenWidth >= 800
-        ? 550.0
-        : 350.0;
-    if (keyboardInset > 0 && screenWidth < 800) {
-      return base * 0.7;
-    }
-    return base;
-  }
-
-  Widget _buildForm(double screenWidth) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(15),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 6.1, sigmaY: 6.1),
-        child: Container(
-          width: _getFormWidth(screenWidth),
-          padding: const EdgeInsets.all(AppSizes.bodyTabPadding),
-          decoration: BoxDecoration(
-            color: const Color.fromRGBO(233, 233, 233, 0.22),
-            border: Border.all(color: const Color(0xFFE3E3E3)),
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Hero(
-                  tag: 2,
-                  child: Text(
-                    "Login",
-                    style: TextStyle(
-                      fontSize: screenWidth >= 800 ? 28 : 20,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.white,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 10),
-                AutofillGroup(
-                  child: Column(
-                    children: [
-                      AppTextField(
-                        textInputAction: TextInputAction.next,
-                        labelText: "Username or Email",
-                        isRequiredLabel: false,
-                        isRequired: true,
-                        hintText: "Enter username or email address",
-                        keyboardType: TextInputType.emailAddress,
-                        validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return 'Please enter username or email';
-                          }
-                          return null;
-                        },
-                        controller: emailCon,
-                        focusNode: _emailFocus,
-                        onFieldSubmitted: (_) {
-                          _passwordFocus.requestFocus();
-                        },
-                      ),
-                      AppTextField(
-                        isRequiredLabel: false,
-                        textInputAction: TextInputAction.done,
-                        labelText: "Password",
-                        isRequired: true,
-                        hintText: "Password",
-                        keyboardType: TextInputType.text,
-                        validator: (value) =>
-                        value!.trim().isEmpty ? 'Please enter password' : null,
-                        controller: passwordCon,
-                        obscureText: hidePassword,
-                        focusNode: _passwordFocus,
-                        suffixIcon: IconButton(
-                          padding: EdgeInsets.zero,
-                          onPressed: () {
-                            setState(() {
-                              hidePassword = !hidePassword;
-                            });
-                          },
-                          icon: Icon(hidePassword ? Iconsax.eye_slash : Iconsax.eye),
-                        ),
-                        onFieldSubmitted: (_) => _submitLoginForm(),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 12),
-                BlocBuilder<AuthBloc, AuthState>(
-                  builder: (context, state) {
-                    final isLoading = state is AuthLoading;
-                    return isLoading
-                        ? SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: CircularProgressIndicator.adaptive(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                      ),
-                    )
-                        : AppButton(
-                      size: screenWidth >= 800 ? 500.0 : double.infinity,
-                      name: "Log In",
-                      onPressed: _submitLoginForm,
-                    );
-                  },
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
     final keyboardInset = MediaQuery.of(context).viewInsets.bottom;
 
-    return SafeArea(
-      child: GestureDetector(
-        onTap: () => FocusScope.of(context).unfocus(),
-        child: Scaffold(
-          backgroundColor: AppColors.bg,
-          body: BlocListener<AuthBloc, AuthState>(
-            listener: (context, state) async {
-              if (state is AuthAuthenticated || state is AuthAuthenticatedOffline) {
-                await LoginLocalStorage.saveLogin(
-                  emailCon.text.trim(),
-                  passwordCon.text.trim(),
-                );
-                _dismissLoaderIfOpen();
-                showCustomToast(
-                  context: context,
-                  title: 'Success!',
-                  description: state is AuthAuthenticated
-                      ? 'Login Online successfully.'
-                      : 'Login Offline successfully.',
-                  type: ToastificationType.success,
-                  icon: Icons.check_circle,
-                  primaryColor: Colors.green,
-                );
-                AppRoutes.pushReplacement(context, MobileRootScreen());
-              } else if (state is AuthError) {
-                _dismissLoaderIfOpen();
-                appAlertDialog(
-                  context,
-                  state.message,
-                  title: "Login Failed",
-                  actions: [
-                    TextButton(
-                      onPressed: () => AppRoutes.pop(context),
-                      child: const Text("Dismiss"),
+    return Scaffold(
+      backgroundColor: AppColors.bg,
+      body: BlocListener<AuthBloc, AuthState>(
+        listener: (context, state) async {
+          if (state is AuthAuthenticated || state is AuthAuthenticatedOffline) {
+            await LoginLocalStorage.saveLogin(
+              emailCon.text.trim(),
+              passwordCon.text.trim(),
+            );
+
+            showCustomToast(
+              context: context,
+              title: "Success",
+              description: state is AuthAuthenticated
+                  ? "Logged in online"
+                  : "Logged in offline",
+              type: ToastificationType.success,
+            );
+
+            AppRoutes.pushReplacement(context, const MobileRootScreen());
+          }
+
+          if (state is AuthError) {
+            appAlertDialog(
+              context,
+              state.message,
+              title: "Login Failed",
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text("OK"),
+                )
+              ],
+            );
+          }
+        },
+        child: GestureDetector(
+          onTap: () => FocusScope.of(context).unfocus(),
+          child: Container(
+            width: double.infinity,
+            height: double.infinity,
+            decoration: BoxDecoration(
+              gradient: AppColors.primaryGradient,
+            ),
+            child: SingleChildScrollView(
+              padding: EdgeInsets.only(
+                left: 20,
+                right: 20,
+                bottom: keyboardInset,
+                top: 60,
+              ),
+              child: AnimatedOpacity(
+                opacity: _visible ? 1 : 0,
+                duration: const Duration(milliseconds: 350),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    /// 🔹 Lottie / Logo
+                    SizedBox(
+                      height: 220,
+                      child: Lottie.asset(
+                        AppImages.loginLottie,
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+
+                    const SizedBox(height: 10),
+
+                    /// 🔹 Login Card
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.95),
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.12),
+                            blurRadius: 30,
+                            offset: const Offset(0, 20),
+                          )
+                        ],
+                      ),
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            /// Title
+                            const Text(
+                              "Welcome Back 👋",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              "Sign in to continue",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey.shade600,
+                              ),
+                            ),
+
+                            const SizedBox(height: 20),
+
+                            /// Email
+                            AppTextField(
+                              labelText: "Username / Email",
+                              hintText: "Enter your username or email",
+                              controller: emailCon,
+                              keyboardType: TextInputType.emailAddress,
+                              focusNode: _emailFocus,
+                              textInputAction: TextInputAction.next,
+                              validator: (v) =>
+                              v!.isEmpty ? "Required" : null,
+                              onFieldSubmitted: (_) =>
+                                  _passwordFocus.requestFocus(),
+                            ),
+
+                            const SizedBox(height: 12),
+
+                            /// Password
+                            AppTextField(
+                              labelText: "Password",
+                              hintText: "Enter password",
+                              controller: passwordCon,
+                              obscureText: hidePassword,
+                              focusNode: _passwordFocus,
+                              textInputAction: TextInputAction.done,
+                              validator: (v) =>
+                              v!.isEmpty ? "Required" : null,
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  hidePassword
+                                      ? Iconsax.eye_slash
+                                      : Iconsax.eye,
+                                ),
+                                onPressed: () {
+                                  setState(() {
+                                    hidePassword = !hidePassword;
+                                  });
+                                },
+                              ),
+                              onFieldSubmitted: (_) => _submit(), keyboardType: TextInputType.text,
+                            ),
+
+                            /// Forgot
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: TextButton(
+                                onPressed: () {},
+                                child: const Text("Forgot password?"),
+                              ),
+                            ),
+
+                            const SizedBox(height: 10),
+
+                            /// Login Button
+                            BlocBuilder<AuthBloc, AuthState>(
+                              builder: (context, state) {
+                                final loading = state is AuthLoading;
+
+                                return SizedBox(
+                                  height: 48,
+                                  child: ElevatedButton(
+                                    onPressed: loading ? null : _submit,
+                                    style: ElevatedButton.styleFrom(
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                        BorderRadius.circular(12),
+                                      ),
+                                    ),
+                                    child: loading
+                                        ? const SizedBox(
+                                      width: 22,
+                                      height: 22,
+                                      child:
+                                      CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: Colors.white,
+                                      ),
+                                    )
+                                        : const Text(
+                                      "Log In",
+                                      style: TextStyle(fontSize: 16),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+
+                            const SizedBox(height: 14),
+
+
+                          ],
+                        ),
+                      ),
                     ),
                   ],
-                );
-              }
-            },
-            child: Container(
-              width: double.infinity,
-              height: double.infinity,
-              decoration: BoxDecoration(gradient: AppColors.primaryGradient),
-              child: Center(
-                child: SingleChildScrollView(
-                  padding: EdgeInsets.only(bottom: keyboardInset),
-                  child: AnimatedOpacity(
-                    duration: const Duration(milliseconds: 350),
-                    opacity: _visible ? 1.0 : 0.0,
-                    child: Builder(builder: (context) {
-                      // Use Row on wide screens, Column on narrow screens to avoid overflow.
-                      if (screenWidth >= 800) {
-                        return Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            SizedBox(
-                              width: getImageWidth(screenWidth, keyboardInset),
-                              child: Lottie.asset(AppImages.loginLottie, fit: BoxFit.contain),
-                            ),
-                            _buildForm(screenWidth),
-                          ],
-                        );
-                      } else {
-                        // Mobile: stack the image above the form to avoid horizontal overflow.
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            // SizedBox(
-                            //   width: getImageWidth(screenWidth, keyboardInset).clamp(0.0, screenWidth * 0.5),
-                            //   child: Lottie.asset(AppImages.loginLottie, fit: BoxFit.contain),
-                            // ),
-                            _buildForm(screenWidth),
-                          ],
-                        );
-                      }
-                    }),
-                  ),
                 ),
               ),
             ),

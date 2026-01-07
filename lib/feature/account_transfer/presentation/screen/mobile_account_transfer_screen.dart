@@ -565,7 +565,7 @@ class _MobileAccountTransferScreenState extends State<MobileAccountTransferScree
                             isReversalNotifier.value = value;
                           });
                         },
-                        activeColor: AppColors.primaryColor,
+                        activeThumbColor: AppColors.primaryColor,
                       ),
                     ],
                   ),

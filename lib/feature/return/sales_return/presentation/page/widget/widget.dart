@@ -4,7 +4,6 @@ import '/feature/return/sales_return/data/model/sales_return_model.dart';
 import '../../../../../../core/configs/configs.dart';
 import '../../../../../../core/widgets/delete_dialog.dart';
 import '../../sales_return_bloc/sales_return_bloc.dart';
-import 'package:flutter/material.dart';
 
 class SalesReturnTableCard extends StatelessWidget {
   final List<SalesReturnModel> salesReturns;
@@ -114,7 +113,7 @@ class SalesReturnTableCard extends StatelessWidget {
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       itemCount: salesReturns.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 8),
+      separatorBuilder: (_, _) => const SizedBox(height: 8),
       itemBuilder: (context, index) {
         final salesReturn = salesReturns[index];
         final statusColor = _getStatusColor(salesReturn.status ?? '');
@@ -130,7 +129,7 @@ class SalesReturnTableCard extends StatelessWidget {
                   children: [
                     CircleAvatar(
                       radius: 18,
-                      backgroundColor: AppColors.primaryColor.withOpacity(0.1),
+                      backgroundColor: AppColors.primaryColor.withValues(alpha: 0.1),
                       child: Text(
                         '${index + 1}',
                         style: TextStyle(
@@ -174,7 +173,7 @@ class SalesReturnTableCard extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
-                            color: statusColor.withOpacity(0.12),
+                            color: statusColor.withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(16),
                           ),
                           child: Text(
@@ -449,7 +448,7 @@ class SalesReturnTableCard extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: Colors.red.withOpacity(0.1),
+              color: Colors.red.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
@@ -478,7 +477,7 @@ class SalesReturnTableCard extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: statusColor.withOpacity(0.1),
+              color: statusColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
@@ -525,7 +524,7 @@ class SalesReturnTableCard extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: Colors.blue.withOpacity(0.1),
+              color: Colors.blue.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
@@ -778,7 +777,7 @@ class SalesReturnTableCard extends StatelessWidget {
                       margin: const EdgeInsets.only(bottom: 8),
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: Colors.grey.withOpacity(0.05),
+                        color: Colors.grey.withValues(alpha: 0.05),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Row(
@@ -858,7 +857,7 @@ class SalesReturnTableCard extends StatelessWidget {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -871,7 +870,7 @@ class SalesReturnTableCard extends StatelessWidget {
           Icon(
             Icons.assignment_return_outlined,
             size: 48,
-            color: Colors.grey.withOpacity(0.5),
+            color: Colors.grey.withValues(alpha: 0.5),
           ),
           const SizedBox(height: 16),
           Text(

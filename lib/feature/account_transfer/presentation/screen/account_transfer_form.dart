@@ -189,7 +189,7 @@ _fetchApi();
                                     onChanged: (value) {
                                       isQuickTransfer.value = value;
                                     },
-                                    activeColor: AppColors.primaryColor,
+                                    activeThumbColor: AppColors.primaryColor,
                                   ),
                                 ],
                               );

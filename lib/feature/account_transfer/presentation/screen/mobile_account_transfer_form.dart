@@ -161,7 +161,7 @@ class _MobileAccountTransferFormState extends State<MobileAccountTransferForm> {
                               onChanged: (value) {
                                 isQuickTransfer.value = value;
                               },
-                              activeColor: AppColors.primaryColor,
+                              activeThumbColor: AppColors.primaryColor,
                             );
                           },
                         ),
@@ -422,7 +422,7 @@ class _MobileAccountTransferFormState extends State<MobileAccountTransferForm> {
                         width: 40,
                         height: 40,
                         decoration: BoxDecoration(
-                          color: AppColors.primaryColor.withOpacity(0.1),
+                          color: AppColors.primaryColor.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Icon(
