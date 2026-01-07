@@ -1679,7 +1679,8 @@ class _SalesScreenState extends State<MobileSalesScreen> {
       child: Scaffold(
         backgroundColor: AppColors.bg,
         appBar: AppBar(
-          title: const Text('POS - Mobile'),
+          backgroundColor: AppColors.bg,
+          title:  Text('Pos Sale',style: AppTextStyle.titleMedium(context),),
           actions: [
             IconButton(
               onPressed: _openProductBrowser,

@@ -371,7 +371,11 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
 
 
     return AppScaffold(
-      appBar: AppBar(),
+      appBar: AppBar(
+        backgroundColor: AppColors.bg,
+        title:  Text('Sale',style: AppTextStyle.titleMedium(context),),
+
+      ),
       body: SafeArea(
         child:  _buildMobileStepperContent(),
       ),
