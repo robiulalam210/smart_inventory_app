@@ -1,4 +1,5 @@
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
+import 'package:meherinMart/core/widgets/app_scaffold.dart';
 
 import '../../../../core/configs/configs.dart';
 import '../../../../core/widgets/app_dropdown.dart';
@@ -119,8 +120,9 @@ class _PosSaleScreenState extends State<MobilePosSaleScreen> {
   Widget build(BuildContext context) {
 
 
-    return Scaffold(
+    return AppScaffold(
       appBar: AppBar(
+        backgroundColor: AppColors.bg,
         title: Text("Sales List",style: AppTextStyle.titleMedium(context),),
       ),
       body: SafeArea(
