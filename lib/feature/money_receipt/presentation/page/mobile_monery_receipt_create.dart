@@ -525,40 +525,28 @@ class _MoneyReceiptListScreenState extends State<MobileMoneyReceiptForm> {
   Widget _buildMobileSummarySection() {
     final moneyBloc = context.read<MoneyReceiptBloc>();
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(6),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text("Review", style: AppTextStyle.cardLevelHead(context)),
-              const SizedBox(height: 8),
-              _reviewRow("Customer", moneyBloc.selectCustomerModel?.name ?? "-"),
-              _reviewRow("Collected By", moneyBloc.selectUserModel?.username ?? "-"),
-              _reviewRow("Payment To", selectedPaymentToState.value),
-              if (selectedPaymentToState.value == "Specific")
-                _reviewRow("Invoice", selectPosSaleModel.value?.invoiceNo ?? "-"),
-              _reviewRow("Payment Method", selectedPaymentMethodNotifier.value ?? "-"),
-              _reviewRow("Account", moneyBloc.accountModel?.name ?? "-"),
-              _reviewRow("Amount", moneyBloc.amountController.text.trim()),
-              _reviewRow("Remark", moneyBloc.remarkController.text.trim().isEmpty ? "-" : moneyBloc.remarkController.text.trim()),
-            ],
-          ),
-        ),
-        const SizedBox(height: 12),
-        Center(
-          child: AppButton(
-            name: "Create",
-            onPressed: _createMoneyReceipt,
-          ),
-        ),
-      ],
+    return Container(
+      padding: const EdgeInsets.all(0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text("Review", style: AppTextStyle.cardLevelHead(context)),
+          const SizedBox(height: 8),
+          _reviewRow("Customer", moneyBloc.selectCustomerModel?.name ?? "-"),
+          _reviewRow("Collected By", moneyBloc.selectUserModel?.username ?? "-"),
+          _reviewRow("Payment To", selectedPaymentToState.value),
+          if (selectedPaymentToState.value == "Specific")
+            _reviewRow("Invoice", selectPosSaleModel.value?.invoiceNo ?? "-"),
+          _reviewRow("Payment Method", selectedPaymentMethodNotifier.value ?? "-"),
+          _reviewRow("Account", moneyBloc.accountModel?.name ?? "-"),
+          _reviewRow("Amount", moneyBloc.amountController.text.trim()),
+          _reviewRow("Remark", moneyBloc.remarkController.text.trim().isEmpty ? "-" : moneyBloc.remarkController.text.trim()),
+        ],
+      ),
     );
   }
 

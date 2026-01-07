@@ -74,6 +74,22 @@ class _SupplierPaymentScreenState extends State<MobileSupplierPaymentListScreen>
   Widget build(BuildContext context) {
 
     return Scaffold(
+      floatingActionButton: FloatingActionButton(        onPressed: () {
+        showDialog(
+          context: context,
+          builder: (context) {
+            return Dialog(
+
+              insetPadding: const EdgeInsets.all(16),
+              child: SizedBox(
+                // width: double.infinity,
+                // height: AppSizes.height(context) * 0.8,
+                child: const MobileSupplierPaymentCreate(),
+              ),
+            );
+          },
+        );
+      },child: Icon(Icons.add),),
       appBar: AppBar(title: Text("Supplier Payment ",style: AppTextStyle.titleMedium(context),),),
       body: SafeArea(
         child: _buildContentArea()
@@ -91,11 +107,13 @@ class _SupplierPaymentScreenState extends State<MobileSupplierPaymentListScreen>
       xl: 10,
       child: Container(
         padding: AppTextStyle.getResponsivePaddingBody(context),
-        child: Column(
-          children: [
-            _buildFilterSection(),
-            _buildSupplierPaymentList(),
-          ],
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              _buildFilterSection(),
+              _buildSupplierPaymentList(),
+            ],
+          ),
         ),
       ),
     );
@@ -144,29 +162,7 @@ class _SupplierPaymentScreenState extends State<MobileSupplierPaymentListScreen>
                         ),
                       ),
                     ),
-                    const SizedBox(width: 6),
-                    SizedBox(
-                      width: 100,
-                      child: AppButton(
-                        name: "Create",
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        onPressed: () {
-                          showDialog(
-                            context: context,
-                            builder: (context) {
-                              return Dialog(
-                                insetPadding: const EdgeInsets.all(16),
-                                child: SizedBox(
-                                  width: double.infinity,
-                                  height: AppSizes.height(context) * 0.8,
-                                  child: const MobileSupplierPaymentCreate(),
-                                ),
-                              );
-                            },
-                          );
-                        },
-                      ),
-                    ),
+                  
                   ],
                 ),
               ],

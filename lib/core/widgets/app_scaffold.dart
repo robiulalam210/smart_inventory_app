@@ -33,7 +33,7 @@ class AppScaffold extends StatelessWidget {
       builder: (context, state) {
         final isOffline = state is ConnectivityOffline;
 
-        final overlayColor =  AppColors.background;
+        final overlayColor =  AppColors.bg;
 
         return Stack(
           children: [

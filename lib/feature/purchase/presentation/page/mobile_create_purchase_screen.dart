@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:meherinMart/core/widgets/app_scaffold.dart';
+import 'package:meherinMart/feature/purchase/presentation/page/mobile_purchase_screen.dart';
 import '/feature/accounts/data/model/account_active_model.dart';
 import '/feature/products/product/presentation/bloc/products/products_bloc.dart';
 import '/feature/supplier/data/model/supplier_active_model.dart';
@@ -123,7 +124,8 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
     double total = price * quantity;
 
     // update ticket_total controller
-    controllers[index]?["ticket_total"]?.text = (price * quantity).toStringAsFixed(2);
+    controllers[index]?["ticket_total"]?.text = (price * quantity)
+        .toStringAsFixed(2);
     products[index]["ticket_total"] = price * quantity;
 
     if (discountType == 'fixed') {
@@ -162,7 +164,7 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
               .deliveryChargeOverAllController
               .text,
         ) ??
-            0.0;
+        0.0;
 
     if (selectedOverallDeliveryType == 'percentage') {
       deliveryCharge = (total * (deliveryCharge / 100));
@@ -176,7 +178,7 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
         double.tryParse(
           context.read<CreatePurchaseBloc>().discountOverAllController.text,
         ) ??
-            0.0;
+        0.0;
 
     if (selectedOverallDiscountType == 'percentage') {
       discount = (total * (discount / 100));
@@ -201,7 +203,7 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
               .serviceChargeOverAllController
               .text,
         ) ??
-            0.0;
+        0.0;
 
     serviceCharge = (selectedOverallServiceChargeType == 'percentage')
         ? (total * (enteredServiceCharge / 100))
@@ -320,9 +322,11 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
       products[index]["product"] = newVal;
       products[index]["product_id"] = newVal.id;
       products[index]["product_name"] = newVal.name;
-      controllers[index]?["price"]?.text = (newVal.sellingPrice ?? 0.0).toString();
+      controllers[index]?["price"]?.text = (newVal.sellingPrice ?? 0.0)
+          .toString();
       products[index]["price"] = newVal.sellingPrice ?? 0.0;
-      controllers[index]?["discount"]?.text = (newVal.discountValue ?? 0.0).toString();
+      controllers[index]?["discount"]?.text = (newVal.discountValue ?? 0.0)
+          .toString();
       products[index]["discount"] = newVal.discountValue ?? 0.0;
       products[index]["discount_type"] = newVal.discountType ?? 'fixed';
       updateTotal(index);
@@ -349,15 +353,15 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
 
   @override
   Widget build(BuildContext context) {
-
     return SafeArea(
       child: AppScaffold(
-      appBar: AppBar(title: Text("Purchase",style: AppTextStyle.titleMedium(context),),),
+        appBar: AppBar(
+          title: Text("Purchase", style: AppTextStyle.titleMedium(context)),
+        ),
         body: _buildMobileLayout(),
       ),
     );
   }
-
 
   // -----------------------
   // Mobile layout & stepper
@@ -376,7 +380,7 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
             appLoader(context, "Creating Purchase, please wait...");
           } else if (state is CreatePurchaseSuccess) {
             Navigator.pop(context);
-
+            AppRoutes.pushReplacement(context, MobilePurchaseScreen());
           } else if (state is CreatePurchaseFailed) {
             Navigator.pop(context);
             appAlertDialog(
@@ -403,7 +407,6 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
   }
 
   Widget _buildMobileStepperContent() {
-
     return Form(
       key: formKey,
       child: Stepper(
@@ -411,16 +414,21 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
         type: StepperType.vertical,
         currentStep: currentStep,
         onStepContinue: () {
-          if (currentStep < 3) {
+          debugPrint("onStepContinue called, currentStep: $currentStep");
+
+          // Check if we're at the last step (step 3, since steps are 0-indexed)
+          if (currentStep == 3) {
+            print("object");
+            // Last step -> submit
+            _submitForm();
+          } else {
+            // Move to next step
             setState(() {
               currentStep += 1;
             });
             WidgetsBinding.instance.addPostFrameCallback((_) {
               debugPrint("after rebuild currentStep: $currentStep");
             });
-          } else {
-            // last step -> submit
-            _submitForm();
           }
         },
         onStepCancel: () {
@@ -470,19 +478,13 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
             state: currentStep > 0 ? StepState.complete : StepState.indexed,
           ),
           Step(
-            title: Text(
-              'Products',
-              style: AppTextStyle.cardLevelHead(context),
-            ),
+            title: Text('Products', style: AppTextStyle.cardLevelHead(context)),
             content: _buildMobileProductListSection(),
             isActive: currentStep >= 1,
             state: currentStep > 1 ? StepState.complete : StepState.indexed,
           ),
           Step(
-            title: Text(
-              'Charges',
-              style: AppTextStyle.cardLevelHead(context),
-            ),
+            title: Text('Charges', style: AppTextStyle.cardLevelHead(context)),
             content: _buildMobileChargesSection(),
             isActive: currentStep >= 2,
             state: currentStep > 2 ? StepState.complete : StepState.indexed,
@@ -492,13 +494,7 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
               'Summary & Payment',
               style: AppTextStyle.cardLevelHead(context),
             ),
-            content: Column(
-              children: [
-                _buildSummarySection(),
-                const SizedBox(height: 12),
-                _buildActionButtons(),
-              ],
-            ),
+            content: Column(children: [_buildSummarySection()]),
             isActive: currentStep >= 3,
             state: StepState.indexed,
           ),
@@ -506,7 +502,6 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
       ),
     );
   }
-
   Widget _buildMobileTopFormSection() {
     final bloc = context.read<CreatePurchaseBloc>();
 
@@ -569,22 +564,32 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
                 padding: EdgeInsets.zero,
                 children: {
                   'fixed': Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6.0,
+                      vertical: 8,
+                    ),
                     child: Text(
                       'TK',
                       style: TextStyle(
                         fontFamily: GoogleFonts.playfairDisplay().fontFamily,
-                        color: selectedVatType == 'fixed' ? Colors.white : Colors.black,
+                        color: selectedVatType == 'fixed'
+                            ? Colors.white
+                            : Colors.black,
                       ),
                     ),
                   ),
                   'percentage': Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6.0,
+                      vertical: 8,
+                    ),
                     child: Text(
                       '%',
                       style: TextStyle(
                         fontFamily: GoogleFonts.playfairDisplay().fontFamily,
-                        color: selectedVatType == 'percentage' ? Colors.white : Colors.black,
+                        color: selectedVatType == 'percentage'
+                            ? Colors.white
+                            : Colors.black,
                       ),
                     ),
                   ),
@@ -610,7 +615,9 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
                 hintText: 'VAT',
                 isRequiredLable: false,
                 fillColor: Colors.white,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
                 onChanged: (value) {
                   calculateVatTotal();
                   _updatePaymentCalculations();
@@ -631,10 +638,7 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
         _buildProductRows(),
         const SizedBox(height: 8),
         Center(
-          child: AppButton(
-            name: 'Add Product',
-            onPressed: addProduct,
-          ),
+          child: AppButton(name: 'Add Product', onPressed: addProduct),
         ),
       ],
     );
@@ -643,9 +647,7 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
   Widget _buildMobileChargesSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildChargesSection(),
-      ],
+      children: [_buildChargesSection()],
     );
   }
 
@@ -715,8 +717,8 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
                           categoriesBloc.selectedState = newVal.toString();
 
                           final matchingCategory = categoryList.firstWhere(
-                                (category) =>
-                            category.name.toString() == newVal.toString(),
+                            (category) =>
+                                category.name.toString() == newVal.toString(),
                             orElse: () => CategoryModel(),
                           );
 
@@ -765,16 +767,16 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
                         .read<ProductsBloc>()
                         .productList
                         .where((item) {
-                      final categoryMatch = selectedCategoryId.isEmpty
-                          ? true
-                          : item.category?.toString() == selectedCategoryId;
+                          final categoryMatch = selectedCategoryId.isEmpty
+                              ? true
+                              : item.category?.toString() == selectedCategoryId;
 
-                      final notDuplicate =
-                          !selectedProductIds.contains(item.id) ||
+                          final notDuplicate =
+                              !selectedProductIds.contains(item.id) ||
                               item.id == product["product_id"];
 
-                      return categoryMatch && notDuplicate;
-                    })
+                          return categoryMatch && notDuplicate;
+                        })
                         .toList();
 
                     return AppDropdown<ProductModelStockModel>(
@@ -790,7 +792,7 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
                       itemList: filteredProducts,
                       onChanged: (newVal) => onProductChanged(index, newVal),
                       validator: (value) =>
-                      value == null ? 'Please select Product' : null,
+                          value == null ? 'Please select Product' : null,
                       itemBuilder: (item) => DropdownMenuItem(
                         value: item,
                         child: Text(item.toString()),
@@ -854,7 +856,8 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
                     setState(() {
                       final parsedValue = double.tryParse(value) ?? 1;
                       products[index]["price"] = parsedValue;
-                      controllers[index]?["price"]?.text = parsedValue.toString();
+                      controllers[index]?["price"]?.text = parsedValue
+                          .toString();
                       updateTotal(index);
                     });
                   },
@@ -888,7 +891,7 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
                         style: TextStyle(
                           fontFamily: GoogleFonts.playfairDisplay().fontFamily,
                           color:
-                          products[index]["discount_type"] == 'percentage'
+                              products[index]["discount_type"] == 'percentage'
                               ? Colors.white
                               : Colors.black,
                         ),
@@ -998,7 +1001,7 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
                               int.tryParse(
                                 controllers[index]!["quantity"]!.text,
                               ) ??
-                                  0;
+                              0;
                           controllers[index]!["quantity"]!.text =
                               (currentQuantity + 1).toString();
                           products[index]["quantity"] =
@@ -1118,28 +1121,32 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
                   },
                 ),
               ),
-              ResponsiveCol(
-                xs: 12,
-                sm: 1,
-                md: 1,
-                lg: 1,
-                xl: 1,
-                child: IconButton(
-                  icon: Icon(
-                    product == products[products.length - 1]
-                        ? Icons.add
-                        : Icons.remove,
-                    color: products.length == 1 ? Colors.green : Colors.red,
-                  ),
-                  onPressed: () {
-                    if (product == products[products.length - 1]) {
-                      addProduct();
-                    } else {
-                      removeProduct(index);
-                    }
-                  },
-                ),
-              ),
+              product == products[products.length - 1]
+                  ? SizedBox.shrink()
+                  : ResponsiveCol(
+                      xs: 12,
+                      sm: 1,
+                      md: 1,
+                      lg: 1,
+                      xl: 1,
+                      child: IconButton(
+                        icon: Icon(
+                          product == products[products.length - 1]
+                              ? Icons.add
+                              : Icons.remove,
+                          color: products.length == 1
+                              ? Colors.green
+                              : Colors.red,
+                        ),
+                        onPressed: () {
+                          if (product == products[products.length - 1]) {
+                            // addProduct();
+                          } else {
+                            removeProduct(index);
+                          }
+                        },
+                      ),
+                    ),
             ],
           ),
         );
@@ -1156,7 +1163,7 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
           "Overall Discount",
           context.read<CreatePurchaseBloc>().discountOverAllController,
           selectedOverallDiscountType,
-              (value) {
+          (value) {
             setState(() {
               selectedOverallDiscountType = value;
               calculateDiscountTotal();
@@ -1168,7 +1175,7 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
           "Service Charge",
           context.read<CreatePurchaseBloc>().serviceChargeOverAllController,
           selectedOverallServiceChargeType,
-              (value) {
+          (value) {
             setState(() {
               selectedOverallServiceChargeType = value;
               calculateServiceChargeTotal();
@@ -1180,7 +1187,7 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
           "Delivery Charge",
           context.read<CreatePurchaseBloc>().deliveryChargeOverAllController,
           selectedOverallDeliveryType,
-              (value) {
+          (value) {
             setState(() {
               selectedOverallDeliveryType = value;
               calculateDeliveryTotal();
@@ -1193,11 +1200,11 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
   }
 
   Widget _buildChargeField(
-      String label,
-      TextEditingController controller,
-      String selectedType,
-      Function(String) onTypeChanged,
-      ) {
+    String label,
+    TextEditingController controller,
+    String selectedType,
+    Function(String) onTypeChanged,
+  ) {
     return ResponsiveCol(
       xs: 12,
       sm: 3,
@@ -1260,8 +1267,9 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
                   ),
                   onChanged: (value) {
                     if (label.contains('Discount')) calculateDiscountTotal();
-                    if (label.contains('Service'))
+                    if (label.contains('Service')) {
                       calculateServiceChargeTotal();
+                    }
                     if (label.contains('Delivery')) calculateDeliveryTotal();
                     _updatePaymentCalculations();
                     setState(() {});
@@ -1408,26 +1416,26 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
                   label: "Payment Method",
                   context: context,
                   hint:
-                  context
-                      .read<CreatePurchaseBloc>()
-                      .selectedPaymentMethod
-                      .isEmpty
+                      context
+                          .read<CreatePurchaseBloc>()
+                          .selectedPaymentMethod
+                          .isEmpty
                       ? "Select Payment Method"
                       : context
-                      .read<CreatePurchaseBloc>()
-                      .selectedPaymentMethod,
+                            .read<CreatePurchaseBloc>()
+                            .selectedPaymentMethod,
                   isLabel: false,
                   isRequired: true,
                   isNeedAll: false,
                   value:
-                  context
-                      .read<CreatePurchaseBloc>()
-                      .selectedPaymentMethod
-                      .isEmpty
+                      context
+                          .read<CreatePurchaseBloc>()
+                          .selectedPaymentMethod
+                          .isEmpty
                       ? null
                       : context
-                      .read<CreatePurchaseBloc>()
-                      .selectedPaymentMethod,
+                            .read<CreatePurchaseBloc>()
+                            .selectedPaymentMethod,
                   itemList: const ['cash', 'bank', 'cheque', 'digital'],
                   onChanged: (newVal) {
                     context.read<CreatePurchaseBloc>().selectedPaymentMethod =
@@ -1460,28 +1468,28 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
                       return const Center(child: CircularProgressIndicator());
                     } else if (state is AccountActiveListSuccess) {
                       final filteredList =
-                      context
-                          .read<CreatePurchaseBloc>()
-                          .selectedPaymentMethod
-                          .isNotEmpty
+                          context
+                              .read<CreatePurchaseBloc>()
+                              .selectedPaymentMethod
+                              .isNotEmpty
                           ? state.list.where((item) {
-                        final paymentMethod = context
-                            .read<CreatePurchaseBloc>()
-                            .selectedPaymentMethod
-                            .toLowerCase();
-                        final accountType =
-                            item.acType?.toLowerCase() ?? '';
+                              final paymentMethod = context
+                                  .read<CreatePurchaseBloc>()
+                                  .selectedPaymentMethod
+                                  .toLowerCase();
+                              final accountType =
+                                  item.acType?.toLowerCase() ?? '';
 
-                        if (paymentMethod == 'cash') {
-                          return accountType == 'cash';
-                        } else if (paymentMethod == 'bank') {
-                          return accountType == 'bank';
-                        } else if (paymentMethod == 'digital') {
-                          return accountType == 'mobile banking';
-                        } else {
-                          return true;
-                        }
-                      }).toList()
+                              if (paymentMethod == 'cash') {
+                                return accountType == 'cash';
+                              } else if (paymentMethod == 'bank') {
+                                return accountType == 'bank';
+                              } else if (paymentMethod == 'digital') {
+                                return accountType == 'mobile banking';
+                              } else {
+                                return true;
+                              }
+                            }).toList()
                           : state.list;
 
                       return AppDropdown<AccountActiveModel>(
@@ -1498,18 +1506,18 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
                         onChanged: (newVal) {
                           if (newVal != null) {
                             context
-                                .read<CreatePurchaseBloc>()
-                                .accountActiveModel =
+                                    .read<CreatePurchaseBloc>()
+                                    .accountActiveModel =
                                 newVal;
                             context
-                                .read<CreatePurchaseBloc>()
-                                .selectedAccountId =
+                                    .read<CreatePurchaseBloc>()
+                                    .selectedAccountId =
                                 newVal.id?.toString() ?? "";
                           } else {
                             context
-                                .read<CreatePurchaseBloc>()
-                                .selectedAccountId =
-                            "";
+                                    .read<CreatePurchaseBloc>()
+                                    .selectedAccountId =
+                                "";
                           }
                         },
                         validator: (value) {
@@ -1631,22 +1639,6 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
     );
   }
 
-  Widget _buildActionButtons() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            const SizedBox(width: 10),
-            AppButton(name: 'Submit', onPressed: _submitForm),
-            const SizedBox(width: 5),
-          ],
-        ),
-      ],
-    );
-  }
-
   void _selectDate() async {
     DateTime? pickedDate = await showDatePicker(
       context: context,
@@ -1664,25 +1656,38 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
   }
 
   void _submitForm() {
+    debugPrint("========== SUBMIT FORM CALLED ==========");
+
     if (formKey.currentState!.validate()) {
+      debugPrint("✅ Form validation passed");
+
       // Validate that at least one product is selected
       bool hasValidProducts = false;
       bool hasValidPrices = true;
 
       for (var product in products) {
+        debugPrint("Checking product: ${product.toString()}");
         if (product["product_id"] != null) {
           hasValidProducts = true;
+          debugPrint("✅ Product found with ID: ${product["product_id"]}");
 
           // Check if price is valid (greater than 0)
           double price = double.tryParse(product["price"].toString()) ?? 0.0;
+          debugPrint("Product price: $price");
+
           if (price <= 0) {
+            debugPrint("❌ Invalid price found: $price");
             hasValidPrices = false;
             break;
           }
         }
       }
 
+      debugPrint("hasValidProducts: $hasValidProducts");
+      debugPrint("hasValidPrices: $hasValidPrices");
+
       if (!hasValidProducts) {
+        debugPrint("❌ No valid products found - showing alert");
         appAlertDialog(
           context,
           "Please add at least one product to the purchase.",
@@ -1698,6 +1703,7 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
       }
 
       if (!hasValidPrices) {
+        debugPrint("❌ Invalid prices found - showing alert");
         appAlertDialog(
           context,
           "Please enter valid prices (greater than 0) for all products.",
@@ -1712,17 +1718,23 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
         return;
       }
 
+      debugPrint("✅ All product validations passed");
+
       // Calculate totals from products
       double subtotal = 0.0;
       var transferProducts = products
           .where((product) => product["product_id"] != null)
           .map((product) {
+        debugPrint("Processing product for transfer: ${product.toString()}");
+
         // Calculate the actual price from the product data
         double price = double.tryParse(product["price"].toString()) ?? 0.0;
         int qty = int.tryParse(product["quantity"].toString()) ?? 1;
         double discount =
             double.tryParse(product["discount"].toString()) ?? 0.0;
         String discountType = product["discount_type"].toString();
+
+        debugPrint("Price: $price, Qty: $qty, Discount: $discount ($discountType)");
 
         // Calculate item total
         double itemTotal = price * qty;
@@ -1737,6 +1749,9 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
         double itemNetTotal = itemTotal - itemDiscount;
         subtotal += itemNetTotal;
 
+        debugPrint("Item Total: $itemTotal, Discount: $itemDiscount, Net Total: $itemNetTotal");
+        debugPrint("Subtotal so far: $subtotal");
+
         return {
           "product_id": product["product_id"].toString(),
           "qty": qty,
@@ -1746,6 +1761,9 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
         };
       })
           .toList();
+
+      debugPrint("✅ Products processed. Transfer products count: ${transferProducts.length}");
+      debugPrint("✅ Final subtotal: $subtotal");
 
       // Calculate charges based on subtotal
       double overallDiscount =
@@ -1774,34 +1792,48 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
 
       double vat = double.tryParse(vatController.text) ?? 0.0;
 
+      debugPrint("Charges:");
+      debugPrint("  Overall Discount: $overallDiscount ($selectedOverallDiscountType)");
+      debugPrint("  Service Charge: $serviceCharge ($selectedOverallServiceChargeType)");
+      debugPrint("  Delivery Charge: $deliveryCharge ($selectedOverallDeliveryType)");
+      debugPrint("  VAT: $vat ($selectedVatType)");
+
       // Apply overall discount
       if (selectedOverallDiscountType == 'percentage' && overallDiscount > 0) {
-        double _ = subtotal * (overallDiscount / 100);
+        double discountAmount = subtotal * (overallDiscount / 100);
+        debugPrint("  Overall Discount Amount: $discountAmount");
       } else if (selectedOverallDiscountType == 'fixed' &&
           overallDiscount > 0) {
+        debugPrint("  Overall Discount Amount (fixed): $overallDiscount");
       }
 
       // Apply charges
-
       // Service charge
       if (selectedOverallServiceChargeType == 'percentage' &&
           serviceCharge > 0) {
+        double serviceAmount = subtotal * (serviceCharge / 100);
+        debugPrint("  Service Charge Amount: $serviceAmount");
       } else if (selectedOverallServiceChargeType == 'fixed' &&
           serviceCharge > 0) {
+        debugPrint("  Service Charge Amount (fixed): $serviceCharge");
       }
 
       // Delivery charge
       if (selectedOverallDeliveryType == 'percentage' && deliveryCharge > 0) {
-      } else if (selectedOverallDeliveryType == 'fixed' && deliveryCharge > 0) {
+        double deliveryAmount = subtotal * (deliveryCharge / 100);
+        debugPrint("  Delivery Charge Amount: $deliveryAmount");
+      } else if (selectedOverallDeliveryType == 'fixed' &&
+          deliveryCharge > 0) {
+        debugPrint("  Delivery Charge Amount (fixed): $deliveryCharge");
       }
 
       // VAT
       if (selectedVatType == 'percentage' && vat > 0) {
+        double vatAmount = subtotal * (vat / 100);
+        debugPrint("  VAT Amount: $vatAmount");
       } else if (selectedVatType == 'fixed' && vat > 0) {
+        debugPrint("  VAT Amount (fixed): $vat");
       }
-
-
-
 
       Map<String, dynamic> body = {
         "instant_pay": _isChecked,
@@ -1833,8 +1865,11 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
         // "remark": context.read<CreatePurchaseBloc>().remarkController.text.trim(),
       };
 
+      debugPrint("✅ Body created with ${body.length} fields");
+
       // Add payment information if payment method is selected
       if (context.read<CreatePurchaseBloc>().selectedPaymentMethod.isNotEmpty) {
+        debugPrint("✅ Payment method selected: ${context.read<CreatePurchaseBloc>().selectedPaymentMethod}");
         body["payment_method"] = context
             .read<CreatePurchaseBloc>()
             .selectedPaymentMethod;
@@ -1842,12 +1877,24 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
             .read<CreatePurchaseBloc>()
             .selectedAccountId;
         body["paid_amount"] = paidAmount;
+        debugPrint("✅ Paid amount: $paidAmount");
+      } else {
+        debugPrint("⚠️ No payment method selected");
       }
 
       // Log the request body for debugging
+      debugPrint("📦 FINAL REQUEST BODY:");
+      debugPrint(body.toString());
+
+      debugPrint("🚀 Sending AddPurchase event...");
 
       // Send the request
       context.read<CreatePurchaseBloc>().add(AddPurchase(body: body));
+
+      debugPrint("✅ AddPurchase event dispatched");
+    } else {
+      debugPrint("❌ Form validation failed!");
     }
-  }
-}
+
+    debugPrint("========== SUBMIT FORM COMPLETE ==========");
+  }}
