@@ -784,10 +784,15 @@ Map<String, dynamic> _analyzeBalances(List<CustomerDueAdvance> customers) {
   String riskLevel;
   if (totalDue > 10000) {
     riskLevel = 'High';
-  } else if (totalDue > 5000) riskLevel = 'Medium';
-  else if (totalDue > 1000) riskLevel = 'Low';
-  else riskLevel = 'Minimal';
-
+  } else if (totalDue > 5000) {
+    riskLevel = 'Medium';
+  }
+  else if (totalDue > 1000) {
+    riskLevel = 'Low';
+  }
+  else {
+    riskLevel = 'Minimal';
+  }
   return {
     'categories': categories,
     'highDueCustomers': highDueCustomers,

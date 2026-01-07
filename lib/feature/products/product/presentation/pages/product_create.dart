@@ -689,7 +689,7 @@ class _ProductsFormState extends State<ProductsForm> {
               return Switch(
                 padding: EdgeInsets.zero,
                 value: productsBloc.isDiscountApplied,
-                activeColor: Colors.orange,
+                activeThumbColor: Colors.orange,
                 onChanged: (value) {
                   setState(() {
                     productsBloc.isDiscountApplied = value;

@@ -51,6 +51,10 @@ final class AccountActiveListFailed extends AccountState {
   final String title, content;
 
   AccountActiveListFailed({required this.title, required this.content});
+  @override
+  String toString() {
+    return 'AccountActiveListFailed(title: $title, content: $content)';
+  }
 }
 
 

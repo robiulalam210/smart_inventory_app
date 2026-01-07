@@ -90,7 +90,7 @@ class StatsCardMonthly extends StatelessWidget {
                   width: 120,
                   height: 120,
                   decoration: BoxDecoration(
-                    color: color.withAlpha(25),
+                    color: color.withAlpha(12),
                     shape: BoxShape.circle,
                   ),
                 ),

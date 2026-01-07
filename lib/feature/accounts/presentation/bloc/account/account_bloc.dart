@@ -54,9 +54,44 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
       ApiResponse response = appParseJson(
         res,
             (data) {
-          return List<AccountActiveModel>.from(data.map((x) => AccountActiveModel.fromJson(x)));
+          // Case 1: data is a List of objects
+          if (data is List) {
+            if (data.isEmpty) return <AccountActiveModel>[];
+
+            // Check if first element is a Map
+            if (data.first is Map<String, dynamic>) {
+              return data.map((e) => AccountActiveModel.fromJson(e as Map<String, dynamic>)).toList();
+            }
+
+            // If first element is a List (nested list), flatten
+            if (data.first is List) {
+              return data
+                  .expand((e) => e as List)
+                  .map((e) => AccountActiveModel.fromJson(e as Map<String, dynamic>))
+                  .toList();
+            }
+          }
+
+          // Case 2: data is a Map
+          if (data is Map<String, dynamic>) {
+            // If values contain lists, flatten
+            final lists = data.values.whereType<List>();
+            if (lists.isNotEmpty) {
+              return lists
+                  .expand((e) => e)
+                  .map((e) => AccountActiveModel.fromJson(e as Map<String, dynamic>))
+                  .toList();
+            }
+
+            // If data itself is a single object
+            return [AccountActiveModel.fromJson(data)];
+          }
+
+          // Default empty
+          return <AccountActiveModel>[];
         },
       );
+
 
 
       if (response.success == true) {
@@ -69,7 +104,9 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
           content: response.message ?? "Unknown Error",
         ));
       }
-    } catch (error) {
+    } catch (error,st) {
+      print(error);
+      print(st);
       emit(AccountActiveListFailed(title: "Error", content: error.toString()));
     }
 

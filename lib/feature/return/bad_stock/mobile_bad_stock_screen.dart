@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -87,7 +86,7 @@ class _BadStockScreenState extends State<MobileBadStockScreen> {
     final width = MediaQuery.of(context).size.width;
     final isMobile = width < 600; // adjust breakpoint if needed
 
-    void _refreshWithCurrentFilters() {
+    void refreshWithCurrentFilters() {
       _fetchBadStockList(
         filterText: filterTextController.text,
         from: selectedDateRange?.start ?? startDate,
@@ -136,14 +135,14 @@ class _BadStockScreenState extends State<MobileBadStockScreen> {
                         to: value.end,
                       );
                     } else {
-                      _refreshWithCurrentFilters();
+                      refreshWithCurrentFilters();
                     }
                   },
                 ),
               ),
               const SizedBox(width: 8),
               IconButton(
-                onPressed: _refreshWithCurrentFilters,
+                onPressed: refreshWithCurrentFilters,
                 icon: const Icon(Icons.refresh),
                 tooltip: "Refresh",
               ),
@@ -195,7 +194,7 @@ class _BadStockScreenState extends State<MobileBadStockScreen> {
                   to: value.end,
                 );
               } else {
-                _refreshWithCurrentFilters();
+                refreshWithCurrentFilters();
               }
             },
           ),
@@ -203,7 +202,7 @@ class _BadStockScreenState extends State<MobileBadStockScreen> {
         const SizedBox(width: 12),
 
         IconButton(
-          onPressed: _refreshWithCurrentFilters,
+          onPressed: refreshWithCurrentFilters,
           icon: const Icon(Icons.refresh),
           tooltip: "Refresh",
         ),
@@ -457,7 +456,7 @@ class BadStockTableCard extends StatelessWidget {
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       itemCount: badStocks.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 8),
+      separatorBuilder: (_, _) => const SizedBox(height: 8),
       itemBuilder: (context, index) {
         final badStock = badStocks[index];
         return Card(

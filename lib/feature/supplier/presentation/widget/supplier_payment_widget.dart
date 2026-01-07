@@ -86,7 +86,7 @@ class SupplierPaymentWidget extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color: _getStatusColors(getStatus(payment.paymentSummary)).$1.withOpacity(0.05),
+              color: _getStatusColors(getStatus(payment.paymentSummary)).$1.withValues(alpha:0.05),
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(16),
                 topRight: Radius.circular(16),
@@ -445,9 +445,9 @@ class SupplierPaymentWidget extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.05),
+        color: color.withValues(alpha:0.05),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.2)),
+        border: Border.all(color: color.withValues(alpha:0.2)),
       ),
       child: Row(
         children: [
@@ -516,16 +516,16 @@ class SupplierPaymentWidget extends StatelessWidget {
       case 'completed':
       case 'paid':
       case 'success':
-        return (Colors.green.withOpacity(0.2), Colors.green);
+        return (Colors.green.withValues(alpha:0.2), Colors.green);
       case 'pending':
       case 'processing':
-        return (Colors.orange.withOpacity(0.2), Colors.orange);
+        return (Colors.orange.withValues(alpha:0.2), Colors.orange);
       case 'failed':
       case 'cancelled':
       case 'rejected':
-        return (Colors.red.withOpacity(0.2), Colors.red);
+        return (Colors.red.withValues(alpha:0.2), Colors.red);
       default:
-        return (Colors.grey.withOpacity(0.2), Colors.grey);
+        return (Colors.grey.withValues(alpha:0.2), Colors.grey);
     }
   }
 
@@ -551,7 +551,7 @@ class SupplierPaymentWidget extends StatelessWidget {
             color: Colors.white,
             boxShadow: [
               BoxShadow(
-                color: Colors.grey.withOpacity(0.1),
+                color: Colors.grey.withValues(alpha:0.1),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -820,7 +820,7 @@ class SupplierPaymentWidget extends StatelessWidget {
             decoration: BoxDecoration(
               color: color,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: color.withOpacity(0.3)),
+              border: Border.all(color: color.withValues(alpha:0.3)),
             ),
             constraints: const BoxConstraints(minWidth: 70),
             child: Text(

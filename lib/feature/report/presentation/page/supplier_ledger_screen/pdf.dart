@@ -766,8 +766,12 @@ Map<String, dynamic> _analyzePeriod(List<SupplierLedger> transactions, Map<Strin
   String activityLevel;
   if (transactionsPerDay > 2) {
     activityLevel = 'High';
-  } else if (transactionsPerDay > 0.5) activityLevel = 'Medium';
-  else activityLevel = 'Low';
+  } else if (transactionsPerDay > 0.5) {
+    activityLevel = 'Medium';
+  }
+  else {
+    activityLevel = 'Low';
+  }
 
   return {
     'transactionsPerDay': transactionsPerDay,
@@ -788,9 +792,15 @@ Map<String, dynamic> _analyzePaymentTrends(List<SupplierLedger> transactions) {
       : 0;
 
   String paymentFrequency;
-  if (payments.length >= 10) paymentFrequency = 'Frequent';
-  else if (payments.length >= 5) paymentFrequency = 'Regular';
-  else paymentFrequency = 'Occasional';
+  if (payments.length >= 10) {
+    paymentFrequency = 'Frequent';
+  }
+  else if (payments.length >= 5) {
+    paymentFrequency = 'Regular';
+  }
+  else {
+    paymentFrequency = 'Occasional';
+  }
 
   return {
     'averagePurchase': averagePurchase,
