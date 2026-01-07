@@ -16,6 +16,7 @@ import '../../expense_sub_head/presentation/bloc/expense_sub_head/expense_sub_he
 import '../bloc/expense_list/expense_bloc.dart';
 import '../widget/widget.dart';
 import 'expense_create.dart';
+import 'mobile_expense_create.dart';
 
 class MobileExpenseListScreen extends StatefulWidget {
   const MobileExpenseListScreen({super.key});
@@ -368,7 +369,7 @@ class _ExpenseListScreenState extends State<MobileExpenseListScreen> {
               maxHeight: AppSizes.height(context) * 0.8,
               minHeight: AppSizes.height(context) * 0.6,
             ),
-            child: const ExpenseCreateScreen(),
+            child: const MobileExpenseCreate(),
           ),
         );
       },

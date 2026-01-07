@@ -1,14 +1,13 @@
 import 'package:flutter/cupertino.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:meherinMart/core/widgets/app_scaffold.dart';
 import 'package:meherinMart/feature/feature.dart';
-import 'package:meherinMart/feature/splash/presentation/bloc/connectivity_bloc/connectivity_state.dart';
 
 import '../core/configs/configs.dart';
 import '../core/shared/widgets/sideMenu/mobile_tab_sidebar.dart';
 import 'lab_dashboard/presentation/widgets/stats_card_monthly.dart';
 
-final GlobalKey<ScaffoldState> _drawerKey = GlobalKey();
 
 class MobileRootScreen extends StatefulWidget {
   const MobileRootScreen({super.key});
@@ -22,6 +21,7 @@ class _RootScreenState extends State<MobileRootScreen> {
   String selectedPurchaseOverviewType = 'current_day';
 
   late ScrollController scrollController;
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
@@ -373,191 +373,147 @@ class _RootScreenState extends State<MobileRootScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        key: _drawerKey,
+    return AppScaffold(
+      scaffoldKey: _scaffoldKey,
 
-        // Mobile/tablet drawer
-        drawer: const Drawer(child: MobileTabSidebar()),
+      // Mobile/tablet drawer
+      drawer: const Drawer(child: MobileTabSidebar()),
 
-        // AppBar only for smaller screens
-        appBar: _buildAppBar(context),
-
-        body: PopScope(
-          canPop: false,
-          onPopInvoked: (didPop) {
-            // Prevent default back behavior / handle back if necessary.
-            if (didPop) return;
+      // AppBar only for smaller screens
+      appBar: AppBar(
+        backgroundColor: AppColors.bgSecondaryLight,
+        leading: IconButton(
+          icon: const Icon(Icons.menu),
+          onPressed: () {
+            // Try opening drawer using the scaffold key
+            if (_scaffoldKey.currentState != null) {
+              _scaffoldKey.currentState!.openDrawer();
+            } else {
+              // Fallback: try using context
+              Scaffold.of(context).openDrawer();
+            }
           },
-          child: BlocBuilder<DashboardBloc, DashboardState>(
-            builder: (context, state) {
+        ),
+        title: Row(
+          children: [
+            // App title
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: Responsive.isMobile(context) ? 8.0 : 16.0,
+                ),
+                child: Text(
+                  AppConstants.appName,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.primaryColor,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ),
+
+            gapW8,
 
 
-              return RefreshIndicator(
-                onRefresh: () async {
-                  context.read<DashboardBloc>().add(FetchDashboardData(context: context));
+          ],
+        ),
+      ),
 
-                },
-                child: ListView(
-                  padding: EdgeInsets.zero,
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: AppSizes.bodyPadding * (Responsive.isMobile(context) ? 0.5 : 1.5),
-                      ),
-                      child: BlocConsumer<DashboardBloc, DashboardState>(
-                        listener: (context, state) {
-                          if (state is DashboardError) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(state.message)),
-                            );
-                          }
-                        },
-                        builder: (context, state) {
-                          return Container(
-                            color: AppColors.bg,
-                            child: SafeArea(
-                              child: SizedBox(
-                                height: AppSizes.height(context) * 0.95,
-                                child: ResponsiveRow(
-                                  spacing: 0,
-                                  runSpacing: 0,
+      body: PopScope(
+        canPop: false,
+        onPopInvoked: (didPop) {
+          // Prevent default back behavior / handle back if necessary.
+          if (didPop) return;
+        },
+        child: BlocBuilder<DashboardBloc, DashboardState>(
+          builder: (context, state) {
+
+
+            return RefreshIndicator(
+              onRefresh: () async {
+                context.read<DashboardBloc>().add(FetchDashboardData(context: context));
+
+              },
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: AppSizes.bodyPadding * (Responsive.isMobile(context) ? 0.5 : 1.5),
+                ),
+                child: BlocConsumer<DashboardBloc, DashboardState>(
+                  listener: (context, state) {
+                    if (state is DashboardError) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(state.message)),
+                      );
+                    }
+                  },
+                  builder: (context, state) {
+                    return SafeArea(
+                      child: SingleChildScrollView(
+                        controller: scrollController,
+                        padding: EdgeInsets.all(Responsive.isMobile(context) ? 8.0 : 12.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // ==== HEADER AND FILTER ====
+                            const Text(
+                              "Dashboard",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            _buildFilterSegmentedControl(),
+
+                            // ==== LOADING STATE ====
+                            if (state is DashboardLoading)
+                              const Center(
+                                child: CircularProgressIndicator(),
+                              ),
+
+                            // ==== DASHBOARD CARDS ====
+                            if (state is DashboardLoaded) ...[
+                              _buildDashboardCards(state.dashboardData),
+                              const SizedBox(height: 12),
+
+                              // ==== SALES & PURCHASE OVERVIEW ====
+                              _buildSalesPurchaseOverview(state.dashboardData),
+
+                            ],
+
+                            // ==== ERROR STATE ====
+                            if (state is DashboardError)
+                              Center(
+                                child: Column(
                                   children: [
-                                    ResponsiveCol(
-                                      xs: 12,
-                                      sm: 12,
-                                      md: 12,
-                                      lg: 12,
-                                      xl: 12,
-                                      child: SizedBox(
-                                        height: AppSizes.height(context) * 0.90,
-                                        child: Scrollbar(
-                                          controller: scrollController,
-                                          thickness: 8,
-                                          thumbVisibility: true,
-                                          child: SingleChildScrollView(
-                                            controller: scrollController,
-                                            padding: EdgeInsets.all(Responsive.isMobile(context) ? 8.0 : 12.0),
-                                            child: Column(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              children: [
-                                                // ==== HEADER AND FILTER ====
-                                               Column(
-                                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                                  children: [
-                                                    const Text(
-                                                      "Dashboard",
-                                                      style: TextStyle(
-                                                        fontSize: 16,
-                                                        fontWeight: FontWeight.bold,
-                                                      ),
-                                                    ),
-                                                    const SizedBox(height: 12),
-                                                    _buildFilterSegmentedControl(),
-                                                  ],
-                                                )
-                                                   ,
-                                                const SizedBox(height: 16),
-
-                                                // ==== LOADING STATE ====
-                                                if (state is DashboardLoading)
-                                                  const Center(
-                                                    child: CircularProgressIndicator(),
-                                                  ),
-
-                                                // ==== DASHBOARD CARDS ====
-                                                if (state is DashboardLoaded) ...[
-                                                  _buildDashboardCards(state.dashboardData),
-                                                  const SizedBox(height: 12),
-
-                                                  // ==== SALES & PURCHASE OVERVIEW ====
-                                                  _buildSalesPurchaseOverview(state.dashboardData),
-                                                  const SizedBox(height: 100),
-
-                                                  // ==== RECENT ACTIVITIES ====
-                                                ],
-
-                                                // ==== ERROR STATE ====
-                                                if (state is DashboardError)
-                                                  Center(
-                                                    child: Column(
-                                                      children: [
-                                                        Text('Error: ${state.message}'),
-                                                        ElevatedButton(
-                                                          onPressed: () {
-                                                            context.read<DashboardBloc>().add(
-                                                              FetchDashboardData(context: context),
-                                                            );
-                                                          },
-                                                          child: const Text('Retry'),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      ),
+                                    Text('Error: ${state.message}'),
+                                    ElevatedButton(
+                                      onPressed: () {
+                                        context.read<DashboardBloc>().add(
+                                          FetchDashboardData(context: context),
+                                        );
+                                      },
+                                      child: const Text('Retry'),
                                     ),
                                   ],
                                 ),
                               ),
-                            ),
-                          );
-                        },
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                    );
+                  },
                 ),
-              );
-            },
-          ),
+              ),
+            );
+          },
         ),
-
       ),
+
     );
   }
 
-  AppBar _buildAppBar(BuildContext context) {
-    return AppBar(
-      backgroundColor: AppColors.bgSecondaryLight,
-      leading: IconButton(
-        icon: const Icon(Icons.menu),
-        onPressed: () => _drawerKey.currentState?.openDrawer(),
-      ),
-      title: Row(
-        children: [
-          // App title
-          Expanded(
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: Responsive.isMobile(context) ? 8.0 : 16.0,
-              ),
-              child: Text(
-                AppConstants.appName,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.primaryColor,
-                ),
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ),
-
-          gapW8,
-
-
-        ],
-      ),
-    );
-  }
 }
 
-Color getConnectivityColor(ConnectivityState state) {
-  if (state is ConnectivityOnline) return Colors.green;
-  if (state is ConnectivityOffline) return Colors.red;
-  if (state is ConnectivityConnecting) return Colors.orange;
-  return Colors.grey;
-}
 

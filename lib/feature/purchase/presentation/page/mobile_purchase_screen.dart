@@ -160,15 +160,17 @@ class _PurchaseScreenState extends State<MobilePurchaseScreen> {
                     },
                   ),
                 ],
-                child: Column(
-                  children: [
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
 
-                      _buildMobileHeader(),
-                    const SizedBox(height: 16),
-                    SizedBox(
-                      child: _buildPurchaseList(),
-                    ),
-                  ],
+                        _buildMobileHeader(),
+                      const SizedBox(height: 16),
+                      SizedBox(
+                        child: _buildPurchaseList(),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -205,7 +207,7 @@ class _PurchaseScreenState extends State<MobilePurchaseScreen> {
             children: [
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  padding: const EdgeInsets.symmetric(horizontal: 6),
                   child: CustomSearchTextFormField(
                     controller: filterTextController,
                     onChanged: (value) => _fetchApi(filterText: value),
@@ -213,7 +215,7 @@ class _PurchaseScreenState extends State<MobilePurchaseScreen> {
                       filterTextController.clear();
                       _fetchApi();
                     },
-                    hintText: "Search purchases...",
+                    hintText: "purchases...",
                   ),
                 ),
               ),
@@ -228,6 +230,10 @@ class _PurchaseScreenState extends State<MobilePurchaseScreen> {
                 onPressed: () => _fetchApi(),
                 icon: const Icon(Icons.refresh),
                 tooltip: "Refresh",
+              ),  IconButton(
+                onPressed: () => _clearFilters,
+                icon:  Icon(HugeIcons.strokeRoundedCancelSquare),
+                tooltip: "Clear",
               ),
             ],
           ),
@@ -267,34 +273,7 @@ class _PurchaseScreenState extends State<MobilePurchaseScreen> {
               ),
           ],
         ),
-        const SizedBox(height: 12),
 
-        // Action Buttons
-        Row(
-          children: [
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: () => _showMobileFilterSheet(context),
-                icon: const Icon(Iconsax.filter, size: 16),
-                label: const Text('More Filters'),
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: _clearFilters,
-                icon: const Icon(Icons.clear_all, size: 16),
-                label: const Text('Clear All'),
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                ),
-              ),
-            ),
-          ],
-        ),
       ],
     );
   }

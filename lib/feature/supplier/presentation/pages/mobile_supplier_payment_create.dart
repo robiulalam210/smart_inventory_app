@@ -39,12 +39,9 @@ class _MobileSupplierPaymentCreateState extends State<MobileSupplierPaymentCreat
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: SingleChildScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: _buildForm(),
-        ),
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: _buildForm(),
       ),
     );
   }
@@ -74,16 +71,23 @@ class _MobileSupplierPaymentCreateState extends State<MobileSupplierPaymentCreat
       },
       child: Form(
         key: formKey,
-        child: Column(
-          children: [
-            _buildHeader(),
-            const SizedBox(height: 6),
-            _buildSupplierInfoSection(),
-            const SizedBox(height: 6),
-            _buildPaymentInfoSection(),
-            const SizedBox(height: 8),
-            _buildActionButtons(),
-          ],
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              _buildHeader(),
+              const SizedBox(height: 6),
+              Column(
+                children: [
+
+                  _buildSupplierInfoSection(),
+                  const SizedBox(height: 6),
+                  _buildPaymentInfoSection(),
+                  const SizedBox(height: 15),
+                  _buildActionButtons(),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -124,7 +128,6 @@ class _MobileSupplierPaymentCreateState extends State<MobileSupplierPaymentCreat
             secondChild: _buildCollectedByDropdown(),
           ),
 
-          const SizedBox(height: 8),
 
           // Payment To & Conditional Invoice
           _buildTwoColumnRow(
@@ -132,7 +135,6 @@ class _MobileSupplierPaymentCreateState extends State<MobileSupplierPaymentCreat
             secondChild: _buildInvoiceDropdownIfNeeded(),
           ),
 
-          const SizedBox(height: 8),
 
           // Date field
           CustomInputField(
@@ -169,7 +171,6 @@ class _MobileSupplierPaymentCreateState extends State<MobileSupplierPaymentCreat
             secondChild: _buildAccountDropdown(),
           ),
 
-          const SizedBox(height: 6),
 
           // Amount & Remark
           _buildTwoColumnRow(
@@ -194,41 +195,37 @@ class _MobileSupplierPaymentCreateState extends State<MobileSupplierPaymentCreat
   }
 
   Widget _buildActionButtons() {
-    return _buildTwoColumnRow(
-      firstChild: AppButton(
-        name: "Cancel",
-        color: Colors.grey,
-        onPressed: () => Navigator.of(context).pop(),
-      ),
-      secondChild: AppButton(
-        name: "Create Payment",
-        onPressed: _submitPayment,
-      ),
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        AppButton(
+          size: 100,
+          name: "Cancel",
+          color: Colors.grey,
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        gapW16,
+        AppButton(
+          size: 180,
+          name: "Create Payment",
+          onPressed: _submitPayment,
+        ),
+      ],
+      
     );
   }
 
   Widget _buildTwoColumnRow({required Widget firstChild, required Widget secondChild}) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final isSmallScreen = constraints.maxWidth < 500;
 
-        if (isSmallScreen) {
-          return Column(
-            children: [
-              firstChild,
-              const SizedBox(height: 6),
-              secondChild,
-            ],
-          );
-        } else {
-          return Row(
-            children: [
-              Expanded(child: firstChild),
-              const SizedBox(width: 6),
-              Expanded(child: secondChild),
-            ],
-          );
-        }
+        return Column(
+          children: [
+            firstChild,
+            secondChild,
+          ],
+        );
       },
     );
   }
