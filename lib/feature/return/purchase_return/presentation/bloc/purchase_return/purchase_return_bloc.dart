@@ -516,7 +516,7 @@ class PurchaseReturnBloc extends Bloc<PurchaseReturnEvent, PurchaseReturnState> 
         final purchaseReturnData = PurchaseReturnModel.fromJson(res['data']);
 
         // Update local list
-        final index = list.indexWhere((item) => item.id == event.id);
+        final index = list.indexWhere((item) => item.id.toString() == event.id);
         if (index != -1) {
           list[index] = purchaseReturnData;
         }
@@ -554,7 +554,7 @@ class PurchaseReturnBloc extends Bloc<PurchaseReturnEvent, PurchaseReturnState> 
         final purchaseReturnData = PurchaseReturnModel.fromJson(res['data']);
 
         // Update local list
-        final index = list.indexWhere((item) => item.id == event.id);
+        final index = list.indexWhere((item) => item.id.toString() == event.id);
         if (index != -1) {
           list[index] = purchaseReturnData;
         }
@@ -592,7 +592,7 @@ class PurchaseReturnBloc extends Bloc<PurchaseReturnEvent, PurchaseReturnState> 
         final purchaseReturnData = PurchaseReturnModel.fromJson(res['data']);
 
         // Update local list
-        final index = list.indexWhere((item) => item.id == event.id);
+        final index = list.indexWhere((item) => item.id.toString() == event.id);
         if (index != -1) {
           list[index] = purchaseReturnData;
         }
@@ -656,7 +656,7 @@ class PurchaseReturnBloc extends Bloc<PurchaseReturnEvent, PurchaseReturnState> 
 
       if (res['status'] == true) {
         // Remove from local list
-        list.removeWhere((item) => item.id == event.id);
+        list.removeWhere((item) => item.id.toString() == event.id);
 
         emit(PurchaseReturnDeleteSuccess(
             message: res['message'] ?? "Purchase return deleted successfully"

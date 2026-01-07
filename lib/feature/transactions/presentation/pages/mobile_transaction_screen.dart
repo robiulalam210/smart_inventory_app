@@ -1,10 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
-import 'package:lottie/lottie.dart';
 import '../../../../core/configs/configs.dart';
-import '../../../../core/shared/widgets/sideMenu/sidebar.dart';
 import '../../../../core/widgets/app_button.dart';
-import '../../../../core/widgets/app_dropdown.dart';
 import '../../../../core/widgets/coustom_search_text_field.dart';
 import '../../../../core/widgets/date_range.dart';
 import '../../../products/product/presentation/widget/pagination.dart';
@@ -90,16 +86,6 @@ class _TransactionScreenState extends State<MobileTransactionScreen> {
     );
   }
 
-  void _clearFilters() {
-    filterTextController.clear();
-    selectedTransactionTypeNotifier.value = null;
-    selectedStatusNotifier.value = null;
-    selectedAccountNotifier.value = null;
-    setState(() {
-      selectedDateRange = null;
-    });
-    _fetchTransactions();
-  }
 
   void _clearDateRange() {
     setState(() {

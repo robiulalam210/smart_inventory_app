@@ -1,7 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:lottie/lottie.dart';
 
 import '../../../../../core/widgets/delete_dialog.dart';
 import '../../data/model/purchase_return_model.dart';
@@ -593,7 +591,7 @@ class PurchaseReturnTableCard extends StatelessWidget {
 
         return Container(
           decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), color: Colors.white, boxShadow: [
-            BoxShadow(color: Colors.grey.withOpacity(0.1), blurRadius: 8, offset: const Offset(0, 2))
+            BoxShadow(color: Colors.grey.withValues(alpha: 0.1), blurRadius: 8, offset: const Offset(0, 2))
           ]),
           child: Scrollbar(
             controller: verticalScrollController,
@@ -621,7 +619,7 @@ class PurchaseReturnTableCard extends StatelessWidget {
                           dividerThickness: 0.5,
                           headingRowHeight: 40,
                           headingTextStyle: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w700, fontFamily: GoogleFonts.inter().fontFamily),
-                          headingRowColor: MaterialStateProperty.all(AppColors.primaryColor),
+                          headingRowColor: WidgetStateProperty.all(AppColors.primaryColor),
                           dataTextStyle: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, fontFamily: GoogleFonts.inter().fontFamily),
                           columns: _buildColumns(dynamicColumnWidth),
                           rows: purchaseReturns.asMap().entries.map((entry) {
@@ -658,7 +656,7 @@ class PurchaseReturnTableCard extends StatelessWidget {
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       itemCount: purchaseReturns.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 8),
+      separatorBuilder: (_, _) => const SizedBox(height: 8),
       itemBuilder: (context, index) {
         final pr = purchaseReturns[index];
         final statusColor = _getStatusColor(pr.status ?? '');
@@ -674,7 +672,7 @@ class PurchaseReturnTableCard extends StatelessWidget {
                   children: [
                     CircleAvatar(
                       radius: 18,
-                      backgroundColor: AppColors.primaryColor.withOpacity(0.1),
+                      backgroundColor: AppColors.primaryColor.withValues(alpha: 0.1),
                       child: Text('${index + 1}', style: TextStyle(color: AppColors.primaryColor, fontWeight: FontWeight.w700)),
                     ),
                     const SizedBox(width: 12),
@@ -691,7 +689,7 @@ class PurchaseReturnTableCard extends StatelessWidget {
                       const SizedBox(height: 6),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(color: statusColor.withOpacity(0.12), borderRadius: BorderRadius.circular(16)),
+                        decoration: BoxDecoration(color: statusColor.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(16)),
                         child: Text((pr.status ?? 'N/A').toUpperCase(), style: TextStyle(color: statusColor, fontSize: 11, fontWeight: FontWeight.w700)),
                       ),
                     ]),
@@ -762,7 +760,7 @@ class PurchaseReturnTableCard extends StatelessWidget {
   DataCell _buildStatusCell(String? status, double width) {
     final statusText = status ?? 'Pending';
     final statusColor = _getStatusColor(statusText);
-    return DataCell(SizedBox(width: width, child: Center(child: Container(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), decoration: BoxDecoration(color: statusColor.withOpacity(0.1), borderRadius: BorderRadius.circular(4)), child: Text(statusText.toUpperCase(), style: TextStyle(color: statusColor, fontWeight: FontWeight.w600, fontSize: 10))))));
+    return DataCell(SizedBox(width: width, child: Center(child: Container(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), decoration: BoxDecoration(color: statusColor.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(4)), child: Text(statusText.toUpperCase(), style: TextStyle(color: statusColor, fontWeight: FontWeight.w600, fontSize: 10))))));
   }
 
   DataCell _buildActionCell(PurchaseReturnModel purchaseReturn, BuildContext context, double width) {
@@ -880,7 +878,7 @@ class PurchaseReturnTableCard extends StatelessWidget {
                     ...pr.items!.map((item) => Container(
                       margin: const EdgeInsets.only(bottom: 8),
                       padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(color: Colors.grey.withOpacity(0.05), borderRadius: BorderRadius.circular(4)),
+                      decoration: BoxDecoration(color: Colors.grey.withValues(alpha: 0.05), borderRadius: BorderRadius.circular(4)),
                       child: Row(
                         children: [
                           Expanded(child: Text(item.productName ?? 'Unknown Product', style: const TextStyle(fontWeight: FontWeight.w500))),
@@ -940,7 +938,7 @@ class PurchaseReturnTableCard extends StatelessWidget {
 
   Widget _buildEmptyState() {
     return Container(
-      decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), color: Colors.white, boxShadow: [BoxShadow(color: Colors.grey.withOpacity(0.1), blurRadius: 8, offset: const Offset(0, 2))]),
+      decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), color: Colors.white, boxShadow: [BoxShadow(color: Colors.grey.withValues(alpha: 0.1), blurRadius: 8, offset: const Offset(0, 2))]),
       padding: const EdgeInsets.all(40),
       child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
         Lottie.asset(AppImages.noData, width: 200, height: 200),

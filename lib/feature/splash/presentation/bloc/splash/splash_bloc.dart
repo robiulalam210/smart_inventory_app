@@ -1,39 +1,73 @@
-import 'package:bloc/bloc.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-
-import '../../../../../core/database/login.dart';
-import '../../../../feature.dart';
-
+import 'dart:io';
+import '../../../../../core/configs/configs.dart';
+import '../../../../../core/theme/version_utils.dart';
+import '../../../data/datasource/version_remote_data_source.dart';
 
 part 'splash_event.dart';
 part 'splash_state.dart';
 
-// BLoC
 class SplashBloc extends Bloc<SplashEvent, SplashState> {
-  final AuthBloc authBloc;
-
-  SplashBloc({required this.authBloc}) : super(SplashInitial()) {
-    on<GetLoginData>(_onGetLoginData);
-    on<ToggleVisibilityEvent>(_onToggleVisibility);
+  SplashBloc() : super(SplashInitial()) {
+    on<CheckAppVersionEvent>(_onCheckAppVersion);
+    on<CheckLoginStatusEvent>(_onCheckLoginStatus);
   }
 
-  Future<void> _onGetLoginData(GetLoginData event, Emitter<SplashState> emit) async {
+  /// STEP 1: Version / Maintenance Check (mobile)
+  Future<void> _onCheckAppVersion(
+      CheckAppVersionEvent event,
+      Emitter<SplashState> emit,
+      ) async {
     emit(SplashLoading());
+
+    final result = await VersionRemoteDataSource.getVersion(event.context);
+
+    result.fold(
+          (failure) {
+        emit(VersionFailure(failure.message));
+      },
+          (versionResponse) {
+        final platformVersion = getPlatformVersion(versionResponse);
+
+        final url = Platform.isIOS
+            ? versionResponse.data?.appStoreLink?.trim()
+            : versionResponse.data?.playStoreLink?.trim();
+
+        if (getIsPause(versionResponse) == true) {
+          emit(AppPausedState());
+          return;
+        }
+
+        if (AppUrls.currentVersion != platformVersion) {
+          if (getForceUpdate(versionResponse) == true) {
+            emit(AppForceUpdateState(url: url ?? '', message: versionResponse.data?.updateMessage));
+          } else {
+            emit(UpdateAvailableState(url: url ?? '', message: versionResponse.data?.updateMessage));
+          }
+          return;
+        }
+
+        // App is up-to-date -> proceed to login check
+        add(CheckLoginStatusEvent());
+      },
+    );
+  }
+
+  /// STEP 2: Login Check (both mobile & desktop flows eventually land here)
+  Future<void> _onCheckLoginStatus(
+      CheckLoginStatusEvent event,
+      Emitter<SplashState> emit,
+      ) async {
+    emit(SplashLoading());
+
+    // small delay so splash animation is visible
+    await Future.delayed(const Duration(milliseconds: 800));
+
     final token = await LocalDB.getLoginInfo();
 
-    await Future.delayed(Duration(seconds: 1));
-
-
     if (token?['token'] == null) {
-      // No token, navigate to Login
       emit(SplashNavigateToLogin());
     } else {
-      // Token exists, navigate to Home
       emit(SplashNavigateToHome());
     }
-  }
-
-  void _onToggleVisibility(ToggleVisibilityEvent event, Emitter<SplashState> emit) {
-    emit(VisibilityChanged(false));
   }
 }

@@ -160,7 +160,7 @@ class CategoriesListMobile extends StatelessWidget {
                       label: const Text('Edit'),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: Colors.blue,
-                        side: BorderSide(color: Colors.blue.withOpacity(0.3)),
+                        side: BorderSide(color: Colors.blue.withValues(alpha: 0.3)),
                         padding: const EdgeInsets.symmetric(vertical: 8),
                       ),
                     ),
@@ -173,7 +173,7 @@ class CategoriesListMobile extends StatelessWidget {
                       label: const Text('Delete'),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: Colors.red,
-                        side: BorderSide(color: Colors.red.withOpacity(0.3)),
+                        side: BorderSide(color: Colors.red.withValues(alpha: 0.3)),
                         padding: const EdgeInsets.symmetric(vertical: 8),
                       ),
                     ),
@@ -210,29 +210,6 @@ class CategoriesListMobile extends StatelessWidget {
     );
   }
 
-  Widget _buildActionButton({
-    required IconData icon,
-    required Color color,
-    required VoidCallback onPressed,
-    required String tooltip,
-  }) {
-    return Material(
-      shape: CircleBorder(),
-      color: Colors.transparent,
-      child: IconButton(
-        onPressed: onPressed,
-        icon: Icon(icon, size: 20),
-        color: color,
-        tooltip: tooltip,
-        splashRadius: 20,
-        padding: const EdgeInsets.all(4),
-        constraints: const BoxConstraints(
-          minWidth: 36,
-          minHeight: 36,
-        ),
-      ),
-    );
-  }
 
   bool _getCategoryStatus(CategoryModel category) {
     // Handle different status representations
@@ -311,13 +288,13 @@ class CategoriesListMobile extends StatelessWidget {
               width: 150,
               height: 150,
               decoration: BoxDecoration(
-                color: AppColors.primaryColor.withOpacity(0.05),
+                color: AppColors.primaryColor.withValues(alpha: 0.05),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 Icons.category_outlined,
                 size: 80,
-                color: AppColors.primaryColor.withOpacity(0.3),
+                color: AppColors.primaryColor.withValues(alpha: 0.3),
               ),
             ),
             const SizedBox(height: 24),
@@ -572,7 +549,7 @@ class CategoriesTableCard extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: isActive ? Colors.green.withOpacity(0.1) : Colors.red.withOpacity(0.1),
+              color: isActive ? Colors.green.withValues(alpha: 0.1) : Colors.red.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
@@ -671,7 +648,7 @@ class CategoriesTableCard extends StatelessWidget {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -684,7 +661,7 @@ class CategoriesTableCard extends StatelessWidget {
           Icon(
             Icons.category_outlined,
             size: 48,
-            color: Colors.grey.withOpacity(0.5),
+            color: Colors.grey.withValues(alpha: 0.5),
           ),
           const SizedBox(height: 16),
           Text(

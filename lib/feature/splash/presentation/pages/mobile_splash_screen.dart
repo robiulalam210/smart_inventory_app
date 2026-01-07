@@ -1,7 +1,13 @@
-import '../../../auth/presentation/pages/mobile_login_scr.dart';
-import '../../../mobile_root_screen.dart';
+import 'dart:io';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:lottie/lottie.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../../core/widgets/app_show_info.dart';
+import '../../../auth/presentation/pages/mobile_login_scr.dart';
+import '../../../mobile_root_screen.dart';
 import '../../../../core/configs/configs.dart';
 import '../bloc/splash/splash_bloc.dart';
 
@@ -9,134 +15,183 @@ class MobileSplashScreen extends StatefulWidget {
   const MobileSplashScreen({super.key});
 
   @override
-  SplashScreenState createState() => SplashScreenState();
+  State<MobileSplashScreen> createState() => _MobileSplashScreenState();
 }
 
-class SplashScreenState extends State<MobileSplashScreen>
+class _MobileSplashScreenState extends State<MobileSplashScreen>
     with SingleTickerProviderStateMixin {
-  late AnimationController animationController;
-  late Animation<double> animation;
-
-  @override
-  void dispose() {
-    animationController.dispose(); // Dispose of the AnimationController
-    super.dispose();
-  }
+  late final AnimationController _animationController;
 
   @override
   void initState() {
     super.initState();
-    final splashBloc = context.read<SplashBloc>();
 
-    animationController =
-        AnimationController(vsync: this, duration: const Duration(seconds: 4));
-    animation =
-        CurvedAnimation(parent: animationController, curve: Curves.easeOut);
-    animationController.forward();
+    // Start the version & maintenance check flow for mobile.
+    context.read<SplashBloc>().add(CheckAppVersionEvent(context));
 
-    // Trigger visibility event after 500ms
-    Future.delayed(const Duration(milliseconds: 900), () {
-      splashBloc.add(ToggleVisibilityEvent());
-    });
+    _animationController =
+    AnimationController(vsync: this, duration: const Duration(seconds: 4))
+      ..forward();
+  }
 
-    // Trigger login data fetch
-    context.read<SplashBloc>().add(GetLoginData());
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _launchInBrowser(Uri url) async {
+    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+      debugPrint('Could not launch $url');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final Uri toLaunch = Uri(
+    final developerUrl = Uri(
       scheme: 'https',
       host: 'robi.meherinmart.xyz',
     );
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.whiteColor,
       body: BlocListener<SplashBloc, SplashState>(
         listener: (context, state) {
-          if (state is SplashNavigateToLogin) {
+          // Maintenance: block UI
+          if (state is AppPausedState) {
+            appShowInfo(
+              context,
+              title: "Maintenance Mode",
+              content:
+              "This app is currently under maintenance. Please come back later.",
+              defaultDismissAction: false,
+              actions: [
+                TextButton(
+                  onPressed: () => exit(0),
+                  child: const Text("Close"),
+                ),
+              ],
+            );
+          }
+
+          // Force update
+          else if (state is AppForceUpdateState) {
+            appShowInfo(
+              context,
+              title: "Update Required",
+              content:
+              state.message ?? "You must update the app to continue using it.",
+              defaultDismissAction: false,
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    if (state.url != null && state.url!.isNotEmpty) {
+                      appLaunchUrlPlay(state.url);
+                    }
+                  },
+                  child: const Text("Update"),
+                ),
+              ],
+            );
+          }
+
+          // Optional update
+          else if (state is UpdateAvailableState) {
+            appShowInfo(
+              context,
+              title: "New Version Available",
+              content: state.message ?? "A new version of the app is available.",
+              defaultDismissAction: false,
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    // dismiss dialog and continue to login check
+                    Navigator.pop(context);
+                    context.read<SplashBloc>().add(CheckLoginStatusEvent());
+                  },
+                  child: const Text("Later"),
+                ),
+                TextButton(
+                  onPressed: () {
+                    if (state.url != null && state.url!.isNotEmpty) {
+                      appLaunchUrlPlay(state.url);
+                    }
+                  },
+                  child: const Text("Update"),
+                ),
+              ],
+            );
+          }
+
+          // Navigation decisions
+          else if (state is SplashNavigateToLogin) {
             AppRoutes.pushAndRemoveUntil(context, const MobileLoginScr());
           } else if (state is SplashNavigateToHome) {
             AppRoutes.pushAndRemoveUntil(context, const MobileRootScreen());
           }
         },
-        child: BlocBuilder<SplashBloc, SplashState>(
-          builder: (context, state) {
-            if (state is VisibilityChanged) {
-// Update visibility when state changes
-            }
-            return Container(
-              decoration:  BoxDecoration(
-                  gradient:AppColors.primaryGradient,
-                  color: AppColors.whiteColor),
-              child: Stack(
-                fit: StackFit.expand,
-                children: <Widget>[
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 20.0),
-                        child: TextButton(
-                          onPressed: () => _launchInBrowser(toLaunch),
-                          child: const Text.rich(
+        child: Container(
+          decoration: BoxDecoration(gradient: AppColors.primaryGradient),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              // Bottom developer credit
+              Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 20),
+                    child: TextButton(
+                      onPressed: () => _launchInBrowser(developerUrl),
+                      child: const Text.rich(
+                        TextSpan(
+                          text: 'Developed by ',
+                          style: TextStyle(fontSize: 12, color: Colors.white),
+                          children: [
                             TextSpan(
-                              text: 'Developed by ',
+                              text: "Meherin Mart",
                               style: TextStyle(
+                                fontWeight: FontWeight.w600,
                                 fontSize: 12,
-                                color: Colors.white,
+                                color: Colors.red,
                               ),
-                              children: [
-                                TextSpan(
-                                  text: "Meherin Mart",
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: 12,
-                                    color: Colors.red,
-                                  ),
-                                ),
-                              ],
                             ),
-                          ),
+                          ],
                         ),
                       ),
-                    ],
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Hero(
-                        tag: 1,
-                        child: Lottie.asset(AppImages.splashLottie,
-                            width: Responsive.isMobile(context)
-                                ? AppSizes.width(context) * 0.80
-                                : AppSizes.width(context) * 0.42),
-                      ),
-
-                      Text(
-                        AppConstants.appName,
-                        style: TextStyle(fontSize: 30,color: AppColors.white),
-                      ),
-                      // ),
-                    ],
+                    ),
                   ),
                 ],
               ),
-            );
-          },
+
+              // Center animation & name
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Hero(
+                    tag: 1,
+                    child: Lottie.asset(
+                      AppImages.splashLottie,
+                      width: Responsive.isMobile(context)
+                          ? AppSizes.width(context) * 0.8
+                          : AppSizes.width(context) * 0.42,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    AppConstants.appName,
+                    style: TextStyle(
+                      fontSize: 30,
+                      color: AppColors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
-  }
-
-  Future<void> _launchInBrowser(Uri url) async {
-    if (!await launchUrl(
-      url,
-      mode: LaunchMode.externalApplication,
-    )) {
-      throw 'Could not launch $url';
-    }
   }
 }

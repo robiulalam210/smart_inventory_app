@@ -1,4 +1,5 @@
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'configs.dart';
 
@@ -16,6 +17,15 @@ extension StringCasingExtension on String {
   /// Capitalizes the first letter of every word in the string
   String toTitleCase() {
     return split(' ').map((word) => word.capitalize()).join(' ');
+  }
+}
+
+Future<void> appLaunchUrlPlay(String url) async {
+  final Uri uri = Uri.parse(url);
+  if (await canLaunchUrl(uri)) {
+    await launchUrl(uri, mode: LaunchMode.externalApplication);  // Launch externally (Play Store app)
+  } else {
+    throw 'Could not launch $uri';
   }
 }
 

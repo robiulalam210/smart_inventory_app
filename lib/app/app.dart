@@ -59,7 +59,7 @@ class MyApp extends StatelessWidget {
           ),
         ),
         BlocProvider(
-          create: (context) => SplashBloc(authBloc: context.read<AuthBloc>()),
+          create: (context) => SplashBloc(),
         ),
 
 

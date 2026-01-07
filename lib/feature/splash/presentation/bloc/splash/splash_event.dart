@@ -1,10 +1,10 @@
 part of 'splash_bloc.dart';
 
 sealed class SplashEvent {}
-class GetLoginData extends SplashEvent {}
 
-class NavigateToLogin extends SplashEvent {}
+class CheckAppVersionEvent extends SplashEvent {
+  final BuildContext context;
+  CheckAppVersionEvent(this.context);
+}
 
-class NavigateToHome extends SplashEvent {}
-
-class ToggleVisibilityEvent extends SplashEvent {}
+class CheckLoginStatusEvent extends SplashEvent {}

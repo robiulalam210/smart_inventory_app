@@ -1,21 +1,7 @@
 import 'configs.dart';
 
 class AppColors {
-  // Defuel Color Use
-  // static const Color primary = Color(0xff56E197);
-  // static const Color secondary = Color(0xffDCF7E9);
-  // static const Color background = Color(0xffEFF9FF);
-  /// App Accent Gradient
-  // static const LinearGradient primaryGradient = LinearGradient(
-  //   begin: Alignment.topLeft,
-  //   end: Alignment.bottomRight,
-  //   transform: GradientRotation(238 * 3.1416 / 180), // 238° to radians
-  //   colors: [
-  //     Color(0xFF57EB9C),
-  //     Color(0xFF52C387),
-  //   ],
-  //   stops: [0.0541, 1.6604], // same as 5.41% and 166.04%
-  // );
+
 
   static const Color error = Color(0xffE53935);
   static const Color grey = Color.fromARGB(255, 159, 159, 159);
@@ -26,9 +12,15 @@ class AppColors {
   static const Color lightBg = Color.fromARGB(255, 239, 249, 255);
   static const Color lightBgBottomNav = Color.fromARGB(255, 246, 252, 255);
   static const Color lightText = Color(0xff000000);
-
+  // Dark theme defaults
+  static const Color darkBg = Color(0xFF14171C);
+  static const Color darkBgBottomNav = Color(0xFF191A22);
+  static const Color darkText = Color(0xFFF2F2F2);
   static const Color primaryColor = Color(0xff6EC5EF);
-
+  static Color bottomNavBg(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.dark
+          ? darkBgBottomNav
+          : lightBgBottomNav;
   static Color get secondary => _soften(primaryColor, 0.4);
 
   // --- Derived Colors ---

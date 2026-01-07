@@ -223,16 +223,16 @@ class SalesReturnTableCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 8),
                     ],
-                    if ((salesReturn.items ?? []).isNotEmpty) ...[
+                    if ((salesReturn.items).isNotEmpty) ...[
                       Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
-                          'Returned Items (${salesReturn.items?.length ?? 0}):',
+                          'Returned Items (${salesReturn.items.length}):',
                           style: TextStyle(fontWeight: FontWeight.w700, color: AppColors.blackColor),
                         ),
                       ),
                       const SizedBox(height: 8),
-                      ...?salesReturn.items?.map((item) => Padding(
+                      ...salesReturn.items.map((item) => Padding(
                         padding: const EdgeInsets.only(bottom: 6),
                         child: Row(
                           children: [

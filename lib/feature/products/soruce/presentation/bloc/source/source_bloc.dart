@@ -154,7 +154,7 @@ class SourceBloc extends Bloc<SourceEvent, SourceState> {
 
       // Update the local list
       final updatedList = list.map((source) {
-        if (source.id == event.id) {
+        if (source.id.toString() == event.id) {
           return updatedSource;
         }
         return source;

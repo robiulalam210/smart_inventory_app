@@ -611,16 +611,16 @@ class AccountCard extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(6),
               border: Border.all(
-                color: color.withOpacity(0.3),
+                color: color.withValues(alpha: 0.3),
                 width: 1,
               ),
             ),
             constraints: const BoxConstraints(minWidth: 80),
             child: Text(
-              '${prefix}৳$amount',
+              '$prefix৳$amount',
               style: TextStyle(
                 color: color,
                 fontWeight: FontWeight.w600,
