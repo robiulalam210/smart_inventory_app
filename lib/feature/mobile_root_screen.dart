@@ -7,6 +7,7 @@ import 'package:meherinMart/feature/feature.dart';
 import '../core/configs/configs.dart';
 import '../core/shared/widgets/sideMenu/mobile_tab_sidebar.dart';
 import 'lab_dashboard/presentation/widgets/stats_card_monthly.dart';
+import 'profile/presentation/bloc/profile_bloc/profile_bloc.dart';
 
 
 class MobileRootScreen extends StatefulWidget {
@@ -34,6 +35,8 @@ class _RootScreenState extends State<MobileRootScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // Fetch print layout and initial dashboard data
       context.read<PrintLayoutBloc>().add(FetchPrintLayout());
+      context.read<ProfileBloc>().add(FetchProfilePermission(context: context));
+
       context.read<DashboardBloc>().add(FetchDashboardData(context: context));
     });
   }

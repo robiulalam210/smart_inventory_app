@@ -486,11 +486,9 @@ class _MoneyReceiptListScreenState extends State<MobileMoneyReceiptForm> {
         const SizedBox(height: 12),
         BlocBuilder<AccountBloc, AccountState>(
           builder: (context, state) {
-            print(state);
             if (state is AccountActiveListLoading) {
               return const Center(child: CircularProgressIndicator());
             } else if (state is AccountActiveListSuccess) {
-              print("object${state.list}");
               return _buildAccountDropdown(context, state.list);
             } else if (state is AccountActiveListFailed) {
               return Text('Error: ${state.content}');

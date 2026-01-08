@@ -2,10 +2,26 @@
 import 'dart:typed_data';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
 
+import '../../../../../core/configs/app_urls.dart';
+import '../../../../profile/data/model/profile_perrmission_model.dart';
 import '../../../data/model/purchase_sale_model.dart';
 
-Future<Uint8List> generatePurchasePdf(PurchaseModel purchase) async {
+Future<Uint8List> generatePurchasePdf(PurchaseModel purchase,  CompanyInfo? company,
+    ) async {
+
+  // Fetch company logo as Uint8List
+  Uint8List? logoBytes;
+  if (company?.logo != null && company!.logo.isNotEmpty) {
+    try {
+      logoBytes =
+      (await networkImage("${AppUrls.baseUrlMain}${company.logo}"))
+      as Uint8List?;
+    } catch (e) {
+      logoBytes = null; // fallback if network fails
+    }
+  }
   final pdf = pw.Document();
 
   // Helper function for safe double conversion
@@ -38,49 +54,37 @@ Future<Uint8List> generatePurchasePdf(PurchaseModel purchase) async {
         ),
       ),
       header: (context) => pw.Container(
-        padding: const pw.EdgeInsets.only(
-          bottom: 20,
-          left: 20,
-          right: 20,
-          top: 30,
-        ),
+        padding: const pw.EdgeInsets.fromLTRB(20, 30, 20, 20),
         child: pw.Row(
           mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
           crossAxisAlignment: pw.CrossAxisAlignment.start,
           children: [
             // Company Info
-            pw.Column(
-              crossAxisAlignment: pw.CrossAxisAlignment.start,
-              children: [
-                pw.Text(
-                  'YOUR COMPANY NAME',
-                  style: pw.TextStyle(
-                    fontSize: 14,
-                    fontWeight: pw.FontWeight.bold,
-                    color: PdfColors.blue800,
+            pw.Expanded(
+              child: pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                children: [
+                  pw.Text(
+                    company?.name ?? "",
+                    style: pw.TextStyle(
+                      fontSize: 14,
+                      fontWeight: pw.FontWeight.bold,
+                      color: PdfColors.blue800,
+                    ),
                   ),
-                ),
-                pw.SizedBox(height: 4),
-                pw.Text(
-                  'Company Address Line 1',
-                  style: const pw.TextStyle(fontSize: 10),
-                ),
-                pw.Text(
-                  'City, State, ZIP Code',
-                  style: const pw.TextStyle(fontSize: 10),
-                ),
-                pw.Text(
-                  'Phone: +1 234 567 8900',
-                  style: const pw.TextStyle(fontSize: 10),
-                ),
-                pw.Text(
-                  'Email: info@company.com',
-                  style: const pw.TextStyle(fontSize: 10),
-                ),
-              ],
+                  pw.SizedBox(height: 4),
+                  if (company?.address != null )
+                    pw.Text(company?.address??"", style: const pw.TextStyle(fontSize: 10)),
+                  if (company?.phone != null )
+                    pw.Text(company?.phone??"", style: const pw.TextStyle(fontSize: 10)),
+                  if (company?.email != null )
+                    pw.Text(company?.email??"", style: const pw.TextStyle(fontSize: 10)),
+                ],
+              ),
             ),
 
-            // Logo Placeholder
+            // Logo
+            // Logo
             pw.Container(
               width: 80,
               height: 80,
@@ -88,13 +92,16 @@ Future<Uint8List> generatePurchasePdf(PurchaseModel purchase) async {
                 border: pw.Border.all(color: PdfColors.grey400),
                 borderRadius: pw.BorderRadius.circular(8),
               ),
-              child: pw.Center(
+              child: logoBytes != null
+                  ? pw.Image(pw.MemoryImage(logoBytes), fit: pw.BoxFit.cover)
+                  : pw.Center(
                 child: pw.Text(
-                  'LOGO',
+                  "Logo",
                   style: pw.TextStyle(fontSize: 12, color: PdfColors.grey600),
                 ),
               ),
             ),
+
           ],
         ),
       ),

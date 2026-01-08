@@ -36,7 +36,7 @@ class Data {
   final User? user;
   final dynamic staffProfile;
   final Permissions? permissions;
-  final DataCompanyInfo? companyInfo;
+  final CompanyInfo? companyInfo;
 
   Data({
     this.user,
@@ -49,7 +49,7 @@ class Data {
     user: json["user"] == null ? null : User.fromJson(json["user"]),
     staffProfile: json["staff_profile"],
     permissions: json["permissions"] == null ? null : Permissions.fromJson(json["permissions"]),
-    companyInfo: json["company_info"] == null ? null : DataCompanyInfo.fromJson(json["company_info"]),
+    companyInfo: json["company_info"] == null ? null : CompanyInfo.fromJson(json["company_info"]),
   );
 
   Map<String, dynamic> toJson() => {
@@ -60,31 +60,99 @@ class Data {
   };
 }
 
-class DataCompanyInfo {
+class CompanyInfo {
   final int? id;
   final String? name;
+  final String? tradeLicense;
+  final String? address;
+  final String? phone;
+  final String? email;
+  final String? website;
+  final dynamic logo;
+  final String? currency;
+  final String? timezone;
+  final DateTime? fiscalYearStart;
   final String? planType;
+  final DateTime? startDate;
+  final DateTime? expiryDate;
   final bool? isActive;
+  final int? maxUsers;
+  final int? maxProducts;
+  final int? maxBranches;
+  final String? companyCode;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
 
-  DataCompanyInfo({
+  CompanyInfo({
     this.id,
     this.name,
+    this.tradeLicense,
+    this.address,
+    this.phone,
+    this.email,
+    this.website,
+    this.logo,
+    this.currency,
+    this.timezone,
+    this.fiscalYearStart,
     this.planType,
+    this.startDate,
+    this.expiryDate,
     this.isActive,
+    this.maxUsers,
+    this.maxProducts,
+    this.maxBranches,
+    this.companyCode,
+    this.createdAt,
+    this.updatedAt,
   });
 
-  factory DataCompanyInfo.fromJson(Map<String, dynamic> json) => DataCompanyInfo(
+  factory CompanyInfo.fromJson(Map<String, dynamic> json) => CompanyInfo(
     id: json["id"],
     name: json["name"],
+    tradeLicense: json["trade_license"],
+    address: json["address"],
+    phone: json["phone"],
+    email: json["email"],
+    website: json["website"],
+    logo: json["logo"],
+    currency: json["currency"],
+    timezone: json["timezone"],
+    fiscalYearStart: json["fiscal_year_start"] == null ? null : DateTime.parse(json["fiscal_year_start"]),
     planType: json["plan_type"],
+    startDate: json["start_date"] == null ? null : DateTime.parse(json["start_date"]),
+    expiryDate: json["expiry_date"] == null ? null : DateTime.parse(json["expiry_date"]),
     isActive: json["is_active"],
+    maxUsers: json["max_users"],
+    maxProducts: json["max_products"],
+    maxBranches: json["max_branches"],
+    companyCode: json["company_code"],
+    createdAt: json["created_at"] == null ? null : DateTime.parse(json["created_at"]),
+    updatedAt: json["updated_at"] == null ? null : DateTime.parse(json["updated_at"]),
   );
 
   Map<String, dynamic> toJson() => {
     "id": id,
     "name": name,
+    "trade_license": tradeLicense,
+    "address": address,
+    "phone": phone,
+    "email": email,
+    "website": website,
+    "logo": logo,
+    "currency": currency,
+    "timezone": timezone,
+    "fiscal_year_start": "${fiscalYearStart!.year.toString().padLeft(4, '0')}-${fiscalYearStart!.month.toString().padLeft(2, '0')}-${fiscalYearStart!.day.toString().padLeft(2, '0')}",
     "plan_type": planType,
+    "start_date": "${startDate!.year.toString().padLeft(4, '0')}-${startDate!.month.toString().padLeft(2, '0')}-${startDate!.day.toString().padLeft(2, '0')}",
+    "expiry_date": "${expiryDate!.year.toString().padLeft(4, '0')}-${expiryDate!.month.toString().padLeft(2, '0')}-${expiryDate!.day.toString().padLeft(2, '0')}",
     "is_active": isActive,
+    "max_users": maxUsers,
+    "max_products": maxProducts,
+    "max_branches": maxBranches,
+    "company_code": companyCode,
+    "created_at": createdAt?.toIso8601String(),
+    "updated_at": updatedAt?.toIso8601String(),
   };
 }
 
@@ -253,12 +321,12 @@ class User {
   final String? fullName;
   final String? role;
   final int? company;
-  final UserCompanyInfo? companyInfo;
-  final String? phone;
+  final CompanyInfo? companyInfo;
+  final dynamic phone;
   final dynamic profilePicture;
   final dynamic dateOfBirth;
   final bool? isVerified;
-  final dynamic lastLogin;
+  final DateTime? lastLogin;
   final DateTime? dateJoined;
   final Permissions? permissions;
   final bool? isActive;
@@ -292,12 +360,12 @@ class User {
     fullName: json["full_name"],
     role: json["role"],
     company: json["company"],
-    companyInfo: json["company_info"] == null ? null : UserCompanyInfo.fromJson(json["company_info"]),
+    companyInfo: json["company_info"] == null ? null : CompanyInfo.fromJson(json["company_info"]),
     phone: json["phone"],
     profilePicture: json["profile_picture"],
     dateOfBirth: json["date_of_birth"],
     isVerified: json["is_verified"],
-    lastLogin: json["last_login"],
+    lastLogin: json["last_login"] == null ? null : DateTime.parse(json["last_login"]),
     dateJoined: json["date_joined"] == null ? null : DateTime.parse(json["date_joined"]),
     permissions: json["permissions"] == null ? null : Permissions.fromJson(json["permissions"]),
     isActive: json["is_active"],
@@ -317,77 +385,9 @@ class User {
     "profile_picture": profilePicture,
     "date_of_birth": dateOfBirth,
     "is_verified": isVerified,
-    "last_login": lastLogin,
+    "last_login": lastLogin?.toIso8601String(),
     "date_joined": dateJoined?.toIso8601String(),
     "permissions": permissions?.toJson(),
     "is_active": isActive,
-  };
-}
-
-class UserCompanyInfo {
-  final int? id;
-  final String? name;
-  final String? companyCode;
-  final String? address;
-  final String? phone;
-  final String? email;
-  final dynamic logo;
-  final bool? isActive;
-  final String? planType;
-  final DateTime? startDate;
-  final DateTime? expiryDate;
-  final int? daysUntilExpiry;
-  final int? activeUserCount;
-  final int? productCount;
-
-  UserCompanyInfo({
-    this.id,
-    this.name,
-    this.companyCode,
-    this.address,
-    this.phone,
-    this.email,
-    this.logo,
-    this.isActive,
-    this.planType,
-    this.startDate,
-    this.expiryDate,
-    this.daysUntilExpiry,
-    this.activeUserCount,
-    this.productCount,
-  });
-
-  factory UserCompanyInfo.fromJson(Map<String, dynamic> json) => UserCompanyInfo(
-    id: json["id"],
-    name: json["name"],
-    companyCode: json["company_code"],
-    address: json["address"],
-    phone: json["phone"],
-    email: json["email"],
-    logo: json["logo"],
-    isActive: json["is_active"],
-    planType: json["plan_type"],
-    startDate: json["start_date"] == null ? null : DateTime.parse(json["start_date"]),
-    expiryDate: json["expiry_date"] == null ? null : DateTime.parse(json["expiry_date"]),
-    daysUntilExpiry: json["days_until_expiry"],
-    activeUserCount: json["active_user_count"],
-    productCount: json["product_count"],
-  );
-
-  Map<String, dynamic> toJson() => {
-    "id": id,
-    "name": name,
-    "company_code": companyCode,
-    "address": address,
-    "phone": phone,
-    "email": email,
-    "logo": logo,
-    "is_active": isActive,
-    "plan_type": planType,
-    "start_date": "${startDate!.year.toString().padLeft(4, '0')}-${startDate!.month.toString().padLeft(2, '0')}-${startDate!.day.toString().padLeft(2, '0')}",
-    "expiry_date": "${expiryDate!.year.toString().padLeft(4, '0')}-${expiryDate!.month.toString().padLeft(2, '0')}-${expiryDate!.day.toString().padLeft(2, '0')}",
-    "days_until_expiry": daysUntilExpiry,
-    "active_user_count": activeUserCount,
-    "product_count": productCount,
   };
 }

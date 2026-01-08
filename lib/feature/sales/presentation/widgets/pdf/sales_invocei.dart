@@ -1,9 +1,29 @@
-import 'dart:typed_data';
 
+import 'package:printing/printing.dart';
+
+import '../../../../profile/data/model/profile_perrmission_model.dart';
 import '../../../data/models/pos_sale_model.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
-Future<Uint8List> generateSalesPdf(PosSaleModel sale) async {
+
+import '../../../../../core/configs/configs.dart';
+import '../../../../../core/core.dart';
+
+Future<Uint8List> generateSalesPdf(
+  PosSaleModel sale,
+  CompanyInfo? company,
+) async {
+  // Fetch company logo as Uint8List
+  Uint8List? logoBytes;
+  if (company?.logo != null && company!.logo.isNotEmpty) {
+    try {
+      logoBytes =
+          (await networkImage("${AppUrls.baseUrlMain}${company.logo}"))
+              as Uint8List?;
+    } catch (e) {
+      logoBytes = null; // fallback if network fails
+    }
+  }
   final pdf = pw.Document();
 
   // Helper function for safe double conversion
@@ -28,13 +48,73 @@ Future<Uint8List> generateSalesPdf(PosSaleModel sale) async {
       pageTheme: pw.PageTheme(
         pageFormat: PdfPageFormat.a4,
         margin: const pw.EdgeInsets.all(25),
-        buildBackground:(context) =>  pw.Container(
+        buildBackground: (context) => pw.Container(
           color: PdfColors.white, // Solid color background
         ),
       ),
-      header: (context) {
-        return pw.Container();
-      },
+      header: (context) => pw.Container(
+        padding: const pw.EdgeInsets.fromLTRB(20, 30, 20, 20),
+        child: pw.Row(
+          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: [
+            // Company Info
+            pw.Expanded(
+              child: pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                children: [
+                  pw.Text(
+                    company?.name ?? "",
+                    style: pw.TextStyle(
+                      fontSize: 14,
+                      fontWeight: pw.FontWeight.bold,
+                      color: PdfColors.blue800,
+                    ),
+                  ),
+                  pw.SizedBox(height: 4),
+                  if (company?.address != null)
+                    pw.Text(
+                      company?.address ?? "",
+                      style: const pw.TextStyle(fontSize: 10),
+                    ),
+                  if (company?.phone != null)
+                    pw.Text(
+                      company?.phone ?? "",
+                      style: const pw.TextStyle(fontSize: 10),
+                    ),
+                  if (company?.email != null)
+                    pw.Text(
+                      company?.email ?? "",
+                      style: const pw.TextStyle(fontSize: 10),
+                    ),
+                ],
+              ),
+            ),
+
+            // Logo
+            // Logo
+            pw.Container(
+              width: 80,
+              height: 80,
+              decoration: pw.BoxDecoration(
+                border: pw.Border.all(color: PdfColors.grey400),
+                borderRadius: pw.BorderRadius.circular(8),
+              ),
+              child: logoBytes != null
+                  ? pw.Image(pw.MemoryImage(logoBytes), fit: pw.BoxFit.cover)
+                  : pw.Center(
+                      child: pw.Text(
+                        "Logo",
+                        style: pw.TextStyle(
+                          fontSize: 12,
+                          color: PdfColors.grey600,
+                        ),
+                      ),
+                    ),
+            ),
+          ],
+        ),
+      ),
 
       build: (context) => [
         // Header Section with improved styling
@@ -64,7 +144,10 @@ Future<Uint8List> generateSalesPdf(PosSaleModel sale) async {
                     children: [
                       pw.Container(
                         width: 120,
-                        child: pw.Text('Invoice No:', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+                        child: pw.Text(
+                          'Invoice No:',
+                          style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+                        ),
                       ),
                       pw.Text(sale.invoiceNo ?? 'N/A'),
                     ],
@@ -73,7 +156,10 @@ Future<Uint8List> generateSalesPdf(PosSaleModel sale) async {
                     children: [
                       pw.Container(
                         width: 120,
-                        child: pw.Text('Date:', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+                        child: pw.Text(
+                          'Date:',
+                          style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+                        ),
                       ),
                       pw.Text(sale.formattedSaleDate),
                     ],
@@ -82,7 +168,10 @@ Future<Uint8List> generateSalesPdf(PosSaleModel sale) async {
                     children: [
                       pw.Container(
                         width: 120,
-                        child: pw.Text('Time:', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+                        child: pw.Text(
+                          'Time:',
+                          style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+                        ),
                       ),
                       pw.Text(sale.formattedTime),
                     ],
@@ -90,7 +179,10 @@ Future<Uint8List> generateSalesPdf(PosSaleModel sale) async {
                 ],
               ),
               pw.Container(
-                padding: const pw.EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const pw.EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 decoration: pw.BoxDecoration(
                   color: _getStatusColor(sale.paymentStatus),
                   borderRadius: pw.BorderRadius.circular(20),
@@ -107,7 +199,6 @@ Future<Uint8List> generateSalesPdf(PosSaleModel sale) async {
             ],
           ),
         ),
-
 
         // Customer Info Section
         pw.Container(
@@ -132,7 +223,10 @@ Future<Uint8List> generateSalesPdf(PosSaleModel sale) async {
                       ),
                     ),
                     pw.SizedBox(height: 8),
-                    _buildInfoRow('Customer:', sale.customerName ?? 'Walk-in Customer'),
+                    _buildInfoRow(
+                      'Customer:',
+                      sale.customerName ?? 'Walk-in Customer',
+                    ),
                     _buildInfoRow('Sales Person:', sale.saleByName ?? 'N/A'),
                   ],
                 ),
@@ -150,8 +244,12 @@ Future<Uint8List> generateSalesPdf(PosSaleModel sale) async {
                       ),
                     ),
 
-                    _buildInfoRow('Payment Method:', sale.paymentMethod ?? 'Cash'),
-                    if (sale.accountName != null && sale.accountName!.isNotEmpty)
+                    _buildInfoRow(
+                      'Payment Method:',
+                      sale.paymentMethod ?? 'Cash',
+                    ),
+                    if (sale.accountName != null &&
+                        sale.accountName!.isNotEmpty)
                       _buildInfoRow('Account:', sale.accountName!),
                   ],
                 ),
@@ -162,194 +260,222 @@ Future<Uint8List> generateSalesPdf(PosSaleModel sale) async {
         pw.SizedBox(height: 4),
 
         // Items Table Section
-        pw.Padding(padding: pw.EdgeInsets.symmetric(horizontal: 12),child: pw.Text(
-          'ITEMS DETAILS',
-          style: pw.TextStyle(
-            fontSize: 14,
-            fontWeight: pw.FontWeight.bold,
-            color: PdfColors.blue800,
-          ),
-        ),),
-
-        pw.Padding(padding: pw.EdgeInsets.all(8),child: pw.Table(
-          border: pw.TableBorder.all(color: PdfColors.grey400, width: 1),
-          columnWidths: {
-            0: const pw.FlexColumnWidth(3),
-            1: const pw.FlexColumnWidth(1),
-            2: const pw.FlexColumnWidth(1.5),
-            3: const pw.FlexColumnWidth(1.5),
-          },
-          children: [
-            // Header row
-            pw.TableRow(
-              decoration: const pw.BoxDecoration(
-                color: PdfColors.blue800,
-                borderRadius: pw.BorderRadius.only(
-                  topLeft: pw.Radius.circular(4),
-                  topRight: pw.Radius.circular(4),
-                ),
-              ),
-              children: [
-                pw.Padding(
-                  padding: const pw.EdgeInsets.all(8),
-                  child: pw.Text(
-                    'PRODUCT',
-                    style: pw.TextStyle(
-                      fontWeight: pw.FontWeight.bold,
-                      color: PdfColors.white,
-                    ),
-                  ),
-                ),
-                pw.Padding(
-                  padding: const pw.EdgeInsets.all(8),
-                  child: pw.Text(
-                    'QTY',
-                    style: pw.TextStyle(
-                      fontWeight: pw.FontWeight.bold,
-                      color: PdfColors.white,
-                    ),
-                    textAlign: pw.TextAlign.center,
-                  ),
-                ),
-                pw.Padding(
-                  padding: const pw.EdgeInsets.all(8),
-                  child: pw.Text(
-                    'PRICE',
-                    style: pw.TextStyle(
-                      fontWeight: pw.FontWeight.bold,
-                      color: PdfColors.white,
-                    ),
-                    textAlign: pw.TextAlign.right,
-                  ),
-                ),
-                pw.Padding(
-                  padding: const pw.EdgeInsets.all(8),
-                  child: pw.Text(
-                    'TOTAL',
-                    style: pw.TextStyle(
-                      fontWeight: pw.FontWeight.bold,
-                      color: PdfColors.white,
-                    ),
-                    textAlign: pw.TextAlign.right,
-                  ),
-                ),
-              ],
+        pw.Padding(
+          padding: pw.EdgeInsets.symmetric(horizontal: 12),
+          child: pw.Text(
+            'ITEMS DETAILS',
+            style: pw.TextStyle(
+              fontSize: 14,
+              fontWeight: pw.FontWeight.bold,
+              color: PdfColors.blue800,
             ),
-            // Data rows
-            ...(sale.items ?? []).map((item) {
-              final unitPrice = toDouble(item.unitPrice);
-              final subtotal = toDouble(item.subtotal);
+          ),
+        ),
 
-              return pw.TableRow(
-                decoration: pw.BoxDecoration(
-                  border: pw.Border(bottom: pw.BorderSide(color: PdfColors.grey300)),
+        pw.Padding(
+          padding: pw.EdgeInsets.all(8),
+          child: pw.Table(
+            border: pw.TableBorder.all(color: PdfColors.grey400, width: 1),
+            columnWidths: {
+              0: const pw.FlexColumnWidth(3),
+              1: const pw.FlexColumnWidth(1),
+              2: const pw.FlexColumnWidth(1.5),
+              3: const pw.FlexColumnWidth(1.5),
+            },
+            children: [
+              // Header row
+              pw.TableRow(
+                decoration: const pw.BoxDecoration(
+                  color: PdfColors.blue800,
+                  borderRadius: pw.BorderRadius.only(
+                    topLeft: pw.Radius.circular(4),
+                    topRight: pw.Radius.circular(4),
+                  ),
                 ),
                 children: [
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(8),
                     child: pw.Text(
-                      item.productName ?? 'Unknown Product',
-                      style: const pw.TextStyle(fontSize: 11),
+                      'PRODUCT',
+                      style: pw.TextStyle(
+                        fontWeight: pw.FontWeight.bold,
+                        color: PdfColors.white,
+                      ),
                     ),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(8),
                     child: pw.Text(
-                      (item.quantity ?? 0).toString(),
-                      style: const pw.TextStyle(fontSize: 11),
+                      'QTY',
+                      style: pw.TextStyle(
+                        fontWeight: pw.FontWeight.bold,
+                        color: PdfColors.white,
+                      ),
                       textAlign: pw.TextAlign.center,
                     ),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(8),
                     child: pw.Text(
-                      unitPrice.toStringAsFixed(2),
-                      style: const pw.TextStyle(fontSize: 11),
+                      'PRICE',
+                      style: pw.TextStyle(
+                        fontWeight: pw.FontWeight.bold,
+                        color: PdfColors.white,
+                      ),
                       textAlign: pw.TextAlign.right,
                     ),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(8),
                     child: pw.Text(
-                      subtotal.toStringAsFixed(2),
-                      style: const pw.TextStyle(fontSize: 11),
+                      'TOTAL',
+                      style: pw.TextStyle(
+                        fontWeight: pw.FontWeight.bold,
+                        color: PdfColors.white,
+                      ),
                       textAlign: pw.TextAlign.right,
                     ),
                   ),
                 ],
-              );
-            }),
-          ],
-        ),
+              ),
+              // Data rows
+              ...(sale.items ?? []).map((item) {
+                final unitPrice = toDouble(item.unitPrice);
+                final subtotal = toDouble(item.subtotal);
+
+                return pw.TableRow(
+                  decoration: pw.BoxDecoration(
+                    border: pw.Border(
+                      bottom: pw.BorderSide(color: PdfColors.grey300),
+                    ),
+                  ),
+                  children: [
+                    pw.Padding(
+                      padding: const pw.EdgeInsets.all(8),
+                      child: pw.Text(
+                        item.productName ?? 'Unknown Product',
+                        style: const pw.TextStyle(fontSize: 11),
+                      ),
+                    ),
+                    pw.Padding(
+                      padding: const pw.EdgeInsets.all(8),
+                      child: pw.Text(
+                        (item.quantity ?? 0).toString(),
+                        style: const pw.TextStyle(fontSize: 11),
+                        textAlign: pw.TextAlign.center,
+                      ),
+                    ),
+                    pw.Padding(
+                      padding: const pw.EdgeInsets.all(8),
+                      child: pw.Text(
+                        unitPrice.toStringAsFixed(2),
+                        style: const pw.TextStyle(fontSize: 11),
+                        textAlign: pw.TextAlign.right,
+                      ),
+                    ),
+                    pw.Padding(
+                      padding: const pw.EdgeInsets.all(8),
+                      child: pw.Text(
+                        subtotal.toStringAsFixed(2),
+                        style: const pw.TextStyle(fontSize: 11),
+                        textAlign: pw.TextAlign.right,
+                      ),
+                    ),
+                  ],
+                );
+              }),
+            ],
+          ),
         ),
         pw.SizedBox(height: 25),
 
         // Summary Section
-        pw.Padding(padding: pw.EdgeInsets.all(8),child:  pw.Row(
-          crossAxisAlignment: pw.CrossAxisAlignment.start,
-          children: [
-            pw.Expanded(
-              child: pw.Column(
-                crossAxisAlignment: pw.CrossAxisAlignment.start,
-                children: [
-                  pw.Container(
-                    padding: const pw.EdgeInsets.all(10),
-                    decoration: pw.BoxDecoration(
-                      color: PdfColors.green50,
-                      borderRadius: pw.BorderRadius.circular(8),
-                      border: pw.Border.all(color: PdfColors.green200),
-                    ),
-                    child: pw.Column(
-                      crossAxisAlignment: pw.CrossAxisAlignment.start,
-                      children: [
-                        pw.Text(
-                          'Thank you for your business!',
-                          style: pw.TextStyle(
-                            fontWeight: pw.FontWeight.bold,
-                            color: PdfColors.green800,
-                            fontSize: 14,
-                          ),
-                        ),
-                        if (sale.remark != null && sale.remark!.isNotEmpty) ...[
-                          pw.SizedBox(height: 4),
-                          pw.Text(
-                            'Remarks: ${sale.remark}',
-                            style: const pw.TextStyle(fontSize: 11, color: PdfColors.grey700),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            pw.Expanded(
-              child: pw.Container(
-                padding: const pw.EdgeInsets.all(10),
-                decoration: pw.BoxDecoration(
-                  color: PdfColors.blue50,
-                  border: pw.Border.all(color: PdfColors.blue200),
-                  borderRadius: const pw.BorderRadius.all(pw.Radius.circular(8)),
-                ),
+        pw.Padding(
+          padding: pw.EdgeInsets.all(8),
+          child: pw.Row(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              pw.Expanded(
                 child: pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
                   children: [
-                    _buildSummaryRow('Subtotal:', '\$${netTotal.toStringAsFixed(2)}'),
-                    if (discount > 0) _buildSummaryRow('Discount:', '-\$${discount.toStringAsFixed(2)}'),
-                    if (vat > 0) _buildSummaryRow('Vat:', '\$${vat.toStringAsFixed(2)}'),
-                    pw.SizedBox(height: 4),
-                    pw.Divider(color: PdfColors.blue400, height: 1, thickness: 1),
-                    pw.SizedBox(height: 4),
-                    _buildSummaryRow(
-                      'GRAND TOTAL:',
-                      grandTotal.toStringAsFixed(2),
-                      isTotal: true,
+                    pw.Container(
+                      padding: const pw.EdgeInsets.all(10),
+                      decoration: pw.BoxDecoration(
+                        color: PdfColors.green50,
+                        borderRadius: pw.BorderRadius.circular(8),
+                        border: pw.Border.all(color: PdfColors.green200),
+                      ),
+                      child: pw.Column(
+                        crossAxisAlignment: pw.CrossAxisAlignment.start,
+                        children: [
+                          pw.Text(
+                            'Thank you for your business!',
+                            style: pw.TextStyle(
+                              fontWeight: pw.FontWeight.bold,
+                              color: PdfColors.green800,
+                              fontSize: 14,
+                            ),
+                          ),
+                          if (sale.remark != null &&
+                              sale.remark!.isNotEmpty) ...[
+                            pw.SizedBox(height: 4),
+                            pw.Text(
+                              'Remarks: ${sale.remark}',
+                              style: const pw.TextStyle(
+                                fontSize: 11,
+                                color: PdfColors.grey700,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
                     ),
                   ],
                 ),
               ),
-            ),
-          ],
-        ),)
+              pw.Expanded(
+                child: pw.Container(
+                  padding: const pw.EdgeInsets.all(10),
+                  decoration: pw.BoxDecoration(
+                    color: PdfColors.blue50,
+                    border: pw.Border.all(color: PdfColors.blue200),
+                    borderRadius: const pw.BorderRadius.all(
+                      pw.Radius.circular(8),
+                    ),
+                  ),
+                  child: pw.Column(
+                    children: [
+                      _buildSummaryRow(
+                        'Subtotal:',
+                        '\$${netTotal.toStringAsFixed(2)}',
+                      ),
+                      if (discount > 0)
+                        _buildSummaryRow(
+                          'Discount:',
+                          '-\$${discount.toStringAsFixed(2)}',
+                        ),
+                      if (vat > 0)
+                        _buildSummaryRow('Vat:', '\$${vat.toStringAsFixed(2)}'),
+                      pw.SizedBox(height: 4),
+                      pw.Divider(
+                        color: PdfColors.blue400,
+                        height: 1,
+                        thickness: 1,
+                      ),
+                      pw.SizedBox(height: 4),
+                      _buildSummaryRow(
+                        'GRAND TOTAL:',
+                        grandTotal.toStringAsFixed(2),
+                        isTotal: true,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ],
     ),
   );
@@ -368,17 +494,11 @@ pw.Widget _buildInfoRow(String label, String value) {
           width: 120,
           child: pw.Text(
             label,
-            style: pw.TextStyle(
-              fontWeight: pw.FontWeight.bold,
-              fontSize: 11,
-            ),
+            style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 11),
           ),
         ),
         pw.Expanded(
-          child: pw.Text(
-            value,
-            style: const pw.TextStyle(fontSize: 11),
-          ),
+          child: pw.Text(value, style: const pw.TextStyle(fontSize: 11)),
         ),
       ],
     ),

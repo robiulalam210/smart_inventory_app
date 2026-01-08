@@ -104,9 +104,8 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
           content: response.message ?? "Unknown Error",
         ));
       }
-    } catch (error,st) {
-      print(error);
-      print(st);
+    } catch (error) {
+
       emit(AccountActiveListFailed(title: "Error", content: error.toString()));
     }
 

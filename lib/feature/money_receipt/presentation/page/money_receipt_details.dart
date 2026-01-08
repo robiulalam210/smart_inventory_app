@@ -1,4 +1,5 @@
 import 'package:printing/printing.dart';
+import '../../../profile/presentation/bloc/profile_bloc/profile_bloc.dart';
 import '/feature/money_receipt/presentation/page/pdf/generate_money_receipt.dart';
 import '../../../../core/configs/configs.dart';
 import '../../data/model/money_receipt_model/money_receipt_model.dart';
@@ -10,23 +11,102 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       backgroundColor: AppColors.bg,
       appBar: AppBar(
-        title: Text('Money Receipt - ${receipt.mrNo}'),
+        title: Text('Money Receipt', style: const TextStyle(fontSize: 16)),
+        centerTitle: false,
         actions: [
           IconButton(
-            icon: const Icon(Icons.print),
+            icon: const Icon(Icons.print, size: 22),
             onPressed: () => _generatePdf(context),
             tooltip: 'Generate PDF',
           ),
         ],
       ),
-      body: _buildDesktopView(),
+      body: Responsive(
+        mobile: _buildMobileView(),
+        tablet: _buildTabletView(),
+        smallDesktop: _buildDesktopView(),
+        desktop: _buildDesktopView(),
+        maxDesktop: _buildDesktopView(),
+      ),
     );
   }
 
+  // ===================== MOBILE VIEW (< 600px) =====================
+  Widget _buildMobileView() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header Card
+          _buildMobileHeaderCard(),
+          const SizedBox(height: 16),
+
+          // Payment Info Card
+          _buildMobilePaymentInfoCard(),
+
+          const SizedBox(height: 16),
+
+          // Summary Card
+          _buildMobileSummaryCard(),
+
+          const SizedBox(height: 16),
+
+          // Affected Invoices Card
+          _buildMobileAffectedInvoicesCard(),
+        ],
+      ),
+    );
+  }
+
+  // ===================== TABLET VIEW (600px - 900px) =====================
+  Widget _buildTabletView() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Top Row - Header & Status
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: _buildTabletHeaderCard(),
+              ),
+              const SizedBox(width: 16),
+              _buildTabletStatusCard(),
+            ],
+          ),
+
+          const SizedBox(height: 20),
+
+          // Payment Info Card
+          _buildTabletPaymentInfoCard(),
+
+          const SizedBox(height: 20),
+
+          // Bottom Row - Summary & Invoices
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: _buildTabletSummaryCard(),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildTabletAffectedInvoicesCard(),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ===================== DESKTOP VIEW (900px+) =====================
   Widget _buildDesktopView() {
     return Padding(
       padding: const EdgeInsets.all(12),
@@ -38,21 +118,21 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
             flex: 2,
             child: Column(
               children: [
-                _buildHeaderCard(),
-                // const SizedBox(height: 16),
-                _buildPaymentInfoCard(),
+                _buildDesktopHeaderCard(),
+                const SizedBox(height: 16),
+                _buildDesktopPaymentInfoCard(),
               ],
             ),
           ),
-          // const SizedBox(width: 16),
+          const SizedBox(width: 16),
           // Right Column - Summary and Affected Invoices
           Expanded(
             flex: 1,
             child: Column(
               children: [
-                _buildSummaryCard(),
+                _buildDesktopSummaryCard(),
                 const SizedBox(height: 16),
-                _buildAffectedInvoicesCard(),
+                _buildDesktopAffectedInvoicesCard(),
               ],
             ),
           ),
@@ -61,8 +141,813 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
     );
   }
 
+  // ===================== MOBILE COMPONENTS =====================
+  Widget _buildMobileHeaderCard() {
+    final amount = double.tryParse(receipt.amount ?? '0') ?? 0;
 
-  Widget _buildHeaderCard() {
+    return Card(
+      elevation: 3,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Receipt #${receipt.mrNo}',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primaryColor,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        _formatDate(receipt.paymentDate),
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: _getStatusColor(receipt.paymentSummary?.status ?? '').withValues(alpha:0.1),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: _getStatusColor(receipt.paymentSummary?.status ?? '')),
+                  ),
+                  child: Text(
+                    (receipt.paymentSummary?.status ?? 'UNKNOWN').toUpperCase(),
+                    style: TextStyle(
+                      color: _getStatusColor(receipt.paymentSummary?.status ?? ''),
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            const Divider(),
+            const SizedBox(height: 12),
+            _buildMobileInfoGrid(),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+              decoration: BoxDecoration(
+                color: Colors.green.withValues(alpha:0.05),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.green.shade200),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Amount Received',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                    ),
+                  ),
+                  Text(
+                    '৳${amount.toStringAsFixed(2)}',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.green,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMobileInfoGrid() {
+    final List<Map<String, String?>> infoItems = [
+      {'label': 'Customer', 'value': receipt.customerName ?? '-'},
+      {'label': 'Seller', 'value': receipt.sellerName ?? '-'},
+      {'label': 'Payment Method', 'value': receipt.paymentMethod ?? '-'},
+      {'label': 'Payment Type', 'value': receipt.paymentType ?? '-'},
+      if (receipt.customerPhone != null)
+        {'label': 'Phone', 'value': receipt.customerPhone.toString()},
+      if (receipt.saleInvoiceNo != null)
+        {'label': 'Invoice No', 'value': receipt.saleInvoiceNo!},
+    ];
+
+    return Column(
+      children: infoItems.map((item) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                flex: 2,
+                child: Text(
+                  item['label']!,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey[600],
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+              Expanded(
+                flex: 3,
+                child: Text(
+                  item['value']!,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  textAlign: TextAlign.right,
+                ),
+              ),
+            ],
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildMobilePaymentInfoCard() {
+    final amount = double.tryParse(receipt.amount ?? '0') ?? 0;
+
+    return Card(
+      elevation: 3,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.payment, color: AppColors.primaryColor, size: 20),
+                const SizedBox(width: 8),
+                const Text(
+                  'Payment Information',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            _buildMobilePaymentDetails(amount),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMobilePaymentDetails(double amount) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.green.shade50,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.green.shade200),
+      ),
+      child: Column(
+        children: [
+          _buildMobilePaymentRow('Amount', '৳${amount.toStringAsFixed(2)}', isAmount: true),
+          const SizedBox(height: 12),
+          _buildMobilePaymentRow('Method', receipt.paymentMethod ?? '-'),
+          const SizedBox(height: 8),
+          _buildMobilePaymentRow('Type', receipt.paymentType ?? '-'),
+          const SizedBox(height: 8),
+          if (receipt.paymentDate != null)
+            _buildMobilePaymentRow('Date', _formatDate(receipt.paymentDate)),
+          if (receipt.remark != null && receipt.remark!.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            _buildMobilePaymentRow('Remarks', receipt.remark!),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMobilePaymentRow(String label, String value, {bool isAmount = false}) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: Colors.grey.shade700,
+          ),
+        ),
+        Expanded(
+          child: Text(
+            value,
+            textAlign: TextAlign.right,
+            style: TextStyle(
+              fontSize: isAmount ? 18 : 14,
+              fontWeight: isAmount ? FontWeight.bold : FontWeight.normal,
+              color: isAmount ? Colors.green : Colors.black,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMobileSummaryCard() {
+    final summary = receipt.paymentSummary;
+    final before = summary?.beforePayment;
+    final after = summary?.afterPayment;
+
+    return Card(
+      elevation: 3,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.summarize, color: AppColors.primaryColor, size: 20),
+                const SizedBox(width: 8),
+                const Text(
+                  'Payment Summary',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            if (before != null) _buildMobileSummarySection('Before Payment', before),
+            if (after != null) _buildMobileSummarySection('After Payment', after),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMobileSummarySection(String title, dynamic paymentData) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey.shade300),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
+              color: AppColors.primaryColor,
+            ),
+          ),
+          const SizedBox(height: 8),
+          if (paymentData is BeforePayment) ...[
+            _buildMobileSummaryRow('Total Due', paymentData.totalDue),
+            _buildMobileSummaryRow('Invoice Total', paymentData.invoiceTotal),
+            _buildMobileSummaryRow('Previous Paid', paymentData.previousPaid),
+            _buildMobileSummaryRow('Previous Due', paymentData.previousDue),
+          ] else if (paymentData is AfterPayment) ...[
+            _buildMobileSummaryRow('Total Due', paymentData.totalDue),
+            _buildMobileSummaryRow('Payment Applied', paymentData.paymentApplied),
+            _buildMobileSummaryRow('Current Paid', paymentData.currentPaid),
+            _buildMobileSummaryRow('Current Due', paymentData.currentDue),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMobileSummaryRow(String label, dynamic value) {
+    final amount = double.tryParse(value?.toString() ?? '0') ?? 0;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 13,
+              color: Colors.grey,
+            ),
+          ),
+          Text(
+            '৳${amount.toStringAsFixed(2)}',
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: amount < 0 ? Colors.red : Colors.black,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMobileAffectedInvoicesCard() {
+    final affectedInvoices = receipt.paymentSummary?.affectedInvoices ?? [];
+
+    return Card(
+      elevation: 3,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.receipt, color: AppColors.primaryColor, size: 20),
+                const SizedBox(width: 8),
+                const Text(
+                  'Affected Invoices',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const Spacer(),
+                Text(
+                  '${affectedInvoices.length} invoice(s)',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey[600],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            if (affectedInvoices.isEmpty)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(vertical: 20),
+                  child: Text(
+                    'No affected invoices',
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                ),
+              ),
+            if (affectedInvoices.isNotEmpty)
+              ...affectedInvoices.map((invoice) => _buildMobileInvoiceRow(invoice)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMobileInvoiceRow(AffectedInvoice invoice) {
+    final amount = double.tryParse(invoice.amountApplied?.toString() ?? '0') ?? 0;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade50,
+        border: Border.all(color: Colors.grey.shade200),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  invoice.invoiceNo ?? 'Unknown Invoice',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                  ),
+                ),
+              //   const SizedBox(height: 4),
+              //   if (invoice.paymentDate != null)
+              //     Text(
+              //       _formatDate(invoice.paymentDate),
+              //       style: TextStyle(
+              //         fontSize: 12,
+              //         color: Colors.grey[600],
+              //       ),
+              //     ),
+              ],
+            ),
+          ),
+          Text(
+            '৳${amount.toStringAsFixed(2)}',
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: AppColors.primaryColor,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ===================== TABLET COMPONENTS =====================
+  Widget _buildTabletHeaderCard() {
+    return Card(
+      elevation: 3,
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Money Receipt: ${receipt.mrNo}',
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: AppColors.primaryColor,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Date: ${_formatDate(receipt.paymentDate)}',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey[600],
+              ),
+            ),
+            const SizedBox(height: 16),
+            _buildTabletInfoGrid(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTabletStatusCard() {
+    return Card(
+      elevation: 3,
+      color: _getStatusColor(receipt.paymentSummary?.status ?? '').withValues(alpha:0.05),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'Status',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey[600],
+              ),
+            ),
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: _getStatusColor(receipt.paymentSummary?.status ?? '').withValues(alpha:0.1),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: _getStatusColor(receipt.paymentSummary?.status ?? '')),
+              ),
+              child: Text(
+                (receipt.paymentSummary?.status ?? 'UNKNOWN').toUpperCase(),
+                style: TextStyle(
+                  color: _getStatusColor(receipt.paymentSummary?.status ?? ''),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTabletInfoGrid() {
+    final List<Map<String, String?>> infoItems = [
+      {'label': 'Customer', 'value': receipt.customerName ?? '-'},
+      {'label': 'Seller', 'value': receipt.sellerName ?? '-'},
+      {'label': 'Payment Method', 'value': receipt.paymentMethod ?? '-'},
+      {'label': 'Payment Type', 'value': receipt.paymentType ?? '-'},
+      if (receipt.customerPhone != null)
+        {'label': 'Phone', 'value': receipt.customerPhone.toString()},
+      if (receipt.saleInvoiceNo != null)
+        {'label': 'Invoice No', 'value': receipt.saleInvoiceNo!},
+    ];
+
+    return Wrap(
+      spacing: 20,
+      runSpacing: 12,
+      children: infoItems.map((item) {
+        return SizedBox(
+          width: 180,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                item['label']!,
+                style: TextStyle(
+                  fontSize: 13,
+                  color: Colors.grey[600],
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                item['value']!,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildTabletPaymentInfoCard() {
+    final amount = double.tryParse(receipt.amount ?? '0') ?? 0;
+
+    return Card(
+      elevation: 3,
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Payment Information',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.green.shade50,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.green.shade200),
+              ),
+              child: Column(
+                children: [
+                  _buildTabletPaymentRow('Amount Received', '৳${amount.toStringAsFixed(2)}', isAmount: true),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildTabletPaymentRow('Payment Method', receipt.paymentMethod ?? '-'),
+                      ),
+                      const SizedBox(width: 20),
+                      Expanded(
+                        child: _buildTabletPaymentRow('Payment Type', receipt.paymentType ?? '-'),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  _buildTabletPaymentRow('Payment Date', _formatDate(receipt.paymentDate)),
+                  if (receipt.remark != null && receipt.remark!.isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    _buildTabletPaymentRow('Remarks', receipt.remark!),
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTabletPaymentRow(String label, String value, {bool isAmount = false}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: Colors.grey.shade700,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: isAmount ? 20 : 15,
+            fontWeight: isAmount ? FontWeight.bold : FontWeight.normal,
+            color: isAmount ? Colors.green : Colors.black,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTabletSummaryCard() {
+    final summary = receipt.paymentSummary;
+    final before = summary?.beforePayment;
+    final after = summary?.afterPayment;
+
+    return Card(
+      elevation: 3,
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Payment Summary',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 16),
+            if (before != null) _buildTabletSummarySection('Before Payment', before),
+            if (after != null) _buildTabletSummarySection('After Payment', after),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTabletSummarySection(String title, dynamic paymentData) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey.shade300),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 15,
+              color: AppColors.primaryColor,
+            ),
+          ),
+          const SizedBox(height: 12),
+          if (paymentData is BeforePayment) ...[
+            _buildTabletSummaryRow('Total Due', paymentData.totalDue),
+            _buildTabletSummaryRow('Invoice Total', paymentData.invoiceTotal),
+            _buildTabletSummaryRow('Previous Paid', paymentData.previousPaid),
+            _buildTabletSummaryRow('Previous Due', paymentData.previousDue),
+          ] else if (paymentData is AfterPayment) ...[
+            _buildTabletSummaryRow('Total Due', paymentData.totalDue),
+            _buildTabletSummaryRow('Payment Applied', paymentData.paymentApplied),
+            _buildTabletSummaryRow('Current Paid', paymentData.currentPaid),
+            _buildTabletSummaryRow('Current Due', paymentData.currentDue),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTabletSummaryRow(String label, dynamic value) {
+    final amount = double.tryParse(value?.toString() ?? '0') ?? 0;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 14,
+            ),
+          ),
+          Text(
+            '৳${amount.toStringAsFixed(2)}',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: amount < 0 ? Colors.red : Colors.black,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTabletAffectedInvoicesCard() {
+    final affectedInvoices = receipt.paymentSummary?.affectedInvoices ?? [];
+
+    return Card(
+      elevation: 3,
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Affected Invoices',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              '${affectedInvoices.length} invoice(s)',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey[600],
+              ),
+            ),
+            const SizedBox(height: 16),
+            if (affectedInvoices.isEmpty)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(vertical: 20),
+                  child: Text(
+                    'No affected invoices',
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                ),
+              ),
+            if (affectedInvoices.isNotEmpty)
+              ...affectedInvoices.map((invoice) => _buildTabletInvoiceRow(invoice)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTabletInvoiceRow(AffectedInvoice invoice) {
+    final amount = double.tryParse(invoice.amountApplied?.toString() ?? '0') ?? 0;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade50,
+        border: Border.all(color: Colors.grey.shade300),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  invoice.invoiceNo ?? 'Unknown Invoice',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 15,
+                  ),
+                ),
+                // if (invoice. != null)
+                //   Text(
+                //     _formatDate(invoice.paymentDate),
+                //     style: TextStyle(
+                //       fontSize: 13,
+                //       color: Colors.grey[600],
+                //     ),
+                //   ),
+              ],
+            ),
+          ),
+          Text(
+            '৳${amount.toStringAsFixed(2)}',
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: AppColors.primaryColor,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ===================== DESKTOP COMPONENTS (unchanged) =====================
+  Widget _buildDesktopHeaderCard() {
     return Card(
       elevation: 3,
       child: Padding(
@@ -89,7 +974,7 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
                     vertical: 8,
                   ),
                   decoration: BoxDecoration(
-                    color: _getStatusColor(receipt.paymentSummary?.status ?? '').withValues(alpha: 0.1),
+                    color: _getStatusColor(receipt.paymentSummary?.status ?? '').withValues(alpha:0.1),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(color: _getStatusColor(receipt.paymentSummary?.status ?? '')),
                   ),
@@ -159,7 +1044,7 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildPaymentInfoCard() {
+  Widget _buildDesktopPaymentInfoCard() {
     final amount = double.tryParse(receipt.amount ?? '0') ?? 0;
 
     return Card(
@@ -230,7 +1115,7 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSummaryCard() {
+  Widget _buildDesktopSummaryCard() {
     final summary = receipt.paymentSummary;
     final before = summary?.beforePayment;
     final after = summary?.afterPayment;
@@ -316,7 +1201,7 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildAffectedInvoicesCard() {
+  Widget _buildDesktopAffectedInvoicesCard() {
     final affectedInvoices = receipt.paymentSummary?.affectedInvoices ?? [];
 
     return Card(
@@ -419,7 +1304,7 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
             canChangeOrientation: false,
             canChangePageFormat: false,
             dynamicLayout: true,
-            build: (format) => generateMoneyReceiptPdf(receipt),
+            build: (format) => generateMoneyReceiptPdf(receipt, context.read<ProfileBloc>().permissionModel?.data?.companyInfo),
             pdfPreviewPageDecoration: BoxDecoration(color: AppColors.white),
             actionBarTheme: PdfActionBarTheme(
               backgroundColor: AppColors.primaryColor,

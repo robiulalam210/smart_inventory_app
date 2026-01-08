@@ -1,3 +1,4 @@
+import '../../profile/presentation/bloc/profile_bloc/profile_bloc.dart';
 import '/feature/purchase/presentation/page/purchase_details.dart';
 import 'package:printing/printing.dart';
 
@@ -643,7 +644,7 @@ class PurchaseDataTableWidget extends StatelessWidget {
             canChangeOrientation: false,
             canChangePageFormat: false,
             dynamicLayout: true,
-            build: (format) => generatePurchasePdf(purchase),
+            build: (format) => generatePurchasePdf(purchase, context.read<ProfileBloc>().permissionModel?.data?.companyInfo),
             pagesBuilder: (context, pages) {
               return PageView.builder(
                 itemCount: pages.length,

@@ -1,5 +1,6 @@
 import 'package:printing/printing.dart';
 import '../../../../core/configs/configs.dart';
+import '../../../profile/presentation/bloc/profile_bloc/profile_bloc.dart';
 import '../../data/model/purchase_sale_model.dart';
 import 'pdf/generate_purchase_pdf.dart';
 
@@ -136,7 +137,7 @@ class PurchaseDetailsScreen extends StatelessWidget {
       crossAxisCount: 2,
       crossAxisSpacing: 16,
       mainAxisSpacing: 12,
-      childAspectRatio: 4,
+      childAspectRatio: 3,
       children: [
         _buildInfoItem('Purchase Date', AppWidgets().convertDateTimeDDMMYYYY(purchase.purchaseDate)),
         _buildInfoItem('Invoice No', purchase.invoiceNo ?? '-'),
@@ -310,11 +311,11 @@ class PurchaseDetailsScreen extends StatelessWidget {
   }
 
   Widget _buildSummaryCard() {
-    final total = double.tryParse(purchase.total!) ?? 0.0
+    final total = double.tryParse(purchase.total.toString()) ?? 0.0
        ;
-    final grandTotal = double.tryParse(purchase.grandTotal!) ?? 0.0
+    final grandTotal = double.tryParse(purchase.grandTotal.toString()) ?? 0.0
        ;
-    final subTotal = double.tryParse(purchase.subTotal!) ?? 0.0
+    final subTotal = double.tryParse(purchase.subTotal.toString()) ?? 0.0
        ;
 
     return Card(
@@ -419,11 +420,11 @@ class PurchaseDetailsScreen extends StatelessWidget {
   }
 
   Widget _buildPaymentCard() {
-    final paid = double.tryParse(purchase.paidAmount!) ?? 0.0
+    final paid = double.tryParse(purchase.paidAmount.toString()) ?? 0.0
        ;
-    final due =  double.tryParse(purchase.dueAmount!) ?? 0.0
+    final due =  double.tryParse(purchase.dueAmount.toString()) ?? 0.0
        ;
-    final change =  double.tryParse(purchase.changeAmount!) ?? 0.0
+    final change =  double.tryParse(purchase.changeAmount.toString()) ?? 0.0
         ;
 
     return Card(
@@ -525,7 +526,7 @@ class PurchaseDetailsScreen extends StatelessWidget {
             canChangeOrientation: false,
             canChangePageFormat: false,
             dynamicLayout: true,
-            build: (format) => generatePurchasePdf(purchase),
+            build: (format) => generatePurchasePdf(purchase, context.read<ProfileBloc>().permissionModel?.data?.companyInfo),
             pdfPreviewPageDecoration: BoxDecoration(color: AppColors.white),
             actionBarTheme: PdfActionBarTheme(
               backgroundColor: AppColors.primaryColor,
