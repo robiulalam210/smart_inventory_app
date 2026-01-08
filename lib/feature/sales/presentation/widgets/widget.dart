@@ -1,6 +1,7 @@
 import 'package:printing/printing.dart';
 
 import '../../../../core/configs/configs.dart';
+import '../../../profile/presentation/bloc/profile_bloc/profile_bloc.dart';
 import '../../data/models/pos_sale_model.dart';
 import '../pages/sales_details_screen.dart';
 import 'pdf/sales_invocei.dart';
@@ -696,7 +697,7 @@ class PosSaleDataTableWidget extends StatelessWidget {
             canChangeOrientation: false,
             canChangePageFormat: false,
             dynamicLayout: true,
-            build: (format) => generateSalesPdf(sale),
+            build: (format) => generateSalesPdf(sale, context.read<ProfileBloc>().permissionModel?.data?.companyInfo),
             pagesBuilder: (context, pages) {
               return PageView.builder(
                 itemCount: pages.length,

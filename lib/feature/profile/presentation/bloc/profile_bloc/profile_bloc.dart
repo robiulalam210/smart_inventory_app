@@ -11,6 +11,8 @@ part 'profile_event.dart';
 part 'profile_state.dart';
 
 class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
+  UserProfileModel? profileModel;
+  ProfilePermissionModel? permissionModel;
   ProfileBloc() : super(ProfileInitial()) {
     on<FetchProfilePermission>(_onFetchProfilePermission);
     on<FetchUserProfile>(_onFetchUserProfile);
@@ -53,7 +55,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
 
       // Now use the parsed map with ProfilePermissionModel.fromJson
       final ProfilePermissionModel permissionData = ProfilePermissionModel.fromJson(responseData);
-
+      permissionModel=permissionData;
 
       if (permissionData.status == true) {
         emit(ProfilePermissionSuccess(permissionData: permissionData));
@@ -94,6 +96,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
 
       if (response.success == true) {
         final UserProfileModel profileData = response.data;
+        profileModel=profileData;
         emit(ProfileSuccess(profileData: profileData));
       } else {
         emit(

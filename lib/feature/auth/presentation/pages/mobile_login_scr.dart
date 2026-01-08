@@ -76,9 +76,7 @@ class _MobileLoginScrState extends State<MobileLoginScr> {
             showCustomToast(
               context: context,
               title: "Success",
-              description: state is AuthAuthenticated
-                  ? "Logged in online"
-                  : "Logged in offline",
+              description:  "Login  in Successful",
               type: ToastificationType.success,
             );
 
@@ -122,14 +120,13 @@ class _MobileLoginScrState extends State<MobileLoginScr> {
                   children: [
                     /// 🔹 Lottie / Logo
                     SizedBox(
-                      height: 220,
+                      height: 200,
                       child: Lottie.asset(
                         AppImages.loginLottie,
                         fit: BoxFit.contain,
                       ),
                     ),
 
-                    const SizedBox(height: 10),
 
                     /// 🔹 Login Card
                     Container(
@@ -169,7 +166,7 @@ class _MobileLoginScrState extends State<MobileLoginScr> {
                               ),
                             ),
 
-                            const SizedBox(height: 20),
+                            const SizedBox(height: 15),
 
                             /// Email
                             AppTextField(
@@ -185,7 +182,6 @@ class _MobileLoginScrState extends State<MobileLoginScr> {
                                   _passwordFocus.requestFocus(),
                             ),
 
-                            const SizedBox(height: 12),
 
                             /// Password
                             AppTextField(

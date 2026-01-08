@@ -1,6 +1,7 @@
 import 'package:printing/printing.dart';
 
 import '../../../../core/configs/configs.dart';
+import '../../../profile/presentation/bloc/profile_bloc/profile_bloc.dart';
 import '../../data/model/money_receipt_model/money_receipt_model.dart';
 import '../page/money_receipt_details.dart';
 import '../page/pdf/generate_money_receipt.dart';
@@ -647,7 +648,7 @@ class MoneyReceiptDataTableWidget extends StatelessWidget {
             canChangeOrientation: false,
             canChangePageFormat: false,
             dynamicLayout: true,
-            build: (format) => generateMoneyReceiptPdf(receipt),
+            build: (format) => generateMoneyReceiptPdf(receipt, context.read<ProfileBloc>().permissionModel?.data?.companyInfo),
             pagesBuilder: (context, pages) {
               return PageView.builder(
                 itemCount: pages.length,
