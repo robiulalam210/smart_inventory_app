@@ -184,7 +184,7 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
                     vertical: 6,
                   ),
                   decoration: BoxDecoration(
-                    color: _getStatusColor(receipt.paymentSummary?.status ?? '').withOpacity(0.1),
+                    color: _getStatusColor(receipt.paymentSummary?.status ?? '').withValues(alpha:0.1),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(color: _getStatusColor(receipt.paymentSummary?.status ?? '')),
                   ),
@@ -207,7 +207,7 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
               decoration: BoxDecoration(
-                color: Colors.green.withOpacity(0.05),
+                color: Colors.green.withValues(alpha:0.05),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(color: Colors.green.shade200),
               ),
@@ -603,7 +603,7 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
   Widget _buildTabletStatusCard() {
     return Card(
       elevation: 3,
-      color: _getStatusColor(receipt.paymentSummary?.status ?? '').withOpacity(0.05),
+      color: _getStatusColor(receipt.paymentSummary?.status ?? '').withValues(alpha:0.05),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -620,7 +620,7 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: _getStatusColor(receipt.paymentSummary?.status ?? '').withOpacity(0.1),
+                color: _getStatusColor(receipt.paymentSummary?.status ?? '').withValues(alpha:0.1),
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(color: _getStatusColor(receipt.paymentSummary?.status ?? '')),
               ),
@@ -974,7 +974,7 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
                     vertical: 8,
                   ),
                   decoration: BoxDecoration(
-                    color: _getStatusColor(receipt.paymentSummary?.status ?? '').withOpacity(0.1),
+                    color: _getStatusColor(receipt.paymentSummary?.status ?? '').withValues(alpha:0.1),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(color: _getStatusColor(receipt.paymentSummary?.status ?? '')),
                   ),

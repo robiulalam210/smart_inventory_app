@@ -36,11 +36,11 @@ class PosSaleDataTableWidget extends StatelessWidget {
   }
 
   Widget _buildSaleCard(
-      PosSaleModel sale,
-      int index,
-      BuildContext context,
-      bool isMobile,
-      ) {
+    PosSaleModel sale,
+    int index,
+    BuildContext context,
+    bool isMobile,
+  ) {
     final dueAmount = sale.dueAmount is String
         ? double.tryParse(sale.dueAmount!) ?? 0.0
         : (sale.dueAmount ?? 0.0).toDouble();
@@ -73,10 +73,7 @@ class PosSaleDataTableWidget extends StatelessWidget {
             offset: const Offset(0, 4),
           ),
         ],
-        border: Border.all(
-          color: Colors.grey.shade200,
-          width: 1,
-        ),
+        border: Border.all(color: Colors.grey.shade200, width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -129,14 +126,14 @@ class PosSaleDataTableWidget extends StatelessWidget {
                   ],
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: statusColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: statusColor,
-                      width: 1,
-                    ),
+                    border: Border.all(color: statusColor, width: 1),
                   ),
                   child: Text(
                     status,
@@ -180,7 +177,6 @@ class PosSaleDataTableWidget extends StatelessWidget {
                     ),
                   ],
                 ),
-
 
                 const SizedBox(height: 4),
 
@@ -288,10 +284,7 @@ class PosSaleDataTableWidget extends StatelessWidget {
                 bottomRight: Radius.circular(16),
               ),
               border: Border(
-                top: BorderSide(
-                  color: Colors.grey.shade200,
-                  width: 1,
-                ),
+                top: BorderSide(color: Colors.grey.shade200, width: 1),
               ),
             ),
             child: Row(
@@ -301,10 +294,7 @@ class PosSaleDataTableWidget extends StatelessWidget {
                 Expanded(
                   child: OutlinedButton.icon(
                     onPressed: () => _viewSaleDetails(context, sale),
-                    icon: const Icon(
-                      Iconsax.eye,
-                      size: 16,
-                    ),
+                    icon: const Icon(Iconsax.eye, size: 16),
                     label: const Text('View'),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: Colors.blue,
@@ -322,10 +312,7 @@ class PosSaleDataTableWidget extends StatelessWidget {
                 Expanded(
                   child: OutlinedButton.icon(
                     onPressed: () => _generatePdf(context, sale),
-                    icon: const Icon(
-                      Iconsax.document_download,
-                      size: 16,
-                    ),
+                    icon: const Icon(Iconsax.document_download, size: 16),
                     label: const Text('PDF'),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: Colors.green,
@@ -353,11 +340,7 @@ class PosSaleDataTableWidget extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(
-          icon,
-          size: 16,
-          color: Colors.grey.shade600,
-        ),
+        Icon(icon, size: 16, color: Colors.grey.shade600),
         const SizedBox(width: 8),
         Expanded(
           child: Column(
@@ -398,15 +381,18 @@ class PosSaleDataTableWidget extends StatelessWidget {
         const numColumns = 11;
         const minColumnWidth = 100.0;
 
-        final dynamicColumnWidth =
-        (totalWidth / numColumns).clamp(minColumnWidth, double.infinity);
+        final dynamicColumnWidth = (totalWidth / numColumns).clamp(
+          minColumnWidth,
+          double.infinity,
+        );
 
         return Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(AppSizes.radius),
             color: Colors.white,
           ),
-          child:ClipRRect( borderRadius: BorderRadius.circular(AppSizes.radius),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(AppSizes.radius),
             child: Scrollbar(
               controller: verticalScrollController,
               thumbVisibility: true,
@@ -439,12 +425,12 @@ class PosSaleDataTableWidget extends StatelessWidget {
                             .entries
                             .map(
                               (entry) => _buildDataRow(
-                            context,
-                            entry.key + 1,
-                            entry.value,
-                            dynamicColumnWidth,
-                          ),
-                        )
+                                context,
+                                entry.key + 1,
+                                entry.value,
+                                dynamicColumnWidth,
+                              ),
+                            )
                             .toList(),
                       ),
                     ),
@@ -476,32 +462,32 @@ class PosSaleDataTableWidget extends StatelessWidget {
     return labels
         .map(
           (label) => DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: Padding(
-            padding: const EdgeInsets.all(4),
-            child: Text(
-              label,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w700,
-                color: Colors.white,
+            label: SizedBox(
+              width: columnWidth,
+              child: Padding(
+                padding: const EdgeInsets.all(4),
+                child: Text(
+                  label,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
+                ),
               ),
             ),
           ),
-        ),
-      ),
-    )
+        )
         .toList();
   }
 
   DataRow _buildDataRow(
-      BuildContext context,
-      int index,
-      PosSaleModel sale,
-      double columnWidth,
-      ) {
+    BuildContext context,
+    int index,
+    PosSaleModel sale,
+    double columnWidth,
+  ) {
     final dueAmount = sale.dueAmount is String
         ? double.tryParse(sale.dueAmount!) ?? 0.0
         : (sale.dueAmount ?? 0.0).toDouble();
@@ -521,15 +507,31 @@ class PosSaleDataTableWidget extends StatelessWidget {
     return DataRow(
       cells: [
         _buildDataCell(index.toString(), columnWidth, TextAlign.center),
-        _buildDataCell(sale.invoiceNo.toString(), columnWidth, TextAlign.center),
+        _buildDataCell(
+          sale.invoiceNo.toString(),
+          columnWidth,
+          TextAlign.center,
+        ),
         _buildDataCell(
           _formatDate(sale.saleDate),
           columnWidth,
           TextAlign.center,
         ),
-        _buildDataCell(sale.customerName.toString(), columnWidth, TextAlign.center),
-        _buildDataCell(sale.saleByName.toString(), columnWidth, TextAlign.center),
-        _buildDataCell(sale.createdByName.toString(), columnWidth, TextAlign.center),
+        _buildDataCell(
+          sale.customerName.toString(),
+          columnWidth,
+          TextAlign.center,
+        ),
+        _buildDataCell(
+          sale.saleByName.toString(),
+          columnWidth,
+          TextAlign.center,
+        ),
+        _buildDataCell(
+          sale.createdByName.toString(),
+          columnWidth,
+          TextAlign.center,
+        ),
         _buildDataCell(
           _formatCurrency(payableAmount),
           columnWidth,
@@ -613,7 +615,11 @@ class PosSaleDataTableWidget extends StatelessWidget {
     );
   }
 
-  DataCell _buildActionsCell(BuildContext context, PosSaleModel sale, double width) {
+  DataCell _buildActionsCell(
+    BuildContext context,
+    PosSaleModel sale,
+    double width,
+  ) {
     return DataCell(
       SizedBox(
         width: width,
@@ -675,9 +681,7 @@ class PosSaleDataTableWidget extends StatelessWidget {
   void _viewSaleDetails(BuildContext context, PosSaleModel sale) {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => SalesDetailsScreen(sale: sale),
-      ),
+      MaterialPageRoute(builder: (context) => SalesDetailsScreen(sale: sale)),
     );
   }
 
@@ -697,7 +701,10 @@ class PosSaleDataTableWidget extends StatelessWidget {
             canChangeOrientation: false,
             canChangePageFormat: false,
             dynamicLayout: true,
-            build: (format) => generateSalesPdf(sale, context.read<ProfileBloc>().permissionModel?.data?.companyInfo),
+            build: (format) => generateSalesPdf(
+              sale,
+              context.read<ProfileBloc>().permissionModel?.data?.companyInfo,
+            ),
             pagesBuilder: (context, pages) {
               return PageView.builder(
                 itemCount: pages.length,

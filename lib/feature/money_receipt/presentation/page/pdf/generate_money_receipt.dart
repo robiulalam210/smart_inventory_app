@@ -115,39 +115,6 @@ Future<Uint8List> generateMoneyReceiptPdf(MoneyreceiptModel receipt, CompanyInfo
 }
 
 // ---------------------- HEADER ----------------------
-pw.Widget _buildHeader() {
-  return pw.Container(
-    padding: const pw.EdgeInsets.all(8),
-    margin: const pw.EdgeInsets.all(8),
-    child: pw.Row(
-      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-      children: [
-        pw.Column(
-          crossAxisAlignment: pw.CrossAxisAlignment.start,
-          children: [
-            pw.Text(
-              'MONEY RECEIPT',
-              style: pw.TextStyle(
-                fontSize: 16,
-                fontWeight: pw.FontWeight.bold,
-                color: PdfColors.blue800,
-              ),
-            ),
-            pw.SizedBox(height: 4),
-            pw.Text(
-              'Official Payment Receipt',
-              style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey600),
-            ),
-          ],
-        ),
-        pw.Text(
-          '${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}',
-          style: const pw.TextStyle(fontSize: 10),
-        ),
-      ],
-    ),
-  );
-}
 
 // ---------------------- RECEIPT HEADER ----------------------
 pw.Widget _buildReceiptHeader(MoneyreceiptModel receipt) {

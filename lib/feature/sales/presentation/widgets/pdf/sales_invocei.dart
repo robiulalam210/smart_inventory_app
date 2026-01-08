@@ -1,6 +1,4 @@
-import 'dart:typed_data';
 
-import 'package:meherinMart/core/configs/app_urls.dart';
 import 'package:printing/printing.dart';
 
 import '../../../../profile/data/model/profile_perrmission_model.dart';

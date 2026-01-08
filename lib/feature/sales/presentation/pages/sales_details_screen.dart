@@ -144,7 +144,7 @@ class SalesDetailsScreen extends StatelessWidget {
                           vertical: 6,
                         ),
                         decoration: BoxDecoration(
-                          color: sale.statusColor.withOpacity(0.1),
+                          color: sale.statusColor.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(color: sale.statusColor),
                         ),
@@ -190,7 +190,7 @@ class SalesDetailsScreen extends StatelessWidget {
   Widget _buildMobileHeaderCard() {
     return Card(
       elevation: 3,
-      color: AppColors.primaryColor.withOpacity(0.05),
+      color: AppColors.primaryColor.withValues(alpha:0.05),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -613,7 +613,7 @@ class SalesDetailsScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
               decoration: BoxDecoration(
-                color: sale.statusColor.withOpacity(0.1),
+                color: sale.statusColor.withValues(alpha:0.1),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: sale.statusColor),
               ),
@@ -700,7 +700,7 @@ class SalesDetailsScreen extends StatelessWidget {
       children: [
         TableRow(
           decoration: BoxDecoration(
-              color: AppColors.primaryColor.withOpacity(0.1)),
+              color: AppColors.primaryColor.withValues(alpha:0.1)),
           children: const [
             _TableHeader('Product'),
             _TableHeader('Qty'),
