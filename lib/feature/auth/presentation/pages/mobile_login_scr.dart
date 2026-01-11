@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'package:meherinMart/core/widgets/app_scaffold.dart';
+
 import '../../../../core/core.dart';
 import '../../../../core/database/login_local_storage.dart';
 import '../../../feature.dart';
@@ -63,8 +65,8 @@ class _MobileLoginScrState extends State<MobileLoginScr> {
   Widget build(BuildContext context) {
     final keyboardInset = MediaQuery.of(context).viewInsets.bottom;
 
-    return Scaffold(
-      backgroundColor: AppColors.bg,
+    return AppScaffold(
+      // backgroundColor: AppColors.bg,
       body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) async {
           if (state is AuthAuthenticated || state is AuthAuthenticatedOffline) {
@@ -99,12 +101,12 @@ class _MobileLoginScrState extends State<MobileLoginScr> {
         },
         child: GestureDetector(
           onTap: () => FocusScope.of(context).unfocus(),
-          child: Container(
+          child: SizedBox(
             width: double.infinity,
             height: double.infinity,
-            decoration: BoxDecoration(
-              gradient: AppColors.primaryGradient,
-            ),
+            // decoration: BoxDecoration(
+            //   gradient: AppColors.primaryGradient,
+            // ),
             child: SingleChildScrollView(
               padding: EdgeInsets.only(
                 left: 20,
@@ -120,27 +122,27 @@ class _MobileLoginScrState extends State<MobileLoginScr> {
                   children: [
                     /// 🔹 Lottie / Logo
                     SizedBox(
-                      height: 200,
+                      height: 220,
                       child: Lottie.asset(
                         AppImages.loginLottie,
-                        fit: BoxFit.contain,
+                        fit: BoxFit.fitHeight,height: 200
                       ),
                     ),
 
 
                     /// 🔹 Login Card
                     Container(
-                      padding: const EdgeInsets.all(20),
+                      padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
                         color: Colors.white.withValues(alpha: 0.95),
                         borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.12),
-                            blurRadius: 30,
-                            offset: const Offset(0, 20),
-                          )
-                        ],
+                        // boxShadow: [
+                        //   BoxShadow(
+                        //     color: Colors.black.withValues(alpha: 0.12),
+                        //     blurRadius: 30,
+                        //     offset: const Offset(0, 20),
+                        //   )
+                        // ],
                       ),
                       child: Form(
                         key: _formKey,
@@ -182,7 +184,7 @@ class _MobileLoginScrState extends State<MobileLoginScr> {
                                   _passwordFocus.requestFocus(),
                             ),
 
-
+                            const SizedBox(height: 8),
                             /// Password
                             AppTextField(
                               labelText: "Password",

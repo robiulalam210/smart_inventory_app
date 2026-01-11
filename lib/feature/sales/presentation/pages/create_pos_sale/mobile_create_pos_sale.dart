@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../../../../../core/widgets/app_scaffold.dart';
@@ -45,6 +46,9 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
   String selectedOverallDiscountType = 'fixed';
   String selectedOverallServiceChargeType = 'fixed';
   String selectedOverallDeliveryType = 'fixed';
+
+  // Add autovalidate mode for each step
+  AutovalidateMode _autovalidateMode = AutovalidateMode.disabled;
 
   @override
   void initState() {
@@ -94,7 +98,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
 
     // Find matched user
     final matchedUser = userList.firstWhere(
-      (user) => user.id == loginUserId,
+          (user) => user.id == loginUserId,
       orElse: () => userList.first,
     );
 
@@ -111,7 +115,31 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
   void _updateChangeAmount() {
     final bloc = context.read<CreatePosSaleBloc>();
     final payableAmount = double.tryParse(bloc.payableAmount.text) ?? 0.0;
-    final changeAmount = calculateAllFinalTotal() - payableAmount;
+    final netTotal = calculateAllFinalTotal();
+    final changeAmount = payableAmount - netTotal;
+
+    // For walk-in customers, change amount should be 0 (no advance)
+    final selectedCustomer = bloc.selectClintModel;
+    final isWalkInCustomer = selectedCustomer?.id == -1;
+
+    if (isWalkInCustomer) {
+      // Walk-in customer: Must pay exact amount, no change
+      if (payableAmount != netTotal) {
+        showCustomToast(
+          context: context,
+          title: 'Warning!',
+          description: "Walk-in customer must pay exact amount. No change allowed.",
+          icon: Icons.warning,
+          primaryColor: Colors.orange,
+        );
+        // Auto-correct to exact amount
+        bloc.payableAmount.text = netTotal.toStringAsFixed(2);
+        setState(() {
+          changeAmountController.text = "0.00";
+        });
+        return;
+      }
+    }
 
     setState(() {
       changeAmountController.text = changeAmount.toStringAsFixed(2);
@@ -307,9 +335,9 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
     // Calculate final total
     double finalTotal =
         totalAfterDiscount +
-        overallVat +
-        overallServiceCharge +
-        overallDeliveryCharge;
+            overallVat +
+            overallServiceCharge +
+            overallDeliveryCharge;
 
     return finalTotal;
   }
@@ -368,21 +396,16 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
 
   @override
   Widget build(BuildContext context) {
-
-
     return AppScaffold(
       appBar: AppBar(
         backgroundColor: AppColors.bg,
-        title:  Text('Sale',style: AppTextStyle.titleMedium(context),),
-
+        title: Text('Sale', style: AppTextStyle.titleMedium(context)),
       ),
       body: SafeArea(
-        child:  _buildMobileStepperContent(),
+        child: _buildMobileStepperContent(),
       ),
     );
   }
-
-
 
   Widget _buildMobileStepperContent() {
     return BlocConsumer<CreatePosSaleBloc, CreatePosSaleState>(
@@ -390,7 +413,6 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
         if (state is CreatePosSaleLoading) {
           appLoader(context, "Creating PosSale, please wait...");
         } else if (state is CreatePosSaleSuccess) {
-          // Navigator.pop(context);
           showCustomToast(
             context: context,
             title: 'Success!',
@@ -419,39 +441,48 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
       },
       builder: (context, state) {
         final bloc = context.read<CreatePosSaleBloc>();
+        final selectedCustomer = bloc.selectClintModel;
+        final isWalkInCustomer = selectedCustomer?.id == -1;
 
         return Form(
           key: formKey,
+          autovalidateMode: _autovalidateMode,
           child: Stepper(
-            physics: const ClampingScrollPhysics(), // 👈 important
+            physics: const ClampingScrollPhysics(),
             type: StepperType.vertical,
             currentStep: currentStep,
             onStepContinue: () {
-              if (currentStep < 3) {
-                setState(() {
-                  currentStep += 1;
-                });
-
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  debugPrint("after rebuild currentStep: $currentStep");
-                });
+              if (_validateCurrentStep()) {
+                if (currentStep < 3) {
+                  setState(() {
+                    currentStep += 1;
+                    _autovalidateMode = AutovalidateMode.disabled;
+                  });
+                } else {
+                  _submitForm();
+                }
               } else {
-                // 👇 LAST STEP → SUBMIT
-                _submitForm();
+                // Enable auto-validation to show errors
+                setState(() {
+                  _autovalidateMode = AutovalidateMode.onUserInteraction;
+                });
               }
             },
-
             onStepCancel: () {
               if (currentStep > 0) {
                 setState(() {
                   currentStep -= 1;
+                  _autovalidateMode = AutovalidateMode.disabled;
                 });
               }
             },
             onStepTapped: (step) {
-              setState(() {
-                currentStep = step;
-              });
+              if (step <= currentStep) {
+                setState(() {
+                  currentStep = step;
+                  _autovalidateMode = AutovalidateMode.disabled;
+                });
+              }
             },
             controlsBuilder: (context, details) {
               return Padding(
@@ -519,10 +550,60 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                 ),
                 content: Column(
                   children: [
+                    // Show customer type info
+                    if (isWalkInCustomer)
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        margin: const EdgeInsets.only(bottom: 10),
+                        decoration: BoxDecoration(
+                          color: Colors.orange[50],
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.orange),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.info, color: Colors.orange[700]),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                "Walk-in Customer: Must pay exact amount. No due or advance allowed.",
+                                style: TextStyle(
+                                  color: Colors.orange[800],
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    else
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        margin: const EdgeInsets.only(bottom: 10),
+                        decoration: BoxDecoration(
+                          color: Colors.green[50],
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.green),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.check_circle, color: Colors.green[700]),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                "Saved Customer: Due or advance payment allowed.",
+                                style: TextStyle(
+                                  color: Colors.green[800],
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
                     _buildSummarySection(bloc),
                     const SizedBox(height: 20),
-
-                    // Final submit button
                   ],
                 ),
                 isActive: currentStep >= 3,
@@ -533,6 +614,228 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
         );
       },
     );
+  }
+
+  bool _validateCurrentStep() {
+    switch (currentStep) {
+      case 0:
+        return _validateCustomerInfoStep();
+      case 1:
+        return _validateProductsStep();
+      case 2:
+        return _validateChargesStep();
+      case 3:
+        return _validateSummaryStep();
+      default:
+        return false;
+    }
+  }
+
+  bool _validateCustomerInfoStep() {
+    final bloc = context.read<CreatePosSaleBloc>();
+
+    if (bloc.selectClintModel == null) {
+      showCustomToast(
+        context: context,
+        title: 'Validation Error',
+        description: 'Please select a customer',
+        icon: Icons.error,
+        primaryColor: Colors.red,
+      );
+      return false;
+    }
+
+    if (bloc.selectSalesModel == null) {
+      showCustomToast(
+        context: context,
+        title: 'Validation Error',
+        description: 'Please select a sales person',
+        icon: Icons.error,
+        primaryColor: Colors.red,
+      );
+      return false;
+    }
+
+    if (bloc.dateEditingController.text.isEmpty) {
+      showCustomToast(
+        context: context,
+        title: 'Validation Error',
+        description: 'Please select a sale date',
+        icon: Icons.error,
+        primaryColor: Colors.red,
+      );
+      return false;
+    }
+
+    return true;
+  }
+
+  bool _validateProductsStep() {
+    if (products.isEmpty) {
+      showCustomToast(
+        context: context,
+        title: 'Validation Error',
+        description: 'Please add at least one product',
+        icon: Icons.error,
+        primaryColor: Colors.red,
+      );
+      return false;
+    }
+
+    for (int i = 0; i < products.length; i++) {
+      final product = products[i];
+
+      if (product["product"] == null) {
+        showCustomToast(
+          context: context,
+          title: 'Validation Error',
+          description: 'Please select a product for item ${i + 1}',
+          icon: Icons.error,
+          primaryColor: Colors.red,
+        );
+        return false;
+      }
+
+      final quantity = int.tryParse(controllers[i]!["quantity"]!.text) ?? 0;
+      if (quantity <= 0) {
+        showCustomToast(
+          context: context,
+          title: 'Validation Error',
+          description: 'Please enter a valid quantity for item ${i + 1}',
+          icon: Icons.error,
+          primaryColor: Colors.red,
+        );
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  bool _validateChargesStep() {
+    final bloc = context.read<CreatePosSaleBloc>();
+
+    final vatValue = double.tryParse(bloc.vatOverAllController.text) ?? 0;
+    if (vatValue < 0) {
+      showCustomToast(
+        context: context,
+        title: 'Validation Error',
+        description: 'VAT cannot be negative',
+        icon: Icons.error,
+        primaryColor: Colors.red,
+      );
+      return false;
+    }
+
+    final discountValue = double.tryParse(bloc.discountOverAllController.text) ?? 0;
+    if (discountValue < 0) {
+      showCustomToast(
+        context: context,
+        title: 'Validation Error',
+        description: 'Discount cannot be negative',
+        icon: Icons.error,
+        primaryColor: Colors.red,
+      );
+      return false;
+    }
+
+    final serviceChargeValue = double.tryParse(bloc.serviceChargeOverAllController.text) ?? 0;
+    if (serviceChargeValue < 0) {
+      showCustomToast(
+        context: context,
+        title: 'Validation Error',
+        description: 'Service charge cannot be negative',
+        icon: Icons.error,
+        primaryColor: Colors.red,
+      );
+      return false;
+    }
+
+    final deliveryChargeValue = double.tryParse(bloc.deliveryChargeOverAllController.text) ?? 0;
+    if (deliveryChargeValue < 0) {
+      showCustomToast(
+        context: context,
+        title: 'Validation Error',
+        description: 'Delivery charge cannot be negative',
+        icon: Icons.error,
+        primaryColor: Colors.red,
+      );
+      return false;
+    }
+
+    return true;
+  }
+
+  bool _validateSummaryStep() {
+    final bloc = context.read<CreatePosSaleBloc>();
+    final selectedCustomer = bloc.selectClintModel;
+    final isWalkInCustomer = selectedCustomer?.id == -1;
+    final netTotal = calculateAllFinalTotal();
+    final paidAmount = double.tryParse(bloc.payableAmount.text.trim()) ?? 0;
+
+    // Validate walk-in customer: Must pay exact amount
+    if (isWalkInCustomer) {
+      if (paidAmount != netTotal) {
+        showCustomToast(
+          context: context,
+          title: 'Validation Error',
+          description: "Walk-in customer must pay EXACT amount: ${netTotal.toStringAsFixed(2)}",
+          icon: Icons.error,
+          primaryColor: Colors.red,
+        );
+        return false;
+      }
+    }
+
+    // Validate saved customer: Paid amount should not be negative
+    if (paidAmount < 0) {
+      showCustomToast(
+        context: context,
+        title: 'Validation Error',
+        description: 'Paid amount cannot be negative',
+        icon: Icons.error,
+        primaryColor: Colors.red,
+      );
+      return false;
+    }
+
+    // Validate money receipt section
+    if (_isChecked) {
+      if (bloc.selectedPaymentMethod.isEmpty) {
+        showCustomToast(
+          context: context,
+          title: 'Validation Error',
+          description: 'Please select a payment method',
+          icon: Icons.error,
+          primaryColor: Colors.red,
+        );
+        return false;
+      }
+
+      if (bloc.accountModel == null) {
+        showCustomToast(
+          context: context,
+          title: 'Validation Error',
+          description: 'Please select an account',
+          icon: Icons.error,
+          primaryColor: Colors.red,
+        );
+        return false;
+      }
+
+      if (bloc.payableAmount.text.isEmpty) {
+        showCustomToast(
+          context: context,
+          title: 'Validation Error',
+          description: 'Please enter payable amount',
+          icon: Icons.error,
+          primaryColor: Colors.red,
+        );
+        return false;
+      }
+    }
+
+    return true;
   }
 
   Widget _buildMobileTopFormSection(CreatePosSaleBloc bloc) {
@@ -553,20 +856,27 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                   isRequired: true,
                   value: bloc.selectClintModel,
                   itemList:
-                      [CustomerActiveModel(name: 'Walk-in-customer', id: -1)] +
+                  [CustomerActiveModel(name: 'Walk-in-customer', id: -1)] +
                       context.read<CustomerBloc>().activeCustomer,
                   onChanged: (newVal) {
                     bloc.selectClintModel = newVal;
                     bloc.customType = (newVal?.id == -1)
                         ? "Walking Customer"
                         : "Saved Customer";
-                    if(  newVal?.id == -1){
-                      _isChecked=true;
+                    if (newVal?.id == -1) {
+                      _isChecked = true;
+                      bloc.isChecked = true;
+                      // Auto-set payable amount to net total for walk-in customer
+                      Future.delayed(const Duration(milliseconds: 100), () {
+                        final netTotal = calculateAllFinalTotal();
+                        bloc.payableAmount.text = netTotal.toStringAsFixed(2);
+                        _updateChangeAmount();
+                      });
                     }
                     setState(() {});
                   },
                   validator: (value) =>
-                      value == null ? 'Please select Customer' : null,
+                  value == null ? 'Please select Customer' : null,
                   itemBuilder: (item) => DropdownMenuItem(
                     value: item,
                     child: Text(
@@ -598,7 +908,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                     setState(() {});
                   },
                   validator: (value) =>
-                      value == null ? 'Please select Sales' : null,
+                  value == null ? 'Please select Sales' : null,
                   itemBuilder: (item) => DropdownMenuItem(
                     value: item,
                     child: Text(
@@ -638,7 +948,6 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-    
         ...products.asMap().entries.map((entry) {
           final index = entry.key;
           final product = entry.value;
@@ -681,7 +990,6 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                         ),
                         onPressed: addProduct,
                       ),
-
                   ],
                 ),
                 const SizedBox(height: 6),
@@ -708,8 +1016,8 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                         setState(() {
                           categoriesBloc.selectedState = newVal.toString();
                           final matchingCategory = categoryList.firstWhere(
-                            (category) =>
-                                category.name.toString() == newVal.toString(),
+                                (category) =>
+                            category.name.toString() == newVal.toString(),
                             orElse: () => CategoryModel(),
                           );
                           categoriesBloc.selectedStateId =
@@ -743,19 +1051,18 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                         .read<ProductsBloc>()
                         .productList
                         .where((item) {
-                          final categoryMatch = selectedCategoryId.isEmpty
-                              ? true
-                              : item.category?.toString() == selectedCategoryId;
-                          final notDuplicate =
-                              !selectedProductIds.contains(item.id) ||
+                      final categoryMatch = selectedCategoryId.isEmpty
+                          ? true
+                          : item.category?.toString() == selectedCategoryId;
+                      final notDuplicate =
+                          !selectedProductIds.contains(item.id) ||
                               item.id == product["product_id"];
-                          return categoryMatch && notDuplicate;
-                        })
-                        .toList();
+                      return categoryMatch && notDuplicate;
+                    }).toList();
 
                     return AppDropdown<ProductModelStockModel>(
                       context: context,
-                      isRequired: false,
+                      isRequired: true,
                       isLabel: true,
                       isSearch: true,
                       label: "Product",
@@ -766,7 +1073,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                       itemList: filteredProducts,
                       onChanged: (newVal) => onProductChanged(index, newVal),
                       validator: (value) =>
-                          value == null ? 'Please select Product' : null,
+                      value == null ? 'Please select Product' : null,
                       itemBuilder: (item) => DropdownMenuItem(
                         value: item,
                         child: Text(item.toString()),
@@ -869,9 +1176,10 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                                   onPressed: () {
                                     int currentQuantity =
                                         int.tryParse(
-                                          controllers[index]!["quantity"]!.text,
+                                          controllers[index]!["quantity"]!
+                                              .text,
                                         ) ??
-                                        0;
+                                            0;
                                     controllers[index]!["quantity"]!.text =
                                         (currentQuantity + 1).toString();
                                     products[index]["quantity"] =
@@ -897,8 +1205,8 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                   children: [
                     Text("Discount", style: AppTextStyle.bodySmall(context)),
                     const SizedBox(height: 4),
-                    Row(                  crossAxisAlignment: CrossAxisAlignment.start,
-
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Expanded(
                           child: AbsorbPointer(
@@ -915,7 +1223,8 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                                     'TK',
                                     style: TextStyle(
                                       fontSize: 12,
-                                      fontFamily: GoogleFonts.playfairDisplay()
+                                      fontFamily:
+                                      GoogleFonts.playfairDisplay()
                                           .fontFamily,
                                       color: product["discount_type"] == 'fixed'
                                           ? Colors.white
@@ -932,10 +1241,11 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                                     '%',
                                     style: TextStyle(
                                       fontSize: 12,
-                                      fontFamily: GoogleFonts.playfairDisplay()
+                                      fontFamily:
+                                      GoogleFonts.playfairDisplay()
                                           .fontFamily,
-                                      color:
-                                          product["discount_type"] == 'percent'
+                                      color: product["discount_type"] ==
+                                          'percent'
                                           ? Colors.white
                                           : Colors.black,
                                     ),
@@ -945,11 +1255,11 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                               onValueChanged: discountApplied
                                   ? (_) {}
                                   : (value) {
-                                      setState(() {
-                                        product["discount_type"] = value;
-                                        updateTotal(index);
-                                      });
-                                    },
+                                setState(() {
+                                  product["discount_type"] = value;
+                                  updateTotal(index);
+                                });
+                              },
                               groupValue: product["discount_type"],
                               unselectedColor: Colors.grey[300],
                               selectedColor: AppColors.primaryColor,
@@ -990,10 +1300,10 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                             onChanged: discountApplied
                                 ? null
                                 : (value) {
-                                    products[index]["discount"] =
-                                        double.tryParse(value) ?? 0.0;
-                                    updateTotal(index);
-                                  },
+                              products[index]["discount"] =
+                                  double.tryParse(value) ?? 0.0;
+                              updateTotal(index);
+                            },
                           ),
                         ),
                       ],
@@ -1020,7 +1330,6 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
     );
   }
 
-
   Widget _buildChargesSection(CreatePosSaleBloc bloc) {
     return ResponsiveRow(
       spacing: 6,
@@ -1030,7 +1339,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
           "Overall Discount",
           selectedOverallDiscountType,
           bloc.discountOverAllController,
-          (value) {
+              (value) {
             setState(() {
               selectedOverallDiscountType = value;
               bloc.selectedOverallDiscountType = value;
@@ -1042,7 +1351,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
           "Overall Vat",
           selectedOverallVatType,
           bloc.vatOverAllController,
-          (value) {
+              (value) {
             setState(() {
               selectedOverallVatType = value;
               bloc.selectedOverallVatType = value;
@@ -1054,7 +1363,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
           "Service Charge",
           selectedOverallServiceChargeType,
           bloc.serviceChargeOverAllController,
-          (value) {
+              (value) {
             setState(() {
               selectedOverallServiceChargeType = value;
               bloc.selectedOverallServiceChargeType = value;
@@ -1066,7 +1375,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
           "Delivery Charge",
           selectedOverallDeliveryType,
           bloc.deliveryChargeOverAllController,
-          (value) {
+              (value) {
             setState(() {
               selectedOverallDeliveryType = value;
               bloc.selectedOverallDeliveryType = value;
@@ -1079,11 +1388,11 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
   }
 
   Widget _buildChargeField(
-    String label,
-    String selectedType,
-    TextEditingController controller,
-    Function(String) onTypeChanged,
-  ) {
+      String label,
+      String selectedType,
+      TextEditingController controller,
+      Function(String) onTypeChanged,
+      ) {
     return ResponsiveCol(
       xs: 12,
       sm: 2,
@@ -1144,6 +1453,18 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                   },
                   autofillHints: '',
                   levelText: '',
+                  validator: (value) {
+                    if (value!.isNotEmpty) {
+                      final numericValue = double.tryParse(value);
+                      if (numericValue == null) {
+                        return 'Enter valid number';
+                      }
+                      if (numericValue < 0) {
+                        return 'Cannot be negative';
+                      }
+                    }
+                    return null;
+                  },
                 ),
               ),
             ],
@@ -1154,6 +1475,8 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
   }
 
   Widget _buildSummarySection(CreatePosSaleBloc bloc) {
+    final selectedCustomer = bloc.selectClintModel;
+    final isWalkInCustomer = selectedCustomer?.id == -1;
     final productTotal = calculateTotalTicketForAllProducts();
     final specificDiscount = calculateSpecificDiscountTotal();
     final subTotal = calculateTotalForAllProducts();
@@ -1184,7 +1507,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                 _buildSummaryRow("Vat (+)", vat),
                 _buildSummaryRow("Service Charge (+)", serviceCharge),
                 _buildSummaryRow("Delivery Charge (+)", deliveryCharge),
-                _buildSummaryRow("Net Total", netTotal),
+                _buildSummaryRow("Net Total", netTotal, isBold: true),
               ],
             ),
           ),
@@ -1195,13 +1518,13 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
           md: 5,
           lg: 5,
           xl: 5,
-          child: _buildPaymentSection(bloc),
+          child: _buildPaymentSection(bloc, isWalkInCustomer, netTotal),
         ),
       ],
     );
   }
 
-  Widget _buildPaymentSection(CreatePosSaleBloc bloc) {
+  Widget _buildPaymentSection(CreatePosSaleBloc bloc, bool isWalkInCustomer, double netTotal) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1243,7 +1566,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                     setState(() {});
                   },
                   validator: (value) =>
-                      value == null ? 'Please select a payment method' : null,
+                  value == null ? 'Please select a payment method' : null,
                   itemBuilder: (item) => DropdownMenuItem(
                     value: item,
                     child: Text(item.toString()),
@@ -1259,14 +1582,16 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                     } else if (state is AccountActiveListSuccess) {
                       final filteredList = bloc.selectedPaymentMethod.isNotEmpty
                           ? state.list.where((item) {
-                              return item.acType?.toLowerCase() ==
-                                  bloc.selectedPaymentMethod.toLowerCase();
-                            }).toList()
+                        return item.acType?.toLowerCase() ==
+                            bloc.selectedPaymentMethod.toLowerCase();
+                      }).toList()
                           : state.list;
 
                       final selectedAccount =
                           bloc.accountModel ??
-                          (filteredList.isNotEmpty ? filteredList.first : null);
+                              (filteredList.isNotEmpty
+                                  ? filteredList.first
+                                  : null);
                       bloc.accountModel = selectedAccount;
 
                       return AppDropdown<AccountActiveModel>(
@@ -1285,7 +1610,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                           setState(() {});
                         },
                         validator: (value) =>
-                            value == null ? 'Please select an account' : null,
+                        value == null ? 'Please select an account' : null,
                         itemBuilder: (item) => DropdownMenuItem(
                           value: item,
                           child: Text(item.toString()),
@@ -1305,10 +1630,8 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
               Expanded(
                 flex: 2,
                 child: AppTextField(
-                  // isRequiredLable: false,
                   controller: changeAmountController,
-                  hintText: 'Change Amount',
-                  // fillColor: Colors.white,
+                  hintText: isWalkInCustomer ? 'Change (0.00)' : 'Change Amount',
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
                   ),
@@ -1318,20 +1641,53 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
               const SizedBox(width: 5),
               Expanded(
                 flex: 2,
-                child: AppTextField(
-                  // isRequiredLable: false,
-                  controller: bloc.payableAmount,
-                  hintText: 'Payable Amount',
-                  // fillColor: Colors.white,
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
-                  ),
-                  validator: (value) =>
-                      value!.isEmpty ? 'Please enter Payable Amount' : null,
-                  onChanged: (value) {
-                    _updateChangeAmount();
-                    setState(() {});
-                  },
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    AppTextField(
+                      controller: bloc.payableAmount,
+                      hintText: isWalkInCustomer
+                          ? 'Payable Amount (${netTotal.toStringAsFixed(2)})'
+                          : 'Payable Amount',
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      validator: (value) {
+                        if (value!.isEmpty) {
+                          return 'Please enter Payable Amount';
+                        }
+                        final numericValue = double.tryParse(value);
+                        if (numericValue == null) {
+                          return 'Enter valid number';
+                        }
+                        if (numericValue < 0) {
+                          return 'Cannot be negative';
+                        }
+
+                        // Walk-in customer validation
+                        if (isWalkInCustomer && numericValue != netTotal) {
+                          return 'Must pay exact: ${netTotal.toStringAsFixed(2)}';
+                        }
+
+                        return null;
+                      },
+                      onChanged: (value) {
+                        _updateChangeAmount();
+                        setState(() {});
+                      },
+                    ),
+                    if (isWalkInCustomer)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4, left: 4),
+                        child: Text(
+                          "Walk-in: Pay exact amount only",
+                          style: TextStyle(
+                            color: Colors.orange[700],
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
               ),
             ],
@@ -1359,9 +1715,8 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
             child: Text(
               label,
               style: isBold
-                  ? AppTextStyle.cardLevelHead(
-                      context,
-                    ).copyWith(fontWeight: FontWeight.bold)
+                  ? AppTextStyle.cardLevelHead(context)
+                  .copyWith(fontWeight: FontWeight.bold)
                   : AppTextStyle.cardLevelHead(context),
             ),
           ),
@@ -1369,16 +1724,15 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
             value.toStringAsFixed(2),
             style: isBold
                 ? AppTextStyle.cardLevelText(context).copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.primaryColor,
-                  )
+              fontWeight: FontWeight.bold,
+              color: AppColors.primaryColor,
+            )
                 : AppTextStyle.cardLevelText(context),
           ),
         ],
       ),
     );
   }
-
 
   void _selectDate() async {
     DateTime? pickedDate = await showDatePicker(
@@ -1398,86 +1752,87 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
   }
 
   void _submitForm() {
-    if (formKey.currentState!.validate()) {
-      final bloc = context.read<CreatePosSaleBloc>();
-
-      var transferProducts = products
-          .map(
-            (product) => {
-              "product_id": int.tryParse(product["product_id"].toString()),
-              "quantity": int.tryParse(product["quantity"].toString()),
-              "unit_price": double.tryParse(product["price"].toString()),
-              "discount": double.tryParse(product["discount"].toString()),
-              "discount_type": product["discount_type"].toString(),
-            },
-          )
-          .toList();
-
-      final selectedCustomer = bloc.selectClintModel;
-      final isWalkInCustomer = selectedCustomer?.id == -1;
-
-      Map<String, dynamic> body = {
-        "type": "normal_sale",
-        "sale_date": appWidgets.convertDateTime(
-          DateFormat(
-            "dd-MM-yyyy",
-          ).parse(bloc.dateEditingController.text.trim(), true),
-          "yyyy-MM-dd",
-        ),
-        "sale_by": bloc.selectSalesModel?.id.toString() ?? '',
-        "overall_vat_type": selectedOverallVatType.toLowerCase(),
-        "vat": bloc.vatOverAllController.text.isEmpty
-            ? 0
-            : double.tryParse(bloc.vatOverAllController.text),
-        "overall_service_type": selectedOverallServiceChargeType.toLowerCase(),
-        "service_charge": bloc.serviceChargeOverAllController.text.isEmpty
-            ? 0
-            : double.tryParse(bloc.serviceChargeOverAllController.text),
-        "overall_delivery_type": selectedOverallDeliveryType.toLowerCase(),
-        "delivery_charge": bloc.deliveryChargeOverAllController.text.isEmpty
-            ? 0
-            : double.tryParse(bloc.deliveryChargeOverAllController.text),
-        "overall_discount_type": selectedOverallDiscountType.toLowerCase(),
-        "overall_discount": bloc.discountOverAllController.text.isEmpty
-            ? 0.0
-            : double.tryParse(bloc.discountOverAllController.text),
-        "remark": bloc.remarkController.text,
-        "items": transferProducts,
-        "customer_type": isWalkInCustomer ? "walk_in" : "saved_customer",
-        "with_money_receipt": _isChecked ? "Yes" : "No",
-        "paid_amount": double.tryParse(bloc.payableAmount.text.trim()) ?? 0,
-      };
-
-      if (isWalkInCustomer) {
-        body.remove('customer_id');
-      } else {
-        body['customer_id'] = selectedCustomer?.id.toString() ?? '';
-      }
-
-      if (isWalkInCustomer) {
-        final netTotal = calculateAllFinalTotal();
-        final paidAmount = double.tryParse(bloc.payableAmount.text.trim()) ?? 0;
-
-        if (paidAmount < netTotal) {
-          showCustomToast(
-            context: context,
-            title: 'Warning!',
-            description:
-                "Walk-in customer: Full payment required. No due allowed.",
-            icon: Icons.error,
-            primaryColor: Colors.redAccent,
-          );
-          return;
-        }
-      }
-
-      if (_isChecked) {
-        body['payment_method'] = bloc.selectedPaymentMethod;
-        body['account_id'] = bloc.accountModel?.id.toString() ?? '';
-      }
-
-      bloc.add(AddPosSale(body: body));
-      log(body.toString());
+    // First validate the form
+    if (!formKey.currentState!.validate()) {
+      showCustomToast(
+        context: context,
+        title: 'Validation Error',
+        description: 'Please fix all validation errors before submitting',
+        icon: Icons.error,
+        primaryColor: Colors.red,
+      );
+      return;
     }
+
+    // Then validate final step specific requirements
+    if (!_validateSummaryStep()) {
+      return;
+    }
+
+    final bloc = context.read<CreatePosSaleBloc>();
+
+    var transferProducts = products
+        .map(
+          (product) => {
+        "product_id": int.tryParse(product["product_id"].toString()),
+        "quantity": int.tryParse(product["quantity"].toString()),
+        "unit_price": double.tryParse(product["price"].toString()),
+        "discount": double.tryParse(product["discount"].toString()),
+        "discount_type": product["discount_type"].toString(),
+      },
+    )
+        .toList();
+
+    final selectedCustomer = bloc.selectClintModel;
+    final isWalkInCustomer = selectedCustomer?.id == -1;
+    final netTotal = calculateAllFinalTotal();
+    final paidAmount = double.tryParse(bloc.payableAmount.text.trim()) ?? 0;
+
+    Map<String, dynamic> body = {
+      "type": "normal_sale",
+      "sale_date": appWidgets.convertDateTime(
+        DateFormat(
+          "dd-MM-yyyy",
+        ).parse(bloc.dateEditingController.text.trim(), true),
+        "yyyy-MM-dd",
+      ),
+      "sale_by": bloc.selectSalesModel?.id.toString() ?? '',
+      "overall_vat_type": selectedOverallVatType.toLowerCase(),
+      "vat": bloc.vatOverAllController.text.isEmpty
+          ? 0
+          : double.tryParse(bloc.vatOverAllController.text),
+      "overall_service_type": selectedOverallServiceChargeType.toLowerCase(),
+      "service_charge": bloc.serviceChargeOverAllController.text.isEmpty
+          ? 0
+          : double.tryParse(bloc.serviceChargeOverAllController.text),
+      "overall_delivery_type": selectedOverallDeliveryType.toLowerCase(),
+      "delivery_charge": bloc.deliveryChargeOverAllController.text.isEmpty
+          ? 0
+          : double.tryParse(bloc.deliveryChargeOverAllController.text),
+      "overall_discount_type": selectedOverallDiscountType.toLowerCase(),
+      "overall_discount": bloc.discountOverAllController.text.isEmpty
+          ? 0.0
+          : double.tryParse(bloc.discountOverAllController.text),
+      "remark": bloc.remarkController.text,
+      "items": transferProducts,
+      "customer_type": isWalkInCustomer ? "walk_in" : "saved_customer",
+      "with_money_receipt": _isChecked ? "Yes" : "No",
+      "paid_amount": paidAmount,
+      "due_amount": isWalkInCustomer ? 0.0 : (netTotal - paidAmount).clamp(0, double.infinity),
+    };
+
+    if (isWalkInCustomer) {
+      body.remove('customer_id');
+    } else {
+      body['customer_id'] = selectedCustomer?.id.toString() ?? '';
+    }
+
+    if (_isChecked) {
+      body['payment_method'] = bloc.selectedPaymentMethod;
+      body['account_id'] = bloc.accountModel?.id.toString() ?? '';
+    }
+
+    bloc.add(AddPosSale(body: body));
+    log(body.toString());
   }
 }
