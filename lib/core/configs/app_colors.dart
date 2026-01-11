@@ -9,18 +9,24 @@ class AppColors {
   static const Color white = Color(0xffffffff);
   static const Color black = Colors.black;
 
-  static const Color lightBg = Color.fromARGB(255, 239, 249, 255);
-  static const Color lightBgBottomNav = Color.fromARGB(255, 246, 252, 255);
+  // Light theme defaults
+  static const Color lightBg = Color(0xFFEFF9FF);
+  static const Color lightBgBottomNav = Color(0xFFF6FCFF);
   static const Color lightText = Color(0xff000000);
+
   // Dark theme defaults
   static const Color darkBg = Color(0xFF14171C);
   static const Color darkBgBottomNav = Color(0xFF191A22);
   static const Color darkText = Color(0xFFF2F2F2);
-  static const Color primaryColor = Color(0xff6EC5EF);
+  static const Color primaryColor = Color(0xff60DAFF);
   static Color bottomNavBg(BuildContext context) =>
       Theme.of(context).brightness == Brightness.dark
           ? darkBgBottomNav
           : lightBgBottomNav;
+  static Color background(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.dark
+          ? darkBg
+          : lightBg;
   static Color get secondary => _soften(primaryColor, 0.4);
 
   // --- Derived Colors ---
@@ -29,7 +35,6 @@ class AppColors {
   static Color get primaryDark => _darken(primaryColor, 0.15);
 
   /// 🌈 Background based on primary color (blends with white)
-  static Color get background => _mixWithWhite(primaryColor, 0.9);
 
   // Try 0.85–0.9 for more or less intensity
 
