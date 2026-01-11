@@ -31,9 +31,8 @@ class AppScaffold extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<ConnectivityBloc, ConnectivityState>(
       builder: (context, state) {
-        final isOffline = state is ConnectivityOffline;
 
-        final overlayColor =  AppColors.bg;
+        final overlayColor =  AppColors.background(context);
 
         return Stack(
           children: [
@@ -51,27 +50,7 @@ class AppScaffold extends StatelessWidget {
               resizeToAvoidBottomInset: resizeToAvoidBottomInset ?? true,
               body: body,
             ),
-            if (isOffline)
-              Positioned.fill(
-                child: Material(
-                  color: Colors.black.withValues(alpha: 0.4), // semi-transparent overlay
-                  child: SafeArea(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        // Lottie.asset(AppImages.noInternetJson),
-                        const SizedBox(height: 24),
-                        // Text(
-                        //   "No Internet Connection",
-                        //   textAlign: TextAlign.center,
-                        //   style: AppTextStyle.headlineMedium(context)
-                        //       .copyWith(color: themeState.primaryColor),
-                        // ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
+
           ],
         );
       },

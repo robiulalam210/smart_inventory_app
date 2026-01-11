@@ -1,5 +1,7 @@
 import 'dart:async';
-import 'package:meherinMart/core/widgets/app_scaffold.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:iconsax/iconsax.dart';
 
 import '../../../../core/core.dart';
 import '../../../../core/database/login_local_storage.dart';
@@ -13,7 +15,8 @@ class MobileLoginScr extends StatefulWidget {
   State<MobileLoginScr> createState() => _MobileLoginScrState();
 }
 
-class _MobileLoginScrState extends State<MobileLoginScr> {
+class _MobileLoginScrState extends State<MobileLoginScr>
+    with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
 
   final emailCon = TextEditingController();
@@ -25,13 +28,35 @@ class _MobileLoginScrState extends State<MobileLoginScr> {
   bool hidePassword = true;
   bool _visible = false;
 
+  late AnimationController _controller;
+  late Animation<double> fadeAnimation;
+  late Animation<Offset> slideAnimation;
+
   @override
   void initState() {
     super.initState();
     _loadSavedLogin();
 
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 700),
+    );
+
+    fadeAnimation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeInOut,
+    );
+
+    slideAnimation = Tween<Offset>(
+      begin: const Offset(0, 0.2),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutBack));
+
     Future.delayed(const Duration(milliseconds: 200), () {
-      if (mounted) setState(() => _visible = true);
+      if (mounted) {
+        setState(() => _visible = true);
+        _controller.forward();
+      }
     });
   }
 
@@ -47,6 +72,7 @@ class _MobileLoginScrState extends State<MobileLoginScr> {
     passwordCon.dispose();
     _emailFocus.dispose();
     _passwordFocus.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
@@ -63,10 +89,7 @@ class _MobileLoginScrState extends State<MobileLoginScr> {
 
   @override
   Widget build(BuildContext context) {
-    final keyboardInset = MediaQuery.of(context).viewInsets.bottom;
-
-    return AppScaffold(
-      // backgroundColor: AppColors.bg,
+    return Scaffold(
       body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) async {
           if (state is AuthAuthenticated || state is AuthAuthenticatedOffline) {
@@ -78,7 +101,7 @@ class _MobileLoginScrState extends State<MobileLoginScr> {
             showCustomToast(
               context: context,
               title: "Success",
-              description:  "Login  in Successful",
+              description: "Login Successful",
               type: ToastificationType.success,
             );
 
@@ -94,175 +117,137 @@ class _MobileLoginScrState extends State<MobileLoginScr> {
                 TextButton(
                   onPressed: () => Navigator.pop(context),
                   child: const Text("OK"),
-                )
+                ),
               ],
             );
           }
         },
         child: GestureDetector(
           onTap: () => FocusScope.of(context).unfocus(),
-          child: SizedBox(
-            width: double.infinity,
-            height: double.infinity,
-            // decoration: BoxDecoration(
-            //   gradient: AppColors.primaryGradient,
-            // ),
+          child: SafeArea(
             child: SingleChildScrollView(
-              padding: EdgeInsets.only(
-                left: 20,
-                right: 20,
-                bottom: keyboardInset,
-                top: 60,
-              ),
-              child: AnimatedOpacity(
-                opacity: _visible ? 1 : 0,
-                duration: const Duration(milliseconds: 350),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    /// 🔹 Lottie / Logo
-                    SizedBox(
-                      height: 220,
-                      child: Lottie.asset(
-                        AppImages.loginLottie,
-                        fit: BoxFit.fitHeight,height: 200
-                      ),
-                    ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 18,
+                  vertical: 24,
+                ),
+                child: FadeTransition(
+                  opacity: fadeAnimation,
+                  child: SlideTransition(
+                    position: slideAnimation,
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 30),
 
-
-                    /// 🔹 Login Card
-                    Container(
-                      padding: const EdgeInsets.all(14),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.95),
-                        borderRadius: BorderRadius.circular(20),
-                        // boxShadow: [
-                        //   BoxShadow(
-                        //     color: Colors.black.withValues(alpha: 0.12),
-                        //     blurRadius: 30,
-                        //     offset: const Offset(0, 20),
-                        //   )
-                        // ],
-                      ),
-                      child: Form(
-                        key: _formKey,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            /// Title
-                            const Text(
-                              "Welcome Back 👋",
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.w600,
-                              ),
+                        /// Logo Floating
+                        AnimatedOpacity(
+                          opacity: _visible ? 1 : 0,
+                          duration: const Duration(milliseconds: 600),
+                          child: AnimatedScale(
+                            scale: _visible ? 1 : 0.7,
+                            duration: const Duration(milliseconds: 600),
+                            child: Image.asset(
+                              "assets/images/logo.png",
+                              height: 180,
                             ),
-                            const SizedBox(height: 6),
-                            Text(
-                              "Sign in to continue",
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey.shade600,
-                              ),
-                            ),
-
-                            const SizedBox(height: 15),
-
-                            /// Email
-                            AppTextField(
-                              labelText: "Username / Email",
-                              hintText: "Enter your username or email",
-                              controller: emailCon,
-                              keyboardType: TextInputType.emailAddress,
-                              focusNode: _emailFocus,
-                              textInputAction: TextInputAction.next,
-                              validator: (v) =>
-                              v!.isEmpty ? "Required" : null,
-                              onFieldSubmitted: (_) =>
-                                  _passwordFocus.requestFocus(),
-                            ),
-
-                            const SizedBox(height: 8),
-                            /// Password
-                            AppTextField(
-                              labelText: "Password",
-                              hintText: "Enter password",
-                              controller: passwordCon,
-                              obscureText: hidePassword,
-                              focusNode: _passwordFocus,
-                              textInputAction: TextInputAction.done,
-                              validator: (v) =>
-                              v!.isEmpty ? "Required" : null,
-                              suffixIcon: IconButton(
-                                icon: Icon(
-                                  hidePassword
-                                      ? Iconsax.eye_slash
-                                      : Iconsax.eye,
-                                ),
-                                onPressed: () {
-                                  setState(() {
-                                    hidePassword = !hidePassword;
-                                  });
-                                },
-                              ),
-                              onFieldSubmitted: (_) => _submit(), keyboardType: TextInputType.text,
-                            ),
-
-                            /// Forgot
-                            Align(
-                              alignment: Alignment.centerRight,
-                              child: TextButton(
-                                onPressed: () {},
-                                child: const Text("Forgot password?"),
-                              ),
-                            ),
-
-                            const SizedBox(height: 10),
-
-                            /// Login Button
-                            BlocBuilder<AuthBloc, AuthState>(
-                              builder: (context, state) {
-                                final loading = state is AuthLoading;
-
-                                return SizedBox(
-                                  height: 48,
-                                  child: ElevatedButton(
-                                    onPressed: loading ? null : _submit,
-                                    style: ElevatedButton.styleFrom(
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius:
-                                        BorderRadius.circular(12),
-                                      ),
-                                    ),
-                                    child: loading
-                                        ? const SizedBox(
-                                      width: 22,
-                                      height: 22,
-                                      child:
-                                      CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        color: Colors.white,
-                                      ),
-                                    )
-                                        : const Text(
-                                      "Log In",
-                                      style: TextStyle(fontSize: 16),
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-
-                            const SizedBox(height: 14),
-
-
-                          ],
+                          ),
                         ),
-                      ),
+
+                        const SizedBox(height: 15),
+
+                        const Text(
+                          "Welcome Back 👋",
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+
+                        const SizedBox(height: 10),
+
+                        /// Glass Card
+                        AnimatedContainer(
+                          duration: const Duration(milliseconds: 600),
+                          padding: const EdgeInsets.all(24),
+
+                          child: Form(
+                            key: _formKey,
+                            child: Column(
+                              children: [
+                                AppTextField(
+                                  labelText: "Username / Email",
+                                  hintText: "Enter your username or email",
+                                  controller: emailCon,
+                                  keyboardType: TextInputType.emailAddress,
+                                  focusNode: _emailFocus,
+                                  textInputAction: TextInputAction.next,
+                                  validator: (v) =>
+                                      v!.isEmpty ? "Required" : null,
+                                  onFieldSubmitted: (_) =>
+                                      _passwordFocus.requestFocus(),
+                                ),
+                                const SizedBox(height: 8),
+
+                          AppTextField( labelText: "Password", hintText: "Enter password", controller: passwordCon, obscureText: hidePassword, focusNode: _passwordFocus, textInputAction: TextInputAction.done, validator: (v) => v!.isEmpty ? "Required" : null, suffixIcon: IconButton( icon: Icon( hidePassword ? Iconsax.eye_slash : Iconsax.eye, ), onPressed: () { setState(() { hidePassword = !hidePassword; }); }, ), onFieldSubmitted: (_) => _submit(), keyboardType: TextInputType.text, ),
+                                Align(
+                                  alignment: Alignment.centerRight,
+                                  child: TextButton(
+                                    onPressed: () {},
+                                    child: const Text("Forgot password?"),
+                                  ),
+                                ),
+
+                                const SizedBox(height: 6),
+
+                                BlocBuilder<AuthBloc, AuthState>(
+                                  builder: (context, state) {
+                                    final loading = state is AuthLoading;
+
+                                    return GestureDetector(
+                                      onTap: loading ? null : _submit,
+                                      child: AnimatedContainer(
+                                        duration: const Duration(
+                                          milliseconds: 200,
+                                        ),
+                                        height: 48,
+                                        alignment: Alignment.center,
+                                        decoration: BoxDecoration(
+                                          color: loading
+                                              ? Colors.indigo.shade200
+                                              : Colors.indigo,
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                        ),
+                                        child: loading
+                                            ? const SizedBox(
+                                                width: 22,
+                                                height: 22,
+                                                child:
+                                                    CircularProgressIndicator(
+                                                      strokeWidth: 2,
+                                                      color: Colors.white,
+                                                    ),
+                                              )
+                                            : const Text(
+                                                "Log In",
+                                                style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
             ),
