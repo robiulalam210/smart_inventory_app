@@ -402,219 +402,217 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
         title: Text('Sale', style: AppTextStyle.titleMedium(context)),
       ),
       body: SafeArea(
-        child: _buildMobileStepperContent(),
+        child:  BlocConsumer<CreatePosSaleBloc, CreatePosSaleState>(
+          listener: (context, state) {
+            if (state is CreatePosSaleLoading) {
+              appLoader(context, "Creating PosSale, please wait...");
+            } else if (state is CreatePosSaleSuccess) {
+              showCustomToast(
+                context: context,
+                title: 'Success!',
+                description: "Sale created successfully!",
+                icon: Icons.check_circle,
+                primaryColor: Colors.green,
+              );
+
+              changeAmountController.clear();
+              AppRoutes.pushReplacement(context, MobilePosSaleScreen());
+              setState(() {});
+            } else if (state is CreatePosSaleFailed) {
+              Navigator.pop(context);
+              appAlertDialog(
+                context,
+                state.content,
+                title: state.title,
+                actions: [
+                  TextButton(
+                    onPressed: () => AppRoutes.pop(context),
+                    child: const Text("Dismiss"),
+                  ),
+                ],
+              );
+            }
+          },
+          builder: (context, state) {
+            final bloc = context.read<CreatePosSaleBloc>();
+            final selectedCustomer = bloc.selectClintModel;
+            final isWalkInCustomer = selectedCustomer?.id == -1;
+
+            return Form(
+              key: formKey,
+              autovalidateMode: _autovalidateMode,
+              child: Stepper(
+                physics: const ClampingScrollPhysics(),
+                type: StepperType.vertical,
+                currentStep: currentStep,
+                onStepContinue: () {
+                  if (_validateCurrentStep()) {
+                    if (currentStep < 3) {
+                      setState(() {
+                        currentStep += 1;
+                        _autovalidateMode = AutovalidateMode.disabled;
+                      });
+                    } else {
+                      _submitForm();
+                    }
+                  } else {
+                    // Enable auto-validation to show errors
+                    setState(() {
+                      _autovalidateMode = AutovalidateMode.onUserInteraction;
+                    });
+                  }
+                },
+                onStepCancel: () {
+                  if (currentStep > 0) {
+                    setState(() {
+                      currentStep -= 1;
+                      _autovalidateMode = AutovalidateMode.disabled;
+                    });
+                  }
+                },
+                onStepTapped: (step) {
+                  if (step <= currentStep) {
+                    setState(() {
+                      currentStep = step;
+                      _autovalidateMode = AutovalidateMode.disabled;
+                    });
+                  }
+                },
+                controlsBuilder: (context, details) {
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 8.0),
+                    child: Row(
+                      children: [
+                        if (currentStep > 0)
+                          Expanded(
+                            child: AppButton(
+                              onPressed: details.onStepCancel,
+                              name: "Back",
+                              color: AppColors.redColor,
+                            ),
+                          ),
+                        if (currentStep > 0) const SizedBox(width: 8),
+                        Expanded(
+                          child: AppButton(
+                            onPressed: details.onStepContinue,
+                            name: currentStep < 3 ? 'Next' : 'Submit',
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+                steps: [
+                  // Step 1: Customer Information
+                  Step(
+                    title: Text(
+                      'Customer Info',
+                      style: AppTextStyle.cardLevelHead(context),
+                    ),
+                    content: _buildMobileTopFormSection(bloc),
+                    isActive: currentStep >= 0,
+                    state: currentStep > 0 ? StepState.complete : StepState.indexed,
+                  ),
+
+                  // Step 2: Products
+                  Step(
+                    title: Text(
+                      'Products',
+                      style: AppTextStyle.cardLevelHead(context),
+                    ),
+                    content: _buildMobileProductListSection(bloc),
+                    isActive: currentStep >= 1,
+                    state: currentStep > 1 ? StepState.complete : StepState.indexed,
+                  ),
+
+                  // Step 3: Charges
+                  Step(
+                    title: Text(
+                      'Charges',
+                      style: AppTextStyle.cardLevelHead(context),
+                    ),
+                    content: _buildMobileChargesSection(bloc),
+                    isActive: currentStep >= 2,
+                    state: currentStep > 2 ? StepState.complete : StepState.indexed,
+                  ),
+
+                  // Step 4: Summary & Payment
+                  Step(
+                    title: Text(
+                      'Summary & Payment',
+                      style: AppTextStyle.cardLevelHead(context),
+                    ),
+                    content: Column(
+                      children: [
+                        // Show customer type info
+                        if (isWalkInCustomer)
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            margin: const EdgeInsets.only(bottom: 10),
+                            decoration: BoxDecoration(
+                              color: Colors.orange[50],
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: Colors.orange),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(Icons.info, color: Colors.orange[700]),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    "Walk-in Customer: Must pay exact amount. No due or advance allowed.",
+                                    style: TextStyle(
+                                      color: Colors.orange[800],
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        else
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            margin: const EdgeInsets.only(bottom: 10),
+                            decoration: BoxDecoration(
+                              color: Colors.green[50],
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: Colors.green),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(Icons.check_circle, color: Colors.green[700]),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    "Saved Customer: Due or advance payment allowed.",
+                                    style: TextStyle(
+                                      color: Colors.green[800],
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                        _buildSummarySection(bloc),
+                        const SizedBox(height: 20),
+                      ],
+                    ),
+                    isActive: currentStep >= 3,
+                    state: StepState.indexed,
+                  ),
+                ],
+              ),
+            );
+          },
+        )
       ),
     );
   }
 
-  Widget _buildMobileStepperContent() {
-    return BlocConsumer<CreatePosSaleBloc, CreatePosSaleState>(
-      listener: (context, state) {
-        if (state is CreatePosSaleLoading) {
-          appLoader(context, "Creating PosSale, please wait...");
-        } else if (state is CreatePosSaleSuccess) {
-          showCustomToast(
-            context: context,
-            title: 'Success!',
-            description: "Sale created successfully!",
-            icon: Icons.check_circle,
-            primaryColor: Colors.green,
-          );
 
-          changeAmountController.clear();
-          AppRoutes.pushReplacement(context, MobilePosSaleScreen());
-          setState(() {});
-        } else if (state is CreatePosSaleFailed) {
-          Navigator.pop(context);
-          appAlertDialog(
-            context,
-            state.content,
-            title: state.title,
-            actions: [
-              TextButton(
-                onPressed: () => AppRoutes.pop(context),
-                child: const Text("Dismiss"),
-              ),
-            ],
-          );
-        }
-      },
-      builder: (context, state) {
-        final bloc = context.read<CreatePosSaleBloc>();
-        final selectedCustomer = bloc.selectClintModel;
-        final isWalkInCustomer = selectedCustomer?.id == -1;
-
-        return Form(
-          key: formKey,
-          autovalidateMode: _autovalidateMode,
-          child: Stepper(
-            physics: const ClampingScrollPhysics(),
-            type: StepperType.vertical,
-            currentStep: currentStep,
-            onStepContinue: () {
-              if (_validateCurrentStep()) {
-                if (currentStep < 3) {
-                  setState(() {
-                    currentStep += 1;
-                    _autovalidateMode = AutovalidateMode.disabled;
-                  });
-                } else {
-                  _submitForm();
-                }
-              } else {
-                // Enable auto-validation to show errors
-                setState(() {
-                  _autovalidateMode = AutovalidateMode.onUserInteraction;
-                });
-              }
-            },
-            onStepCancel: () {
-              if (currentStep > 0) {
-                setState(() {
-                  currentStep -= 1;
-                  _autovalidateMode = AutovalidateMode.disabled;
-                });
-              }
-            },
-            onStepTapped: (step) {
-              if (step <= currentStep) {
-                setState(() {
-                  currentStep = step;
-                  _autovalidateMode = AutovalidateMode.disabled;
-                });
-              }
-            },
-            controlsBuilder: (context, details) {
-              return Padding(
-                padding: const EdgeInsets.only(top: 8.0),
-                child: Row(
-                  children: [
-                    if (currentStep > 0)
-                      Expanded(
-                        child: AppButton(
-                          onPressed: details.onStepCancel,
-                          name: "Back",
-                          color: AppColors.redColor,
-                        ),
-                      ),
-                    if (currentStep > 0) const SizedBox(width: 8),
-                    Expanded(
-                      child: AppButton(
-                        onPressed: details.onStepContinue,
-                        name: currentStep < 3 ? 'Next' : 'Submit',
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            },
-            steps: [
-              // Step 1: Customer Information
-              Step(
-                title: Text(
-                  'Customer Info',
-                  style: AppTextStyle.cardLevelHead(context),
-                ),
-                content: _buildMobileTopFormSection(bloc),
-                isActive: currentStep >= 0,
-                state: currentStep > 0 ? StepState.complete : StepState.indexed,
-              ),
-
-              // Step 2: Products
-              Step(
-                title: Text(
-                  'Products',
-                  style: AppTextStyle.cardLevelHead(context),
-                ),
-                content: _buildMobileProductListSection(bloc),
-                isActive: currentStep >= 1,
-                state: currentStep > 1 ? StepState.complete : StepState.indexed,
-              ),
-
-              // Step 3: Charges
-              Step(
-                title: Text(
-                  'Charges',
-                  style: AppTextStyle.cardLevelHead(context),
-                ),
-                content: _buildMobileChargesSection(bloc),
-                isActive: currentStep >= 2,
-                state: currentStep > 2 ? StepState.complete : StepState.indexed,
-              ),
-
-              // Step 4: Summary & Payment
-              Step(
-                title: Text(
-                  'Summary & Payment',
-                  style: AppTextStyle.cardLevelHead(context),
-                ),
-                content: Column(
-                  children: [
-                    // Show customer type info
-                    if (isWalkInCustomer)
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        margin: const EdgeInsets.only(bottom: 10),
-                        decoration: BoxDecoration(
-                          color: Colors.orange[50],
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Colors.orange),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(Icons.info, color: Colors.orange[700]),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                "Walk-in Customer: Must pay exact amount. No due or advance allowed.",
-                                style: TextStyle(
-                                  color: Colors.orange[800],
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
-                    else
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        margin: const EdgeInsets.only(bottom: 10),
-                        decoration: BoxDecoration(
-                          color: Colors.green[50],
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Colors.green),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(Icons.check_circle, color: Colors.green[700]),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                "Saved Customer: Due or advance payment allowed.",
-                                style: TextStyle(
-                                  color: Colors.green[800],
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                    _buildSummarySection(bloc),
-                    const SizedBox(height: 20),
-                  ],
-                ),
-                isActive: currentStep >= 3,
-                state: StepState.indexed,
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
 
   bool _validateCurrentStep() {
     switch (currentStep) {
