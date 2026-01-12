@@ -22,7 +22,7 @@ class CreatePosSaleBloc extends Bloc<CreatePosSaleEvent, CreatePosSaleState> {
   AccountActiveModel? accountModel;
   String selectedAccount = "";
   String selectedAccountId = "";
-  List paymentMethod = ["Bank", "Cash", "Mobile Banking"];
+  List<String> paymentMethod = ["Bank", "Cash", "Mobile Banking"];
   String selectedPaymentMethod = "Cash";
   TextEditingController dateEditingController = TextEditingController();
   TextEditingController customerPhoneController = TextEditingController();

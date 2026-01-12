@@ -27,7 +27,12 @@ class MobileCreatePosSale extends StatefulWidget {
 }
 
 class _CreatePosSalePageState extends State<MobileCreatePosSale> {
-  final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  // Separate form keys for each step
+  final GlobalKey<FormState> _formKeyStep1 = GlobalKey<FormState>();
+  final GlobalKey<FormState> _formKeyStep2 = GlobalKey<FormState>();
+  final GlobalKey<FormState> _formKeyStep3 = GlobalKey<FormState>();
+  final GlobalKey<FormState> _formKeyStep4 = GlobalKey<FormState>();
+
   TextEditingController changeAmountController = TextEditingController();
   late CategoriesBloc categoriesBloc;
 
@@ -47,8 +52,11 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
   String selectedOverallServiceChargeType = 'fixed';
   String selectedOverallDeliveryType = 'fixed';
 
-  // Add autovalidate mode for each step
-  AutovalidateMode _autovalidateMode = AutovalidateMode.disabled;
+  // Track validation state for each step
+  bool _step1Validated = false;
+  bool _step2Validated = false;
+  bool _step3Validated = false;
+  bool _step4Validated = false;
 
   @override
   void initState() {
@@ -402,7 +410,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
         title: Text('Sale', style: AppTextStyle.titleMedium(context)),
       ),
       body: SafeArea(
-        child:  BlocConsumer<CreatePosSaleBloc, CreatePosSaleState>(
+        child: BlocConsumer<CreatePosSaleBloc, CreatePosSaleState>(
           listener: (context, state) {
             if (state is CreatePosSaleLoading) {
               appLoader(context, "Creating PosSale, please wait...");
@@ -438,198 +446,144 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
             final selectedCustomer = bloc.selectClintModel;
             final isWalkInCustomer = selectedCustomer?.id == -1;
 
-            return Form(
-              key: formKey,
-              autovalidateMode: _autovalidateMode,
-              child: Stepper(
-                physics: const ClampingScrollPhysics(),
-                type: StepperType.vertical,
-                currentStep: currentStep,
-                onStepContinue: () {
-                  if (_validateCurrentStep()) {
-                    if (currentStep < 3) {
-                      setState(() {
-                        currentStep += 1;
-                        _autovalidateMode = AutovalidateMode.disabled;
-                      });
-                    } else {
-                      _submitForm();
-                    }
-                  } else {
-                    // Enable auto-validation to show errors
-                    setState(() {
-                      _autovalidateMode = AutovalidateMode.onUserInteraction;
-                    });
-                  }
-                },
-                onStepCancel: () {
-                  if (currentStep > 0) {
-                    setState(() {
-                      currentStep -= 1;
-                      _autovalidateMode = AutovalidateMode.disabled;
-                    });
-                  }
-                },
-                onStepTapped: (step) {
-                  if (step <= currentStep) {
-                    setState(() {
-                      currentStep = step;
-                      _autovalidateMode = AutovalidateMode.disabled;
-                    });
-                  }
-                },
-                controlsBuilder: (context, details) {
-                  return Padding(
-                    padding: const EdgeInsets.only(top: 8.0),
-                    child: Row(
-                      children: [
-                        if (currentStep > 0)
-                          Expanded(
-                            child: AppButton(
-                              onPressed: details.onStepCancel,
-                              name: "Back",
-                              color: AppColors.redColor,
-                            ),
-                          ),
-                        if (currentStep > 0) const SizedBox(width: 8),
+            return Stepper(
+              physics: const ClampingScrollPhysics(),
+              type: StepperType.vertical,
+              currentStep: currentStep,
+              onStepContinue: () {
+                _validateAndMoveToNextStep();
+              },
+              onStepCancel: () {
+                if (currentStep > 0) {
+                  setState(() {
+                    currentStep -= 1;
+                  });
+                }
+              },
+              onStepTapped: (step) {
+                if (step <= currentStep) {
+                  setState(() {
+                    currentStep = step;
+                  });
+                }
+              },
+              controlsBuilder: (context, details) {
+                return Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: Row(
+                    children: [
+                      if (currentStep > 0)
                         Expanded(
                           child: AppButton(
-                            onPressed: details.onStepContinue,
-                            name: currentStep < 3 ? 'Next' : 'Submit',
+                            onPressed: details.onStepCancel,
+                            name: "Back",
+                            color: AppColors.redColor,
                           ),
                         ),
-                      ],
-                    ),
-                  );
-                },
-                steps: [
-                  // Step 1: Customer Information
-                  Step(
-                    title: Text(
-                      'Customer Info',
-                      style: AppTextStyle.cardLevelHead(context),
-                    ),
-                    content: _buildMobileTopFormSection(bloc),
-                    isActive: currentStep >= 0,
-                    state: currentStep > 0 ? StepState.complete : StepState.indexed,
+                      if (currentStep > 0) const SizedBox(width: 8),
+                      Expanded(
+                        child: AppButton(
+                          onPressed: details.onStepContinue,
+                          name: currentStep < 3 ? 'Next' : 'Submit',
+                        ),
+                      ),
+                    ],
                   ),
-
-                  // Step 2: Products
-                  Step(
-                    title: Text(
-                      'Products',
-                      style: AppTextStyle.cardLevelHead(context),
-                    ),
-                    content: _buildMobileProductListSection(bloc),
-                    isActive: currentStep >= 1,
-                    state: currentStep > 1 ? StepState.complete : StepState.indexed,
+                );
+              },
+              steps: [
+                // Step 1: Customer Information
+                Step(
+                  title: Text(
+                    'Customer Info',
+                    style: AppTextStyle.cardLevelHead(context),
                   ),
+                  content: _buildMobileTopFormSection(bloc),
+                  isActive: currentStep >= 0,
+                  state: _getStepState(0),
+                ),
 
-                  // Step 3: Charges
-                  Step(
-                    title: Text(
-                      'Charges',
-                      style: AppTextStyle.cardLevelHead(context),
-                    ),
-                    content: _buildMobileChargesSection(bloc),
-                    isActive: currentStep >= 2,
-                    state: currentStep > 2 ? StepState.complete : StepState.indexed,
+                // Step 2: Products
+                Step(
+                  title: Text(
+                    'Products',
+                    style: AppTextStyle.cardLevelHead(context),
                   ),
+                  content: _buildMobileProductListSection(bloc),
+                  isActive: currentStep >= 1,
+                  state: _getStepState(1),
+                ),
 
-                  // Step 4: Summary & Payment
-                  Step(
-                    title: Text(
-                      'Summary & Payment',
-                      style: AppTextStyle.cardLevelHead(context),
-                    ),
-                    content: Column(
-                      children: [
-                        // Show customer type info
-                        if (isWalkInCustomer)
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            margin: const EdgeInsets.only(bottom: 10),
-                            decoration: BoxDecoration(
-                              color: Colors.orange[50],
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: Colors.orange),
-                            ),
-                            child: Row(
-                              children: [
-                                Icon(Icons.info, color: Colors.orange[700]),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Text(
-                                    "Walk-in Customer: Must pay exact amount. No due or advance allowed.",
-                                    style: TextStyle(
-                                      color: Colors.orange[800],
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          )
-                        else
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            margin: const EdgeInsets.only(bottom: 10),
-                            decoration: BoxDecoration(
-                              color: Colors.green[50],
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: Colors.green),
-                            ),
-                            child: Row(
-                              children: [
-                                Icon(Icons.check_circle, color: Colors.green[700]),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Text(
-                                    "Saved Customer: Due or advance payment allowed.",
-                                    style: TextStyle(
-                                      color: Colors.green[800],
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-
-                        _buildSummarySection(bloc),
-                        const SizedBox(height: 20),
-                      ],
-                    ),
-                    isActive: currentStep >= 3,
-                    state: StepState.indexed,
+                // Step 3: Charges
+                Step(
+                  title: Text(
+                    'Charges',
+                    style: AppTextStyle.cardLevelHead(context),
                   ),
-                ],
-              ),
+                  content: _buildMobileChargesSection(bloc),
+                  isActive: currentStep >= 2,
+                  state: _getStepState(2),
+                ),
+
+                // Step 4: Summary & Payment
+                Step(
+                  title: Text(
+                    'Summary & Payment',
+                    style: AppTextStyle.cardLevelHead(context),
+                  ),
+                  content: _buildSummarySection(bloc, isWalkInCustomer),
+                  isActive: currentStep >= 3,
+                  state: _getStepState(3),
+                ),
+              ],
             );
           },
-        )
+        ),
       ),
     );
   }
 
-
-
-  bool _validateCurrentStep() {
-    switch (currentStep) {
-      case 0:
-        return _validateCustomerInfoStep();
-      case 1:
-        return _validateProductsStep();
-      case 2:
-        return _validateChargesStep();
-      case 3:
-        return _validateSummaryStep();
-      default:
-        return false;
+  StepState _getStepState(int stepIndex) {
+    if (currentStep > stepIndex) {
+      return StepState.complete;
+    } else if (currentStep == stepIndex) {
+      return StepState.indexed;
+    } else {
+      return StepState.indexed;
     }
   }
 
-  bool _validateCustomerInfoStep() {
+  void _validateAndMoveToNextStep() {
+    switch (currentStep) {
+      case 0:
+        _validateStep1();
+        break;
+      case 1:
+        _validateStep2();
+        break;
+      case 2:
+        _validateStep3();
+        break;
+      case 3:
+        _validateStep4();
+        break;
+    }
+  }
+
+  void _validateStep1() {
+    // First validate the form
+    if (!_formKeyStep1.currentState!.validate()) {
+      showCustomToast(
+        context: context,
+        title: 'Validation Error',
+        description: 'Please fix the errors in Customer Information',
+        icon: Icons.error,
+        primaryColor: Colors.red,
+      );
+      return;
+    }
+
+    // Then validate business logic
     final bloc = context.read<CreatePosSaleBloc>();
 
     if (bloc.selectClintModel == null) {
@@ -640,7 +594,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
         icon: Icons.error,
         primaryColor: Colors.red,
       );
-      return false;
+      return;
     }
 
     if (bloc.selectSalesModel == null) {
@@ -651,7 +605,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
         icon: Icons.error,
         primaryColor: Colors.red,
       );
-      return false;
+      return;
     }
 
     if (bloc.dateEditingController.text.isEmpty) {
@@ -662,13 +616,17 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
         icon: Icons.error,
         primaryColor: Colors.red,
       );
-      return false;
+      return;
     }
 
-    return true;
+    _step1Validated = true;
+    setState(() {
+      currentStep += 1;
+    });
   }
 
-  bool _validateProductsStep() {
+  void _validateStep2() {
+    // Validate at least one product is added
     if (products.isEmpty) {
       showCustomToast(
         context: context,
@@ -677,9 +635,10 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
         icon: Icons.error,
         primaryColor: Colors.red,
       );
-      return false;
+      return;
     }
 
+    // Validate each product
     for (int i = 0; i < products.length; i++) {
       final product = products[i];
 
@@ -691,7 +650,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
           icon: Icons.error,
           primaryColor: Colors.red,
         );
-        return false;
+        return;
       }
 
       final quantity = int.tryParse(controllers[i]!["quantity"]!.text) ?? 0;
@@ -703,68 +662,65 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
           icon: Icons.error,
           primaryColor: Colors.red,
         );
-        return false;
+        return;
       }
     }
 
-    return true;
+    _step2Validated = true;
+    setState(() {
+      currentStep += 1;
+    });
   }
 
-  bool _validateChargesStep() {
+  void _validateStep3() {
     final bloc = context.read<CreatePosSaleBloc>();
 
+    // Validate numeric fields
+    final validationErrors = <String>[];
+
     final vatValue = double.tryParse(bloc.vatOverAllController.text) ?? 0;
-    if (vatValue < 0) {
-      showCustomToast(
-        context: context,
-        title: 'Validation Error',
-        description: 'VAT cannot be negative',
-        icon: Icons.error,
-        primaryColor: Colors.red,
-      );
-      return false;
-    }
+    if (vatValue < 0) validationErrors.add('VAT cannot be negative');
 
     final discountValue = double.tryParse(bloc.discountOverAllController.text) ?? 0;
-    if (discountValue < 0) {
-      showCustomToast(
-        context: context,
-        title: 'Validation Error',
-        description: 'Discount cannot be negative',
-        icon: Icons.error,
-        primaryColor: Colors.red,
-      );
-      return false;
-    }
+    if (discountValue < 0) validationErrors.add('Discount cannot be negative');
 
     final serviceChargeValue = double.tryParse(bloc.serviceChargeOverAllController.text) ?? 0;
-    if (serviceChargeValue < 0) {
-      showCustomToast(
-        context: context,
-        title: 'Validation Error',
-        description: 'Service charge cannot be negative',
-        icon: Icons.error,
-        primaryColor: Colors.red,
-      );
-      return false;
-    }
+    if (serviceChargeValue < 0) validationErrors.add('Service charge cannot be negative');
 
     final deliveryChargeValue = double.tryParse(bloc.deliveryChargeOverAllController.text) ?? 0;
-    if (deliveryChargeValue < 0) {
+    if (deliveryChargeValue < 0) validationErrors.add('Delivery charge cannot be negative');
+
+    if (validationErrors.isNotEmpty) {
       showCustomToast(
         context: context,
         title: 'Validation Error',
-        description: 'Delivery charge cannot be negative',
+        description: validationErrors.join('\n'),
         icon: Icons.error,
         primaryColor: Colors.red,
       );
-      return false;
+      return;
     }
 
-    return true;
+    _step3Validated = true;
+    setState(() {
+      currentStep += 1;
+    });
   }
 
-  bool _validateSummaryStep() {
+  void _validateStep4() {
+    // First validate the form
+    if (!_formKeyStep4.currentState!.validate()) {
+      showCustomToast(
+        context: context,
+        title: 'Validation Error',
+        description: 'Please fix the errors in Summary & Payment',
+        icon: Icons.error,
+        primaryColor: Colors.red,
+      );
+      return;
+    }
+
+    // Then validate business logic
     final bloc = context.read<CreatePosSaleBloc>();
     final selectedCustomer = bloc.selectClintModel;
     final isWalkInCustomer = selectedCustomer?.id == -1;
@@ -781,7 +737,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
           icon: Icons.error,
           primaryColor: Colors.red,
         );
-        return false;
+        return;
       }
     }
 
@@ -794,7 +750,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
         icon: Icons.error,
         primaryColor: Colors.red,
       );
-      return false;
+      return;
     }
 
     // Validate money receipt section
@@ -807,7 +763,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
           icon: Icons.error,
           primaryColor: Colors.red,
         );
-        return false;
+        return;
       }
 
       if (bloc.accountModel == null) {
@@ -818,7 +774,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
           icon: Icons.error,
           primaryColor: Colors.red,
         );
-        return false;
+        return;
       }
 
       if (bloc.payableAmount.text.isEmpty) {
@@ -829,115 +785,119 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
           icon: Icons.error,
           primaryColor: Colors.red,
         );
-        return false;
+        return;
       }
     }
 
-    return true;
+    _step4Validated = true;
+    _submitForm();
   }
 
   Widget _buildMobileTopFormSection(CreatePosSaleBloc bloc) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Column(
-          children: [
-            BlocBuilder<CustomerBloc, CustomerState>(
-              builder: (context, state) {
-                return AppDropdown(
-                  context: context,
-                  label: "Customer",
-                  hint: bloc.selectClintModel?.name ?? "Select Customer",
-                  isSearch: true,
-                  isNeedAll: false,
-                  isRequired: true,
-                  value: bloc.selectClintModel,
-                  itemList:
-                  [CustomerActiveModel(name: 'Walk-in-customer', id: -1)] +
-                      context.read<CustomerBloc>().activeCustomer,
-                  onChanged: (newVal) {
-                    bloc.selectClintModel = newVal;
-                    bloc.customType = (newVal?.id == -1)
-                        ? "Walking Customer"
-                        : "Saved Customer";
-                    if (newVal?.id == -1) {
-                      _isChecked = true;
-                      bloc.isChecked = true;
-                      // Auto-set payable amount to net total for walk-in customer
-                      Future.delayed(const Duration(milliseconds: 100), () {
-                        final netTotal = calculateAllFinalTotal();
-                        bloc.payableAmount.text = netTotal.toStringAsFixed(2);
-                        _updateChangeAmount();
-                      });
-                    }
-                    setState(() {});
-                  },
-                  validator: (value) =>
-                  value == null ? 'Please select Customer' : null,
-                  itemBuilder: (item) => DropdownMenuItem(
-                    value: item,
-                    child: Text(
-                      item.toString(),
-                      style: const TextStyle(
-                        color: AppColors.blackColor,
-                        fontFamily: 'Quicksand',
-                        fontWeight: FontWeight.w300,
+    return Form(
+      key: _formKeyStep1,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Column(
+            children: [
+              BlocBuilder<CustomerBloc, CustomerState>(
+                builder: (context, state) {
+                  return AppDropdown<CustomerActiveModel>(
+                    context: context,
+                    label: "Customer",
+                    hint: bloc.selectClintModel?.name ?? "Select Customer",
+                    isSearch: true,
+                    isNeedAll: false,
+                    isRequired: true,
+                    value: bloc.selectClintModel,
+                    itemList:
+                    [CustomerActiveModel(name: 'Walk-in-customer', id: -1)] +
+                        context.read<CustomerBloc>().activeCustomer,
+                    onChanged: (newVal) {
+                      bloc.selectClintModel = newVal;
+                      bloc.customType = (newVal?.id == -1)
+                          ? "Walking Customer"
+                          : "Saved Customer";
+                      if (newVal?.id == -1) {
+                        _isChecked = true;
+                        bloc.isChecked = true;
+                        // Auto-set payable amount to net total for walk-in customer
+                        Future.delayed(const Duration(milliseconds: 100), () {
+                          final netTotal = calculateAllFinalTotal();
+                          bloc.payableAmount.text = netTotal.toStringAsFixed(2);
+                          _updateChangeAmount();
+                        });
+                      }
+                      setState(() {});
+                    },
+                    validator: (value) =>
+                    value == null ? 'Please select Customer' : null,
+                    itemBuilder: (item) => DropdownMenuItem(
+                      value: item,
+                      child: Text(
+                        item.toString(),
+                        style: const TextStyle(
+                          color: AppColors.blackColor,
+                          fontFamily: 'Quicksand',
+                          fontWeight: FontWeight.w300,
+                        ),
                       ),
                     ),
-                  ),
-                );
-              },
-            ),
-            const SizedBox(height: 12),
-            BlocBuilder<UserBloc, UserState>(
-              builder: (context, state) {
-                return AppDropdown(
-                  context: context,
-                  label: "Sales By",
-                  hint: bloc.selectSalesModel?.username ?? "Select Sales",
-                  isSearch: true,
-                  isNeedAll: false,
-                  isRequired: true,
-                  value: bloc.selectSalesModel,
-                  itemList: context.read<UserBloc>().list,
-                  onChanged: (newVal) {
-                    bloc.selectSalesModel = newVal;
-                    setState(() {});
-                  },
-                  validator: (value) =>
-                  value == null ? 'Please select Sales' : null,
-                  itemBuilder: (item) => DropdownMenuItem(
-                    value: item,
-                    child: Text(
-                      item.toString(),
-                      style: const TextStyle(
-                        color: AppColors.blackColor,
-                        fontFamily: 'Quicksand',
-                        fontWeight: FontWeight.w300,
+                  );
+                },
+              ),
+              const SizedBox(height: 12),
+              BlocBuilder<UserBloc, UserState>(
+                builder: (context, state) {
+                  return AppDropdown(
+                    context: context,
+                    label: "Sales By",
+                    hint: bloc.selectSalesModel?.username ?? "Select Sales",
+                    isSearch: true,
+                    isNeedAll: false,
+                    isRequired: true,
+                    value: bloc.selectSalesModel,
+                    itemList: context.read<UserBloc>().list,
+                    onChanged: (newVal) {
+                      bloc.selectSalesModel = newVal;
+                      setState(() {});
+                    },
+                    validator: (value) =>
+                    value == null ? 'Please select Sales' : null,
+                    itemBuilder: (item) => DropdownMenuItem(
+                      value: item,
+                      child: Text(
+                        item.toString(),
+                        style: const TextStyle(
+                          color: AppColors.blackColor,
+                          fontFamily: 'Quicksand',
+                          fontWeight: FontWeight.w300,
+                        ),
                       ),
                     ),
-                  ),
-                );
-              },
-            ),
-            const SizedBox(height: 12),
-            CustomInputField(
-              radius: 8,
-              isRequired: true,
-              readOnly: true,
-              controller: bloc.dateEditingController,
-              hintText: 'Sale Date',
-              keyboardType: TextInputType.datetime,
-              autofillHints: AutofillHints.name,
-              bottom: 15.0,
-              fillColor: AppColors.whiteColor,
-              validator: (value) => value!.isEmpty ? 'Please enter date' : null,
-              onTap: _selectDate,
-            ),
-          ],
-        ),
-      ],
+                  );
+                },
+              ),
+              const SizedBox(height: 12),
+              CustomInputField(
+                radius: 8,
+                isRequired: true,
+                readOnly: true,
+                controller: bloc.dateEditingController,
+                hintText: 'Sale Date',
+                keyboardType: TextInputType.datetime,
+                autofillHints: AutofillHints.name,
+                bottom: 15.0,
+                fillColor: AppColors.whiteColor,
+                validator: (value) => value!.isEmpty ? 'Please enter date' : null,
+                onTap: _selectDate,
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -973,7 +933,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                     if (index > 0)
                       IconButton(
                         icon: const Icon(
-                          HugeIcons.strokeRoundedDelete02,
+                          Icons.delete,
                           color: Colors.red,
                           size: 20,
                         ),
@@ -983,7 +943,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                     else
                       IconButton(
                         icon: const Icon(
-                          HugeIcons.strokeRoundedAddCircleHalfDot,
+                          Icons.add_circle,
                           color: Colors.green,
                         ),
                         onPressed: addProduct,
@@ -1472,53 +1432,111 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
     );
   }
 
-  Widget _buildSummarySection(CreatePosSaleBloc bloc) {
-    final selectedCustomer = bloc.selectClintModel;
-    final isWalkInCustomer = selectedCustomer?.id == -1;
+  Widget _buildSummarySection(CreatePosSaleBloc bloc, bool isWalkInCustomer) {
     final productTotal = calculateTotalTicketForAllProducts();
     final specificDiscount = calculateSpecificDiscountTotal();
     final subTotal = calculateTotalForAllProducts();
     final netTotal = calculateAllFinalTotal();
 
-    return ResponsiveRow(
-      spacing: 20,
-      runSpacing: 10,
-      children: [
-        ResponsiveCol(
-          xs: 12,
-          sm: 5,
-          md: 5,
-          lg: 5,
-          xl: 5,
-          child: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
-              color: Colors.white,
+    return Form(
+      key: _formKeyStep4,
+      child: Column(
+        children: [
+          // Show customer type info
+          if (isWalkInCustomer)
+            Container(
+              padding: const EdgeInsets.all(8),
+              margin: const EdgeInsets.only(bottom: 10),
+              decoration: BoxDecoration(
+                color: Colors.orange[50],
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.orange),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.info, color: Colors.orange[700]),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      "Walk-in Customer: Must pay exact amount. No due or advance allowed.",
+                      style: TextStyle(
+                        color: Colors.orange[800],
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            )
+          else
+            Container(
+              padding: const EdgeInsets.all(8),
+              margin: const EdgeInsets.only(bottom: 10),
+              decoration: BoxDecoration(
+                color: Colors.green[50],
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.green),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.check_circle, color: Colors.green[700]),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      "Saved Customer: Due or advance payment allowed.",
+                      style: TextStyle(
+                        color: Colors.green[800],
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-            child: Column(
-              children: [
-                _buildSummaryRow("Product Total", productTotal),
-                _buildSummaryRow("Specific Discount (-)", specificDiscount),
-                _buildSummaryRow("Sub Total", subTotal),
-                _buildSummaryRow("Discount (-)", discount),
-                _buildSummaryRow("Vat (+)", vat),
-                _buildSummaryRow("Service Charge (+)", serviceCharge),
-                _buildSummaryRow("Delivery Charge (+)", deliveryCharge),
-                _buildSummaryRow("Net Total", netTotal, isBold: true),
-              ],
-            ),
+
+          ResponsiveRow(
+            spacing: 20,
+            runSpacing: 10,
+            children: [
+              ResponsiveCol(
+                xs: 12,
+                sm: 5,
+                md: 5,
+                lg: 5,
+                xl: 5,
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8),
+                    color: Colors.white,
+                  ),
+                  child: Column(
+                    children: [
+                      _buildSummaryRow("Product Total", productTotal),
+                      _buildSummaryRow("Specific Discount (-)", specificDiscount),
+                      _buildSummaryRow("Sub Total", subTotal),
+                      _buildSummaryRow("Discount (-)", discount),
+                      _buildSummaryRow("Vat (+)", vat),
+                      _buildSummaryRow("Service Charge (+)", serviceCharge),
+                      _buildSummaryRow("Delivery Charge (+)", deliveryCharge),
+                      _buildSummaryRow("Net Total", netTotal, isBold: true),
+                    ],
+                  ),
+                ),
+              ),
+              ResponsiveCol(
+                xs: 12,
+                sm: 5,
+                md: 5,
+                lg: 5,
+                xl: 5,
+                child: _buildPaymentSection(bloc, isWalkInCustomer, netTotal),
+              ),
+            ],
           ),
-        ),
-        ResponsiveCol(
-          xs: 12,
-          sm: 5,
-          md: 5,
-          lg: 5,
-          xl: 5,
-          child: _buildPaymentSection(bloc, isWalkInCustomer, netTotal),
-        ),
-      ],
+          const SizedBox(height: 20),
+        ],
+      ),
     );
   }
 
@@ -1546,7 +1564,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
           Row(
             children: [
               Expanded(
-                child: AppDropdown(
+                child: AppDropdown<String>(
                   context: context,
                   label: "Payment Method",
                   hint: bloc.selectedPaymentMethod.isEmpty
@@ -1558,7 +1576,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                   value: bloc.selectedPaymentMethod.isEmpty
                       ? null
                       : bloc.selectedPaymentMethod,
-                  itemList: [] + bloc.paymentMethod,
+                  itemList: bloc.paymentMethod,
                   onChanged: (newVal) {
                     bloc.selectedPaymentMethod = newVal.toString();
                     setState(() {});
@@ -1691,6 +1709,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
             ],
           ),
         ],
+        const SizedBox(height: 10),
         CustomInputField(
           isRequiredLable: true,
           controller: bloc.remarkController,
@@ -1750,23 +1769,6 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
   }
 
   void _submitForm() {
-    // First validate the form
-    if (!formKey.currentState!.validate()) {
-      showCustomToast(
-        context: context,
-        title: 'Validation Error',
-        description: 'Please fix all validation errors before submitting',
-        icon: Icons.error,
-        primaryColor: Colors.red,
-      );
-      return;
-    }
-
-    // Then validate final step specific requirements
-    if (!_validateSummaryStep()) {
-      return;
-    }
-
     final bloc = context.read<CreatePosSaleBloc>();
 
     var transferProducts = products

@@ -2,6 +2,7 @@
 import '../../../../../core/configs/configs.dart';
 import '../../../../../core/widgets/delete_dialog.dart';
 import '../../data/model/product_model.dart';
+import '../pages/mobile_product_create.dart';
 
 class ProductDataTableWidget extends StatelessWidget {
   final List<ProductModel> products;
@@ -201,7 +202,33 @@ class ProductDataTableWidget extends StatelessWidget {
                 // Edit Button
                 Expanded(
                   child: OutlinedButton.icon(
-                    onPressed: () => onEdit?.call(product),
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) {
+                          return Dialog(
+                            insetPadding: const EdgeInsets.all(10),
+                            child: ConstrainedBox(
+                              constraints: BoxConstraints(
+                                // minWidth: isMobile
+                                //     ? double.infinity
+                                //     : AppSizes.width(context) * 0.7,
+                                // maxWidth: isMobile
+                                //     ? double.infinity
+                                //     : AppSizes.width(context) * 0.7,
+                                maxHeight: isMobile
+                                    ? AppSizes.height(context) * 0.7
+                                    : AppSizes.height(context) * 0.8,
+                              ),
+                              child: MobileProductCreate(
+                                productId: product.id.toString(),
+                                product: product,
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    },
                     icon: const Icon(
                       Iconsax.edit,
                       size: 16,

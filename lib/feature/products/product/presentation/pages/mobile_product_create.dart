@@ -20,17 +20,17 @@ import '../../../../../core/widgets/show_custom_toast.dart';
 import '../../data/model/product_model.dart';
 import '../bloc/products/products_bloc.dart';
 
-class ProductsForm extends StatefulWidget {
+class MobileProductCreate extends StatefulWidget {
   final ProductModel? product;
   final String? productId;
 
-  const ProductsForm({super.key, this.product, this.productId});
+  const MobileProductCreate({super.key, this.product, this.productId});
 
   @override
-  State<ProductsForm> createState() => _ProductsFormState();
+  State<MobileProductCreate> createState() => _ProductsFormState();
 }
 
-class _ProductsFormState extends State<ProductsForm> {
+class _ProductsFormState extends State<MobileProductCreate> {
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   late ProductsBloc productsBloc;
   late CategoriesBloc categoriesBloc;
