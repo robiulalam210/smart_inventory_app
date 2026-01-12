@@ -9,7 +9,8 @@ class MobileAccountTransferForm extends StatefulWidget {
   const MobileAccountTransferForm({super.key});
 
   @override
-  State<MobileAccountTransferForm> createState() => _MobileAccountTransferFormState();
+  State<MobileAccountTransferForm> createState() =>
+      _MobileAccountTransferFormState();
 }
 
 class _MobileAccountTransferFormState extends State<MobileAccountTransferForm> {
@@ -53,11 +54,7 @@ class _MobileAccountTransferFormState extends State<MobileAccountTransferForm> {
 
   void _fetchApi() {
     context.read<AccountTransferBloc>().add(
-      FetchAccountTransferList(
-        context: context,
-        pageNumber: 1,
-        pageSize: 10,
-      ),
+      FetchAccountTransferList(context: context, pageNumber: 1, pageSize: 10),
     );
   }
 
@@ -65,9 +62,9 @@ class _MobileAccountTransferFormState extends State<MobileAccountTransferForm> {
   Widget build(BuildContext context) {
     return AppScaffold(
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           "Account Transfer",
-          style: TextStyle(fontWeight: FontWeight.w600),
+          style: AppTextStyle.titleMedium(context),
         ),
         centerTitle: true,
         actions: [
@@ -106,7 +103,6 @@ class _MobileAccountTransferFormState extends State<MobileAccountTransferForm> {
                   state is QuickTransferFailed ||
                   state is ExecuteTransferFailed) {
                 Navigator.pop(context);
-
               }
             },
             child: SingleChildScrollView(
@@ -128,7 +124,7 @@ class _MobileAccountTransferFormState extends State<MobileAccountTransferForm> {
                         ),
                       ],
                     ),
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(8),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -156,12 +152,15 @@ class _MobileAccountTransferFormState extends State<MobileAccountTransferForm> {
                         ValueListenableBuilder<bool>(
                           valueListenable: isQuickTransfer,
                           builder: (context, isQuick, child) {
-                            return Switch(
-                              value: isQuick,
-                              onChanged: (value) {
-                                isQuickTransfer.value = value;
-                              },
-                              activeThumbColor: AppColors.primaryColor,
+                            return Transform.scale(
+                              scale: 0.8,
+                              child: Switch(
+                                value: isQuick,
+                                onChanged: (value) {
+                                  isQuickTransfer.value = value;
+                                },
+                                activeThumbColor: AppColors.primaryColor,
+                              ),
                             );
                           },
                         ),
@@ -278,7 +277,7 @@ class _MobileAccountTransferFormState extends State<MobileAccountTransferForm> {
               color: AppColors.primaryColor,
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 4),
           _buildAccountDropdown(isFromAccount: isFromAccount),
         ],
       ),
@@ -294,7 +293,7 @@ class _MobileAccountTransferFormState extends State<MobileAccountTransferForm> {
       builder: (context, state) {
         if (state is AccountActiveListLoading) {
           return Container(
-            height: 50,
+            height: 40,
             alignment: Alignment.center,
             child: const CircularProgressIndicator(strokeWidth: 2),
           );
@@ -309,15 +308,11 @@ class _MobileAccountTransferFormState extends State<MobileAccountTransferForm> {
 
           return GestureDetector(
             onTap: () {
-              _showAccountSelector(
-                context,
-                filteredAccounts,
-                isFromAccount,
-              );
+              _showAccountSelector(context, filteredAccounts, isFromAccount);
             },
             child: Container(
               width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(color: Colors.grey.shade300),
@@ -334,29 +329,27 @@ class _MobileAccountTransferFormState extends State<MobileAccountTransferForm> {
                           style: TextStyle(
                             fontSize: 14,
                             color: selectedAccount != null
-                                ? Colors.black87
-                                : Colors.grey.shade600,
+                                ? Colors.black
+                                : Colors.black,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
-                        if (selectedAccount != null && selectedAccount.acNumber != null)
+                        if (selectedAccount != null &&
+                            selectedAccount.acNumber != null)
                           Padding(
                             padding: const EdgeInsets.only(top: 4),
                             child: Text(
                               "Acc. No: ${selectedAccount.acNumber}",
                               style: const TextStyle(
                                 fontSize: 12,
-                                color: Colors.grey,
+                                color: Colors.black,
                               ),
                             ),
                           ),
                       ],
                     ),
                   ),
-                  Icon(
-                    Icons.arrow_drop_down,
-                    color: Colors.grey.shade600,
-                  ),
+                  Icon(Icons.arrow_drop_down, color: Colors.grey.shade600),
                 ],
               ),
             ),
@@ -368,10 +361,10 @@ class _MobileAccountTransferFormState extends State<MobileAccountTransferForm> {
   }
 
   void _showAccountSelector(
-      BuildContext context,
-      List<AccountActiveModel> accounts,
-      bool isFromAccount,
-      ) {
+    BuildContext context,
+    List<AccountActiveModel> accounts,
+    bool isFromAccount,
+  ) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -379,87 +372,104 @@ class _MobileAccountTransferFormState extends State<MobileAccountTransferForm> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) {
-        return Container(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade300,
-                  borderRadius: BorderRadius.circular(2),
+        return SafeArea(
+          child: Container(
+            padding: const EdgeInsets.all(8),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                "Select ${isFromAccount ? 'From' : 'To'} Account",
-                style: const TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 16,
-                ),
-              ),
-              const SizedBox(height: 16),
-              Expanded(
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: accounts.length,
-                  itemBuilder: (context, index) {
-                    final account = accounts[index];
-                    return ListTile(
-                      onTap: () {
-                        setState(() {
-                          if (isFromAccount) {
-                            transferBloc.fromAccountModel = account;
-                          } else {
-                            transferBloc.toAccountModel = account;
-                          }
-                        });
-                        Navigator.pop(context);
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    SizedBox(width: 5),
+
+                    Text(
+                      "Select ${isFromAccount ? 'From' : 'To'} Account",
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16,
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () {
+                        AppRoutes.pop(context);
                       },
-                      leading: Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          color: AppColors.primaryColor.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Icon(
-                          Icons.account_balance_wallet,
-                          color: AppColors.primaryColor,
-                          size: 20,
-                        ),
-                      ),
-                      title: Text(
-                        account.name ?? "Unknown",
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w500,
-                          fontSize: 14,
-                        ),
-                      ),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          if (account.acNumber != null)
-                            Text(
-                              "Acc. No: ${account.acNumber}",
-                              style: const TextStyle(fontSize: 12),
-                            ),
-                          Text(
-                            "Balance: ${account.balance ?? '0.00'}",
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: Colors.green,
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
+                      icon: Icon(HugeIcons.strokeRoundedCancelSquare),
+                    ),
+                  ],
                 ),
-              ),
-            ],
+
+                const SizedBox(height: 16),
+                Expanded(
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: accounts.length,
+                    itemBuilder: (context, index) {
+                      final account = accounts[index];
+                      return ListTile(
+                        onTap: () {
+                          setState(() {
+                            if (isFromAccount) {
+                              transferBloc.fromAccountModel = account;
+                            } else {
+                              transferBloc.toAccountModel = account;
+                            }
+                          });
+                          Navigator.pop(context);
+                        },
+                        leading: Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: AppColors.primaryColor.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Icon(
+                            Icons.account_balance_wallet,
+                            color: AppColors.primaryColor,
+                            size: 20,
+                          ),
+                        ),
+                        title: Text(
+                          account.name ?? "Unknown",
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w500,
+                            fontSize: 14,
+                          ),
+                        ),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (account.acNumber != null)
+                              Text(
+                                "Acc. No: ${account.acNumber}",
+                                style: const TextStyle(fontSize: 12),
+                              ),
+                            Text(
+                              "Balance: ${account.balance ?? '0.00'}",
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Colors.green,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
           ),
         );
       },
@@ -598,8 +608,8 @@ class _MobileAccountTransferFormState extends State<MobileAccountTransferForm> {
             );
             if (pickedDate != null) {
               setState(() {
-                transferBloc.dateController.text =
-                    appWidgets.convertDateTimeDDMMYYYY(pickedDate);
+                transferBloc.dateController.text = appWidgets
+                    .convertDateTimeDDMMYYYY(pickedDate);
               });
             }
           },
@@ -612,7 +622,11 @@ class _MobileAccountTransferFormState extends State<MobileAccountTransferForm> {
             ),
             child: Row(
               children: [
-                Icon(Icons.calendar_today, size: 20, color: Colors.grey.shade600),
+                Icon(
+                  Icons.calendar_today,
+                  size: 20,
+                  color: Colors.grey.shade600,
+                ),
                 const SizedBox(width: 12),
                 Text(
                   transferBloc.dateController.text.isNotEmpty
@@ -731,50 +745,53 @@ class _MobileAccountTransferFormState extends State<MobileAccountTransferForm> {
   Widget _buildActionButtons() {
     return Row(
       children: [
-      Expanded(child:   ValueListenableBuilder<bool>(
-        valueListenable: isQuickTransfer,
-        builder: (context, isQuick, child) {
-          return SizedBox(
-            width: double.infinity,
-            child: AppButton(
-              onPressed: () {
-                if (isQuick) {
-                  _createQuickTransfer();
-                } else {
-                  _createTransfer();
-                }
-              },
-             name:    isQuick ? "QUICK TRANSFER" : "CREATE TRANSFER",
-
-            ),
-          );
-        },
-      ),),
+        Expanded(
+          child: ValueListenableBuilder<bool>(
+            valueListenable: isQuickTransfer,
+            builder: (context, isQuick, child) {
+              return SizedBox(
+                width: double.infinity,
+                child: AppButton(
+                  onPressed: () {
+                    if (isQuick) {
+                      _createQuickTransfer();
+                    } else {
+                      _createTransfer();
+                    }
+                  },
+                  name: isQuick ? "QUICK TRANSFER" : "CREATE TRANSFER",
+                ),
+              );
+            },
+          ),
+        ),
         const SizedBox(width: 12),
-     Expanded(child:    SizedBox(
-       width: double.infinity,
-       child: OutlinedButton(
-         onPressed: () {
-           transferBloc.add(ResetForm());
-           setState(() {});
-         },
-         style: OutlinedButton.styleFrom(
-           padding: const EdgeInsets.symmetric(vertical: 0),
-           shape: RoundedRectangleBorder(
-             borderRadius: BorderRadius.circular(12),
-           ),
-           side: BorderSide(color: AppColors.primaryColor),
-         ),
-         child: Text(
-           "RESET FORM",
-           style: TextStyle(
-             fontWeight: FontWeight.w600,
-             fontSize: 14,
-             color: AppColors.primaryColor,
-           ),
-         ),
-       ),
-     ),)
+        Expanded(
+          child: SizedBox(
+            width: double.infinity,
+            child: OutlinedButton(
+              onPressed: () {
+                transferBloc.add(ResetForm());
+                setState(() {});
+              },
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 0),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                side: BorderSide(color: AppColors.primaryColor),
+              ),
+              child: Text(
+                "RESET FORM",
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                  color: AppColors.primaryColor,
+                ),
+              ),
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -791,9 +808,9 @@ class _MobileAccountTransferFormState extends State<MobileAccountTransferForm> {
     }
 
     if (transferBloc.toAccountModel == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select to account')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Please select to account')));
       return;
     }
 
@@ -816,9 +833,7 @@ class _MobileAccountTransferFormState extends State<MobileAccountTransferForm> {
     if (transferAmount > fromBalance) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            'Insufficient balance. Available: $fromBalance',
-          ),
+          content: Text('Insufficient balance. Available: $fromBalance'),
         ),
       );
       return;
@@ -865,9 +880,9 @@ class _MobileAccountTransferFormState extends State<MobileAccountTransferForm> {
     }
 
     if (transferBloc.toAccountModel == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select to account')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Please select to account')));
       return;
     }
 
@@ -890,9 +905,7 @@ class _MobileAccountTransferFormState extends State<MobileAccountTransferForm> {
     if (transferAmount > fromBalance) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            'Insufficient balance. Available: $fromBalance',
-          ),
+          content: Text('Insufficient balance. Available: $fromBalance'),
         ),
       );
       return;
@@ -940,15 +953,10 @@ class _MobileAccountTransferFormState extends State<MobileAccountTransferForm> {
               transferBloc.add(ResetForm());
               setState(() {});
             },
-            child: Text(
-              "OK",
-              style: TextStyle(color: AppColors.primaryColor),
-            ),
+            child: Text("OK", style: TextStyle(color: AppColors.primaryColor)),
           ),
         ],
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
   }

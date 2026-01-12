@@ -2,6 +2,7 @@
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:meherinMart/core/widgets/app_scaffold.dart';
 import '../../../../core/configs/configs.dart';
 import '../../../../core/widgets/app_alert_dialog.dart';
 import '../../../../core/widgets/app_button.dart';
@@ -39,7 +40,7 @@ class _MobileAccountTransferScreenState extends State<MobileAccountTransferScree
     DateTime now = DateTime.now();
     selectedDateRange = DateRange(
       DateTime(now.year, now.month - 1, 1),
-      DateTime(now.year, now.month, 0), // Last day of previous month
+      DateTime(now.year, now.month, now.day), // Last day of previous month
     );
     filterTextController.clear();
     _fetchApi();
@@ -119,8 +120,9 @@ class _MobileAccountTransferScreenState extends State<MobileAccountTransferScree
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return AppScaffold(
       appBar: AppBar(
+        backgroundColor: AppColors.bg,
         title:  Text("Account Transfers",style: AppTextStyle.titleMedium(context),),
         actions: [
           IconButton(
@@ -159,13 +161,12 @@ class _MobileAccountTransferScreenState extends State<MobileAccountTransferScree
         _fetchApi();
       },
       child: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(12),
         child: Column(
           children: [
             _buildMobileHeader(),
-            const SizedBox(height: 16),
+            const SizedBox(height: 6),
             _buildFilterChips(),
-            const SizedBox(height: 16),
             _buildTransferList(),
           ],
         ),
@@ -190,7 +191,7 @@ class _MobileAccountTransferScreenState extends State<MobileAccountTransferScree
         children: [
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 0),
               child: CustomSearchTextFormField(
                 isRequiredLabel: false,
                 controller: filterTextController,
@@ -199,7 +200,7 @@ class _MobileAccountTransferScreenState extends State<MobileAccountTransferScree
                   filterTextController.clear();
                   _fetchApi();
                 },
-                hintText: "Search transfers...",
+                hintText: "transfers...",
               ),
             ),
           ),
@@ -210,8 +211,8 @@ class _MobileAccountTransferScreenState extends State<MobileAccountTransferScree
 
   Widget _buildFilterChips() {
     return Wrap(
-      spacing: 8,
-      runSpacing: 8,
+      spacing: 4,
+      runSpacing: 4,
       children: [
         if (selectedStatusNotifier.value != null)
           Chip(
@@ -376,7 +377,7 @@ class _MobileAccountTransferScreenState extends State<MobileAccountTransferScree
                       _showCancelDialog(context, transfer);
                     },
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 6),
                   PaginationBar(
                     count: state.count,
                     totalPages: state.totalPages,

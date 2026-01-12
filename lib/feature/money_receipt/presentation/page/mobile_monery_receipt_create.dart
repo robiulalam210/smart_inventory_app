@@ -254,11 +254,11 @@ class _MoneyReceiptListScreenState extends State<MobileMoneyReceiptForm> {
 
     // Validate form
     if (!formKey1.currentState!.validate()) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Please fix the errors in step 1')),
-        );
-      });
+      // WidgetsBinding.instance.addPostFrameCallback((_) {
+      //   ScaffoldMessenger.of(context).showSnackBar(
+      //     SnackBar(content: Text('Please fix the errors in step 1')),
+      //   );
+      // });
       return false;
     }
 
@@ -879,7 +879,7 @@ class _MoneyReceiptListScreenState extends State<MobileMoneyReceiptForm> {
     }
 
     Map<String, dynamic> body = {
-      "amount": moneyReceiptBloc.amountController.text.trim(),
+      "amount": double.tryParse(moneyReceiptBloc.amountController.text.trim()),
       "customer_id": moneyReceiptBloc.selectCustomerModel!.id.toString(),
       "payment_date": appWidgets.convertDateTime(
         DateFormat("dd-MM-yyyy").parse(moneyReceiptBloc.dateController.text.trim(), true),

@@ -43,7 +43,7 @@ class MobileAccountTransferCard extends StatelessWidget {
     return Card(
       color: AppColors.whiteColor,
       margin: const EdgeInsets.only(bottom: 8),
-      elevation: 1,
+      elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
@@ -74,14 +74,13 @@ class MobileAccountTransferCard extends StatelessWidget {
                 ],
               ),
 
-              const SizedBox(height: 12),
+              const SizedBox(height: 6),
 
               // Transfer Details
               _buildDetailRow('Date:', _formatDate(transfer.transferDate)),
               _buildDetailRow('From:', transfer.fromAccount?.name ?? 'N/A'),
               _buildDetailRow('To:', transfer.toAccount?.name ?? 'N/A'),
 
-              const SizedBox(height: 8),
 
               // Amount and Type Row
               Row(
@@ -92,7 +91,6 @@ class MobileAccountTransferCard extends StatelessWidget {
                 ],
               ),
 
-              const SizedBox(height: 12),
 
               // Actions Row
               if (_shouldShowActions(transfer))
@@ -284,7 +282,7 @@ class MobileAccountTransferCard extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 2),
       child: TextButton.icon(
         onPressed: onPressed,
-        icon: Icon(icon, size: 16, color: color),
+        icon: Icon(icon, size: 14, color: color),
         label: Text(
           text,
           style: GoogleFonts.inter(
@@ -294,7 +292,7 @@ class MobileAccountTransferCard extends StatelessWidget {
           ),
         ),
         style: TextButton.styleFrom(
-          padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+          padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 0),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
             side: BorderSide(color: color.withValues(alpha: 0.3)),
