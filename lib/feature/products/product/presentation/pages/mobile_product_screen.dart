@@ -11,6 +11,7 @@ import '../../data/model/product_model.dart';
 import '../bloc/products/products_bloc.dart';
 import '../widget/pagination.dart';
 import '../widget/widget.dart';
+import 'mobile_product_create.dart';
 import 'product_create.dart';
 
 class MobileProductScreen extends StatefulWidget {
@@ -290,12 +291,12 @@ floatingActionButton: FloatingActionButton( onPressed: () => _showCreateProductD
           insetPadding: const EdgeInsets.all(20),
           child: ConstrainedBox(
             constraints: BoxConstraints(
-              maxWidth: Responsive.isMobile(context)
-                  ? AppSizes.width(context)
-                  : AppSizes.width(context) * 0.6,
-              maxHeight: Responsive.isMobile(context)
-                  ? AppSizes.height(context) * 0.8
-                  : 500,
+              // maxWidth: Responsive.isMobile(context)
+              //     ? AppSizes.width(context)
+              //     : AppSizes.width(context) * 0.6,
+              maxHeight:  Responsive.isMobile(context)
+                  ? AppSizes.height(context) * 0.7
+                  : AppSizes.height(context) * 0.8,
             ),
             child: const ProductsForm(),
           ),
@@ -309,17 +310,20 @@ floatingActionButton: FloatingActionButton( onPressed: () => _showCreateProductD
       context: context,
       builder: (context) {
         return Dialog(
-          insetPadding: const EdgeInsets.all(20),
+          insetPadding: const EdgeInsets.all(10),
           child: ConstrainedBox(
             constraints: BoxConstraints(
-              maxWidth: isMobile
-                  ? AppSizes.width(context)
-                  : AppSizes.width(context) * 0.7,
+              // minWidth: isMobile
+              //     ? double.infinity
+              //     : AppSizes.width(context) * 0.7,
+              // maxWidth: isMobile
+              //     ? double.infinity
+              //     : AppSizes.width(context) * 0.7,
               maxHeight: isMobile
-                  ? AppSizes.height(context) * 0.9
+                  ? AppSizes.height(context) * 0.7
                   : AppSizes.height(context) * 0.8,
             ),
-            child: ProductsForm(
+            child: MobileProductCreate(
               productId: product.id.toString(),
               product: product,
             ),

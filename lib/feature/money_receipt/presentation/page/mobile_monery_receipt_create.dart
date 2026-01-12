@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '/core/core.dart';
 import '../../../accounts/data/model/account_active_model.dart';
@@ -18,10 +19,26 @@ class MobileMoneyReceiptForm extends StatefulWidget {
 }
 
 class _MoneyReceiptListScreenState extends State<MobileMoneyReceiptForm> {
+  final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> formKey1 = GlobalKey<FormState>();
+  final GlobalKey<FormState> formKey2 = GlobalKey<FormState>();
+  final GlobalKey<FormState> formKey3 = GlobalKey<FormState>();
+
+  late MoneyReceiptBloc moneyReceiptBloc;
+  bool _isValidationMode = false;
+
+  ValueNotifier<String> selectedPaymentToState = ValueNotifier<String>('Over All');
+  ValueNotifier<PosSaleModel?> selectPosSaleModel = ValueNotifier<PosSaleModel?>(null);
+  ValueNotifier<String?> selectedPaymentMethodNotifier = ValueNotifier<String?>("Cash");
+  ValueNotifier<String?> selectedAccountNotifier = ValueNotifier<String?>(null);
+
+  // Stepper state for mobile
+  int currentStep = 0;
+
   @override
   void initState() {
-    _initializeData();
     super.initState();
+    _initializeData();
   }
 
   void _initializeData() {
@@ -31,34 +48,23 @@ class _MoneyReceiptListScreenState extends State<MobileMoneyReceiptForm> {
     context.read<CustomerBloc>().add(FetchCustomerActiveList(context));
     context.read<AccountBloc>().add(FetchAccountActiveList(context));
 
-    final moneyReceiptBloc = context.read<MoneyReceiptBloc>();
-    moneyReceiptBloc.dateController.text = appWidgets.convertDateTimeDDMMYYYY(
-      DateTime.now(),
-    );
-    moneyReceiptBloc.withdrawDateController.text = appWidgets
-        .convertDateTimeDDMMYYYY(DateTime.now());
+    moneyReceiptBloc = context.read<MoneyReceiptBloc>();
+    moneyReceiptBloc.dateController.text = appWidgets.convertDateTimeDDMMYYYY(DateTime.now());
+    moneyReceiptBloc.withdrawDateController.text = appWidgets.convertDateTimeDDMMYYYY(DateTime.now());
   }
 
-  final GlobalKey<FormState> formKey = GlobalKey<FormState>();
-  late MoneyReceiptBloc moneyReceiptBloc;
-
-  ValueNotifier<String> selectedPaymentToState = ValueNotifier<String>(
-    'Over All',
-  );
-  ValueNotifier<PosSaleModel?> selectPosSaleModel =
-  ValueNotifier<PosSaleModel?>(null);
-  ValueNotifier<String?> selectedPaymentMethodNotifier = ValueNotifier<String?>(
-    "Cash",
-  );
-  ValueNotifier<String?> selectedAccountNotifier = ValueNotifier<String?>(null);
-
-  // Stepper state for mobile
-  int currentStep = 0;
+  void _setValidationMode(bool mode) {
+    if (mounted) {
+      setState(() {
+        _isValidationMode = mode;
+      });
+    }
+  }
 
   @override
   void didChangeDependencies() {
-    moneyReceiptBloc = context.read<MoneyReceiptBloc>();
     super.didChangeDependencies();
+    moneyReceiptBloc = context.read<MoneyReceiptBloc>();
   }
 
   @override
@@ -77,8 +83,8 @@ class _MoneyReceiptListScreenState extends State<MobileMoneyReceiptForm> {
     String paymentMethod = '',
     DateTime? from,
     DateTime? to,
-    int pageNumber = 1, // Changed from 0 to 1 for pagination
-    int pageSize = 10, // Added pageSize parameter
+    int pageNumber = 1,
+    int pageSize = 10,
   }) {
     context.read<MoneyReceiptBloc>().add(
       FetchMoneyReceiptList(
@@ -90,7 +96,7 @@ class _MoneyReceiptListScreenState extends State<MobileMoneyReceiptForm> {
         startDate: from,
         endDate: to,
         pageNumber: pageNumber,
-        pageSize: pageSize, // Add pageSize
+        pageSize: pageSize,
       ),
     );
   }
@@ -98,15 +104,12 @@ class _MoneyReceiptListScreenState extends State<MobileMoneyReceiptForm> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: Text("Money receipt",style: AppTextStyle.titleMedium(context),),),
-        body: SafeArea(child: _buildMobileLayout()));
+      appBar: AppBar(
+        title: Text("Money receipt", style: AppTextStyle.titleMedium(context)),
+      ),
+      body: SafeArea(child: _buildMobileLayout()),
+    );
   }
-
-
-
-
-
-
 
   // ----------------------------
   // Mobile layout (stepper)
@@ -119,14 +122,11 @@ class _MoneyReceiptListScreenState extends State<MobileMoneyReceiptForm> {
         } else if (state is MoneyReceiptAddSuccess) {
           Navigator.pop(context); // close loader
           _fetchApi(
-            customer:
-            context.read<MoneyReceiptBloc>().selectCustomerModel?.id.toString() ?? '',
-            seller:
-            context.read<MoneyReceiptBloc>().selectUserModel?.id.toString() ?? '',
+            customer: moneyReceiptBloc.selectCustomerModel?.id.toString() ?? '',
+            seller: moneyReceiptBloc.selectUserModel?.id.toString() ?? '',
             paymentMethod: selectedPaymentMethodNotifier.value?.toString() ?? '',
           );
           AppRoutes.pushReplacement(context, MobileMoneyReceiptList());
-          // context.read<DashboardBloc>().add(ChangeDashboardScreen(index: 4));
         } else if (state is MoneyReceiptAddFailed) {
           Navigator.pop(context);
           appAlertDialog(
@@ -145,22 +145,23 @@ class _MoneyReceiptListScreenState extends State<MobileMoneyReceiptForm> {
       builder: (context, state) {
         return SingleChildScrollView(
           padding: const EdgeInsets.all(12.0),
-          child: Form(
-            key: formKey,
-            child: _buildMobileStepperContent(),
-          ),
+          child: _buildMobileStepperContent(),
         );
       },
     );
   }
 
   Widget _buildMobileStepperContent() {
-
     return Stepper(
       physics: const ClampingScrollPhysics(),
       type: StepperType.vertical,
       currentStep: currentStep,
       onStepContinue: () {
+        // Validate current step before moving
+        if (!_validateCurrentStep()) {
+          return;
+        }
+
         if (currentStep < 3) {
           setState(() => currentStep += 1);
         } else {
@@ -198,19 +199,28 @@ class _MoneyReceiptListScreenState extends State<MobileMoneyReceiptForm> {
       steps: [
         Step(
           title: Text('Customer & Date', style: AppTextStyle.cardLevelHead(context)),
-          content: _buildMobileTopFormSection(),
+          content: Form(
+            key: formKey1,
+            child: _buildMobileTopFormSection(),
+          ),
           isActive: currentStep >= 0,
           state: currentStep > 0 ? StepState.complete : StepState.indexed,
         ),
         Step(
           title: Text('Payment To / Invoice', style: AppTextStyle.cardLevelHead(context)),
-          content: _buildMobilePaymentToSection(),
+          content: Form(
+            key: formKey2,
+            child: _buildMobilePaymentToSection(),
+          ),
           isActive: currentStep >= 1,
           state: currentStep > 1 ? StepState.complete : StepState.indexed,
         ),
         Step(
           title: Text('Payment Info', style: AppTextStyle.cardLevelHead(context)),
-          content: _buildMobilePaymentSection(),
+          content: Form(
+            key: formKey3,
+            child: _buildMobilePaymentSection(),
+          ),
           isActive: currentStep >= 2,
           state: currentStep > 2 ? StepState.complete : StepState.indexed,
         ),
@@ -224,9 +234,144 @@ class _MoneyReceiptListScreenState extends State<MobileMoneyReceiptForm> {
     );
   }
 
-  Widget _buildMobileTopFormSection() {
-    final moneyBloc = context.read<MoneyReceiptBloc>();
+  bool _validateCurrentStep() {
+    switch (currentStep) {
+      case 0:
+        return _validateStep1();
+      case 1:
+        return _validateStep2();
+      case 2:
+        return _validateStep3();
+      case 3:
+        return true; // No validation needed for review step
+      default:
+        return true;
+    }
+  }
 
+  bool _validateStep1() {
+    _setValidationMode(true);
+
+    // Validate form
+    if (!formKey1.currentState!.validate()) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Please fix the errors in step 1')),
+        );
+      });
+      return false;
+    }
+
+    // Validate customer selection
+    if (moneyReceiptBloc.selectCustomerModel == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Please select a customer')),
+        );
+      });
+      return false;
+    }
+
+    // Validate collected by selection
+    if (moneyReceiptBloc.selectUserModel == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Please select collected by')),
+        );
+      });
+      return false;
+    }
+
+    _setValidationMode(false);
+    return true;
+  }
+
+  bool _validateStep2() {
+    _setValidationMode(true);
+
+    // Validate form
+    if (!formKey2.currentState!.validate()) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Please fix the errors in step 2')),
+        );
+      });
+      return false;
+    }
+
+    // Validate payment to selection
+    if (selectedPaymentToState.value.isEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Please select payment to')),
+        );
+      });
+      return false;
+    }
+
+    // If specific payment is selected, validate invoice
+    if (selectedPaymentToState.value == "Specific" && selectPosSaleModel.value == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Please select an invoice for specific payment')),
+        );
+      });
+      return false;
+    }
+
+    _setValidationMode(false);
+    return true;
+  }
+
+  bool _validateStep3() {
+    _setValidationMode(true);
+
+    // Validate form
+    if (!formKey3.currentState!.validate()) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Please fix the errors in step 3')),
+        );
+      });
+      return false;
+    }
+
+    // Validate payment method
+    if (selectedPaymentMethodNotifier.value == null || selectedPaymentMethodNotifier.value!.isEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Please select payment method')),
+        );
+      });
+      return false;
+    }
+
+    // Validate amount
+    final amount = double.tryParse(moneyReceiptBloc.amountController.text.trim());
+    if (amount == null || amount <= 0) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Please enter a valid amount greater than 0')),
+        );
+      });
+      return false;
+    }
+
+    // Validate account selection
+    if (moneyReceiptBloc.accountModel == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Please select an account')),
+        );
+      });
+      return false;
+    }
+
+    _setValidationMode(false);
+    return true;
+  }
+
+  Widget _buildMobileTopFormSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -237,14 +382,14 @@ class _MoneyReceiptListScreenState extends State<MobileMoneyReceiptForm> {
               label: "Customer",
               context: context,
               isSearch: true,
-              hint: moneyBloc.selectCustomerModel?.name?.toString() ?? "Select Customer",
+              hint: moneyReceiptBloc.selectCustomerModel?.name?.toString() ?? "Select Customer",
               isNeedAll: false,
               isRequired: true,
-              value: moneyBloc.selectCustomerModel,
+              value: moneyReceiptBloc.selectCustomerModel,
               itemList: customerBloc.activeCustomer,
               onChanged: (newVal) {
                 setState(() {
-                  moneyBloc.selectCustomerModel = newVal;
+                  moneyReceiptBloc.selectCustomerModel = newVal;
                 });
 
                 if (newVal != null) {
@@ -257,7 +402,10 @@ class _MoneyReceiptListScreenState extends State<MobileMoneyReceiptForm> {
                 }
               },
               validator: (value) {
-                return value == null ? 'Please select Customer' : null;
+                if (_isValidationMode && value == null) {
+                  return 'Please select Customer';
+                }
+                return null;
               },
               itemBuilder: (item) => DropdownMenuItem(
                 value: item,
@@ -279,26 +427,29 @@ class _MoneyReceiptListScreenState extends State<MobileMoneyReceiptForm> {
             final userBloc = context.read<UserBloc>();
             final userList = userBloc.list;
 
-            if (userList.isNotEmpty && moneyBloc.selectUserModel == null) {
-              moneyBloc.selectUserModel = userList.first;
+            if (userList.isNotEmpty && moneyReceiptBloc.selectUserModel == null) {
+              moneyReceiptBloc.selectUserModel = userList.first;
             }
 
             return AppDropdown(
               label: "Collected By",
               context: context,
-              hint: moneyBloc.selectUserModel?.username?.toString() ?? "Select Collected By",
+              hint: moneyReceiptBloc.selectUserModel?.username?.toString() ?? "Select Collected By",
               isLabel: false,
               isRequired: true,
               isNeedAll: false,
-              value: moneyBloc.selectUserModel,
+              value: moneyReceiptBloc.selectUserModel,
               itemList: userList,
               onChanged: (newVal) {
                 setState(() {
-                  moneyBloc.selectUserModel = newVal;
+                  moneyReceiptBloc.selectUserModel = newVal;
                 });
               },
               validator: (value) {
-                return value == null ? 'Please select Collected By' : null;
+                if (_isValidationMode && value == null) {
+                  return 'Please select Collected By';
+                }
+                return null;
               },
               itemBuilder: (item) => DropdownMenuItem(
                 value: item,
@@ -318,13 +469,16 @@ class _MoneyReceiptListScreenState extends State<MobileMoneyReceiptForm> {
         CustomInputField(
           isRequiredLable: true,
           isRequired: false,
-          controller: moneyBloc.dateController,
+          controller: moneyReceiptBloc.dateController,
           hintText: 'Date',
           fillColor: Colors.white,
           readOnly: true,
           keyboardType: TextInputType.text,
           validator: (value) {
-            return value!.isEmpty ? 'Please enter Date' : null;
+            if (_isValidationMode && (value == null || value.isEmpty)) {
+              return 'Please enter Date';
+            }
+            return null;
           },
           onTap: () async {
             FocusScope.of(context).requestFocus(FocusNode());
@@ -336,7 +490,7 @@ class _MoneyReceiptListScreenState extends State<MobileMoneyReceiptForm> {
             );
             if (pickedDate != null) {
               setState(() {
-                moneyBloc.dateController.text =
+                moneyReceiptBloc.dateController.text =
                     appWidgets.convertDateTimeDDMMYYYY(pickedDate);
               });
             }
@@ -348,8 +502,6 @@ class _MoneyReceiptListScreenState extends State<MobileMoneyReceiptForm> {
   }
 
   Widget _buildMobilePaymentToSection() {
-    final moneyBloc = context.read<MoneyReceiptBloc>();
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -364,7 +516,7 @@ class _MoneyReceiptListScreenState extends State<MobileMoneyReceiptForm> {
               isRequired: true,
               isNeedAll: false,
               value: selectedPaymentTo,
-              itemList: moneyBloc.paymentTo,
+              itemList: moneyReceiptBloc.paymentTo,
               onChanged: (newVal) {
                 selectedPaymentToState.value = newVal.toString();
                 if (newVal != "Specific") {
@@ -373,7 +525,10 @@ class _MoneyReceiptListScreenState extends State<MobileMoneyReceiptForm> {
                 setState(() {});
               },
               validator: (value) {
-                return value == null ? 'Please select Payment To' : null;
+                if (_isValidationMode && value == null) {
+                  return 'Please select Payment To';
+                }
+                return null;
               },
               itemBuilder: (item) => DropdownMenuItem(
                 value: item,
@@ -411,12 +566,15 @@ class _MoneyReceiptListScreenState extends State<MobileMoneyReceiptForm> {
                       onChanged: (newVal) {
                         selectPosSaleModel.value = newVal;
                         if (newVal != null) {
-                          moneyBloc.amountController.text = newVal.dueAmount.toString();
+                          moneyReceiptBloc.amountController.text = newVal.dueAmount.toString();
                         }
                         setState(() {});
                       },
                       validator: (value) {
-                        return value == null ? 'Please select Invoice' : null;
+                        if (_isValidationMode && value == null) {
+                          return 'Please select Invoice';
+                        }
+                        return null;
                       },
                       itemBuilder: (item) => DropdownMenuItem(
                         value: item,
@@ -442,8 +600,6 @@ class _MoneyReceiptListScreenState extends State<MobileMoneyReceiptForm> {
   }
 
   Widget _buildMobilePaymentSection() {
-    final moneyBloc = context.read<MoneyReceiptBloc>();
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -458,16 +614,19 @@ class _MoneyReceiptListScreenState extends State<MobileMoneyReceiptForm> {
               isRequired: true,
               isNeedAll: false,
               value: selectedPaymentMethod,
-              itemList: moneyBloc.paymentMethod,
+              itemList: moneyReceiptBloc.paymentMethod,
               onChanged: (newVal) {
                 selectedPaymentMethodNotifier.value = newVal.toString();
                 // Clear selected account when payment method changes
-                moneyBloc.accountModel = null;
-                moneyBloc.selectedAccountId = "";
+                moneyReceiptBloc.accountModel = null;
+                moneyReceiptBloc.selectedAccountId = "";
                 setState(() {});
               },
               validator: (value) {
-                return value == null ? 'Please select a payment method' : null;
+                if (_isValidationMode && value == null) {
+                  return 'Please select a payment method';
+                }
+                return null;
               },
               itemBuilder: (item) => DropdownMenuItem(
                 value: item,
@@ -500,20 +659,24 @@ class _MoneyReceiptListScreenState extends State<MobileMoneyReceiptForm> {
         const SizedBox(height: 12),
         AppTextField(
           isRequired: true,
-          controller: moneyBloc.amountController,
+          controller: moneyReceiptBloc.amountController,
           hintText: 'Amount',
           keyboardType: TextInputType.number,
           validator: (value) {
-            if (value == null || value.isEmpty) return 'Please enter amount';
-            final amount = double.tryParse(value);
-            if (amount == null || amount <= 0) return 'Please enter a valid amount';
+            if (_isValidationMode && (value == null || value.isEmpty)) {
+              return 'Please enter amount';
+            }
+            final amount = double.tryParse(value ?? '');
+            if (_isValidationMode && (amount == null || amount <= 0)) {
+              return 'Please enter a valid amount greater than 0';
+            }
             return null;
           },
           onChanged: (value) => setState(() {}),
         ),
         const SizedBox(height: 12),
         AppTextField(
-          controller: moneyBloc.remarkController,
+          controller: moneyReceiptBloc.remarkController,
           hintText: 'Remark',
           keyboardType: TextInputType.text,
           onChanged: (value) => setState(() {}),
@@ -523,8 +686,6 @@ class _MoneyReceiptListScreenState extends State<MobileMoneyReceiptForm> {
   }
 
   Widget _buildMobileSummarySection() {
-    final moneyBloc = context.read<MoneyReceiptBloc>();
-
     return Container(
       padding: const EdgeInsets.all(0),
       decoration: BoxDecoration(
@@ -536,15 +697,15 @@ class _MoneyReceiptListScreenState extends State<MobileMoneyReceiptForm> {
         children: [
           Text("Review", style: AppTextStyle.cardLevelHead(context)),
           const SizedBox(height: 8),
-          _reviewRow("Customer", moneyBloc.selectCustomerModel?.name ?? "-"),
-          _reviewRow("Collected By", moneyBloc.selectUserModel?.username ?? "-"),
+          _reviewRow("Customer", moneyReceiptBloc.selectCustomerModel?.name ?? "-"),
+          _reviewRow("Collected By", moneyReceiptBloc.selectUserModel?.username ?? "-"),
           _reviewRow("Payment To", selectedPaymentToState.value),
           if (selectedPaymentToState.value == "Specific")
             _reviewRow("Invoice", selectPosSaleModel.value?.invoiceNo ?? "-"),
           _reviewRow("Payment Method", selectedPaymentMethodNotifier.value ?? "-"),
-          _reviewRow("Account", moneyBloc.accountModel?.name ?? "-"),
-          _reviewRow("Amount", moneyBloc.amountController.text.trim()),
-          _reviewRow("Remark", moneyBloc.remarkController.text.trim().isEmpty ? "-" : moneyBloc.remarkController.text.trim()),
+          _reviewRow("Account", moneyReceiptBloc.accountModel?.name ?? "-"),
+          _reviewRow("Amount", moneyReceiptBloc.amountController.text.trim()),
+          _reviewRow("Remark", moneyReceiptBloc.remarkController.text.trim().isEmpty ? "-" : moneyReceiptBloc.remarkController.text.trim()),
         ],
       ),
     );
@@ -566,18 +727,7 @@ class _MoneyReceiptListScreenState extends State<MobileMoneyReceiptForm> {
       BuildContext context,
       List<AccountActiveModel> accounts,
       ) {
-    final moneyBloc = context.read<MoneyReceiptBloc>();
     final selectedPaymentMethod = selectedPaymentMethodNotifier.value;
-
-    // Debug: Print all accounts and payment method for troubleshooting
-    debugPrint("=== ACCOUNT FILTERING DEBUG ===");
-    debugPrint("Selected Payment Method: '$selectedPaymentMethod'");
-    debugPrint("All Accounts:");
-    for (var account in accounts) {
-      debugPrint(
-        " - ${account.name} | Type: '${account.acType}' | ID: ${account.id}",
-      );
-    }
 
     // Filter accounts based on selected payment method
     final List<AccountActiveModel> filteredList;
@@ -586,7 +736,6 @@ class _MoneyReceiptListScreenState extends State<MobileMoneyReceiptForm> {
         final itemType = item.acType?.toLowerCase().trim() ?? '';
         final paymentMethod = selectedPaymentMethod.toLowerCase().trim();
 
-        // Map common payment method variations to account types
         final paymentMethodMap = {
           'bank': 'bank',
           'cash': 'cash',
@@ -598,42 +747,19 @@ class _MoneyReceiptListScreenState extends State<MobileMoneyReceiptForm> {
         final mappedPaymentMethod =
             paymentMethodMap[paymentMethod] ?? paymentMethod;
 
-        bool matches = itemType == mappedPaymentMethod;
-        if (matches) {
-          debugPrint(
-            "MATCH FOUND: '${item.acType}' == '$selectedPaymentMethod'",
-          );
-        }
-
-        return matches;
+        return itemType == mappedPaymentMethod;
       }).toList();
-
-      debugPrint("Filtered Accounts Count: ${filteredList.length}");
-      debugPrint("Filtered Accounts:");
-      for (var account in filteredList) {
-        debugPrint(" - ${account.name} | Type: '${account.acType}'");
-      }
     } else {
       filteredList = accounts;
     }
 
-    debugPrint("==============================");
-
     // Auto-select first account if none is selected and list is available
-    if (moneyBloc.accountModel == null && filteredList.isNotEmpty) {
-      moneyBloc.accountModel = filteredList.first;
-      moneyBloc.selectedAccountId = filteredList.first.id.toString();
-      debugPrint("Auto-selected account: ${filteredList.first.name}");
-    }
-
-    // Clear selection if selected account is not in filtered list
-    if (moneyBloc.accountModel != null &&
-        !filteredList.any(
-              (account) => account.id == moneyBloc.accountModel!.id,
-        )) {
-      moneyBloc.accountModel = null;
-      moneyBloc.selectedAccountId = "";
-      debugPrint("Cleared account selection - not in filtered list");
+    if (moneyReceiptBloc.accountModel == null && filteredList.isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        moneyReceiptBloc.accountModel = filteredList.first;
+        moneyReceiptBloc.selectedAccountId = filteredList.first.id.toString();
+        setState(() {});
+      });
     }
 
     return AppDropdown<AccountActiveModel>(
@@ -641,33 +767,34 @@ class _MoneyReceiptListScreenState extends State<MobileMoneyReceiptForm> {
       label: "Account",
       hint: filteredList.isEmpty
           ? "No accounts available"
-          : (moneyBloc.accountModel == null
+          : (moneyReceiptBloc.accountModel == null
           ? "Select Account"
-          : "${moneyBloc.accountModel!.name}${moneyBloc.accountModel!.acNumber != null ? ' - ${moneyBloc.accountModel!.acNumber}' : ''}"),
+          : "${moneyReceiptBloc.accountModel!.name}${moneyReceiptBloc.accountModel!.acNumber != null ? ' - ${moneyReceiptBloc.accountModel!.acNumber}' : ''}"),
       isLabel: false,
       isRequired: true,
       isNeedAll: false,
-      value: moneyBloc.accountModel,
+      value: moneyReceiptBloc.accountModel,
       itemList: filteredList,
       onChanged: (newVal) {
         setState(() {
-          moneyBloc.accountModel = newVal;
+          moneyReceiptBloc.accountModel = newVal;
           if (newVal != null) {
-            moneyBloc.selectedAccountId = newVal.id.toString();
-            debugPrint(
-              "Selected Account: ${newVal.name} (ID: ${newVal.id})",
-            );
+            moneyReceiptBloc.selectedAccountId = newVal.id.toString();
           } else {
-            moneyBloc.selectedAccountId = "";
-            debugPrint("Account selection cleared");
+            moneyReceiptBloc.selectedAccountId = "";
           }
         });
       },
       validator: (value) {
-        if (selectedPaymentMethod != null && filteredList.isEmpty) {
-          return 'No "$selectedPaymentMethod" accounts available';
+        if (_isValidationMode) {
+          if (selectedPaymentMethod != null && filteredList.isEmpty) {
+            return 'No "$selectedPaymentMethod" accounts available';
+          }
+          if (value == null) {
+            return 'Please select an account';
+          }
         }
-        return value == null ? 'Please select an account' : null;
+        return null;
       },
       itemBuilder: (item) => DropdownMenuItem(
         value: item,
@@ -684,51 +811,83 @@ class _MoneyReceiptListScreenState extends State<MobileMoneyReceiptForm> {
   }
 
   void _createMoneyReceipt() {
-    if (!formKey.currentState!.validate()) return;
+    // Final validation of all steps
+    bool allStepsValid = true;
+    for (int i = 0; i < 3; i++) {
+      if (!_validateStepWithIndex(i)) {
+        allStepsValid = false;
+        setState(() {
+          currentStep = i;
+        });
+        break;
+      }
+    }
 
-    final moneyBloc = context.read<MoneyReceiptBloc>();
-
-    // Validate required fields
-    if (moneyBloc.selectCustomerModel == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Please select a customer')));
+    if (!allStepsValid) {
       return;
     }
 
-    if (moneyBloc.selectUserModel == null) {
+    // Validate required fields
+    if (moneyReceiptBloc.selectCustomerModel == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select collected by')),
+        SnackBar(content: Text('Please select a customer')),
+      );
+      return;
+    }
+
+    if (moneyReceiptBloc.selectUserModel == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please select collected by')),
+      );
+      return;
+    }
+
+    if (selectedPaymentToState.value.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please select payment to')),
+      );
+      return;
+    }
+
+    if (selectedPaymentToState.value == "Specific" && selectPosSaleModel.value == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please select an invoice for specific payment')),
       );
       return;
     }
 
     if (selectedPaymentMethodNotifier.value == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select payment method')),
+        SnackBar(content: Text('Please select payment method')),
       );
       return;
     }
 
-    if (moneyBloc.accountModel == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Please select an account')));
+    if (moneyReceiptBloc.accountModel == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please select an account')),
+      );
+      return;
+    }
+
+    final amount = double.tryParse(moneyReceiptBloc.amountController.text.trim());
+    if (amount == null || amount <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please enter a valid amount greater than 0')),
+      );
       return;
     }
 
     Map<String, dynamic> body = {
-      "amount": moneyBloc.amountController.text.trim(),
-      "customer_id": moneyBloc.selectCustomerModel!.id.toString(),
+      "amount": moneyReceiptBloc.amountController.text.trim(),
+      "customer_id": moneyReceiptBloc.selectCustomerModel!.id.toString(),
       "payment_date": appWidgets.convertDateTime(
-        DateFormat(
-          "dd-MM-yyyy",
-        ).parse(moneyBloc.dateController.text.trim(), true),
+        DateFormat("dd-MM-yyyy").parse(moneyReceiptBloc.dateController.text.trim(), true),
         "yyyy-MM-dd",
       ),
       "payment_method": selectedPaymentMethodNotifier.value.toString(),
-      "seller_id": moneyBloc.selectUserModel!.id.toString(),
-      "account": moneyBloc.selectedAccountId,
+      "seller_id": moneyReceiptBloc.selectUserModel!.id.toString(),
+      "account": moneyReceiptBloc.selectedAccountId,
       "specific_invoice": selectedPaymentToState.value == "Specific",
       "payment_type": selectedPaymentToState.value == "Over All"
           ? "overall"
@@ -742,10 +901,23 @@ class _MoneyReceiptListScreenState extends State<MobileMoneyReceiptForm> {
     }
 
     // Add remark if provided
-    if (moneyBloc.remarkController.text.isNotEmpty) {
-      body["remark"] = moneyBloc.remarkController.text.trim();
+    if (moneyReceiptBloc.remarkController.text.isNotEmpty) {
+      body["remark"] = moneyReceiptBloc.remarkController.text.trim();
     }
 
-    moneyBloc.add(AddMoneyReceipt(body: body));
+    moneyReceiptBloc.add(AddMoneyReceipt(body: body));
+  }
+
+  bool _validateStepWithIndex(int index) {
+    switch (index) {
+      case 0:
+        return _validateStep1();
+      case 1:
+        return _validateStep2();
+      case 2:
+        return _validateStep3();
+      default:
+        return true;
+    }
   }
 }
