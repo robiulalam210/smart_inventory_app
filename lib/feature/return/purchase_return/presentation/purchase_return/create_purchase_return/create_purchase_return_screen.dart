@@ -545,9 +545,10 @@ class _CreatePurchaseReturnScreenState
                         final isLoading = state is PurchaseReturnCreateLoading;
 
                         return AppButton(
+                          size: 150,
                           onPressed: isLoading ? null : () => _submitForm(),
                          isLoading: isLoading,
-                          name:'Create Purchase Return',
+                          name:'Purchase Return',
                         );
                       },
                     ),
