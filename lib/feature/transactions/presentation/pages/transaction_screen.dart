@@ -468,9 +468,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                 SizedBox(
                   child: TransactionCard(
                     transactions: state.list,
-                    onReverse: (transaction) async {
-                      // Implement reverse functionality
-                    },
+
                   ),
                 ),
                 const SizedBox(height: 16),

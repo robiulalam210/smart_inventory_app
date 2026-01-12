@@ -5,13 +5,11 @@ import '../../data/model/transactions_model.dart';
 
 class TransactionCard extends StatelessWidget {
   final List<TransactionsModel> transactions;
-  final Function(TransactionsModel)? onReverse;
   final VoidCallback? onTransactionTap;
 
   const TransactionCard({
     super.key,
     required this.transactions,
-    this.onReverse,
     this.onTransactionTap,
   });
 
@@ -110,7 +108,6 @@ class TransactionCard extends StatelessWidget {
                               _buildDataCell(transaction.description ?? "-", minColumnWidth * 1.3),
                               _buildDateCell(transaction.transactionDate, minColumnWidth),
                               _buildStatusCell(transaction.status, minColumnWidth),
-                              _buildActionCell(transaction, minColumnWidth * 0.8),
                             ],
                           );
                         }).toList(),
@@ -185,7 +182,7 @@ class TransactionCard extends StatelessWidget {
             ],
           ),
 
-          const SizedBox(height: 8),
+          const SizedBox(height: 4),
 
           // Account and Type
           Row(
@@ -205,7 +202,7 @@ class TransactionCard extends StatelessWidget {
             ],
           ),
 
-          const SizedBox(height: 12),
+          const SizedBox(height: 6),
 
           // Amount and Date
           Row(
@@ -236,7 +233,7 @@ class TransactionCard extends StatelessWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 12),
+                const SizedBox(height: 6),
                 Text(
                   'Description:',
                   style: TextStyle(
@@ -258,25 +255,7 @@ class TransactionCard extends StatelessWidget {
               ],
             ),
 
-          // Reverse button
-          if (onReverse != null && transaction.status?.toLowerCase() != 'reversed')
-            Column(
-              children: [
-                const SizedBox(height: 12),
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton.icon(
-                    onPressed: () => onReverse!(transaction),
-                    icon: const Icon(Icons.swap_horiz, size: 16),
-                    label: const Text('Reverse Transaction'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.orange,
-                      side: BorderSide(color: Colors.orange.withValues(alpha:0.3)),
-                    ),
-                  ),
-                ),
-              ],
-            ),
+
         ],
       ),
     );
@@ -586,26 +565,6 @@ class TransactionCard extends StatelessWidget {
     );
   }
 
-  DataCell _buildActionCell(TransactionsModel transaction, double width) {
-    return DataCell(
-      Container(
-        width: width,
-        padding: const EdgeInsets.symmetric(horizontal: 4),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            if (onReverse != null && transaction.status?.toLowerCase() != 'reversed')
-              IconButton(
-                icon: const Icon(Icons.swap_horiz, size: 16),
-                onPressed: () => onReverse!(transaction),
-                tooltip: 'Reverse Transaction',
-                color: Colors.orange,
-              ),
-          ],
-        ),
-      ),
-    );
-  }
 
   Widget _buildEmptyState() {
     return Container(

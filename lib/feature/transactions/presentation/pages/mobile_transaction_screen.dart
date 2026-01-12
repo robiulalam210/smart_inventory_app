@@ -97,7 +97,7 @@ class _TransactionScreenState extends State<MobileTransactionScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Transaction")),
+      appBar: AppBar(title:  Text("Transaction",style: AppTextStyle.titleMedium(context),)),
       body: SafeArea(
         child: _buildContentArea(),
       ),
@@ -181,12 +181,11 @@ class _TransactionScreenState extends State<MobileTransactionScreen> {
             ],
           ),
         ),
-        const SizedBox(height: 6),
 
         // Filter Chips
         Wrap(
-          spacing: 8,
-          runSpacing: 8,
+          spacing: 4,
+          runSpacing: 4,
           children: [
             if (selectedTransactionTypeNotifier.value != null)
               Chip(
@@ -232,9 +231,7 @@ class _TransactionScreenState extends State<MobileTransactionScreen> {
                 SizedBox(
                   child: TransactionCard(
                     transactions: state.list,
-                    onReverse: (transaction) async {
-                      // Implement reverse functionality
-                    },
+
                   ),
                 ),
                 const SizedBox(height: 16),
