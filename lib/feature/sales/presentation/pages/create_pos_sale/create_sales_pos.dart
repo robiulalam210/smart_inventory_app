@@ -440,8 +440,8 @@ class _SalesScreenState extends State<SalesScreen> {
                   value: item,
                   child: Text(
                     item.toString(),
-                    style: const TextStyle(
-                      color: AppColors.blackColor,
+                    style:  TextStyle(
+                      color:AppColors.blackColor(context),
                       fontFamily: 'Quicksand',
                       fontWeight: FontWeight.w300,
                     ),
@@ -478,8 +478,8 @@ class _SalesScreenState extends State<SalesScreen> {
                   value: item,
                   child: Text(
                     item.toString(),
-                    style: const TextStyle(
-                      color: AppColors.blackColor,
+                    style:  TextStyle(
+                      color:AppColors.blackColor(context),
                       fontFamily: 'Quicksand',
                       fontWeight: FontWeight.w300,
                     ),
@@ -504,7 +504,7 @@ class _SalesScreenState extends State<SalesScreen> {
             keyboardType: TextInputType.datetime,
             autofillHints: AutofillHints.name,
             bottom: 15.0,
-            fillColor: AppColors.whiteColor,
+            fillColor: AppColors.whiteColor(context),
             validator: (value) => value!.isEmpty ? 'Please enter date' : null,
             onTap: _selectDate,
           ),
@@ -688,7 +688,7 @@ class _SalesScreenState extends State<SalesScreen> {
                         child: OutlinedButton(
                           style: OutlinedButton.styleFrom(
                             padding: EdgeInsets.zero,
-                            side: BorderSide(color: AppColors.border),
+                            side: BorderSide(color: AppColors.text(context)),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(6),
                             ),
@@ -752,7 +752,7 @@ class _SalesScreenState extends State<SalesScreen> {
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             padding: EdgeInsets.zero,
-                            backgroundColor: AppColors.primaryColor,
+                            backgroundColor: AppColors.primaryColor(context),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(6),
                             ),
@@ -793,7 +793,7 @@ class _SalesScreenState extends State<SalesScreen> {
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(6),
-                      border: Border.all(color: AppColors.border),
+                      border: Border.all(color: AppColors.text(context)),
                     ),
                     child: Text(
                       controllers[index]?["price"]?.text ?? '0',
@@ -856,8 +856,8 @@ class _SalesScreenState extends State<SalesScreen> {
                           },
                           groupValue: product["discount_type"],
                           unselectedColor: Colors.grey[200],
-                          selectedColor: AppColors.primaryColor,
-                          borderColor: AppColors.primaryColor,
+                          selectedColor: AppColors.primaryColor(context),
+                          borderColor: AppColors.primaryColor(context),
                         ),
                       ),
                       const SizedBox(width: 6),
@@ -908,7 +908,7 @@ class _SalesScreenState extends State<SalesScreen> {
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(6),
-                      border: Border.all(color: AppColors.border),
+                      border: Border.all(color: AppColors.text(context)),
                     ),
                     child: Text(
                       controllers[index]?["ticket_total"]?.text ?? '0',
@@ -929,7 +929,7 @@ class _SalesScreenState extends State<SalesScreen> {
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(6),
-                      border: Border.all(color: AppColors.border),
+                      border: Border.all(color: AppColors.text(context)),
                     ),
                     child: Text(
                       controllers[index]?["total"]?.text ?? '0',
@@ -1140,8 +1140,8 @@ class _SalesScreenState extends State<SalesScreen> {
                     groupValue: selectedType,
                     onValueChanged: onTypeChanged,
                     unselectedColor: Colors.grey[300],
-                    selectedColor: AppColors.primaryColor,
-                    borderColor: AppColors.primaryColor,
+                    selectedColor: AppColors.primaryColor(context),
+                    borderColor: AppColors.primaryColor(context),
                   ),
                 ),
 
@@ -1831,7 +1831,7 @@ class _SalesScreenState extends State<SalesScreen> {
       autofocus: true,
       onKey: _handleKey,
       child: Container(
-        color: AppColors.bg,
+        color: AppColors.bottomNavBg(context),
         child: SafeArea(
           child: ResponsiveRow(
             spacing: 0,

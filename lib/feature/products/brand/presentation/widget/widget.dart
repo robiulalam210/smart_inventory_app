@@ -82,7 +82,7 @@ class BrandTableCard extends StatelessWidget {
                             fontFamily: GoogleFonts.inter().fontFamily,
                           ),
                           headingRowColor: WidgetStateProperty.all(
-                            AppColors.primaryColor,
+                            AppColors.primaryColor(context),
                           ),
                           dataTextStyle: TextStyle(
                             fontSize: 11,
@@ -161,13 +161,13 @@ class BrandTableCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: AppColors.primaryColor.withValues(alpha: 0.1),
+                  color: AppColors.primaryColor(context).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(
                   '${index + 1}',
                   style: TextStyle(
-                    color: AppColors.primaryColor,
+                    color: AppColors.primaryColor(context),
                     fontWeight: FontWeight.w600,
                     fontSize: 12,
                   ),

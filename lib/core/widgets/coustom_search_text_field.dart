@@ -64,7 +64,7 @@
 //           ),
 //           child: Container(
 //             decoration: BoxDecoration(
-//               // border: Border.all(color: AppColors.primaryColor, width: 0.5),
+//               // border: Border.all(color: AppColors.primaryColor(context), width: 0.5),
 //               borderRadius: BorderRadius.circular(6),
 //             ),
 //             child: TextFormField(
@@ -77,7 +77,7 @@
 //                 isDense: true,
 //                 hintText: forSearch ? "Search $hintText" : hintText,
 //                 hintStyle: TextStyle(
-//                   color: AppColors.matteBlack,
+//                   color:  AppColors.text(context),
 //                   fontWeight: FontWeight.w300,
 //                   fontSize: 14,
 //                 ),
@@ -95,7 +95,7 @@
 //                 ),
 //                 focusedBorder: OutlineInputBorder(
 //                   borderRadius: BorderRadius.circular(AppSizes.radius),
-//                   borderSide: BorderSide(color: AppColors.matteBlack),
+//                   borderSide: BorderSide(color:  AppColors.text(context)),
 //                 ),
 //                 enabledBorder: OutlineInputBorder(
 //                   borderRadius: BorderRadius.circular(AppSizes.radius),
@@ -206,7 +206,7 @@ class CustomSearchTextFormField extends StatelessWidget {
         autofocus: autofocus,
         validator: validator,
         style: TextStyle(
-          color: enabled ? AppColors.matteBlack : AppColors.matteBlack.withValues(alpha: 0.6),
+          color: enabled ?  AppColors.text(context) :  AppColors.text(context).withValues(alpha: 0.6),
           fontSize: 14,
           fontWeight: FontWeight.w400,
         ),
@@ -214,12 +214,12 @@ class CustomSearchTextFormField extends StatelessWidget {
           isDense: true,
           hintText: forSearch ? "Search $hintText" : hintText,
           hintStyle: TextStyle(
-            color: AppColors.matteBlack.withValues(alpha: 0.5),
+            color:  AppColors.text(context).withValues(alpha: 0.5),
             fontWeight: FontWeight.w300,
             fontSize: 14,
           ),
-          prefixIcon: prefixIcon ?? (forSearch ? _buildDefaultSearchIcon() : null),
-          suffixIcon:  _buildClearButton(),
+          prefixIcon: prefixIcon ?? (forSearch ? _buildDefaultSearchIcon(context) : null),
+          suffixIcon:  _buildClearButton(context),
           counterText: "", // Hide counter text when maxLength is set
           contentPadding: const EdgeInsets.symmetric(
             vertical: 8.0,
@@ -238,7 +238,7 @@ class CustomSearchTextFormField extends StatelessWidget {
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(AppSizes.radius),
-            borderSide: BorderSide(color: AppColors.primaryColor),
+            borderSide: BorderSide(color: AppColors.primaryColor(context)),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(AppSizes.radius),
@@ -257,23 +257,23 @@ class CustomSearchTextFormField extends StatelessWidget {
     );
   }
 
-  Widget _buildDefaultSearchIcon() {
+  Widget _buildDefaultSearchIcon(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(left: 12, right: 8),
       child: Icon(
         Icons.search,
         size: 20,
-        color: AppColors.matteBlack.withValues(alpha: 0.5),
+        color:  AppColors.text(context).withValues(alpha: 0.5),
       ),
     );
   }
 
-  Widget _buildClearButton() {
+  Widget _buildClearButton(BuildContext context) {
     return IconButton(
       icon: Icon(
         Icons.clear,
         size: 20,
-        color: AppColors.matteBlack.withValues(alpha: 0.5),
+        color:  AppColors.text(context).withValues(alpha: 0.5),
       ),
       onPressed: onClear ?? () {
         controller.clear();

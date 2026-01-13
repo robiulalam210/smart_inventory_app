@@ -97,7 +97,7 @@ class _MobileSupplierPaymentCreateState extends State<MobileSupplierPaymentCreat
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: AppColors.bg,
+        color: AppColors.bottomNavBg(context),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -117,7 +117,7 @@ class _MobileSupplierPaymentCreateState extends State<MobileSupplierPaymentCreat
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: AppColors.whiteColor,
+        color: AppColors.whiteColor(context),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
@@ -156,7 +156,7 @@ class _MobileSupplierPaymentCreateState extends State<MobileSupplierPaymentCreat
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.whiteColor,
+        color: AppColors.whiteColor(context),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
@@ -259,7 +259,7 @@ class _MobileSupplierPaymentCreateState extends State<MobileSupplierPaymentCreat
           validator: (value) => value == null ? 'Please select Supplier' : null,
           itemBuilder: (item) => DropdownMenuItem(
             value: item,
-            child: Text(item.toString(), style: const TextStyle(color: AppColors.blackColor)),
+            child: Text(item.toString(), style:  TextStyle(color:AppColors.blackColor(context))),
           ),
         );
       },
@@ -283,7 +283,7 @@ class _MobileSupplierPaymentCreateState extends State<MobileSupplierPaymentCreat
           validator: (value) => value == null ? 'Please select Collected By' : null,
           itemBuilder: (item) => DropdownMenuItem(
             value: item,
-            child: Text(item.toString(), style: const TextStyle(color: AppColors.blackColor)),
+            child: Text(item.toString(), style:  TextStyle(color:AppColors.blackColor(context))),
           ),
         );
       },
@@ -307,7 +307,7 @@ class _MobileSupplierPaymentCreateState extends State<MobileSupplierPaymentCreat
       validator: (value) => value == null ? 'Please select Payment To' : null,
       itemBuilder: (item) => DropdownMenuItem(
         value: item,
-        child: Text(item.toString(), style: const TextStyle(color: AppColors.blackColor)),
+        child: Text(item.toString(), style:  TextStyle(color:AppColors.blackColor(context))),
       ),
     );
   }
@@ -337,7 +337,7 @@ class _MobileSupplierPaymentCreateState extends State<MobileSupplierPaymentCreat
           validator: (value) => value == null ? 'Please select Invoice' : null,
           itemBuilder: (item) => DropdownMenuItem(
             value: item,
-            child: Text(item.toString(), style: const TextStyle(color: AppColors.blackColor)),
+            child: Text(item.toString(), style:  TextStyle(color:AppColors.blackColor(context))),
           ),
         );
       },
@@ -365,7 +365,7 @@ class _MobileSupplierPaymentCreateState extends State<MobileSupplierPaymentCreat
       validator: (value) => value == null ? 'Please select a payment method' : null,
       itemBuilder: (item) => DropdownMenuItem(
         value: item,
-        child: Text(item.toString(), style: const TextStyle(color: AppColors.blackColor)),
+        child: Text(item.toString(), style:  TextStyle(color:AppColors.blackColor(context))),
       ),
     );
   }
@@ -404,7 +404,7 @@ class _MobileSupplierPaymentCreateState extends State<MobileSupplierPaymentCreat
           validator: (value) => value == null ? 'Please select an account' : null,
           itemBuilder: (item) => DropdownMenuItem(
             value: item.toString(),
-            child: Text(item.toString(), style: const TextStyle(color: AppColors.blackColor)),
+            child: Text(item.toString(), style:  TextStyle(color:AppColors.blackColor(context))),
           ),
         );
       },

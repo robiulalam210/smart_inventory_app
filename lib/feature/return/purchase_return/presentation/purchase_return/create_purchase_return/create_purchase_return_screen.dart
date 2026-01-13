@@ -198,7 +198,7 @@ class _CreatePurchaseReturnScreenState
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: AppColors.primaryColor,
+                        color: AppColors.primaryColor(context),
                       ),
                     ),
                     const Spacer(),
@@ -252,8 +252,8 @@ class _CreatePurchaseReturnScreenState
                               value: item,
                               child: Text(
                                 item.name ?? 'Unknown',
-                                style: const TextStyle(
-                                  color: AppColors.blackColor,
+                                style:  TextStyle(
+                                  color:AppColors.blackColor(context),
                                   fontFamily: 'Quicksand',
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -300,8 +300,8 @@ class _CreatePurchaseReturnScreenState
                               value: item,
                               child: Text(
                                 item.invoiceNo ?? 'Unknown',
-                                style: const TextStyle(
-                                  color: AppColors.blackColor,
+                                style:  TextStyle(
+                                  color:AppColors.blackColor(context),
                                   fontFamily: 'Quicksand',
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -322,7 +322,7 @@ class _CreatePurchaseReturnScreenState
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
-                      color: AppColors.primaryColor,
+                      color: AppColors.primaryColor(context),
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -435,8 +435,8 @@ class _CreatePurchaseReturnScreenState
                           value: item,
                           child: Text(
                             item == 'fixed' ? 'Fixed Amount' : 'Percentage',
-                            style: const TextStyle(
-                              color: AppColors.blackColor,
+                            style:  TextStyle(
+                              color:AppColors.blackColor(context),
                               fontFamily: 'Quicksand',
                               fontWeight: FontWeight.w600,
                             ),
@@ -582,7 +582,7 @@ class _CreatePurchaseReturnScreenState
             child: Text(
               item.toUpperCase(),
               style: TextStyle(
-                color: AppColors.blackColor,
+                color:AppColors.blackColor(context),
                 fontFamily: 'Quicksand',
                 fontWeight: FontWeight.w600,
               ),
@@ -618,7 +618,7 @@ class _CreatePurchaseReturnScreenState
                 Text(
                   item.name ?? 'Unknown Account',
                   style: TextStyle(
-                    color: AppColors.blackColor,
+                    color:AppColors.blackColor(context),
                     fontFamily: 'Quicksand',
                     fontWeight: FontWeight.w600,
                   ),

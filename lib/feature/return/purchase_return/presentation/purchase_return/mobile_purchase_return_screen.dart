@@ -289,7 +289,7 @@ class _PurchaseReturnScreenState extends State<MobilePurchaseReturnScreen> {
                                   child: Text(
                                     isAllOption ? 'All Suppliers' : '${item.name} (${item.phone})',
                                     style: TextStyle(
-                                      color: isAllOption ? AppColors.primaryColor : AppColors.blackColor,
+                                      color: isAllOption ? AppColors.primaryColor(context) :AppColors.blackColor(context),
                                       fontFamily: 'Quicksand',
                                       fontWeight: isAllOption ? FontWeight.bold : FontWeight.w300,
                                     ),
@@ -398,7 +398,7 @@ class _PurchaseReturnScreenState extends State<MobilePurchaseReturnScreen> {
                               child: Text(
                                 isAllOption ? 'All Suppliers' : '${item.name} (${item.phone})',
                                 style: TextStyle(
-                                  color: isAllOption ? AppColors.primaryColor : AppColors.blackColor,
+                                  color: isAllOption ? AppColors.primaryColor(context) :AppColors.blackColor(context),
                                   fontFamily: 'Quicksand',
                                   fontWeight: isAllOption ? FontWeight.bold : FontWeight.w300,
                                 ),
@@ -457,7 +457,7 @@ class _PurchaseReturnScreenState extends State<MobilePurchaseReturnScreen> {
                   onPressed: () => _fetchPurchaseReturnList(),
                   icon: const Icon(Icons.refresh),
                   tooltip: "Refresh",
-                  color: AppColors.primaryColor,
+                  color: AppColors.primaryColor(context),
                 ),
               ],
             );
@@ -526,7 +526,7 @@ class _PurchaseReturnScreenState extends State<MobilePurchaseReturnScreen> {
           const SizedBox(height: 12),
           ElevatedButton(
             onPressed: () => _fetchPurchaseReturnList(),
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryColor, foregroundColor: Colors.white),
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryColor(context), foregroundColor: Colors.white),
             child: const Text("Refresh"),
           ),
         ],
@@ -619,7 +619,7 @@ class PurchaseReturnTableCard extends StatelessWidget {
                           dividerThickness: 0.5,
                           headingRowHeight: 40,
                           headingTextStyle: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w700, fontFamily: GoogleFonts.inter().fontFamily),
-                          headingRowColor: WidgetStateProperty.all(AppColors.primaryColor),
+                          headingRowColor: WidgetStateProperty.all(AppColors.primaryColor(context)),
                           dataTextStyle: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, fontFamily: GoogleFonts.inter().fontFamily),
                           columns: _buildColumns(dynamicColumnWidth),
                           rows: purchaseReturns.asMap().entries.map((entry) {
@@ -672,8 +672,8 @@ class PurchaseReturnTableCard extends StatelessWidget {
                   children: [
                     CircleAvatar(
                       radius: 18,
-                      backgroundColor: AppColors.primaryColor.withValues(alpha: 0.1),
-                      child: Text('${index + 1}', style: TextStyle(color: AppColors.primaryColor, fontWeight: FontWeight.w700)),
+                      backgroundColor: AppColors.primaryColor(context).withValues(alpha: 0.1),
+                      child: Text('${index + 1}', style: TextStyle(color: AppColors.primaryColor(context), fontWeight: FontWeight.w700)),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -697,7 +697,7 @@ class PurchaseReturnTableCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 if ((pr.reason ?? '').isNotEmpty) ...[
-                  Align(alignment: Alignment.centerLeft, child: Text('Reason:', style: TextStyle(fontWeight: FontWeight.w700, color: AppColors.blackColor))),
+                  Align(alignment: Alignment.centerLeft, child: Text('Reason:', style: TextStyle(fontWeight: FontWeight.w700, color:AppColors.blackColor(context)))),
                   const SizedBox(height: 4),
                   Align(alignment: Alignment.centerLeft, child: Text(pr.reason ?? 'No reason provided', style: const TextStyle(fontSize: 13))),
                   const SizedBox(height: 8),
@@ -843,7 +843,7 @@ class PurchaseReturnTableCard extends StatelessWidget {
         content: Text(content),
         actions: [
           TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Cancel')),
-          ElevatedButton(onPressed: () => Navigator.of(context).pop(true), style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryColor), child: const Text('Confirm')),
+          ElevatedButton(onPressed: () => Navigator.of(context).pop(true), style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryColor(context)), child: const Text('Confirm')),
         ],
       ),
     );

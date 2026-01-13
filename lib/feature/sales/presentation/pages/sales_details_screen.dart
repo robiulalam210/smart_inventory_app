@@ -23,7 +23,7 @@ class SalesDetailsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.bg,
+      backgroundColor: AppColors.bottomNavBg(context),
       appBar: AppBar(
         title: Text('Sale Details', style: const TextStyle(fontSize: 16)),
         centerTitle: false,
@@ -36,9 +36,9 @@ class SalesDetailsScreen extends StatelessWidget {
         ],
       ),
       body: Responsive(
-        mobile: _buildMobileView(),
-        tablet: _buildMobileView(),
-        desktop:_buildDesktopView() ,
+        mobile: _buildMobileView(context,),
+        tablet: _buildMobileView(context,),
+        desktop:_buildDesktopView(context,) ,
 
       ),
     );
@@ -64,7 +64,7 @@ class SalesDetailsScreen extends StatelessWidget {
             pdfPreviewPageDecoration:
             BoxDecoration(color: AppColors.white),
             actionBarTheme: PdfActionBarTheme(
-              backgroundColor: AppColors.primaryColor,
+              backgroundColor: AppColors.primaryColor(context),
               iconColor: Colors.white,
               textStyle: const TextStyle(color: Colors.white),
             ),
@@ -97,14 +97,14 @@ class SalesDetailsScreen extends StatelessWidget {
   }
 
   // ===================== MOBILE VIEW =====================
-  Widget _buildMobileView() {
+  Widget _buildMobileView(BuildContext context,) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Header Card
-          _buildMobileHeaderCard(),
+          _buildMobileHeaderCard(context,),
           const SizedBox(height: 16),
 
           // Status & Invoice Info
@@ -130,10 +130,10 @@ class SalesDetailsScreen extends StatelessWidget {
                           const SizedBox(height: 4),
                           Text(
                             sale.invoiceNo??"",
-                            style: const TextStyle(
+                            style:  TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
-                              color: AppColors.primaryColor,
+                              color: AppColors.primaryColor(context),
                             ),
                           ),
                         ],
@@ -171,26 +171,26 @@ class SalesDetailsScreen extends StatelessWidget {
           const SizedBox(height: 16),
 
           // Items Section
-          _buildMobileItemsCard(),
+          _buildMobileItemsCard(context,),
 
           const SizedBox(height: 16),
 
           // Summary Section
-          _buildMobileSummaryCard(),
+          _buildMobileSummaryCard(context,),
 
           const SizedBox(height: 16),
 
           // Payment Section
-          _buildMobilePaymentCard(),
+          _buildMobilePaymentCard(context,),
         ],
       ),
     );
   }
 
-  Widget _buildMobileHeaderCard() {
+  Widget _buildMobileHeaderCard(BuildContext context,) {
     return Card(
       elevation: 3,
-      color: AppColors.primaryColor.withValues(alpha:0.05),
+      color: AppColors.primaryColor(context).withValues(alpha:0.05),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -199,7 +199,7 @@ class SalesDetailsScreen extends StatelessWidget {
             Row(
               children: [
                 Icon(Icons.receipt_long,
-                    color: AppColors.primaryColor, size: 20),
+                    color: AppColors.primaryColor(context), size: 20),
                 const SizedBox(width: 8),
                 const Text(
                   'Sale Details',
@@ -277,7 +277,7 @@ class SalesDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMobileItemsCard() {
+  Widget _buildMobileItemsCard(BuildContext context,) {
     return Card(
       elevation: 3,
       child: Padding(
@@ -288,7 +288,7 @@ class SalesDetailsScreen extends StatelessWidget {
             Row(
               children: [
                 Icon(Icons.shopping_cart,
-                    color: AppColors.primaryColor, size: 20),
+                    color: AppColors.primaryColor(context), size: 20),
                 const SizedBox(width: 8),
                 const Text(
                   'Items',
@@ -386,7 +386,7 @@ class SalesDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMobileSummaryCard() {
+  Widget _buildMobileSummaryCard(BuildContext context,) {
     final grossTotal = toDouble(sale.grossTotal);
     final netTotal = toDouble(sale.netTotal);
     final grandTotal = toDouble(sale.grandTotal);
@@ -405,7 +405,7 @@ class SalesDetailsScreen extends StatelessWidget {
             Row(
               children: [
                 Icon(Icons.calculate,
-                    color: AppColors.primaryColor, size: 20),
+                    color: AppColors.primaryColor(context), size: 20),
                 const SizedBox(width: 8),
                 const Text(
                   'Summary',
@@ -417,19 +417,19 @@ class SalesDetailsScreen extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 16),
-            _mobileSummaryRow('Gross Total', grossTotal),
+            _mobileSummaryRow(context,'Gross Total', grossTotal),
             if (discount > 0)
-              _mobileSummaryRow('Discount', -discount, isNegative: true),
+              _mobileSummaryRow(context,'Discount', -discount, isNegative: true),
             if (delivery > 0)
-              _mobileSummaryRow('Delivery Charge', delivery),
+              _mobileSummaryRow(context,'Delivery Charge', delivery),
             if (service > 0)
-              _mobileSummaryRow('Service Charge', service),
+              _mobileSummaryRow(context,'Service Charge', service),
             if (vat > 0)
-              _mobileSummaryRow('VAT', vat),
-            const Divider(height: 24),
-            _mobileSummaryRow('Net Total', netTotal, isBold: true),
+              _mobileSummaryRow(context,'VAT', vat),
+            const Divider(height: 16),
+            _mobileSummaryRow(context,'Net Total', netTotal, isBold: true),
             const SizedBox(height: 8),
-            _mobileSummaryRow('Grand Total', grandTotal,
+            _mobileSummaryRow(context,'Grand Total', grandTotal,
                 isBold: true, isHighlighted: true),
           ],
         ),
@@ -437,7 +437,7 @@ class SalesDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _mobileSummaryRow(String label, double value,
+  Widget _mobileSummaryRow(context,String label, double value,
       {bool isNegative = false,
         bool isBold = false,
         bool isHighlighted = false}) {
@@ -451,7 +451,7 @@ class SalesDetailsScreen extends StatelessWidget {
             style: TextStyle(
               fontSize: 14,
               fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
-              color: isHighlighted ? AppColors.primaryColor : Colors.black,
+              color: isHighlighted ? AppColors.primaryColor(context) : Colors.black,
             ),
           ),
           Text(
@@ -459,7 +459,7 @@ class SalesDetailsScreen extends StatelessWidget {
             style: TextStyle(
               fontSize: 14,
               fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
-              color: isHighlighted ? AppColors.primaryColor : Colors.black,
+              color: isHighlighted ? AppColors.primaryColor(context) : Colors.black,
             ),
           ),
         ],
@@ -467,7 +467,7 @@ class SalesDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMobilePaymentCard() {
+  Widget _buildMobilePaymentCard(BuildContext context,) {
     final payable = toDouble(sale.payableAmount);
     final paid = toDouble(sale.paidAmount);
     final due = sale.calculatedDueAmount;
@@ -511,11 +511,11 @@ class SalesDetailsScreen extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  _mobilePaymentRow('Payable', payable),
+                  _mobilePaymentRow(context,'Payable', payable),
                   const SizedBox(height: 8),
-                  _mobilePaymentRow('Paid', paid),
+                  _mobilePaymentRow(context,'Paid', paid),
                   const SizedBox(height: 8),
-                  _mobilePaymentRow(
+                  _mobilePaymentRow(context,
                     isDue ? 'Due Amount' : 'Advance',
                     due.abs(),
                     color: isDue ? Colors.red : Colors.green,
@@ -547,7 +547,7 @@ class SalesDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _mobilePaymentRow(String label, double amount, {Color? color}) {
+  Widget _mobilePaymentRow(BuildContext context,String label, double amount, {Color? color}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -564,7 +564,7 @@ class SalesDetailsScreen extends StatelessWidget {
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
-            color: color ?? AppColors.primaryColor,
+            color: color ?? AppColors.primaryColor(context),
           ),
         ),
       ],
@@ -572,19 +572,19 @@ class SalesDetailsScreen extends StatelessWidget {
   }
 
   // ===================== DESKTOP VIEW (unchanged) =====================
-  Widget _buildDesktopView() {
+  Widget _buildDesktopView(BuildContext context,) {
     return Padding(
       padding: const EdgeInsets.all(24),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(flex: 2, child: Column(children: [
-            _buildHeaderCard(),
-            _buildItemsCard(),
+            _buildHeaderCard(context,),
+            _buildItemsCard(context,),
           ])),
           const SizedBox(width: 16),
           Expanded(flex: 1, child: Column(children: [
-            _buildSummaryCard(),
+            _buildSummaryCard(context,),
             const SizedBox(height: 16),
             _buildPaymentCard(),
           ])),
@@ -593,7 +593,7 @@ class SalesDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildHeaderCard() {
+  Widget _buildHeaderCard(BuildContext context,) {
     return Card(
       elevation: 3,
       color: Colors.white,
@@ -604,10 +604,10 @@ class SalesDetailsScreen extends StatelessWidget {
             Expanded(
               child: Text(
                 'Invoice: ${sale.invoiceNo}',
-                style: const TextStyle(
+                style:  TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.primaryColor),
+                    color: AppColors.primaryColor(context)),
               ),
             ),
             Container(
@@ -667,7 +667,7 @@ class SalesDetailsScreen extends StatelessWidget {
     ]);
   }
 
-  Widget _buildItemsCard() {
+  Widget _buildItemsCard(BuildContext context,) {
     return Card(
       elevation: 3,
       child: Padding(
@@ -681,13 +681,13 @@ class SalesDetailsScreen extends StatelessWidget {
                 child:
                 Text('No items found', style: TextStyle(color: Colors.grey)))
           else
-            _buildItemsTable(),
+            _buildItemsTable(context,),
         ]),
       ),
     );
   }
 
-  Widget _buildItemsTable() {
+  Widget _buildItemsTable(BuildContext context,) {
     return Table(
       columnWidths: const {
         0: FlexColumnWidth(4),
@@ -700,7 +700,7 @@ class SalesDetailsScreen extends StatelessWidget {
       children: [
         TableRow(
           decoration: BoxDecoration(
-              color: AppColors.primaryColor.withValues(alpha:0.1)),
+              color: AppColors.primaryColor(context).withValues(alpha:0.1)),
           children: const [
             _TableHeader('Product'),
             _TableHeader('Qty'),
@@ -741,7 +741,7 @@ class SalesDetailsScreen extends StatelessWidget {
     ]);
   }
 
-  Widget _buildSummaryCard() {
+  Widget _buildSummaryCard(BuildContext context,) {
     return Card(
       elevation: 3,
       child: Padding(
@@ -750,13 +750,13 @@ class SalesDetailsScreen extends StatelessWidget {
           const Text('Summary',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           const SizedBox(height: 4),
-          _buildDesktopSummaryList(),
+          _buildDesktopSummaryList(context,),
         ]),
       ),
     );
   }
 
-  Widget _buildDesktopSummaryList() {
+  Widget _buildDesktopSummaryList(BuildContext context,) {
     final grossTotal = toDouble(sale.grossTotal);
     final netTotal = toDouble(sale.netTotal);
     final grandTotal = toDouble(sale.grandTotal);
@@ -767,30 +767,30 @@ class SalesDetailsScreen extends StatelessWidget {
     final vat = toDouble(sale.overallVatAmount);
 
     return Column(children: [
-      _summaryRow('Gross Total', grossTotal),
-      if (discount > 0) _summaryRow('Discount', -discount, negative: true),
-      if (delivery > 0) _summaryRow('Delivery Charge', delivery),
-      if (service > 0) _summaryRow('Service Charge', service),
-      if (vat > 0) _summaryRow('VAT', vat),
+      _summaryRow(context,'Gross Total', grossTotal),
+      if (discount > 0) _summaryRow(context,'Discount', -discount, negative: true),
+      if (delivery > 0) _summaryRow(context,'Delivery Charge', delivery),
+      if (service > 0) _summaryRow(context,'Service Charge', service),
+      if (vat > 0) _summaryRow(context,'VAT', vat),
       const Divider(),
-      _summaryRow('Net Total', netTotal, bold: true),
-      _summaryRow('Grand Total', grandTotal,
+      _summaryRow(context,'Net Total', netTotal, bold: true),
+      _summaryRow(context,'Grand Total', grandTotal,
           bold: true, highlight: true),
     ]);
   }
 
-  Widget _summaryRow(String label, double value,
+  Widget _summaryRow(BuildContext context,String label, double value,
       {bool negative = false, bool bold = false, bool highlight = false}) {
     return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
       Text(label,
           style: TextStyle(
               fontWeight: bold ? FontWeight.bold : FontWeight.normal,
-              color: highlight ? AppColors.primaryColor : Colors.black)),
+              color: highlight ? AppColors.primaryColor(context) : Colors.black)),
       Text(
         '${negative ? '-' : ''}৳${value.abs().toStringAsFixed(2)}',
         style: TextStyle(
             fontWeight: bold ? FontWeight.bold : FontWeight.normal,
-            color: highlight ? AppColors.primaryColor : Colors.black),
+            color: highlight ? AppColors.primaryColor(context) : Colors.black),
       ),
     ]);
   }
@@ -838,9 +838,9 @@ class _TableHeader extends StatelessWidget {
       padding: const EdgeInsets.all(8),
       child: Text(text,
           textAlign: TextAlign.center,
-          style: const TextStyle(
+          style:  TextStyle(
               fontWeight: FontWeight.bold,
-              color: AppColors.primaryColor)),
+              color: AppColors.primaryColor(context))),
     );
   }
 }

@@ -403,7 +403,7 @@ void printSummary({
           // page container white
 
           actionBarTheme: PdfActionBarTheme(
-            backgroundColor: AppColors.primaryColor,
+            backgroundColor: AppColors.primaryColor(context),
             iconColor: Colors.white,
             textStyle: const TextStyle(color: Colors.white),
           ),

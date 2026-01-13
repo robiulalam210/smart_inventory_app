@@ -78,9 +78,9 @@ class _AppButtonState extends State<AppButton> {
                     ? Border.all(
                   color: isHover
                       ? (widget.borderColor ??
-                      (widget.color ?? AppColors.primaryColor))
+                      (widget.color ?? AppColors.primaryColor(context)))
                       : (widget.borderColor ??
-                      (widget.color ?? AppColors.primaryColor))
+                      (widget.color ?? AppColors.primaryColor(context)))
                       .withValues(alpha: 0.8),
                   width: 1.5,
                 )
@@ -115,13 +115,13 @@ class _AppButtonState extends State<AppButton> {
     if (isHover) {
       return LinearGradient(
         colors: [
-          AppColors.primaryColor.withValues(alpha: 0.9),
-          AppColors.secondaryBabyBlue.withValues(alpha: 0.9),
+          AppColors.primaryColor(context).withValues(alpha: 0.9),
+          AppColors.secondary(context).withValues(alpha: 0.9),
         ],
       );
     }
 
-    return AppColors.primaryGradient;
+    return AppColors.primaryGradient(context);
   }
 
   Color? _getBackgroundColor(BuildContext context) {
@@ -145,7 +145,7 @@ class _AppButtonState extends State<AppButton> {
           strokeWidth: 2,
           valueColor: AlwaysStoppedAnimation<Color>(
             widget.isOutlined
-                ? (widget.color ?? AppColors.primaryColor)
+                ? (widget.color ?? AppColors.primaryColor(context))
                 : Colors.white,
           ),
         ),
@@ -179,7 +179,7 @@ class _AppButtonState extends State<AppButton> {
       if (widget.isDisabled) return Colors.black54;
       if (widget.isOutlined) {
         return widget.textColor ??
-            (widget.color ?? AppColors.primaryColor);
+            (widget.color ?? AppColors.primaryColor(context));
       }
       return widget.textColor ?? Colors.white;
     }

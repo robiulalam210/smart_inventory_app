@@ -54,7 +54,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.whiteColor,
+        color: AppColors.whiteColor(context),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Padding(
@@ -72,10 +72,10 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                   children: [
                     Text(
                       widget.id.isEmpty ? "Create Account" : "Update Account",
-                      style: const TextStyle(
+                      style:  TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: AppColors.primaryColor,
+                        color: AppColors.primaryColor(context),
                       ),
                     ),
                     IconButton(
@@ -119,8 +119,8 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                               value: item,
                               child: Text(
                                 item.toString(),
-                                style: const TextStyle(
-                                  color: AppColors.blackColor,
+                                style:  TextStyle(
+                                  color:AppColors.blackColor(context),
                                   fontFamily: 'Quicksand',
                                   fontWeight: FontWeight.w600,
                                 ),

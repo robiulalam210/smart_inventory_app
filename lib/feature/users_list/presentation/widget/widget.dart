@@ -75,7 +75,7 @@ class UserTableCard extends StatelessWidget {
                             fontFamily: GoogleFonts.inter().fontFamily,
                           ),
                           headingRowColor: WidgetStateProperty.all(
-                            AppColors.primaryColor,
+                            AppColors.primaryColor(context),
                           ),
                           dataTextStyle: TextStyle(
                             fontSize: 11,

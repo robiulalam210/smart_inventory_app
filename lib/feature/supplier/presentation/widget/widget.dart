@@ -71,7 +71,7 @@ class SupplierDataTableWidget extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
             decoration: BoxDecoration(
-              color: AppColors.primaryColor.withValues(alpha: 0.05),
+              color: AppColors.primaryColor(context).withValues(alpha: 0.05),
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(16),
                 topRight: Radius.circular(16),
@@ -88,7 +88,7 @@ class SupplierDataTableWidget extends StatelessWidget {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: AppColors.primaryColor,
+                        color: AppColors.primaryColor(context),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
@@ -202,14 +202,14 @@ class SupplierDataTableWidget extends StatelessWidget {
                           Icon(
                             Iconsax.wallet_money,
                             size: 16,
-                            color: AppColors.primaryColor,
+                            color: AppColors.primaryColor(context),
                           ),
                           const SizedBox(width: 6),
                           Text(
                             'Financial Summary',
                             style: TextStyle(
                               fontWeight: FontWeight.w700,
-                              color: AppColors.primaryColor,
+                              color: AppColors.primaryColor(context),
                               fontSize: 12,
                             ),
                           ),
@@ -528,7 +528,7 @@ class SupplierDataTableWidget extends StatelessWidget {
                             .map((e) => _buildRow(e.key + 1, e.value))
                             .toList(),
                         headingRowColor: WidgetStateProperty.all(
-                          AppColors.primaryColor,
+                          AppColors.primaryColor(context),
                         ),
                         headingTextStyle: const TextStyle(
                           color: Colors.white,

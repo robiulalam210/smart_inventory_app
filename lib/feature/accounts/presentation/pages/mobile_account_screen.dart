@@ -91,7 +91,7 @@ class _AccountScreenState extends State<MobileAccountScreen> {
       lg: 10,
       xl: 10,
       child: RefreshIndicator(
-        color: AppColors.primaryColor,
+        color: AppColors.primaryColor(context),
         onRefresh: () async {
           _fetchApi();
         },
@@ -206,7 +206,7 @@ class _AccountScreenState extends State<MobileAccountScreen> {
                 ),
               ),
               IconButton(
-                icon: Icon(Iconsax.filter, color: AppColors.primaryColor),
+                icon: Icon(Iconsax.filter, color: AppColors.primaryColor(context)),
                 onPressed: () => _showMobileFilterSheet(context),
               ),
               IconButton(
@@ -433,8 +433,8 @@ class _AccountScreenState extends State<MobileAccountScreen> {
                                 : null;
                           });
                         },
-                        selectedColor: AppColors.primaryColor.withValues(alpha: 0.2),
-                        checkmarkColor: AppColors.primaryColor,
+                        selectedColor: AppColors.primaryColor(context).withValues(alpha: 0.2),
+                        checkmarkColor: AppColors.primaryColor(context),
                       );
                     }).toList(),
                   ),
@@ -476,7 +476,7 @@ class _AccountScreenState extends State<MobileAccountScreen> {
                             );
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primaryColor,
+                            backgroundColor: AppColors.primaryColor(context),
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),

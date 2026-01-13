@@ -46,7 +46,7 @@ class _BrandScreenState extends State<BrandScreen> {
     final isMobile = Responsive.isMobile(context);
 
     return Container(
-      color: AppColors.bg,
+      color: AppColors.bottomNavBg(context),
       child: SafeArea(
         child: ResponsiveRow(
           spacing: 0,

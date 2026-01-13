@@ -67,7 +67,7 @@
 //             : AppSizes.height(context) * 0.13,
 //         padding: const EdgeInsets.all(8),
 //         decoration: BoxDecoration(
-//           color: AppColors.whiteColor,
+//           color: AppColors.whiteColor(context),
 //           borderRadius: BorderRadius.circular(10),
 //           boxShadow: const [
 //             BoxShadow(

@@ -105,7 +105,7 @@ class SupplierPaymentWidget extends StatelessWidget {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: AppColors.primaryColor,
+                          color: AppColors.primaryColor(context),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
@@ -207,14 +207,14 @@ class SupplierPaymentWidget extends StatelessWidget {
                           Icon(
                             Iconsax.wallet_money,
                             size: 16,
-                            color: AppColors.primaryColor,
+                            color: AppColors.primaryColor(context),
                           ),
                           const SizedBox(width: 6),
                           Text(
                             'Payment Details',
                             style: TextStyle(
                               fontWeight: FontWeight.w700,
-                              color: AppColors.primaryColor,
+                              color: AppColors.primaryColor(context),
                               fontSize: 13,
                             ),
                           ),
@@ -330,7 +330,7 @@ class SupplierPaymentWidget extends StatelessWidget {
                               pdfPreviewPageDecoration:
                               BoxDecoration(color: AppColors.white),
                               actionBarTheme: PdfActionBarTheme(
-                                backgroundColor: AppColors.primaryColor,
+                                backgroundColor: AppColors.primaryColor(context),
                                 iconColor: Colors.white,
                                 textStyle: const TextStyle(color: Colors.white),
                               ),
@@ -587,7 +587,7 @@ class SupplierPaymentWidget extends StatelessWidget {
                         )
                             .toList(),
                         headingRowColor:
-                        WidgetStateProperty.all(AppColors.primaryColor),
+                        WidgetStateProperty.all(AppColors.primaryColor(context)),
                         headingRowHeight: 40,
                         headingTextStyle: const TextStyle(
                           color: Colors.white,
@@ -717,7 +717,7 @@ class SupplierPaymentWidget extends StatelessWidget {
                         pdfPreviewPageDecoration:
                         BoxDecoration(color: AppColors.white),
                         actionBarTheme: PdfActionBarTheme(
-                          backgroundColor: AppColors.primaryColor,
+                          backgroundColor: AppColors.primaryColor(context),
                           iconColor: Colors.white,
                           textStyle: const TextStyle(color: Colors.white),
                         ),

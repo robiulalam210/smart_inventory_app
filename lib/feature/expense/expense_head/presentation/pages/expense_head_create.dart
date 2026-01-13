@@ -135,7 +135,7 @@ class _ExpenseHeadCreateState extends State<ExpenseHeadCreate> {
             width: MediaQuery.of(context).size.width,
             decoration: BoxDecoration(
               shape: BoxShape.rectangle,
-              color: AppColors.whiteColor,
+              color: AppColors.whiteColor(context),
               borderRadius: BorderRadius.circular(AppSizes.radius),
             ),
             child: Padding(

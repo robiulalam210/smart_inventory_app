@@ -56,7 +56,7 @@ class _BadStockScreenState extends State<BadStockScreen> {
     final isBigScreen = Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
 
     return Container(
-      color: AppColors.bg,
+      color: AppColors.bottomNavBg(context),
       child: SafeArea(
         child: ResponsiveRow(
           children: [
@@ -340,7 +340,7 @@ class BadStockTableCard extends StatelessWidget {
                             fontFamily: GoogleFonts.inter().fontFamily,
                           ),
                           headingRowColor: WidgetStateProperty.all(
-                            AppColors.primaryColor,
+                            AppColors.primaryColor(context),
                           ),
                           dataTextStyle: TextStyle(
                             fontSize: 11,

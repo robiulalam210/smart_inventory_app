@@ -301,7 +301,7 @@ class _CreateSalesReturnScreenState
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: AppColors.primaryColor,
+                        color: AppColors.primaryColor(context),
                       ),
                     ),
                     IconButton(
@@ -411,7 +411,7 @@ class _CreateSalesReturnScreenState
                 Text(
                   item.invoiceNo ?? 'Unknown',
                   style: TextStyle(
-                    color: AppColors.blackColor,
+                    color:AppColors.blackColor(context),
                     fontFamily: 'Quicksand',
                     fontWeight: FontWeight.w600,
                   ),
@@ -423,7 +423,7 @@ class _CreateSalesReturnScreenState
                 Text(
                   'Total: ৳${item.grandTotal?.toStringAsFixed(2) ?? "0.00"}',
                   style: TextStyle(
-                    color: AppColors.primaryColor,
+                    color: AppColors.primaryColor(context),
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
                   ),
@@ -492,7 +492,7 @@ class _CreateSalesReturnScreenState
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: AppColors.primaryColor,
+              color: AppColors.primaryColor(context),
             ),
           ),
           const SizedBox(height: 6),
@@ -533,7 +533,7 @@ class _CreateSalesReturnScreenState
                     child: Text(
                       item == 'percentage' ? '%' : 'Fixed',
                       style: TextStyle(
-                        color: AppColors.blackColor,
+                        color:AppColors.blackColor(context),
                         fontFamily: 'Quicksand',
                         fontWeight: FontWeight.w600,
                       ),
@@ -589,7 +589,7 @@ class _CreateSalesReturnScreenState
             child: Text(
               item.toUpperCase(),
               style: TextStyle(
-                color: AppColors.blackColor,
+                color:AppColors.blackColor(context),
                 fontFamily: 'Quicksand',
                 fontWeight: FontWeight.w600,
               ),
@@ -625,7 +625,7 @@ class _CreateSalesReturnScreenState
                 Text(
                   item.name ?? 'Unknown Account',
                   style: TextStyle(
-                    color: AppColors.blackColor,
+                    color:AppColors.blackColor(context),
                     fontFamily: 'Quicksand',
                     fontWeight: FontWeight.w600,
                   ),
@@ -652,7 +652,7 @@ class _CreateSalesReturnScreenState
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
-            color: AppColors.primaryColor,
+            color: AppColors.primaryColor(context),
           ),
         ),
         const SizedBox(height: 12),
@@ -693,7 +693,7 @@ class _CreateSalesReturnScreenState
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
-                      color: AppColors.primaryColor,
+                      color: AppColors.primaryColor(context),
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -721,7 +721,7 @@ class _CreateSalesReturnScreenState
                       _updateProductQuantity(index, (item.quantity ?? 0) + 1),
                   onDecrement: () =>
                       _updateProductQuantity(index, (item.quantity ?? 0) - 1),
-                  color: AppColors.primaryColor,
+                  color: AppColors.primaryColor(context),
                 ),
                 const SizedBox(width: 16),
                 _buildQuantityControl(
@@ -825,7 +825,7 @@ class _CreateSalesReturnScreenState
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.bold,
-            color: isTotal ? AppColors.primaryColor : AppColors.blackColor,
+            color: isTotal ? AppColors.primaryColor(context) :AppColors.blackColor(context),
           ),
         ),
       ],
@@ -848,7 +848,7 @@ class _CreateSalesReturnScreenState
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: AppColors.primaryColor,
+              color: AppColors.primaryColor(context),
             ),
           ),
           const SizedBox(height: 12),
@@ -874,7 +874,7 @@ class _CreateSalesReturnScreenState
           _buildSummaryRow(
             label: 'Total Return Amount:',
             value: double.tryParse(totalAmountController.text) ?? 0.0,
-            color: AppColors.primaryColor,
+            color: AppColors.primaryColor(context),
             isTotal: true,
           ),
         ],

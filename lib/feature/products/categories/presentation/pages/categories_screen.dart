@@ -46,7 +46,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
     final isBigScreen =
         Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
     return Container(
-      color: AppColors.bg,
+      color: AppColors.bottomNavBg(context),
       child: SafeArea(
         child: ResponsiveRow(
           spacing: 0,
@@ -81,7 +81,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
       md: 12,
       lg: 10,
       xl: 10,
-      child: Container(color: AppColors.bg, child: buildContent()),
+      child: Container(color: AppColors.bottomNavBg(context), child: buildContent()),
     );
   }
 
@@ -134,7 +134,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
-                      color: AppColors.primaryColor,
+                      color: AppColors.primaryColor(context),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -184,7 +184,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
-                      color: AppColors.primaryColor,
+                      color: AppColors.primaryColor(context),
                     ),
                   ),
 

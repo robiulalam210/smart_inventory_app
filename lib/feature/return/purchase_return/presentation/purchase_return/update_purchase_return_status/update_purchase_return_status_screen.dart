@@ -40,11 +40,11 @@
 //     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 //
 //     return Scaffold(
-//       backgroundColor: AppColors.bg,
+//       backgroundColor: AppColors.bottomNavBg(context),
 //       body: Container(
 //         padding: AppTextStyle.getResponsivePaddingBody(context),
 //         child: RefreshIndicator(
-//           color: AppColors.primaryColor,
+//           color: AppColors.primaryColor(context),
 //           onRefresh: () async {
 //             context.read<AccountBloc>().add(
 //                   FetchAccountList(context,),
@@ -85,7 +85,7 @@
 //                         child: Text(
 //                           item.toString(),
 //                           style: const TextStyle(
-//                             color: AppColors.blackColor,
+//                             color:AppColors.blackColor(context),
 //                             fontFamily: 'Quicksand',
 //                             fontWeight: FontWeight.w600,
 //                           ),
@@ -132,7 +132,7 @@
 //                       child: Text(
 //                         item.toString(),
 //                         style: const TextStyle(
-//                           color: AppColors.blackColor,
+//                           color:AppColors.blackColor(context),
 //                           fontFamily: 'Quicksand',
 //                           fontWeight: FontWeight.w600,
 //                         ),
@@ -194,7 +194,7 @@
 //                           child: Text(
 //                             item.toString(),
 //                             style: const TextStyle(
-//                               color: AppColors.blackColor,
+//                               color:AppColors.blackColor(context),
 //                               fontFamily: 'Quicksand',
 //                               fontWeight: FontWeight.w300,
 //                             ),

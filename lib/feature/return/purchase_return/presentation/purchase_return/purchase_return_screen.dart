@@ -189,7 +189,7 @@ class _PurchaseReturnScreenState extends State<PurchaseReturnScreen> {
                         icon: const Icon(Icons.clear_all, size: 16),
                         label: const Text('Clear Filters'),
                         style: TextButton.styleFrom(
-                          foregroundColor: AppColors.primaryColor,
+                          foregroundColor: AppColors.primaryColor(context),
                         ),
                       ),
                   ],
@@ -282,7 +282,7 @@ class _PurchaseReturnScreenState extends State<PurchaseReturnScreen> {
                         child: Text(
                           isAllOption ? 'All Suppliers' : '${item.name} (${item.phone})',
                           style: TextStyle(
-                            color: isAllOption ? AppColors.primaryColor : AppColors.blackColor,
+                            color: isAllOption ? AppColors.primaryColor(context) :AppColors.blackColor(context),
                             fontFamily: 'Quicksand',
                             fontWeight: isAllOption ? FontWeight.bold : FontWeight.w300,
                           ),
@@ -351,7 +351,7 @@ class _PurchaseReturnScreenState extends State<PurchaseReturnScreen> {
               icon: const Icon(Icons.refresh),
               tooltip: "Refresh",
               style: IconButton.styleFrom(
-                backgroundColor: AppColors.primaryColor.withValues(alpha: 0.1),
+                backgroundColor: AppColors.primaryColor(context).withValues(alpha: 0.1),
               ),
             ),
           ],
@@ -436,7 +436,7 @@ class _PurchaseReturnScreenState extends State<PurchaseReturnScreen> {
           ElevatedButton( // Now properly imported
             onPressed: () => _fetchPurchaseReturnList(),
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primaryColor,
+              backgroundColor: AppColors.primaryColor(context),
               foregroundColor: Colors.white,
             ),
             child: const Text("Refresh"),

@@ -82,7 +82,7 @@ class PosSaleDataTableWidget extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
-              color: AppColors.primaryColor.withValues(alpha: 0.05),
+              color: AppColors.primaryColor(context).withValues(alpha: 0.05),
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(16),
                 topRight: Radius.circular(16),
@@ -99,7 +99,7 @@ class PosSaleDataTableWidget extends StatelessWidget {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: AppColors.primaryColor,
+                        color: AppColors.primaryColor(context),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
@@ -416,7 +416,7 @@ class PosSaleDataTableWidget extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                         ),
                         headingRowColor: WidgetStateProperty.all(
-                          AppColors.primaryColor,
+                          AppColors.primaryColor(context),
                         ),
                         headingRowHeight: 40,
                         columns: _buildColumns(dynamicColumnWidth),
@@ -692,7 +692,7 @@ class PosSaleDataTableWidget extends StatelessWidget {
         builder: (context) => Scaffold(
           appBar: AppBar(
             title: const Text('Sales Invoice'),
-            backgroundColor: AppColors.primaryColor,
+            backgroundColor: AppColors.primaryColor(context),
           ),
           body: PdfPreview.builder(
             useActions: true,

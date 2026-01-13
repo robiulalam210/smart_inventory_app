@@ -54,7 +54,7 @@ class _PurchaseReportScreenState extends State<PurchaseReportScreen> {
     final isBigScreen = Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
 
     return Container(
-      color: AppColors.bg,
+      color: AppColors.bottomNavBg(context),
       child: SafeArea(
         child: ResponsiveRow(
           children: [
@@ -128,8 +128,8 @@ class _PurchaseReportScreenState extends State<PurchaseReportScreen> {
                   value: item,
                   child: Text(
                     item.name ?? 'Unknown Supplier',
-                    style: const TextStyle(
-                      color: AppColors.blackColor,
+                    style:  TextStyle(
+                      color:AppColors.blackColor(context),
                       fontFamily: 'Quicksand',
                       fontWeight: FontWeight.w300,
                     ),
@@ -183,7 +183,7 @@ class _PurchaseReportScreenState extends State<PurchaseReportScreen> {
               "Total Purchases",
               "\$${summary.totalPurchases.toStringAsFixed(2)}",
               Icons.shopping_cart,
-              AppColors.primaryColor,
+              AppColors.primaryColor(context),
             ),
             _buildSummaryCard(
               "Total Paid",
@@ -225,7 +225,7 @@ class _PurchaseReportScreenState extends State<PurchaseReportScreen> {
                       pdfPreviewPageDecoration:
                       BoxDecoration(color: AppColors.white),
                       actionBarTheme: PdfActionBarTheme(
-                        backgroundColor: AppColors.primaryColor,
+                        backgroundColor: AppColors.primaryColor(context),
                         iconColor: Colors.white,
                         textStyle: const TextStyle(color: Colors.white),
                       ),
@@ -295,10 +295,10 @@ class _PurchaseReportScreenState extends State<PurchaseReportScreen> {
               ),
               Text(
                 value,
-                style: const TextStyle(
+                style:  TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.blackColor,
+                  color:AppColors.blackColor(context),
                 ),
               ),
             ],
@@ -469,7 +469,7 @@ class PurchaseReportTableCard extends StatelessWidget {
                             fontFamily: GoogleFonts.inter().fontFamily,
                           ),
                           headingRowColor: WidgetStateProperty.all(
-                            AppColors.primaryColor,
+                            AppColors.primaryColor(context),
                           ),
                           dataTextStyle: TextStyle(
                             fontSize: 11,

@@ -219,7 +219,7 @@ class _ExpenseListScreenState extends State<MobileExpenseListScreen> {
               IconButton(
                 icon: Icon(
                   Iconsax.filter,
-                  color: AppColors.primaryColor,
+                  color: AppColors.primaryColor(context),
                 ),
                 onPressed: () => _showMobileFilterSheet(context),
               ),
@@ -503,7 +503,7 @@ class _ExpenseListScreenState extends State<MobileExpenseListScreen> {
                             _fetchApi();
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primaryColor,
+                            backgroundColor: AppColors.primaryColor(context),
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),

@@ -51,7 +51,7 @@ class _GroupsScreenState extends State<GroupsScreen> {
     final isMobile = Responsive.isMobile(context);
 
     return Container(
-      color: AppColors.bg,
+      color: AppColors.bottomNavBg(context),
       child: SafeArea(
         child: ResponsiveRow(
           spacing: 0,
@@ -87,7 +87,7 @@ class _GroupsScreenState extends State<GroupsScreen> {
       lg: 10,
       xl: 10,
       child: Container(
-        color: AppColors.bg,
+        color: AppColors.bottomNavBg(context),
         child: RefreshIndicator(
           onRefresh: () async {
             _fetchApi();

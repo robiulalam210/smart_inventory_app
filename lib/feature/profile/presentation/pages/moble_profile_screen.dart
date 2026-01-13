@@ -1,9 +1,41 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:meherinMart/core/widgets/app_scaffold.dart';
+import 'package:meherinMart/feature/auth/presentation/pages/mobile_login_scr.dart';
 import '../../../../core/configs/configs.dart';
+import '../../../../core/database/auth_db.dart';
+import '../../../../core/widgets/app_alert_dialog.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/show_custom_toast.dart';
+import '../../../common/presentation/cubit/theme_cubit.dart';
 import '../../data/model/profile_perrmission_model.dart';
 import '../bloc/profile_bloc/profile_bloc.dart';
+import '../widget/user_profile.dart';
+
+final List<Map<String, dynamic>> colors = const [
+  {'color': Color(0xff60DAFF), 'name': 'Default'},
+  {'color': Color(0xff69B128), 'name': 'Default 2'},
+  {'color': Colors.red, 'name': 'Red'},
+  {'color': Colors.pink, 'name': 'Pink'},
+  {'color': Colors.purple, 'name': 'Purple'},
+  {'color': Colors.deepPurple, 'name': 'Deep Purple'},
+  {'color': Colors.indigo, 'name': 'Indigo'},
+  {'color': Colors.blue, 'name': 'Blue'},
+  {'color': Colors.lightBlue, 'name': 'Light Blue'},
+  {'color': Colors.cyan, 'name': 'Cyan'},
+  {'color': Colors.teal, 'name': 'Teal'},
+  {'color': Colors.green, 'name': 'Green'},
+  {'color': Colors.lightGreen, 'name': 'Light Green'},
+  {'color': Colors.lime, 'name': 'Lime'},
+  {'color': Colors.yellow, 'name': 'Yellow'},
+  {'color': Colors.amber, 'name': 'Amber'},
+  {'color': Colors.orange, 'name': 'Orange'},
+  {'color': Colors.deepOrange, 'name': 'Deep Orange'},
+  {'color': Colors.brown, 'name': 'Brown'},
+  {'color': Colors.grey, 'name': 'Grey'},
+  {'color': Colors.blueGrey, 'name': 'Blue Grey'},
+  {'color': Colors.black, 'name': 'Black'},
+  {'color': Colors.white, 'name': 'White'},
+];
 
 class MobileProfileScreen extends StatefulWidget {
   const MobileProfileScreen({super.key});
@@ -26,8 +58,6 @@ class _MobileProfileScreenState extends State<MobileProfileScreen> {
   final TextEditingController _newPasswordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
   TextEditingController();
-
-  int _currentSection = 0;
 
   @override
   void initState() {
@@ -53,9 +83,16 @@ class _MobileProfileScreenState extends State<MobileProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final themeCubit = context.read<ThemeCubit>();
+    final themeState = context.watch<ThemeCubit>().state;
+
+    final primary = themeState.primaryColor;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final iconBg = primary.withOpacity(0.11);
+
     return AppScaffold(
       appBar: AppBar(
-        title: const Text("Profile"),
+        title: const Text("Profile").tr(),
         centerTitle: true,
         actions: [
           IconButton(
@@ -79,8 +116,298 @@ class _MobileProfileScreenState extends State<MobileProfileScreen> {
                 if (state is ProfilePermissionLoading) {
                   return _buildLoadingState();
                 } else if (state is ProfilePermissionSuccess) {
+                  final my = state.permissionData;
                   _populateFormFields(state.permissionData);
-                  return _buildMobileLayout(state.permissionData, state);
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Profile Header
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          buildDoctorAvatar(
+                            isMan: (my.data?.user?.username ?? "")
+                                .toLowerCase()
+                                .startsWith('m'),
+                            imageUrl: my.data?.user?.profilePicture,
+                            fullName: my.data?.user?.fullName ?? '',
+                            context: context,
+                            isDoctor: true,
+                          ),
+                          const SizedBox(height: 4),
+                          Container(
+                            width: 110,
+                            height: 30,
+                            decoration: BoxDecoration(
+                              color: iconBg,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Center(
+                              child: Text(
+                                "change_image".tr(),
+                                style: TextStyle(
+                                  color: primary,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 15),
+                          Text(
+                            my.data?.user?.username ?? '',
+                            style: TextStyle(
+                              color: primary,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 22,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            my.data?.user?.fullName ?? '',
+                            style: TextStyle(
+                              color: isDark ? Colors.white : Colors.black87,
+                              fontSize: 16,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            my.data?.user?.email ?? '',
+                            style: TextStyle(
+                              color: isDark ? Colors.white70 : Colors.black54,
+                              fontSize: 13,
+                            ),
+                          ),
+                          const SizedBox(height: 14),
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              onPressed: () => _showEditProfileDialog(),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: iconBg,
+                                elevation: 0,
+                                foregroundColor: primary,
+                                padding:
+                                const EdgeInsets.symmetric(vertical: 14),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              child: Text(
+                                "edit_profile_details".tr(),
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+
+                      // Quick Action Buttons
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _buildQuickActionButton(
+                              icon: Icons.security,
+                              label: "Permissions".tr(),
+                              color: primary,
+                              onTap: () => _showPermissionsDialog(),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _buildQuickActionButton(
+                              icon: Icons.lock,
+                              label: "Security".tr(),
+                              color: primary,
+                              onTap: () => _showSecurityDialog(),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+
+                      /// THEME MODE
+                      Theme(
+                        data: ThemeData(dividerColor: Colors.transparent),
+                        child: ExpansionTile(
+                          tilePadding: EdgeInsets.zero,
+                          iconColor: primary,
+                          collapsedIconColor: primary,
+                          title: Row(
+                            children: [
+                              _iconBox(Icons.palette, primary, iconBg),
+                              const SizedBox(width: 8),
+                              Text('theme_mode'.tr(),
+                                  style: AppTextStyle.body(context)),
+                            ],
+                          ),
+                          children: [
+                            RadioGroup<ThemeMode>(
+                              groupValue: themeState.themeMode,
+                              onChanged: (val) async {
+                                if (val == null) return;
+                                themeCubit.setThemeMode(val);
+                                final modeStr = val == ThemeMode.light
+                                    ? 'light'
+                                    : val == ThemeMode.dark
+                                    ? 'dark'
+                                    : 'system';
+                                await AuthLocalDB.saveThemeMode(modeStr);
+                              },
+                              child: Column(
+                                children: ThemeMode.values.map((mode) {
+                                  final text = mode == ThemeMode.light
+                                      ? "Light"
+                                      : mode == ThemeMode.dark
+                                      ? "Dark"
+                                      : "System";
+                                  return RadioListTile<ThemeMode>(
+                                    title: Text(text,
+                                        style: AppTextStyle.body(context)),
+                                    value: mode,
+                                    activeColor: primary,
+                                    groupValue: themeState.themeMode,
+                                    onChanged: (val) {
+                                      if (val != null) {
+                                        themeCubit.setThemeMode(val);
+                                        final modeStr = val == ThemeMode.light
+                                            ? 'light'
+                                            : val == ThemeMode.dark
+                                            ? 'dark'
+                                            : 'system';
+                                        AuthLocalDB.saveThemeMode(modeStr);
+                                      }
+                                    },
+                                  );
+                                }).toList(),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+
+                      /// THEME COLOR
+                      InkWell(
+                        onTap: () => _showThemeColorBottomSheet(
+                          context,
+                          themeCubit,
+                          themeState.primaryColor,
+                        ),
+                        child: Row(
+                          children: [
+                            _iconBox(Icons.palette, primary, iconBg),
+                            const SizedBox(width: 8),
+                            Text("theme_color".tr(),
+                                style: AppTextStyle.body(context)),
+                            const Spacer(),
+                            Builder(
+                              builder: (context) {
+                                final currentColor = context
+                                    .watch<ThemeCubit>()
+                                    .state
+                                    .primaryColor;
+                                final colorMap = colors.firstWhere(
+                                      (c) => c['color'].value == currentColor.value,
+                                  orElse: () => {
+                                    'color': currentColor,
+                                    'name': 'Custom',
+                                  },
+                                );
+                                return Row(
+                                  children: [
+                                    Container(
+                                      width: 24,
+                                      height: 24,
+                                      decoration: BoxDecoration(
+                                        color: colorMap['color'],
+                                        shape: BoxShape.circle,
+                                        border:
+                                        Border.all(color: Colors.black12),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(colorMap['name'],
+                                        style: AppTextStyle.body(context)),
+                                    const SizedBox(width: 8),
+                                    Icon(
+                                      Icons.arrow_forward_ios_rounded,
+                                      size: 16,
+                                      color: primary,
+                                    ),
+                                  ],
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      /// MENU ITEMS
+                      languageDropdown(context),
+
+                      InkWell(
+                        onTap: () {
+                          // TODO: Implement emergency support
+                        },
+                        child: _menuItem(
+                          Icons.health_and_safety_rounded,
+                          "emergency_support".tr(),
+                          iconBg,
+                          primary,
+                          context,
+                        ),
+                      ),
+
+                      InkWell(
+                        onTap: () {
+                          // TODO: Implement privacy policy
+                        },
+                        child: _menuItem(
+                          Icons.shield_outlined,
+                          "privacy_policy".tr(),
+                          iconBg,
+                          primary,
+                          context,
+                        ),
+                      ),
+
+                      InkWell(
+                        onTap: () {
+                          appAdaptiveDialog(
+                            context: context,
+                            title: "Log Out",
+                            message: "Are you sure you want to log out?",
+                            actions: [
+                              AdaptiveDialogAction(
+                                text: "Cancel",
+                                onPressed: () => Navigator.pop(context),
+                              ),
+                              AdaptiveDialogAction(
+                                text: "Log Out",
+                                isDestructive: true,
+                                onPressed: ()async {
+                                  await AuthLocalDB.clear();
+                                  if (!context.mounted) return;
+                                  AppRoutes.pushAndRemoveUntil(context, MobileLoginScr());                                },
+                              ),
+                            ],
+                          );
+                        },
+                        child: _menuItem(
+                          Icons.logout,
+                          "logout".tr(),
+                          iconBg,
+                          primary,
+                          context,
+                        ),
+                      ),
+                    ],
+                  );
                 } else if (state is ProfilePermissionFailed) {
                   return _buildErrorState(state, _loadProfileData);
                 }
@@ -90,334 +417,186 @@ class _MobileProfileScreenState extends State<MobileProfileScreen> {
           ),
         ),
       ),
-      bottomNavigationBar: _buildBottomNavigationBar(),
     );
   }
 
-  Widget _buildMobileLayout(ProfilePermissionModel p, ProfileState state) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Profile Header Card
-        _buildProfileHeaderCard(p),
-        const SizedBox(height: 10),
-
-        // Current Section Content
-        _currentSection == 0
-            ? _buildProfileForm(p)
-            : _currentSection == 1
-            ? _buildPermissionsSection(state)
-            : _buildSecuritySection(),
-      ],
-    );
-  }
-
-  Widget _buildProfileHeaderCard(ProfilePermissionModel p) {
-    return Card(
-      elevation: 1,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(8),
-        child: Column(
-          children: [
-            // Profile Picture
-            Stack(
-              children: [
-                Container(
-                  width: 100,
-                  height: 100,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: AppColors.primaryColor,
-                      width: 3,
-                    ),
-                  ),
-                  child: CircleAvatar(
-                    radius: 50,
-                    backgroundColor: Colors.grey[200],
-                    backgroundImage: p.data?.user?.profilePicture != null &&
-                        p.data!.user!.profilePicture!.isNotEmpty
-                        ? NetworkImage(p.data!.user!.profilePicture!)
-                        : null,
-                    child: p.data?.user?.profilePicture == null ||
-                        p.data!.user!.profilePicture!.isEmpty
-                        ? Icon(
-                      Icons.person,
-                      size: 40,
-                      color: Colors.grey[400],
-                    )
-                        : null,
-                  ),
-                ),
-                Positioned(
-                  bottom: 0,
-                  right: 0,
-                  child: GestureDetector(
-                    onTap: _showImagePickerOptions,
-                    child: Container(
-                      padding: const EdgeInsets.all(6),
-                      decoration: BoxDecoration(
-                        color: AppColors.primaryColor,
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white, width: 2),
-                      ),
-                      child: const Icon(
-                        Icons.camera_alt,
-                        color: Colors.white,
-                        size: 16,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-
-            // User Info
-            Text(
-              p.data?.user?.fullName ?? "No Name",
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 4),
-
-            Text(
-              '@${p.data?.user?.username ?? "No Username"}',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey[600],
-              ),
-            ),
-            const SizedBox(height: 8),
-
-            Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 6,
-              ),
-              decoration: BoxDecoration(
-                color: AppColors.primaryColor.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Text(
-                p.data?.user?.role
-                    ?.replaceAll('_', ' ')
-                    .toUpperCase() ??
-                    "NO ROLE",
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.primaryColor,
-                ),
-              ),
-            ),
-          ],
+  Widget _buildQuickActionButton({
+    required IconData icon,
+    required String label,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return ElevatedButton(
+      onPressed: onTap,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: color.withOpacity(0.1),
+        foregroundColor: color,
+        elevation: 0,
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
         ),
       ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 24),
+          const SizedBox(height: 8),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _buildProfileForm(ProfilePermissionModel pp) {
-    final profile = pp.data?.user;
+  void _showEditProfileDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return BlocBuilder<ProfileBloc, ProfileState>(
+          builder: (context, state) {
+            if (state is ProfilePermissionSuccess) {
+              return _buildProfileDialog(state.permissionData);
+            }
+            return const Center(child: CircularProgressIndicator());
+          },
+        );
+      },
+    );
+  }
 
-    return Card(
-      elevation: 1,
-      color: AppColors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
+  Widget _buildProfileDialog(ProfilePermissionModel pp) {
+    return AlertDialog(
+      title: Text('Edit Profile'.tr()),
+      content: SingleChildScrollView(
         child: Form(
           key: _formKey,
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Profile Information',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Update your personal information',
-                style: TextStyle(
-                  color: Colors.grey[600],
-                  fontSize: 14,
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              // Form Fields
               TextFormField(
                 controller: _firstNameController,
                 decoration: InputDecoration(
-                  labelText: 'First Name',
+                  labelText: 'First Name'.tr(),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
                   prefixIcon: const Icon(Icons.person),
-                  filled: true,
-                  fillColor: Colors.grey[50],
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter first name';
+                    return 'Please enter first name'.tr();
                   }
                   return null;
                 },
               ),
               const SizedBox(height: 16),
-
               TextFormField(
                 controller: _lastNameController,
                 decoration: InputDecoration(
-                  labelText: 'Last Name',
+                  labelText: 'Last Name'.tr(),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
                   prefixIcon: const Icon(Icons.person_outline),
-                  filled: true,
-                  fillColor: Colors.grey[50],
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter last name';
+                    return 'Please enter last name'.tr();
                   }
                   return null;
                 },
               ),
               const SizedBox(height: 16),
-
               TextFormField(
                 controller: _emailController,
                 decoration: InputDecoration(
-                  labelText: 'Email Address',
+                  labelText: 'Email Address'.tr(),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
                   prefixIcon: const Icon(Icons.email),
-                  filled: true,
-                  fillColor: Colors.grey[50],
                 ),
                 keyboardType: TextInputType.emailAddress,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter email address';
+                    return 'Please enter email address'.tr();
                   }
-                  if (!RegExp(r'^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-                    return 'Please enter a valid email address';
+                  if (!RegExp(r'^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$')
+                      .hasMatch(value)) {
+                    return 'Please enter a valid email address'.tr();
                   }
                   return null;
                 },
               ),
               const SizedBox(height: 16),
-
               TextFormField(
                 controller: _phoneController,
                 decoration: InputDecoration(
-                  labelText: 'Phone Number',
+                  labelText: 'Phone Number'.tr(),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
                   prefixIcon: const Icon(Icons.phone),
-                  filled: true,
-                  fillColor: Colors.grey[50],
                 ),
                 keyboardType: TextInputType.phone,
-              ),
-              const SizedBox(height: 16),
-
-              TextFormField(
-                initialValue: profile?.username ?? "",
-                decoration: InputDecoration(
-                  labelText: 'Username',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  prefixIcon: const Icon(Icons.alternate_email),
-                  filled: true,
-                  fillColor: Colors.grey[100],
-                ),
-                readOnly: true,
-              ),
-              const SizedBox(height: 16),
-
-              TextFormField(
-                initialValue:
-                profile?.role?.replaceAll('_', ' ').toUpperCase() ??
-                    "No Role",
-                decoration: InputDecoration(
-                  labelText: 'Role',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  prefixIcon: const Icon(Icons.work),
-                  filled: true,
-                  fillColor: Colors.grey[100],
-                ),
-                readOnly: true,
-              ),
-              const SizedBox(height: 24),
-
-              // Update Button
-              SizedBox(
-                width: double.infinity,
-                child: AppButton(
-                  name: "Update Profile",
-                  onPressed: _updateProfile,
-                ),
               ),
             ],
           ),
         ),
       ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text('Cancel'.tr()),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            if (_formKey.currentState!.validate()) {
+              _updateProfile();
+              Navigator.pop(context);
+            }
+          },
+          child: Text('Update'.tr()),
+        ),
+      ],
     );
   }
 
-  Widget _buildPermissionsSection(ProfileState state) {
-    if (state is ProfilePermissionSuccess) {
-      return _buildPermissionsList(state.permissionData);
-    } else if (state is ProfilePermissionLoading) {
-      return const Center(child: CircularProgressIndicator());
-    } else if (state is ProfilePermissionFailed) {
-      return _buildErrorState(state, _loadProfileData);
-    }
-    return const Center(child: CircularProgressIndicator());
+  void _showPermissionsDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return BlocBuilder<ProfileBloc, ProfileState>(
+          builder: (context, state) {
+            if (state is ProfilePermissionSuccess) {
+              return _buildPermissionsDialog(state.permissionData);
+            }
+            return const Center(child: CircularProgressIndicator());
+          },
+        );
+      },
+    );
   }
 
-  Widget _buildPermissionsList(ProfilePermissionModel permissionData) {
+  Widget _buildPermissionsDialog(ProfilePermissionModel permissionData) {
     final permissions = permissionData.data?.permissions;
 
-    return Card(
-      elevation: 1,
-      color: AppColors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
+    return AlertDialog(
+      title: Text('Module Permissions'.tr()),
+      content: SingleChildScrollView(
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Module Permissions',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
             Text(
-              'Your access permissions for system modules',
+              'Your access permissions for system modules'.tr(),
               style: TextStyle(
                 color: Colors.grey[600],
                 fontSize: 14,
@@ -425,43 +604,43 @@ class _MobileProfileScreenState extends State<MobileProfileScreen> {
             ),
             const SizedBox(height: 20),
 
-            if (permissions != null)
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildMobilePermissionCard(
-                    'Dashboard',
-                    Icons.dashboard,
-                    permissions.dashboard?.view ?? false,
-                  ),
-                  const SizedBox(height: 12),
-
-                  _buildMobilePermissionCard(
-                    'Sales',
-                    Icons.shopping_cart,
-                    [
-                      _buildPermissionItem('View', permissions.sales?.view ?? false),
-                      _buildPermissionItem('Create', permissions.sales?.create ?? false),
-                      _buildPermissionItem('Edit', permissions.sales?.edit ?? false),
-                      _buildPermissionItem('Delete', permissions.sales?.delete ?? false),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-
-                  _buildMobilePermissionCard(
-                    'Money Receipt',
-                    Icons.receipt,
-                    [
-                      _buildPermissionItem('View', permissions.moneyReceipt?.view ?? false),
-                      _buildPermissionItem('Create', permissions.moneyReceipt?.create ?? false),
-                      _buildPermissionItem('Edit', permissions.moneyReceipt?.edit ?? false),
-                      _buildPermissionItem('Delete', permissions.moneyReceipt?.delete ?? false),
-                    ],
-                  ),
-                  // Add more permission cards as needed
+            if (permissions != null) ...[
+              _buildDialogPermissionItem(
+                'Dashboard',
+                Icons.dashboard,
+                permissions.dashboard?.view ?? false,
+              ),
+              const SizedBox(height: 12),
+              _buildDialogPermissionItem(
+                'Sales',
+                Icons.shopping_cart,
+                [
+                  _buildPermissionItem(
+                      'View', permissions.sales?.view ?? false),
+                  _buildPermissionItem(
+                      'Create', permissions.sales?.create ?? false),
+                  _buildPermissionItem(
+                      'Edit', permissions.sales?.edit ?? false),
+                  _buildPermissionItem(
+                      'Delete', permissions.sales?.delete ?? false),
                 ],
-              )
-            else
+              ),
+              const SizedBox(height: 12),
+              _buildDialogPermissionItem(
+                'Money Receipt',
+                Icons.receipt,
+                [
+                  _buildPermissionItem('View',
+                      permissions.moneyReceipt?.view ?? false),
+                  _buildPermissionItem('Create',
+                      permissions.moneyReceipt?.create ?? false),
+                  _buildPermissionItem('Edit',
+                      permissions.moneyReceipt?.edit ?? false),
+                  _buildPermissionItem('Delete',
+                      permissions.moneyReceipt?.delete ?? false),
+                ],
+              ),
+            ] else
               Center(
                 child: Column(
                   children: [
@@ -472,7 +651,7 @@ class _MobileProfileScreenState extends State<MobileProfileScreen> {
                     ),
                     const SizedBox(height: 12),
                     Text(
-                      'No permissions data available',
+                      'No permissions data available'.tr(),
                       style: TextStyle(
                         fontSize: 14,
                         color: Colors.grey[600],
@@ -484,17 +663,23 @@ class _MobileProfileScreenState extends State<MobileProfileScreen> {
           ],
         ),
       ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text('Close'.tr()),
+        ),
+      ],
     );
   }
 
-  Widget _buildMobilePermissionCard(
+  Widget _buildDialogPermissionItem(
       String title,
       IconData icon,
       dynamic permissions,
       ) {
     return Card(
-      elevation: 1,
-      color: AppColors.white,
+      elevation: 0,
+      color: Colors.grey[50],
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Column(
@@ -502,34 +687,21 @@ class _MobileProfileScreenState extends State<MobileProfileScreen> {
           children: [
             Row(
               children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryColor.withValues(alpha: 0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    icon,
-                    color: AppColors.primaryColor,
-                    size: 20,
-                  ),
-                ),
+                Icon(icon, color: Theme.of(context).colorScheme.primary),
                 const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 12),
-
             if (permissions is bool)
-              _buildPermissionItem(permissions ? 'Allowed' : 'Denied', permissions)
+              _buildPermissionItem(
+                  permissions ? 'Allowed' : 'Denied', permissions)
             else if (permissions is List<Widget>)
               Wrap(
                 spacing: 8,
@@ -542,196 +714,121 @@ class _MobileProfileScreenState extends State<MobileProfileScreen> {
     );
   }
 
-  Widget _buildPermissionItem(String action, bool hasPermission) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: hasPermission
-            ? Colors.green.withValues(alpha: 0.1)
-            : Colors.red.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: hasPermission ? Colors.green : Colors.red,
-          width: 1,
-        ),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            hasPermission ? Icons.check_circle : Icons.cancel,
-            size: 14,
-            color: hasPermission ? Colors.green : Colors.red,
-          ),
-          const SizedBox(width: 6),
-          Text(
-            action,
-            style: TextStyle(
-              color: hasPermission ? Colors.green : Colors.red,
-              fontWeight: FontWeight.w500,
-              fontSize: 11,
+  void _showSecurityDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Change Password'.tr()),
+          content: SingleChildScrollView(
+            child: Form(
+              key: _passwordFormKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextFormField(
+                    controller: _currentPasswordController,
+                    decoration: InputDecoration(
+                      labelText: 'Current Password'.tr(),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      prefixIcon: const Icon(Icons.lock),
+                    ),
+                    obscureText: true,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter current password'.tr();
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _newPasswordController,
+                    decoration: InputDecoration(
+                      labelText: 'New Password'.tr(),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      prefixIcon: const Icon(Icons.lock_outline),
+                    ),
+                    obscureText: true,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter new password'.tr();
+                      }
+                      if (value.length < 6) {
+                        return 'Password must be at least 6 characters'.tr();
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _confirmPasswordController,
+                    decoration: InputDecoration(
+                      labelText: 'Confirm New Password'.tr(),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      prefixIcon: const Icon(Icons.lock_reset),
+                    ),
+                    obscureText: true,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please confirm new password'.tr();
+                      }
+                      if (value != _newPasswordController.text) {
+                        return 'Passwords do not match'.tr();
+                      }
+                      return null;
+                    },
+                  ),
+                ],
+              ),
             ),
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSecuritySection() {
-    return Card(
-      elevation: 1,
-      color: AppColors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Form(
-          key: _passwordFormKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Change Password',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Update your password to keep your account secure',
-                style: TextStyle(
-                  color: Colors.grey[600],
-                  fontSize: 14,
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              // Password Fields
-              TextFormField(
-                controller: _currentPasswordController,
-                decoration: InputDecoration(
-                  labelText: 'Current Password',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  prefixIcon: const Icon(Icons.lock),
-                  filled: true,
-                  fillColor: Colors.grey[50],
-                ),
-                obscureText: true,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter current password';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-
-              TextFormField(
-                controller: _newPasswordController,
-                decoration: InputDecoration(
-                  labelText: 'New Password',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  prefixIcon: const Icon(Icons.lock_outline),
-                  filled: true,
-                  fillColor: Colors.grey[50],
-                ),
-                obscureText: true,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter new password';
-                  }
-                  if (value.length < 6) {
-                    return 'Password must be at least 6 characters';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-
-              TextFormField(
-                controller: _confirmPasswordController,
-                decoration: InputDecoration(
-                  labelText: 'Confirm New Password',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  prefixIcon: const Icon(Icons.lock_reset),
-                  filled: true,
-                  fillColor: Colors.grey[50],
-                ),
-                obscureText: true,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please confirm new password';
-                  }
-                  if (value != _newPasswordController.text) {
-                    return 'Passwords do not match';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 24),
-
-              BlocBuilder<ProfileBloc, ProfileState>(
-                builder: (context, state) {
-                  return SizedBox(
-                    width: double.infinity,
-                    child: AppButton(
-                      name: state is PasswordChanging
-                          ? "Changing Password..."
-                          : "Change Password",
-                      onPressed: state is PasswordChanging
-                          ? null
-                          : _changePassword,
-                    ),
-                  );
-                },
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildBottomNavigationBar() {
-    return BottomNavigationBar(
-      currentIndex: _currentSection,
-      onTap: (index) {
-        setState(() {
-          _currentSection = index;
-        });
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('Cancel'.tr()),
+            ),
+            BlocBuilder<ProfileBloc, ProfileState>(
+              builder: (context, state) {
+                return ElevatedButton(
+                  onPressed: state is PasswordChanging
+                      ? null
+                      : () {
+                    if (_passwordFormKey.currentState!.validate()) {
+                      _changePassword();
+                      Navigator.pop(context);
+                    }
+                  },
+                  child: state is PasswordChanging
+                      ? const CircularProgressIndicator()
+                      : Text('Change Password'.tr()),
+                );
+              },
+            ),
+          ],
+        );
       },
-      items: const [
-        BottomNavigationBarItem(
-          icon: Icon(Icons.person),
-          label: 'Profile',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.security),
-          label: 'Permissions',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.lock),
-          label: 'Security',
-        ),
-      ],
     );
   }
+
+  // Remaining methods stay the same as before...
+  // (_handleStateChanges, _buildLoadingState, _buildErrorState, _populateFormFields,
+  // _updateProfile, _changePassword, _clearPasswordFields, _showImagePickerOptions,
+  // and all the helper widgets)
 
   void _handleStateChanges(BuildContext context, ProfileState state) {
     if (state is ProfileUpdateSuccess) {
       _loadProfileData();
       showCustomToast(
         context: context,
-        title: 'Success!',
-        description: 'Profile updated successfully',
+        title: 'Success!'.tr(),
+        description: 'Profile updated successfully'.tr(),
         icon: Icons.check_circle,
         primaryColor: Colors.green,
       );
@@ -748,8 +845,8 @@ class _MobileProfileScreenState extends State<MobileProfileScreen> {
       _loadProfileData();
       showCustomToast(
         context: context,
-        title: 'Success!',
-        description: 'Password changed successfully',
+        title: 'Success!'.tr(),
+        description: 'Password changed successfully'.tr(),
         icon: Icons.check_circle,
         primaryColor: Colors.green,
       );
@@ -789,7 +886,7 @@ class _MobileProfileScreenState extends State<MobileProfileScreen> {
             ),
             const SizedBox(height: 16),
             Text(
-              state.title ?? 'Error',
+              state.title ?? 'Error'.tr(),
               style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -799,7 +896,7 @@ class _MobileProfileScreenState extends State<MobileProfileScreen> {
             ),
             const SizedBox(height: 12),
             Text(
-              state.content ?? 'Something went wrong',
+              state.content ?? 'Something went wrong'.tr(),
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 14,
@@ -810,7 +907,7 @@ class _MobileProfileScreenState extends State<MobileProfileScreen> {
             SizedBox(
               width: 200,
               child: AppButton(
-                name: "Try Again",
+                name: "Try Again".tr(),
                 onPressed: onRetry,
               ),
             ),
@@ -890,33 +987,33 @@ class _MobileProfileScreenState extends State<MobileProfileScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-              const Text(
-                'Update Profile Picture',
-                style: TextStyle(
+              Text(
+                'Update Profile Picture'.tr(),
+                style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
                 ),
               ),
               const SizedBox(height: 8),
-              const Text(
-                'Choose an option to update your profile picture',
+              Text(
+                'Choose an option to update your profile picture'.tr(),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 20),
               ListTile(
                 leading: const Icon(Icons.photo_library),
-                title: const Text('Choose from Gallery'),
+                title: Text('Choose from Gallery'.tr()),
                 onTap: () {
                   Navigator.pop(context);
-                  // Implement gallery image picker
+                  // TODO: Implement gallery image picker
                 },
               ),
               ListTile(
                 leading: const Icon(Icons.camera_alt),
-                title: const Text('Take a Photo'),
+                title: Text('Take a Photo'.tr()),
                 onTap: () {
                   Navigator.pop(context);
-                  // Implement camera image picker
+                  // TODO: Implement camera image picker
                 },
               ),
               const SizedBox(height: 20),
@@ -926,4 +1023,230 @@ class _MobileProfileScreenState extends State<MobileProfileScreen> {
       },
     );
   }
+}
+
+Widget _menuItem(
+    IconData icon,
+    String label,
+    Color bg,
+    Color iconColor,
+    BuildContext context,
+    ) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 7),
+    child: Row(
+      children: [
+        Container(
+          width: 42,
+          height: 42,
+          decoration: BoxDecoration(
+            color: bg,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Icon(icon, color: iconColor),
+        ),
+        const SizedBox(width: 13),
+        Expanded(child: Text(label, style: AppTextStyle.body(context))),
+      ],
+    ),
+  );
+}
+
+Widget _iconBox(IconData icon, Color color, Color bg) {
+  return Container(
+    width: 42,
+    height: 42,
+    decoration: BoxDecoration(
+      color: bg,
+      borderRadius: BorderRadius.circular(10),
+    ),
+    child: Icon(icon, color: color),
+  );
+}
+
+Widget _buildPermissionItem(String action, bool hasPermission) {
+  return Container(
+    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+    decoration: BoxDecoration(
+      color: hasPermission
+          ? Colors.green.withOpacity(0.1)
+          : Colors.red.withOpacity(0.1),
+      borderRadius: BorderRadius.circular(16),
+      border: Border.all(
+        color: hasPermission ? Colors.green : Colors.red,
+        width: 1,
+      ),
+    ),
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(
+          hasPermission ? Icons.check_circle : Icons.cancel,
+          size: 14,
+          color: hasPermission ? Colors.green : Colors.red,
+        ),
+        const SizedBox(width: 6),
+        Text(
+          action,
+          style: TextStyle(
+            color: hasPermission ? Colors.green : Colors.red,
+            fontWeight: FontWeight.w500,
+            fontSize: 11,
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+void _showThemeColorBottomSheet(
+    BuildContext context,
+    ThemeCubit themeCubit,
+    Color currentColor,
+    ) {
+  final isDark = Theme.of(context).brightness == Brightness.dark;
+
+  showModalBottomSheet(
+    context: context,
+    backgroundColor: isDark ? const Color(0xFF23272B) : Colors.white,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+    ),
+    builder: (_) {
+      return Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              margin: const EdgeInsets.only(top: 8),
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Choose Theme Color'.tr(),
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 20),
+            Wrap(
+              spacing: 12,
+              runSpacing: 12,
+              children: colors.map((c) {
+                final selected = c['color'].value == currentColor.value;
+                return GestureDetector(
+                  onTap: () async {
+                    themeCubit.setPrimaryColor(c['color']);
+                    await AuthLocalDB.savePrimaryColor(
+                        c['color'].value.toString());
+                    if (!context.mounted) return;
+                    Navigator.pop(context);
+                  },
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 50,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          color: c['color'],
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: selected
+                                ? c['color']
+                                : Colors.grey.shade300,
+                            width: selected ? 3 : 1,
+                          ),
+                        ),
+                        child: selected
+                            ? const Icon(Icons.check, color: Colors.white)
+                            : null,
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        c['name'],
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: selected
+                              ? c['color']
+                              : isDark
+                              ? Colors.white
+                              : Colors.black,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: 20),
+          ],
+        ),
+      );
+    },
+  );
+}
+
+/// LANGUAGE DROPDOWN
+Widget languageDropdown(BuildContext context) {
+  final Map<String, String> languages = {'en': 'English', 'bn': 'বাংলা'};
+
+  final currentCode = context.locale.languageCode;
+
+  return Container(
+    padding: const EdgeInsets.symmetric(vertical: 8),
+    child: Row(
+      children: [
+        Container(
+          width: 42,
+          height: 42,
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.primary.withOpacity(0.11),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(
+            Icons.translate,
+            color: Theme.of(context).colorScheme.primary,
+            size: 18,
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Text("language".tr(), style: AppTextStyle.body(context)),
+        ),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 6),
+          decoration: BoxDecoration(
+            color: AppColors.bottomNavBg(context),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: DropdownButton<String>(
+            value: currentCode,
+            underline: const SizedBox(),
+            dropdownColor: Theme.of(context).cardColor,
+            icon: const Icon(Icons.arrow_drop_down),
+            items: languages.entries.map((entry) {
+              return DropdownMenuItem(
+                value: entry.key,
+                child: Text(entry.value, style: AppTextStyle.body(context)),
+              );
+            }).toList(),
+            onChanged: (value) async {
+              if (value != null) {
+                context.setLocale(Locale(value));
+                await AuthLocalDB.saveLanguage(value);
+              }
+            },
+          ),
+        ),
+      ],
+    ),
+  );
 }

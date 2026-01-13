@@ -69,7 +69,7 @@ class _ExpenseHeadScreenState extends State<MobileExpenseHeadScreen> {
       xl: 10,
       child: SizedBox(
         child: RefreshIndicator(
-          color: AppColors.primaryColor,
+          color: AppColors.primaryColor(context),
           onRefresh: () async {
             _fetchApiData();
           },
@@ -163,7 +163,7 @@ class _ExpenseHeadScreenState extends State<MobileExpenseHeadScreen> {
                 ),
               ),
               IconButton(
-                icon: Icon(Iconsax.filter, color: AppColors.primaryColor),
+                icon: Icon(Iconsax.filter, color: AppColors.primaryColor(context)),
                 onPressed: () => _showMobileFilterOptions(context),
               ),
             ],

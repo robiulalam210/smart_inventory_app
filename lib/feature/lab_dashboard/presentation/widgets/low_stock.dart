@@ -18,7 +18,7 @@ Widget lowStock(BuildContext context, List<Product>? lowStockProducts) {
           headingRowColor: WidgetStateProperty.resolveWith(
                   (states) => Colors.orangeAccent.shade200),
           headingTextStyle: AppTextStyle.cardTitle(context)
-              .copyWith(color: AppColors.whiteColor),
+              .copyWith(color: AppColors.whiteColor(context)),
           columns: const <DataColumn>[
             DataColumn(label: Text('Product Name')),
             DataColumn(label: Text('Quantity')),
@@ -82,7 +82,7 @@ Widget customer(
       headingRowColor: WidgetStateProperty.resolveWith(
               (states) => Colors.orangeAccent.shade200),
       headingTextStyle: AppTextStyle.cardTitle(context)
-          .copyWith(color: AppColors.whiteColor),
+          .copyWith(color: AppColors.whiteColor(context)),
       columns: <DataColumn>[
         DataColumn(label: Text('$itemName Name', )),
         const DataColumn(

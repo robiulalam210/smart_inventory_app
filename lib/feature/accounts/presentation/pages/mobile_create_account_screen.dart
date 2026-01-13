@@ -51,7 +51,7 @@ class _MobileCreateAccountScreenState
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.whiteColor,
+        color: AppColors.whiteColor(context),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Padding(
@@ -74,10 +74,10 @@ class _MobileCreateAccountScreenState
                       widget.id.isEmpty
                           ? "Create Account"
                           : "Update Account",
-                      style: const TextStyle(
+                      style:  TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: AppColors.primaryColor,
+                        color: AppColors.primaryColor(context),
                       ),
                     ),
                     IconButton(

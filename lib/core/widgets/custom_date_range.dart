@@ -23,7 +23,7 @@ class CustomDateRange extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
         decoration: BoxDecoration(
-          color: date != null ? AppColors.primaryColor.withValues(alpha: 0.05) : Colors.grey[200],
+          color: date != null ? AppColors.primaryColor(context).withValues(alpha: 0.05) : Colors.grey[200],
           borderRadius: BorderRadius.circular(5),
           border: Border.all(color: const Color.fromARGB(24, 7, 51, 96), width: 0.5),
         ),
@@ -31,7 +31,7 @@ class CustomDateRange extends StatelessWidget {
           date != null ? DateFormat('yyyy-MM-dd').format(date!) : label,
           style: TextStyle(
               fontFamily: GoogleFonts.playfairDisplay().fontFamily,
-              color: date != null ? AppColors.primaryColor : Colors.grey),
+              color: date != null ? AppColors.primaryColor(context) : Colors.grey),
         ),
       ),
     );

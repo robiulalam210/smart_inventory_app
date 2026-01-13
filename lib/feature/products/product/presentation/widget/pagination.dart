@@ -77,7 +77,7 @@ class PaginationBar extends StatelessWidget {
                 context,
                 availablePageSizes,
               )
-                  : _buildPageSizeOnly(availablePageSizes),
+                  : _buildPageSizeOnly(context ,availablePageSizes),
             ),
           ),
         ],
@@ -99,7 +99,7 @@ class PaginationBar extends StatelessWidget {
         ),
         const SizedBox(width: 8),
 
-        _pageSizeDropdown(availablePageSizes),
+        _pageSizeDropdown(context ,availablePageSizes),
 
         const SizedBox(width: 12),
 
@@ -123,7 +123,7 @@ class PaginationBar extends StatelessWidget {
 
   // ================= PAGE SIZE ONLY =================
 
-  Widget _buildPageSizeOnly(List<int> availablePageSizes) {
+  Widget _buildPageSizeOnly(BuildContext context ,List<int> availablePageSizes) {
     return Row(
       children: [
         const Text(
@@ -131,29 +131,29 @@ class PaginationBar extends StatelessWidget {
           style: TextStyle(fontSize: 14, color: Colors.grey),
         ),
         const SizedBox(width: 8),
-        _pageSizeDropdown(availablePageSizes),
+        _pageSizeDropdown(context ,availablePageSizes),
       ],
     );
   }
 
   // ================= DROPDOWN =================
 
-  Widget _pageSizeDropdown(List<int> availablePageSizes) {
+  Widget _pageSizeDropdown(BuildContext context ,List<int> availablePageSizes) {
     return Container(
       height: 35,
       padding: const EdgeInsets.symmetric(horizontal: 8),
       decoration: BoxDecoration(
-        color: AppColors.bg,
+        color: AppColors.bottomNavBg(context),
         border: Border.all(color: Colors.grey.shade300),
         borderRadius: BorderRadius.circular(4),
       ),
       child: DropdownButton<int>(
         value: pageSize,
         underline: const SizedBox(),
-        icon: const Icon(
+        icon:  Icon(
           Icons.arrow_drop_down,
           size: 20,
-          color: AppColors.primaryColor,
+          color: AppColors.primaryColor(context),
         ),
         style: const TextStyle(fontSize: 14, color: Colors.black),
         onChanged: (value) {
@@ -164,7 +164,7 @@ class PaginationBar extends StatelessWidget {
             value: value,
             child: Text(
               value.toString(),
-              style: const TextStyle(color: AppColors.primaryColor),
+              style:  TextStyle(color: AppColors.primaryColor(context)),
             ),
           );
         }).toList(),
@@ -193,21 +193,21 @@ class PaginationBar extends StatelessWidget {
     }
 
     if (startPage > 1) {
-      pages.add(_pageButton(1));
+      pages.add(_pageButton(context ,1));
       if (startPage > 2) {
         pages.add(const Text('...', style: TextStyle(color: Colors.grey)));
       }
     }
 
     for (int i = startPage; i <= endPage; i++) {
-      pages.add(_pageButton(i));
+      pages.add(_pageButton(context ,i));
     }
 
     if (endPage < totalPages) {
       if (endPage < totalPages - 1) {
         pages.add(const Text('...', style: TextStyle(color: Colors.grey)));
       }
-      pages.add(_pageButton(totalPages));
+      pages.add(_pageButton(context ,totalPages));
     }
 
     return pages;
@@ -215,7 +215,7 @@ class PaginationBar extends StatelessWidget {
 
   // ================= PAGE BUTTON =================
 
-  Widget _pageButton(int page) {
+  Widget _pageButton(BuildContext context ,int page) {
     final bool isActive = page == currentPage;
 
     return Container(
@@ -225,12 +225,12 @@ class PaginationBar extends StatelessWidget {
         style: TextButton.styleFrom(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           backgroundColor:
-          isActive ? AppColors.primaryColor : Colors.transparent,
+          isActive ? AppColors.primaryColor(context) : Colors.transparent,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(4),
             side: BorderSide(
               color: isActive
-                  ? AppColors.primaryColor
+                  ? AppColors.primaryColor(context)
                   : Colors.grey.shade300,
             ),
           ),

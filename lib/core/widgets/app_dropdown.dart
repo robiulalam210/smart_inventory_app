@@ -69,7 +69,7 @@ class AppDropdown<T> extends FormField<T> {
               child: Container(
                 padding: EdgeInsets.all(5),
                 decoration: BoxDecoration(
-                  color: AppColors.whiteColor,
+                  color: AppColors.whiteColor(context),
                   border: Border.all(
                     color: state.hasError
                         ? AppColors.error.withValues(alpha: 0.7)
@@ -87,7 +87,7 @@ class AppDropdown<T> extends FormField<T> {
                   itemsListPadding: EdgeInsets.symmetric(
                       horizontal: 8, vertical: 4),
                   decoration: CustomDropdownDecoration(
-                    closedFillColor: AppColors.whiteColor,
+                    closedFillColor: AppColors.whiteColor(context),
                     expandedBorderRadius: BorderRadius.circular(2),
                     searchFieldDecoration: SearchFieldDecoration(
                       hintStyle: AppTextStyle.cardLevelHead(context),
@@ -97,7 +97,7 @@ class AppDropdown<T> extends FormField<T> {
                     AppTextStyle.cardLevelText(context),
                     headerStyle: AppTextStyle.cardLevelText(context),
                     hintStyle: TextStyle(
-                      color: AppColors.matteBlack,
+                      color:  AppColors.text(context),
                       fontWeight: FontWeight.w300,
                       fontSize: 14,
                     ),
@@ -138,7 +138,7 @@ class AppDropdown<T> extends FormField<T> {
                   itemsListPadding: EdgeInsets.symmetric(
                       horizontal: 8, vertical: 4),
                   decoration: CustomDropdownDecoration(
-                    closedFillColor: AppColors.whiteColor,
+                    closedFillColor: AppColors.whiteColor(context),
                     expandedBorderRadius: BorderRadius.circular(2),
                     searchFieldDecoration: SearchFieldDecoration(
                       hintStyle: AppTextStyle.cardLevelHead(context),
@@ -148,7 +148,7 @@ class AppDropdown<T> extends FormField<T> {
                     AppTextStyle.cardLevelText(context),
                     headerStyle: AppTextStyle.cardLevelText(context),
                     hintStyle: TextStyle(
-                      color: AppColors.matteBlack,
+                      color:  AppColors.text(context),
                       fontWeight: FontWeight.w300,
                       fontSize: 14,
                     ),

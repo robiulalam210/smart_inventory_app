@@ -226,7 +226,7 @@ class _ExpenseCreateScreenState extends State<ExpenseCreateScreen> {
             width: MediaQuery.of(context).size.width,
             decoration: BoxDecoration(
               shape: BoxShape.rectangle,
-              color: AppColors.whiteColor,
+              color: AppColors.whiteColor(context),
               borderRadius: BorderRadius.circular(AppSizes.borderRadiusSize),
             ),
             padding: AppTextStyle.getResponsivePaddingBody(context),
@@ -318,8 +318,8 @@ class _ExpenseCreateScreenState extends State<ExpenseCreateScreen> {
                                             value: item,
                                             child: Text(
                                               item.name ?? 'Unnamed Head',
-                                              style: const TextStyle(
-                                                color: AppColors.blackColor,
+                                              style:  TextStyle(
+                                                color:AppColors.blackColor(context),
                                                 fontFamily: 'Quicksand',
                                                 fontWeight: FontWeight.w300,
                                               ),
@@ -367,8 +367,8 @@ class _ExpenseCreateScreenState extends State<ExpenseCreateScreen> {
                                             value: item,
                                             child: Text(
                                               item.name ?? 'Unnamed Sub Head',
-                                              style: const TextStyle(
-                                                color: AppColors.blackColor,
+                                              style:  TextStyle(
+                                                color:AppColors.blackColor(context),
                                                 fontFamily: 'Quicksand',
                                                 fontWeight: FontWeight.w300,
                                               ),
@@ -415,8 +415,8 @@ class _ExpenseCreateScreenState extends State<ExpenseCreateScreen> {
                                           value: item,
                                           child: Text(
                                             item.toString(),
-                                            style: const TextStyle(
-                                              color: AppColors.blackColor,
+                                            style:  TextStyle(
+                                              color:AppColors.blackColor(context),
                                               fontFamily: 'Quicksand',
                                               fontWeight: FontWeight.w300,
                                             ),
@@ -488,8 +488,8 @@ class _ExpenseCreateScreenState extends State<ExpenseCreateScreen> {
                                                 value: item,
                                                 child: Text(
                                                   item.toString(),
-                                                  style: const TextStyle(
-                                                    color: AppColors.blackColor,
+                                                  style:  TextStyle(
+                                                    color:AppColors.blackColor(context),
                                                     fontFamily: 'Quicksand',
                                                     fontWeight: FontWeight.w300,
                                                   ),

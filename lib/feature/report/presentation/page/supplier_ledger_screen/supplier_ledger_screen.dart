@@ -58,7 +58,7 @@ class _SupplierLedgerScreenState extends State<SupplierLedgerScreen> {
     final isBigScreen = Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
 
     return Container(
-      color: AppColors.bg,
+      color: AppColors.bottomNavBg(context),
       child: SafeArea(
         child: ResponsiveRow(
           children: [
@@ -225,7 +225,7 @@ class _SupplierLedgerScreenState extends State<SupplierLedgerScreen> {
                       child: Text(
                         item.name ?? 'Unknown Supplier',
                         style: TextStyle(
-                          color: isAllOption ? AppColors.primaryColor : AppColors.blackColor,
+                          color: isAllOption ? AppColors.primaryColor(context) :AppColors.blackColor(context),
                           fontFamily: 'Quicksand',
                           fontWeight: isAllOption ? FontWeight.bold : FontWeight.w300,
                         ),
@@ -382,7 +382,7 @@ class _SupplierLedgerScreenState extends State<SupplierLedgerScreen> {
                             pdfPreviewPageDecoration:
                             BoxDecoration(color: AppColors.white),
                             actionBarTheme: PdfActionBarTheme(
-                              backgroundColor: AppColors.primaryColor,
+                              backgroundColor: AppColors.primaryColor(context),
                               iconColor: Colors.white,
                               textStyle: const TextStyle(color: Colors.white),
                             ),
@@ -624,7 +624,7 @@ class SupplierLedgerTableCard extends StatelessWidget {
                             fontFamily: GoogleFonts.inter().fontFamily,
                           ),
                           headingRowColor: WidgetStateProperty.all(
-                            AppColors.primaryColor,
+                            AppColors.primaryColor(context),
                           ),
                           dataTextStyle: TextStyle(
                             fontSize: 10,

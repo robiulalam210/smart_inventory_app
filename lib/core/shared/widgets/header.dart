@@ -30,7 +30,7 @@ class _HeaderState extends State<Header> {
               ? AppSizes.paddingInside / 2
               : AppSizes.paddingInside),
       decoration: BoxDecoration(
-        color: AppColors.bgSecondaryLight,
+        color: AppColors.bottomNavBg(context),
       ),
       child: SafeArea(
         bottom: false,
@@ -46,7 +46,7 @@ class _HeaderState extends State<Header> {
                   AppConstants.appName,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w600,
-                        color: AppColors.primaryColor,
+                        color: AppColors.primaryColor(context),
                       ),
                   overflow: TextOverflow.ellipsis,
                 ),

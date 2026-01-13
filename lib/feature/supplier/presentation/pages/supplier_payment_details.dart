@@ -14,7 +14,7 @@ class SupplierPaymentDetailsScreen extends StatelessWidget {
     final isDesktop = MediaQuery.of(context).size.width > 768;
 
     return Scaffold(
-      backgroundColor: AppColors.bg,
+      backgroundColor: AppColors.bottomNavBg(context),
       appBar: AppBar(
         title: Text('Supplier Payment - ${payment.spNo}'),
         actions: [
@@ -25,11 +25,11 @@ class SupplierPaymentDetailsScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: isDesktop ? _buildDesktopView() : _buildMobileView(),
+      body: isDesktop ? _buildDesktopView(context) : _buildMobileView(context,),
     );
   }
 
-  Widget _buildDesktopView() {
+  Widget _buildDesktopView(BuildContext context,) {
     return Padding(
       padding: const EdgeInsets.all(24),
       child: Row(
@@ -40,9 +40,9 @@ class SupplierPaymentDetailsScreen extends StatelessWidget {
             flex: 2,
             child: Column(
               children: [
-                _buildHeaderCard(),
+                _buildHeaderCard(context),
                 const SizedBox(height: 16),
-                _buildPaymentInfoCard(),
+                _buildPaymentInfoCard(context,),
               ],
             ),
           ),
@@ -52,9 +52,9 @@ class SupplierPaymentDetailsScreen extends StatelessWidget {
             flex: 1,
             child: Column(
               children: [
-                _buildSummaryCard(),
+                _buildSummaryCard(context,),
                 const SizedBox(height: 16),
-                _buildAffectedInvoicesCard(),
+                _buildAffectedInvoicesCard(context,),
               ],
             ),
           ),
@@ -63,24 +63,24 @@ class SupplierPaymentDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMobileView() {
+  Widget _buildMobileView(BuildContext context,) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
-          _buildHeaderCard(),
+          _buildHeaderCard(context,),
           const SizedBox(height: 16),
-          _buildPaymentInfoCard(),
+          _buildPaymentInfoCard(context,),
           const SizedBox(height: 16),
-          _buildSummaryCard(),
+          _buildSummaryCard(context,),
           const SizedBox(height: 16),
-          _buildAffectedInvoicesCard(),
+          _buildAffectedInvoicesCard(context,),
         ],
       ),
     );
   }
 
-  Widget _buildHeaderCard() {
+  Widget _buildHeaderCard(BuildContext context,) {
     return Card(
       elevation: 3,
       child: Padding(
@@ -94,10 +94,10 @@ class SupplierPaymentDetailsScreen extends StatelessWidget {
                 Expanded(
                   child: Text(
                     'Supplier Payment: ${payment.spNo}',
-                    style: const TextStyle(
+                    style:  TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
-                      color: AppColors.primaryColor,
+                      color: AppColors.primaryColor(context),
                     ),
                   ),
                 ),
@@ -177,7 +177,7 @@ class SupplierPaymentDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildPaymentInfoCard() {
+  Widget _buildPaymentInfoCard(BuildContext context,) {
     final amount = double.tryParse(payment.amount ?? '0') ?? 0;
 
     return Card(
@@ -195,14 +195,14 @@ class SupplierPaymentDetailsScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            _buildPaymentDetails(amount),
+            _buildPaymentDetails(context,amount),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildPaymentDetails(double amount) {
+  Widget _buildPaymentDetails(BuildContext context,double amount) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -212,26 +212,26 @@ class SupplierPaymentDetailsScreen extends StatelessWidget {
       ),
       child: Column(
         children: [
-          _buildPaymentRow('Amount Paid', '৳${amount.toStringAsFixed(2)}', isAmount: true),
+          _buildPaymentRow(context,'Amount Paid', '৳${amount.toStringAsFixed(2)}', isAmount: true),
           const SizedBox(height: 8),
-          _buildPaymentRow('Payment Method', payment.paymentMethod ?? '-'),
-          _buildPaymentRow('Payment Type', payment.paymentType ?? '-'),
+          _buildPaymentRow(context,'Payment Method', payment.paymentMethod ?? '-'),
+          _buildPaymentRow(context,'Payment Type', payment.paymentType ?? '-'),
           if (payment.paymentDate != null)
-            _buildPaymentRow('Payment Date', _formatDate(payment.paymentDate)),
+            _buildPaymentRow(context,'Payment Date', _formatDate(payment.paymentDate)),
           if (payment.chequeNo != null)
-            _buildPaymentRow('Cheque No', payment.chequeNo!),
+            _buildPaymentRow(context,'Cheque No', payment.chequeNo!),
           if (payment.chequeDate != null)
-            _buildPaymentRow('Cheque Date', _formatDate(payment.chequeDate)),
+            _buildPaymentRow(context,'Cheque Date', _formatDate(payment.chequeDate)),
           if (payment.bankName != null)
-            _buildPaymentRow('Bank Name', payment.bankName!),
+            _buildPaymentRow(context,'Bank Name', payment.bankName!),
           if (payment.remark != null && payment.remark!.isNotEmpty)
-            _buildPaymentRow('Remarks', payment.remark!),
+            _buildPaymentRow(context,'Remarks', payment.remark!),
         ],
       ),
     );
   }
 
-  Widget _buildPaymentRow(String label, String value, {bool isAmount = false}) {
+  Widget _buildPaymentRow(BuildContext context,String label, String value, {bool isAmount = false}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -247,14 +247,14 @@ class SupplierPaymentDetailsScreen extends StatelessWidget {
           style: TextStyle(
             fontWeight: isAmount ? FontWeight.bold : FontWeight.normal,
             fontSize: isAmount ? 16 : 14,
-            color: isAmount ? AppColors.primaryColor : Colors.black,
+            color: isAmount ? AppColors.primaryColor(context) : Colors.black,
           ),
         ),
       ],
     );
   }
 
-  Widget _buildSummaryCard() {
+  Widget _buildSummaryCard(BuildContext context,) {
     final summary = payment.paymentSummary;
     final before = summary?.beforePayment;
     final after = summary?.afterPayment;
@@ -274,15 +274,15 @@ class SupplierPaymentDetailsScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            if (before != null) _buildSummarySection('Before Payment', before),
-            if (after != null) _buildSummarySection('After Payment', after),
+            if (before != null) _buildSummarySection(context,'Before Payment', before),
+            if (after != null) _buildSummarySection(context,'After Payment', after),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildSummarySection(String title, dynamic paymentData) {
+  Widget _buildSummarySection(BuildContext context,String title, dynamic paymentData) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(12),
@@ -295,9 +295,9 @@ class SupplierPaymentDetailsScreen extends StatelessWidget {
         children: [
           Text(
             title,
-            style: const TextStyle(
+            style:  TextStyle(
               fontWeight: FontWeight.bold,
-              color: AppColors.primaryColor,
+              color: AppColors.primaryColor(context),
             ),
           ),
           const SizedBox(height: 8),
@@ -335,7 +335,7 @@ class SupplierPaymentDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildAffectedInvoicesCard() {
+  Widget _buildAffectedInvoicesCard(BuildContext context,) {
     final affectedInvoices = payment.paymentSummary?.affectedInvoices ?? [];
 
     return Card(
@@ -361,14 +361,14 @@ class SupplierPaymentDetailsScreen extends StatelessWidget {
                 ),
               ),
             if (affectedInvoices.isNotEmpty)
-              ...affectedInvoices.map((invoice) => _buildInvoiceRow(invoice)),
+              ...affectedInvoices.map((invoice) => _buildInvoiceRow(context,invoice)),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildInvoiceRow(AffectedInvoice invoice) {
+  Widget _buildInvoiceRow(BuildContext context,AffectedInvoice invoice) {
     final amount = double.tryParse(invoice.amountApplied?.toString() ?? '0') ?? 0;
 
     return Container(
@@ -389,9 +389,9 @@ class SupplierPaymentDetailsScreen extends StatelessWidget {
           ),
           Text(
             '৳${amount.toStringAsFixed(2)}',
-            style: const TextStyle(
+            style:  TextStyle(
               fontWeight: FontWeight.bold,
-              color: AppColors.primaryColor,
+              color: AppColors.primaryColor(context),
             ),
           ),
         ],
@@ -439,7 +439,7 @@ class SupplierPaymentDetailsScreen extends StatelessWidget {
           backgroundColor: Colors.white,
           appBar: AppBar(
             title: const Text('Supplier Payment Receipt'),
-            backgroundColor: AppColors.primaryColor,
+            backgroundColor: AppColors.primaryColor(context),
             foregroundColor: Colors.white,
           ),
           body: PdfPreview(
@@ -452,7 +452,7 @@ class SupplierPaymentDetailsScreen extends StatelessWidget {
             build: (format) => generateSupplierPaymentPdf(payment),
             pdfPreviewPageDecoration: BoxDecoration(color: AppColors.white),
             actionBarTheme: PdfActionBarTheme(
-              backgroundColor: AppColors.primaryColor,
+              backgroundColor: AppColors.primaryColor(context),
               iconColor: Colors.white,
               textStyle: const TextStyle(color: Colors.white),
             ),

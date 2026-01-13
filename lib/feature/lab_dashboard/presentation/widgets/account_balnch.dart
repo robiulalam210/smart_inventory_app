@@ -15,7 +15,7 @@ class AccountCardDashbord extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 5),
       decoration: BoxDecoration(
-          color: AppColors.whiteColor,
+          color: AppColors.whiteColor(context),
           borderRadius: BorderRadius.circular(10),
         border: Border.all(color: Colors.grey.shade200,width: 0.5)
         ),

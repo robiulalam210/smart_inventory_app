@@ -513,8 +513,8 @@ class _SalesScreenState extends State<MobileSalesScreen> {
                       value: item,
                       child: Text(
                         item.toString(),
-                        style: const TextStyle(
-                          color: AppColors.blackColor,
+                        style:  TextStyle(
+                          color:AppColors.blackColor(context),
                           fontFamily: 'Quicksand',
                           fontWeight: FontWeight.w300,
                         ),
@@ -547,8 +547,8 @@ class _SalesScreenState extends State<MobileSalesScreen> {
                       value: item,
                       child: Text(
                         item.toString(),
-                        style: const TextStyle(
-                          color: AppColors.blackColor,
+                        style:  TextStyle(
+                          color:AppColors.blackColor(context),
                           fontFamily: 'Quicksand',
                           fontWeight: FontWeight.w300,
                         ),
@@ -572,7 +572,7 @@ class _SalesScreenState extends State<MobileSalesScreen> {
                 keyboardType: TextInputType.datetime,
                 autofillHints: AutofillHints.name,
                 bottom: 15.0,
-                fillColor: AppColors.whiteColor,
+                fillColor: AppColors.whiteColor(context),
                 validator: (value) =>
                 value!.isEmpty ? 'Please enter date' : null,
                 onTap: _selectDate,
@@ -955,8 +955,8 @@ class _SalesScreenState extends State<MobileSalesScreen> {
                   groupValue: selectedType,
                   onValueChanged: onTypeChanged,
                   unselectedColor: Colors.grey[300],
-                  selectedColor: AppColors.primaryColor,
-                  borderColor: AppColors.primaryColor,
+                  selectedColor: AppColors.primaryColor(context),
+                  borderColor: AppColors.primaryColor(context),
                 ),
               ),
               const SizedBox(width: 8),
@@ -1370,7 +1370,7 @@ class _SalesScreenState extends State<MobileSalesScreen> {
               style: isBold
                   ? AppTextStyle.cardLevelText(context).copyWith(
                 fontWeight: FontWeight.bold,
-                color: AppColors.primaryColor,
+                color: AppColors.primaryColor(context),
               )
                   : AppTextStyle.cardLevelText(context),
               textAlign: TextAlign.right,
@@ -1779,9 +1779,9 @@ class _SalesScreenState extends State<MobileSalesScreen> {
                           ),
                         ),
                       ),
-                      const Icon(
+                       Icon(
                         Icons.add_circle_outline,
-                        color: AppColors.primaryColor,
+                        color: AppColors.primaryColor(context),
                       ),
                     ],
                   ),
@@ -2030,9 +2030,9 @@ class _SalesScreenState extends State<MobileSalesScreen> {
       autofocus: true,
       onKey: _handleKey,
       child: Scaffold(
-        backgroundColor: AppColors.bg,
+        backgroundColor: AppColors.bottomNavBg(context),
         appBar: AppBar(
-          backgroundColor: AppColors.bg,
+          backgroundColor: AppColors.bottomNavBg(context),
           title: Text('Pos Sale', style: AppTextStyle.titleMedium(context)),
           actions: [
             IconButton(

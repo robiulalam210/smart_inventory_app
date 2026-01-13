@@ -116,8 +116,7 @@ class _RootScreenState extends State<MobileRootScreen> {
         },
         groupValue: selectedPurchaseOverviewType,
         unselectedColor: Colors.white54,
-        selectedColor: AppColors.primaryColor,
-        borderColor: AppColors.primaryColor,
+        borderColor: AppColors.primaryColor(context),
       ),
     );
   }
@@ -384,7 +383,7 @@ class _RootScreenState extends State<MobileRootScreen> {
 
       // AppBar only for smaller screens
       appBar: AppBar(
-        backgroundColor: AppColors.bgSecondaryLight,
+        backgroundColor: AppColors.bottomNavBg(context),
         leading: IconButton(
           icon: const Icon(Icons.menu),
           onPressed: () {
@@ -409,7 +408,7 @@ class _RootScreenState extends State<MobileRootScreen> {
                   AppConstants.appName,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w600,
-                    color: AppColors.primaryColor,
+                    color: AppColors.primaryColor(context),
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),

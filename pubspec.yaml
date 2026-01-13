@@ -72,6 +72,8 @@ dependencies:
   dio: ^5.9.0
   date_format: ^2.0.9
   init: ^1.0.0
+  flutter_secure_storage: ^10.0.0
+  easy_localization: ^3.0.8
 
 
 dev_dependencies:
@@ -87,6 +89,7 @@ flutter:
     - assets/images/
     - assets/jsons/
     - assets/icons/
+    - assets/translations/
     - .env
 
   fonts:

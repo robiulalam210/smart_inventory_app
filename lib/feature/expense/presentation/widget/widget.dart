@@ -81,7 +81,7 @@ class ExpenseTableCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color: AppColors.primaryColor.withValues(alpha: 0.05),
+              color: AppColors.primaryColor(context).withValues(alpha: 0.05),
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(16),
                 topRight: Radius.circular(16),
@@ -98,7 +98,7 @@ class ExpenseTableCard extends StatelessWidget {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: AppColors.primaryColor,
+                        color: AppColors.primaryColor(context),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
@@ -414,7 +414,7 @@ class ExpenseTableCard extends StatelessWidget {
                           fontWeight: FontWeight.w700,
                         ),
                         headingRowColor: WidgetStateProperty.all(
-                          AppColors.primaryColor,
+                          AppColors.primaryColor(context),
                         ),
                         dataTextStyle: const TextStyle(
                           fontSize: 11,
@@ -678,7 +678,7 @@ class ExpenseTableCard extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: AppColors.primaryColor,
+                      color: AppColors.primaryColor(context),
                     ),
                   ),
                   const SizedBox(height: 20),

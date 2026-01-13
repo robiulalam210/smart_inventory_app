@@ -80,7 +80,7 @@ class ExpenseHeadTableCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color: AppColors.primaryColor.withValues(alpha: 0.05),
+              color: AppColors.primaryColor(context).withValues(alpha: 0.05),
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(16),
                 topRight: Radius.circular(16),
@@ -97,7 +97,7 @@ class ExpenseHeadTableCard extends StatelessWidget {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: AppColors.primaryColor,
+                        color: AppColors.primaryColor(context),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(

@@ -20,7 +20,7 @@ class _CreateCustomerScreenState extends State<CreateCustomerScreen> {
         Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.bg,
+        color: AppColors.bottomNavBg(context),
         borderRadius: BorderRadius.circular(AppSizes.bodyPadding),
       ),
       child: SafeArea(
@@ -35,7 +35,7 @@ class _CreateCustomerScreenState extends State<CreateCustomerScreen> {
       width: MediaQuery.of(context).size.width,
       decoration: BoxDecoration(
         shape: BoxShape.rectangle,
-        color: AppColors.bg,
+        color: AppColors.bottomNavBg(context),
         borderRadius: BorderRadius.circular(AppSizes.borderRadiusSize),
       ),
       child: Padding(
@@ -50,7 +50,7 @@ class _CreateCustomerScreenState extends State<CreateCustomerScreen> {
                 Container(
                   padding: const EdgeInsets.all(4),
                   decoration: BoxDecoration(
-                    color: AppColors.whiteColor,
+                    color: AppColors.whiteColor(context),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
@@ -234,8 +234,8 @@ class _CreateCustomerScreenState extends State<CreateCustomerScreen> {
               value: item,
               child: Text(
                 item.toString(),
-                style: const TextStyle(
-                  color: AppColors.blackColor,
+                style:  TextStyle(
+                  color:AppColors.blackColor(context),
                   fontFamily: 'Quicksand',
                   fontWeight: FontWeight.w600,
                 ),

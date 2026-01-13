@@ -121,7 +121,7 @@ class _PosSaleScreenState extends State<PosSaleScreen> {
         Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
 
     return Container(
-      color: AppColors.bg,
+      color: AppColors.bottomNavBg(context),
       child: SafeArea(
         child: ResponsiveRow(
           children: [
@@ -148,7 +148,7 @@ class _PosSaleScreenState extends State<PosSaleScreen> {
       lg: 10,
       child: RefreshIndicator(
         onRefresh: () async => _fetchApi(),
-        color: AppColors.primaryColor,
+        color: AppColors.primaryColor(context),
         child: Container(
           padding: AppTextStyle.getResponsivePaddingBody(context),
           child: MultiBlocListener(
@@ -250,8 +250,8 @@ class _PosSaleScreenState extends State<PosSaleScreen> {
                               value: item,
                               child: Text(
                                 item.name ?? 'Unknown Customer',
-                                style: const TextStyle(
-                                  color: AppColors.blackColor,
+                                style:  TextStyle(
+                                  color:AppColors.blackColor(context),
                                   fontFamily: 'Quicksand',
                                   fontWeight: FontWeight.w300,
                                 ),
@@ -296,8 +296,8 @@ class _PosSaleScreenState extends State<PosSaleScreen> {
                           value: item,
                           child: Text(
                             item.username ?? 'Unknown Seller',
-                            style: const TextStyle(
-                              color: AppColors.blackColor,
+                            style:  TextStyle(
+                              color:AppColors.blackColor(context),
                               fontFamily: 'Quicksand',
                               fontWeight: FontWeight.w300,
                             ),
@@ -331,7 +331,7 @@ class _PosSaleScreenState extends State<PosSaleScreen> {
 
             IconButton(
               onPressed: () => _clearFilters,
-              icon:  Icon(HugeIcons.strokeRoundedCancelCircle,color: AppColors.redAccent,),
+              icon:  Icon(HugeIcons.strokeRoundedCancelCircle,color: AppColors.errorColor(context),),
               tooltip: "Cancel",
             ),   IconButton(
               onPressed: () => _fetchApi(),

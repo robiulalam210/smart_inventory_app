@@ -51,7 +51,7 @@ class _MobileSplashScreenState extends State<MobileSplashScreen>
     );
 
     return Scaffold(
-      backgroundColor: AppColors.whiteColor,
+      backgroundColor: AppColors.whiteColor(context),
       body: BlocListener<SplashBloc, SplashState>(
         listener: (context, state) {
           // Maintenance: block UI
@@ -128,7 +128,7 @@ class _MobileSplashScreenState extends State<MobileSplashScreen>
           }
         },
         child: Container(
-          decoration: BoxDecoration(gradient: AppColors.primaryGradient),
+          decoration: BoxDecoration(gradient: AppColors.primaryGradient(context)),
           child: Stack(
             fit: StackFit.expand,
             children: [

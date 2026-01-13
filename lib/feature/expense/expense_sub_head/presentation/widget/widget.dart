@@ -99,7 +99,7 @@ class ExpenseSubHeadTableCard extends StatelessWidget {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: AppColors.primaryColor,
+                          color: AppColors.primaryColor(context),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
@@ -365,7 +365,7 @@ class ExpenseSubHeadTableCard extends StatelessWidget {
                             fontFamily: GoogleFonts.inter().fontFamily,
                           ),
                           headingRowColor: WidgetStateProperty.all(
-                            AppColors.primaryColor,
+                            AppColors.primaryColor(context),
                           ),
                           dataTextStyle: TextStyle(
                             fontSize: 11,

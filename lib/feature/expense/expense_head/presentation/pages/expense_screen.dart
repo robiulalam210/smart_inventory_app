@@ -51,7 +51,7 @@ class _ExpenseHeadScreenState extends State<ExpenseHeadScreen> {
     final isBigScreen =
         Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
     return Container(
-      color: AppColors.bg,
+      color: AppColors.bottomNavBg(context),
       child: SafeArea(
         child: ResponsiveRow(
           spacing: 0,
@@ -88,7 +88,7 @@ class _ExpenseHeadScreenState extends State<ExpenseHeadScreen> {
       xl: 10,
       child: SizedBox(
         child: RefreshIndicator(
-          color: AppColors.primaryColor,
+          color: AppColors.primaryColor(context),
           onRefresh: () async {
             _fetchApiData();
           },

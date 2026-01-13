@@ -18,7 +18,7 @@ class _CreateSupplierScreenState extends State<CreateSupplierScreen> {
         Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.bg,
+        color: AppColors.bottomNavBg(context),
 
         borderRadius: BorderRadius.circular(AppSizes.bodyPadding),
 
@@ -51,7 +51,7 @@ class _CreateSupplierScreenState extends State<CreateSupplierScreen> {
         width: MediaQuery.of(context).size.width,
         decoration: BoxDecoration(
           shape: BoxShape.rectangle,
-          color: AppColors.bg,
+          color: AppColors.bottomNavBg(context),
           borderRadius: BorderRadius.circular(AppSizes.borderRadiusSize),
         ),
         child: SingleChildScrollView(
@@ -67,7 +67,7 @@ class _CreateSupplierScreenState extends State<CreateSupplierScreen> {
                   Container(
                     padding: const EdgeInsets.all(4),
                     decoration: BoxDecoration(
-                      color: AppColors.whiteColor,
+                      color: AppColors.whiteColor(context),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Row(
@@ -173,8 +173,8 @@ class _CreateSupplierScreenState extends State<CreateSupplierScreen> {
                       value: item,
                       child: Text(
                         item.toString(),
-                        style: const TextStyle(
-                          color: AppColors.blackColor,
+                        style:  TextStyle(
+                          color:AppColors.blackColor(context),
                           fontFamily: 'Quicksand',
                           fontWeight: FontWeight.w600,
                         ),

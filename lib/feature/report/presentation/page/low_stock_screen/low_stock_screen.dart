@@ -42,7 +42,7 @@ class _LowStockScreenState extends State<LowStockScreen> {
     final isBigScreen = Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
 
     return Container(
-      color: AppColors.bg,
+      color: AppColors.bottomNavBg(context),
       child: SafeArea(
         child: ResponsiveRow(
           children: [
@@ -117,7 +117,7 @@ class _LowStockScreenState extends State<LowStockScreen> {
               icon: const Icon(Icons.refresh),
               label: const Text("Refresh"),
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primaryColor,
+                backgroundColor: AppColors.primaryColor(context),
                 foregroundColor: Colors.white,
               ),
             ),
@@ -205,7 +205,7 @@ class _LowStockScreenState extends State<LowStockScreen> {
                       pdfPreviewPageDecoration:
                       BoxDecoration(color: AppColors.white),
                       actionBarTheme: PdfActionBarTheme(
-                        backgroundColor: AppColors.primaryColor,
+                        backgroundColor: AppColors.primaryColor(context),
                         iconColor: Colors.white,
                         textStyle: const TextStyle(color: Colors.white),
                       ),

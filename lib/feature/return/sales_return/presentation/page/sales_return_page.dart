@@ -63,7 +63,7 @@ class _SalesReturnScreenState extends State<SalesReturnScreen> {
     final isBigScreen = Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
 
     return Container(
-      color: AppColors.bg,
+      color: AppColors.bottomNavBg(context),
       child: SafeArea(
         child: ResponsiveRow(
           children: [
@@ -224,7 +224,7 @@ class _SalesReturnScreenState extends State<SalesReturnScreen> {
                     child: Text(
                       isAllOption ? 'All Customers' : '${item.name} (${item.phone})',
                       style: TextStyle(
-                        color: isAllOption ? AppColors.primaryColor : AppColors.blackColor,
+                        color: isAllOption ? AppColors.primaryColor(context) :AppColors.blackColor(context),
                         fontFamily: 'Quicksand',
                         fontWeight: isAllOption ? FontWeight.bold : FontWeight.w300,
                       ),

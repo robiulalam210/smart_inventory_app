@@ -8,7 +8,7 @@ class AppTextFormFieldTheme {
     prefixIconColor: AppColors.textLight,
 
     suffixIconColor: AppColors.textLight,
-    fillColor: AppColors.whiteColor,
+    fillColor: AppColors.white,
     filled: true,
     // constraints: const BoxConstraints.expand(height: TSizes.inputFieldHeight),
     labelStyle: const TextStyle().copyWith(color: AppColors.titleLight),

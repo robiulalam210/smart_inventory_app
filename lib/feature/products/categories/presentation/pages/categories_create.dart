@@ -132,7 +132,7 @@ class _CategoriesCreateState extends State<CategoriesCreate> {
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.primaryColor,
+                    color: AppColors.primaryColor(context),
                   ),
                 ),
                 IconButton(
@@ -201,8 +201,8 @@ class _CategoriesCreateState extends State<CategoriesCreate> {
                         value: item,
                         child: Text(
                           item.toString(),
-                          style: const TextStyle(
-                            color: AppColors.blackColor,
+                          style:  TextStyle(
+                            color:AppColors.blackColor(context),
                             fontFamily: 'Quicksand',
                             fontWeight: FontWeight.w600,
                           ),
@@ -223,12 +223,12 @@ class _CategoriesCreateState extends State<CategoriesCreate> {
                     onPressed: () => Navigator.pop(context),
                     style: OutlinedButton.styleFrom(
                       padding: EdgeInsets.symmetric(vertical: 12),
-                      side: BorderSide(color: AppColors.primaryColor),
+                      side: BorderSide(color: AppColors.primaryColor(context)),
                     ),
                     child: Text(
                       'Cancel',
                       style: TextStyle(
-                        color: AppColors.primaryColor,
+                        color: AppColors.primaryColor(context),
                         fontWeight: FontWeight.w600,
                       ),
                     ),

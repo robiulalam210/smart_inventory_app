@@ -131,7 +131,7 @@ class _MoneyReceiptScreenState extends State<MobileMoneyReceiptList> {
       appBar: AppBar(title: Text("Money receipt"),),
       body: SafeArea(
         child: RefreshIndicator(
-          color: AppColors.primaryColor,
+          color: AppColors.primaryColor(context),
           onRefresh: () async {
             _fetchApi();
           },
@@ -246,7 +246,7 @@ class _MoneyReceiptScreenState extends State<MobileMoneyReceiptList> {
               IconButton(
                 icon: Icon(
                   Iconsax.filter,
-                  color: AppColors.primaryColor,
+                  color: AppColors.primaryColor(context),
                 ),
                 onPressed: () => _showMobileFilterSheet(context),
               ),
@@ -562,7 +562,7 @@ class _MoneyReceiptScreenState extends State<MobileMoneyReceiptList> {
                             _fetchApi();
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primaryColor,
+                            backgroundColor: AppColors.primaryColor(context),
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),

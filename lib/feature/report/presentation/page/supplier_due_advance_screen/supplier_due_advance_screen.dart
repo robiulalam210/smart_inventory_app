@@ -71,7 +71,7 @@ class _SupplierDueAdvanceScreenState extends State<SupplierDueAdvanceScreen> {
     final isBigScreen = Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
 
     return Container(
-      color: AppColors.bg,
+      color: AppColors.bottomNavBg(context),
       child: SafeArea(
         child: ResponsiveRow(
           children: [
@@ -234,7 +234,7 @@ Spacer(),
               "Total Suppliers",
               totalActiveSuppliers.toString(),
               Icons.business_center,
-              AppColors.primaryColor,subtitle: ""
+              AppColors.primaryColor(context),subtitle: ""
             ),
             _buildSummaryCard(
               "Total Due",
@@ -286,7 +286,7 @@ Spacer(),
                       pdfPreviewPageDecoration:
                       BoxDecoration(color: AppColors.white),
                       actionBarTheme: PdfActionBarTheme(
-                        backgroundColor: AppColors.primaryColor,
+                        backgroundColor: AppColors.primaryColor(context),
                         iconColor: Colors.white,
                         textStyle: const TextStyle(color: Colors.white),
                       ),
@@ -594,7 +594,7 @@ class SupplierDueAdvanceDataTable extends StatelessWidget {
               scrollDirection: Axis.horizontal,
               child: DataTable(
                 headingRowColor: WidgetStateProperty.resolveWith<Color>(
-                      (states) => AppColors.primaryColor,
+                      (states) => AppColors.primaryColor(context),
                 ),
                 columnSpacing: 12,
                 dataRowMinHeight: 35,

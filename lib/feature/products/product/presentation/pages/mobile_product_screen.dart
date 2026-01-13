@@ -86,7 +86,7 @@ floatingActionButton: FloatingActionButton( onPressed: () => _showCreateProductD
       lg: 10,
       xl: 10,
       child: RefreshIndicator(
-        color: AppColors.primaryColor,
+        color: AppColors.primaryColor(context),
         onRefresh: () async {
           _fetchProductList();
         },
@@ -189,7 +189,7 @@ floatingActionButton: FloatingActionButton( onPressed: () => _showCreateProductD
               IconButton(
                 icon: Icon(
                   Iconsax.filter,
-                  color: AppColors.primaryColor,
+                  color: AppColors.primaryColor(context),
                 ),
                 onPressed: () => _showMobileFilterSheet(context),
               ),
