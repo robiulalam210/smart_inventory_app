@@ -136,7 +136,7 @@ class _MobileAccountTransferFormState extends State<MobileAccountTransferForm> {
                               style: TextStyle(
                                 fontWeight: FontWeight.w600,
                                 fontSize: 14,
-                                color: AppColors.primaryColor,
+                                color: AppColors.primaryColor(context),
                               ),
                             ),
                             const SizedBox(height: 4),
@@ -159,7 +159,7 @@ class _MobileAccountTransferFormState extends State<MobileAccountTransferForm> {
                                 onChanged: (value) {
                                   isQuickTransfer.value = value;
                                 },
-                                activeThumbColor: AppColors.primaryColor,
+                                activeThumbColor: AppColors.primaryColor(context),
                               ),
                             );
                           },
@@ -205,7 +205,7 @@ class _MobileAccountTransferFormState extends State<MobileAccountTransferForm> {
                           style: TextStyle(
                             fontWeight: FontWeight.w600,
                             fontSize: 16,
-                            color: AppColors.primaryColor,
+                            color: AppColors.primaryColor(context),
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -274,7 +274,7 @@ class _MobileAccountTransferFormState extends State<MobileAccountTransferForm> {
             style: TextStyle(
               fontWeight: FontWeight.w600,
               fontSize: 14,
-              color: AppColors.primaryColor,
+              color: AppColors.primaryColor(context),
             ),
           ),
           const SizedBox(height: 4),
@@ -431,12 +431,12 @@ class _MobileAccountTransferFormState extends State<MobileAccountTransferForm> {
                           width: 40,
                           height: 40,
                           decoration: BoxDecoration(
-                            color: AppColors.primaryColor.withValues(alpha: 0.1),
+                            color: AppColors.primaryColor(context).withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Icon(
                             Icons.account_balance_wallet,
-                            color: AppColors.primaryColor,
+                            color: AppColors.primaryColor(context),
                             size: 20,
                           ),
                         ),
@@ -594,9 +594,9 @@ class _MobileAccountTransferFormState extends State<MobileAccountTransferForm> {
               builder: (context, child) {
                 return Theme(
                   data: ThemeData.light().copyWith(
-                    primaryColor: AppColors.primaryColor,
+                    primaryColor: AppColors.primaryColor(context),
                     colorScheme: ColorScheme.light(
-                      primary: AppColors.primaryColor,
+                      primary: AppColors.primaryColor(context),
                     ),
                     buttonTheme: const ButtonThemeData(
                       textTheme: ButtonTextTheme.primary,
@@ -779,14 +779,14 @@ class _MobileAccountTransferFormState extends State<MobileAccountTransferForm> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
-                side: BorderSide(color: AppColors.primaryColor),
+                side: BorderSide(color: AppColors.primaryColor(context)),
               ),
               child: Text(
                 "RESET FORM",
                 style: TextStyle(
                   fontWeight: FontWeight.w600,
                   fontSize: 14,
-                  color: AppColors.primaryColor,
+                  color: AppColors.primaryColor(context),
                 ),
               ),
             ),
@@ -953,7 +953,7 @@ class _MobileAccountTransferFormState extends State<MobileAccountTransferForm> {
               transferBloc.add(ResetForm());
               setState(() {});
             },
-            child: Text("OK", style: TextStyle(color: AppColors.primaryColor)),
+            child: Text("OK", style: TextStyle(color: AppColors.primaryColor(context))),
           ),
         ],
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),

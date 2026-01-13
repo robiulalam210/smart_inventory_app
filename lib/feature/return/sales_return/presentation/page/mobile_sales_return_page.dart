@@ -266,7 +266,7 @@ class _SalesReturnScreenState extends State<MobileSalesReturnPage> {
                   child: Text(
                     isAllOption ? 'All Customers' : '${item.name} (${item.phone})',
                     style: TextStyle(
-                      color: isAllOption ? AppColors.primaryColor : AppColors.blackColor,
+                      color: isAllOption ? AppColors.primaryColor(context) :AppColors.blackColor(context),
                       fontFamily: 'Quicksand',
                       fontWeight: isAllOption ? FontWeight.bold : FontWeight.w300,
                     ),

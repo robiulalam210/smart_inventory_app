@@ -12,7 +12,7 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.bg,
+      backgroundColor: AppColors.bottomNavBg(context),
       appBar: AppBar(
         title: Text('Money Receipt', style: const TextStyle(fontSize: 16)),
         centerTitle: false,
@@ -25,45 +25,45 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
         ],
       ),
       body: Responsive(
-        mobile: _buildMobileView(),
-        tablet: _buildTabletView(),
-        smallDesktop: _buildDesktopView(),
-        desktop: _buildDesktopView(),
-        maxDesktop: _buildDesktopView(),
+        mobile: _buildMobileView(context ,),
+        tablet: _buildTabletView(context ,),
+        smallDesktop: _buildDesktopView(context ,),
+        desktop: _buildDesktopView(context ,),
+        maxDesktop: _buildDesktopView(context ,),
       ),
     );
   }
 
   // ===================== MOBILE VIEW (< 600px) =====================
-  Widget _buildMobileView() {
+  Widget _buildMobileView(BuildContext context ,) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Header Card
-          _buildMobileHeaderCard(),
+          _buildMobileHeaderCard(context),
           const SizedBox(height: 16),
 
           // Payment Info Card
-          _buildMobilePaymentInfoCard(),
+          _buildMobilePaymentInfoCard(context ,),
 
           const SizedBox(height: 16),
 
           // Summary Card
-          _buildMobileSummaryCard(),
+          _buildMobileSummaryCard(context ,),
 
           const SizedBox(height: 16),
 
           // Affected Invoices Card
-          _buildMobileAffectedInvoicesCard(),
+          _buildMobileAffectedInvoicesCard(context ,),
         ],
       ),
     );
   }
 
   // ===================== TABLET VIEW (600px - 900px) =====================
-  Widget _buildTabletView() {
+  Widget _buildTabletView(BuildContext context ,) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
       child: Column(
@@ -74,7 +74,7 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
-                child: _buildTabletHeaderCard(),
+                child: _buildTabletHeaderCard(context ,),
               ),
               const SizedBox(width: 16),
               _buildTabletStatusCard(),
@@ -93,11 +93,11 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
-                child: _buildTabletSummaryCard(),
+                child: _buildTabletSummaryCard(context ,),
               ),
               const SizedBox(width: 16),
               Expanded(
-                child: _buildTabletAffectedInvoicesCard(),
+                child: _buildTabletAffectedInvoicesCard(context ,),
               ),
             ],
           ),
@@ -107,7 +107,7 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
   }
 
   // ===================== DESKTOP VIEW (900px+) =====================
-  Widget _buildDesktopView() {
+  Widget _buildDesktopView(BuildContext context ,) {
     return Padding(
       padding: const EdgeInsets.all(12),
       child: Row(
@@ -118,9 +118,9 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
             flex: 2,
             child: Column(
               children: [
-                _buildDesktopHeaderCard(),
+                _buildDesktopHeaderCard(context ,),
                 const SizedBox(height: 16),
-                _buildDesktopPaymentInfoCard(),
+                _buildDesktopPaymentInfoCard(context ,),
               ],
             ),
           ),
@@ -130,9 +130,9 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
             flex: 1,
             child: Column(
               children: [
-                _buildDesktopSummaryCard(),
+                _buildDesktopSummaryCard(context ,),
                 const SizedBox(height: 16),
-                _buildDesktopAffectedInvoicesCard(),
+                _buildDesktopAffectedInvoicesCard(context ,),
               ],
             ),
           ),
@@ -142,7 +142,7 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
   }
 
   // ===================== MOBILE COMPONENTS =====================
-  Widget _buildMobileHeaderCard() {
+  Widget _buildMobileHeaderCard(BuildContext context ,) {
     final amount = double.tryParse(receipt.amount ?? '0') ?? 0;
 
     return Card(
@@ -161,10 +161,10 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
                     children: [
                       Text(
                         'Receipt #${receipt.mrNo}',
-                        style: const TextStyle(
+                        style:  TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: AppColors.primaryColor,
+                          color: AppColors.primaryColor(context),
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -286,7 +286,7 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMobilePaymentInfoCard() {
+  Widget _buildMobilePaymentInfoCard(BuildContext context ,) {
     final amount = double.tryParse(receipt.amount ?? '0') ?? 0;
 
     return Card(
@@ -298,7 +298,7 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(Icons.payment, color: AppColors.primaryColor, size: 20),
+                Icon(Icons.payment, color: AppColors.primaryColor(context), size: 20),
                 const SizedBox(width: 8),
                 const Text(
                   'Payment Information',
@@ -371,7 +371,7 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMobileSummaryCard() {
+  Widget _buildMobileSummaryCard(BuildContext context ,) {
     final summary = receipt.paymentSummary;
     final before = summary?.beforePayment;
     final after = summary?.afterPayment;
@@ -385,7 +385,7 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(Icons.summarize, color: AppColors.primaryColor, size: 20),
+                Icon(Icons.summarize, color: AppColors.primaryColor(context), size: 20),
                 const SizedBox(width: 8),
                 const Text(
                   'Payment Summary',
@@ -397,15 +397,15 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 12),
-            if (before != null) _buildMobileSummarySection('Before Payment', before),
-            if (after != null) _buildMobileSummarySection('After Payment', after),
+            if (before != null) _buildMobileSummarySection(context ,'Before Payment', before),
+            if (after != null) _buildMobileSummarySection(context ,'After Payment', after),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildMobileSummarySection(String title, dynamic paymentData) {
+  Widget _buildMobileSummarySection(context ,String title, dynamic paymentData) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
@@ -418,10 +418,10 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
         children: [
           Text(
             title,
-            style: const TextStyle(
+            style:  TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 14,
-              color: AppColors.primaryColor,
+              color: AppColors.primaryColor(context),
             ),
           ),
           const SizedBox(height: 8),
@@ -468,7 +468,7 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMobileAffectedInvoicesCard() {
+  Widget _buildMobileAffectedInvoicesCard(BuildContext context ,) {
     final affectedInvoices = receipt.paymentSummary?.affectedInvoices ?? [];
 
     return Card(
@@ -480,7 +480,7 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(Icons.receipt, color: AppColors.primaryColor, size: 20),
+                Icon(Icons.receipt, color: AppColors.primaryColor(context), size: 20),
                 const SizedBox(width: 8),
                 const Text(
                   'Affected Invoices',
@@ -511,14 +511,14 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
                 ),
               ),
             if (affectedInvoices.isNotEmpty)
-              ...affectedInvoices.map((invoice) => _buildMobileInvoiceRow(invoice)),
+              ...affectedInvoices.map((invoice) => _buildMobileInvoiceRow(context ,invoice)),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildMobileInvoiceRow(AffectedInvoice invoice) {
+  Widget _buildMobileInvoiceRow(BuildContext context ,AffectedInvoice invoice) {
     final amount = double.tryParse(invoice.amountApplied?.toString() ?? '0') ?? 0;
 
     return Container(
@@ -556,10 +556,10 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
           ),
           Text(
             '৳${amount.toStringAsFixed(2)}',
-            style: const TextStyle(
+            style:  TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: AppColors.primaryColor,
+              color: AppColors.primaryColor(context),
             ),
           ),
         ],
@@ -568,7 +568,7 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
   }
 
   // ===================== TABLET COMPONENTS =====================
-  Widget _buildTabletHeaderCard() {
+  Widget _buildTabletHeaderCard(BuildContext context ,) {
     return Card(
       elevation: 3,
       child: Padding(
@@ -578,10 +578,10 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
           children: [
             Text(
               'Money Receipt: ${receipt.mrNo}',
-              style: const TextStyle(
+              style:  TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: AppColors.primaryColor,
+                color: AppColors.primaryColor(context),
               ),
             ),
             const SizedBox(height: 8),
@@ -763,7 +763,7 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTabletSummaryCard() {
+  Widget _buildTabletSummaryCard(BuildContext context ,) {
     final summary = receipt.paymentSummary;
     final before = summary?.beforePayment;
     final after = summary?.afterPayment;
@@ -783,15 +783,15 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            if (before != null) _buildTabletSummarySection('Before Payment', before),
-            if (after != null) _buildTabletSummarySection('After Payment', after),
+            if (before != null) _buildTabletSummarySection(context ,'Before Payment', before),
+            if (after != null) _buildTabletSummarySection(context ,'After Payment', after),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildTabletSummarySection(String title, dynamic paymentData) {
+  Widget _buildTabletSummarySection(BuildContext context ,String title, dynamic paymentData) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
@@ -804,10 +804,10 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
         children: [
           Text(
             title,
-            style: const TextStyle(
+            style:  TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 15,
-              color: AppColors.primaryColor,
+              color: AppColors.primaryColor(context),
             ),
           ),
           const SizedBox(height: 12),
@@ -853,7 +853,7 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTabletAffectedInvoicesCard() {
+  Widget _buildTabletAffectedInvoicesCard(BuildContext context ,) {
     final affectedInvoices = receipt.paymentSummary?.affectedInvoices ?? [];
 
     return Card(
@@ -890,14 +890,14 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
                 ),
               ),
             if (affectedInvoices.isNotEmpty)
-              ...affectedInvoices.map((invoice) => _buildTabletInvoiceRow(invoice)),
+              ...affectedInvoices.map((invoice) => _buildTabletInvoiceRow(context ,invoice)),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildTabletInvoiceRow(AffectedInvoice invoice) {
+  Widget _buildTabletInvoiceRow(context ,AffectedInvoice invoice) {
     final amount = double.tryParse(invoice.amountApplied?.toString() ?? '0') ?? 0;
 
     return Container(
@@ -935,10 +935,10 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
           ),
           Text(
             '৳${amount.toStringAsFixed(2)}',
-            style: const TextStyle(
+            style:  TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: AppColors.primaryColor,
+              color: AppColors.primaryColor(context),
             ),
           ),
         ],
@@ -947,7 +947,7 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
   }
 
   // ===================== DESKTOP COMPONENTS (unchanged) =====================
-  Widget _buildDesktopHeaderCard() {
+  Widget _buildDesktopHeaderCard(BuildContext context ,) {
     return Card(
       elevation: 3,
       child: Padding(
@@ -961,10 +961,10 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
                 Expanded(
                   child: Text(
                     'Money Receipt: ${receipt.mrNo}',
-                    style: const TextStyle(
+                    style:  TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color: AppColors.primaryColor,
+                      color: AppColors.primaryColor(context),
                     ),
                   ),
                 ),
@@ -1044,7 +1044,7 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildDesktopPaymentInfoCard() {
+  Widget _buildDesktopPaymentInfoCard(BuildContext context ,) {
     final amount = double.tryParse(receipt.amount ?? '0') ?? 0;
 
     return Card(
@@ -1062,14 +1062,14 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            _buildPaymentDetails(amount),
+            _buildPaymentDetails(context ,amount),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildPaymentDetails(double amount) {
+  Widget _buildPaymentDetails(BuildContext context ,double amount) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -1079,20 +1079,20 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
       ),
       child: Column(
         children: [
-          _buildPaymentRow('Amount Received', '৳${amount.toStringAsFixed(2)}', isAmount: true),
+          _buildPaymentRow(context ,'Amount Received', '৳${amount.toStringAsFixed(2)}', isAmount: true),
           const SizedBox(height: 8),
-          _buildPaymentRow('Payment Method', receipt.paymentMethod ?? '-'),
-          _buildPaymentRow('Payment Type', receipt.paymentType ?? '-'),
+          _buildPaymentRow(context ,'Payment Method', receipt.paymentMethod ?? '-'),
+          _buildPaymentRow(context ,'Payment Type', receipt.paymentType ?? '-'),
           if (receipt.paymentDate != null)
-            _buildPaymentRow('Payment Date', _formatDate(receipt.paymentDate)),
+            _buildPaymentRow(context ,'Payment Date', _formatDate(receipt.paymentDate)),
           if (receipt.remark != null && receipt.remark!.isNotEmpty)
-            _buildPaymentRow('Remarks', receipt.remark!),
+            _buildPaymentRow(context ,'Remarks', receipt.remark!),
         ],
       ),
     );
   }
 
-  Widget _buildPaymentRow(String label, String value, {bool isAmount = false}) {
+  Widget _buildPaymentRow(context ,String label, String value, {bool isAmount = false}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -1108,14 +1108,14 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
           style: TextStyle(
             fontWeight: isAmount ? FontWeight.bold : FontWeight.normal,
             fontSize: isAmount ? 16 : 14,
-            color: isAmount ? AppColors.primaryColor : Colors.black,
+            color: isAmount ? AppColors.primaryColor(context) : Colors.black,
           ),
         ),
       ],
     );
   }
 
-  Widget _buildDesktopSummaryCard() {
+  Widget _buildDesktopSummaryCard(BuildContext context ,) {
     final summary = receipt.paymentSummary;
     final before = summary?.beforePayment;
     final after = summary?.afterPayment;
@@ -1135,15 +1135,15 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 4),
-            if (before != null) _buildSummarySection('Before Payment', before),
-            if (after != null) _buildSummarySection('After Payment', after),
+            if (before != null) _buildSummarySection(context ,'Before Payment', before),
+            if (after != null) _buildSummarySection(context ,'After Payment', after),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildSummarySection(String title, dynamic paymentData) {
+  Widget _buildSummarySection(BuildContext context ,String title, dynamic paymentData) {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(8),
@@ -1156,9 +1156,9 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
         children: [
           Text(
             title,
-            style: const TextStyle(
+            style:  TextStyle(
               fontWeight: FontWeight.bold,
-              color: AppColors.primaryColor,
+              color: AppColors.primaryColor(context),
             ),
           ),
           const SizedBox(height: 4),
@@ -1201,7 +1201,7 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildDesktopAffectedInvoicesCard() {
+  Widget _buildDesktopAffectedInvoicesCard(BuildContext context ,) {
     final affectedInvoices = receipt.paymentSummary?.affectedInvoices ?? [];
 
     return Card(
@@ -1227,14 +1227,14 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
                 ),
               ),
             if (affectedInvoices.isNotEmpty)
-              ...affectedInvoices.map((invoice) => _buildInvoiceRow(invoice)),
+              ...affectedInvoices.map((invoice) => _buildInvoiceRow(context ,invoice)),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildInvoiceRow(AffectedInvoice invoice) {
+  Widget _buildInvoiceRow(BuildContext context ,AffectedInvoice invoice) {
     final amount = double.tryParse(invoice.amountApplied?.toString() ?? '0') ?? 0;
 
     return Container(
@@ -1255,9 +1255,9 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
           ),
           Text(
             '৳${amount.toStringAsFixed(2)}',
-            style: const TextStyle(
+            style:  TextStyle(
               fontWeight: FontWeight.bold,
-              color: AppColors.primaryColor,
+              color: AppColors.primaryColor(context),
             ),
           ),
         ],
@@ -1294,7 +1294,7 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
           backgroundColor: Colors.white,
           appBar: AppBar(
             title: const Text('Money Receipt Preview'),
-            backgroundColor: AppColors.primaryColor,
+            backgroundColor: AppColors.primaryColor(context),
             foregroundColor: Colors.white,
           ),
           body: PdfPreview(
@@ -1307,7 +1307,7 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
             build: (format) => generateMoneyReceiptPdf(receipt, context.read<ProfileBloc>().permissionModel?.data?.companyInfo),
             pdfPreviewPageDecoration: BoxDecoration(color: AppColors.white),
             actionBarTheme: PdfActionBarTheme(
-              backgroundColor: AppColors.primaryColor,
+              backgroundColor: AppColors.primaryColor(context),
               iconColor: Colors.white,
               textStyle: const TextStyle(color: Colors.white),
             ),

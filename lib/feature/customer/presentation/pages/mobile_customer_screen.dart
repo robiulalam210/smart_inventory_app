@@ -88,7 +88,7 @@ class _CustomerScreenState extends State<MobileCustomerScreen> {
       lg: 10,
       xl: 10,
       child: RefreshIndicator(
-        color: AppColors.primaryColor,
+        color: AppColors.primaryColor(context),
         onRefresh: () async {
           _fetchApi();
         },
@@ -215,7 +215,7 @@ class _CustomerScreenState extends State<MobileCustomerScreen> {
               IconButton(
                 icon: Icon(
                   Iconsax.filter,
-                  color: AppColors.primaryColor,
+                  color: AppColors.primaryColor(context),
                 ),
                 onPressed: () => _showMobileFilterSheet(context),
               ),
@@ -400,8 +400,8 @@ class _CustomerScreenState extends State<MobileCustomerScreen> {
                             selectedStatusNotifier.value = selected ? status : null;
                           });
                         },
-                        selectedColor: AppColors.primaryColor.withValues(alpha: 0.2),
-                        checkmarkColor: AppColors.primaryColor,
+                        selectedColor: AppColors.primaryColor(context).withValues(alpha: 0.2),
+                        checkmarkColor: AppColors.primaryColor(context),
                       );
                     }).toList(),
                   ),
@@ -440,7 +440,7 @@ class _CustomerScreenState extends State<MobileCustomerScreen> {
                             );
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primaryColor,
+                            backgroundColor: AppColors.primaryColor(context),
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),

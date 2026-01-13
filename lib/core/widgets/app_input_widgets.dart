@@ -91,12 +91,12 @@ class AppPhoneFormField extends StatelessWidget {
             //
             //   return null;
             // },
-            cursorColor: AppColors.primaryColor,
+            cursorColor: AppColors.primaryColor(context),
             textInputAction: TextInputAction.next,
             decoration: InputDecoration(
               hintText: "phone number",
               hintStyle: TextStyle(
-                color: AppColors.matteBlack,
+                color:  AppColors.text(context),
                 fontWeight: FontWeight.w300,
                 fontSize: 12,
               ),
@@ -113,7 +113,7 @@ class AppPhoneFormField extends StatelessWidget {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(AppSizes.radius),
-                borderSide: BorderSide(color: AppColors.matteBlack),
+                borderSide: BorderSide(color:  AppColors.text(context)),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(AppSizes.radius),
@@ -440,12 +440,12 @@ class _AppSheetContentState<T> extends State<_AppSheetContent<T>> {
               title: Text(
                 widget.getLabel(item),
                 style: TextStyle(
-                  color: isSelected ? AppColors.primaryColor : null,
+                  color: isSelected ? AppColors.primaryColor(context) : null,
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                 ),
               ),
               leading: isSelected
-                  ? Icon(Icons.check, color: AppColors.primaryColor)
+                  ? Icon(Icons.check, color: AppColors.primaryColor(context))
                   : const SizedBox(width: 24),
               onTap: () {
                 widget.onChanged(item);

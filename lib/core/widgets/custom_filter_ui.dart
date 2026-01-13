@@ -28,8 +28,8 @@ class CustomFilterBox extends StatelessWidget {
           padding: const EdgeInsets.all(6.0),
           child: Row(
             children: [
-              const Icon(Iconsax.setting_54,
-                  size: 18, color: AppColors.primaryColor),
+               Icon(Iconsax.setting_54,
+                  size: 18, color: AppColors.primaryColor(context)),
               const SizedBox(
                 width: 4,
               ),

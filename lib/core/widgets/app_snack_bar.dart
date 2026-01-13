@@ -8,7 +8,7 @@
 //         children: [
 //           Icon(
 //             Icons.info,
-//             color: color ?? AppColors.primaryColor,
+//             color: color ?? AppColors.primaryColor(context),
 //             size: 20,
 //           ),
 //           const SizedBox(
@@ -22,7 +22,7 @@
 //       behavior: SnackBarBehavior.floating,
 //       margin: const EdgeInsets.all(AppSizes.bodyPadding),
 //       shape: RoundedRectangleBorder(
-//           side: BorderSide(color: color ?? AppColors.primaryColor),
+//           side: BorderSide(color: color ?? AppColors.primaryColor(context)),
 //           borderRadius: BorderRadius.circular(10)),
 //     ),
 //   );

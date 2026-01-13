@@ -180,7 +180,7 @@ class _SupplierScreenState extends State<MobileSupplierListScreen> {
                             Container(
                               margin: const EdgeInsets.only(right: 8),
                               decoration: BoxDecoration(
-                                color: AppColors.primaryColor.withValues(
+                                color: AppColors.primaryColor(context).withValues(
                                   alpha: 0.1,
                                 ),
                                 shape: BoxShape.circle,
@@ -188,7 +188,7 @@ class _SupplierScreenState extends State<MobileSupplierListScreen> {
                               child: IconButton(
                                 icon: Icon(
                                   Iconsax.filter,
-                                  color: AppColors.primaryColor,
+                                  color: AppColors.primaryColor(context),
                                   size: 20,
                                 ),
                                 onPressed: () {
@@ -211,7 +211,7 @@ class _SupplierScreenState extends State<MobileSupplierListScreen> {
                               margin: const EdgeInsets.only(right: 8),
                               child: Chip(
                                 label: Text(dataBloc.selectedState),
-                                backgroundColor: AppColors.primaryColor
+                                backgroundColor: AppColors.primaryColor(context)
                                     .withValues(alpha: 0.1),
                                 deleteIcon: const Icon(Icons.close, size: 16),
                                 onDeleted: () {
@@ -397,8 +397,8 @@ class _SupplierScreenState extends State<MobileSupplierListScreen> {
                             dataBloc.selectedState = selected ? status : "";
                           });
                         },
-                        selectedColor: AppColors.primaryColor.withValues(alpha:0.2),
-                        checkmarkColor: AppColors.primaryColor,
+                        selectedColor: AppColors.primaryColor(context).withValues(alpha:0.2),
+                        checkmarkColor: AppColors.primaryColor(context),
                       );
                     }).toList(),
                   ),
@@ -438,7 +438,7 @@ class _SupplierScreenState extends State<MobileSupplierListScreen> {
                             );
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primaryColor,
+                            backgroundColor: AppColors.primaryColor(context),
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),

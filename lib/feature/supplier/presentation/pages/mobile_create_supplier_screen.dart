@@ -18,7 +18,7 @@ class _CreateSupplierScreenState extends State<MobileCreateSupplierScreen> {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.bg,
+        color: AppColors.bottomNavBg(context),
         borderRadius: BorderRadius.circular(AppSizes.bodyPadding),
       ),
       child: SafeArea(
@@ -33,7 +33,7 @@ class _CreateSupplierScreenState extends State<MobileCreateSupplierScreen> {
                 Container(
                   padding: const EdgeInsets.all(4),
                   decoration: BoxDecoration(
-                    color: AppColors.whiteColor,
+                    color: AppColors.whiteColor(context),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
@@ -142,8 +142,8 @@ class _CreateSupplierScreenState extends State<MobileCreateSupplierScreen> {
         value: item,
         child: Text(
           item.toString(),
-          style: const TextStyle(
-            color: AppColors.blackColor,
+          style:  TextStyle(
+            color:AppColors.blackColor(context),
             fontFamily: 'Quicksand',
             fontWeight: FontWeight.w600,
           ),

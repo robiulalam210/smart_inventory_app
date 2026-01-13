@@ -93,7 +93,7 @@ class _AccountTransferFormState extends State<AccountTransferForm> {
               lg: 2,
               xl: 2,
               child: Container(
-                decoration: BoxDecoration(color: AppColors.whiteColor),
+                decoration: BoxDecoration(color: AppColors.whiteColor(context)),
                 child: isBigScreen ? const Sidebar() : const SizedBox.shrink(),
               ),
             ),
@@ -107,7 +107,7 @@ class _AccountTransferFormState extends State<AccountTransferForm> {
               key: formKey,
               child: Container(
                 padding: const EdgeInsets.all(10),
-                color: AppColors.bg,
+                color: AppColors.bottomNavBg(context),
                 child: BlocListener<AccountTransferBloc, AccountTransferState>(
                   listener: (context, state) {
                     if (state is AccountTransferAddLoading ||
@@ -189,7 +189,7 @@ _fetchApi();
                                     onChanged: (value) {
                                       isQuickTransfer.value = value;
                                     },
-                                    activeThumbColor: AppColors.primaryColor,
+                                    activeThumbColor: AppColors.primaryColor(context),
                                   ),
                                 ],
                               );
@@ -289,8 +289,8 @@ _fetchApi();
                                       value: item,
                                       child: Text(
                                         item.replaceAll('_', ' ').toUpperCase(),
-                                        style: const TextStyle(
-                                          color: AppColors.blackColor,
+                                        style:  TextStyle(
+                                          color:AppColors.blackColor(context),
                                           fontFamily: 'Quicksand',
                                           fontWeight: FontWeight.w300,
                                         ),
@@ -415,7 +415,7 @@ _fetchApi();
                           AppButton(
                             width: 100,
 
-                            color: AppColors.secondary,
+                            color: AppColors.secondary(context),
                             onPressed: () {
                               transferBloc.add(ResetForm());
                               setState(() {});

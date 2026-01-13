@@ -1,4 +1,6 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import '../feature/common/presentation/cubit/theme_cubit.dart';
 import '../feature/splash/presentation/pages/mobile_splash_screen.dart';
 import '/feature/account_transfer/presentation/bloc/account_transfer/account_transfer_bloc.dart';
 import '/feature/customer/presentation/bloc/customer/customer_bloc.dart';
@@ -41,8 +43,7 @@ import '../feature/supplier/presentation/bloc/supplier_payment/supplier_payment_
 import '../feature/transactions/presentation/bloc/transactions/transaction_bloc.dart';
 
 class MyApp extends StatelessWidget {
-
-  const MyApp({super.key, });
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -58,15 +59,12 @@ class MyApp extends StatelessWidget {
             authService: AuthService(),
           ),
         ),
-        BlocProvider(
-          create: (context) => SplashBloc(),
-        ),
-
-
+        BlocProvider(create: (context) => SplashBloc()),
 
         BlocProvider(create: (context) => PrintLayoutBloc(PrintLayoutRepoDb())),
 
         BlocProvider(create: (_) => ProfileBloc()),
+        BlocProvider(create: (_) => ThemeCubit()),
         BlocProvider(create: (_) => BrandBloc()),
         BlocProvider(create: (_) => UnitBloc()),
         BlocProvider(create: (_) => CategoriesBloc()),
@@ -79,7 +77,14 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (_) => ExpenseBloc()),
         BlocProvider(create: (_) => ExpenseHeadBloc()),
         BlocProvider(create: (_) => ExpenseSubHeadBloc()),
-
+        BlocProvider<ThemeCubit>(
+          create: (_) {
+            final cubit = ThemeCubit();
+            // async load saved prefs (do not await here)
+            cubit.loadFromStorage();
+            return cubit;
+          },
+        ),
         BlocProvider(create: (_) => PosSaleBloc()),
         BlocProvider(create: (_) => CreatePosSaleBloc()),
         BlocProvider(create: (_) => UserBloc()),
@@ -108,25 +113,51 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (_) => TransactionBloc()),
         BlocProvider(create: (_) => AccountTransferBloc()),
       ],
-      child: Center(
-        child: MaterialApp(
-          localizationsDelegates: [
-            // quill.FlutterQuillLocalizations.delegate, // <-- add this
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-          ],
-          supportedLocales: const [
-            Locale('en', ''), // English
-            // Add other locales if needed
-          ],
-          title: AppConstants.appName,
-          debugShowCheckedModeBanner: false,
-          theme: AppTheme.light(context),
-          home: Responsive.isMobile(context) ? MobileSplashScreen():SplashScreen(),
 
-        ),
+      child: BlocBuilder<ThemeCubit, ThemeState>(
+        buildWhen: (previous, current) => previous.themeMode != current.themeMode,
+        builder: (context, themeState) {
+          return MaterialApp(
+            debugShowCheckedModeBanner: false,
+
+            /// ----------- 🌍 Localization Setup -----------
+            localizationsDelegates: [
+              ...context.localizationDelegates,     // EasyLocalization delegates
+              // FlutterQuillLocalizations.delegate,   // 👈 Required for Quill
+            ],
+            supportedLocales: context.supportedLocales,
+            locale: context.locale,
+
+            /// ----------- 🎨 Theming Setup -----------
+            theme: AppTheme.light(context),
+            darkTheme: AppTheme.dark(context),
+            themeMode: themeState.themeMode,
+            title: AppConstants.appName,
+            home: Responsive.isMobile(context)
+                ? MobileSplashScreen()
+                : SplashScreen(),
+          );
+        },
       ),
+
+      // child: Center(
+      //   child: MaterialApp(
+      //     localizationsDelegates: [
+      //       // quill.FlutterQuillLocalizations.delegate, // <-- add this
+      //       GlobalMaterialLocalizations.delegate,
+      //       GlobalWidgetsLocalizations.delegate,
+      //       GlobalCupertinoLocalizations.delegate,
+      //     ],
+      //     supportedLocales: const [
+      //       Locale('en', ''), // English
+      //       // Add other locales if needed
+      //     ],
+      //     title: AppConstants.appName,
+      //     debugShowCheckedModeBanner: false,
+      //     theme: AppTheme.light(context),
+      //
+      //   ),
+      // ),
     );
   }
 }

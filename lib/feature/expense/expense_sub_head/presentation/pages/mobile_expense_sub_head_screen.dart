@@ -65,7 +65,7 @@ class _ExpenseHeadScreenState extends State<MobileExpenseSubHeadScreen> {
                   child: Container(
                     decoration: BoxDecoration(
                       shape: BoxShape.rectangle,
-                      color: AppColors.whiteColor,
+                      color: AppColors.whiteColor(context),
                       borderRadius: BorderRadius.circular(AppSizes.radius),
                     ),
                     width: double.infinity,
@@ -96,7 +96,7 @@ class _ExpenseHeadScreenState extends State<MobileExpenseSubHeadScreen> {
       xl: 10,
       child: SizedBox(
         child: RefreshIndicator(
-          color: AppColors.primaryColor,
+          color: AppColors.primaryColor(context),
           onRefresh: () async {
             _fetchApiData();
           },

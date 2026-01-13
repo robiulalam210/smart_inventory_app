@@ -370,7 +370,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
 
 
     return Container(
-      color: AppColors.bg,
+      color: AppColors.bottomNavBg(context),
       child: SafeArea(
         child:  _buildDesktopLayout() ,
       ),
@@ -525,8 +525,8 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                         value: item,
                         child: Text(
                           item.toString(),
-                          style: const TextStyle(
-                            color: AppColors.blackColor,
+                          style:  TextStyle(
+                            color:AppColors.blackColor(context),
                             fontFamily: 'Quicksand',
                             fontWeight: FontWeight.w300,
                           ),
@@ -563,8 +563,8 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                         value: item,
                         child: Text(
                           item.toString(),
-                          style: const TextStyle(
-                            color: AppColors.blackColor,
+                          style:  TextStyle(
+                            color:AppColors.blackColor(context),
                             fontFamily: 'Quicksand',
                             fontWeight: FontWeight.w300,
                           ),
@@ -589,7 +589,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                   keyboardType: TextInputType.datetime,
                   autofillHints: AutofillHints.name,
                   bottom: 15.0,
-                  fillColor: AppColors.whiteColor,
+                  fillColor: AppColors.whiteColor(context),
                   validator: (value) =>
                       value!.isEmpty ? 'Please enter date' : null,
                   onTap: _selectDate,
@@ -752,21 +752,21 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                       "Price",
                       style: AppTextStyle.cardLevelText(context),
                     ),
-                    fillColor: AppColors.whiteColor,
+                    fillColor: AppColors.whiteColor(context),
                     filled: true,
                     hintStyle: AppTextStyle.cardLevelText(context),
                     isCollapsed: true,
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(5),
                       borderSide: BorderSide(
-                        color: AppColors.primaryColor.withValues(alpha: 0.5),
+                        color: AppColors.primaryColor(context).withValues(alpha: 0.5),
                         width: 0.5,
                       ),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(5),
                       borderSide: BorderSide(
-                        color: AppColors.primaryColor.withValues(alpha: 0.5),
+                        color: AppColors.primaryColor(context).withValues(alpha: 0.5),
                         width: 0.5,
                       ),
                     ),
@@ -836,8 +836,8 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                           },
                     groupValue: product["discount_type"],
                     unselectedColor: Colors.grey[300],
-                    selectedColor: AppColors.primaryColor,
-                    borderColor: AppColors.primaryColor,
+                    selectedColor: AppColors.primaryColor(context),
+                    borderColor: AppColors.primaryColor(context),
                   ),
                 ),
               ),
@@ -857,7 +857,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                   ),
                   readOnly: true,
                   decoration: InputDecoration(
-                    fillColor: AppColors.whiteColor,
+                    fillColor: AppColors.whiteColor(context),
                     filled: true,
                     hintStyle: AppTextStyle.cardLevelText(context),
                     isCollapsed: true,
@@ -950,7 +950,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                       "Ticket Total",
                       style: AppTextStyle.cardLevelText(context),
                     ),
-                    fillColor: AppColors.whiteColor,
+                    fillColor: AppColors.whiteColor(context),
                     filled: true,
                     hintStyle: AppTextStyle.cardLevelText(context),
                     isCollapsed: true,
@@ -987,7 +987,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                       "Final Total",
                       style: AppTextStyle.cardLevelText(context),
                     ),
-                    fillColor: AppColors.whiteColor,
+                    fillColor: AppColors.whiteColor(context),
                     filled: true,
                     hintStyle: AppTextStyle.cardLevelText(context),
                     isCollapsed: true,
@@ -1141,8 +1141,8 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                   onValueChanged: onTypeChanged,
                   groupValue: selectedType,
                   unselectedColor: Colors.grey[300],
-                  selectedColor: AppColors.primaryColor,
-                  borderColor: AppColors.primaryColor,
+                  selectedColor: AppColors.primaryColor(context),
+                  borderColor: AppColors.primaryColor(context),
                 ),
               ),
               const SizedBox(width: 4),
@@ -1388,7 +1388,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
             style: isBold
                 ? AppTextStyle.cardLevelText(context).copyWith(
                     fontWeight: FontWeight.bold,
-                    color: AppColors.primaryColor,
+                    color: AppColors.primaryColor(context),
                   )
                 : AppTextStyle.cardLevelText(context),
           ),
@@ -1419,7 +1419,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
           ElevatedButton(
             onPressed: _submitForm,
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primaryColor,
+              backgroundColor: AppColors.primaryColor(context),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),

@@ -157,7 +157,7 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
         Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
 
     return Container(
-      color: AppColors.bg,
+      color: AppColors.bottomNavBg(context),
       child: SafeArea(
         child: ResponsiveRow(
           children: [
@@ -261,8 +261,8 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
                   value: item,
                   child: Text(
                     item,
-                    style: const TextStyle(
-                      color: AppColors.blackColor,
+                    style:  TextStyle(
+                      color:AppColors.blackColor(context),
                       fontFamily: 'Quicksand',
                       fontWeight: FontWeight.w300,
                     ),
@@ -327,8 +327,8 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
                       value: item,
                       child: Text(
                         item.name ?? 'Unnamed Head',
-                        style: const TextStyle(
-                          color: AppColors.blackColor,
+                        style:  TextStyle(
+                          color:AppColors.blackColor(context),
                           fontFamily: 'Quicksand',
                           fontWeight: FontWeight.w300,
                         ),
@@ -425,7 +425,7 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
               "Total Expenses",
               summary.totalCount.toString(),
               Icons.receipt_long,
-              AppColors.primaryColor,
+              AppColors.primaryColor(context),
             ),
             _buildSummaryCard(
               "Total Amount",
@@ -467,7 +467,7 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
                       pdfPreviewPageDecoration:
                       BoxDecoration(color: AppColors.white),
                       actionBarTheme: PdfActionBarTheme(
-                        backgroundColor: AppColors.primaryColor,
+                        backgroundColor: AppColors.primaryColor(context),
                         iconColor: Colors.white,
                         textStyle: const TextStyle(color: Colors.white),
                       ),
@@ -732,7 +732,7 @@ class ExpenseReportDataTable extends StatelessWidget {
               scrollDirection: Axis.horizontal,
               child: DataTable(
                 headingRowColor: WidgetStateProperty.resolveWith<Color>(
-                  (states) => AppColors.primaryColor,
+                  (states) => AppColors.primaryColor(context),
                 ),
                 columnSpacing: 12,
                 dataRowMinHeight: 40,

@@ -130,7 +130,7 @@ class _MoneyReceiptScreenState extends State<MoneyReceiptScreen> {
     final isBigScreen =
         Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
     return Container(
-      color: AppColors.bg,
+      color: AppColors.bottomNavBg(context),
       child: SafeArea(
         child: ResponsiveRow(
           spacing: 0,
@@ -166,7 +166,7 @@ class _MoneyReceiptScreenState extends State<MoneyReceiptScreen> {
       lg: 10,
       xl: 10,
       child: RefreshIndicator(
-        color: AppColors.primaryColor,
+        color: AppColors.primaryColor(context),
         onRefresh: () async {
           _fetchApi();
         },
@@ -294,8 +294,8 @@ class _MoneyReceiptScreenState extends State<MoneyReceiptScreen> {
                           value: item,
                           child: Text(
                             item.name ?? 'Unknown Customer',
-                            style: const TextStyle(
-                              color: AppColors.blackColor,
+                            style:  TextStyle(
+                              color:AppColors.blackColor(context),
                               fontFamily: 'Quicksand',
                               fontWeight: FontWeight.w300,
                             ),
@@ -339,8 +339,8 @@ class _MoneyReceiptScreenState extends State<MoneyReceiptScreen> {
                           value: item,
                           child: Text(
                             item.username ?? 'Unknown Seller',
-                            style: const TextStyle(
-                              color: AppColors.blackColor,
+                            style:  TextStyle(
+                              color:AppColors.blackColor(context),
                               fontFamily: 'Quicksand',
                               fontWeight: FontWeight.w300,
                             ),

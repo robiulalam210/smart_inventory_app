@@ -37,7 +37,7 @@ class _TopProductsScreenState extends State<TopProductsScreen> {
         Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
 
     return Container(
-      color: AppColors.bg,
+      color: AppColors.bottomNavBg(context),
       child: SafeArea(
         child: ResponsiveRow(
           children: [
@@ -108,7 +108,7 @@ class _TopProductsScreenState extends State<TopProductsScreen> {
               "Total Products",
               summary.totalProducts.toString(),
               Icons.inventory_2,
-              AppColors.primaryColor,
+              AppColors.primaryColor(context),
             ),
             _buildSummaryCard(
               "Total Quantity Sold",
@@ -150,7 +150,7 @@ class _TopProductsScreenState extends State<TopProductsScreen> {
                       pdfPreviewPageDecoration:
                       BoxDecoration(color: AppColors.white),
                       actionBarTheme: PdfActionBarTheme(
-                        backgroundColor: AppColors.primaryColor,
+                        backgroundColor: AppColors.primaryColor(context),
                         iconColor: Colors.white,
                         textStyle: const TextStyle(color: Colors.white),
                       ),
@@ -248,10 +248,10 @@ class _TopProductsScreenState extends State<TopProductsScreen> {
                 ),
                 Text(
                   value,
-                  style: const TextStyle(
+                  style:  TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.blackColor,
+                    color:AppColors.blackColor(context),
                   ),
                 ),
               ],
@@ -426,7 +426,7 @@ class TopProductsTableCard extends StatelessWidget {
                             fontFamily: GoogleFonts.inter().fontFamily,
                           ),
                           headingRowColor: WidgetStateProperty.all(
-                            AppColors.primaryColor,
+                            AppColors.primaryColor(context),
                           ),
                           dataTextStyle: TextStyle(
                             fontSize: 11,

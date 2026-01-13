@@ -59,7 +59,7 @@ class _SplashScreenState extends State<SplashScreen>
           }
         },
         child: Container(
-          decoration: BoxDecoration(gradient: AppColors.primaryGradient),
+          decoration: BoxDecoration(gradient: AppColors.primaryGradient(context)),
           child: Stack(
             fit: StackFit.expand,
             children: [

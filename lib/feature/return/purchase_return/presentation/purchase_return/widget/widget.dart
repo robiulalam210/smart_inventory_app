@@ -80,7 +80,7 @@ class PurchaseReturnTableCard extends StatelessWidget {
                             fontWeight: FontWeight.w700,
                             fontFamily: GoogleFonts.inter().fontFamily,
                           ),
-                          headingRowColor: WidgetStateProperty.all(AppColors.primaryColor),
+                          headingRowColor: WidgetStateProperty.all(AppColors.primaryColor(context)),
                           dataTextStyle: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w500,
@@ -147,11 +147,11 @@ class PurchaseReturnTableCard extends StatelessWidget {
                   children: [
                     CircleAvatar(
                       radius: 18,
-                      backgroundColor: AppColors.primaryColor.withValues(alpha: 0.1),
+                      backgroundColor: AppColors.primaryColor(context).withValues(alpha: 0.1),
                       child: Text(
                         '${index + 1}',
                         style: TextStyle(
-                          color: AppColors.primaryColor,
+                          color: AppColors.primaryColor(context),
                           fontWeight: FontWeight.w700,
                         ),
                       ),
@@ -201,7 +201,7 @@ class PurchaseReturnTableCard extends StatelessWidget {
                 if ((pr.reason ?? '').isNotEmpty) ...[
                   Align(
                     alignment: Alignment.centerLeft,
-                    child: Text('Reason:', style: TextStyle(fontWeight: FontWeight.w700, color: AppColors.blackColor)),
+                    child: Text('Reason:', style: TextStyle(fontWeight: FontWeight.w700, color:AppColors.blackColor(context))),
                   ),
                   const SizedBox(height: 4),
                   Align(
@@ -449,7 +449,7 @@ class PurchaseReturnTableCard extends StatelessWidget {
         content: Text(content),
         actions: [
           TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Cancel')),
-          ElevatedButton(onPressed: () => Navigator.of(context).pop(true), style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryColor), child: const Text('Confirm')),
+          ElevatedButton(onPressed: () => Navigator.of(context).pop(true), style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryColor(context)), child: const Text('Confirm')),
         ],
       ),
     );

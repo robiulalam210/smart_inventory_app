@@ -84,7 +84,7 @@ class CategoriesListMobile extends StatelessWidget {
                     width: 28,
                     height: 28,
                     decoration: BoxDecoration(
-                      color: AppColors.primaryColor.withValues(alpha: 0.1),
+                      color: AppColors.primaryColor(context).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Center(
@@ -93,7 +93,7 @@ class CategoriesListMobile extends StatelessWidget {
                         style: GoogleFonts.inter(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
-                          color: AppColors.primaryColor,
+                          color: AppColors.primaryColor(context),
                         ),
                       ),
                     ),
@@ -288,13 +288,13 @@ class CategoriesListMobile extends StatelessWidget {
               width: 150,
               height: 150,
               decoration: BoxDecoration(
-                color: AppColors.primaryColor.withValues(alpha: 0.05),
+                color: AppColors.primaryColor(context).withValues(alpha: 0.05),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 Icons.category_outlined,
                 size: 80,
-                color: AppColors.primaryColor.withValues(alpha: 0.3),
+                color: AppColors.primaryColor(context).withValues(alpha: 0.3),
               ),
             ),
             const SizedBox(height: 24),
@@ -343,7 +343,7 @@ class CategoriesListMobile extends StatelessWidget {
                   );
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryColor,
+                  backgroundColor: AppColors.primaryColor(context),
                   padding: const EdgeInsets.symmetric(
                     horizontal: 32,
                     vertical: 14,
@@ -447,7 +447,7 @@ class CategoriesTableCard extends StatelessWidget {
                             fontFamily: GoogleFonts.inter().fontFamily,
                           ),
                           headingRowColor: WidgetStateProperty.all(
-                            AppColors.primaryColor,
+                            AppColors.primaryColor(context),
                           ),
                           dataTextStyle: TextStyle(
                             fontSize: 11,

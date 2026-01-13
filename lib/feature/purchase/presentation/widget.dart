@@ -72,7 +72,7 @@ class PurchaseDataTableWidget extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color: AppColors.primaryColor.withValues(alpha: 0.05),
+              color: AppColors.primaryColor(context).withValues(alpha: 0.05),
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(16),
                 topRight: Radius.circular(16),
@@ -89,7 +89,7 @@ class PurchaseDataTableWidget extends StatelessWidget {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: AppColors.primaryColor,
+                        color: AppColors.primaryColor(context),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
@@ -408,7 +408,7 @@ class PurchaseDataTableWidget extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                         ),
                         headingRowColor: WidgetStateProperty.all(
-                          AppColors.primaryColor,
+                          AppColors.primaryColor(context),
                         ),
                         columns: _buildColumns(dynamicColumnWidth),
                         rows: sales
@@ -635,7 +635,7 @@ class PurchaseDataTableWidget extends StatelessWidget {
         builder: (context) => Scaffold(
           appBar: AppBar(
             title: const Text('Purchase Invoice'),
-            backgroundColor: AppColors.primaryColor,
+            backgroundColor: AppColors.primaryColor(context),
           ),
           body: PdfPreview.builder(
             useActions: true,

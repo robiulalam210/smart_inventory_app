@@ -123,7 +123,7 @@ class _AccountTransferScreenState extends State<AccountTransferScreen> {
         Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
 
     return Container(
-      color: AppColors.bg,
+      color: AppColors.bottomNavBg(context),
       child: SafeArea(
         child: ResponsiveRow(
           spacing: 0,
@@ -159,7 +159,7 @@ class _AccountTransferScreenState extends State<AccountTransferScreen> {
       lg: 10,
       xl: 10,
       child: RefreshIndicator(
-        color: AppColors.primaryColor,
+        color: AppColors.primaryColor(context),
         onRefresh: () async {
           _fetchApi();
         },
@@ -655,8 +655,8 @@ class _AccountTransferScreenState extends State<AccountTransferScreen> {
               value: item,
               child: Text(
                 item.toUpperCase(),
-                style: const TextStyle(
-                  color: AppColors.blackColor,
+                style:  TextStyle(
+                  color:AppColors.blackColor(context),
                   fontFamily: 'Quicksand',
                   fontWeight: FontWeight.w300,
                 ),
@@ -686,8 +686,8 @@ class _AccountTransferScreenState extends State<AccountTransferScreen> {
               value: item,
               child: Text(
                 item.replaceAll('_', ' ').toUpperCase(),
-                style: const TextStyle(
-                  color: AppColors.blackColor,
+                style:  TextStyle(
+                  color:AppColors.blackColor(context),
                   fontFamily: 'Quicksand',
                   fontWeight: FontWeight.w300,
                 ),
@@ -739,8 +739,8 @@ class _AccountTransferScreenState extends State<AccountTransferScreen> {
               : "Select Date Range",
           onPressed: () => _showDateRangePicker(context),
           color: startDate != null && endDate != null
-              ? AppColors.primaryColor.withValues(alpha: 0.8)
-              : AppColors.primaryColor,
+              ? AppColors.primaryColor(context).withValues(alpha: 0.8)
+              : AppColors.primaryColor(context),
         ),
 
         // Clear Date Button (only shown when date is selected)
@@ -748,7 +748,7 @@ class _AccountTransferScreenState extends State<AccountTransferScreen> {
           const SizedBox(width: 10),
           AppButton(
             name: "Clear Date",
-            color: AppColors.secondary,
+            color: AppColors.secondary(context),
             onPressed: _clearDateFilter,
           ),
         ],
@@ -766,7 +766,7 @@ class _AccountTransferScreenState extends State<AccountTransferScreen> {
                 isReversalNotifier.value = value;
                 _fetchApi(isReversal: value);
               },
-              activeThumbColor: AppColors.primaryColor,
+              activeThumbColor: AppColors.primaryColor(context),
             ),
           ],
         ),

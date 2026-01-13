@@ -57,7 +57,7 @@ class _GroupsScreenState extends State<MobileGroupsScreen> {
           lg: 10,
           xl: 10,
           child: Container(
-            color: AppColors.bg,
+            color: AppColors.bottomNavBg(context),
             child: RefreshIndicator(
               onRefresh: () async {
                 _fetchApi();

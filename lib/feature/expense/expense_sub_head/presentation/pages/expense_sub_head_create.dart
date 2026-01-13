@@ -159,7 +159,7 @@ class _ExpenseSubCreateScreenState extends State<ExpenseSubCreateScreen> {
             width: MediaQuery.of(context).size.width,
             decoration: BoxDecoration(
               shape: BoxShape.rectangle,
-              color: AppColors.whiteColor,
+              color: AppColors.whiteColor(context),
               borderRadius: BorderRadius.circular(AppSizes.radius),
             ),
             child: Padding(
@@ -233,8 +233,8 @@ class _ExpenseSubCreateScreenState extends State<ExpenseSubCreateScreen> {
                               value: item,
                               child: Text(
                                 item.name ?? 'Unnamed Head',
-                                style: const TextStyle(
-                                  color: AppColors.blackColor,
+                                style:  TextStyle(
+                                  color:AppColors.blackColor(context),
                                   fontFamily: 'Quicksand',
                                   fontWeight: FontWeight.w300,
                                 ),

@@ -209,7 +209,7 @@ class _LogInScreenState extends State<LogInScreen> {
       child: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         child: Scaffold(
-          backgroundColor: AppColors.bg,
+          backgroundColor: AppColors.bottomNavBg(context),
           body: BlocListener<AuthBloc, AuthState>(
             listener: (context, state) async {
               if (state is AuthAuthenticated || state is AuthAuthenticatedOffline) {
@@ -247,7 +247,7 @@ class _LogInScreenState extends State<LogInScreen> {
             child: Container(
               width: double.infinity,
               height: double.infinity,
-              decoration: BoxDecoration(gradient: AppColors.primaryGradient),
+              decoration: BoxDecoration(gradient: AppColors.primaryGradient(context)),
               child: Center(
                 child: SingleChildScrollView(
                   padding: EdgeInsets.only(bottom: keyboardInset),

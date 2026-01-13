@@ -14,7 +14,7 @@ class PurchaseDetailsScreen extends StatelessWidget {
     final isDesktop = MediaQuery.of(context).size.width > 768;
 
     return Scaffold(
-      backgroundColor: AppColors.bg,
+      backgroundColor: AppColors.bottomNavBg(context),
       appBar: AppBar(
         title: Text('Purchase Details - ${purchase.invoiceNo}'),
         actions: [
@@ -25,11 +25,11 @@ class PurchaseDetailsScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: isDesktop ? _buildDesktopView() : _buildMobileView(),
+      body: isDesktop ? _buildDesktopView(context ,) : _buildMobileView(context ,),
     );
   }
 
-  Widget _buildDesktopView() {
+  Widget _buildDesktopView(BuildContext context ,) {
     return Padding(
       padding: const EdgeInsets.all(24),
       child: Row(
@@ -40,9 +40,9 @@ class PurchaseDetailsScreen extends StatelessWidget {
             flex: 2,
             child: Column(
               children: [
-                _buildHeaderCard(),
+                _buildHeaderCard(context ,),
                 const SizedBox(height: 16),
-                _buildItemsCard(),
+                _buildItemsCard(context ,),
               ],
             ),
           ),
@@ -52,7 +52,7 @@ class PurchaseDetailsScreen extends StatelessWidget {
             flex: 1,
             child: Column(
               children: [
-                _buildSummaryCard(),
+                _buildSummaryCard(context ,),
                 const SizedBox(height: 16),
                 _buildPaymentCard(),
               ],
@@ -63,16 +63,16 @@ class PurchaseDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMobileView() {
+  Widget _buildMobileView(BuildContext context ,) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
-          _buildHeaderCard(),
+          _buildHeaderCard(context ,),
           const SizedBox(height: 16),
-          _buildItemsCard(),
+          _buildItemsCard(context ,),
           const SizedBox(height: 16),
-          _buildSummaryCard(),
+          _buildSummaryCard(context ,),
           const SizedBox(height: 16),
           _buildPaymentCard(),
         ],
@@ -80,7 +80,7 @@ class PurchaseDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildHeaderCard() {
+  Widget _buildHeaderCard(BuildContext context ,) {
     return Card(
       elevation: 3,
       child: Padding(
@@ -94,10 +94,10 @@ class PurchaseDetailsScreen extends StatelessWidget {
                 Expanded(
                   child: Text(
                     'Purchase Invoice: ${purchase.invoiceNo}',
-                    style: const TextStyle(
+                    style:  TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
-                      color: AppColors.primaryColor,
+                      color: AppColors.primaryColor(context),
                     ),
                   ),
                 ),
@@ -175,7 +175,7 @@ class PurchaseDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildItemsCard() {
+  Widget _buildItemsCard(BuildContext context ,) {
     return Card(
       elevation: 3,
       child: Padding(
@@ -199,14 +199,14 @@ class PurchaseDetailsScreen extends StatelessWidget {
                 ),
               ),
             if (purchase.items != null && purchase.items!.isNotEmpty)
-              _buildItemsTable(),
+              _buildItemsTable(context ,),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildItemsTable() {
+  Widget _buildItemsTable(BuildContext context ,) {
     return Container(
       decoration: BoxDecoration(
         border: Border.all(color: Colors.grey.shade300),
@@ -227,14 +227,14 @@ class PurchaseDetailsScreen extends StatelessWidget {
           // Header row
           TableRow(
             decoration: BoxDecoration(
-              color: AppColors.primaryColor.withValues(alpha: 0.1),
+              color: AppColors.primaryColor(context).withValues(alpha: 0.1),
             ),
             children: [
-              _buildTableHeaderCell('Product'),
-              _buildTableHeaderCell('Qty'),
-              _buildTableHeaderCell('Price'),
-              _buildTableHeaderCell('Discount'),
-              _buildTableHeaderCell('Total'),
+              _buildTableHeaderCell(context ,'Product'),
+              _buildTableHeaderCell(context ,'Qty'),
+              _buildTableHeaderCell(context ,'Price'),
+              _buildTableHeaderCell(context ,'Discount'),
+              _buildTableHeaderCell(context ,'Total'),
             ],
           ),
           // Data rows
@@ -244,14 +244,14 @@ class PurchaseDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTableHeaderCell(String text) {
+  Widget _buildTableHeaderCell(context ,String text) {
     return Padding(
       padding: const EdgeInsets.all(12),
       child: Text(
         text,
-        style: const TextStyle(
+        style:  TextStyle(
           fontWeight: FontWeight.bold,
-          color: AppColors.primaryColor,
+          color: AppColors.primaryColor(context),
         ),
         textAlign: TextAlign.center,
       ),
@@ -310,7 +310,7 @@ class PurchaseDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSummaryCard() {
+  Widget _buildSummaryCard(BuildContext context ,) {
     final total = double.tryParse(purchase.total.toString()) ?? 0.0
        ;
     final grandTotal = double.tryParse(purchase.grandTotal.toString()) ?? 0.0
@@ -333,7 +333,7 @@ class PurchaseDetailsScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            _buildDesktopSummaryList(
+            _buildDesktopSummaryList(context ,
               subTotal,
               total,
               grandTotal,
@@ -345,42 +345,44 @@ class PurchaseDetailsScreen extends StatelessWidget {
   }
 
   Widget _buildDesktopSummaryList(
+      BuildContext context ,
       double subTotal,
       double total,
       double grandTotal,
       ) {
     return Column(
       children: [
-        if (subTotal > 0) _buildSummaryItem('Sub Total', subTotal),
+        if (subTotal > 0) _buildSummaryItem(context ,'Sub Total', subTotal),
         if (purchase.overallDiscount != null && purchase.overallDiscount != "0")
-          _buildSummaryItem(
+          _buildSummaryItem(context ,
             'Discount ${purchase.overallDiscountType == 'percent' ? '(${purchase.overallDiscount}%)' : ''}',
             -double.parse(purchase.overallDiscount ?? '0'),
             isNegative: true,
           ),
         if (purchase.overallDeliveryCharge != null && purchase.overallDeliveryCharge != "0")
-          _buildSummaryItem(
+          _buildSummaryItem(context ,
             'Delivery Charge',
             double.parse(purchase.overallDeliveryCharge ?? '0'),
           ),
         if (purchase.overallServiceCharge != null && purchase.overallServiceCharge != "0")
-          _buildSummaryItem(
+          _buildSummaryItem(context ,
             'Service Charge',
             double.parse(purchase.overallServiceCharge ?? '0'),
           ),
         if (purchase.vat != null && purchase.vat != "0")
-          _buildSummaryItem(
+          _buildSummaryItem(context ,
             'VAT ${purchase.vatType == 'percent' ? '(${purchase.vat}%)' : ''}',
             double.parse(purchase.vat ?? '0'),
           ),
         const Divider(),
-        if (total > 0) _buildSummaryItem('Total', total, isTotal: true),
-        _buildSummaryItem('Grand Total', grandTotal, isGrandTotal: true),
+        if (total > 0) _buildSummaryItem(context ,'Total', total, isTotal: true),
+        _buildSummaryItem(context ,'Grand Total', grandTotal, isGrandTotal: true),
       ],
     );
   }
 
   Widget _buildSummaryItem(
+      BuildContext context ,
       String label,
       double amount, {
         bool isNegative = false,
@@ -399,7 +401,7 @@ class PurchaseDetailsScreen extends StatelessWidget {
                 fontWeight: isTotal || isGrandTotal
                     ? FontWeight.w600
                     : FontWeight.normal,
-                color: isGrandTotal ? AppColors.primaryColor : Colors.black,
+                color: isGrandTotal ? AppColors.primaryColor(context) : Colors.black,
                 fontSize: isGrandTotal ? 15 : 14,
               ),
             ),
@@ -410,7 +412,7 @@ class PurchaseDetailsScreen extends StatelessWidget {
               fontWeight: isTotal || isGrandTotal
                   ? FontWeight.bold
                   : FontWeight.normal,
-              color: isGrandTotal ? AppColors.primaryColor : Colors.black,
+              color: isGrandTotal ? AppColors.primaryColor(context) : Colors.black,
               fontSize: isGrandTotal ? 16 : 14,
             ),
           ),
@@ -516,7 +518,7 @@ class PurchaseDetailsScreen extends StatelessWidget {
           backgroundColor: Colors.white,
           appBar: AppBar(
             title: const Text('Purchase Invoice Preview'),
-            backgroundColor: AppColors.primaryColor,
+            backgroundColor: AppColors.primaryColor(context),
             foregroundColor: Colors.white,
           ),
           body: PdfPreview(
@@ -529,7 +531,7 @@ class PurchaseDetailsScreen extends StatelessWidget {
             build: (format) => generatePurchasePdf(purchase, context.read<ProfileBloc>().permissionModel?.data?.companyInfo),
             pdfPreviewPageDecoration: BoxDecoration(color: AppColors.white),
             actionBarTheme: PdfActionBarTheme(
-              backgroundColor: AppColors.primaryColor,
+              backgroundColor: AppColors.primaryColor(context),
               iconColor: Colors.white,
               textStyle: const TextStyle(color: Colors.white),
             ),

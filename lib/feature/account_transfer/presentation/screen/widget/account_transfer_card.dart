@@ -41,7 +41,7 @@ class MobileAccountTransferCard extends StatelessWidget {
 
   Widget _buildTransferCard(BuildContext context, AccountTransferModel transfer) {
     return Card(
-      color: AppColors.whiteColor,
+      color: AppColors.whiteColor(context),
       margin: const EdgeInsets.only(bottom: 8),
       elevation: 0,
       shape: RoundedRectangleBorder(
@@ -567,7 +567,7 @@ class AccountTransferCard extends StatelessWidget {
                           fontFamily: GoogleFonts.inter().fontFamily,
                         ),
                         headingRowColor: WidgetStateProperty.all(
-                          AppColors.primaryColor,
+                          AppColors.primaryColor(context),
                         ),
                         dataTextStyle: TextStyle(
                           fontSize: 11,
@@ -956,7 +956,7 @@ class AccountTransferCard extends StatelessWidget {
           children: [
             Icon(
               Icons.account_balance_wallet,
-              color: AppColors.primaryColor,
+              color: AppColors.primaryColor(context),
             ),
             const SizedBox(width: 8),
             Text(

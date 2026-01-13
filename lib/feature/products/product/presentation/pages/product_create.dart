@@ -162,7 +162,7 @@ class _ProductsFormState extends State<ProductsForm> {
   Widget _buildDialogContent() {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.bg,
+        color: AppColors.bottomNavBg(context),
         borderRadius: BorderRadius.circular(12),
       ),
       padding: const EdgeInsets.all(12),
@@ -317,8 +317,8 @@ class _ProductsFormState extends State<ProductsForm> {
                                   value: item,
                                   child: Text(
                                     item.toString(),
-                                    style: const TextStyle(
-                                      color: AppColors.blackColor,
+                                    style:  TextStyle(
+                                      color:AppColors.blackColor(context),
                                       fontFamily: 'Quicksand',
                                       fontWeight: FontWeight.w600,
                                     ),
@@ -756,8 +756,8 @@ class _ProductsFormState extends State<ProductsForm> {
                 },
                 groupValue: productsBloc.selectedDiscountType,
                 unselectedColor: Colors.grey[300],
-                selectedColor: AppColors.primaryColor,
-                borderColor: AppColors.primaryColor,
+                selectedColor: AppColors.primaryColor(context),
+                borderColor: AppColors.primaryColor(context),
               );
             },
           ),

@@ -1,52 +1,115 @@
+ import '../../feature/common/presentation/cubit/theme_cubit.dart';
 import 'configs.dart';
 
-class AppColors {
+ class AppColors {
+   static const Color error = Color(0xffE53935);
+   static const Color grey = Color.fromARGB(255, 159, 159, 159);
+   static const Color lightGrey = Color.fromARGB(255, 231, 231, 231);
+   static const Color white = Color(0xffffffff);
+   static const Color black = Colors.black;
+
+   // Light theme defaults
+   static const Color lightBg = Color(0xFFEFF9FF);
+   static const Color lightBgBottomNav = Color(0xFFF6FCFF);
+   static const Color lightText = Color(0xff000000);
+
+   // Dark theme defaults
+   static const Color darkBg = Color(0xFF14171C);
+   static const Color darkBgBottomNav = Color(0xFF191A22);
+   static const Color darkText = Color(0xFFF2F2F2);
+
+   // Default fallback for brand color (can be replaced by ThemeCubit)
+   // static const Color defaultPrimary = Color(0xff60DAFF);
+   static const Color defaultPrimary = Color(0xff60DAFF);
+
+   /// Get current theme primary color, falling back if Cubit not present.
+   static Color primaryColor(BuildContext context) {
+     try {
+       final themeState = context.watch<ThemeCubit>().state;
+       return themeState.primaryColor;
+     } catch (_) {
+       return defaultPrimary;
+     }
+   }
+
+   static Color secondary(BuildContext context) =>
+       _soften(primaryColor(context), 0.4);
+
+   static Color primaryLight(BuildContext context) =>
+       _lighten(primaryColor(context), 0.25);
+
+   static Color primaryDark(BuildContext context) =>
+       _darken(primaryColor(context), 0.15);
+
+   /// Theme-aware background color
+   static Color background(BuildContext context) =>
+       Theme.of(context).brightness == Brightness.dark
+           ? darkBg
+           : lightBg;
+
+   static Color bottomNavBg(BuildContext context) =>
+       Theme.of(context).brightness == Brightness.dark
+           ? darkBgBottomNav
+           : lightBgBottomNav;
+
+   static Color text(BuildContext context) =>
+       Theme.of(context).brightness == Brightness.dark
+           ? darkText
+           : lightText;
+
+   static LinearGradient primaryGradient(BuildContext context) =>
+       buildGradient(primaryColor(context));
+
+   static LinearGradient buildGradient(Color base) => LinearGradient(
+     begin: Alignment.topLeft,
+     end: Alignment.bottomRight,
+     colors: [
+       _lighten(base, 0.15),
+       _darken(base, 0.05),
+     ],
+   );
+
+   // Utility helpers for color manipulation
+   static Color _lighten(Color color, [double amount = .1]) {
+     final hsl = HSLColor.fromColor(color);
+     final hslLight =
+     hsl.withLightness((hsl.lightness + amount).clamp(0.0, 1.0));
+     return hslLight.toColor();
+   }
+
+   static Color _darken(Color color, [double amount = .1]) {
+     final hsl = HSLColor.fromColor(color);
+     final hslDark = hsl.withLightness((hsl.lightness - amount).clamp(0.0, 1.0));
+     return hslDark.toColor();
+   }
+
+   static Color _soften(Color color, [double amount = .3]) {
+     final hsl = HSLColor.fromColor(color);
+     final hslSoft = hsl
+         .withSaturation((hsl.saturation * (1 - amount)).clamp(0.0, 1.0))
+         .withLightness((hsl.lightness + amount * 0.4).clamp(0.0, 1.0));
+     return hslSoft.toColor();
+   }
 
 
-  static const Color error = Color(0xffE53935);
-  static const Color grey = Color.fromARGB(255, 159, 159, 159);
-  static const Color lightGrey = Color.fromARGB(255, 231, 231, 231);
-  static const Color white = Color(0xffffffff);
-  static const Color black = Colors.black;
+   // Static error, white, black, greys for all modes
+   static Color errorColor(BuildContext context) => error;
+   static Color greyColor(BuildContext context) => grey;
+   static Color lightGreyColor(BuildContext context) => lightGrey;
+   static Color whiteColor(BuildContext context) => white;
+   static Color blackColor(BuildContext context) => black;
 
-  // Light theme defaults
-  static const Color lightBg = Color(0xFFEFF9FF);
-  static const Color lightBgBottomNav = Color(0xFFF6FCFF);
-  static const Color lightText = Color(0xff000000);
 
-  // Dark theme defaults
-  static const Color darkBg = Color(0xFF14171C);
-  static const Color darkBgBottomNav = Color(0xFF191A22);
-  static const Color darkText = Color(0xFFF2F2F2);
-  static const Color primaryColor = Color(0xff60DAFF);
-  static Color bottomNavBg(BuildContext context) =>
-      Theme.of(context).brightness == Brightness.dark
-          ? darkBgBottomNav
-          : lightBgBottomNav;
-  static Color background(BuildContext context) =>
-      Theme.of(context).brightness == Brightness.dark
-          ? darkBg
-          : lightBg;
-  static Color get secondary => _soften(primaryColor, 0.4);
 
-  // --- Derived Colors ---
-  static Color get primaryLight => _lighten(primaryColor, 0.25);
 
-  static Color get primaryDark => _darken(primaryColor, 0.15);
 
-  /// 🌈 Background based on primary color (blends with white)
 
-  // Try 0.85–0.9 for more or less intensity
-
-  // Gradient based on primary shades
-  static LinearGradient get primaryGradient => buildGradient(primaryColor);
 
 
   static const Color matteBlack = Color(0xff28282B);
   // static const Color seed = Colors.redAccent;
   static const Color link = Colors.blue;
   static const Color blue = Colors.blueAccent;
-  static const Color text = matteBlack;
   static const Color subText = Colors.blueGrey;
   static const Color disable = Colors.grey;
   static const Color green = Colors.greenAccent;
@@ -60,8 +123,6 @@ class AppColors {
   static const Color primaryColorBg             = Color(0xFFCEE2CE);
   static const Color bg               = Color(0xffEFF9FF);
   static const Color lightGreen               = Color(0xFFFCFCFC);
-  static const Color whiteColor               =Color(0xFFFFFFFF);
-  static const Color blackColor               = Color(0xFF191919);
   static const Color black50Color               = Color(0xFF353535);
   static const Color white50Color               = Color(0xFF9E9E9E);
   static Color onInverseSurface(BuildContext context) => Theme.of(context).colorScheme.onInverseSurface;
@@ -149,45 +210,6 @@ class AppColors {
 
 
 
-  static LinearGradient buildGradient(Color base) => LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-    colors: [
-      _lighten(base, 0.15),
-      _darken(base, 0.05),
-    ],
-  );
 
-  // --- Utility helpers ---
-  static Color _lighten(Color color, [double amount = .1]) {
-    final hsl = HSLColor.fromColor(color);
-    final hslLight =
-    hsl.withLightness((hsl.lightness + amount).clamp(0.0, 1.0));
-    return hslLight.toColor();
-  }
 
-  static Color _darken(Color color, [double amount = .1]) {
-    final hsl = HSLColor.fromColor(color);
-    final hslDark = hsl.withLightness((hsl.lightness - amount).clamp(0.0, 1.0));
-    return hslDark.toColor();
-  }
-
-  /// Lightens and slightly desaturates a color for secondary tone
-  static Color _soften(Color color, [double amount = .3]) {
-    final hsl = HSLColor.fromColor(color);
-    final hslSoft = hsl
-        .withSaturation((hsl.saturation * (1 - amount)).clamp(0.0, 1.0))
-        .withLightness((hsl.lightness + amount * 0.4).clamp(0.0, 1.0));
-    return hslSoft.toColor();
-  }
-
-  /// Mixes color with white to create soft pastel background
-  static Color _mixWithWhite(Color color, double amount) {
-    return Color.lerp(color, Colors.white, amount)!;
-  }
-}
-
-// class AppColors{
-//
-//
-// }
+ }

@@ -56,7 +56,7 @@ class _CustomerLedgerScreenState extends State<CustomerLedgerScreen> {
     final isBigScreen = Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
 
     return Container(
-      color: AppColors.bg,
+      color: AppColors.bottomNavBg(context),
       child: SafeArea(
         child: ResponsiveRow(
           children: [
@@ -142,8 +142,8 @@ class _CustomerLedgerScreenState extends State<CustomerLedgerScreen> {
                   value: item,
                   child: Text(
                     item.name ?? 'Unknown Customer',
-                    style: const TextStyle(
-                      color: AppColors.blackColor,
+                    style:  TextStyle(
+                      color:AppColors.blackColor(context),
                       fontFamily: 'Quicksand',
                       fontWeight: FontWeight.w300,
                     ),
@@ -287,7 +287,7 @@ class _CustomerLedgerScreenState extends State<CustomerLedgerScreen> {
                   _buildSummaryItem("Total Credit", totalCredit.toStringAsFixed(2), Icons.arrow_upward, Colors.green),
                   _buildSummaryItem("Sales Transactions", salesCount.toString(), Icons.shopping_cart, Colors.orange),
                   _buildSummaryItem("Payment Transactions", paymentsCount.toString(), Icons.payment, Colors.purple),
-                  _buildSummaryItem("Total Transactions", summary.totalTransactions.toString(), Icons.receipt, AppColors.primaryColor),
+                  _buildSummaryItem("Total Transactions", summary.totalTransactions.toString(), Icons.receipt, AppColors.primaryColor(context)),
                   AppButton(
                       size: 80,
                       name: "Pdf", onPressed: (){
@@ -310,7 +310,7 @@ class _CustomerLedgerScreenState extends State<CustomerLedgerScreen> {
                             pdfPreviewPageDecoration:
                             BoxDecoration(color: AppColors.white),
                             actionBarTheme: PdfActionBarTheme(
-                              backgroundColor: AppColors.primaryColor,
+                              backgroundColor: AppColors.primaryColor(context),
                               iconColor: Colors.white,
                               textStyle: const TextStyle(color: Colors.white),
                             ),
@@ -559,7 +559,7 @@ class CustomerLedgerTableCard extends StatelessWidget {
                             fontFamily: GoogleFonts.inter().fontFamily,
                           ),
                           headingRowColor: WidgetStateProperty.all(
-                            AppColors.primaryColor,
+                            AppColors.primaryColor(context),
                           ),
                           dataTextStyle: TextStyle(
                             fontSize: 10,

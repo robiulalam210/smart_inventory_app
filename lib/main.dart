@@ -1,18 +1,22 @@
 import 'dart:io';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:window_manager/window_manager.dart';
 import 'app/app.dart';
 import 'core/configs/configs.dart';
+import 'core/database/auth_db.dart';
 import 'feature/keyboard.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:screen_retriever/screen_retriever.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await EasyLocalization.ensureInitialized();
   await dotenv.load(fileName: ".env");
 
-  // final dbHelper = DatabaseHelper();
-  // await dbHelper.initDatabase();
-
+  final savedLang = await AuthLocalDB.getLanguage();
+  final startLocale = savedLang != null && savedLang.isNotEmpty
+      ? Locale(savedLang)
+      : const Locale('en');
   // 🖥️ Desktop window setup (dynamic sizing)
   if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
     await windowManager.ensureInitialized();
@@ -65,7 +69,13 @@ void main() async {
   runApp(
     ToastificationWrapper(
       child: KeyboardGuard(
-        child: MyApp(),
+        child: EasyLocalization(
+          supportedLocales: const [Locale('en'), Locale('bn')],
+          path: 'assets/translations',
+          fallbackLocale: const Locale('en'),
+          startLocale: startLocale,
+          child: const MyApp(),
+        ),
       ),
     ),
   );

@@ -229,8 +229,8 @@
 //       },
 //       groupValue: selectedPurchaseOverviewType,
 //       unselectedColor: Colors.white54,
-//       selectedColor: AppColors.primaryColor,
-//       borderColor: AppColors.primaryColor,
+//       selectedColor: AppColors.primaryColor(context),
+//       borderColor: AppColors.primaryColor(context),
 //     ),
 //   );
 // }

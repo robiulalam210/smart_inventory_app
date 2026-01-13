@@ -696,8 +696,8 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
                   value: item,
                   child: Text(
                     item.toString(),
-                    style: const TextStyle(
-                      color: AppColors.blackColor,
+                    style:  TextStyle(
+                      color:AppColors.blackColor(context),
                       fontFamily: 'Quicksand',
                       fontWeight: FontWeight.w600,
                     ),
@@ -715,7 +715,7 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
             hintText: 'Purchase Date',
             keyboardType: TextInputType.datetime,
             bottom: 15.0,
-            fillColor: AppColors.whiteColor,
+            fillColor: AppColors.whiteColor(context),
             validator: (value) {
               return value!.isEmpty ? 'Please enter date' : null;
             },
@@ -769,8 +769,8 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
                   },
                   groupValue: selectedVatType,
                   unselectedColor: Colors.grey[300],
-                  selectedColor: AppColors.primaryColor,
-                  borderColor: AppColors.primaryColor,
+                  selectedColor: AppColors.primaryColor(context),
+                  borderColor: AppColors.primaryColor(context),
                 ),
               ),
               const SizedBox(width: 8),
@@ -985,21 +985,21 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
                         "Price",
                         style: AppTextStyle.cardLevelText(context),
                       ),
-                      fillColor: AppColors.whiteColor,
+                      fillColor: AppColors.whiteColor(context),
                       filled: true,
                       hintStyle: AppTextStyle.cardLevelText(context),
                       isCollapsed: true,
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(5),
                         borderSide: BorderSide(
-                          color: AppColors.primaryColor.withValues(alpha: 0.5),
+                          color: AppColors.primaryColor(context).withValues(alpha: 0.5),
                           width: 0.5,
                         ),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(5),
                         borderSide: BorderSide(
-                          color: AppColors.primaryColor.withValues(alpha: 0.5),
+                          color: AppColors.primaryColor(context).withValues(alpha: 0.5),
                           width: 0.5,
                         ),
                       ),
@@ -1078,8 +1078,8 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
                     },
                     groupValue: products[index]["discount_type"],
                     unselectedColor: Colors.grey[300],
-                    selectedColor: AppColors.primaryColor,
-                    borderColor: AppColors.primaryColor,
+                    selectedColor: AppColors.primaryColor(context),
+                    borderColor: AppColors.primaryColor(context),
                   ),
                 ),
                 ResponsiveCol(
@@ -1095,21 +1095,21 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
                       decimal: true,
                     ),
                     decoration: InputDecoration(
-                      fillColor: AppColors.whiteColor,
+                      fillColor: AppColors.whiteColor(context),
                       filled: true,
                       hintStyle: AppTextStyle.cardLevelText(context),
                       isCollapsed: true,
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(5),
                         borderSide: BorderSide(
-                          color: AppColors.primaryColor.withValues(alpha: 0.5),
+                          color: AppColors.primaryColor(context).withValues(alpha: 0.5),
                           width: 0.5,
                         ),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(5),
                         borderSide: BorderSide(
-                          color: AppColors.primaryColor.withValues(alpha: 0.5),
+                          color: AppColors.primaryColor(context).withValues(alpha: 0.5),
                           width: 0.5,
                         ),
                       ),
@@ -1208,21 +1208,21 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
                         "Ticket Total",
                         style: AppTextStyle.cardLevelText(context),
                       ),
-                      fillColor: AppColors.whiteColor,
+                      fillColor: AppColors.whiteColor(context),
                       filled: true,
                       hintStyle: AppTextStyle.cardLevelText(context),
                       isCollapsed: true,
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(5),
                         borderSide: BorderSide(
-                          color: AppColors.primaryColor.withValues(alpha: 0.5),
+                          color: AppColors.primaryColor(context).withValues(alpha: 0.5),
                           width: 0.5,
                         ),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(5),
                         borderSide: BorderSide(
-                          color: AppColors.primaryColor.withValues(alpha: 0.5),
+                          color: AppColors.primaryColor(context).withValues(alpha: 0.5),
                           width: 0.5,
                         ),
                       ),
@@ -1262,21 +1262,21 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
                         "Total Amount",
                         style: AppTextStyle.cardLevelText(context),
                       ),
-                      fillColor: AppColors.whiteColor,
+                      fillColor: AppColors.whiteColor(context),
                       filled: true,
                       hintStyle: AppTextStyle.cardLevelText(context),
                       isCollapsed: true,
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(5),
                         borderSide: BorderSide(
-                          color: AppColors.primaryColor.withValues(alpha: 0.5),
+                          color: AppColors.primaryColor(context).withValues(alpha: 0.5),
                           width: 0.5,
                         ),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(5),
                         borderSide: BorderSide(
-                          color: AppColors.primaryColor.withValues(alpha: 0.5),
+                          color: AppColors.primaryColor(context).withValues(alpha: 0.5),
                           width: 0.5,
                         ),
                       ),
@@ -1431,8 +1431,8 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
                   onValueChanged: onTypeChanged,
                   groupValue: selectedType,
                   unselectedColor: Colors.grey[300],
-                  selectedColor: AppColors.primaryColor,
-                  borderColor: AppColors.primaryColor,
+                  selectedColor: AppColors.primaryColor(context),
+                  borderColor: AppColors.primaryColor(context),
                 ),
               ),
               const SizedBox(width: 8),
@@ -1635,8 +1635,8 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
                     value: item,
                     child: Text(
                       item.toString().toUpperCase(),
-                      style: const TextStyle(
-                        color: AppColors.blackColor,
+                      style:  TextStyle(
+                        color:AppColors.blackColor(context),
                         fontFamily: 'Quicksand',
                         fontWeight: FontWeight.w300,
                       ),
@@ -1714,8 +1714,8 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
                               value: item,
                               child: Text(
                                 "${item.name} (${item.acType})",
-                                style: const TextStyle(
-                                  color: AppColors.blackColor,
+                                style:  TextStyle(
+                                  color:AppColors.blackColor(context),
                                   fontFamily: 'Quicksand',
                                   fontWeight: FontWeight.w300,
                                 ),
@@ -1769,7 +1769,7 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
               AppButton(
                 name: 'Full Payment',
                 onPressed: _payFullAmount,
-                color: AppColors.primaryColor,
+                color: AppColors.primaryColor(context),
               ),
               const SizedBox(width: 10),
               AppButton(

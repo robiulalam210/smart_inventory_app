@@ -112,7 +112,7 @@ class _TransactionScreenState extends State<MobileTransactionScreen> {
       lg: 10,
       xl: 10,
       child: RefreshIndicator(
-        color: AppColors.primaryColor,
+        color: AppColors.primaryColor(context),
         onRefresh: () async {
           _fetchTransactions();
         },
@@ -169,7 +169,7 @@ class _TransactionScreenState extends State<MobileTransactionScreen> {
               IconButton(
                 icon: Icon(
                   Iconsax.filter,
-                  color: AppColors.primaryColor,
+                  color: AppColors.primaryColor(context),
                 ),
                 onPressed: () => _showMobileFilterSheet(context),
               ),
@@ -369,8 +369,8 @@ class _TransactionScreenState extends State<MobileTransactionScreen> {
                             selectedTransactionTypeNotifier.value = selected ? type : null;
                           });
                         },
-                        selectedColor: AppColors.primaryColor.withValues(alpha: 0.2),
-                        checkmarkColor: AppColors.primaryColor,
+                        selectedColor: AppColors.primaryColor(context).withValues(alpha: 0.2),
+                        checkmarkColor: AppColors.primaryColor(context),
                       );
                     }).toList(),
                   ),
@@ -399,8 +399,8 @@ class _TransactionScreenState extends State<MobileTransactionScreen> {
                             selectedStatusNotifier.value = selected ? status : null;
                           });
                         },
-                        selectedColor: AppColors.primaryColor.withValues(alpha: 0.2),
-                        checkmarkColor: AppColors.primaryColor,
+                        selectedColor: AppColors.primaryColor(context).withValues(alpha: 0.2),
+                        checkmarkColor: AppColors.primaryColor(context),
                       );
                     }).toList(),
                   ),

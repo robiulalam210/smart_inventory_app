@@ -74,7 +74,7 @@ class MoneyReceiptDataTableWidget extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color: AppColors.primaryColor.withValues(alpha: 0.05),
+              color: AppColors.primaryColor(context).withValues(alpha: 0.05),
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(16),
                 topRight: Radius.circular(16),
@@ -91,7 +91,7 @@ class MoneyReceiptDataTableWidget extends StatelessWidget {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: AppColors.primaryColor,
+                        color: AppColors.primaryColor(context),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
@@ -417,7 +417,7 @@ class MoneyReceiptDataTableWidget extends StatelessWidget {
                         )
                             .toList(),
                         headingRowColor: WidgetStateProperty.all(
-                          AppColors.primaryColor,
+                          AppColors.primaryColor(context),
                         ),
                         headingTextStyle: const TextStyle(
                           color: Colors.white,
@@ -639,7 +639,7 @@ class MoneyReceiptDataTableWidget extends StatelessWidget {
         builder: (context) => Scaffold(
           appBar: AppBar(
             title: const Text('Money Receipt'),
-            backgroundColor: AppColors.primaryColor,
+            backgroundColor: AppColors.primaryColor(context),
           ),
           body: PdfPreview.builder(
             useActions: true,

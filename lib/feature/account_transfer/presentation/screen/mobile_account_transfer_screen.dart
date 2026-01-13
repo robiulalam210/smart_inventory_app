@@ -122,7 +122,7 @@ class _MobileAccountTransferScreenState extends State<MobileAccountTransferScree
   Widget build(BuildContext context) {
     return AppScaffold(
       appBar: AppBar(
-        backgroundColor: AppColors.bg,
+        backgroundColor: AppColors.bottomNavBg(context),
         title:  Text("Account Transfers",style: AppTextStyle.titleMedium(context),),
         actions: [
           IconButton(
@@ -148,7 +148,7 @@ class _MobileAccountTransferScreenState extends State<MobileAccountTransferScree
             ),
           );
         },
-        backgroundColor: AppColors.primaryColor,
+        backgroundColor: AppColors.primaryColor(context),
         child: const Icon(Icons.add, color: Colors.white),
       ),
     );
@@ -156,7 +156,7 @@ class _MobileAccountTransferScreenState extends State<MobileAccountTransferScree
 
   Widget _buildContentArea() {
     return RefreshIndicator(
-      color: AppColors.primaryColor,
+      color: AppColors.primaryColor(context),
       onRefresh: () async {
         _fetchApi();
       },
@@ -352,7 +352,7 @@ class _MobileAccountTransferScreenState extends State<MobileAccountTransferScree
                     AppButton(
                       name: "Clear Filters",
                       onPressed: _clearAllFilters,
-                      color: AppColors.primaryColor.withValues(alpha: 0.8),
+                      color: AppColors.primaryColor(context).withValues(alpha: 0.8),
                     ),
                   ],
                 ),
@@ -511,8 +511,8 @@ class _MobileAccountTransferScreenState extends State<MobileAccountTransferScree
                             selectedStatusNotifier.value = selected ? (status == "All" ? null : status) : null;
                           });
                         },
-                        selectedColor: AppColors.primaryColor.withValues(alpha: 0.2),
-                        checkmarkColor: AppColors.primaryColor,
+                        selectedColor: AppColors.primaryColor(context).withValues(alpha: 0.2),
+                        checkmarkColor: AppColors.primaryColor(context),
                       );
                     }).toList(),
                   ),
@@ -541,8 +541,8 @@ class _MobileAccountTransferScreenState extends State<MobileAccountTransferScree
                             selectedTransferTypeNotifier.value = selected ? (type == "All" ? null : type) : null;
                           });
                         },
-                        selectedColor: AppColors.primaryColor.withValues(alpha: 0.2),
-                        checkmarkColor: AppColors.primaryColor,
+                        selectedColor: AppColors.primaryColor(context).withValues(alpha: 0.2),
+                        checkmarkColor: AppColors.primaryColor(context),
                       );
                     }).toList(),
                   ),
@@ -566,7 +566,7 @@ class _MobileAccountTransferScreenState extends State<MobileAccountTransferScree
                             isReversalNotifier.value = value;
                           });
                         },
-                        activeThumbColor: AppColors.primaryColor,
+                        activeThumbColor: AppColors.primaryColor(context),
                       ),
                     ],
                   ),
@@ -598,7 +598,7 @@ class _MobileAccountTransferScreenState extends State<MobileAccountTransferScree
                             _fetchApi();
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primaryColor,
+                            backgroundColor: AppColors.primaryColor(context),
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),

@@ -94,7 +94,7 @@ class _CustomerDueAdvanceScreenState extends State<CustomerDueAdvanceScreen> {
     final isBigScreen = Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
 
     return Container(
-      color: AppColors.bg,
+      color: AppColors.bottomNavBg(context),
       child: SafeArea(
         child: ResponsiveRow(
           children: [
@@ -231,7 +231,7 @@ class _CustomerDueAdvanceScreenState extends State<CustomerDueAdvanceScreen> {
                     child: Text(
                       isAllOption ? 'All Customers' : '${item.name} (${item.phone})',
                       style: TextStyle(
-                        color: isAllOption ? AppColors.primaryColor : AppColors.blackColor,
+                        color: isAllOption ? AppColors.primaryColor(context) :AppColors.blackColor(context),
                         fontFamily: 'Quicksand',
                         fontWeight: isAllOption ? FontWeight.bold : FontWeight.w300,
                       ),
@@ -262,8 +262,8 @@ class _CustomerDueAdvanceScreenState extends State<CustomerDueAdvanceScreen> {
               value: item,
               child: Text(
                 statusLabels[item] ?? item,
-                style: const TextStyle(
-                  color: AppColors.blackColor,
+                style:  TextStyle(
+                  color:AppColors.blackColor(context),
                   fontFamily: 'Quicksand',
                   fontWeight: FontWeight.w300,
                 ),
@@ -308,7 +308,7 @@ AppButton(name: "Clear", onPressed: (){
               "Total Customers",
               summary.totalCustomers.toString(),
               Icons.people,
-              AppColors.primaryColor,
+              AppColors.primaryColor(context),
             ),
             _buildSummaryCard(
               "Total Due Amount",
@@ -370,7 +370,7 @@ AppButton(name: "Clear", onPressed: (){
                       pdfPreviewPageDecoration:
                       BoxDecoration(color: AppColors.white),
                       actionBarTheme: PdfActionBarTheme(
-                        backgroundColor: AppColors.primaryColor,
+                        backgroundColor: AppColors.primaryColor(context),
                         iconColor: Colors.white,
                         textStyle: const TextStyle(color: Colors.white),
                       ),
@@ -631,7 +631,7 @@ class CustomerDueAdvanceTableCard extends StatelessWidget {
                             fontFamily: GoogleFonts.inter().fontFamily,
                           ),
                           headingRowColor: WidgetStateProperty.all(
-                            AppColors.primaryColor,
+                            AppColors.primaryColor(context),
                           ),
                           dataTextStyle: TextStyle(
                             fontSize: 10,

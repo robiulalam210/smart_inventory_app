@@ -411,8 +411,8 @@ class _MoneyReceiptListScreenState extends State<MobileMoneyReceiptForm> {
                 value: item,
                 child: Text(
                   item.toString(),
-                  style: const TextStyle(
-                    color: AppColors.blackColor,
+                  style:  TextStyle(
+                    color:AppColors.blackColor(context),
                     fontFamily: 'Quicksand',
                     fontWeight: FontWeight.w300,
                   ),
@@ -455,8 +455,8 @@ class _MoneyReceiptListScreenState extends State<MobileMoneyReceiptForm> {
                 value: item,
                 child: Text(
                   item.username ?? "Unknown",
-                  style: const TextStyle(
-                    color: AppColors.blackColor,
+                  style:  TextStyle(
+                    color:AppColors.blackColor(context),
                     fontFamily: 'Quicksand',
                     fontWeight: FontWeight.w300,
                   ),
@@ -534,8 +534,8 @@ class _MoneyReceiptListScreenState extends State<MobileMoneyReceiptForm> {
                 value: item,
                 child: Text(
                   item.toString(),
-                  style: const TextStyle(
-                    color: AppColors.blackColor,
+                  style:  TextStyle(
+                    color:AppColors.blackColor(context),
                     fontFamily: 'Quicksand',
                     fontWeight: FontWeight.w300,
                   ),
@@ -580,8 +580,8 @@ class _MoneyReceiptListScreenState extends State<MobileMoneyReceiptForm> {
                         value: item,
                         child: Text(
                           item.toString(),
-                          style: const TextStyle(
-                            color: AppColors.blackColor,
+                          style:  TextStyle(
+                            color:AppColors.blackColor(context),
                             fontFamily: 'Quicksand',
                             fontWeight: FontWeight.w300,
                           ),
@@ -632,8 +632,8 @@ class _MoneyReceiptListScreenState extends State<MobileMoneyReceiptForm> {
                 value: item,
                 child: Text(
                   item.toString(),
-                  style: const TextStyle(
-                    color: AppColors.blackColor,
+                  style:  TextStyle(
+                    color:AppColors.blackColor(context),
                     fontFamily: 'Quicksand',
                     fontWeight: FontWeight.w300,
                   ),
@@ -800,8 +800,8 @@ class _MoneyReceiptListScreenState extends State<MobileMoneyReceiptForm> {
         value: item,
         child: Text(
           "${item.name ?? 'Unknown'}${item.acNumber != null && item.acNumber!.isNotEmpty ? ' - ${item.acNumber}' : ''}",
-          style: const TextStyle(
-            color: AppColors.blackColor,
+          style:  TextStyle(
+            color:AppColors.blackColor(context),
             fontFamily: 'Quicksand',
             fontWeight: FontWeight.w300,
           ),

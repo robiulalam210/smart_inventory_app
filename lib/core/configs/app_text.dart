@@ -31,7 +31,7 @@ class AppTextStyle {
 
   static TextStyle appBarTitle(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    const color = AppColors.whiteColor;
+    final color = AppColors.whiteColor(context);
 
     return Responsive.isMobile(context)
         ? textTheme.labelLarge!.copyWith(
@@ -46,15 +46,44 @@ class AppTextStyle {
     );
   }
 
+  static TextStyle titleBold(BuildContext context) => TextStyle(
+    fontSize: 16,
+    fontWeight: FontWeight.w800,
+    color: AppColors.text(context),
+    fontFamily: fontFamily,
+  );
+
+  static TextStyle subtitle(BuildContext context) => TextStyle(
+    fontSize: 16,
+    fontWeight: FontWeight.w400,
+    color: AppColors.text(context),
+    fontFamily: fontFamily,
+  );
+
+  static TextStyle body(BuildContext context) => TextStyle(
+    fontSize: 14,
+    color: AppColors.text(context),
+    fontFamily: fontFamily,
+    fontStyle: FontStyle.normal,
+    height: 13 / 10,
+    letterSpacing: -0.32,
+  );
+
+  static TextStyle button(BuildContext context) => TextStyle(
+    fontSize: 14,
+    fontWeight: FontWeight.w600,
+    color: AppColors.text(context),
+    fontFamily: fontFamily,
+  );
   static TextStyle headerTitle(BuildContext context) =>
       Theme.of(context).textTheme.bodyLarge!.copyWith(
-          color: AppColors.blackColor,
+          color:AppColors.blackColor(context),
           fontFamily: fontFamily,
           fontWeight: FontWeight.w700);
 
   static TextStyle headerTitleWhite(BuildContext context) =>
       Theme.of(context).textTheme.bodyLarge!.copyWith(
-          color: AppColors.whiteColor,
+          color: AppColors.whiteColor(context),
           fontFamily: fontFamily,
           fontWeight: FontWeight.w700);
 
@@ -64,11 +93,11 @@ class AppTextStyle {
     return Responsive.isMobile(context)
         ? textTheme.bodyMedium!.copyWith(
       fontFamily: fontFamily,
-      color: AppColors.whiteColor,
+      color: AppColors.whiteColor(context),
       fontWeight: FontWeight.w700,
     )
         : textTheme.headlineSmall!.copyWith(
-      color: AppColors.whiteColor,
+      color: AppColors.whiteColor(context),
       fontFamily: fontFamily,
       fontWeight: FontWeight.w700,
     );
@@ -104,7 +133,7 @@ class AppTextStyle {
 
   static TextStyle cardLevelHead(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    const color = AppColors.black50Color;
+    final color =AppColors.blackColor(context);
 
     return Responsive.isMobile(context)
         ? textTheme.labelSmall!.copyWith(
@@ -139,11 +168,11 @@ class AppTextStyle {
     return Responsive.isMobile(context)
         ? textTheme.labelSmall!.copyWith(
       fontFamily: fontFamily,
-      color: AppColors.whiteColor,
+      color: AppColors.whiteColor(context),
       fontWeight: FontWeight.w500,
     )
         : textTheme.bodyMedium!.copyWith(
-      color: AppColors.whiteColor,
+      color: AppColors.whiteColor(context),
       fontFamily: fontFamily,
       fontWeight: FontWeight.w600,
     );
@@ -151,7 +180,7 @@ class AppTextStyle {
 
   static TextStyle searchTextStyle(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    const color = AppColors.blackColor;
+    final color =AppColors.blackColor(context);
 
     return Responsive.isMobile(context)
         ? textTheme.labelSmall!.copyWith(
@@ -172,11 +201,11 @@ class AppTextStyle {
     return Responsive.isMobile(context)
         ? textTheme.labelMedium!.copyWith(
       fontFamily: fontFamily,
-      color: AppColors.blackColor,
+      color:AppColors.blackColor(context),
       fontWeight: FontWeight.w400,
     )
         : textTheme.labelMedium!.copyWith(
-      color: AppColors.blackColor,
+      color:AppColors.blackColor(context),
       fontFamily: fontFamily,
       fontWeight: FontWeight.w400,
     );
@@ -188,12 +217,12 @@ class AppTextStyle {
     return Responsive.isMobile(context)
         ? textTheme.labelLarge!.copyWith(
       fontFamily: fontFamily,
-      color: AppColors.whiteColor,
+      color: AppColors.whiteColor(context),
       fontSize: 14,
       fontWeight: FontWeight.w300,
     )
         : textTheme.bodyLarge!.copyWith(
-      color: AppColors.whiteColor,
+      color: AppColors.whiteColor(context),
       fontFamily: fontFamily,
       fontSize: 14,
       fontWeight: FontWeight.w300,
@@ -202,7 +231,7 @@ class AppTextStyle {
 
   static TextStyle errorTextStyle(BuildContext context) =>
       Theme.of(context).textTheme.labelMedium!.copyWith(
-          color: AppColors.redColor,
+          color: AppColors.errorColor(context),
           fontFamily: fontFamily,
           fontWeight: FontWeight.w700);
 

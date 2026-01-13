@@ -122,7 +122,7 @@ class _PosSaleScreenState extends State<MobilePosSaleScreen> {
 
     return AppScaffold(
       appBar: AppBar(
-        backgroundColor: AppColors.bg,
+        backgroundColor: AppColors.bottomNavBg(context),
         title: Text("Sales List",style: AppTextStyle.titleMedium(context),),
       ),
       body: SafeArea(
@@ -131,7 +131,7 @@ class _PosSaleScreenState extends State<MobilePosSaleScreen> {
           lg: 10,
           child: RefreshIndicator(
             onRefresh: () async => _fetchApi(),
-            color: AppColors.primaryColor,
+            color: AppColors.primaryColor(context),
             child: Container(
               padding: AppTextStyle.getResponsivePaddingBody(context),
               child: SingleChildScrollView(
@@ -193,7 +193,7 @@ class _PosSaleScreenState extends State<MobilePosSaleScreen> {
               IconButton(
                 icon: Icon(
                   Iconsax.filter,
-                  color: AppColors.primaryColor,
+                  color: AppColors.primaryColor(context),
                 ),
                 onPressed: () => _showMobileFilterSheet(context),
               ),
@@ -486,7 +486,7 @@ class _PosSaleScreenState extends State<MobilePosSaleScreen> {
                             _fetchApi();
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primaryColor,
+                            backgroundColor: AppColors.primaryColor(context),
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),

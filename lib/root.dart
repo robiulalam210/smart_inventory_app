@@ -67,7 +67,7 @@ class _RootScreenState extends State<RootScreen> {
                     // ),
 
                     // Vertical divider (optional)
-                    Container(width: 1, color: AppColors.border),
+                    Container(width: 1, color: AppColors.text(context)),
 
                     // Main content area
                     Expanded(
@@ -134,7 +134,7 @@ class _RootScreenState extends State<RootScreen> {
 
   AppBar _buildAppBar(BuildContext context) {
     return AppBar(
-      backgroundColor: AppColors.bgSecondaryLight,
+      backgroundColor: AppColors.bottomNavBg(context),
       leading: IconButton(
         icon: const Icon(Icons.menu),
         onPressed: () => _drawerKey.currentState?.openDrawer(),
@@ -151,7 +151,7 @@ class _RootScreenState extends State<RootScreen> {
                 AppConstants.appName,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w600,
-                  color: AppColors.primaryColor,
+                  color: AppColors.primaryColor(context),
                 ),
                 overflow: TextOverflow.ellipsis,
               ),

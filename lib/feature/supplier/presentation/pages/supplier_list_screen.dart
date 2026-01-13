@@ -74,7 +74,7 @@ class _SupplierScreenState extends State<SupplierScreen> {
     final isBigScreen =
         Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
     return Container(
-      color: AppColors.bg,
+      color: AppColors.bottomNavBg(context),
       child: SafeArea(
         child: ResponsiveRow(
           spacing: 0,
@@ -215,8 +215,8 @@ class _SupplierScreenState extends State<SupplierScreen> {
                           value: item,
                           child: Text(
                             item.toString(),
-                            style: const TextStyle(
-                              color: AppColors.blackColor,
+                            style:  TextStyle(
+                              color:AppColors.blackColor(context),
                               fontFamily: 'Quicksand',
                               fontWeight: FontWeight.w600,
                             ),

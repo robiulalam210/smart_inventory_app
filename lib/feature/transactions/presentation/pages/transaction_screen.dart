@@ -118,7 +118,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
     final isBigScreen =
         Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
     return Container(
-      color: AppColors.bg,
+      color: AppColors.bottomNavBg(context),
       child: SafeArea(
         child: ResponsiveRow(
           spacing: 0,
@@ -154,7 +154,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
       lg: 10,
       xl: 10,
       child: RefreshIndicator(
-        color: AppColors.primaryColor,
+        color: AppColors.primaryColor(context),
         onRefresh: () async {
           _fetchTransactions();
         },
@@ -223,8 +223,8 @@ class _TransactionScreenState extends State<TransactionScreen> {
                       value: item,
                       child: Text(
                         item,
-                        style: const TextStyle(
-                          color: AppColors.blackColor,
+                        style:  TextStyle(
+                          color:AppColors.blackColor(context),
                           fontFamily: 'Quicksand',
                           fontWeight: FontWeight.w300,
                         ),
@@ -261,8 +261,8 @@ class _TransactionScreenState extends State<TransactionScreen> {
                       value: item,
                       child: Text(
                         item,
-                        style: const TextStyle(
-                          color: AppColors.blackColor,
+                        style:  TextStyle(
+                          color:AppColors.blackColor(context),
                           fontFamily: 'Quicksand',
                           fontWeight: FontWeight.w300,
                         ),
@@ -279,7 +279,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
             AppButton(
               name: "Date Range",
               onPressed: () => _selectDateRange(context),
-              textColor: AppColors.primaryColor,
+              textColor: AppColors.primaryColor(context),
             ),
 
             gapW16,
@@ -302,24 +302,24 @@ class _TransactionScreenState extends State<TransactionScreen> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   decoration: BoxDecoration(
-                    color: AppColors.primaryColor.withValues(alpha: 0.05),
+                    color: AppColors.primaryColor(context).withValues(alpha: 0.05),
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: AppColors.primaryColor.withValues(alpha: 0.2)),
+                    border: Border.all(color: AppColors.primaryColor(context).withValues(alpha: 0.2)),
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.calendar_today, size: 16, color: AppColors.primaryColor),
+                      Icon(Icons.calendar_today, size: 16, color: AppColors.primaryColor(context)),
                       const SizedBox(width: 8),
                       Text(
                         '${startDate != null ? _formatDate(startDate!) : "Any"} - ${endDate != null ? _formatDate(endDate!) : "Any"}',
                         style: TextStyle(
-                          color: AppColors.primaryColor,
+                          color: AppColors.primaryColor(context),
                           fontWeight: FontWeight.w500,
                         ),
                       ),
                       const Spacer(),
                       IconButton(
-                        icon: Icon(Icons.clear, size: 16, color: AppColors.primaryColor),
+                        icon: Icon(Icons.clear, size: 16, color: AppColors.primaryColor(context)),
                         onPressed: _clearDateRange,
                         tooltip: "Clear Date Range",
                       ),
@@ -378,7 +378,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
               IconButton(
                 icon: Icon(
                   Iconsax.filter,
-                  color: AppColors.primaryColor,
+                  color: AppColors.primaryColor(context),
                 ),
                 onPressed: () => _showMobileFilterSheet(context),
               ),
@@ -581,8 +581,8 @@ class _TransactionScreenState extends State<TransactionScreen> {
                             selectedTransactionTypeNotifier.value = selected ? type : null;
                           });
                         },
-                        selectedColor: AppColors.primaryColor.withValues(alpha: 0.2),
-                        checkmarkColor: AppColors.primaryColor,
+                        selectedColor: AppColors.primaryColor(context).withValues(alpha: 0.2),
+                        checkmarkColor: AppColors.primaryColor(context),
                       );
                     }).toList(),
                   ),
@@ -611,8 +611,8 @@ class _TransactionScreenState extends State<TransactionScreen> {
                             selectedStatusNotifier.value = selected ? status : null;
                           });
                         },
-                        selectedColor: AppColors.primaryColor.withValues(alpha: 0.2),
-                        checkmarkColor: AppColors.primaryColor,
+                        selectedColor: AppColors.primaryColor(context).withValues(alpha: 0.2),
+                        checkmarkColor: AppColors.primaryColor(context),
                       );
                     }).toList(),
                   ),
@@ -652,7 +652,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                             _fetchTransactions();
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primaryColor,
+                            backgroundColor: AppColors.primaryColor(context),
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),

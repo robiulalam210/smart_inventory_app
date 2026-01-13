@@ -74,7 +74,7 @@ class _StockReportScreenState extends State<StockReportScreen> {
     final isBigScreen = Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
 
     return Container(
-      color: AppColors.bg,
+      color: AppColors.bottomNavBg(context),
       child: SafeArea(
         child: ResponsiveRow(
           children: [
@@ -137,7 +137,7 @@ class _StockReportScreenState extends State<StockReportScreen> {
               "Total Products",
               summary.totalProducts.toString(),
               Icons.inventory_2,
-              AppColors.primaryColor,
+              AppColors.primaryColor(context),
             ),
             _buildSummaryCard(
               "Total Stock ",
@@ -258,7 +258,7 @@ class _StockReportScreenState extends State<StockReportScreen> {
             gapW16,
             AppButton(
                 size: 100,
-                color: AppColors.primaryColor,
+                color: AppColors.primaryColor(context),
                 name: "Pdf", onPressed: (){
               Navigator.push(
                 context,
@@ -279,7 +279,7 @@ class _StockReportScreenState extends State<StockReportScreen> {
                       pdfPreviewPageDecoration:
                       BoxDecoration(color: AppColors.white),
                       actionBarTheme: PdfActionBarTheme(
-                        backgroundColor: AppColors.primaryColor,
+                        backgroundColor: AppColors.primaryColor(context),
                         iconColor: Colors.white,
                         textStyle: const TextStyle(color: Colors.white),
                       ),
@@ -351,10 +351,10 @@ class _StockReportScreenState extends State<StockReportScreen> {
                 ),
                 Text(
                   value,
-                  style: const TextStyle(
+                  style:  TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.blackColor,
+                    color:AppColors.blackColor(context),
                   ),
                 ),
               ],
@@ -536,7 +536,7 @@ class StockReportTableCard extends StatelessWidget {
                             fontFamily: GoogleFonts.inter().fontFamily,
                           ),
                           headingRowColor: WidgetStateProperty.all(
-                            AppColors.primaryColor,
+                            AppColors.primaryColor(context),
                           ),
                           dataTextStyle: TextStyle(
                             fontSize: 10,

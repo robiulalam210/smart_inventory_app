@@ -15,7 +15,7 @@ class _TransactionScreenState extends State<SampleCollectionScreen> {
     final isBigScreen =
         Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
     return Container(
-      color: AppColors.bg,
+      color: AppColors.bottomNavBg(context),
       child: SafeArea(
         child: ResponsiveRow(
           spacing: 0,
@@ -50,7 +50,7 @@ class _TransactionScreenState extends State<SampleCollectionScreen> {
       md: 12,
       lg: 10,
       xl: 10,
-      child: Container(color: AppColors.bg, ),
+      child: Container(color: AppColors.bottomNavBg(context), ),
     );
   }
 }

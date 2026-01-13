@@ -57,7 +57,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
 
     return Container(
-      color: AppColors.bg,
+      color: AppColors.bottomNavBg(context),
       child: SafeArea(
         child: ResponsiveRow(
           children: [
@@ -185,7 +185,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           vertical: 6,
                         ),
                         decoration: BoxDecoration(
-                          color: AppColors.primaryColor.withValues(alpha: 0.1),
+                          color: AppColors.primaryColor(context).withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(16),
                         ),
                         child: Text(
@@ -196,7 +196,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
-                            color: AppColors.primaryColor,
+                            color: AppColors.primaryColor(context),
                           ),
                         ),
                       ),
@@ -268,30 +268,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
         leading: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: isActive ? AppColors.primaryColor : Colors.grey[100],
+            color: isActive ? AppColors.primaryColor(context) : Colors.grey[100],
             shape: BoxShape.circle,
           ),
           child: Icon(
             icon,
             size: 20,
-            color: isActive ? Colors.white : AppColors.primaryColor,
+            color: isActive ? Colors.white : AppColors.primaryColor(context),
           ),
         ),
         title: Text(
           title,
           style: TextStyle(
             fontWeight: FontWeight.w600,
-            color: isActive ? AppColors.primaryColor : Colors.grey[700],
+            color: isActive ? AppColors.primaryColor(context) : Colors.grey[700],
             fontSize: 14,
           ),
         ),
         tileColor: isActive
-            ? AppColors.primaryColor.withValues(alpha: 0.1)
+            ? AppColors.primaryColor(context).withValues(alpha: 0.1)
             : Colors.transparent,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
           side: BorderSide(
-            color: isActive ? AppColors.primaryColor : Colors.transparent,
+            color: isActive ? AppColors.primaryColor(context) : Colors.transparent,
             width: 1,
           ),
         ),
@@ -315,7 +315,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           height: 120,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            border: Border.all(color: AppColors.primaryColor, width: 3),
+            border: Border.all(color: AppColors.primaryColor(context), width: 3),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.1),
@@ -343,7 +343,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: AppColors.primaryColor,
+                color: AppColors.primaryColor(context),
                 shape: BoxShape.circle,
                 border: Border.all(color: Colors.white, width: 2),
               ),
@@ -391,12 +391,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     Expanded(
                       child: Column(
                         children: [
-                          const Text(
+                          Text(
                             'Personal Information',
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.w600,
-                              color: AppColors.primaryColor,
+                              color: AppColors.primaryColor(context),
                             ),
                           ),
                           const SizedBox(height: 20),
@@ -461,12 +461,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     Expanded(
                       child: Column(
                         children: [
-                          const Text(
+                           Text(
                             'Contact Information',
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.w600,
-                              color: AppColors.primaryColor,
+                              color: AppColors.primaryColor(context),
                             ),
                           ),
                           const SizedBox(height: 20),
@@ -675,10 +675,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: AppColors.primaryColor.withValues(alpha: 0.1),
+                      color: AppColors.primaryColor(context).withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(icon, color: AppColors.primaryColor, size: 24),
+                    child: Icon(icon, color: AppColors.primaryColor(context), size: 24),
                   ),
                   const SizedBox(width: 12),
                   Text(

@@ -53,7 +53,7 @@ class _ExpenseHeadScreenState extends State<ExpenseSubHeadScreen> {
     final isBigScreen =
         Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
     return Container(
-      color: AppColors.bg,
+      color: AppColors.bottomNavBg(context),
       child: SafeArea(
         child: ResponsiveRow(
           spacing: 0,
@@ -90,7 +90,7 @@ class _ExpenseHeadScreenState extends State<ExpenseSubHeadScreen> {
       xl: 10,
       child: SizedBox(
         child: RefreshIndicator(
-          color: AppColors.primaryColor,
+          color: AppColors.primaryColor(context),
           onRefresh: () async {
             _fetchApiData();
           },
@@ -216,7 +216,7 @@ class _ExpenseHeadScreenState extends State<ExpenseSubHeadScreen> {
                                   child: Container(
                                     decoration: BoxDecoration(
                                       shape: BoxShape.rectangle,
-                                      color: AppColors.whiteColor,
+                                      color: AppColors.whiteColor(context),
                                       borderRadius: BorderRadius.circular(AppSizes.borderRadiusSize),
                                     ),
                                     width: double.infinity,

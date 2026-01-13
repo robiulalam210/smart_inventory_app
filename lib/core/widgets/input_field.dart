@@ -143,7 +143,7 @@ class CustomInputFieldState extends State<CustomInputField> {
                           ? "Search ${widget.hintText}"
                           : widget.hintText,
                     hintStyle: TextStyle(
-                      color:  AppColors.matteBlack,
+                      color:   AppColors.text(context),
                       fontWeight: FontWeight.w300,
                       fontSize: 14,
                     ),
@@ -158,10 +158,10 @@ class CustomInputFieldState extends State<CustomInputField> {
                         borderSide:  BorderSide(color: AppColors.error, )),
                     focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(AppSizes.radius),
-                        borderSide: BorderSide(color:  AppColors.matteBlack,)),
+                        borderSide: BorderSide(color:   AppColors.text(context),)),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(AppSizes.radius),
-                      borderSide: BorderSide(color: AppColors.border, ),
+                      borderSide: BorderSide(color: AppColors.greyColor(context), ),
                     ),
                     focusedErrorBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(AppSizes.radius),
@@ -318,25 +318,25 @@ class CustomInputFieldPayRollState extends State<CustomInputFieldPayRoll> {
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(widget.radius),
                     borderSide: BorderSide(
-                        color: AppColors.primaryColor.withValues(alpha: 0.5),
+                        color: AppColors.primaryColor(context).withValues(alpha: 0.5),
                         width: 0.5),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(widget.radius),
                     borderSide: BorderSide(
-                        color: AppColors.primaryColor.withValues(alpha: 0.5),
+                        color: AppColors.primaryColor(context).withValues(alpha: 0.5),
                         width: 0.5),
                   ),
                   errorBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(widget.radius),
                     borderSide: BorderSide(
-                        color: AppColors.redColor.withValues(alpha: 0.5),
+                        color: AppColors.errorColor(context).withValues(alpha: 0.5),
                         width: 1.0), // Customize error border color
                   ),
                   focusedErrorBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(widget.radius),
                     borderSide: BorderSide(
-                        color: AppColors.redColor.withValues(alpha: 0.5),
+                        color: AppColors.errorColor(context).withValues(alpha: 0.5),
                         width: 1.5), // Customize focused error border color
                   ),
                   errorStyle: AppTextStyle.errorTextStyle(context),

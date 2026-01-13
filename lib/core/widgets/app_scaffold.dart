@@ -1,7 +1,7 @@
+import '../../feature/common/presentation/cubit/theme_cubit.dart';
 import '../../feature/splash/presentation/bloc/connectivity_bloc/connectivity_bloc.dart';
 import '../../feature/splash/presentation/bloc/connectivity_bloc/connectivity_state.dart';
 import '/core/core.dart';
-
 
 class AppScaffold extends StatelessWidget {
   final Widget body;
@@ -29,29 +29,65 @@ class AppScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ConnectivityBloc, ConnectivityState>(
-      builder: (context, state) {
+    return BlocBuilder<ThemeCubit, ThemeState>(
+      builder: (context, themeState) {
+        // Determine effective brightness
+        final brightness = themeState.themeMode == ThemeMode.system
+            ? MediaQuery.of(context).platformBrightness
+            : themeState.themeMode == ThemeMode.dark
+            ? Brightness.dark
+            : Brightness.light;
 
-        final overlayColor =  AppColors.background(context);
+        final isDark = brightness == Brightness.dark;
 
-        return Stack(
-          children: [
-            Scaffold(
-              key: scaffoldKey,
-              backgroundColor: overlayColor,
-              appBar: appBar,
-              drawer: drawer,
-              endDrawer: endDrawer,
-              bottomNavigationBar: bottomNavigationBar,
-              floatingActionButton: floatingActionButton,
-              floatingActionButtonLocation: isCenterFAB
-                  ? FloatingActionButtonLocation.centerDocked
-                  : FloatingActionButtonLocation.endFloat,
-              resizeToAvoidBottomInset: resizeToAvoidBottomInset ?? true,
-              body: body,
-            ),
+        return BlocBuilder<ConnectivityBloc, ConnectivityState>(
+          builder: (context, state) {
+            final isOffline = state is ConnectivityOffline;
 
-          ],
+            final overlayColor = isDark
+                ? AppColors.darkBg
+                : AppColors.background(context);
+
+            return Stack(
+              children: [
+                Scaffold(
+                  key: scaffoldKey,
+                  backgroundColor: overlayColor,
+                  appBar: appBar,
+                  drawer: drawer,
+                  endDrawer: endDrawer,
+                  bottomNavigationBar: bottomNavigationBar,
+                  floatingActionButton: floatingActionButton,
+                  floatingActionButtonLocation: isCenterFAB
+                      ? FloatingActionButtonLocation.centerDocked
+                      : FloatingActionButtonLocation.endFloat,
+                  resizeToAvoidBottomInset: resizeToAvoidBottomInset ?? true,
+                  body: body,
+                ),
+                if (isOffline)
+                  Positioned.fill(
+                    child: Material(
+                      color: Colors.black.withValues(alpha: 0.4), // semi-transparent overlay
+                      child: SafeArea(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            // Lottie.asset(AppImages.noInternetJson),
+                            const SizedBox(height: 24),
+                            Text(
+                              "No Internet Connection",
+                              textAlign: TextAlign.center,
+                              style: AppTextStyle.headlineMedium(context)
+                                  .copyWith(color: themeState.primaryColor),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            );
+          },
         );
       },
     );

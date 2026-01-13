@@ -47,7 +47,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       },
       builder: (context, state) {
         return Container(
-          color: AppColors.bg,
+          color: AppColors.bottomNavBg(context),
           key: drawerKey,
           child: SafeArea(
             child: SizedBox(
@@ -243,8 +243,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
         },
         groupValue: selectedPurchaseOverviewType,
         unselectedColor: Colors.white54,
-        selectedColor: AppColors.primaryColor,
-        borderColor: AppColors.primaryColor,
+        selectedColor: AppColors.primaryColor(context),
+        borderColor: AppColors.primaryColor(context),
       ),
     );
   }
@@ -541,8 +541,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
         },
         groupValue: selectedPurchaseOverviewType,
         unselectedColor: Colors.white54,
-        selectedColor: AppColors.primaryColor,
-        borderColor: AppColors.primaryColor,
+        selectedColor: AppColors.primaryColor(context),
+        borderColor: AppColors.primaryColor(context),
       ),
     );
   }

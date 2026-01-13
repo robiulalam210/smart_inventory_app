@@ -85,7 +85,7 @@ class SalesReturnTableCard extends StatelessWidget {
                             fontFamily: GoogleFonts.inter().fontFamily,
                           ),
                           headingRowColor: WidgetStateProperty.all(
-                            AppColors.primaryColor,
+                            AppColors.primaryColor(context),
                           ),
                           dataTextStyle: TextStyle(
                             fontSize: 11,
@@ -129,11 +129,11 @@ class SalesReturnTableCard extends StatelessWidget {
                   children: [
                     CircleAvatar(
                       radius: 18,
-                      backgroundColor: AppColors.primaryColor.withValues(alpha: 0.1),
+                      backgroundColor: AppColors.primaryColor(context).withValues(alpha: 0.1),
                       child: Text(
                         '${index + 1}',
                         style: TextStyle(
-                          color: AppColors.primaryColor,
+                          color: AppColors.primaryColor(context),
                           fontWeight: FontWeight.w700,
                         ),
                       ),
@@ -209,7 +209,7 @@ class SalesReturnTableCard extends StatelessWidget {
                         alignment: Alignment.centerLeft,
                         child: Text(
                           'Reason:',
-                          style: TextStyle(fontWeight: FontWeight.w700, color: AppColors.blackColor),
+                          style: TextStyle(fontWeight: FontWeight.w700, color:AppColors.blackColor(context)),
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -227,7 +227,7 @@ class SalesReturnTableCard extends StatelessWidget {
                         alignment: Alignment.centerLeft,
                         child: Text(
                           'Returned Items (${salesReturn.items.length}):',
-                          style: TextStyle(fontWeight: FontWeight.w700, color: AppColors.blackColor),
+                          style: TextStyle(fontWeight: FontWeight.w700, color:AppColors.blackColor(context)),
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -753,7 +753,7 @@ class SalesReturnTableCard extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: AppColors.primaryColor,
+                      color: AppColors.primaryColor(context),
                     ),
                   ),
                   const SizedBox(height: 16),

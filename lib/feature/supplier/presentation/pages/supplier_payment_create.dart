@@ -78,7 +78,7 @@ class _MoneyReceiptListScreenState extends State<SupplierPaymentForm> {
                 Container(
                   padding:  EdgeInsets.symmetric(horizontal: 8,vertical: 4),
                   decoration: BoxDecoration(
-                    color: AppColors.bg,
+                    color: AppColors.bottomNavBg(context),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
@@ -101,7 +101,7 @@ class _MoneyReceiptListScreenState extends State<SupplierPaymentForm> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: AppColors.whiteColor,
+                    color: AppColors.whiteColor(context),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Column(
@@ -145,8 +145,8 @@ class _MoneyReceiptListScreenState extends State<SupplierPaymentForm> {
                                 value: item,
                                 child: Text(
                                   item.toString(),
-                                  style: const TextStyle(
-                                    color: AppColors.blackColor,
+                                  style:  TextStyle(
+                                    color:AppColors.blackColor(context),
                                     fontFamily: 'Quicksand',
                                     fontWeight: FontWeight.w300,
                                   ),
@@ -178,8 +178,8 @@ class _MoneyReceiptListScreenState extends State<SupplierPaymentForm> {
                                 value: item,
                                 child: Text(
                                   item.toString(),
-                                  style: const TextStyle(
-                                    color: AppColors.blackColor,
+                                  style:  TextStyle(
+                                    color:AppColors.blackColor(context),
                                     fontFamily: 'Quicksand',
                                     fontWeight: FontWeight.w300,
                                   ),
@@ -215,8 +215,8 @@ class _MoneyReceiptListScreenState extends State<SupplierPaymentForm> {
                             value: item,
                             child: Text(
                               item.toString(),
-                              style: const TextStyle(
-                                color: AppColors.blackColor,
+                              style:  TextStyle(
+                                color:AppColors.blackColor(context),
                                 fontFamily: 'Quicksand',
                                 fontWeight: FontWeight.w300,
                               ),
@@ -249,8 +249,8 @@ class _MoneyReceiptListScreenState extends State<SupplierPaymentForm> {
                                 value: item,
                                 child: Text(
                                   item.toString(),
-                                  style: const TextStyle(
-                                    color: AppColors.blackColor,
+                                  style:  TextStyle(
+                                    color:AppColors.blackColor(context),
                                     fontFamily: 'Quicksand',
                                     fontWeight: FontWeight.w300,
                                   ),
@@ -303,7 +303,7 @@ class _MoneyReceiptListScreenState extends State<SupplierPaymentForm> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: AppColors.whiteColor,
+                    color: AppColors.whiteColor(context),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Column(
@@ -345,8 +345,8 @@ class _MoneyReceiptListScreenState extends State<SupplierPaymentForm> {
                             value: item,
                             child: Text(
                               item.toString(),
-                              style: const TextStyle(
-                                color: AppColors.blackColor,
+                              style:  TextStyle(
+                                color:AppColors.blackColor(context),
                                 fontFamily: 'Quicksand',
                                 fontWeight: FontWeight.w300,
                               ),
@@ -401,8 +401,8 @@ class _MoneyReceiptListScreenState extends State<SupplierPaymentForm> {
                                 value: item.toString(),
                                 child: Text(
                                   item.toString(),
-                                  style: const TextStyle(
-                                    color: AppColors.blackColor,
+                                  style:  TextStyle(
+                                    color:AppColors.blackColor(context),
                                     fontFamily: 'Quicksand',
                                     fontWeight: FontWeight.w300,
                                   ),
