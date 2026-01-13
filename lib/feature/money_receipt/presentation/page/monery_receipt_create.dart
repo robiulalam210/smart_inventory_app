@@ -240,7 +240,6 @@ class _MoneyReceiptListScreenState extends State<MoneyReceiptForm> {
                               final customerBloc = context.read<CustomerBloc>();
                               return AppDropdown(
                                 label: "Customer",
-                                context: context,
                                 isSearch: true,
                                 hint: moneyBloc.selectCustomerModel?.name
                                     ?.toString() ??
@@ -269,17 +268,6 @@ class _MoneyReceiptListScreenState extends State<MoneyReceiptForm> {
                                       ? 'Please select Customer'
                                       : null;
                                 },
-                                itemBuilder: (item) => DropdownMenuItem(
-                                  value: item,
-                                  child: Text(
-                                    item.toString(),
-                                    style:  TextStyle(
-                                      color:AppColors.blackColor(context),
-                                      fontFamily: 'Quicksand',
-                                      fontWeight: FontWeight.w300,
-                                    ),
-                                  ),
-                                ),
                               );
                             },
                           ),
@@ -303,7 +291,6 @@ class _MoneyReceiptListScreenState extends State<MoneyReceiptForm> {
 
                               return AppDropdown(
                                 label: "Collected By",
-                                context: context,
                                 hint: moneyBloc.selectUserModel?.username
                                     ?.toString() ??
                                     "Select Collected By",
@@ -322,17 +309,6 @@ class _MoneyReceiptListScreenState extends State<MoneyReceiptForm> {
                                       ? 'Please select Collected By'
                                       : null;
                                 },
-                                itemBuilder: (item) => DropdownMenuItem(
-                                  value: item,
-                                  child: Text(
-                                    item.username ?? "Unknown",
-                                    style:  TextStyle(
-                                      color:AppColors.blackColor(context),
-                                      fontFamily: 'Quicksand',
-                                      fontWeight: FontWeight.w300,
-                                    ),
-                                  ),
-                                ),
                               );
                             },
                           ),
@@ -348,7 +324,6 @@ class _MoneyReceiptListScreenState extends State<MoneyReceiptForm> {
                             builder: (context, selectedPaymentTo, child) {
                               return AppDropdown<String>(
                                 label: "Payment To",
-                                context: context,
                                 hint: selectedPaymentTo.isNotEmpty
                                     ? selectedPaymentTo
                                     : "Select Payment To",
@@ -371,17 +346,6 @@ class _MoneyReceiptListScreenState extends State<MoneyReceiptForm> {
                                       ? 'Please select Payment To'
                                       : null;
                                 },
-                                itemBuilder: (item) => DropdownMenuItem(
-                                  value: item,
-                                  child: Text(
-                                    item.toString(),
-                                    style:  TextStyle(
-                                      color:AppColors.blackColor(context),
-                                      fontFamily: 'Quicksand',
-                                      fontWeight: FontWeight.w300,
-                                    ),
-                                  ),
-                                ),
                               );
                             },
                           ),
@@ -407,7 +371,6 @@ class _MoneyReceiptListScreenState extends State<MoneyReceiptForm> {
                                       context.read<PosSaleBloc>();
                                       return AppDropdown<PosSaleModel>(
                                         label: "Invoice",
-                                        context: context,
                                         hint: selectedPosSale
                                             ?.invoiceNo
                                             ?.toString() ??
@@ -429,18 +392,6 @@ class _MoneyReceiptListScreenState extends State<MoneyReceiptForm> {
                                               ? 'Please select Invoice'
                                               : null;
                                         },
-                                        itemBuilder: (item) =>
-                                            DropdownMenuItem(
-                                              value: item,
-                                              child: Text(
-                                                item.toString(),
-                                                style:  TextStyle(
-                                                  color:AppColors.blackColor(context),
-                                                  fontFamily: 'Quicksand',
-                                                  fontWeight: FontWeight.w300,
-                                                ),
-                                              ),
-                                            ),
                                       );
                                     },
                                   );
@@ -540,7 +491,6 @@ class _MoneyReceiptListScreenState extends State<MoneyReceiptForm> {
 
                               return AppDropdown<String>(
                                 label: "Payment Method",
-                                context: context,
                                 hint: selectedPaymentMethod ??
                                     "Select Payment Method",
                                 isLabel: false,
@@ -561,17 +511,6 @@ class _MoneyReceiptListScreenState extends State<MoneyReceiptForm> {
                                       ? 'Please select a payment method'
                                       : null;
                                 },
-                                itemBuilder: (item) => DropdownMenuItem(
-                                  value: item,
-                                  child: Text(
-                                    item.toString(),
-                                    style:  TextStyle(
-                                      color:AppColors.blackColor(context),
-                                      fontFamily: 'Quicksand',
-                                      fontWeight: FontWeight.w300,
-                                    ),
-                                  ),
-                                ),
                               );
                             },
                           ),
@@ -758,7 +697,6 @@ class _MoneyReceiptListScreenState extends State<MoneyReceiptForm> {
     }
 
     return AppDropdown<AccountActiveModel>(
-      context: context,
       label: "Account",
       hint: filteredList.isEmpty
           ? "No accounts available"
@@ -790,17 +728,6 @@ class _MoneyReceiptListScreenState extends State<MoneyReceiptForm> {
         }
         return value == null ? 'Please select an account' : null;
       },
-      itemBuilder: (item) => DropdownMenuItem(
-        value: item,
-        child: Text(
-          "${item.name ?? 'Unknown'}${item.acNumber != null && item.acNumber!.isNotEmpty ? ' - ${item.acNumber}' : ''}",
-          style:  TextStyle(
-            color:AppColors.blackColor(context),
-            fontFamily: 'Quicksand',
-            fontWeight: FontWeight.w300,
-          ),
-        ),
-      ),
     );
   }
 

@@ -373,7 +373,6 @@ mainAxisAlignment: MainAxisAlignment.start,                  children: [
         return AppDropdown<SalesInvoiceModel>(
           label: "Receipt Number",
           isSearch: true,
-          context: context,
           hint: _selectedInvoice?.invoiceNo ?? "Select Receipt Number",
           isRequired: true,
           value: _selectedInvoice,
@@ -384,35 +383,6 @@ mainAxisAlignment: MainAxisAlignment.start,                  children: [
             }
           },
           validator: (value) => value == null ? 'Please select Receipt Number' : null,
-          itemBuilder: (item) => DropdownMenuItem<SalesInvoiceModel>(
-            value: item,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  item.invoiceNo ?? 'Unknown',
-                  style: TextStyle(
-                    color:AppColors.blackColor(context),
-                    fontFamily: 'Quicksand',
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                Text(
-                  'Customer: ${item.customerName ?? "Walk-in Customer"}',
-                  style: TextStyle(color: AppColors.grey, fontSize: 12),
-                ),
-                Text(
-                  'Total: ৳${item.grandTotal?.toStringAsFixed(2) ?? "0.00"}',
-                  style: TextStyle(
-                    color: AppColors.primaryColor(context),
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-          ),
         );
       },
     );
@@ -498,7 +468,6 @@ mainAxisAlignment: MainAxisAlignment.start,                  children: [
                 flex: 2,
                 child: AppDropdown<String>(
                   label: "Type",
-                  context: context,
                   hint: _returnChargeType ?? "Select",
                   value: _returnChargeType,
                   itemList: ['fixed', 'percentage'],
@@ -508,17 +477,7 @@ mainAxisAlignment: MainAxisAlignment.start,                  children: [
                       _calculateTotals();
                     });
                   },
-                  itemBuilder: (item) => DropdownMenuItem(
-                    value: item,
-                    child: Text(
-                      item == 'percentage' ? '%' : 'Fixed',
-                      style: TextStyle(
-                        color:AppColors.blackColor(context),
-                        fontFamily: 'Quicksand',
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
+
                 ),
               ),
               const SizedBox(width: 12),
@@ -548,7 +507,6 @@ mainAxisAlignment: MainAxisAlignment.start,                  children: [
       builder: (context, state) {
         return AppDropdown<String>(
           label: "Payment Method ",
-          context: context,
           hint: _selectedPaymentMethod ?? "Select Payment Method",
           isRequired: true,
           value: _selectedPaymentMethod,
@@ -559,17 +517,7 @@ mainAxisAlignment: MainAxisAlignment.start,                  children: [
             });
           },
           validator: (value) => value == null ? 'Please select Payment Method' : null,
-          itemBuilder: (item) => DropdownMenuItem(
-            value: item,
-            child: Text(
-              item.toUpperCase(),
-              style: TextStyle(
-                color:AppColors.blackColor(context),
-                fontFamily: 'Quicksand',
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
+
         );
       },
     );
@@ -580,7 +528,6 @@ mainAxisAlignment: MainAxisAlignment.start,                  children: [
       builder: (context, state) {
         return AppDropdown<AccountActiveModel>(
           label: "Account",
-          context: context,
           hint: _selectedAccount?.name ?? "Select Account",
           isRequired: true,
           value: _selectedAccount,
@@ -591,28 +538,6 @@ mainAxisAlignment: MainAxisAlignment.start,                  children: [
             });
           },
           validator: (value) => value == null ? 'Please select Account' : null,
-          itemBuilder: (item) => DropdownMenuItem<AccountActiveModel>(
-            value: item,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  item.name ?? 'Unknown Account',
-                  style: TextStyle(
-                    color:AppColors.blackColor(context),
-                    fontFamily: 'Quicksand',
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                if (item.acType != null)
-                  Text(
-                    'Type: ${item.acType}',
-                    style: TextStyle(color: AppColors.grey, fontSize: 12),
-                  ),
-              ],
-            ),
-          ),
         );
       },
     );

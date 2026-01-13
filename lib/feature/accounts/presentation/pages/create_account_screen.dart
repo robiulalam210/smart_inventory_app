@@ -96,7 +96,6 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                         valueListenable: selectedAccountType,
                         builder: (context, selectedType, child) {
                           return AppDropdown(
-                            context: context,
                             label: "Account Type",
                             hint: selectedType.isEmpty
                                 ? "Select Account type"
@@ -115,17 +114,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                               }
                               return null;
                             },
-                            itemBuilder: (item) => DropdownMenuItem(
-                              value: item,
-                              child: Text(
-                                item.toString(),
-                                style:  TextStyle(
-                                  color:AppColors.blackColor(context),
-                                  fontFamily: 'Quicksand',
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
+
                           );
                         },
                       ),

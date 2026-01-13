@@ -216,7 +216,6 @@ class _CreateCustomerScreenState extends State<CreateCustomerScreen> {
           width: isSmallScreen ? double.infinity : constraints.maxWidth * 0.5,
           child: AppDropdown(
             label: "Status",
-            context: context,
             hint: context.read<CustomerBloc>().selectedState.isEmpty
                 ? "Select Status"
                 : context.read<CustomerBloc>().selectedState,
@@ -230,17 +229,7 @@ class _CreateCustomerScreenState extends State<CreateCustomerScreen> {
                 context.read<CustomerBloc>().selectedState = newVal.toString();
               });
             },
-            itemBuilder: (item) => DropdownMenuItem(
-              value: item,
-              child: Text(
-                item.toString(),
-                style:  TextStyle(
-                  color:AppColors.blackColor(context),
-                  fontFamily: 'Quicksand',
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
+
           ),
         );
       },

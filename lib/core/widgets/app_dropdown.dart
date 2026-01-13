@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import '../configs/configs.dart';
 
 class AppDropdown<T> extends FormField<T> {
@@ -8,250 +9,214 @@ class AppDropdown<T> extends FormField<T> {
     this.isRequired = false,
     T? value,
     required this.itemList,
-    required this.context,
     required this.onChanged,
-    this.isOnCreateBtn,
-    this.isOnPrefixIconBtn,
-    required this.itemBuilder,
-    this.isLabel = false,
-    this.isCreateBtn = false,
-    this.isPrefixIconBtn = false,
     this.isSearch = false,
     this.isNeedAll,
     this.isNeedText,
+    this.isLabel = false,
     super.validator,
   }) : super(
-         initialValue: value,
-         builder: (FormFieldState<T> state) {
-           // Create display list with "All" option if needed
-           List<dynamic> displayItems = [...itemList];
-           List<String> displayTexts = itemList
-               .map((item) => item.toString())
-               .toList();
+    initialValue: value,
+    builder: (FormFieldState<T> state) {
+      final context = state.context;
+      final bool showLabel = !(isLabel ?? false);
 
-           if (isNeedAll ?? false) {
-             displayItems.insert(0, "All");
-             displayTexts.insert(0, "All");
-           }
-           if (isNeedText ?? false) {
-             displayItems.insert(0, "Text");
-             displayTexts.insert(0, "Text");
-           }
+      final List<T> items = [...itemList];
+      final List<String> displayTexts =
+      itemList.map((e) => e.toString()).toList();
 
-           return Container(
-             decoration: BoxDecoration(
-               color: AppColors.bottomNavBg(context),
-               borderRadius: BorderRadius.all(Radius.circular(2)),
-             ),
-             height: isLabel == true ? 57 : 75,
-             child: Column(
-               crossAxisAlignment: CrossAxisAlignment.start,
-               children: [
-                 if (!isLabel!)
-                   Row(
-                     crossAxisAlignment: CrossAxisAlignment.center,
-                     mainAxisAlignment: MainAxisAlignment.start,
-                     children: [
-                       Text(
-                         label,
-                         style: AppTextStyle.labelDropdownTextStyle(
-                           context,
-                         ).copyWith(color: AppColors.text(context)),
-                       ),
-                       const SizedBox(width: 4),
-                       if (isRequired)
-                         Text(
-                           "*",
-                           style: AppTextStyle.labelDropdownTextStyle(
-                             context,
-                           ).copyWith(color: AppColors.error),
-                         ),
-                     ],
-                   ),
-                 if (!isLabel) const SizedBox(height: 2),
+      if (isNeedAll ?? false) {
+        items.insert(0, "All" as T);
+        displayTexts.insert(0, "All");
+      }
+      if (isNeedText ?? false) {
+        items.insert(0, "Text" as T);
+        displayTexts.insert(0, "Text");
+      }
 
-                 SizedBox(
-                   height: 40,
-                   child: Container(
-                     padding: EdgeInsets.all(5),
-                     decoration: BoxDecoration(
-                       color: AppColors.bottomNavBg(context),
-                       border: Border.all(
-                         color: state.hasError
-                             ? AppColors.error.withValues(alpha: 0.7)
-                             : AppColors.border,
-                         width: 0.4,
-                       ),
-                       borderRadius: BorderRadius.circular(AppSizes.radius),
-                     ),
-                     child: isSearch == false
-                         ? CustomDropdown(
-                             closedHeaderPadding: EdgeInsets.only(
-                               top: 6,
-                               left: 4,
-                               right: 4,
-                               bottom: 6,
-                             ),
-                             listItemPadding: EdgeInsets.symmetric(
-                               horizontal: 8,
-                               vertical: 8,
-                             ),
-                             
-                             itemsListPadding: EdgeInsets.symmetric(
-                               horizontal: 8,
-                               vertical: 4,
-                             ),
-                             decoration: CustomDropdownDecoration(
-                               expandedFillColor: AppColors.bottomNavBg(context),
-                               closedFillColor: AppColors.bottomNavBg(context),
-                               expandedBorderRadius: BorderRadius.circular(2),
-                               searchFieldDecoration: SearchFieldDecoration(
-                                 hintStyle: AppTextStyle.cardLevelHead(
-                                   context,
-                                 ).copyWith(color: AppColors.text(context)),
-                                 textStyle: AppTextStyle.cardLevelText(
-                                   context,
-                                 ).copyWith(color: AppColors.text(context)),
-                               ),
-                               listItemStyle: AppTextStyle.cardLevelText(
-                                 context,
-                               ).copyWith(color: AppColors.text(context)),
-                               headerStyle: AppTextStyle.cardLevelText(context),
-                               hintStyle: TextStyle(
-                                 color: AppColors.text(context),
-                                 fontWeight: FontWeight.w300,
-                                 fontSize: 14,
-                               ),
-                             ),
-                             hintText: hint,
-                             items: displayTexts,
-                             // Use display texts for dropdown
-                             onChanged: (newValue) {
-                               T? selectedItem;
+      final TextEditingController controller = TextEditingController(
+          text: state.value != null ? state.value.toString() : "");
 
-                               if (newValue == "All") {
-                                 // Handle "All" selection - return null
-                                 selectedItem = null;
-                               } else {
-                                 // Find the index in display items and get corresponding item
-                                 final index = displayTexts.indexOf(newValue!);
-                                 if (index != -1) {
-                                   final displayItem = displayItems[index];
-                                   // If it's a special item ("All", "Text") or actual object
-                                   if (displayItem is T) {
-                                     selectedItem = displayItem;
-                                   } else {
-                                     // For special items that aren't type T, return null
-                                     selectedItem = null;
-                                   }
-                                 }
-                               }
+      final LayerLink layerLink = LayerLink();
+      OverlayEntry? overlayEntry;
 
-                               state.didChange(selectedItem);
-                               onChanged(selectedItem);
-                             },
-                           )
-                         : CustomDropdown.search(
-                             closedHeaderPadding: EdgeInsets.only(
-                               top: 6,
-                               left: 4,
-                               right: 4,
-                               bottom: 6,
-                             ),
+      void removeOverlay() {
+        overlayEntry?.remove();
+        overlayEntry = null;
+      }
 
-                             closeDropDownOnClearFilterSearch: false,
-                             listItemPadding: EdgeInsets.symmetric(
-                               horizontal: 4,
-                               vertical: 4,
-                             ),
-                             itemsListPadding: EdgeInsets.symmetric(
-                               horizontal: 8,
-                               vertical: 4,
-                             ),
-                             decoration: CustomDropdownDecoration(
-                               expandedFillColor: AppColors.bottomNavBg(context),
+      void showOverlay() {
+        removeOverlay();
+        final RenderBox renderBox =
+        context.findRenderObject() as RenderBox;
+        final size = renderBox.size;
+        final offset = renderBox.localToGlobal(Offset.zero);
 
-                               closedFillColor: AppColors.bottomNavBg(context),
-                               expandedBorderRadius: BorderRadius.circular(2),
-                               searchFieldDecoration: SearchFieldDecoration(
-                                 fillColor: AppColors.bottomNavBg(context),
+        overlayEntry = OverlayEntry(
+          builder: (context) {
+            return Positioned(
+              left: offset.dx,
+              width: size.width,
+              top: offset.dy + size.height + 4,
+              child: Material(
+                elevation: 4,
+                borderRadius: BorderRadius.circular(8),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxHeight: 200),
+                  child: ListView.separated(
+                    padding: EdgeInsets.zero,
+                    shrinkWrap: true,
+                    itemCount: displayTexts.length,
+                    separatorBuilder: (_, __) =>
+                    const Divider(height: 1, color: Colors.grey),
+                    itemBuilder: (context, index) {
+                      final text = displayTexts[index];
+                      return InkWell(
+                        onTap: () {
+                          final selectedItem = items[index];
+                          state.didChange(selectedItem);
+                          onChanged(selectedItem);
+                          controller.text = text;
+                          removeOverlay();
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 8, horizontal: 12),
+                          child: Text(
+                            text,
+                            style: const TextStyle(
+                              fontSize: 14, // small but readable
+                              fontWeight: FontWeight.w400,
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+            );
+          },
+        );
 
-                                 hintStyle: AppTextStyle.cardLevelHead(
-                                   context,
-                                 ).copyWith(color: AppColors.text(context)),
-                                 textStyle: AppTextStyle.cardLevelText(
-                                   context,
-                                 ).copyWith(color: AppColors.text(context)),
-                               ),
-                               listItemStyle: AppTextStyle.cardLevelText(
-                                 context,
-                               ).copyWith(color: AppColors.text(context)),
-                               headerStyle: AppTextStyle.cardLevelText(
-                                 context,
-                               ).copyWith(color: AppColors.text(context)),
-                               hintStyle: TextStyle(
-                                 color: AppColors.text(context),
-                                 fontWeight: FontWeight.w300,
-                                 fontSize: 14,
-                               ),
-                             ),
-                             hintText: hint,
-                             items: displayTexts,
-                             // Use display texts for dropdown
-                             onChanged: (newValue) {
-                               T? selectedItem;
+        Overlay.of(context).insert(overlayEntry!);
+      }
 
-                               if (newValue == "All") {
-                                 // Handle "All" selection - return null
-                                 selectedItem = null;
-                               } else {
-                                 // Find the index in display items and get corresponding item
-                                 final index = displayTexts.indexOf(newValue!);
-                                 if (index != -1) {
-                                   final displayItem = displayItems[index];
-                                   // If it's a special item ("All", "Text") or actual object
-                                   if (displayItem is T) {
-                                     selectedItem = displayItem;
-                                   } else {
-                                     // For special items that aren't type T, return null
-                                     selectedItem = null;
-                                   }
-                                 }
-                               }
+      return SizedBox(
+        height: showLabel ? 70 : 50,
+        child: CompositedTransformTarget(
+          link: layerLink,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (showLabel)
+                Row(
+                  children: [
+                    Text(
+                      label,
+                      style: const TextStyle(
+                        fontSize: 12, // small label
+                        fontWeight: FontWeight.w500,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    if (isRequired) const SizedBox(width: 4),
+                    if (isRequired)
+                      const Text(
+                        "*",
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.red,
+                        ),
+                      ),
+                  ],
+                ),
+              if (showLabel) const SizedBox(height: 4),
+              SizedBox(
+                height: 32, // small TextField
+                child: TextField(
+                  controller: controller,
+                  readOnly: !isSearch,
+                  onTap: () {
+                    if (!isSearch) showOverlay();
+                  },
+                  onChanged: (v) {
+                    if (isSearch) showOverlay(); // filter overlay
+                  },
+                  style: const TextStyle(
+                    fontSize: 13, // small but readable
+                    fontWeight: FontWeight.w400,
+                    color: Colors.black87,
+                  ),
+                  decoration: InputDecoration(
+                    hintText: hint,
+                    isDense: false,
+                    filled: false,
+                    hintStyle: const TextStyle(
+                      fontSize: 13,
+                      color: Colors.grey,
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 10, vertical: 4),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(6),
+                      borderSide: BorderSide(
+                        color: state.hasError
+                            ? Colors.red
+                            : Colors.grey.shade400,
+                      ),
+                    ),
+                    suffixIcon: controller.text.isNotEmpty
+                        ? InkWell(
+                      onTap: () {
+                        controller.clear();
+                        state.didChange(null);
+                        removeOverlay();
+                      },
+                      child: const Icon(
+                        Icons.clear_rounded,
+                        size: 18,
+                      ),
+                    )
+                        : InkWell(
+                      onTap: () {
+                        showOverlay();
+                      },
+                      child: const Icon(
+                        Icons.arrow_drop_down,
+                        size: 18,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              if (state.hasError)
+                Padding(
+                  padding: const EdgeInsets.only(left: 6, top: 2),
+                  child: Text(
+                    state.errorText!,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Colors.red,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      );
+    },
+  );
 
-                               state.didChange(selectedItem);
-                               onChanged(selectedItem);
-                             },
-                           ),
-                   ),
-                 ),
-
-                 if (state.hasError)
-                   Padding(
-                     padding: const EdgeInsets.symmetric(horizontal: 6),
-                     child: Text(
-                       state.errorText!,
-                       style: AppTextStyle.errorTextStyle(context),
-                     ),
-                   ),
-               ],
-             ),
-           );
-         },
-       );
-
-  final String label, hint;
+  final String label;
+  final String hint;
   final bool isRequired;
   final bool? isLabel;
-  final bool? isCreateBtn;
-  final bool? isPrefixIconBtn;
   final bool isSearch;
   final bool? isNeedAll;
   final bool? isNeedText;
-  final BuildContext context;
   final List<T> itemList;
   final void Function(T?) onChanged;
-  final void Function()? isOnCreateBtn;
-  final void Function()? isOnPrefixIconBtn;
-  final DropdownMenuItem<T> Function(T item) itemBuilder;
 }

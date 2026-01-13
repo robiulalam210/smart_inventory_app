@@ -440,7 +440,6 @@ class _MoneyReceiptScreenState extends State<MobileMoneyReceiptList> {
                           const SizedBox(height: 8),
                           AppDropdown<CustomerActiveModel>(
                             label: "",
-                            context: context,
                             isSearch: true,
                             isLabel: false,
                             hint: "Select Customer",
@@ -454,10 +453,7 @@ class _MoneyReceiptScreenState extends State<MobileMoneyReceiptList> {
                                 selectedCustomerNotifier.value = newVal?.id.toString();
                               });
                             },
-                            itemBuilder: (item) => DropdownMenuItem<CustomerActiveModel>(
-                              value: item,
-                              child: Text(item.name ?? 'Unknown Customer'),
-                            ),
+
                           ),
                         ],
                       );
@@ -481,7 +477,6 @@ class _MoneyReceiptScreenState extends State<MobileMoneyReceiptList> {
                           const SizedBox(height: 8),
                           AppDropdown<UsersListModel>(
                             label: "",
-                            context: context,
                             hint: "Select Seller",
                             isLabel: false,
                             isRequired: false,
@@ -494,10 +489,7 @@ class _MoneyReceiptScreenState extends State<MobileMoneyReceiptList> {
                                 selectedSellerNotifier.value = newVal?.id.toString();
                               });
                             },
-                            itemBuilder: (item) => DropdownMenuItem<UsersListModel>(
-                              value: item,
-                              child: Text(item.username ?? 'Unknown Seller'),
-                            ),
+
                           ),
                         ],
                       );

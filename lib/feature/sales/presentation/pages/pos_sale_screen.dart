@@ -229,7 +229,6 @@ class _PosSaleScreenState extends State<PosSaleScreen> {
 
                       return AppDropdown<CustomerActiveModel>(
                         label: "Customer",
-                        context: context,
                         isSearch: true,
                         hint: selectedCustomer?.name ?? "Select Customer",
                         isNeedAll: true,
@@ -245,18 +244,7 @@ class _PosSaleScreenState extends State<PosSaleScreen> {
                           _fetchApi(customer: newVal?.id.toString() ?? '');
                         },
                         validator: (value) => null,
-                        itemBuilder: (item) =>
-                            DropdownMenuItem<CustomerActiveModel>(
-                              value: item,
-                              child: Text(
-                                item.name ?? 'Unknown Customer',
-                                style:  TextStyle(
-                                  color:AppColors.blackColor(context),
-                                  fontFamily: 'Quicksand',
-                                  fontWeight: FontWeight.w300,
-                                ),
-                              ),
-                            ),
+
                       );
                     },
                   );
@@ -279,7 +267,6 @@ class _PosSaleScreenState extends State<PosSaleScreen> {
 
                       return AppDropdown<UsersListModel>(
                         label: "Seller",
-                        context: context,
                         hint: selectedSeller?.username ?? "Select Seller",
                         isLabel: true,
                         isRequired: false,
@@ -292,17 +279,6 @@ class _PosSaleScreenState extends State<PosSaleScreen> {
                           _fetchApi(seller: newVal?.id.toString() ?? '');
                         },
                         validator: (value) => null,
-                        itemBuilder: (item) => DropdownMenuItem<UsersListModel>(
-                          value: item,
-                          child: Text(
-                            item.username ?? 'Unknown Seller',
-                            style:  TextStyle(
-                              color:AppColors.blackColor(context),
-                              fontFamily: 'Quicksand',
-                              fontWeight: FontWeight.w300,
-                            ),
-                          ),
-                        ),
                       );
                     },
                   );

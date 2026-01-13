@@ -94,7 +94,6 @@ class _MobileCreateAccountScreenState
                   valueListenable: selectedAccountType,
                   builder: (_, type, _) {
                     return AppDropdown(
-                      context: context,
                       label: "Account Type",
                       hint: "Select account type",
                       value: type.isEmpty ? null : type,
@@ -108,10 +107,7 @@ class _MobileCreateAccountScreenState
                       selectedAccountType.value = v!,
                       validator: (v) =>
                       v == null ? "Select account type" : null,
-                      itemBuilder: (item) => DropdownMenuItem(
-                        value: item,
-                        child: Text(item),
-                      ),
+
                     );
                   },
                 ),

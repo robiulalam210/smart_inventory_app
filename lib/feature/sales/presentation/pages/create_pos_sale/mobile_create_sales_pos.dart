@@ -472,7 +472,6 @@ class _SalesScreenState extends State<MobileSalesScreen> {
               child: BlocBuilder<CustomerBloc, CustomerState>(
                 builder: (context, state) {
                   return AppDropdown(
-                    context: context,
                     label: "Customer",
                     hint: bloc.selectClintModel?.name ?? "Select Customer",
                     isSearch: true,
@@ -509,17 +508,7 @@ class _SalesScreenState extends State<MobileSalesScreen> {
                     },
                     validator: (value) =>
                     value == null ? 'Please select Customer' : null,
-                    itemBuilder: (item) => DropdownMenuItem(
-                      value: item,
-                      child: Text(
-                        item.toString(),
-                        style:  TextStyle(
-                          color:AppColors.blackColor(context),
-                          fontFamily: 'Quicksand',
-                          fontWeight: FontWeight.w300,
-                        ),
-                      ),
-                    ),
+
                   );
                 },
               ),
@@ -529,7 +518,6 @@ class _SalesScreenState extends State<MobileSalesScreen> {
               child: BlocBuilder<UserBloc, UserState>(
                 builder: (context, state) {
                   return AppDropdown(
-                    context: context,
                     label: "Sales By",
                     hint: bloc.selectSalesModel?.username ?? "Select Sales",
                     isSearch: true,
@@ -543,17 +531,7 @@ class _SalesScreenState extends State<MobileSalesScreen> {
                     },
                     validator: (value) =>
                     value == null ? 'Please select Sales' : null,
-                    itemBuilder: (item) => DropdownMenuItem(
-                      value: item,
-                      child: Text(
-                        item.toString(),
-                        style:  TextStyle(
-                          color:AppColors.blackColor(context),
-                          fontFamily: 'Quicksand',
-                          fontWeight: FontWeight.w300,
-                        ),
-                      ),
-                    ),
+
                   );
                 },
               ),
@@ -1189,7 +1167,6 @@ class _SalesScreenState extends State<MobileSalesScreen> {
           Row(children: [
             Expanded(
                 child: AppDropdown(
-                  context: context,
                   label: "Payment Method",
                   hint: bloc.selectedPaymentMethod.isEmpty
                       ? "Select Payment Method"
@@ -1207,8 +1184,7 @@ class _SalesScreenState extends State<MobileSalesScreen> {
                   },
                   validator: (value) =>
                   value == null ? 'Please select a payment method' : null,
-                  itemBuilder: (item) =>
-                      DropdownMenuItem(value: item, child: Text(item.toString())),
+
                 )),
             const SizedBox(width: 6),
             Expanded(
@@ -1230,7 +1206,6 @@ class _SalesScreenState extends State<MobileSalesScreen> {
                           (filteredList.isNotEmpty ? filteredList.first : null);
                       bloc.accountModel = selectedAccount;
                       return AppDropdown<AccountActiveModel>(
-                        context: context,
                         label: "Account",
                         hint: bloc.accountModel == null
                             ? "Select Account"
@@ -1246,10 +1221,7 @@ class _SalesScreenState extends State<MobileSalesScreen> {
                         },
                         validator: (value) =>
                         value == null ? 'Please select an account' : null,
-                        itemBuilder: (item) => DropdownMenuItem(
-                          value: item,
-                          child: Text(item.toString()),
-                        ),
+
                       );
                     } else {
                       return Container();

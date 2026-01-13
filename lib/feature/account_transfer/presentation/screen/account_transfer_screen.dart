@@ -639,7 +639,6 @@ class _AccountTransferScreenState extends State<AccountTransferScreen> {
         // 📋 Status Dropdown
         Expanded(
           child: AppDropdown<String>(
-            context: context,
             hint: "Select Status",
             isNeedAll: true,
             isLabel: false,
@@ -651,17 +650,7 @@ class _AccountTransferScreenState extends State<AccountTransferScreen> {
               _fetchApi(status: newVal);
             },
             validator: (value) => null,
-            itemBuilder: (item) => DropdownMenuItem<String>(
-              value: item,
-              child: Text(
-                item.toUpperCase(),
-                style:  TextStyle(
-                  color:AppColors.blackColor(context),
-                  fontFamily: 'Quicksand',
-                  fontWeight: FontWeight.w300,
-                ),
-              ),
-            ),
+
             label: '',
           ),
         ),
@@ -670,7 +659,6 @@ class _AccountTransferScreenState extends State<AccountTransferScreen> {
         // 🔄 Transfer Type Dropdown
         Expanded(
           child: AppDropdown<String>(
-            context: context,
             hint: "Transfer Type",
             isNeedAll: true,
             isLabel: false,
@@ -682,17 +670,7 @@ class _AccountTransferScreenState extends State<AccountTransferScreen> {
               _fetchApi(transferType: newVal);
             },
             validator: (value) => null,
-            itemBuilder: (item) => DropdownMenuItem<String>(
-              value: item,
-              child: Text(
-                item.replaceAll('_', ' ').toUpperCase(),
-                style:  TextStyle(
-                  color:AppColors.blackColor(context),
-                  fontFamily: 'Quicksand',
-                  fontWeight: FontWeight.w300,
-                ),
-              ),
-            ),
+
             label: '',
           ),
         ),

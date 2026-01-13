@@ -181,7 +181,6 @@ class _CategoriesCreateState extends State<CategoriesCreate> {
                         : constraints.maxWidth * 0.5,
                     child: AppDropdown(
                       label: "Status",
-                      context: context,
                       hint: context.read<CategoriesBloc>().selectedState.isEmpty
                           ? "Select Status"
                           : context.read<CategoriesBloc>().selectedState,
@@ -197,17 +196,6 @@ class _CategoriesCreateState extends State<CategoriesCreate> {
                               .toString();
                         });
                       },
-                      itemBuilder: (item) => DropdownMenuItem(
-                        value: item,
-                        child: Text(
-                          item.toString(),
-                          style:  TextStyle(
-                            color:AppColors.blackColor(context),
-                            fontFamily: 'Quicksand',
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
                     ),
                   );
                 },

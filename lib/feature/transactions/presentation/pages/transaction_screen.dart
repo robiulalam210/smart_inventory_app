@@ -205,7 +205,6 @@ class _TransactionScreenState extends State<TransactionScreen> {
                 valueListenable: selectedTransactionTypeNotifier,
                 builder: (context, value, child) {
                   return AppDropdown<String>(
-                    context: context,
                     hint: "Transaction Type",
                     isNeedAll: true,
                     isLabel: false,
@@ -219,17 +218,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                       );
                     },
                     validator: (value) => null,
-                    itemBuilder: (item) => DropdownMenuItem<String>(
-                      value: item,
-                      child: Text(
-                        item,
-                        style:  TextStyle(
-                          color:AppColors.blackColor(context),
-                          fontFamily: 'Quicksand',
-                          fontWeight: FontWeight.w300,
-                        ),
-                      ),
-                    ),
+
                     label: '',
                   );
                 },
@@ -243,7 +232,6 @@ class _TransactionScreenState extends State<TransactionScreen> {
                 valueListenable: selectedStatusNotifier,
                 builder: (context, value, child) {
                   return AppDropdown<String>(
-                    context: context,
                     hint: "Status",
                     isNeedAll: true,
                     isLabel: false,
@@ -257,17 +245,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                       );
                     },
                     validator: (value) => null,
-                    itemBuilder: (item) => DropdownMenuItem<String>(
-                      value: item,
-                      child: Text(
-                        item,
-                        style:  TextStyle(
-                          color:AppColors.blackColor(context),
-                          fontFamily: 'Quicksand',
-                          fontWeight: FontWeight.w300,
-                        ),
-                      ),
-                    ),
+
                     label: '',
                   );
                 },

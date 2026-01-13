@@ -223,7 +223,6 @@ class _CustomerScreenState extends State<CustomerScreen> {
             valueListenable: selectedStatusNotifier,
             builder: (context, value, child) {
               return AppDropdown<String>(
-                context: context,
                 isLabel: false,
                 hint: "Select Status",
                 label: "",
@@ -236,17 +235,7 @@ class _CustomerScreenState extends State<CustomerScreen> {
                   _fetchApi(status: newVal?.toLowerCase() ?? '');
                 },
                 validator: (value) => null,
-                itemBuilder: (item) => DropdownMenuItem<String>(
-                  value: item,
-                  child: Text(
-                    item,
-                    style:  TextStyle(
-                      color:AppColors.blackColor(context),
-                      fontFamily: 'Quicksand',
-                      fontWeight: FontWeight.w300,
-                    ),
-                  ),
-                ),
+
               );
             },
           ),

@@ -211,7 +211,6 @@ class _ExpenseSubCreateScreenState extends State<ExpenseSubCreateScreen> {
                           final expenseHeads = context.read<ExpenseHeadBloc>().list;
 
                           return AppDropdown<ExpenseHeadModel>(
-                            context: context,
                             label: "Expense Head",
                             hint: _selectedExpenseHead?.name ?? "Select Expense Head",
                             isNeedAll: false,
@@ -229,17 +228,6 @@ class _ExpenseSubCreateScreenState extends State<ExpenseSubCreateScreen> {
                                   ? 'Please select Expense Head'
                                   : null;
                             },
-                            itemBuilder: (item) => DropdownMenuItem<ExpenseHeadModel>(
-                              value: item,
-                              child: Text(
-                                item.name ?? 'Unnamed Head',
-                                style:  TextStyle(
-                                  color:AppColors.blackColor(context),
-                                  fontFamily: 'Quicksand',
-                                  fontWeight: FontWeight.w300,
-                                ),
-                              ),
-                            ),
                           );
                         },
                       ),

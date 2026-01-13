@@ -109,7 +109,6 @@ class _PurchaseReportScreenState extends State<PurchaseReportScreen> {
             builder: (context, state) {
               return AppDropdown<SupplierActiveModel>(
                 label: "Supplier",
-                context: context,
                 isSearch: true,
                 hint: "Select Supplier",
                 isNeedAll: true,
@@ -124,17 +123,6 @@ class _PurchaseReportScreenState extends State<PurchaseReportScreen> {
                     supplier: newVal?.id.toString() ?? '',
                   );
                 },
-                itemBuilder: (item) => DropdownMenuItem<SupplierActiveModel>(
-                  value: item,
-                  child: Text(
-                    item.name ?? 'Unknown Supplier',
-                    style:  TextStyle(
-                      color:AppColors.blackColor(context),
-                      fontFamily: 'Quicksand',
-                      fontWeight: FontWeight.w300,
-                    ),
-                  ),
-                ),
               );
             },
           ),

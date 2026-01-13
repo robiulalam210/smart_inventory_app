@@ -271,7 +271,6 @@ _fetchApi();
                                   lg: 3,
                                   xl: 3,
                                   child: AppDropdown<String>(
-                                    context: context,
                                     label: "Transfer Type",
                                     hint: transferBloc.selectedTransferType
                                         .toUpperCase(),
@@ -285,17 +284,6 @@ _fetchApi();
                                         transferBloc.selectedTransferType = newVal.toString();
                                       });
                                     },
-                                    itemBuilder: (item) => DropdownMenuItem(
-                                      value: item,
-                                      child: Text(
-                                        item.replaceAll('_', ' ').toUpperCase(),
-                                        style:  TextStyle(
-                                          color:AppColors.blackColor(context),
-                                          fontFamily: 'Quicksand',
-                                          fontWeight: FontWeight.w300,
-                                        ),
-                                      ),
-                                    ),
                                   ),
                                 ),
                                 // Date
@@ -464,7 +452,6 @@ _fetchApi();
           }).toList();
 
           return AppDropdown<AccountActiveModel>(
-            context: context,
             label: isFromAccount ? "From Account" : "To Account",
             hint: selectedAccount == null
                 ? "Select ${isFromAccount ? 'From' : 'To'} Account"
@@ -494,29 +481,6 @@ _fetchApi();
               }
               return null;
             },
-            itemBuilder: (item) => DropdownMenuItem(
-              value: item,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    item.name ?? "Unknown",
-                    style: const TextStyle(
-                      color: Colors.black,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    "Balance: ${item.balance ?? '0.00'} | Type: ${item.acType?.toUpperCase() ?? 'Unknown'}",
-                    style: const TextStyle(
-                      color: Colors.grey,
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
-              ),
-            ),
           );
         } else {
           return const SizedBox.shrink();

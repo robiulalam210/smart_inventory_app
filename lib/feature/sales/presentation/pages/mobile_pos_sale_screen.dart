@@ -364,7 +364,6 @@ class _PosSaleScreenState extends State<MobilePosSaleScreen> {
                           const SizedBox(height: 8),
                           AppDropdown<CustomerActiveModel>(
                             label: "",
-                            context: context,
                             hint: "Select Customer",
                             isSearch: true,
                             isLabel: false,
@@ -378,10 +377,7 @@ class _PosSaleScreenState extends State<MobilePosSaleScreen> {
                                 selectedCustomerNotifier.value = newVal?.id.toString();
                               });
                             },
-                            itemBuilder: (item) => DropdownMenuItem<CustomerActiveModel>(
-                              value: item,
-                              child: Text(item.name ?? 'Unknown Customer'),
-                            ),
+
                           ),
                         ],
                       );
@@ -405,7 +401,6 @@ class _PosSaleScreenState extends State<MobilePosSaleScreen> {
                           const SizedBox(height: 8),
                           AppDropdown<UsersListModel>(
                             label: "",
-                            context: context,
                             hint: "Select Seller",
                             isLabel: false,
                             isRequired: false,
@@ -418,10 +413,7 @@ class _PosSaleScreenState extends State<MobilePosSaleScreen> {
                                 selectedSellerNotifier.value = newVal?.id.toString();
                               });
                             },
-                            itemBuilder: (item) => DropdownMenuItem<UsersListModel>(
-                              value: item,
-                              child: Text(item.username ?? 'Unknown Seller'),
-                            ),
+
                           ),
                         ],
                       );

@@ -244,7 +244,6 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
               child: BlocBuilder<ExpenseHeadBloc, ExpenseHeadState>(
                 builder: (context, state) {
                   return AppDropdown<ExpenseHeadModel>(
-                    context: context,
                     label: "Expense Head",
                     hint: _selectedExpenseHead?.name ?? "Select Expense Head",
                     isNeedAll: true,
@@ -253,17 +252,7 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
                     itemList: context.read<ExpenseHeadBloc>().list,
                     onChanged: _onExpenseHeadChanged,
                     validator: (value) => null,
-                    itemBuilder: (item) => DropdownMenuItem<ExpenseHeadModel>(
-                      value: item,
-                      child: Text(
-                        item.name ?? 'Unnamed Head',
-                        style:  TextStyle(
-                          color:AppColors.blackColor(context),
-                          fontFamily: 'Quicksand',
-                          fontWeight: FontWeight.w300,
-                        ),
-                      ),
-                    ),
+
                   );
                 },
               ),
@@ -311,7 +300,6 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
               children: [
                 Expanded(
                   child: AppDropdown<ExpenseSubHeadModel>(
-                    context: context,
                     label: "Expense Sub Head",
                     hint: _selectedExpenseSubHead?.name ?? "Select Sub Head",
                     isNeedAll: true,
@@ -322,17 +310,7 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
                         .toList(),
                     onChanged: _onExpenseSubHeadChanged,
                     validator: (value) => null,
-                    itemBuilder: (item) => DropdownMenuItem<ExpenseSubHeadModel>(
-                      value: item,
-                      child: Text(
-                        item.name ?? 'Unnamed Sub Head',
-                        style:  TextStyle(
-                          color:AppColors.blackColor(context),
-                          fontFamily: 'Quicksand',
-                          fontWeight: FontWeight.w300,
-                        ),
-                      ),
-                    ),
+
                   ),
                 ),
               ],

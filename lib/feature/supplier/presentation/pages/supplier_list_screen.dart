@@ -192,7 +192,6 @@ class _SupplierScreenState extends State<SupplierScreen> {
                     Expanded(
                       flex: 2,
                       child: AppDropdown(
-                        context: context,
                         hint: "Select Status",
                         isLabel: true,
                         isNeedAll: true,
@@ -211,17 +210,7 @@ class _SupplierScreenState extends State<SupplierScreen> {
                                 : newVal.toString(),
                           );
                         },
-                        itemBuilder: (item) => DropdownMenuItem(
-                          value: item,
-                          child: Text(
-                            item.toString(),
-                            style:  TextStyle(
-                              color:AppColors.blackColor(context),
-                              fontFamily: 'Quicksand',
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
+
                         label: '',
                       ),
                     ),

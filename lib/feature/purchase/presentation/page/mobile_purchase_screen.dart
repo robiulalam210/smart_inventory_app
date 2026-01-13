@@ -397,7 +397,6 @@ class _PurchaseScreenState extends State<MobilePurchaseScreen> {
                           const SizedBox(height: 8),
                           AppDropdown<SupplierActiveModel>(
                             label: "",
-                            context: context,
                             hint: "Select Supplier",
                             isLabel: false,
                             isRequired: false,
@@ -409,10 +408,7 @@ class _PurchaseScreenState extends State<MobilePurchaseScreen> {
                                 selectedSupplierNotifier.value = newVal?.id?.toString();
                               });
                             },
-                            itemBuilder: (item) => DropdownMenuItem<SupplierActiveModel>(
-                              value: item,
-                              child: Text(item.name ?? 'Unknown Supplier'),
-                            ),
+
                           ),
                         ],
                       );

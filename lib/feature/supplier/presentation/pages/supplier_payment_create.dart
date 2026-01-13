@@ -112,7 +112,6 @@ class _MoneyReceiptListScreenState extends State<SupplierPaymentForm> {
                           builder: (context, state) {
                             return AppDropdown(
                               label: "Supplier",
-                              context: context,
                               hint: context.read<SupplierPaymentBloc>().selectCustomerModel?.name?.toString() ??
                                   "Select Supplier",
                               isNeedAll: false,
@@ -141,17 +140,7 @@ class _MoneyReceiptListScreenState extends State<SupplierPaymentForm> {
                               validator: (value) {
                                 return value == null ? 'Please select Supplier' : null;
                               },
-                              itemBuilder: (item) => DropdownMenuItem(
-                                value: item,
-                                child: Text(
-                                  item.toString(),
-                                  style:  TextStyle(
-                                    color:AppColors.blackColor(context),
-                                    fontFamily: 'Quicksand',
-                                    fontWeight: FontWeight.w300,
-                                  ),
-                                ),
-                              ),
+
                             );
                           },
                         ),
@@ -159,7 +148,6 @@ class _MoneyReceiptListScreenState extends State<SupplierPaymentForm> {
                           builder: (context, state) {
                             return AppDropdown(
                               label: "Collected By",
-                              context: context,
                               hint: context.read<SupplierPaymentBloc>().selectUserModel?.username.toString() ??
                                   "Select Collected By",
                               isLabel: false,
@@ -174,17 +162,7 @@ class _MoneyReceiptListScreenState extends State<SupplierPaymentForm> {
                               validator: (value) {
                                 return value == null ? 'Please select Collected By' : null;
                               },
-                              itemBuilder: (item) => DropdownMenuItem(
-                                value: item,
-                                child: Text(
-                                  item.toString(),
-                                  style:  TextStyle(
-                                    color:AppColors.blackColor(context),
-                                    fontFamily: 'Quicksand',
-                                    fontWeight: FontWeight.w300,
-                                  ),
-                                ),
-                              ),
+
                             );
                           },
                         ),
@@ -195,7 +173,6 @@ class _MoneyReceiptListScreenState extends State<SupplierPaymentForm> {
                       _buildTwoColumnRow(
                         firstChild: AppDropdown(
                           label: "Payment To",
-                          context: context,
                           hint: context.read<SupplierPaymentBloc>().selectedPaymentToState.isNotEmpty
                               ? context.read<SupplierPaymentBloc>().selectedPaymentToState
                               : "Select Payment To",
@@ -211,24 +188,13 @@ class _MoneyReceiptListScreenState extends State<SupplierPaymentForm> {
                           validator: (value) {
                             return value == null ? 'Please select Payment To' : null;
                           },
-                          itemBuilder: (item) => DropdownMenuItem(
-                            value: item,
-                            child: Text(
-                              item.toString(),
-                              style:  TextStyle(
-                                color:AppColors.blackColor(context),
-                                fontFamily: 'Quicksand',
-                                fontWeight: FontWeight.w300,
-                              ),
-                            ),
-                          ),
+
                         ),
                         secondChild: context.read<SupplierPaymentBloc>().selectedPaymentToState.toString() == "Specific"
                             ? BlocBuilder<SupplierInvoiceBloc, SupplierInvoiceState>(
                           builder: (context, state) {
                             return AppDropdown(
                               label: "Invoice",
-                              context: context,
                               hint: context.read<SupplierInvoiceBloc>().supplierInvoiceListModel == ""
                                   ? "Select Invoice"
                                   : context.read<SupplierInvoiceBloc>().supplierInvoiceListModel,
@@ -245,17 +211,7 @@ class _MoneyReceiptListScreenState extends State<SupplierPaymentForm> {
                               validator: (value) {
                                 return value == null ? 'Please select Invoice' : null;
                               },
-                              itemBuilder: (item) => DropdownMenuItem(
-                                value: item,
-                                child: Text(
-                                  item.toString(),
-                                  style:  TextStyle(
-                                    color:AppColors.blackColor(context),
-                                    fontFamily: 'Quicksand',
-                                    fontWeight: FontWeight.w300,
-                                  ),
-                                ),
-                              ),
+
                             );
                           },
                         )
@@ -319,7 +275,6 @@ class _MoneyReceiptListScreenState extends State<SupplierPaymentForm> {
                       _buildTwoColumnRow(
                         firstChild: AppDropdown(
                           label: "Payment Method",
-                          context: context,
                           hint: context.read<SupplierPaymentBloc>().selectedPaymentMethod.isEmpty
                               ? "Select Payment Method"
                               : context.read<SupplierPaymentBloc>().selectedPaymentMethod,
@@ -341,17 +296,7 @@ class _MoneyReceiptListScreenState extends State<SupplierPaymentForm> {
                           validator: (value) {
                             return value == null ? 'Please select a payment method' : null;
                           },
-                          itemBuilder: (item) => DropdownMenuItem(
-                            value: item,
-                            child: Text(
-                              item.toString(),
-                              style:  TextStyle(
-                                color:AppColors.blackColor(context),
-                                fontFamily: 'Quicksand',
-                                fontWeight: FontWeight.w300,
-                              ),
-                            ),
-                          ),
+
                         ),
                         secondChild: BlocBuilder<AccountBloc, AccountState>(
                           builder: (context, state) {
@@ -369,7 +314,6 @@ class _MoneyReceiptListScreenState extends State<SupplierPaymentForm> {
                               hint: filteredList.isEmpty
                                   ? "No accounts available for selected payment method"
                                   : "Select Account",
-                              context: context,
                               isLabel: false,
                               isRequired: true,
                               isNeedAll: false,
@@ -397,17 +341,7 @@ class _MoneyReceiptListScreenState extends State<SupplierPaymentForm> {
                                 }
                                 return null;
                               },
-                              itemBuilder: (item) => DropdownMenuItem(
-                                value: item.toString(),
-                                child: Text(
-                                  item.toString(),
-                                  style:  TextStyle(
-                                    color:AppColors.blackColor(context),
-                                    fontFamily: 'Quicksand',
-                                    fontWeight: FontWeight.w300,
-                                  ),
-                                ),
-                              ),
+
                             );
                           },
                         ),
