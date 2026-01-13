@@ -967,8 +967,9 @@ class _SalesScreenState extends State<MobileSalesScreen> {
                     isRequiredLevle: false,
                     controller: controller,
                     hintText: label,
-                    fillColor: Colors.white,
-                    keyboardType: const TextInputType.numberWithOptions(
+                    fillColor:              AppColors.bottomNavBg(context),
+
+      keyboardType: const TextInputType.numberWithOptions(
                       decimal: true,
                     ),
                     onChanged: (_) => setState(() {}),
@@ -1070,7 +1071,7 @@ class _SalesScreenState extends State<MobileSalesScreen> {
             padding: const EdgeInsets.all(8),
             margin: const EdgeInsets.only(bottom: 10),
             decoration: BoxDecoration(
-              color: Colors.orange[50],
+              color: AppColors.bottomNavBg(context),
               borderRadius: BorderRadius.circular(8),
               border: Border.all(color: Colors.orange),
             ),
@@ -1096,7 +1097,7 @@ class _SalesScreenState extends State<MobileSalesScreen> {
             padding: const EdgeInsets.all(8),
             margin: const EdgeInsets.only(bottom: 10),
             decoration: BoxDecoration(
-              color: Colors.green[50],
+              color: AppColors.bottomNavBg(context),
               borderRadius: BorderRadius.circular(8),
               border: Border.all(color: Colors.green),
             ),
@@ -1121,7 +1122,7 @@ class _SalesScreenState extends State<MobileSalesScreen> {
         Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.bottomNavBg(context),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Column(
@@ -1162,7 +1163,10 @@ class _SalesScreenState extends State<MobileSalesScreen> {
         CheckboxListTile(
           title: Text(
             "With Money Receipt",
-            style: AppTextStyle.headerTitle(context),
+            style: AppTextStyle.headerTitle(context).copyWith(
+              color: AppColors.text(context),
+
+            ),
           ),
           value: _isChecked,
           onChanged: isWalkInCustomer
@@ -2033,7 +2037,10 @@ class _SalesScreenState extends State<MobileSalesScreen> {
         backgroundColor: AppColors.bottomNavBg(context),
         appBar: AppBar(
           backgroundColor: AppColors.bottomNavBg(context),
-          title: Text('Pos Sale', style: AppTextStyle.titleMedium(context)),
+          title: Text('Pos Sale', style: AppTextStyle.titleMedium(context).copyWith(
+            color: AppColors.text(context),
+
+          )),
           actions: [
             IconButton(
               onPressed: _openProductBrowser,
@@ -2135,7 +2142,7 @@ Future<Uint8List> generateSalesPreviewPdf(
   }
 
   // Helper for summary rows
-  pw.Widget _buildSummaryRow(String label, String value, {bool isTotal = false}) {
+  pw.Widget buildSummaryRow(String label, String value, {bool isTotal = false}) {
     return pw.Container(
       margin: const pw.EdgeInsets.symmetric(vertical: 2),
       child: pw.Row(
@@ -2553,11 +2560,11 @@ Future<Uint8List> generateSalesPreviewPdf(
                   ),
                   child: pw.Column(
                     children: [
-                      _buildSummaryRow('Subtotal:', '৳${sale.netTotal?.toStringAsFixed(2) ?? "0.00"}'),
+                      buildSummaryRow('Subtotal:', '৳${sale.netTotal?.toStringAsFixed(2) ?? "0.00"}'),
                       if (sale.overallDiscount != null && sale.overallDiscount! > 0)
-                        _buildSummaryRow('Discount:', '-৳${sale.overallDiscount?.toStringAsFixed(2) ?? "0.00"}'),
+                        buildSummaryRow('Discount:', '-৳${sale.overallDiscount?.toStringAsFixed(2) ?? "0.00"}'),
                       if (sale.overallVatAmount != null && sale.overallVatAmount! > 0)
-                        _buildSummaryRow('Vat:', '৳${sale.overallVatAmount?.toStringAsFixed(2) ?? "0.00"}'),
+                        buildSummaryRow('Vat:', '৳${sale.overallVatAmount?.toStringAsFixed(2) ?? "0.00"}'),
                       pw.SizedBox(height: 4),
                       pw.Divider(
                         color: PdfColors.blue400,
@@ -2565,7 +2572,7 @@ Future<Uint8List> generateSalesPreviewPdf(
                         thickness: 1,
                       ),
                       pw.SizedBox(height: 4),
-                      _buildSummaryRow('GRAND TOTAL:', '৳${sale.grandTotal?.toStringAsFixed(2) ?? "0.00"}', isTotal: true),
+                      buildSummaryRow('GRAND TOTAL:', '৳${sale.grandTotal?.toStringAsFixed(2) ?? "0.00"}', isTotal: true),
                     ],
                   ),
                 ),

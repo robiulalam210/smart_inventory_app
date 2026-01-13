@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:meherinMart/core/widgets/app_scaffold.dart';
 import 'package:meherinMart/feature/feature.dart';
+import 'package:meherinMart/feature/profile/presentation/pages/moble_profile_screen.dart';
 
 import '../core/configs/configs.dart';
 import '../core/shared/widgets/sideMenu/mobile_tab_sidebar.dart';
@@ -424,9 +425,15 @@ class _RootScreenState extends State<MobileRootScreen> {
               ),
             ),
 
-            gapW8,
+
           ],
         ),
+        actions: [
+          IconButton(onPressed: (){
+            AppRoutes.push(context, MobileProfileScreen());
+          }, icon: Icon(Icons.person,size: 35,)),
+          gapW8,
+        ],
       ),
 
       body: PopScope(
