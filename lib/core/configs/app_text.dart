@@ -133,7 +133,7 @@ class AppTextStyle {
 
   static TextStyle cardLevelHead(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    final color =AppColors.blackColor(context);
+    final color =AppColors.text(context);
 
     return Responsive.isMobile(context)
         ? textTheme.labelSmall!.copyWith(
@@ -149,15 +149,18 @@ class AppTextStyle {
   }
 
   static TextStyle cardLevelText(BuildContext context) {
+    final color =AppColors.text(context);
     final textTheme = Theme.of(context).textTheme;
 
     return Responsive.isMobile(context)
         ? textTheme.labelSmall!.copyWith(
-      fontFamily: fontFamily,
+      fontFamily: fontFamily,      color: color,
+
       fontWeight: FontWeight.w500,
     )
         : textTheme.labelSmall!.copyWith(
-      fontFamily: fontFamily,
+      fontFamily: fontFamily,      color: color,
+
       fontWeight: FontWeight.w500,
     );
   }
@@ -201,11 +204,11 @@ class AppTextStyle {
     return Responsive.isMobile(context)
         ? textTheme.labelMedium!.copyWith(
       fontFamily: fontFamily,
-      color:AppColors.blackColor(context),
+      color:AppColors.text(context),
       fontWeight: FontWeight.w400,
     )
         : textTheme.labelMedium!.copyWith(
-      color:AppColors.blackColor(context),
+      color:AppColors.text(context),
       fontFamily: fontFamily,
       fontWeight: FontWeight.w400,
     );

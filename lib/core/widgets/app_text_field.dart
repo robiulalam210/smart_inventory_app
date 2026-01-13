@@ -53,7 +53,9 @@ class AppTextField extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       Text(labelText ?? hintText,
-                          style: AppTextStyle.labelDropdownTextStyle(context)),
+                          style: AppTextStyle.labelDropdownTextStyle(context).copyWith(
+                            color: AppColors.text(context)
+                          )),
                       const SizedBox(
                         width: 4,
                       ),

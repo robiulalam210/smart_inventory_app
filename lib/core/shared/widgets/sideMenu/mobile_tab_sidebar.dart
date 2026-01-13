@@ -157,6 +157,7 @@ class MobileTabSidebar extends StatelessWidget {
                   margin: EdgeInsets.zero,
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
+                    color: AppColors.bottomNavBg(context),
                     // color: Theme.of(context)
                     //     .colorScheme
                     //     .inversePrimary
@@ -177,9 +178,7 @@ class MobileTabSidebar extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
-                            color: Theme
-                                .of(context)
-                                .primaryColor,
+                            color: AppColors.text(context),
                           ),
                         );
                       },
@@ -221,19 +220,14 @@ class MobileTabSidebar extends StatelessWidget {
                               style: TextStyle(
                                 fontWeight: FontWeight.w600,
                                 fontSize: 14,
-                                color: Theme
-                                    .of(
-                                  context,
-                                )
-                                    .textTheme
-                                    .bodyMedium!
-                                    .color,
+                                color: AppColors.text(context),
                               ),
                             ),
                             children: section.items.map((item) {
                               return MenuTile(
                                 isSubmenu: true,
                                 title: item.title,
+
                                 isSelected: currentIndex == item.index,
                                 onPressed: () {
                                   _handleMenuSelection(item.index, context);

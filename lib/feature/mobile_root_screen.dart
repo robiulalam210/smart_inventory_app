@@ -9,7 +9,6 @@ import '../core/shared/widgets/sideMenu/mobile_tab_sidebar.dart';
 import 'lab_dashboard/presentation/widgets/stats_card_monthly.dart';
 import 'profile/presentation/bloc/profile_bloc/profile_bloc.dart';
 
-
 class MobileRootScreen extends StatefulWidget {
   const MobileRootScreen({super.key});
 
@@ -48,17 +47,13 @@ class _RootScreenState extends State<MobileRootScreen> {
   }
 
   Widget _buildFilterSegmentedControl() {
-
     return SizedBox(
-      width:  double.infinity ,
+      width: double.infinity,
       child: CupertinoSegmentedControl<String>(
         padding: EdgeInsets.zero,
         children: {
           'current_day': Padding(
-            padding: const EdgeInsets.symmetric(
-              vertical: 4.0,
-              horizontal: 4.0,
-            ),
+            padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 4.0),
             child: Text(
               'Today',
               style: TextStyle(
@@ -71,10 +66,7 @@ class _RootScreenState extends State<MobileRootScreen> {
             ),
           ),
           'this_month': Padding(
-            padding: const EdgeInsets.symmetric(
-              vertical: 4.0,
-              horizontal: 4.0,
-            ),
+            padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 4.0),
             child: Text(
               DateFormat('MMMM').format(DateTime.now()),
               style: TextStyle(
@@ -87,10 +79,7 @@ class _RootScreenState extends State<MobileRootScreen> {
             ),
           ),
           'lifeTime': Padding(
-            padding: const EdgeInsets.symmetric(
-              vertical: 4.0,
-              horizontal: 4.0,
-            ),
+            padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 4.0),
             child: Text(
               'Life Time',
               style: TextStyle(
@@ -107,10 +96,7 @@ class _RootScreenState extends State<MobileRootScreen> {
           setState(() {
             selectedPurchaseOverviewType = value;
             context.read<DashboardBloc>().add(
-              FetchDashboardData(
-                dateFilter: value,
-                context: context,
-              ),
+              FetchDashboardData(dateFilter: value, context: context),
             );
           });
         },
@@ -130,7 +116,9 @@ class _RootScreenState extends State<MobileRootScreen> {
   }) {
     return Container(
       padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8)),
+      decoration: BoxDecoration(
+        color: AppColors.bottomNavBg(context),        borderRadius: BorderRadius.circular(8),
+      ),
       child: Row(
         children: [
           CircleAvatar(
@@ -142,11 +130,15 @@ class _RootScreenState extends State<MobileRootScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: AppTextStyle.cardLevelHead(context)),
+                Text(title, style: AppTextStyle.cardLevelHead(context).copyWith(
+                  color: AppColors.text(context),
+                )),
                 const SizedBox(height: 4),
                 Text(
                   isCurrency ? value.toStringAsFixed(2) : value.toString(),
-                  style: AppTextStyle.cardLevelText(context),
+                  style: AppTextStyle.cardLevelText(context).copyWith(
+                    color: AppColors.text(context),
+                  ),
                 ),
               ],
             ),
@@ -166,6 +158,7 @@ class _RootScreenState extends State<MobileRootScreen> {
       childAspectRatio: isMobile ? 2.2 : 1.5,
       crossAxisSpacing: 5,
       mainAxisSpacing: 5,
+
       children: [
         dashboardCardItem(
           title: "Total Sales",
@@ -192,7 +185,9 @@ class _RootScreenState extends State<MobileRootScreen> {
           title: "Net Profit",
           value: data.profitLoss?.netProfit?.toDouble() ?? 0.0,
           icon: Icons.trending_up,
-          color: (data.profitLoss?.netProfit ?? 0) >= 0 ? Colors.green : Colors.red,
+          color: (data.profitLoss?.netProfit ?? 0) >= 0
+              ? Colors.green
+              : Colors.red,
           isCurrency: true,
         ),
         // dashboardCardItem(
@@ -206,14 +201,13 @@ class _RootScreenState extends State<MobileRootScreen> {
   }
 
   Widget _buildSalesPurchaseOverview(DashboardData data) {
-      return Column(
-        children: [
-          _buildSalesOverview(data),
-          const SizedBox(height: 16),
-          _buildPurchaseOverview(data),
-        ],
-      );
-
+    return Column(
+      children: [
+        _buildSalesOverview(data),
+        const SizedBox(height: 16),
+        _buildPurchaseOverview(data),
+      ],
+    );
   }
 
   Widget _buildSalesOverview(DashboardData data) {
@@ -223,7 +217,7 @@ class _RootScreenState extends State<MobileRootScreen> {
       padding: EdgeInsets.all(isMobile ? 8.0 : 12.0),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
-        color: Colors.white,
+        color: AppColors.bottomNavBg(context),
       ),
       child: Column(
         children: [
@@ -235,6 +229,7 @@ class _RootScreenState extends State<MobileRootScreen> {
                 style: TextStyle(
                   fontFamily: GoogleFonts.playfairDisplay().fontFamily,
                   fontWeight: FontWeight.w500,
+                  color: AppColors.text(context),
                   fontSize: isMobile ? 14 : 18,
                 ),
               ),
@@ -249,7 +244,9 @@ class _RootScreenState extends State<MobileRootScreen> {
                   Expanded(
                     child: StatsCardMonthly(
                       title: "Total Sold Quantity",
-                      count: data.todayMetrics?.sales?.totalQuantity?.toString() ?? "0",
+                      count:
+                          data.todayMetrics?.sales?.totalQuantity?.toString() ??
+                          "0",
                       color: Colors.pink,
                       icon: "assets/images/sold.png",
                     ),
@@ -258,7 +255,8 @@ class _RootScreenState extends State<MobileRootScreen> {
                   Expanded(
                     child: StatsCardMonthly(
                       title: "Total Amount",
-                      count: (data.todayMetrics?.sales?.total ?? 0).toStringAsFixed(2),
+                      count: (data.todayMetrics?.sales?.total ?? 0)
+                          .toStringAsFixed(2),
                       color: Colors.purple,
                       icon: "assets/images/gross.png",
                     ),
@@ -271,7 +269,8 @@ class _RootScreenState extends State<MobileRootScreen> {
                   Expanded(
                     child: StatsCardMonthly(
                       title: "Total Due",
-                      count: (data.todayMetrics?.sales?.totalDue ?? 0).toStringAsFixed(2),
+                      count: (data.todayMetrics?.sales?.totalDue ?? 0)
+                          .toStringAsFixed(2),
                       color: Colors.redAccent,
                       icon: "assets/images/cancel.png",
                     ),
@@ -280,8 +279,12 @@ class _RootScreenState extends State<MobileRootScreen> {
                   Expanded(
                     child: StatsCardMonthly(
                       title: "Profit / Loss",
-                      count: (data.profitLoss?.netProfit ?? 0).toStringAsFixed(2),
-                      color: (data.profitLoss?.netProfit ?? 0) >= 0 ? Colors.green : Colors.red,
+                      count: (data.profitLoss?.netProfit ?? 0).toStringAsFixed(
+                        2,
+                      ),
+                      color: (data.profitLoss?.netProfit ?? 0) >= 0
+                          ? Colors.green
+                          : Colors.red,
                       icon: "assets/images/expenses.png",
                     ),
                   ),
@@ -301,7 +304,7 @@ class _RootScreenState extends State<MobileRootScreen> {
       padding: EdgeInsets.all(isMobile ? 8.0 : 12.0),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
-        color: Colors.white,
+        color: AppColors.bottomNavBg(context),
       ),
       child: Column(
         children: [
@@ -313,6 +316,7 @@ class _RootScreenState extends State<MobileRootScreen> {
                 style: TextStyle(
                   fontFamily: GoogleFonts.playfairDisplay().fontFamily,
                   fontWeight: FontWeight.w600,
+                  color: AppColors.text(context),
                   fontSize: isMobile ? 14 : 18,
                 ),
               ),
@@ -327,7 +331,10 @@ class _RootScreenState extends State<MobileRootScreen> {
                   Expanded(
                     child: StatsCardMonthly(
                       title: "Total Purchase\nQuantity",
-                      count: data.todayMetrics?.purchases?.totalQuantity?.toString() ?? "0",
+                      count:
+                          data.todayMetrics?.purchases?.totalQuantity
+                              ?.toString() ??
+                          "0",
                       color: Colors.blue,
                       icon: "assets/images/buy.png",
                     ),
@@ -336,7 +343,8 @@ class _RootScreenState extends State<MobileRootScreen> {
                   Expanded(
                     child: StatsCardMonthly(
                       title: "Total Amount",
-                      count: (data.todayMetrics?.purchases?.total ?? 0).toStringAsFixed(2),
+                      count: (data.todayMetrics?.purchases?.total ?? 0)
+                          .toStringAsFixed(2),
                       color: Colors.green,
                       icon: "assets/images/gross.png",
                     ),
@@ -349,7 +357,8 @@ class _RootScreenState extends State<MobileRootScreen> {
                   Expanded(
                     child: StatsCardMonthly(
                       title: "Total Due",
-                      count: (data.todayMetrics?.purchases?.totalDue ?? 0).toStringAsFixed(2),
+                      count: (data.todayMetrics?.purchases?.totalDue ?? 0)
+                          .toStringAsFixed(2),
                       color: Colors.redAccent,
                       icon: "assets/images/cancel.png",
                     ),
@@ -358,9 +367,10 @@ class _RootScreenState extends State<MobileRootScreen> {
                   Expanded(
                     child: StatsCardMonthly(
                       title: "Total Returns",
-                      count: (data.todayMetrics?.purchaseReturns?.totalAmount ?? 0).toStringAsFixed(2),
-                      color: Colors.black,
-                      icon: "assets/images/product_return.png",
+                      count:
+                          (data.todayMetrics?.purchaseReturns?.totalAmount ?? 0)
+                              .toStringAsFixed(2),
+                      color: AppColors.text(context),                      icon: "assets/images/product_return.png",
                     ),
                   ),
                 ],
@@ -371,7 +381,6 @@ class _RootScreenState extends State<MobileRootScreen> {
       ),
     );
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -416,8 +425,6 @@ class _RootScreenState extends State<MobileRootScreen> {
             ),
 
             gapW8,
-
-
           ],
         ),
       ),
@@ -430,49 +437,47 @@ class _RootScreenState extends State<MobileRootScreen> {
         },
         child: BlocBuilder<DashboardBloc, DashboardState>(
           builder: (context, state) {
-
-
             return RefreshIndicator(
               onRefresh: () async {
-                context.read<DashboardBloc>().add(FetchDashboardData(context: context));
-
+                context.read<DashboardBloc>().add(
+                  FetchDashboardData(context: context),
+                );
               },
               child: Padding(
                 padding: EdgeInsets.symmetric(
-                  horizontal: AppSizes.bodyPadding * (Responsive.isMobile(context) ? 0.5 : 1.5),
+                  horizontal:
+                      AppSizes.bodyPadding *
+                      (Responsive.isMobile(context) ? 0.5 : 1.5),
                 ),
                 child: BlocConsumer<DashboardBloc, DashboardState>(
                   listener: (context, state) {
                     if (state is DashboardError) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(state.message)),
-                      );
+                      ScaffoldMessenger.of(
+                        context,
+                      ).showSnackBar(SnackBar(content: Text(state.message)));
                     }
                   },
                   builder: (context, state) {
                     return SafeArea(
                       child: SingleChildScrollView(
                         controller: scrollController,
-                        padding: EdgeInsets.all(Responsive.isMobile(context) ? 8.0 : 12.0),
+                        padding: EdgeInsets.all(
+                          Responsive.isMobile(context) ? 8.0 : 12.0,
+                        ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             // ==== HEADER AND FILTER ====
-                            const Text(
+                            Text(
                               "Dashboard",
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
+                              style: AppTextStyle.titleSmall(context),
                             ),
                             const SizedBox(height: 12),
                             _buildFilterSegmentedControl(),
 
                             // ==== LOADING STATE ====
                             if (state is DashboardLoading)
-                              const Center(
-                                child: CircularProgressIndicator(),
-                              ),
+                              const Center(child: CircularProgressIndicator()),
 
                             // ==== DASHBOARD CARDS ====
                             if (state is DashboardLoaded) ...[
@@ -481,7 +486,6 @@ class _RootScreenState extends State<MobileRootScreen> {
 
                               // ==== SALES & PURCHASE OVERVIEW ====
                               _buildSalesPurchaseOverview(state.dashboardData),
-
                             ],
 
                             // ==== ERROR STATE ====
@@ -512,10 +516,6 @@ class _RootScreenState extends State<MobileRootScreen> {
           },
         ),
       ),
-
     );
   }
-
 }
-
-
