@@ -1,11 +1,18 @@
 // NOTE: adjust imports paths to match your project structure
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:flutter/cupertino.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
+import 'package:printing/printing.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
 
+import '../../../../profile/data/model/profile_perrmission_model.dart';
+import '../../../../profile/presentation/bloc/profile_bloc/profile_bloc.dart';
+import '../../../data/models/pos_sale_model.dart';
 import '../mobile_pos_sale_screen.dart';
 import '/core/core.dart';
 import '/feature/products/product/data/model/product_stock_model.dart';
@@ -31,6 +38,7 @@ class _SalesScreenState extends State<MobileSalesScreen> {
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   late CategoriesBloc categoriesBloc;
   late BrandBloc brandBloc;
+  late CreatePosSaleBloc createPosSaleBloc;
 
   TextEditingController changeAmountController = TextEditingController();
   TextEditingController productSearchController = TextEditingController();
@@ -65,6 +73,7 @@ class _SalesScreenState extends State<MobileSalesScreen> {
     context.read<ProductsBloc>().add(FetchProductsStockList(context));
     categoriesBloc = context.read<CategoriesBloc>();
     brandBloc = context.read<BrandBloc>();
+    createPosSaleBloc = context.read<CreatePosSaleBloc>();
 
     // Initialize BLoC fields (dates etc)
     final bloc = context.read<CreatePosSaleBloc>();
@@ -82,13 +91,21 @@ class _SalesScreenState extends State<MobileSalesScreen> {
         ? bloc.selectedOverallDiscountType
         : selectedOverallDiscountType;
     selectedOverallServiceChargeType =
-        bloc.selectedOverallServiceChargeType.isNotEmpty
+    bloc.selectedOverallServiceChargeType.isNotEmpty
         ? bloc.selectedOverallServiceChargeType
         : selectedOverallServiceChargeType;
     selectedOverallDeliveryType = bloc.selectedOverallDeliveryType.isNotEmpty
         ? bloc.selectedOverallDeliveryType
         : selectedOverallDeliveryType;
     _isChecked = bloc.isChecked;
+
+    // For walk-in customer (default), set _isChecked to false
+    bloc.selectClintModel = CustomerActiveModel(
+      name: 'Walk-in-customer',
+      id: -1,
+    );
+    _isChecked = false;
+    bloc.isChecked = false;
 
     // Ensure there's at least one product row (empty) so UI has an 'add' row
     if (bloc.products.isEmpty) {
@@ -111,16 +128,12 @@ class _SalesScreenState extends State<MobileSalesScreen> {
     final token = await LocalDB.getLoginInfo();
     final loginUserId = token?['userId'];
     final bloc = context.read<CreatePosSaleBloc>();
-    bloc.selectClintModel = CustomerActiveModel(
-      name: 'Walk-in-customer',
-      id: -1,
-    );
 
     final userList = context.read<UserBloc>().list;
     if (userList.isEmpty) return;
 
     final matchedUser = userList.firstWhere(
-      (user) => user.id == loginUserId,
+          (user) => user.id == loginUserId,
       orElse: () => userList.first,
     );
 
@@ -134,7 +147,7 @@ class _SalesScreenState extends State<MobileSalesScreen> {
     for (int i = 0; i < bloc.products.length; i++) {
       controllers.putIfAbsent(
         i,
-        () => {
+            () => {
           "price": TextEditingController(
             text: _toDouble(bloc.products[i]["price"]).toStringAsFixed(2),
           ),
@@ -175,8 +188,32 @@ class _SalesScreenState extends State<MobileSalesScreen> {
 
   void _updateChangeAmount() {
     final bloc = context.read<CreatePosSaleBloc>();
+    final selectedCustomer = bloc.selectClintModel;
+    final isWalkInCustomer = selectedCustomer?.id == -1;
     final payableAmount = double.tryParse(bloc.payableAmount.text) ?? 0.0;
-    final changeAmount = calculateAllFinalTotal() - payableAmount;
+    final netTotal = calculateAllFinalTotal();
+    final changeAmount = payableAmount - netTotal;
+
+    // For walk-in customers, change amount should be 0 (no advance)
+    if (isWalkInCustomer) {
+      // Walk-in customer: Must pay exact amount, no change
+      if (payableAmount != netTotal) {
+        showCustomToast(
+          context: context,
+          title: 'Warning!',
+          description:
+          "Walk-in customer must pay exact amount. No change allowed.",
+          icon: Icons.warning,
+          primaryColor: Colors.orange,
+        );
+        // Auto-correct to exact amount
+        bloc.payableAmount.text = netTotal.toStringAsFixed(2);
+        setState(() {
+          changeAmountController.text = "0.00";
+        });
+        return;
+      }
+    }
 
     setState(() {
       changeAmountController.text = changeAmount.toStringAsFixed(2);
@@ -187,17 +224,9 @@ class _SalesScreenState extends State<MobileSalesScreen> {
   double calculateAllFinalTotal() {
     final bloc = context.read<CreatePosSaleBloc>();
     final productList = products;
-    // double specificDiscount = productList.fold(0.0, (p, e) {
-    //   final disc = _toDouble(e["discount"]);
-    //   final ticket = _toDouble(e["ticket_total"]);
-    //   return p +
-    //       ((e["discount_type"] == 'percent')
-    //           ? (ticket * (disc / 100.0))
-    //           : disc);
-    // });
     double subTotal = productList.fold(
       0.0,
-      (p, e) => p + _toDouble(e["total"]),
+          (p, e) => p + _toDouble(e["total"]),
     );
     double overallDiscount =
         double.tryParse(bloc.discountOverAllController.text) ?? 0.0;
@@ -286,7 +315,7 @@ class _SalesScreenState extends State<MobileSalesScreen> {
 
           // Update local scanned list (optional)
           final index = _scannedProducts.indexWhere(
-            (p) => p['sku'] == product['sku'],
+                (p) => p['sku'] == product['sku'],
           );
           if (index >= 0) {
             setState(() {
@@ -352,11 +381,10 @@ class _SalesScreenState extends State<MobileSalesScreen> {
     if (bloc.products.isEmpty) bloc.addProduct();
 
     final emptyIndex = bloc.products.indexWhere(
-      (row) => row["product_id"] == null,
+          (row) => row["product_id"] == null,
     );
-    final targetIndex = emptyIndex >= 0
-        ? emptyIndex
-        : (bloc.products.length - 1);
+    final targetIndex =
+    emptyIndex >= 0 ? emptyIndex : (bloc.products.length - 1);
 
     // If target already has a product, append new row
     final int useIndex;
@@ -380,13 +408,13 @@ class _SalesScreenState extends State<MobileSalesScreen> {
       productJson['discount'] ?? productJson['discount_value'] ?? 0,
     );
     final discountType =
-        (productJson['discount_type'] ?? productJson['discountType'] ?? 'fixed')
-            .toString();
+    (productJson['discount_type'] ?? productJson['discountType'] ?? 'fixed')
+        .toString();
     final discountApplied =
         (productJson['discount_applied'] ??
             productJson['discountApplied'] ??
             false) ==
-        true;
+            true;
     final stockQty = _toInt(
       productJson['stock_qty'] ?? productJson['stockQty'] ?? 0,
     );
@@ -410,7 +438,7 @@ class _SalesScreenState extends State<MobileSalesScreen> {
     // Ensure controllers exist and set values
     controllers.putIfAbsent(
       useIndex,
-      () => {
+          () => {
         "price": TextEditingController(text: sellingPrice.toStringAsFixed(2)),
         "discount": TextEditingController(
           text: discountApplied ? discountValue.toString() : "0",
@@ -423,9 +451,8 @@ class _SalesScreenState extends State<MobileSalesScreen> {
 
     controllers[useIndex]!["quantity"]!.text = "1";
     controllers[useIndex]!["price"]!.text = sellingPrice.toStringAsFixed(2);
-    controllers[useIndex]!["discount"]!.text = discountApplied
-        ? discountValue.toString()
-        : "0";
+    controllers[useIndex]!["discount"]!.text =
+    discountApplied ? discountValue.toString() : "0";
 
     updateTotal(useIndex);
 
@@ -452,23 +479,36 @@ class _SalesScreenState extends State<MobileSalesScreen> {
                     isNeedAll: false,
                     isRequired: true,
                     value: bloc.selectClintModel,
-                    itemList:
-                        [
-                          CustomerActiveModel(name: 'Walk-in-customer', id: -1),
-                        ] +
+                    itemList: [
+                      CustomerActiveModel(name: 'Walk-in-customer', id: -1),
+                    ] +
                         context.read<CustomerBloc>().activeCustomer,
                     onChanged: (newVal) {
                       bloc.selectClintModel = newVal;
                       bloc.customType = (newVal?.id == -1)
                           ? "Walking Customer"
                           : "Saved Customer";
-                      if(  newVal?.id == -1){
-                        _isChecked=true;
+
+                      // Apply customer type rules
+                      if (newVal?.id == -1) {
+                        // Walk-in customer: set _isChecked to false
+                        _isChecked = false;
+                        bloc.isChecked = false;
+                        // Auto-set payable amount to net total for walk-in customer
+                        Future.delayed(const Duration(milliseconds: 100), () {
+                          final netTotal = calculateAllFinalTotal();
+                          bloc.payableAmount.text = netTotal.toStringAsFixed(2);
+                          _updateChangeAmount();
+                        });
+                      } else {
+                        // Saved customer: set _isChecked to true
+                        _isChecked = true;
+                        bloc.isChecked = true;
                       }
                       setState(() {});
                     },
                     validator: (value) =>
-                        value == null ? 'Please select Customer' : null,
+                    value == null ? 'Please select Customer' : null,
                     itemBuilder: (item) => DropdownMenuItem(
                       value: item,
                       child: Text(
@@ -502,7 +542,7 @@ class _SalesScreenState extends State<MobileSalesScreen> {
                       setState(() {});
                     },
                     validator: (value) =>
-                        value == null ? 'Please select Sales' : null,
+                    value == null ? 'Please select Sales' : null,
                     itemBuilder: (item) => DropdownMenuItem(
                       value: item,
                       child: Text(
@@ -534,7 +574,7 @@ class _SalesScreenState extends State<MobileSalesScreen> {
                 bottom: 15.0,
                 fillColor: AppColors.whiteColor,
                 validator: (value) =>
-                    value!.isEmpty ? 'Please enter date' : null,
+                value!.isEmpty ? 'Please enter date' : null,
                 onTap: _selectDate,
               ),
             ),
@@ -561,8 +601,9 @@ class _SalesScreenState extends State<MobileSalesScreen> {
           final product = entry.value;
           final discountApplied = product["discountApplied"] == true;
           final selectedItem = product["product"] as ProductModelStockModel?;
-          final title =
-              selectedItem?.name ?? product["product"]?.toString() ?? '';
+          final title = selectedItem?.name ?? 'Select Product';
+          final productId = product["product_id"];
+          final isProductSelected = productId != null;
 
           return Card(
             margin: const EdgeInsets.only(bottom: 5),
@@ -581,7 +622,12 @@ class _SalesScreenState extends State<MobileSalesScreen> {
                       Expanded(
                         child: Text(
                           title,
-                          style: AppTextStyle.titleSmall(context),
+                          style: isProductSelected
+                              ? AppTextStyle.titleSmall(context)
+                              : AppTextStyle.titleSmall(context).copyWith(
+                            color: Colors.grey,
+                            fontStyle: FontStyle.italic,
+                          ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -591,9 +637,9 @@ class _SalesScreenState extends State<MobileSalesScreen> {
                           if (product == products.last) {
                             context.read<CreatePosSaleBloc>().addProduct();
                           } else {
-                            context.read<CreatePosSaleBloc>().removeProduct(
-                              index,
-                            );
+                            context
+                                .read<CreatePosSaleBloc>()
+                                .removeProduct(index);
                           }
                           setState(() {});
                         },
@@ -601,8 +647,8 @@ class _SalesScreenState extends State<MobileSalesScreen> {
                           padding: const EdgeInsets.all(6),
                           decoration: BoxDecoration(
                             color: product == products.last
-                                ? Colors.green.withValues(alpha: 0.08)
-                                : Colors.red.withValues(alpha: 0.08),
+                                ? Colors.green.withOpacity(0.08)
+                                : Colors.red.withOpacity(0.08),
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Icon(
@@ -617,137 +663,150 @@ class _SalesScreenState extends State<MobileSalesScreen> {
                     ],
                   ),
 
-                  /// 🔹 Stock + discount
-                  Row(
-                    children: [
-                      Text(
-                        'Stock: ${product["stock_qty"] ?? selectedItem?.stockQty ?? 0}',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      if (product["discount_type"] != null)
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.green.withValues(alpha: 0.08),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(
-                            product["discount_type"] == 'percent'
-                                ? '${product["discount"] ?? 0}% off'
-                                : 'Tk ${product["discount"] ?? 0}',
-                            style: const TextStyle(fontSize: 12),
+                  if (isProductSelected) ...[
+                    /// 🔹 Stock + discount
+                    Row(
+                      children: [
+                        Text(
+                          'Stock: ${product["stock_qty"] ?? selectedItem?.stockQty ?? 0}',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey,
                           ),
                         ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 5),
-
-                  /// 🔹 Qty + Price + Total
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      /// Qty controller
-                      Row(
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.remove, size: 18),
-                            onPressed: () {
-                              int q =
-                                  int.tryParse(
-                                    controllers[index]?["quantity"]?.text ??
-                                        "0",
-                                  ) ??
-                                  0;
-                              if (q > 1) {
-                                controllers[index]!["quantity"]!.text =
-                                    "${q - 1}";
-                                products[index]["quantity"] = q - 1;
-                                updateTotal(index);
-                              }
-                            },
-                          ),
-                          SizedBox(
-                            width: 40,
-                            child: TextFormField(
-                              controller: controllers[index]?["quantity"],
-                              readOnly: discountApplied,
-                              keyboardType: TextInputType.number,
-                              textAlign: TextAlign.center,
-
-                              decoration: const InputDecoration(
-                                isDense: true,
-                                contentPadding: EdgeInsets.symmetric(
-                                  vertical: 4,
-                                  horizontal: 4,
-                                ),
-                              ),
-                              onChanged: discountApplied
-                                  ? null
-                                  : (v) {
-                                      final q = int.tryParse(v) ?? 0;
-                                      controllers[index]!["quantity"]!.text =
-                                          "$q";
-                                      products[index]["quantity"] = q;
-                                      updateTotal(index);
-                                    },
+                        const SizedBox(width: 8),
+                        if (product["discount_type"] != null)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.green.withOpacity(0.08),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              product["discount_type"] == 'percent'
+                                  ? '${product["discount"] ?? 0}% off'
+                                  : 'Tk ${product["discount"] ?? 0}',
+                              style: const TextStyle(fontSize: 12),
                             ),
                           ),
-                          IconButton(
-                            icon: const Icon(Icons.add, size: 18),
-                            onPressed: () {
-                              int q =
-                                  int.tryParse(
-                                    controllers[index]?["quantity"]?.text ??
-                                        "0",
-                                  ) ??
-                                  0;
-                              controllers[index]!["quantity"]!.text =
-                                  "${q + 1}";
-                              products[index]["quantity"] = q + 1;
-                              updateTotal(index);
-                            },
-                          ),
-                        ],
-                      ),
+                      ],
+                    ),
 
-                      /// Price
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            'Price',
-                            style: AppTextStyle.cardLevelHead(context),
-                          ),
-                          Text(
-                            '৳ ${controllers[index]?["price"]?.text ?? '0'}',
-                            style: AppTextStyle.cardLevelText(context),
-                          ),
-                        ],
-                      ),
+                    const SizedBox(height: 5),
 
-                      /// Total
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            'Total',
-                            style: AppTextStyle.cardLevelHead(context),
-                          ),
-                          Text(
-                            '৳ ${controllers[index]?["total"]?.text ?? '0'}',
-                            style: AppTextStyle.cardLevelText(context),                          ),
-                        ],
+                    /// 🔹 Qty + Price + Total
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        /// Qty controller
+                        Row(
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.remove, size: 18),
+                              onPressed: () {
+                                int q = int.tryParse(
+                                  controllers[index]?["quantity"]
+                                      ?.text ??
+                                      "0",
+                                ) ??
+                                    0;
+                                if (q > 1) {
+                                  controllers[index]!["quantity"]!.text =
+                                  "${q - 1}";
+                                  products[index]["quantity"] = q - 1;
+                                  updateTotal(index);
+                                }
+                              },
+                            ),
+                            SizedBox(
+                              width: 40,
+                              child: TextFormField(
+                                controller: controllers[index]?["quantity"],
+                                readOnly: discountApplied,
+                                keyboardType: TextInputType.number,
+                                textAlign: TextAlign.center,
+                                decoration: const InputDecoration(
+                                  isDense: true,
+                                  contentPadding: EdgeInsets.symmetric(
+                                    vertical: 4,
+                                    horizontal: 4,
+                                  ),
+                                ),
+                                onChanged: discountApplied
+                                    ? null
+                                    : (v) {
+                                  final q = int.tryParse(v) ?? 0;
+                                  controllers[index]!["quantity"]!.text =
+                                  "$q";
+                                  products[index]["quantity"] = q;
+                                  updateTotal(index);
+                                },
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.add, size: 18),
+                              onPressed: () {
+                                int q = int.tryParse(
+                                  controllers[index]?["quantity"]
+                                      ?.text ??
+                                      "0",
+                                ) ??
+                                    0;
+                                controllers[index]!["quantity"]!.text =
+                                "${q + 1}";
+                                products[index]["quantity"] = q + 1;
+                                updateTotal(index);
+                              },
+                            ),
+                          ],
+                        ),
+
+                        /// Price
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              'Price',
+                              style: AppTextStyle.cardLevelHead(context),
+                            ),
+                            Text(
+                              '৳ ${controllers[index]?["price"]?.text ?? '0'}',
+                              style: AppTextStyle.cardLevelText(context),
+                            ),
+                          ],
+                        ),
+
+                        /// Total
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              'Total',
+                              style: AppTextStyle.cardLevelHead(context),
+                            ),
+                            Text(
+                              '৳ ${controllers[index]?["total"]?.text ?? '0'}',
+                              style: AppTextStyle.cardLevelText(context),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ] else ...[
+                    // Show message when no product selected
+                    const SizedBox(height: 10),
+                    Text(
+                      'Tap the product browser button below to add products',
+                      style: TextStyle(
+                        color: Colors.grey[600],
+                        fontSize: 12,
+                        fontStyle: FontStyle.italic,
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -777,10 +836,8 @@ class _SalesScreenState extends State<MobileSalesScreen> {
     double discountAmount = discountType == 'percent'
         ? ticketTotal * (discountValue / 100.0)
         : discountValue;
-    double finalTotal = (ticketTotal - discountAmount).clamp(
-      0.0,
-      double.infinity,
-    );
+    double finalTotal =
+    (ticketTotal - discountAmount).clamp(0.0, double.infinity);
     controllers[index]!["total"]?.text = finalTotal.toStringAsFixed(2);
     products[index]["total"] = finalTotal;
 
@@ -794,8 +851,7 @@ class _SalesScreenState extends State<MobileSalesScreen> {
     if (newVal == null) return;
 
     final alreadyAdded = products.asMap().entries.any(
-      (entry) => entry.key != index && entry.value["product_id"] == newVal.id,
-    );
+            (entry) => entry.key != index && entry.value["product_id"] == newVal.id);
 
     if (alreadyAdded) {
       showCustomToast(
@@ -825,11 +881,12 @@ class _SalesScreenState extends State<MobileSalesScreen> {
     products[index]["discount"] = _toDouble(newVal.discountValue);
     products[index]["discount_type"] = newVal.discountType ?? "fixed";
     products[index]["discountApplied"] = newVal.discountApplied ?? false;
+    products[index]["stock_qty"] = newVal.stockQty;
 
     // ensure controllers exist
     controllers.putIfAbsent(
       index,
-      () => {
+          () => {
         "price": TextEditingController(),
         "discount": TextEditingController(),
         "quantity": TextEditingController(text: "1"),
@@ -838,14 +895,13 @@ class _SalesScreenState extends State<MobileSalesScreen> {
       },
     );
 
-    controllers[index]!["price"]!.text = _toDouble(
-      newVal.sellingPrice,
-    ).toStringAsFixed(2);
+    controllers[index]!["price"]!.text =
+        _toDouble(newVal.sellingPrice).toStringAsFixed(2);
     controllers[index]!["discount"]!.text = (newVal.discountApplied == true
         ? _toDouble(newVal.discountValue).toString()
         : "0");
     controllers[index]!["quantity"]!.text =
-        controllers[index]!["quantity"]!.text.isEmpty
+    controllers[index]!["quantity"]!.text.isEmpty
         ? "1"
         : controllers[index]!["quantity"]!.text;
 
@@ -855,11 +911,11 @@ class _SalesScreenState extends State<MobileSalesScreen> {
   // Charges section (kept, compact)
   Widget _buildChargesSection(CreatePosSaleBloc bloc) {
     Widget chargeField(
-      String label,
-      String selectedType,
-      TextEditingController controller,
-      Function(String) onTypeChanged,
-    ) {
+        String label,
+        String selectedType,
+        TextEditingController controller,
+        Function(String) onTypeChanged,
+        ) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -931,7 +987,7 @@ class _SalesScreenState extends State<MobileSalesScreen> {
       children: [
         Row(children: [
           Expanded(
-            child:  chargeField(
+            child: chargeField(
               "Discount",
               selectedOverallDiscountType,
               context.read<CreatePosSaleBloc>().discountOverAllController,
@@ -945,21 +1001,21 @@ class _SalesScreenState extends State<MobileSalesScreen> {
             ),
           ),
           const SizedBox(width: 8),
-          Expanded(child:    chargeField(
-            "Delivery",
-            selectedOverallDeliveryType,
-            context.read<CreatePosSaleBloc>().deliveryChargeOverAllController,
-                (value) {
-              setState(() {
-                selectedOverallDeliveryType = value;
-                context.read<CreatePosSaleBloc>().selectedOverallDeliveryType =
-                    value;
-              });
-            },
-          ),)
-        ],),
-
-
+          Expanded(
+            child: chargeField(
+              "Delivery",
+              selectedOverallDeliveryType,
+              context.read<CreatePosSaleBloc>().deliveryChargeOverAllController,
+                  (value) {
+                setState(() {
+                  selectedOverallDeliveryType = value;
+                  context.read<CreatePosSaleBloc>().selectedOverallDeliveryType =
+                      value;
+                });
+              },
+            ),
+          )
+        ]),
         const SizedBox(height: 8),
         Row(
           children: [
@@ -968,7 +1024,7 @@ class _SalesScreenState extends State<MobileSalesScreen> {
                 "Vat",
                 selectedOverallVatType,
                 context.read<CreatePosSaleBloc>().vatOverAllController,
-                (value) {
+                    (value) {
                   setState(() {
                     selectedOverallVatType = value;
                     context.read<CreatePosSaleBloc>().selectedOverallVatType =
@@ -985,61 +1041,83 @@ class _SalesScreenState extends State<MobileSalesScreen> {
                 context
                     .read<CreatePosSaleBloc>()
                     .serviceChargeOverAllController,
-                (value) {
+                    (value) {
                   setState(() {
                     selectedOverallServiceChargeType = value;
                     context
-                            .read<CreatePosSaleBloc>()
-                            .selectedOverallServiceChargeType =
-                        value;
+                        .read<CreatePosSaleBloc>()
+                        .selectedOverallServiceChargeType = value;
                   });
                 },
               ),
             ),
           ],
         ),
-
-
       ],
     );
   }
 
   Widget _buildSummaryAndPayment(CreatePosSaleBloc bloc) {
-    double productTotal = products.fold(
-      0.0,
-      (p, e) => p + _toDouble(e["ticket_total"]),
-    );
-    double specificDiscount = products.fold(0.0, (p, e) {
-      final disc = _toDouble(e["discount"]);
-      final ticket = _toDouble(e["ticket_total"]);
-      return p +
-          ((e["discount_type"] == 'percent')
-              ? (ticket * (disc / 100.0))
-              : disc);
-    });
-    double subTotal = products.fold(0.0, (p, e) => p + _toDouble(e["total"]));
-    double overallDiscount =
-        double.tryParse(bloc.discountOverAllController.text) ?? 0.0;
-    if (selectedOverallDiscountType == 'percent') {
-      overallDiscount = subTotal * (overallDiscount / 100.0);
-    }
-    double vat = double.tryParse(bloc.vatOverAllController.text) ?? 0.0;
-    if (selectedOverallVatType == 'percent') vat = subTotal * (vat / 100.0);
-    double serviceCharge =
-        double.tryParse(bloc.serviceChargeOverAllController.text) ?? 0.0;
-    if (selectedOverallServiceChargeType == 'percent') {
-      serviceCharge = subTotal * (serviceCharge / 100.0);
-    }
-    double deliveryCharge =
-        double.tryParse(bloc.deliveryChargeOverAllController.text) ?? 0.0;
-    if (selectedOverallDeliveryType == 'percent') {
-      deliveryCharge = subTotal * (deliveryCharge / 100.0);
-    }
-    double netTotal =
-        (subTotal - overallDiscount) + vat + serviceCharge + deliveryCharge;
+    final selectedCustomer = bloc.selectClintModel;
+    final isWalkInCustomer = selectedCustomer?.id == -1;
+    final netTotal = calculateAllFinalTotal();
 
     return Column(
       children: [
+        // Show customer type info
+        if (isWalkInCustomer)
+          Container(
+            padding: const EdgeInsets.all(8),
+            margin: const EdgeInsets.only(bottom: 10),
+            decoration: BoxDecoration(
+              color: Colors.orange[50],
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.orange),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.info, color: Colors.orange[700]),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    "Walk-in Customer: Must pay exact amount. No due or advance allowed.",
+                    style: TextStyle(
+                      color: Colors.orange[800],
+                      fontWeight: FontWeight.w500,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          )
+        else
+          Container(
+            padding: const EdgeInsets.all(8),
+            margin: const EdgeInsets.only(bottom: 10),
+            decoration: BoxDecoration(
+              color: Colors.green[50],
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.green),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.check_circle, color: Colors.green[700]),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    "Saved Customer: Due or advance payment allowed. Money receipt required.",
+                    style: TextStyle(
+                      color: Colors.green[800],
+                      fontWeight: FontWeight.w500,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
         Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
@@ -1048,106 +1126,141 @@ class _SalesScreenState extends State<MobileSalesScreen> {
           ),
           child: Column(
             children: [
-              _buildSummaryRow("Product Total", productTotal),
-              _buildSummaryRow("Specific Discount (-)", specificDiscount),
-              _buildSummaryRow("Sub Total", subTotal),
-              _buildSummaryRow("Discount (-)", overallDiscount),
-              _buildSummaryRow("Vat (+)", vat),
-              _buildSummaryRow("Service Charge (+)", serviceCharge),
-              _buildSummaryRow("Delivery Charge (+)", deliveryCharge),
+              _buildSummaryRow(
+                  "Product Total",
+                  products.fold(
+                    0.0,
+                        (p, e) => p + _toDouble(e["ticket_total"]),
+                  )),
+              _buildSummaryRow("Specific Discount (-)", products.fold(0.0, (p, e) {
+                final disc = _toDouble(e["discount"]);
+                final ticket = _toDouble(e["ticket_total"]);
+                return p +
+                    ((e["discount_type"] == 'percent')
+                        ? (ticket * (disc / 100.0))
+                        : disc);
+              })),
+              _buildSummaryRow("Sub Total",
+                  products.fold(0.0, (p, e) => p + _toDouble(e["total"]))),
+              _buildSummaryRow("Discount (-)",
+                  double.tryParse(bloc.discountOverAllController.text) ?? 0.0),
+              _buildSummaryRow("Vat (+)",
+                  double.tryParse(bloc.vatOverAllController.text) ?? 0.0),
+              _buildSummaryRow("Service Charge (+)",
+                  double.tryParse(bloc.serviceChargeOverAllController.text) ??
+                      0.0),
+              _buildSummaryRow("Delivery Charge (+)",
+                  double.tryParse(bloc.deliveryChargeOverAllController.text) ??
+                      0.0),
               const Divider(),
-              _buildSummaryRow("Net Total", netTotal),
+              _buildSummaryRow("Net Total", netTotal, isBold: true),
             ],
           ),
         ),
+
+        // Checkbox should be visible for all customers but disabled for walk-in
         CheckboxListTile(
           title: Text(
             "With Money Receipt",
             style: AppTextStyle.headerTitle(context),
           ),
           value: _isChecked,
-          onChanged: (bool? newValue) {
+          onChanged: isWalkInCustomer
+              ? null // Disabled for walk-in customers
+              : (bool? newValue) {
             setState(() {
               _isChecked = newValue ?? false;
               context.read<CreatePosSaleBloc>().isChecked = _isChecked;
             });
           },
           controlAffinity: ListTileControlAffinity.leading,
+          secondary: isWalkInCustomer
+              ? Icon(Icons.info, color: Colors.orange[700], size: 20)
+              : null,
         ),
+
+        // Show payment section only when _isChecked is true
         if (_isChecked) ...[
-          AppDropdown(
-            context: context,
-            label: "Payment Method",
-            hint:
-                context.read<CreatePosSaleBloc>().selectedPaymentMethod.isEmpty
-                ? "Select Payment Method"
-                : context.read<CreatePosSaleBloc>().selectedPaymentMethod,
-            isLabel: false,
-            isRequired: true,
-            isNeedAll: false,
-            value:
-                context.read<CreatePosSaleBloc>().selectedPaymentMethod.isEmpty
-                ? null
-                : context.read<CreatePosSaleBloc>().selectedPaymentMethod,
-            itemList: [] + context.read<CreatePosSaleBloc>().paymentMethod,
-            onChanged: (newVal) {
-              context.read<CreatePosSaleBloc>().selectedPaymentMethod = newVal
-                  .toString();
-              setState(() {});
-            },
-            validator: (value) =>
-                value == null ? 'Please select a payment method' : null,
-            itemBuilder: (item) =>
-                DropdownMenuItem(value: item, child: Text(item.toString())),
-          ),
-          BlocBuilder<AccountBloc, AccountState>(
-            builder: (context, state) {
-              if (state is AccountActiveListLoading) {
-                return const Center(child: CircularProgressIndicator());
-              } else if (state is AccountActiveListSuccess) {
-                final bloc = context.read<CreatePosSaleBloc>();
-                final filteredList = bloc.selectedPaymentMethod.isNotEmpty
-                    ? state.list
-                          .where(
-                            (item) =>
-                                item.acType?.toLowerCase() ==
-                                bloc.selectedPaymentMethod.toLowerCase(),
-                          )
-                          .toList()
-                    : state.list;
-                final selectedAccount =
-                    bloc.accountModel ??
-                    (filteredList.isNotEmpty ? filteredList.first : null);
-                bloc.accountModel = selectedAccount;
-                return AppDropdown<AccountActiveModel>(
+          const SizedBox(height: 10),
+          Row(children: [
+            Expanded(
+                child: AppDropdown(
                   context: context,
-                  label: "Account",
-                  hint: bloc.accountModel == null
-                      ? "Select Account"
-                      : bloc.accountModel!.name.toString(),
+                  label: "Payment Method",
+                  hint: bloc.selectedPaymentMethod.isEmpty
+                      ? "Select Payment Method"
+                      : bloc.selectedPaymentMethod,
                   isLabel: false,
                   isRequired: true,
                   isNeedAll: false,
-                  value: selectedAccount,
-                  itemList: filteredList,
+                  value: bloc.selectedPaymentMethod.isEmpty
+                      ? null
+                      : bloc.selectedPaymentMethod,
+                  itemList: [] + bloc.paymentMethod,
                   onChanged: (newVal) {
-                    bloc.accountModel = newVal;
+                    bloc.selectedPaymentMethod = newVal.toString();
                     setState(() {});
                   },
                   validator: (value) =>
-                      value == null ? 'Please select an account' : null,
-                  itemBuilder: (item) => DropdownMenuItem(
-                    value: item,
-                    child: Text(item.toString()),
-                  ),
-                );
-              } else {
-                return Container();
-              }
-            },
-          ),
-          Row(
-            children: [
+                  value == null ? 'Please select a payment method' : null,
+                  itemBuilder: (item) =>
+                      DropdownMenuItem(value: item, child: Text(item.toString())),
+                )),
+            const SizedBox(width: 6),
+            Expanded(
+                child: BlocBuilder<AccountBloc, AccountState>(
+                  builder: (context, state) {
+                    if (state is AccountActiveListLoading) {
+                      return const Center(child: CircularProgressIndicator());
+                    } else if (state is AccountActiveListSuccess) {
+                      final filteredList = bloc.selectedPaymentMethod.isNotEmpty
+                          ? state.list
+                          .where(
+                            (item) =>
+                        item.acType?.toLowerCase() ==
+                            bloc.selectedPaymentMethod.toLowerCase(),
+                      )
+                          .toList()
+                          : state.list;
+                      final selectedAccount = bloc.accountModel ??
+                          (filteredList.isNotEmpty ? filteredList.first : null);
+                      bloc.accountModel = selectedAccount;
+                      return AppDropdown<AccountActiveModel>(
+                        context: context,
+                        label: "Account",
+                        hint: bloc.accountModel == null
+                            ? "Select Account"
+                            : bloc.accountModel!.name.toString(),
+                        isLabel: false,
+                        isRequired: true,
+                        isNeedAll: false,
+                        value: selectedAccount,
+                        itemList: filteredList,
+                        onChanged: (newVal) {
+                          bloc.accountModel = newVal;
+                          setState(() {});
+                        },
+                        validator: (value) =>
+                        value == null ? 'Please select an account' : null,
+                        itemBuilder: (item) => DropdownMenuItem(
+                          value: item,
+                          child: Text(item.toString()),
+                        ),
+                      );
+                    } else {
+                      return Container();
+                    }
+                  },
+                ))
+          ])
+        ],
+
+        // Payable amount section (common for both)
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Show change amount only when there's a payment (not for walk-in when not checked)
+            if (_isChecked)
               Expanded(
                 child: AppTextField(
                   controller: changeAmountController,
@@ -1158,25 +1271,79 @@ class _SalesScreenState extends State<MobileSalesScreen> {
                   readOnly: true,
                 ),
               ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: AppTextField(
-                  controller: context.read<CreatePosSaleBloc>().payableAmount,
-                  hintText: 'Payable Amount',
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
+            if (_isChecked) const SizedBox(width: 6),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  AppTextField(
+                    controller: bloc.payableAmount,
+                    hintText: isWalkInCustomer && !_isChecked
+                        ? 'Payable Amount (Auto-set to net total)'
+                        : 'Payable Amount',
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    validator: (value) {
+                      if (value!.isEmpty) {
+                        return 'Please enter Payable Amount';
+                      }
+                      final numericValue = double.tryParse(value);
+                      if (numericValue == null) {
+                        return 'Enter valid number';
+                      }
+                      if (numericValue < 0) {
+                        return 'Cannot be negative';
+                      }
+
+                      // Walk-in customer validation - must pay exact amount
+                      if (isWalkInCustomer && numericValue != netTotal) {
+                        return 'Must pay exact: ${netTotal.toStringAsFixed(2)}';
+                      }
+
+                      return null;
+                    },
+                    onChanged: (v) => setState(() {
+                      _updateChangeAmount();
+                    }),
                   ),
-                  onChanged: (v) => setState(() {
-                    _updateChangeAmount();
-                  }),
-                ),
+                  if (isWalkInCustomer)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 4, left: 4),
+                      child: Text(
+                        "Walk-in: Must pay exact amount ${netTotal.toStringAsFixed(2)}",
+                        style: TextStyle(
+                          color: Colors.orange[700],
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                  if (!isWalkInCustomer)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 4, left: 4),
+                      child: Text(
+                        "Due: ${(netTotal - (double.tryParse(bloc.payableAmount.text.trim()) ?? 0)).clamp(0, double.infinity).toStringAsFixed(2)}",
+                        style: TextStyle(
+                          color: (double.tryParse(
+                              bloc.payableAmount.text.trim()) ??
+                              0) >=
+                              netTotal
+                              ? Colors.green[700]
+                              : Colors.red[700],
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                ],
               ),
-            ],
-          ),
-        ],
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 10),
         CustomInputField(
           isRequiredLable: true,
-          controller: context.read<CreatePosSaleBloc>().remarkController,
+          controller: bloc.remarkController,
           hintText: 'Remark',
           fillColor: Colors.white,
           validator: (value) => value!.isEmpty ? 'Please enter Remark' : null,
@@ -1187,7 +1354,7 @@ class _SalesScreenState extends State<MobileSalesScreen> {
     );
   }
 
-  Widget _buildSummaryRow(String label, double value) {
+  Widget _buildSummaryRow(String label, double value, {bool isBold = false}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6.0),
       child: Row(
@@ -1200,7 +1367,12 @@ class _SalesScreenState extends State<MobileSalesScreen> {
             flex: 2,
             child: Text(
               value.toStringAsFixed(2),
-              style: AppTextStyle.cardLevelText(context),
+              style: isBold
+                  ? AppTextStyle.cardLevelText(context).copyWith(
+                fontWeight: FontWeight.bold,
+                color: AppColors.primaryColor,
+              )
+                  : AppTextStyle.cardLevelText(context),
               textAlign: TextAlign.right,
             ),
           ),
@@ -1209,19 +1381,89 @@ class _SalesScreenState extends State<MobileSalesScreen> {
     );
   }
 
+  // Fixed PDF Preview function
+  void _generatePdf(BuildContext context) async {
+    // Create a mock PosSaleModel for preview
+    final bloc = context.read<CreatePosSaleBloc>();
+    final netTotal = calculateAllFinalTotal();
+    final subTotal = products.fold(
+      0.0,
+          (p, e) => p + _toDouble(e["total"]),
+    );
+    final overallDiscount =
+        double.tryParse(bloc.discountOverAllController.text) ?? 0.0;
+    final vat = double.tryParse(bloc.vatOverAllController.text) ?? 0.0;
+    final serviceCharge =
+        double.tryParse(bloc.serviceChargeOverAllController.text) ?? 0.0;
+    final deliveryCharge =
+        double.tryParse(bloc.deliveryChargeOverAllController.text) ?? 0.0;
+
+    // Create a preview sale model
+    final previewSale = PosSaleModel(
+      id: 0,
+      invoiceNo: 'PREVIEW-${DateTime.now().millisecondsSinceEpoch}',
+      saleDate: DateTime.now(),
+      // formattedSaleDate: DateFormat('dd-MM-yyyy').format(DateTime.now()),
+      // formattedTime: DateFormat('hh:mm a').format(DateTime.now()),
+      netTotal: netTotal,
+      grandTotal: netTotal,
+      overallDiscount: overallDiscount,
+      overallVatAmount: vat,
+      // paymentStatus: 'pending',
+      customerName: bloc.selectClintModel?.name ?? 'Walk-in Customer',
+      saleByName: bloc.selectSalesModel?.username ?? 'Sales Person',
+      remark: bloc.remarkController.text,
+      paymentMethod: bloc.selectedPaymentMethod,
+      accountName: bloc.accountModel?.name,
+      items: products.where((p) => p["product_id"] != null).map((p) {
+        final product = p["product"] as ProductModelStockModel?;
+        return PosSaleItem(
+          productName: product?.name ?? 'Product',
+          quantity: _toInt(p["quantity"]),
+          unitPrice: _toDouble(p["price"]),
+          subtotal: _toDouble(p["total"]),
+        );
+      }).toList(),
+    );
+
+    try {
+      final companyInfo = context
+          .read<ProfileBloc>()
+          .permissionModel
+          ?.data
+          ?.companyInfo;
+
+      // Generate PDF bytes
+      final pdfBytes = await generateSalesPreviewPdf(previewSale, companyInfo);
+
+      // Show PDF preview
+      await Printing.layoutPdf(
+        onLayout: (format) => pdfBytes,
+      );
+    } catch (e) {
+      showCustomToast(
+        context: context,
+        title: 'Error!',
+        description: 'Failed to generate PDF: ${e.toString()}',
+        icon: Icons.error,
+        primaryColor: Colors.red,
+      );
+    }
+  }
+
   Widget _buildActionButtons() {
     return Row(
       children: [
         Expanded(
           child: AppButton(
             name: 'Preview',
-            onPressed: () {},
+            onPressed: () => _generatePdf(context),
             color: const Color(0xff800000),
           ),
         ),
         const SizedBox(width: 12),
         Expanded(
-          child: AppButton(name: 'Submit', onPressed: _submitForm),
+          child: AppButton(name: 'Submit', onPressed: _validateAndSubmitForm),
         ),
       ],
     );
@@ -1250,11 +1492,16 @@ class _SalesScreenState extends State<MobileSalesScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                    Text("Product List ",style:AppTextStyle.titleMedium(context),),
-                    IconButton(onPressed: (){
-                      AppRoutes.pop(context);
-                    }, icon: Icon(HugeIcons.strokeRoundedCancelSquare))
-                  ],),
+                      Text("Product List ",
+                          style: AppTextStyle.titleMedium(context)),
+                      IconButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        icon: const Icon(Icons.close),
+                      )
+                    ],
+                  ),
                   Container(
                     width: 48,
                     height: 6,
@@ -1305,9 +1552,8 @@ class _SalesScreenState extends State<MobileSalesScreen> {
                           return Center(child: Text(state.content));
                         }
 
-                        final query = productSearchController.text
-                            .trim()
-                            .toLowerCase();
+                        final query =
+                        productSearchController.text.trim().toLowerCase();
                         final filteredProducts = productList.where((p) {
                           final searchableText = [
                             p.name,
@@ -1315,11 +1561,9 @@ class _SalesScreenState extends State<MobileSalesScreen> {
                           ].whereType<String>().join(' ').toLowerCase();
                           final matchesSearch =
                               query.isEmpty || searchableText.contains(query);
-                          final matchesCategory =
-                              selectedCategoryFilter.isEmpty ||
+                          final matchesCategory = selectedCategoryFilter.isEmpty ||
                               p.categoryInfo?.name == selectedCategoryFilter;
-                          final matchesBrand =
-                              selectedBrandFilter.isEmpty ||
+                          final matchesBrand = selectedBrandFilter.isEmpty ||
                               p.brand == selectedBrandFilter;
                           return matchesSearch &&
                               matchesCategory &&
@@ -1335,12 +1579,12 @@ class _SalesScreenState extends State<MobileSalesScreen> {
                           padding: EdgeInsets.zero,
                           itemCount: filteredProducts.length,
                           gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 2,
-                                childAspectRatio: 0.90,
-                                crossAxisSpacing: 8,
-                                mainAxisSpacing: 8,
-                              ),
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            childAspectRatio: 0.90,
+                            crossAxisSpacing: 8,
+                            mainAxisSpacing: 8,
+                          ),
                           itemBuilder: (context, index) =>
                               _buildProductCard(filteredProducts[index]),
                         );
@@ -1356,17 +1600,15 @@ class _SalesScreenState extends State<MobileSalesScreen> {
     );
   }
 
-
   Widget _buildProductCard(ProductModelStockModel p) {
+    final bloc = context.read<CreatePosSaleBloc>();
+
+    final existingIndex = bloc.products.indexWhere(
+          (row) => row["product_id"] == p.id,
+    );
     return InkWell(
       // ➕ ADD PRODUCT / INCREASE QTY
       onTap: () {
-        final bloc = context.read<CreatePosSaleBloc>();
-
-        final existingIndex = bloc.products.indexWhere(
-              (row) => row["product_id"] == p.id,
-        );
-
         if (existingIndex != -1) {
           final qtyController = controllers[existingIndex]?["quantity"];
           final currentQty = int.tryParse(qtyController?.text ?? "1") ?? 1;
@@ -1375,6 +1617,7 @@ class _SalesScreenState extends State<MobileSalesScreen> {
           bloc.products[existingIndex]["quantity"] = currentQty + 1;
           updateTotal(existingIndex);
 
+          Navigator.pop(context);
           setState(() {});
           return;
         }
@@ -1440,10 +1683,13 @@ class _SalesScreenState extends State<MobileSalesScreen> {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: Colors.grey.shade200),
+          border: Border.all(
+            color: existingIndex != -1 ? Colors.green : Colors.grey.shade200,
+            width: existingIndex != -1 ? 2 : 1,
+          ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.02),
+              color: Colors.black.withOpacity(0.02),
               blurRadius: 6,
               offset: const Offset(0, 2),
             ),
@@ -1522,9 +1768,7 @@ class _SalesScreenState extends State<MobileSalesScreen> {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: p.stockQty == 0
-                              ? Colors.grey
-                              : Colors.redAccent,
+                          color: p.stockQty == 0 ? Colors.grey : Colors.redAccent,
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
@@ -1567,9 +1811,143 @@ class _SalesScreenState extends State<MobileSalesScreen> {
     }
   }
 
+  // Validate form before submission
+  void _validateAndSubmitForm() {
+    // First validate the form
+    if (!formKey.currentState!.validate()) {
+      showCustomToast(
+        context: context,
+        title: 'Validation Error',
+        description: 'Please fix the errors in the form',
+        icon: Icons.error,
+        primaryColor: Colors.red,
+      );
+      return;
+    }
+
+    // Validate business logic
+    final bloc = context.read<CreatePosSaleBloc>();
+    final selectedCustomer = bloc.selectClintModel;
+    final isWalkInCustomer = selectedCustomer?.id == -1;
+    final netTotal = calculateAllFinalTotal();
+    final paidAmount = double.tryParse(bloc.payableAmount.text.trim()) ?? 0;
+
+    // Validate at least one product is added
+    bool hasProducts = false;
+    for (var product in products) {
+      if (product["product_id"] != null) {
+        hasProducts = true;
+        break;
+      }
+    }
+
+    if (!hasProducts) {
+      showCustomToast(
+        context: context,
+        title: 'Validation Error',
+        description: 'Please add at least one product',
+        icon: Icons.error,
+        primaryColor: Colors.red,
+      );
+      return;
+    }
+
+    // Validate walk-in customer rules
+    if (isWalkInCustomer) {
+      // Check 1: Must pay exact amount
+      if (paidAmount != netTotal) {
+        showCustomToast(
+          context: context,
+          title: 'Validation Error',
+          description:
+          "Walk-in customer must pay EXACT amount: ${netTotal.toStringAsFixed(2)}",
+          icon: Icons.error,
+          primaryColor: Colors.red,
+        );
+        return;
+      }
+
+      // Check 2: _isChecked must be false for walk-in customer
+      if (_isChecked) {
+        showCustomToast(
+          context: context,
+          title: 'Validation Error',
+          description: "Walk-in customer cannot have money receipt",
+          icon: Icons.error,
+          primaryColor: Colors.red,
+        );
+        return;
+      }
+    }
+    // Validate saved customer rules
+    else {
+      // Check 1: _isChecked must be true for saved customer
+      if (!_isChecked) {
+        showCustomToast(
+          context: context,
+          title: 'Validation Error',
+          description: 'Saved customer must have money receipt',
+          icon: Icons.error,
+          primaryColor: Colors.red,
+        );
+        return;
+      }
+
+      // Check 2: Validate money receipt section when checked
+      if (_isChecked) {
+        if (bloc.selectedPaymentMethod.isEmpty) {
+          showCustomToast(
+            context: context,
+            title: 'Validation Error',
+            description: 'Please select a payment method',
+            icon: Icons.error,
+            primaryColor: Colors.red,
+          );
+          return;
+        }
+
+        if (bloc.accountModel == null) {
+          showCustomToast(
+            context: context,
+            title: 'Validation Error',
+            description: 'Please select an account',
+            icon: Icons.error,
+            primaryColor: Colors.red,
+          );
+          return;
+        }
+      }
+    }
+
+    // Validate payable amount (common for both)
+    if (bloc.payableAmount.text.isEmpty) {
+      showCustomToast(
+        context: context,
+        title: 'Validation Error',
+        description: 'Please enter payable amount',
+        icon: Icons.error,
+        primaryColor: Colors.red,
+      );
+      return;
+    }
+
+    // Validate paid amount is not negative
+    if (paidAmount < 0) {
+      showCustomToast(
+        context: context,
+        title: 'Validation Error',
+        description: 'Paid amount cannot be negative',
+        icon: Icons.error,
+        primaryColor: Colors.red,
+      );
+      return;
+    }
+
+    _submitForm();
+  }
+
   // Submit form
   void _submitForm() {
-    if (!formKey.currentState!.validate()) return;
     final bloc = context.read<CreatePosSaleBloc>();
 
     var transferProducts = products.map((product) {
@@ -1580,17 +1958,18 @@ class _SalesScreenState extends State<MobileSalesScreen> {
         "discount": _toDouble(product["discount"]),
         "discount_type": product["discount_type"]?.toString() ?? 'fixed',
       };
-    }).toList();
+    }).where((p) => p["product_id"] != 0).toList();
 
     final selectedCustomer = bloc.selectClintModel;
     final isWalkInCustomer = selectedCustomer?.id == -1;
+    final netTotal = calculateAllFinalTotal();
+    final paidAmount = double.tryParse(bloc.payableAmount.text.trim()) ?? 0;
 
     Map<String, dynamic> body = {
       "type": "normal_sale",
       "sale_date": appWidgets.convertDateTime(
-        DateFormat(
-          "dd-MM-yyyy",
-        ).parse(bloc.dateEditingController.text.trim(), true),
+        DateFormat("dd-MM-yyyy")
+            .parse(bloc.dateEditingController.text.trim(), true),
         "yyyy-MM-dd",
       ),
       "sale_by": bloc.selectSalesModel?.id.toString() ?? '',
@@ -1614,50 +1993,24 @@ class _SalesScreenState extends State<MobileSalesScreen> {
       "items": transferProducts,
       "customer_type": isWalkInCustomer ? "walk_in" : "saved_customer",
       "with_money_receipt": _isChecked ? "Yes" : "No",
-      "paid_amount": double.tryParse(bloc.payableAmount.text.trim()) ?? 0,
+      "paid_amount": paidAmount,
+      "due_amount": isWalkInCustomer
+          ? 0.0
+          : (netTotal - paidAmount).clamp(0, double.infinity),
     };
 
-    if (!isWalkInCustomer) {
-      body['customer_id'] = selectedCustomer?.id.toString() ?? '';
-    }
-
     if (isWalkInCustomer) {
-      final subTotal = products.fold(0.0, (p, e) => p + _toDouble(e["total"]));
-      double overallDiscount =
-          double.tryParse(bloc.discountOverAllController.text) ?? 0.0;
-      if (selectedOverallDiscountType == 'percent') {
-        overallDiscount = subTotal * (overallDiscount / 100.0);
-      }
-      double vat = double.tryParse(bloc.vatOverAllController.text) ?? 0.0;
-      if (selectedOverallVatType == 'percent') vat = subTotal * (vat / 100.0);
-      double serviceVal =
-          double.tryParse(bloc.serviceChargeOverAllController.text) ?? 0.0;
-      if (selectedOverallServiceChargeType == 'percent') {
-        serviceVal = subTotal * (serviceVal / 100.0);
-      }
-      double delivery =
-          double.tryParse(bloc.deliveryChargeOverAllController.text) ?? 0.0;
-      if (selectedOverallDeliveryType == 'percent') {
-        delivery = subTotal * (delivery / 100.0);
-      }
-
-      final netTotal =
-          (subTotal - overallDiscount) + vat + serviceVal + delivery;
-      final paidAmount = double.tryParse(bloc.payableAmount.text.trim()) ?? 0;
-      if (paidAmount < netTotal) {
-        showCustomToast(
-          context: context,
-          title: 'Warning!',
-          description:
-              "Walk-in customer: Full payment required. No due allowed.",
-          icon: Icons.error,
-          primaryColor: Colors.redAccent,
-        );
-        return;
-      }
+      body.remove('customer_id');
+      // For walk-in customers, force these values
+      body['with_money_receipt'] = "No";
+      body['due_amount'] = 0.0;
+    } else {
+      body['customer_id'] = selectedCustomer?.id.toString() ?? '';
+      // For saved customers, ensure money receipt is included
+      body['with_money_receipt'] = "Yes";
     }
 
-    if (_isChecked) {
+    if (_isChecked && !isWalkInCustomer) {
       body['payment_method'] = bloc.selectedPaymentMethod;
       body['account_id'] = bloc.accountModel?.id.toString() ?? '';
     }
@@ -1680,7 +2033,7 @@ class _SalesScreenState extends State<MobileSalesScreen> {
         backgroundColor: AppColors.bg,
         appBar: AppBar(
           backgroundColor: AppColors.bg,
-          title:  Text('Pos Sale',style: AppTextStyle.titleMedium(context),),
+          title: Text('Pos Sale', style: AppTextStyle.titleMedium(context)),
           actions: [
             IconButton(
               onPressed: _openProductBrowser,
@@ -1699,7 +2052,6 @@ class _SalesScreenState extends State<MobileSalesScreen> {
               if (state is CreatePosSaleLoading) {
                 appLoader(context, "Creating PosSale, please wait...");
               } else if (state is CreatePosSaleSuccess) {
-                // Navigator.pop(context);
                 showCustomToast(
                   context: context,
                   title: 'Success!',
@@ -1708,7 +2060,12 @@ class _SalesScreenState extends State<MobileSalesScreen> {
                   primaryColor: Colors.green,
                 );
                 changeAmountController.clear();
-                AppRoutes.pushReplacement(context, MobilePosSaleScreen());
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const MobilePosSaleScreen(),
+                  ),
+                );
 
                 setState(() {});
               } else if (state is CreatePosSaleFailed) {
@@ -1719,7 +2076,7 @@ class _SalesScreenState extends State<MobileSalesScreen> {
                   title: state.title,
                   actions: [
                     TextButton(
-                      onPressed: () => AppRoutes.pop(context),
+                      onPressed: () => Navigator.pop(context),
                       child: const Text("Dismiss"),
                     ),
                   ],
@@ -1731,7 +2088,6 @@ class _SalesScreenState extends State<MobileSalesScreen> {
 
               return SingleChildScrollView(
                 padding: AppTextStyle.getResponsivePaddingBody(context),
-
                 child: ConstrainedBox(
                   constraints: BoxConstraints(minHeight: availableHeight),
                   child: Form(
@@ -1757,4 +2113,469 @@ class _SalesScreenState extends State<MobileSalesScreen> {
       ),
     );
   }
+}
+
+// Helper functions for PDF generation
+Future<Uint8List> generateSalesPreviewPdf(
+    PosSaleModel sale,
+    CompanyInfo? company,
+    ) async {
+  final pdf = pw.Document();
+
+  // Helper function for safe double conversion
+  double toDouble(dynamic value) {
+    if (value == null) return 0.0;
+    if (value is double) return value;
+    if (value is int) return value.toDouble();
+    if (value is String) {
+      final cleaned = value.replaceAll(RegExp(r'[^\d.]'), '');
+      return double.tryParse(cleaned) ?? 0.0;
+    }
+    return 0.0;
+  }
+
+  // Helper for summary rows
+  pw.Widget _buildSummaryRow(String label, String value, {bool isTotal = false}) {
+    return pw.Container(
+      margin: const pw.EdgeInsets.symmetric(vertical: 2),
+      child: pw.Row(
+        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+        children: [
+          pw.Text(
+            label,
+            style: pw.TextStyle(
+              fontSize: isTotal ? 12 : 10,
+              fontWeight: isTotal ? pw.FontWeight.bold : pw.FontWeight.normal,
+            ),
+          ),
+          pw.Text(
+            value,
+            style: pw.TextStyle(
+              fontSize: isTotal ? 12 : 10,
+              fontWeight: isTotal ? pw.FontWeight.bold : pw.FontWeight.normal,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Helper for info rows
+  pw.Widget _buildInfoRow(String label, String value) {
+    return pw.Container(
+      margin: const pw.EdgeInsets.symmetric(vertical: 2),
+      child: pw.Row(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: [
+          pw.SizedBox(
+            width: 80,
+            child: pw.Text(
+              label,
+              style:  pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold),
+            ),
+          ),
+          pw.Expanded(
+            child: pw.Text(
+              value,
+              style: const pw.TextStyle(fontSize: 10),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Helper for status color
+  PdfColor _getStatusColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'paid':
+        return PdfColors.green;
+      case 'pending':
+        return PdfColors.orange;
+      case 'cancelled':
+        return PdfColors.red;
+      default:
+        return PdfColors.grey;
+    }
+  }
+
+  pdf.addPage(
+    pw.MultiPage(
+      pageTheme: pw.PageTheme(
+        pageFormat: PdfPageFormat.a4,
+        margin: const pw.EdgeInsets.all(25),
+      ),
+      header: (context) => pw.Container(
+        padding: const pw.EdgeInsets.fromLTRB(20, 30, 20, 20),
+        child: pw.Row(
+          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: [
+            // Company Info
+            pw.Expanded(
+              child: pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                children: [
+                  pw.Text(
+                    company?.name ?? "Company Name",
+                    style: pw.TextStyle(
+                      fontSize: 14,
+                      fontWeight: pw.FontWeight.bold,
+                      color: PdfColors.blue800,
+                    ),
+                  ),
+                  pw.SizedBox(height: 4),
+                  if (company?.address != null)
+                    pw.Text(
+                      company?.address??"",
+                      style: const pw.TextStyle(fontSize: 10),
+                    ),
+                  if (company?.phone != null)
+                    pw.Text(
+                      company?.phone??"",
+                      style: const pw.TextStyle(fontSize: 10),
+                    ),
+                  if (company?.email != null)
+                    pw.Text(
+                      company?.email??"",
+                      style: const pw.TextStyle(fontSize: 10),
+                    ),
+                ],
+              ),
+            ),
+            // Logo placeholder
+            pw.Container(
+              width: 80,
+              height: 80,
+              decoration: pw.BoxDecoration(
+                border: pw.Border.all(color: PdfColors.grey400),
+                borderRadius: pw.BorderRadius.circular(8),
+              ),
+              child: pw.Center(
+                child: pw.Text(
+                  "LOGO",
+                  style: pw.TextStyle(
+                    fontSize: 12,
+                    color: PdfColors.grey600,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+      build: (context) => [
+        // Header Section
+        pw.Container(
+          decoration: pw.BoxDecoration(
+            border: pw.Border.all(color: PdfColors.blue800, width: 2),
+            borderRadius: pw.BorderRadius.circular(8),
+          ),
+          padding: const pw.EdgeInsets.all(8),
+          margin: const pw.EdgeInsets.all(12),
+          child: pw.Row(
+            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+            children: [
+              pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                children: [
+                  pw.Text(
+                    'SALES INVOICE',
+                    style: pw.TextStyle(
+                      fontSize: 16,
+                      fontWeight: pw.FontWeight.bold,
+                      color: PdfColors.blue800,
+                    ),
+                  ),
+                  pw.SizedBox(height: 4),
+                  _buildInfoRow('Invoice No:', sale.invoiceNo ?? 'N/A'),
+                  _buildInfoRow('Date:', sale.formattedSaleDate),
+                  _buildInfoRow('Time:', sale.formattedTime),
+                ],
+              ),
+              pw.Container(
+                padding: const pw.EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                decoration: pw.BoxDecoration(
+                  color: _getStatusColor(sale.paymentStatus),
+                  borderRadius: pw.BorderRadius.circular(20),
+                ),
+                child: pw.Text(
+                  sale.paymentStatus.toUpperCase(),
+                  style: pw.TextStyle(
+                    fontWeight: pw.FontWeight.bold,
+                    fontSize: 12,
+                    color: PdfColors.white,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        // Customer Info Section
+        pw.Container(
+          decoration: pw.BoxDecoration(
+            color: PdfColors.grey50,
+            borderRadius: pw.BorderRadius.circular(6),
+          ),
+          padding: const pw.EdgeInsets.symmetric(horizontal: 12),
+          child: pw.Row(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              pw.Expanded(
+                child: pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    pw.Text(
+                      'CUSTOMER INFORMATION',
+                      style: pw.TextStyle(
+                        fontSize: 14,
+                        fontWeight: pw.FontWeight.bold,
+                        color: PdfColors.blue800,
+                      ),
+                    ),
+                    pw.SizedBox(height: 8),
+                    _buildInfoRow('Customer:', sale.customerName ?? 'Walk-in Customer'),
+                    _buildInfoRow('Sales Person:', sale.saleByName ?? 'N/A'),
+                  ],
+                ),
+              ),
+              pw.Expanded(
+                child: pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    pw.Text(
+                      'PAYMENT INFORMATION',
+                      style: pw.TextStyle(
+                        fontSize: 14,
+                        fontWeight: pw.FontWeight.bold,
+                        color: PdfColors.blue800,
+                      ),
+                    ),
+                    pw.SizedBox(height: 8),
+                    _buildInfoRow('Payment Method:', sale.paymentMethod ?? 'Cash'),
+                    if (sale.accountName != null && sale.accountName!.isNotEmpty)
+                      _buildInfoRow('Account:', sale.accountName!),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        pw.SizedBox(height: 4),
+
+        // Items Table Section
+        pw.Padding(
+          padding: const pw.EdgeInsets.symmetric(horizontal: 12),
+          child: pw.Text(
+            'ITEMS DETAILS',
+            style: pw.TextStyle(
+              fontSize: 14,
+              fontWeight: pw.FontWeight.bold,
+              color: PdfColors.blue800,
+            ),
+          ),
+        ),
+
+        pw.Padding(
+          padding: const pw.EdgeInsets.all(8),
+          child: pw.Table(
+            border: pw.TableBorder.all(color: PdfColors.grey400, width: 1),
+            columnWidths: {
+              0: const pw.FlexColumnWidth(3),
+              1: const pw.FlexColumnWidth(1),
+              2: const pw.FlexColumnWidth(1.5),
+              3: const pw.FlexColumnWidth(1.5),
+            },
+            children: [
+              // Header row
+              pw.TableRow(
+                decoration: const pw.BoxDecoration(
+                  color: PdfColors.blue800,
+                  borderRadius: pw.BorderRadius.only(
+                    topLeft: pw.Radius.circular(4),
+                    topRight: pw.Radius.circular(4),
+                  ),
+                ),
+                children: [
+                  pw.Padding(
+                    padding: const pw.EdgeInsets.all(8),
+                    child: pw.Text(
+                      'PRODUCT',
+                      style: pw.TextStyle(
+                        fontWeight: pw.FontWeight.bold,
+                        color: PdfColors.white,
+                      ),
+                    ),
+                  ),
+                  pw.Padding(
+                    padding: const pw.EdgeInsets.all(8),
+                    child: pw.Text(
+                      'QTY',
+                      style: pw.TextStyle(
+                        fontWeight: pw.FontWeight.bold,
+                        color: PdfColors.white,
+                      ),
+                      textAlign: pw.TextAlign.center,
+                    ),
+                  ),
+                  pw.Padding(
+                    padding: const pw.EdgeInsets.all(8),
+                    child: pw.Text(
+                      'PRICE',
+                      style: pw.TextStyle(
+                        fontWeight: pw.FontWeight.bold,
+                        color: PdfColors.white,
+                      ),
+                      textAlign: pw.TextAlign.right,
+                    ),
+                  ),
+                  pw.Padding(
+                    padding: const pw.EdgeInsets.all(8),
+                    child: pw.Text(
+                      'TOTAL',
+                      style: pw.TextStyle(
+                        fontWeight: pw.FontWeight.bold,
+                        color: PdfColors.white,
+                      ),
+                      textAlign: pw.TextAlign.right,
+                    ),
+                  ),
+                ],
+              ),
+              // Data rows
+              ...(sale.items ?? []).map((item) {
+                final unitPrice = toDouble(item.unitPrice);
+                final subtotal = toDouble(item.subtotal);
+
+                return pw.TableRow(
+                  decoration: pw.BoxDecoration(
+                    border: pw.Border(
+                      bottom: pw.BorderSide(color: PdfColors.grey300),
+                    ),
+                  ),
+                  children: [
+                    pw.Padding(
+                      padding: const pw.EdgeInsets.all(8),
+                      child: pw.Text(
+                        item.productName ?? 'Unknown Product',
+                        style: const pw.TextStyle(fontSize: 11),
+                      ),
+                    ),
+                    pw.Padding(
+                      padding: const pw.EdgeInsets.all(8),
+                      child: pw.Text(
+                        (item.quantity ?? 0).toString(),
+                        style: const pw.TextStyle(fontSize: 11),
+                        textAlign: pw.TextAlign.center,
+                      ),
+                    ),
+                    pw.Padding(
+                      padding: const pw.EdgeInsets.all(8),
+                      child: pw.Text(
+                        '৳${unitPrice.toStringAsFixed(2)}',
+                        style: const pw.TextStyle(fontSize: 11),
+                        textAlign: pw.TextAlign.right,
+                      ),
+                    ),
+                    pw.Padding(
+                      padding: const pw.EdgeInsets.all(8),
+                      child: pw.Text(
+                        '৳${subtotal.toStringAsFixed(2)}',
+                        style: const pw.TextStyle(fontSize: 11),
+                        textAlign: pw.TextAlign.right,
+                      ),
+                    ),
+                  ],
+                );
+              }),
+            ],
+          ),
+        ),
+        pw.SizedBox(height: 25),
+
+        // Summary Section
+        pw.Padding(
+          padding: const pw.EdgeInsets.all(8),
+          child: pw.Row(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              pw.Expanded(
+                child: pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    pw.Container(
+                      padding: const pw.EdgeInsets.all(10),
+                      decoration: pw.BoxDecoration(
+                        color: PdfColors.green50,
+                        borderRadius: pw.BorderRadius.circular(8),
+                        border: pw.Border.all(color: PdfColors.green200),
+                      ),
+                      child: pw.Column(
+                        crossAxisAlignment: pw.CrossAxisAlignment.start,
+                        children: [
+                          pw.Text(
+                            'Thank you for your business!',
+                            style: pw.TextStyle(
+                              fontWeight: pw.FontWeight.bold,
+                              color: PdfColors.green800,
+                              fontSize: 14,
+                            ),
+                          ),
+                          if (sale.remark != null && sale.remark!.isNotEmpty) ...[
+                            pw.SizedBox(height: 4),
+                            pw.Text(
+                              'Remarks: ${sale.remark}',
+                              style: const pw.TextStyle(
+                                fontSize: 11,
+                                color: PdfColors.grey700,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              pw.Expanded(
+                child: pw.Container(
+                  padding: const pw.EdgeInsets.all(10),
+                  decoration: pw.BoxDecoration(
+                    color: PdfColors.blue50,
+                    border: pw.Border.all(color: PdfColors.blue200),
+                    borderRadius: const pw.BorderRadius.all(
+                      pw.Radius.circular(8),
+                    ),
+                  ),
+                  child: pw.Column(
+                    children: [
+                      _buildSummaryRow('Subtotal:', '৳${sale.netTotal?.toStringAsFixed(2) ?? "0.00"}'),
+                      if (sale.overallDiscount != null && sale.overallDiscount! > 0)
+                        _buildSummaryRow('Discount:', '-৳${sale.overallDiscount?.toStringAsFixed(2) ?? "0.00"}'),
+                      if (sale.overallVatAmount != null && sale.overallVatAmount! > 0)
+                        _buildSummaryRow('Vat:', '৳${sale.overallVatAmount?.toStringAsFixed(2) ?? "0.00"}'),
+                      pw.SizedBox(height: 4),
+                      pw.Divider(
+                        color: PdfColors.blue400,
+                        height: 1,
+                        thickness: 1,
+                      ),
+                      pw.SizedBox(height: 4),
+                      _buildSummaryRow('GRAND TOTAL:', '৳${sale.grandTotal?.toStringAsFixed(2) ?? "0.00"}', isTotal: true),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
+
+  return pdf.save();
 }

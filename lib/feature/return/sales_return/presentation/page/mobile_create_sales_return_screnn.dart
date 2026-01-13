@@ -1,4 +1,3 @@
-
 import 'package:intl/intl.dart';
 import '/feature/accounts/data/model/account_active_model.dart';
 import '/feature/accounts/presentation/bloc/account/account_bloc.dart';
@@ -20,18 +19,28 @@ class MobileCreateSalesReturnScrenn extends StatefulWidget {
   const MobileCreateSalesReturnScrenn({super.key, this.onSuccess});
 
   @override
-  State<MobileCreateSalesReturnScrenn> createState() => _CreateSalesReturnScreenState();
+  State<MobileCreateSalesReturnScrenn> createState() =>
+      _CreateSalesReturnScreenState();
 }
 
-class _CreateSalesReturnScreenState extends State<MobileCreateSalesReturnScrenn> {
+class _CreateSalesReturnScreenState
+    extends State<MobileCreateSalesReturnScrenn> {
   List<Item> products = [];
   TextEditingController customerNameController = TextEditingController();
   TextEditingController returnDateController = TextEditingController();
   TextEditingController remarkController = TextEditingController();
-  TextEditingController returnChargeController = TextEditingController(text: "0");
-  TextEditingController returnChargeAmountController = TextEditingController(text: "0.00");
-  TextEditingController subtotalController = TextEditingController(text: "0.00");
-  TextEditingController totalAmountController = TextEditingController(text: "0.00");
+  TextEditingController returnChargeController = TextEditingController(
+    text: "0",
+  );
+  TextEditingController returnChargeAmountController = TextEditingController(
+    text: "0.00",
+  );
+  TextEditingController subtotalController = TextEditingController(
+    text: "0.00",
+  );
+  TextEditingController totalAmountController = TextEditingController(
+    text: "0.00",
+  );
 
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
@@ -145,11 +154,15 @@ class _CreateSalesReturnScreenState extends State<MobileCreateSalesReturnScrenn>
             Item(
               productId: productId ?? 0,
               productName: item.productName ?? 'Unknown Product',
-              unitPrice: double.tryParse(item.unitPrice?.toString() ?? "0") ?? 0.0,
-              totalPrice: double.tryParse(item.subtotal?.toString() ?? "0") ?? 0.0,
+              unitPrice:
+                  double.tryParse(item.unitPrice?.toString() ?? "0") ?? 0.0,
+              totalPrice:
+                  double.tryParse(item.subtotal?.toString() ?? "0") ?? 0.0,
               quantity: item.quantity ?? 1,
-              damageQuantity: 0, // Initialize damage quantity as 0
-              discount: double.tryParse(item.discount?.toString() ?? "0") ?? 0.0,
+              damageQuantity: 0,
+              // Initialize damage quantity as 0
+              discount:
+                  double.tryParse(item.discount?.toString() ?? "0") ?? 0.0,
               discountType: item.discountType ?? "fixed",
               originalQuantity: item.quantity ?? 1,
             ),
@@ -162,7 +175,11 @@ class _CreateSalesReturnScreenState extends State<MobileCreateSalesReturnScrenn>
     });
   }
 
-  void _updateProductQuantity(int index, int newQuantity, {bool isDamage = false}) {
+  void _updateProductQuantity(
+    int index,
+    int newQuantity, {
+    bool isDamage = false,
+  }) {
     if (newQuantity < 0) return;
 
     setState(() {
@@ -177,7 +194,8 @@ class _CreateSalesReturnScreenState extends State<MobileCreateSalesReturnScrenn>
           showCustomToast(
             context: context,
             title: 'Alert!',
-            description: 'Damage quantity cannot exceed returned quantity ($maxDamage)',
+            description:
+                'Damage quantity cannot exceed returned quantity ($maxDamage)',
             icon: Icons.error,
             primaryColor: Colors.redAccent,
           );
@@ -298,16 +316,15 @@ class _CreateSalesReturnScreenState extends State<MobileCreateSalesReturnScrenn>
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
 
-mainAxisAlignment: MainAxisAlignment.start,                  children: [
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
                     Expanded(child: _buildReceiptNumberDropdown()),
                     const SizedBox(width: 12),
                     Expanded(child: _buildCustomerNameField()),
-                    const SizedBox(width: 12),
-
-                   Expanded(child: _buildReturnDateField())
 
                   ],
                 ),
+
 
                 // Return Date
                 const SizedBox(height: 8),
@@ -383,7 +400,8 @@ mainAxisAlignment: MainAxisAlignment.start,                  children: [
               onProductChanged(newVal);
             }
           },
-          validator: (value) => value == null ? 'Please select Receipt Number' : null,
+          validator: (value) =>
+              value == null ? 'Please select Receipt Number' : null,
           itemBuilder: (item) => DropdownMenuItem<SalesInvoiceModel>(
             value: item,
             child: Column(
@@ -449,7 +467,9 @@ mainAxisAlignment: MainAxisAlignment.start,                  children: [
         );
         if (pickedDate != null) {
           setState(() {
-            returnDateController.text = DateFormat('dd-MM-yyyy').format(pickedDate);
+            returnDateController.text = DateFormat(
+              'dd-MM-yyyy',
+            ).format(pickedDate);
           });
         }
       },
@@ -477,11 +497,11 @@ mainAxisAlignment: MainAxisAlignment.start,                  children: [
           ),
           const SizedBox(height: 6),
 
-          Wrap(
-            // crossAxisAlignment: CrossAxisAlignment.start,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
-                flex: 3,
+                flex: 2,
                 child: CustomInputField(
                   labelText: "Return Charge",
                   controller: returnChargeController,
@@ -521,22 +541,26 @@ mainAxisAlignment: MainAxisAlignment.start,                  children: [
                   ),
                 ),
               ),
-              const SizedBox(width: 12),
 
-              Expanded(
-                child: CustomInputField(
-                  labelText: "Charge Amount",
-                  controller: returnChargeAmountController,
-                  hintText: '0.00',
-                  fillColor: Colors.white,
-                  readOnly: true,
-                  keyboardType: TextInputType.number,
-                ),
-              ),
+
             ],
           ),
 
+          Row(children: [
+            Expanded(child: _buildReturnDateField()),
+            const SizedBox(width: 12),
 
+            Expanded(
+              child: CustomInputField(
+                labelText: "Charge Amount",
+                controller: returnChargeAmountController,
+                hintText: '0.00',
+                fillColor: Colors.white,
+                readOnly: true,
+                keyboardType: TextInputType.number,
+              ),
+            ),
+          ],)
 
         ],
       ),
@@ -558,7 +582,8 @@ mainAxisAlignment: MainAxisAlignment.start,                  children: [
               _selectedPaymentMethod = newVal;
             });
           },
-          validator: (value) => value == null ? 'Please select Payment Method' : null,
+          validator: (value) =>
+              value == null ? 'Please select Payment Method' : null,
           itemBuilder: (item) => DropdownMenuItem(
             value: item,
             child: Text(
@@ -692,8 +717,10 @@ mainAxisAlignment: MainAxisAlignment.start,                  children: [
                   label: "Return Qty:",
                   quantity: item.quantity ?? 0,
                   maxQuantity: originalMaxQuantity,
-                  onIncrement: () => _updateProductQuantity(index, (item.quantity ?? 0) + 1),
-                  onDecrement: () => _updateProductQuantity(index, (item.quantity ?? 0) - 1),
+                  onIncrement: () =>
+                      _updateProductQuantity(index, (item.quantity ?? 0) + 1),
+                  onDecrement: () =>
+                      _updateProductQuantity(index, (item.quantity ?? 0) - 1),
                   color: AppColors.primaryColor,
                 ),
                 const SizedBox(width: 16),
@@ -701,8 +728,16 @@ mainAxisAlignment: MainAxisAlignment.start,                  children: [
                   label: "Damage Qty:",
                   quantity: item.damageQuantity ?? 0,
                   maxQuantity: item.quantity ?? 0,
-                  onIncrement: () => _updateProductQuantity(index, (item.damageQuantity ?? 0) + 1, isDamage: true),
-                  onDecrement: () => _updateProductQuantity(index, (item.damageQuantity ?? 0) - 1, isDamage: true),
+                  onIncrement: () => _updateProductQuantity(
+                    index,
+                    (item.damageQuantity ?? 0) + 1,
+                    isDamage: true,
+                  ),
+                  onDecrement: () => _updateProductQuantity(
+                    index,
+                    (item.damageQuantity ?? 0) - 1,
+                    isDamage: true,
+                  ),
                   color: Colors.orange,
                 ),
               ],
@@ -736,10 +771,7 @@ mainAxisAlignment: MainAxisAlignment.start,                  children: [
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            label,
-            style: TextStyle(fontSize: 12, color: Colors.grey),
-          ),
+          Text(label, style: TextStyle(fontSize: 12, color: Colors.grey)),
           const SizedBox(height: 4),
           Container(
             decoration: BoxDecoration(
@@ -787,10 +819,7 @@ mainAxisAlignment: MainAxisAlignment.start,                  children: [
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: TextStyle(fontSize: 11, color: Colors.grey),
-        ),
+        Text(label, style: TextStyle(fontSize: 11, color: Colors.grey)),
         Text(
           '৳${amount.toStringAsFixed(2)}',
           style: TextStyle(
@@ -878,10 +907,7 @@ mainAxisAlignment: MainAxisAlignment.start,                  children: [
               if (showType && _returnChargeType == 'percentage')
                 Text(
                   ' (${returnChargeController.text}%)',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey,
-                  ),
+                  style: TextStyle(fontSize: 12, color: Colors.grey),
                 ),
             ],
           ),
@@ -913,16 +939,13 @@ mainAxisAlignment: MainAxisAlignment.start,                  children: [
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
         AppButton(
-          name: "Cancel",  size: 100,
+          name: "Cancel",
+          size: 100,
           color: AppColors.redAccent,
           onPressed: () => Navigator.pop(context),
         ),
         const SizedBox(width: 12),
-        AppButton(
-          size: 150,
-          name: "Submit Return",
-          onPressed: _submitReturn,
-        ),
+        AppButton(size: 150, name: "Submit Return", onPressed: _submitReturn),
       ],
     );
   }
@@ -1038,7 +1061,7 @@ mainAxisAlignment: MainAxisAlignment.start,                  children: [
       "reason": remarkController.text,
       "return_charge": double.tryParse(returnChargeController.text) ?? 0.0,
       "return_charge_type": _returnChargeType ?? 'fixed',
-      "return_amount": totalAmount,  // Send calculated total
+      "return_amount": totalAmount, // Send calculated total
       "items": returnItems,
     };
 
@@ -1061,15 +1084,20 @@ mainAxisAlignment: MainAxisAlignment.start,                  children: [
           reason: remarkController.text,
           returnCharge: double.tryParse(returnChargeController.text) ?? 0.0,
           returnChargeType: _returnChargeType,
-          returnAmount: totalAmount,  // Pass calculated amount
-          items: products.map((item) => SalesReturnItemCreate(
-            productId: item.productId!,
-            quantity: item.quantity!,
-            damageQuantity: item.damageQuantity!,
-            unitPrice: item.unitPrice!,
-            discount: item.discount ?? 0,
-            discountType: item.discountType,
-          )).toList(),
+          returnAmount: totalAmount,
+          // Pass calculated amount
+          items: products
+              .map(
+                (item) => SalesReturnItemCreate(
+                  productId: item.productId!,
+                  quantity: item.quantity!,
+                  damageQuantity: item.damageQuantity!,
+                  unitPrice: item.unitPrice!,
+                  discount: item.discount ?? 0,
+                  discountType: item.discountType,
+                ),
+              )
+              .toList(),
         ),
       ),
     );

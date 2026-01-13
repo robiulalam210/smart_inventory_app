@@ -96,11 +96,7 @@ class _SalesReturnScreenState extends State<MobileSalesReturnPage> {
       appBar: AppBar(title: Text("Sales Return",style: AppTextStyle.titleMedium(context),),),
 
       body: SafeArea(
-        child: ResponsiveRow(
-          children: [
-            _buildContentArea(),
-          ],
-        ),
+        child:   _buildContentArea(),
       ),
     );
   }
@@ -212,9 +208,11 @@ class _SalesReturnScreenState extends State<MobileSalesReturnPage> {
   }
 
   Widget _buildFilterRow() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.center,
+    return Wrap(
+      spacing: 4,
+      runSpacing: 4,
+      // crossAxisAlignment: CrossAxisAlignment.start,
+      // mainAxisAlignment: MainAxisAlignment.center,
       children: [
         // Search Field
         CustomSearchTextFormField(
@@ -233,7 +231,7 @@ class _SalesReturnScreenState extends State<MobileSalesReturnPage> {
               to: selectedDateRange?.end ?? endDate,
             );
           },
-          hintText: "by Receipt No, Customer, or Reason",
+          hintText: "by Receipt No, Customer",
         ),
         const SizedBox(width: 6),
 
@@ -298,8 +296,6 @@ class _SalesReturnScreenState extends State<MobileSalesReturnPage> {
             },
           ),
         ),
-        const SizedBox(width: 6),
-        gapW16,
 
         // Create Sales Return Button
 

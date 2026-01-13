@@ -713,7 +713,7 @@ class SalesDetailsScreen extends StatelessWidget {
     );
   }
 
-  TableRow _buildTableRow(Item item) {
+  TableRow _buildTableRow(PosSaleItem item) {
     final unitPrice = toDouble(item.unitPrice);
     final subtotal = toDouble(item.subtotal);
 
