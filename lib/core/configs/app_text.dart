@@ -1,33 +1,55 @@
-
 import 'configs.dart';
 
 class AppTextStyle {
-  // Define your custom font family
   static const String fontFamily = 'Roboto';
 
   static TextStyle titleLarge(BuildContext context) =>
-      Theme.of(context).textTheme.titleLarge!.copyWith(fontFamily: fontFamily);
+      Theme.of(context).textTheme.titleLarge!.copyWith(
+        fontFamily: fontFamily,
+        color: AppColors.text(context),
+      );
 
   static TextStyle headlineMedium(BuildContext context) =>
-      Theme.of(context).textTheme.headlineMedium!.copyWith(fontFamily: fontFamily);
+      Theme.of(context).textTheme.headlineMedium!.copyWith(
+        fontFamily: fontFamily,
+        color: AppColors.text(context),
+      );
 
   static TextStyle headlineSmall(BuildContext context) =>
-      Theme.of(context).textTheme.headlineSmall!.copyWith(fontFamily: fontFamily);
+      Theme.of(context).textTheme.headlineSmall!.copyWith(
+        fontFamily: fontFamily,
+        color: AppColors.text(context),
+      );
 
   static TextStyle titleMedium(BuildContext context) =>
-      Theme.of(context).textTheme.titleMedium!.copyWith(fontFamily: fontFamily);
+      Theme.of(context).textTheme.titleMedium!.copyWith(
+        fontFamily: fontFamily,
+        color: AppColors.text(context),
+      );
 
   static TextStyle titleSmall(BuildContext context) =>
-      Theme.of(context).textTheme.titleSmall!.copyWith(fontFamily: fontFamily);
+      Theme.of(context).textTheme.titleSmall!.copyWith(
+        fontFamily: fontFamily,
+        color: AppColors.text(context),
+      );
 
   static TextStyle displaySmall(BuildContext context) =>
-      Theme.of(context).textTheme.displaySmall!.copyWith(fontFamily: fontFamily);
+      Theme.of(context).textTheme.displaySmall!.copyWith(
+        fontFamily: fontFamily,
+        color: AppColors.text(context),
+      );
 
   static TextStyle bodySmall(BuildContext context) =>
-      Theme.of(context).textTheme.bodySmall!.copyWith(fontFamily: fontFamily);
+      Theme.of(context).textTheme.bodySmall!.copyWith(
+        fontFamily: fontFamily,
+        color: AppColors.text(context),
+      );
 
   static TextStyle bodyLarge(BuildContext context) =>
-      Theme.of(context).textTheme.bodyLarge!.copyWith(fontFamily: fontFamily);
+      Theme.of(context).textTheme.bodyLarge!.copyWith(
+        fontFamily: fontFamily,
+        color: AppColors.text(context),
+      );
 
   static TextStyle appBarTitle(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
@@ -75,17 +97,20 @@ class AppTextStyle {
     color: AppColors.text(context),
     fontFamily: fontFamily,
   );
+
   static TextStyle headerTitle(BuildContext context) =>
       Theme.of(context).textTheme.bodyLarge!.copyWith(
-          color:AppColors.blackColor(context),
-          fontFamily: fontFamily,
-          fontWeight: FontWeight.w700);
+        color: AppColors.blackColor(context),
+        fontFamily: fontFamily,
+        fontWeight: FontWeight.w700,
+      );
 
   static TextStyle headerTitleWhite(BuildContext context) =>
       Theme.of(context).textTheme.bodyLarge!.copyWith(
-          color: AppColors.whiteColor(context),
-          fontFamily: fontFamily,
-          fontWeight: FontWeight.w700);
+        color: AppColors.whiteColor(context),
+        fontFamily: fontFamily,
+        fontWeight: FontWeight.w700,
+      );
 
   static TextStyle drawerTextStyleWhite(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
@@ -110,10 +135,12 @@ class AppTextStyle {
         ? textTheme.bodyMedium!.copyWith(
       fontFamily: fontFamily,
       fontWeight: FontWeight.w700,
+      color: AppColors.text(context),
     )
         : textTheme.headlineSmall!.copyWith(
       fontFamily: fontFamily,
       fontWeight: FontWeight.w700,
+      color: AppColors.text(context),
     );
   }
 
@@ -124,46 +151,28 @@ class AppTextStyle {
         ? textTheme.labelSmall!.copyWith(
       fontFamily: fontFamily,
       fontWeight: FontWeight.w500,
+      color: AppColors.text(context),
     )
         : textTheme.labelLarge!.copyWith(
       fontFamily: fontFamily,
       fontWeight: FontWeight.w400,
+      color: AppColors.text(context),
     );
   }
 
-  static TextStyle cardLevelHead(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    final color =AppColors.text(context);
+  static TextStyle cardLevelHead(BuildContext context) =>
+      Theme.of(context).textTheme.labelSmall!.copyWith(
+        color: AppColors.text(context),
+        fontFamily: fontFamily,
+        fontWeight: FontWeight.w400,
+      );
 
-    return Responsive.isMobile(context)
-        ? textTheme.labelSmall!.copyWith(
-      color: color,
-      fontFamily: fontFamily,
-      fontWeight: FontWeight.w400,
-    )
-        : textTheme.labelSmall!.copyWith(
-      color: color,
-      fontFamily: fontFamily,
-      fontWeight: FontWeight.w400,
-    );
-  }
-
-  static TextStyle cardLevelText(BuildContext context) {
-    final color =AppColors.text(context);
-    final textTheme = Theme.of(context).textTheme;
-
-    return Responsive.isMobile(context)
-        ? textTheme.labelSmall!.copyWith(
-      fontFamily: fontFamily,      color: color,
-
-      fontWeight: FontWeight.w500,
-    )
-        : textTheme.labelSmall!.copyWith(
-      fontFamily: fontFamily,      color: color,
-
-      fontWeight: FontWeight.w500,
-    );
-  }
+  static TextStyle cardLevelText(BuildContext context) =>
+      Theme.of(context).textTheme.labelSmall!.copyWith(
+        fontFamily: fontFamily,
+        color: AppColors.text(context),
+        fontWeight: FontWeight.w500,
+      );
 
   static TextStyle cardLevelTextWhiteColor(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
@@ -181,38 +190,19 @@ class AppTextStyle {
     );
   }
 
-  static TextStyle searchTextStyle(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    final color =AppColors.blackColor(context);
+  static TextStyle searchTextStyle(BuildContext context) =>
+      Theme.of(context).textTheme.labelSmall!.copyWith(
+        color: AppColors.blackColor(context),
+        fontFamily: fontFamily,
+        fontWeight: FontWeight.w500,
+      );
 
-    return Responsive.isMobile(context)
-        ? textTheme.labelSmall!.copyWith(
-      color: color,
-      fontFamily: fontFamily,
-      fontWeight: FontWeight.w500,
-    )
-        : textTheme.labelSmall!.copyWith(
-      color: color,
-      fontFamily: fontFamily,
-      fontWeight: FontWeight.w600,
-    );
-  }
-
-  static TextStyle labelDropdownTextStyle(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-
-    return Responsive.isMobile(context)
-        ? textTheme.labelMedium!.copyWith(
-      fontFamily: fontFamily,
-      color:AppColors.text(context),
-      fontWeight: FontWeight.w400,
-    )
-        : textTheme.labelMedium!.copyWith(
-      color:AppColors.text(context),
-      fontFamily: fontFamily,
-      fontWeight: FontWeight.w400,
-    );
-  }
+  static TextStyle labelDropdownTextStyle(BuildContext context) =>
+      Theme.of(context).textTheme.labelMedium!.copyWith(
+        fontFamily: fontFamily,
+        color: AppColors.text(context),
+        fontWeight: FontWeight.w400,
+      );
 
   static TextStyle buttonTextStyle(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
@@ -234,9 +224,10 @@ class AppTextStyle {
 
   static TextStyle errorTextStyle(BuildContext context) =>
       Theme.of(context).textTheme.labelMedium!.copyWith(
-          color: AppColors.errorColor(context),
-          fontFamily: fontFamily,
-          fontWeight: FontWeight.w700);
+        color: AppColors.errorColor(context),
+        fontFamily: fontFamily,
+        fontWeight: FontWeight.w700,
+      );
 
   static EdgeInsets getResponsivePaddingBody(BuildContext context) {
     return Responsive.isMobile(context)
