@@ -23,7 +23,7 @@ class StatsCardMonthly extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.all(0),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.bottomNavBg(context),
         borderRadius: BorderRadius.circular(10),
       ),
       child: ClipRRect(

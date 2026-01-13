@@ -25,7 +25,7 @@ class MenuTile extends StatelessWidget {
           fontWeight: FontWeight.w600,
           color: isSelected
               ? Colors.blue // Text color for selected item
-              : Theme.of(context).textTheme.titleSmall!.color,
+              :  AppColors.text(context),
         ),
       ),
       onTap: onPressed,

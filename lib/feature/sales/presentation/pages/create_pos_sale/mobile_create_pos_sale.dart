@@ -106,7 +106,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
 
     // Find matched user
     final matchedUser = userList.firstWhere(
-          (user) => user.id == loginUserId,
+      (user) => user.id == loginUserId,
       orElse: () => userList.first,
     );
 
@@ -136,7 +136,8 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
         showCustomToast(
           context: context,
           title: 'Warning!',
-          description: "Walk-in customer must pay exact amount. No change allowed.",
+          description:
+              "Walk-in customer must pay exact amount. No change allowed.",
           icon: Icons.warning,
           primaryColor: Colors.orange,
         );
@@ -343,9 +344,9 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
     // Calculate final total
     double finalTotal =
         totalAfterDiscount +
-            overallVat +
-            overallServiceCharge +
-            overallDeliveryCharge;
+        overallVat +
+        overallServiceCharge +
+        overallDeliveryCharge;
 
     return finalTotal;
   }
@@ -407,137 +408,150 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
     return AppScaffold(
       appBar: AppBar(
         backgroundColor: AppColors.bottomNavBg(context),
-        title: Text('Sale', style: AppTextStyle.titleMedium(context)),
+        title: Text(
+          'Sale',
+          style: AppTextStyle.titleMedium(
+            context,
+          ).copyWith(color: AppColors.text(context)),
+        ),
       ),
       body: SafeArea(
-        child: BlocConsumer<CreatePosSaleBloc, CreatePosSaleState>(
-          listener: (context, state) {
-            if (state is CreatePosSaleLoading) {
-              appLoader(context, "Creating PosSale, please wait...");
-            } else if (state is CreatePosSaleSuccess) {
-              showCustomToast(
-                context: context,
-                title: 'Success!',
-                description: "Sale created successfully!",
-                icon: Icons.check_circle,
-                primaryColor: Colors.green,
-              );
+        child: Container(
+          color: AppColors.bottomNavBg(context),
+          child: BlocConsumer<CreatePosSaleBloc, CreatePosSaleState>(
+            listener: (context, state) {
+              if (state is CreatePosSaleLoading) {
+                appLoader(context, "Creating PosSale, please wait...");
+              } else if (state is CreatePosSaleSuccess) {
+                showCustomToast(
+                  context: context,
+                  title: 'Success!',
+                  description: "Sale created successfully!",
+                  icon: Icons.check_circle,
+                  primaryColor: Colors.green,
+                );
 
-              changeAmountController.clear();
-              AppRoutes.pushReplacement(context, MobilePosSaleScreen());
-              setState(() {});
-            } else if (state is CreatePosSaleFailed) {
-              Navigator.pop(context);
-              appAlertDialog(
-                context,
-                state.content,
-                title: state.title,
-                actions: [
-                  TextButton(
-                    onPressed: () => AppRoutes.pop(context),
-                    child: const Text("Dismiss"),
+                changeAmountController.clear();
+                AppRoutes.pushReplacement(context, MobilePosSaleScreen());
+                setState(() {});
+              } else if (state is CreatePosSaleFailed) {
+                Navigator.pop(context);
+                appAlertDialog(
+                  context,
+                  state.content,
+                  title: state.title,
+                  actions: [
+                    TextButton(
+                      onPressed: () => AppRoutes.pop(context),
+                      child: const Text("Dismiss"),
+                    ),
+                  ],
+                );
+              }
+            },
+            builder: (context, state) {
+              final bloc = context.read<CreatePosSaleBloc>();
+              final selectedCustomer = bloc.selectClintModel;
+              final isWalkInCustomer = selectedCustomer?.id == -1;
+
+              return Stepper(
+                physics: const ClampingScrollPhysics(),
+                type: StepperType.vertical,
+                currentStep: currentStep,
+                onStepContinue: () {
+                  _validateAndMoveToNextStep();
+                },
+                onStepCancel: () {
+                  if (currentStep > 0) {
+                    setState(() {
+                      currentStep -= 1;
+                    });
+                  }
+                },
+                onStepTapped: (step) {
+                  if (step <= currentStep) {
+                    setState(() {
+                      currentStep = step;
+                    });
+                  }
+                },
+                controlsBuilder: (context, details) {
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 8.0),
+                    child: Row(
+                      children: [
+                        if (currentStep > 0)
+                          Expanded(
+                            child: AppButton(
+                              onPressed: details.onStepCancel,
+                              name: "Back",
+                              color: AppColors.errorColor(context),
+                            ),
+                          ),
+                        if (currentStep > 0) const SizedBox(width: 8),
+                        Expanded(
+                          child: AppButton(
+                            onPressed: details.onStepContinue,
+                            name: currentStep < 3 ? 'Next' : 'Submit',
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+                steps: [
+                  // Step 1: Customer Information
+                  Step(
+                    title: Text(
+                      'Customer Info',
+                      style: AppTextStyle.cardLevelHead(
+                        context,
+                      ).copyWith(color: AppColors.text(context)),                    ),
+                    content: _buildMobileTopFormSection(bloc),
+                    isActive: currentStep >= 0,
+                    state: _getStepState(0),
+                  ),
+
+                  // Step 2: Products
+                  Step(
+                    title: Text(
+                      'Products',
+                      style: AppTextStyle.cardLevelHead(
+                        context,
+                      ).copyWith(color: AppColors.text(context)),                    ),
+                    content: _buildMobileProductListSection(bloc),
+                    isActive: currentStep >= 1,
+                    state: _getStepState(1),
+                  ),
+
+                  // Step 3: Charges
+                  Step(
+                    title: Text(
+                      'Charges',
+                      style: AppTextStyle.cardLevelHead(
+                        context,
+                      ).copyWith(color: AppColors.text(context)),                    ),
+                    content: _buildMobileChargesSection(bloc),
+                    isActive: currentStep >= 2,
+                    state: _getStepState(2),
+                  ),
+
+                  // Step 4: Summary & Payment
+                  Step(
+                    title: Text(
+                      'Summary & Payment',
+                      style: AppTextStyle.cardLevelHead(
+                        context,
+                      ).copyWith(color: AppColors.text(context)),
+                    ),
+                    content: _buildSummarySection(bloc, isWalkInCustomer),
+                    isActive: currentStep >= 3,
+                    state: _getStepState(3),
                   ),
                 ],
               );
-            }
-          },
-          builder: (context, state) {
-            final bloc = context.read<CreatePosSaleBloc>();
-            final selectedCustomer = bloc.selectClintModel;
-            final isWalkInCustomer = selectedCustomer?.id == -1;
-
-            return Stepper(
-              physics: const ClampingScrollPhysics(),
-              type: StepperType.vertical,
-              currentStep: currentStep,
-              onStepContinue: () {
-                _validateAndMoveToNextStep();
-              },
-              onStepCancel: () {
-                if (currentStep > 0) {
-                  setState(() {
-                    currentStep -= 1;
-                  });
-                }
-              },
-              onStepTapped: (step) {
-                if (step <= currentStep) {
-                  setState(() {
-                    currentStep = step;
-                  });
-                }
-              },
-              controlsBuilder: (context, details) {
-                return Padding(
-                  padding: const EdgeInsets.only(top: 8.0),
-                  child: Row(
-                    children: [
-                      if (currentStep > 0)
-                        Expanded(
-                          child: AppButton(
-                            onPressed: details.onStepCancel,
-                            name: "Back",
-                            color: AppColors.errorColor(context),
-                          ),
-                        ),
-                      if (currentStep > 0) const SizedBox(width: 8),
-                      Expanded(
-                        child: AppButton(
-                          onPressed: details.onStepContinue,
-                          name: currentStep < 3 ? 'Next' : 'Submit',
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
-              steps: [
-                // Step 1: Customer Information
-                Step(
-                  title: Text(
-                    'Customer Info',
-                    style: AppTextStyle.cardLevelHead(context),
-                  ),
-                  content: _buildMobileTopFormSection(bloc),
-                  isActive: currentStep >= 0,
-                  state: _getStepState(0),
-                ),
-
-                // Step 2: Products
-                Step(
-                  title: Text(
-                    'Products',
-                    style: AppTextStyle.cardLevelHead(context),
-                  ),
-                  content: _buildMobileProductListSection(bloc),
-                  isActive: currentStep >= 1,
-                  state: _getStepState(1),
-                ),
-
-                // Step 3: Charges
-                Step(
-                  title: Text(
-                    'Charges',
-                    style: AppTextStyle.cardLevelHead(context),
-                  ),
-                  content: _buildMobileChargesSection(bloc),
-                  isActive: currentStep >= 2,
-                  state: _getStepState(2),
-                ),
-
-                // Step 4: Summary & Payment
-                Step(
-                  title: Text(
-                    'Summary & Payment',
-                    style: AppTextStyle.cardLevelHead(context),
-                  ),
-                  content: _buildSummarySection(bloc, isWalkInCustomer),
-                  isActive: currentStep >= 3,
-                  state: _getStepState(3),
-                ),
-              ],
-            );
-          },
+            },
+          ),
         ),
       ),
     );
@@ -681,14 +695,19 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
     final vatValue = double.tryParse(bloc.vatOverAllController.text) ?? 0;
     if (vatValue < 0) validationErrors.add('VAT cannot be negative');
 
-    final discountValue = double.tryParse(bloc.discountOverAllController.text) ?? 0;
+    final discountValue =
+        double.tryParse(bloc.discountOverAllController.text) ?? 0;
     if (discountValue < 0) validationErrors.add('Discount cannot be negative');
 
-    final serviceChargeValue = double.tryParse(bloc.serviceChargeOverAllController.text) ?? 0;
-    if (serviceChargeValue < 0) validationErrors.add('Service charge cannot be negative');
+    final serviceChargeValue =
+        double.tryParse(bloc.serviceChargeOverAllController.text) ?? 0;
+    if (serviceChargeValue < 0)
+      validationErrors.add('Service charge cannot be negative');
 
-    final deliveryChargeValue = double.tryParse(bloc.deliveryChargeOverAllController.text) ?? 0;
-    if (deliveryChargeValue < 0) validationErrors.add('Delivery charge cannot be negative');
+    final deliveryChargeValue =
+        double.tryParse(bloc.deliveryChargeOverAllController.text) ?? 0;
+    if (deliveryChargeValue < 0)
+      validationErrors.add('Delivery charge cannot be negative');
 
     if (validationErrors.isNotEmpty) {
       showCustomToast(
@@ -733,7 +752,8 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
         showCustomToast(
           context: context,
           title: 'Validation Error',
-          description: "Walk-in customer must pay EXACT amount: ${netTotal.toStringAsFixed(2)}",
+          description:
+              "Walk-in customer must pay EXACT amount: ${netTotal.toStringAsFixed(2)}",
           icon: Icons.error,
           primaryColor: Colors.red,
         );
@@ -813,7 +833,9 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                     isRequired: true,
                     value: bloc.selectClintModel,
                     itemList:
-                    [CustomerActiveModel(name: 'Walk-in-customer', id: -1)] +
+                        [
+                          CustomerActiveModel(name: 'Walk-in-customer', id: -1),
+                        ] +
                         context.read<CustomerBloc>().activeCustomer,
                     onChanged: (newVal) {
                       bloc.selectClintModel = newVal;
@@ -833,13 +855,13 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                       setState(() {});
                     },
                     validator: (value) =>
-                    value == null ? 'Please select Customer' : null,
+                        value == null ? 'Please select Customer' : null,
                     itemBuilder: (item) => DropdownMenuItem(
                       value: item,
                       child: Text(
                         item.toString(),
-                        style:  TextStyle(
-                          color:AppColors.blackColor(context),
+                        style: TextStyle(
+                          color: AppColors.text(context),
                           fontFamily: 'Quicksand',
                           fontWeight: FontWeight.w300,
                         ),
@@ -865,13 +887,13 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                       setState(() {});
                     },
                     validator: (value) =>
-                    value == null ? 'Please select Sales' : null,
+                        value == null ? 'Please select Sales' : null,
                     itemBuilder: (item) => DropdownMenuItem(
                       value: item,
                       child: Text(
                         item.toString(),
-                        style:  TextStyle(
-                          color:AppColors.blackColor(context),
+                        style: TextStyle(
+                          color: AppColors.blackColor(context),
                           fontFamily: 'Quicksand',
                           fontWeight: FontWeight.w300,
                         ),
@@ -891,7 +913,8 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                 autofillHints: AutofillHints.name,
                 bottom: 15.0,
                 fillColor: AppColors.whiteColor(context),
-                validator: (value) => value!.isEmpty ? 'Please enter date' : null,
+                validator: (value) =>
+                    value!.isEmpty ? 'Please enter date' : null,
                 onTap: _selectDate,
               ),
             ],
@@ -915,6 +938,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
             margin: const EdgeInsets.only(bottom: 6),
             padding: const EdgeInsets.all(6.0),
             decoration: BoxDecoration(
+              color: AppColors.bottomNavBg(context),
               border: Border.all(color: Colors.grey[300]!),
               borderRadius: BorderRadius.circular(8),
             ),
@@ -942,10 +966,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                       )
                     else
                       IconButton(
-                        icon: const Icon(
-                          Icons.add_circle,
-                          color: Colors.green,
-                        ),
+                        icon: const Icon(Icons.add_circle, color: Colors.green),
                         onPressed: addProduct,
                       ),
                   ],
@@ -974,8 +995,8 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                         setState(() {
                           categoriesBloc.selectedState = newVal.toString();
                           final matchingCategory = categoryList.firstWhere(
-                                (category) =>
-                            category.name.toString() == newVal.toString(),
+                            (category) =>
+                                category.name.toString() == newVal.toString(),
                             orElse: () => CategoryModel(),
                           );
                           categoriesBloc.selectedStateId =
@@ -1009,14 +1030,15 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                         .read<ProductsBloc>()
                         .productList
                         .where((item) {
-                      final categoryMatch = selectedCategoryId.isEmpty
-                          ? true
-                          : item.category?.toString() == selectedCategoryId;
-                      final notDuplicate =
-                          !selectedProductIds.contains(item.id) ||
+                          final categoryMatch = selectedCategoryId.isEmpty
+                              ? true
+                              : item.category?.toString() == selectedCategoryId;
+                          final notDuplicate =
+                              !selectedProductIds.contains(item.id) ||
                               item.id == product["product_id"];
-                      return categoryMatch && notDuplicate;
-                    }).toList();
+                          return categoryMatch && notDuplicate;
+                        })
+                        .toList();
 
                     return AppDropdown<ProductModelStockModel>(
                       context: context,
@@ -1031,7 +1053,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                       itemList: filteredProducts,
                       onChanged: (newVal) => onProductChanged(index, newVal),
                       validator: (value) =>
-                      value == null ? 'Please select Product' : null,
+                          value == null ? 'Please select Product' : null,
                       itemBuilder: (item) => DropdownMenuItem(
                         value: item,
                         child: Text(item.toString()),
@@ -1056,22 +1078,22 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                             readOnly: true,
                             decoration: InputDecoration(
                               filled: true,
-                              fillColor: AppColors.whiteColor(context),
+                              fillColor: AppColors.bottomNavBg(context),
                               contentPadding: const EdgeInsets.all(10),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(5),
                                 borderSide: BorderSide(
-                                  color: AppColors.primaryColor(context).withValues(
-                                    alpha: 0.3,
-                                  ),
+                                  color: AppColors.primaryColor(
+                                    context,
+                                  ).withValues(alpha: 0.3),
                                 ),
                               ),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(5),
                                 borderSide: BorderSide(
-                                  color: AppColors.primaryColor(context).withValues(
-                                    alpha: 0.3,
-                                  ),
+                                  color: AppColors.primaryColor(
+                                    context,
+                                  ).withValues(alpha: 0.3),
                                 ),
                               ),
                             ),
@@ -1092,9 +1114,9 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                           Container(
                             decoration: BoxDecoration(
                               border: Border.all(
-                                color: AppColors.primaryColor(context).withValues(
-                                  alpha: 0.3,
-                                ),
+                                color: AppColors.primaryColor(
+                                  context,
+                                ).withValues(alpha: 0.3),
                               ),
                               borderRadius: BorderRadius.circular(5),
                             ),
@@ -1134,10 +1156,9 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                                   onPressed: () {
                                     int currentQuantity =
                                         int.tryParse(
-                                          controllers[index]!["quantity"]!
-                                              .text,
+                                          controllers[index]!["quantity"]!.text,
                                         ) ??
-                                            0;
+                                        0;
                                     controllers[index]!["quantity"]!.text =
                                         (currentQuantity + 1).toString();
                                     products[index]["quantity"] =
@@ -1181,8 +1202,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                                     'TK',
                                     style: TextStyle(
                                       fontSize: 12,
-                                      fontFamily:
-                                      GoogleFonts.playfairDisplay()
+                                      fontFamily: GoogleFonts.playfairDisplay()
                                           .fontFamily,
                                       color: product["discount_type"] == 'fixed'
                                           ? Colors.white
@@ -1199,11 +1219,10 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                                     '%',
                                     style: TextStyle(
                                       fontSize: 12,
-                                      fontFamily:
-                                      GoogleFonts.playfairDisplay()
+                                      fontFamily: GoogleFonts.playfairDisplay()
                                           .fontFamily,
-                                      color: product["discount_type"] ==
-                                          'percent'
+                                      color:
+                                          product["discount_type"] == 'percent'
                                           ? Colors.white
                                           : Colors.black,
                                     ),
@@ -1213,11 +1232,11 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                               onValueChanged: discountApplied
                                   ? (_) {}
                                   : (value) {
-                                setState(() {
-                                  product["discount_type"] = value;
-                                  updateTotal(index);
-                                });
-                              },
+                                      setState(() {
+                                        product["discount_type"] = value;
+                                        updateTotal(index);
+                                      });
+                                    },
                               groupValue: product["discount_type"],
                               unselectedColor: Colors.grey[300],
                               selectedColor: AppColors.primaryColor(context),
@@ -1236,32 +1255,32 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                             readOnly: discountApplied,
                             decoration: InputDecoration(
                               filled: true,
-                              fillColor: AppColors.whiteColor(context),
+                              fillColor: AppColors.bottomNavBg(context),
                               contentPadding: const EdgeInsets.all(10),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(5),
                                 borderSide: BorderSide(
-                                  color: AppColors.primaryColor(context).withValues(
-                                    alpha: 0.3,
-                                  ),
+                                  color: AppColors.primaryColor(
+                                    context,
+                                  ).withValues(alpha: 0.3),
                                 ),
                               ),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(5),
                                 borderSide: BorderSide(
-                                  color: AppColors.primaryColor(context).withValues(
-                                    alpha: 0.3,
-                                  ),
+                                  color: AppColors.primaryColor(
+                                    context,
+                                  ).withValues(alpha: 0.3),
                                 ),
                               ),
                             ),
                             onChanged: discountApplied
                                 ? null
                                 : (value) {
-                              products[index]["discount"] =
-                                  double.tryParse(value) ?? 0.0;
-                              updateTotal(index);
-                            },
+                                    products[index]["discount"] =
+                                        double.tryParse(value) ?? 0.0;
+                                    updateTotal(index);
+                                  },
                           ),
                         ),
                       ],
@@ -1281,7 +1300,9 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("Additional Charges", style: AppTextStyle.cardLevelHead(context)),
+        Text("Additional Charges", style:    AppTextStyle.cardLevelHead(
+      context,
+    ).copyWith(color: AppColors.text(context)),),
         const SizedBox(height: 12),
         _buildChargesSection(bloc),
       ],
@@ -1297,7 +1318,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
           "Overall Discount",
           selectedOverallDiscountType,
           bloc.discountOverAllController,
-              (value) {
+          (value) {
             setState(() {
               selectedOverallDiscountType = value;
               bloc.selectedOverallDiscountType = value;
@@ -1309,7 +1330,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
           "Overall Vat",
           selectedOverallVatType,
           bloc.vatOverAllController,
-              (value) {
+          (value) {
             setState(() {
               selectedOverallVatType = value;
               bloc.selectedOverallVatType = value;
@@ -1321,7 +1342,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
           "Service Charge",
           selectedOverallServiceChargeType,
           bloc.serviceChargeOverAllController,
-              (value) {
+          (value) {
             setState(() {
               selectedOverallServiceChargeType = value;
               bloc.selectedOverallServiceChargeType = value;
@@ -1333,7 +1354,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
           "Delivery Charge",
           selectedOverallDeliveryType,
           bloc.deliveryChargeOverAllController,
-              (value) {
+          (value) {
             setState(() {
               selectedOverallDeliveryType = value;
               bloc.selectedOverallDeliveryType = value;
@@ -1346,11 +1367,11 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
   }
 
   Widget _buildChargeField(
-      String label,
-      String selectedType,
-      TextEditingController controller,
-      Function(String) onTypeChanged,
-      ) {
+    String label,
+    String selectedType,
+    TextEditingController controller,
+    Function(String) onTypeChanged,
+  ) {
     return ResponsiveCol(
       xs: 12,
       sm: 2,
@@ -1401,7 +1422,8 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                   isRequiredLevle: false,
                   controller: controller,
                   hintText: label,
-                  fillColor: Colors.white,
+                  
+                  fillColor: AppColors.bottomNavBg(context),
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
                   ),
@@ -1448,7 +1470,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
               padding: const EdgeInsets.all(8),
               margin: const EdgeInsets.only(bottom: 10),
               decoration: BoxDecoration(
-                color: Colors.orange[50],
+                color: AppColors.bottomNavBg(context),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(color: Colors.orange),
               ),
@@ -1473,7 +1495,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
               padding: const EdgeInsets.all(8),
               margin: const EdgeInsets.only(bottom: 10),
               decoration: BoxDecoration(
-                color: Colors.green[50],
+                color: AppColors.bottomNavBg(context),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(color: Colors.green),
               ),
@@ -1508,12 +1530,15 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(8),
-                    color: Colors.white,
+                    color: AppColors.bottomNavBg(context),
                   ),
                   child: Column(
                     children: [
                       _buildSummaryRow("Product Total", productTotal),
-                      _buildSummaryRow("Specific Discount (-)", specificDiscount),
+                      _buildSummaryRow(
+                        "Specific Discount (-)",
+                        specificDiscount,
+                      ),
                       _buildSummaryRow("Sub Total", subTotal),
                       _buildSummaryRow("Discount (-)", discount),
                       _buildSummaryRow("Vat (+)", vat),
@@ -1540,7 +1565,11 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
     );
   }
 
-  Widget _buildPaymentSection(CreatePosSaleBloc bloc, bool isWalkInCustomer, double netTotal) {
+  Widget _buildPaymentSection(
+    CreatePosSaleBloc bloc,
+    bool isWalkInCustomer,
+    double netTotal,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1548,7 +1577,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
         CheckboxListTile(
           title: Text(
             "With Money Receipt",
-            style: AppTextStyle.headerTitle(context),
+            style: AppTextStyle.headerTitle(context).copyWith(color: AppColors.text(context)),
           ),
           value: _isChecked,
           onChanged: (bool? newValue) {
@@ -1582,7 +1611,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                     setState(() {});
                   },
                   validator: (value) =>
-                  value == null ? 'Please select a payment method' : null,
+                      value == null ? 'Please select a payment method' : null,
                   itemBuilder: (item) => DropdownMenuItem(
                     value: item,
                     child: Text(item.toString()),
@@ -1598,16 +1627,14 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                     } else if (state is AccountActiveListSuccess) {
                       final filteredList = bloc.selectedPaymentMethod.isNotEmpty
                           ? state.list.where((item) {
-                        return item.acType?.toLowerCase() ==
-                            bloc.selectedPaymentMethod.toLowerCase();
-                      }).toList()
+                              return item.acType?.toLowerCase() ==
+                                  bloc.selectedPaymentMethod.toLowerCase();
+                            }).toList()
                           : state.list;
 
                       final selectedAccount =
                           bloc.accountModel ??
-                              (filteredList.isNotEmpty
-                                  ? filteredList.first
-                                  : null);
+                          (filteredList.isNotEmpty ? filteredList.first : null);
                       bloc.accountModel = selectedAccount;
 
                       return AppDropdown<AccountActiveModel>(
@@ -1626,7 +1653,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                           setState(() {});
                         },
                         validator: (value) =>
-                        value == null ? 'Please select an account' : null,
+                            value == null ? 'Please select an account' : null,
                         itemBuilder: (item) => DropdownMenuItem(
                           value: item,
                           child: Text(item.toString()),
@@ -1647,7 +1674,9 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                 flex: 2,
                 child: AppTextField(
                   controller: changeAmountController,
-                  hintText: isWalkInCustomer ? 'Change (0.00)' : 'Change Amount',
+                  hintText: isWalkInCustomer
+                      ? 'Change (0.00)'
+                      : 'Change Amount',
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
                   ),
@@ -1732,8 +1761,9 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
             child: Text(
               label,
               style: isBold
-                  ? AppTextStyle.cardLevelHead(context)
-                  .copyWith(fontWeight: FontWeight.bold)
+                  ? AppTextStyle.cardLevelHead(
+                      context,
+                    ).copyWith(fontWeight: FontWeight.bold)
                   : AppTextStyle.cardLevelHead(context),
             ),
           ),
@@ -1741,9 +1771,9 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
             value.toStringAsFixed(2),
             style: isBold
                 ? AppTextStyle.cardLevelText(context).copyWith(
-              fontWeight: FontWeight.bold,
-              color: AppColors.primaryColor(context),
-            )
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.primaryColor(context),
+                  )
                 : AppTextStyle.cardLevelText(context),
           ),
         ],
@@ -1774,13 +1804,13 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
     var transferProducts = products
         .map(
           (product) => {
-        "product_id": int.tryParse(product["product_id"].toString()),
-        "quantity": int.tryParse(product["quantity"].toString()),
-        "unit_price": double.tryParse(product["price"].toString()),
-        "discount": double.tryParse(product["discount"].toString()),
-        "discount_type": product["discount_type"].toString(),
-      },
-    )
+            "product_id": int.tryParse(product["product_id"].toString()),
+            "quantity": int.tryParse(product["quantity"].toString()),
+            "unit_price": double.tryParse(product["price"].toString()),
+            "discount": double.tryParse(product["discount"].toString()),
+            "discount_type": product["discount_type"].toString(),
+          },
+        )
         .toList();
 
     final selectedCustomer = bloc.selectClintModel;
@@ -1818,7 +1848,9 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
       "customer_type": isWalkInCustomer ? "walk_in" : "saved_customer",
       "with_money_receipt": _isChecked ? "Yes" : "No",
       "paid_amount": paidAmount,
-      "due_amount": isWalkInCustomer ? 0.0 : (netTotal - paidAmount).clamp(0, double.infinity),
+      "due_amount": isWalkInCustomer
+          ? 0.0
+          : (netTotal - paidAmount).clamp(0, double.infinity),
     };
 
     if (isWalkInCustomer) {
