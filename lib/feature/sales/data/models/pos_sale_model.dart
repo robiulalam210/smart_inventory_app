@@ -39,7 +39,7 @@ class PosSaleModel {
   final String? customerType;
   final String? withMoneyReceipt;
   final String? remark;
-  final List<Item>? items;
+  final List<PosSaleItem>? items;
 
   PosSaleModel({
     this.id,
@@ -153,7 +153,7 @@ class PosSaleModel {
     customerType: json["customer_type"],
     withMoneyReceipt: json["with_money_receipt"],
     remark: json["remark"],
-    items: json["items"] == null ? [] : List<Item>.from(json["items"]!.map((x) => Item.fromJson(x))),
+    items: json["items"] == null ? [] : List<PosSaleItem>.from(json["items"]!.map((x) => PosSaleItem.fromJson(x))),
   );
 
   Map<String, dynamic> toJson() => {
@@ -190,7 +190,7 @@ class PosSaleModel {
   };
 }
 
-class Item {
+class PosSaleItem {
   final int? id;
   final int? productId;
   final String? productName;
@@ -200,7 +200,7 @@ class Item {
   final String? discountType;
   final dynamic subtotal;
 
-  Item({
+  PosSaleItem({
     this.id,
     this.productId,
     this.productName,
@@ -211,7 +211,7 @@ class Item {
     this.subtotal,
   });
 
-  factory Item.fromJson(Map<String, dynamic> json) => Item(
+  factory PosSaleItem.fromJson(Map<String, dynamic> json) => PosSaleItem(
     id: json["id"],
     productId: json["product_id"],
     productName: json["product_name"],

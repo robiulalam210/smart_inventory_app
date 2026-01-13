@@ -533,6 +533,10 @@ pw.Widget _buildSummaryRow(String label, String value, {bool isTotal = false}) {
   );
 }
 
+
+
+
+
 // Helper function to get status color
 PdfColor _getStatusColor(String status) {
   switch (status.toLowerCase()) {
