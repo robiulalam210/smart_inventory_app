@@ -458,6 +458,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                 physics: const ClampingScrollPhysics(),
                 type: StepperType.vertical,
                 currentStep: currentStep,
+
                 onStepContinue: () {
                   _validateAndMoveToNextStep();
                 },

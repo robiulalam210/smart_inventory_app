@@ -5,19 +5,19 @@ import 'package:meherinMart/core/widgets/app_scaffold.dart';
 import 'package:meherinMart/feature/feature.dart';
 import 'package:meherinMart/feature/profile/presentation/pages/moble_profile_screen.dart';
 
-import '../core/configs/configs.dart';
-import '../core/shared/widgets/sideMenu/mobile_tab_sidebar.dart';
-import 'lab_dashboard/presentation/widgets/stats_card_monthly.dart';
-import 'profile/presentation/bloc/profile_bloc/profile_bloc.dart';
+import '../../../../core/configs/configs.dart';
+import '../../../../core/shared/widgets/sideMenu/mobile_tab_sidebar.dart';
+import '../widgets/stats_card_monthly.dart';
+import '../../../profile/presentation/bloc/profile_bloc/profile_bloc.dart';
 
-class MobileRootScreen extends StatefulWidget {
-  const MobileRootScreen({super.key});
+class DashBoardScreen extends StatefulWidget {
+  const DashBoardScreen({super.key});
 
   @override
-  State<MobileRootScreen> createState() => _RootScreenState();
+  State<DashBoardScreen> createState() => _RootScreenState();
 }
 
-class _RootScreenState extends State<MobileRootScreen> {
+class _RootScreenState extends State<DashBoardScreen> {
   int selectedIndex = 1;
   String selectedPurchaseOverviewType = 'current_day';
 

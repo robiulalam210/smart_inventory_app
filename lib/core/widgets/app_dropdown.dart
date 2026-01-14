@@ -115,10 +115,10 @@ class AppDropdown<T> extends FormField<T> {
                   children: [
                     Text(
                       label,
-                      style: const TextStyle(
+                      style:  TextStyle(
                         fontSize: 12, // small label
                         fontWeight: FontWeight.w500,
-                        color: Colors.black87,
+                        color:AppColors.text(context)
                       ),
                     ),
                     if (isRequired) const SizedBox(width: 4),
@@ -145,18 +145,18 @@ class AppDropdown<T> extends FormField<T> {
                   onChanged: (v) {
                     if (isSearch) showOverlay(); // filter overlay
                   },
-                  style: const TextStyle(
+                  style:  TextStyle(
                     fontSize: 13, // small but readable
                     fontWeight: FontWeight.w400,
-                    color: Colors.black87,
+                      color:AppColors.text(context)
                   ),
                   decoration: InputDecoration(
                     hintText: hint,
                     isDense: false,
                     filled: false,
-                    hintStyle: const TextStyle(
+                    hintStyle:  TextStyle(
                       fontSize: 13,
-                      color: Colors.grey,
+                        color:AppColors.text(context)
                     ),
                     contentPadding: const EdgeInsets.symmetric(
                         horizontal: 10, vertical: 4),
