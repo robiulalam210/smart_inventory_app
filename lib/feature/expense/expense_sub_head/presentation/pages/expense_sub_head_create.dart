@@ -159,7 +159,7 @@ class _ExpenseSubCreateScreenState extends State<ExpenseSubCreateScreen> {
             width: MediaQuery.of(context).size.width,
             decoration: BoxDecoration(
               shape: BoxShape.rectangle,
-              color: AppColors.whiteColor(context),
+              color: AppColors.bottomNavBg(context),
               borderRadius: BorderRadius.circular(AppSizes.radius),
             ),
             child: Padding(
@@ -179,8 +179,9 @@ class _ExpenseSubCreateScreenState extends State<ExpenseSubCreateScreen> {
                             widget.id == null
                                 ? 'Create Expense Sub Head'
                                 : 'Update Expense Sub Head',
-                            style: const TextStyle(
+                            style:  TextStyle(
                               fontSize: 16,
+                              color: AppColors.text(context),
                               fontWeight: FontWeight.bold,
                             ),
                           ),

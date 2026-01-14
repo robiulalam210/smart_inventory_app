@@ -61,7 +61,7 @@ class ExpenseSubHeadTableCard extends StatelessWidget {
         vertical: 8.0,
       ),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.bottomNavBg(context),
         borderRadius: BorderRadius.circular(AppSizes.radius),
         boxShadow: [
           BoxShadow(
@@ -120,8 +120,9 @@ class ExpenseSubHeadTableCard extends StatelessWidget {
                           expenseSubHead.name?.capitalize() ?? "N/A",
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
+                          style:  TextStyle(
                             fontWeight: FontWeight.w700,
+                            color: AppColors.text(context),
                             fontSize: 14,
                           ),
                         ),
@@ -172,6 +173,7 @@ class ExpenseSubHeadTableCard extends StatelessWidget {
               children: [
                 // Head Name
                 _buildDetailRow(
+                  context: context,
                   icon: Iconsax.category,
                   label: 'Parent Head',
                   value: expenseSubHead.headName?.capitalize() ?? "N/A",
@@ -188,7 +190,7 @@ class ExpenseSubHeadTableCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
-              color: Colors.grey.shade50,
+              color: AppColors.bottomNavBg(context),
               borderRadius: const BorderRadius.only(
                 bottomLeft: Radius.circular(16),
                 bottomRight: Radius.circular(16),
@@ -244,6 +246,7 @@ class ExpenseSubHeadTableCard extends StatelessWidget {
   }
 
   Widget _buildDetailRow({
+    required BuildContext context,
     required IconData icon,
     required String label,
     required String value,
@@ -255,7 +258,7 @@ class ExpenseSubHeadTableCard extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 18, color: Colors.grey.shade600),
+          Icon(icon, size: 18, color:AppColors.text(context)),
           const SizedBox(width: 8),
           Expanded(
             child: Column(
@@ -265,7 +268,7 @@ class ExpenseSubHeadTableCard extends StatelessWidget {
                   label,
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
-                    color: Colors.grey.shade700,
+                    color: AppColors.text(context),
                     fontSize: 13,
                   ),
                 ),
@@ -274,7 +277,7 @@ class ExpenseSubHeadTableCard extends StatelessWidget {
                   value,
                   style: TextStyle(
                     fontWeight: isImportant ? FontWeight.w700 : FontWeight.w500,
-                    color: isImportant ? Colors.black : Colors.grey.shade800,
+                    color: isImportant ? AppColors.primaryColor(context) : AppColors.text(context),
                     fontSize: isImportant ? 15 : 14,
                   ),
                   maxLines: 2,

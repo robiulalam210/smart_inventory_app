@@ -188,7 +188,7 @@ class _ExpenseListScreenState extends State<MobileExpenseListScreen> {
         // Search Bar
         Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.bottomNavBg(context),
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(

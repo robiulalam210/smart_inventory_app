@@ -60,7 +60,7 @@ class ExpenseTableCard extends StatelessWidget {
         vertical: 8.0,
       ),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.bottomNavBg(context),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -117,8 +117,9 @@ class ExpenseTableCard extends StatelessWidget {
                         children: [
                           Text(
                             expense.invoiceNumber?.capitalize() ?? 'N/A',
-                            style: const TextStyle(
+                            style:  TextStyle(
                               fontWeight: FontWeight.w600,
+                              color: AppColors.text(context),
                               fontSize: 14,
                             ),
                           ),
@@ -127,7 +128,7 @@ class ExpenseTableCard extends StatelessWidget {
                             expense.paymentMethod ?? 'N/A',
                             style: TextStyle(
                               fontSize: 12,
-                              color: Colors.grey.shade600,
+                              color:  AppColors.text(context),
                             ),
                           ),
                         ],
@@ -166,6 +167,7 @@ class ExpenseTableCard extends StatelessWidget {
               children: [
                 // Expense Head
                 _buildDetailRow(
+                  context: context,
                   icon: Iconsax.category,
                   label: 'Expense Head',
                   value: expense.headName ?? 'N/A',
@@ -173,19 +175,28 @@ class ExpenseTableCard extends StatelessWidget {
                 const SizedBox(height: 8),
 
                 // Sub Head
-                _buildDetailRow(
-                  icon: Iconsax.category_2,
-                  label: 'Sub Head',
-                  value: expense.subheadName ?? 'N/A',
-                ),
-                const SizedBox(height: 8),
 
+
+                Row(children: [
+                  Expanded(child: _buildDetailRow(
+                    context: context,
+                    icon: Iconsax.category_2,
+                    label: 'Sub Head',
+                    value: expense.subheadName ?? 'N/A',
+                  ),),
+                  const SizedBox(width: 8),
+
+                  Expanded(
+                    child: _buildDetailRow(
+                        context: context,
+                        icon: Iconsax.calendar,
+                        label: 'Date',
+                        value:  AppWidgets().convertDateTimeDDMMYYYY(expense.expenseDate )
+                    ),
+                  ),
+                ],),
                 // Date
-                _buildDetailRow(
-                  icon: Iconsax.calendar,
-                  label: 'Date',
-                  value:  AppWidgets().convertDateTimeDDMMYYYY(expense.expenseDate )
-                ),
+
                 const SizedBox(height: 8),
 
                 // Note
@@ -233,9 +244,9 @@ class ExpenseTableCard extends StatelessWidget {
 
           // Action Buttons
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
             decoration: BoxDecoration(
-              color: Colors.grey.shade50,
+              color: AppColors.bottomNavBg(context),
               borderRadius: const BorderRadius.only(
                 bottomLeft: Radius.circular(16),
                 bottomRight: Radius.circular(16),
@@ -320,6 +331,8 @@ class ExpenseTableCard extends StatelessWidget {
   }
 
   Widget _buildDetailRow({
+
+    required BuildContext context,
     required IconData icon,
     required String label,
     required String value,
@@ -330,7 +343,7 @@ class ExpenseTableCard extends StatelessWidget {
         Icon(
           icon,
           size: 16,
-          color: Colors.grey.shade600,
+          color:  AppColors.text(context),
         ),
         const SizedBox(width: 8),
         Expanded(
@@ -341,16 +354,17 @@ class ExpenseTableCard extends StatelessWidget {
                 label,
                 style: TextStyle(
                   fontWeight: FontWeight.w600,
-                  color: Colors.grey.shade700,
+                  color:  AppColors.text(context),
                   fontSize: 12,
                 ),
               ),
               const SizedBox(height: 2),
               Text(
                 value,
-                style: const TextStyle(
+                style:  TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w500,
+                  color:  AppColors.text(context)
                 ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
@@ -668,6 +682,7 @@ class ExpenseTableCard extends StatelessWidget {
               maxHeight: AppSizes.height(context) * 0.7,
             ),
             child: Container(
+              color: AppColors.bottomNavBg(context),
               padding: const EdgeInsets.all(20),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -682,14 +697,14 @@ class ExpenseTableCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  _buildViewDetailRow('Invoice No:', expense.invoiceNumber ?? 'N/A'),
-                  _buildViewDetailRow('Expense Head:', expense.headName ?? 'N/A'),
-                  _buildViewDetailRow('Sub Head:', expense.subheadName ?? 'N/A'),
-                  _buildViewDetailRow('Date:', AppWidgets().convertDateTimeDDMMYYYY(expense.expenseDate )),
-                  _buildViewDetailRow('Payment Method:', expense.paymentMethod ?? 'N/A'),
-                  _buildViewDetailRow('Amount:', expense.amount ?? 'N/A'),
+                  _buildViewDetailRow(context,'Invoice No:', expense.invoiceNumber ?? 'N/A'),
+                  _buildViewDetailRow(context,'Expense Head:', expense.headName ?? 'N/A'),
+                  _buildViewDetailRow(context,'Sub Head:', expense.subheadName ?? 'N/A'),
+                  _buildViewDetailRow(context,'Date:', AppWidgets().convertDateTimeDDMMYYYY(expense.expenseDate )),
+                  _buildViewDetailRow(context,'Payment Method:', expense.paymentMethod ?? 'N/A'),
+                  _buildViewDetailRow(context,'Amount:', expense.amount ?? 'N/A'),
                   if (expense.note?.isNotEmpty == true)
-                    _buildViewDetailRow('Note:', expense.note ?? 'N/A'),
+                    _buildViewDetailRow(context,'Note:', expense.note ?? 'N/A'),
                   const SizedBox(height: 20),
                   Align(
                     alignment: Alignment.centerRight,
@@ -707,7 +722,7 @@ class ExpenseTableCard extends StatelessWidget {
     );
   }
 
-  Widget _buildViewDetailRow(String label, String value) {
+  Widget _buildViewDetailRow(BuildContext context,String label, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
@@ -717,8 +732,9 @@ class ExpenseTableCard extends StatelessWidget {
             width: 120,
             child: Text(
               label,
-              style: const TextStyle(
+              style:  TextStyle(
                 fontWeight: FontWeight.w600,
+                color: AppColors.text(context),
                 fontSize: 13,
               ),
             ),
@@ -727,7 +743,7 @@ class ExpenseTableCard extends StatelessWidget {
           Expanded(
             child: Text(
               value,
-              style: const TextStyle(fontSize: 13),
+              style:  TextStyle(fontSize: 13,color: AppColors.text(context)),
             ),
           ),
         ],
