@@ -20,6 +20,7 @@ import '../../../../feature/products/product/presentation/pages/mobile_product_s
 import '../../../../feature/profile/presentation/pages/moble_profile_screen.dart';
 import '../../../../feature/purchase/presentation/page/mobile_create_purchase_screen.dart';
 import '../../../../feature/purchase/presentation/page/mobile_purchase_screen.dart';
+import '../../../../feature/report/presentation/page/customer_due_advance_screen/mobile_customer_due_advance_screen.dart';
 import '../../../../feature/return/bad_stock/mobile_bad_stock_screen.dart';
 import '../../../../feature/return/purchase_return/presentation/purchase_return/mobile_purchase_return_screen.dart';
 import '../../../../feature/return/sales_return/presentation/page/mobile_sales_return_page.dart';
@@ -355,7 +356,7 @@ class MobileTabSidebar extends StatelessWidget {
       // AppRoutes.push(context, MobilePurchaseReturnScreen());
         break;
       case 26: // Sale List
-      // AppRoutes.push(context, MobilePurchaseReturnScreen());
+      AppRoutes.push(context, MobileCustomerDueAdvanceScreen());
         break;
       case 27: // Sale List
       // AppRoutes.push(context, MobilePurchaseReturnScreen());
