@@ -51,7 +51,7 @@ class _MobileCreateAccountScreenState
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.whiteColor(context),
+        color: AppColors.bottomNavBg(context),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Padding(

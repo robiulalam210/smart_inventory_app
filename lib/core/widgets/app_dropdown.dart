@@ -59,6 +59,7 @@ class AppDropdown<T> extends FormField<T> {
               top: offset.dy + size.height + 4,
               child: Material(
                 elevation: 4,
+                color: AppColors.bottomNavBg(context),
                 borderRadius: BorderRadius.circular(8),
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxHeight: 200),
@@ -82,7 +83,7 @@ class AppDropdown<T> extends FormField<T> {
                               vertical: 8, horizontal: 12),
                           child: Text(
                             displayTexts[index],
-                            style: const TextStyle(fontSize: 14),
+                            style:  TextStyle(fontSize: 14,color: AppColors.text(context)),
                           ),
                         ),
                       );

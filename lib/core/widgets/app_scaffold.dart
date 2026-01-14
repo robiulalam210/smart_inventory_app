@@ -21,7 +21,7 @@ class AppScaffold extends StatelessWidget {
     this.floatingActionButton,
     this.drawer,
     this.endDrawer,
-    this.isCenterFAB = true,
+    this.isCenterFAB = false,
     this.scaffoldKey,
     this.bottomNavigationBar,
     this.resizeToAvoidBottomInset,

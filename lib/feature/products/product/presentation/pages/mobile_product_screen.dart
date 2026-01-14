@@ -1,3 +1,4 @@
+import 'package:meherinMart/core/widgets/app_scaffold.dart';
 
 import '../../../../../core/configs/configs.dart';
 import '../../../../../core/widgets/app_alert_dialog.dart';
@@ -31,9 +32,7 @@ class _ProductsScreenState extends State<MobileProductScreen> {
       final productsBloc = context.read<ProductsBloc>();
       productsBloc.filterTextController.clear();
 
-      context.read<CategoriesBloc>().add(
-        FetchCategoriesList(context),
-      );
+      context.read<CategoriesBloc>().add(FetchCategoriesList(context));
       _fetchProductList(pageNumber: 1);
     });
   }
@@ -67,16 +66,18 @@ class _ProductsScreenState extends State<MobileProductScreen> {
 
   @override
   Widget build(BuildContext context) {
-
-    return Scaffold(
-      appBar: AppBar(title: Text("Product",style: AppTextStyle.titleMedium(context),),),
-floatingActionButton: FloatingActionButton( onPressed: () => _showCreateProductDialog(context),child: Icon(Icons.add),),
-      body: SafeArea(
-        child:  _buildContentArea(),
+    return AppScaffold(
+      appBar: AppBar(
+        title: Text("Product", style: AppTextStyle.titleMedium(context)),
       ),
+
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _showCreateProductDialog(context),
+        child: Icon(Icons.add),
+      ),
+      body: SafeArea(child: _buildContentArea()),
     );
   }
-
 
   Widget _buildContentArea() {
     return ResponsiveCol(
@@ -100,12 +101,9 @@ floatingActionButton: FloatingActionButton( onPressed: () => _showCreateProductD
               return SingleChildScrollView(
                 child: Column(
                   children: [
-
-                      _buildMobileHeader(),
+                    _buildMobileHeader(),
                     const SizedBox(height: 8),
-                    SizedBox(
-                      child: _buildProductList(state),
-                    ),
+                    SizedBox(child: _buildProductList(state)),
                   ],
                 ),
               );
@@ -149,7 +147,6 @@ floatingActionButton: FloatingActionButton( onPressed: () => _showCreateProductD
     }
   }
 
-
   Widget _buildMobileHeader() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -157,7 +154,7 @@ floatingActionButton: FloatingActionButton( onPressed: () => _showCreateProductD
         // Search Bar
         Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.bottomNavBg(context),
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
@@ -173,7 +170,9 @@ floatingActionButton: FloatingActionButton( onPressed: () => _showCreateProductD
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   child: CustomSearchTextFormField(
-                    controller: context.read<ProductsBloc>().filterTextController,
+                    controller: context
+                        .read<ProductsBloc>()
+                        .filterTextController,
                     onChanged: (value) {
                       _fetchProductList(filterText: value);
                     },
@@ -196,7 +195,6 @@ floatingActionButton: FloatingActionButton( onPressed: () => _showCreateProductD
             ],
           ),
         ),
-    
       ],
     );
   }
@@ -206,9 +204,7 @@ floatingActionButton: FloatingActionButton( onPressed: () => _showCreateProductD
       return const Center(child: CircularProgressIndicator());
     } else if (state is ProductsListSuccess) {
       if (state.list.isEmpty) {
-        return Center(
-          child: Lottie.asset(AppImages.noData),
-        );
+        return Center(child: Lottie.asset(AppImages.noData));
       } else {
         return Column(
           children: [
@@ -217,7 +213,9 @@ floatingActionButton: FloatingActionButton( onPressed: () => _showCreateProductD
                 products: state.list,
                 onEdit: (v) => _showEditDialog(context, v, false),
                 onDelete: (v) async {
-                  final shouldDelete = await showDeleteConfirmationDialog(context);
+                  final shouldDelete = await showDeleteConfirmationDialog(
+                    context,
+                  );
                   if (!shouldDelete) return;
 
                   if (context.mounted) {
@@ -237,16 +235,10 @@ floatingActionButton: FloatingActionButton( onPressed: () => _showCreateProductD
               from: state.from,
               to: state.to,
               onPageChanged: (page) {
-                _fetchProductList(
-                  pageNumber: page,
-                  pageSize: state.pageSize,
-                );
+                _fetchProductList(pageNumber: page, pageSize: state.pageSize);
               },
               onPageSizeChanged: (newPageSize) {
-                _fetchProductList(
-                  pageNumber: 1,
-                  pageSize: newPageSize,
-                );
+                _fetchProductList(pageNumber: 1, pageSize: newPageSize);
               },
             ),
           ],
@@ -271,10 +263,7 @@ floatingActionButton: FloatingActionButton( onPressed: () => _showCreateProductD
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
-            AppButton(
-              name: "Retry",
-              onPressed: () => _fetchProductList(),
-            ),
+            AppButton(name: "Retry", onPressed: () => _fetchProductList()),
           ],
         ),
       );
@@ -294,18 +283,22 @@ floatingActionButton: FloatingActionButton( onPressed: () => _showCreateProductD
               // maxWidth: Responsive.isMobile(context)
               //     ? AppSizes.width(context)
               //     : AppSizes.width(context) * 0.6,
-              maxHeight:  Responsive.isMobile(context)
+              maxHeight: Responsive.isMobile(context)
                   ? AppSizes.height(context) * 0.7
                   : AppSizes.height(context) * 0.8,
             ),
-            child: const ProductsForm(),
+            child: const MobileProductCreate(),
           ),
         );
       },
     );
   }
 
-  void _showEditDialog(BuildContext context, ProductModel product, bool isMobile) {
+  void _showEditDialog(
+    BuildContext context,
+    ProductModel product,
+    bool isMobile,
+  ) {
     showDialog(
       context: context,
       builder: (context) {
@@ -352,10 +345,7 @@ floatingActionButton: FloatingActionButton( onPressed: () => _showCreateProductD
                 children: [
                   const Text(
                     "Filter Products",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   IconButton(
                     icon: const Icon(Icons.close),

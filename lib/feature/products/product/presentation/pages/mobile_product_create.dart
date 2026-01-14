@@ -174,8 +174,9 @@ class _ProductsFormState extends State<MobileProductCreate> {
             children: [
               Text(
                 _isEditMode ? "Update Product" : "Create New Product",
-                style: const TextStyle(
+                style:  TextStyle(
                   fontSize: 18,
+                  color: AppColors.text(context),
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -644,7 +645,7 @@ class _ProductsFormState extends State<MobileProductCreate> {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 0),
       decoration: BoxDecoration(
-        color: Colors.grey[50],
+        color: AppColors.bottomNavBg(context),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: Colors.grey[300]!),
       ),
@@ -656,7 +657,7 @@ class _ProductsFormState extends State<MobileProductCreate> {
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w500,
-              color: Colors.grey[700],
+              color: AppColors.text(context),
             ),
           ),
           const SizedBox(width: 5),

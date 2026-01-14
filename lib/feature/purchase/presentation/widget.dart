@@ -1,3 +1,5 @@
+import 'package:date_format/date_format.dart';
+
 import '../../profile/presentation/bloc/profile_bloc/profile_bloc.dart';
 import '/feature/purchase/presentation/page/purchase_details.dart';
 import 'package:printing/printing.dart';
@@ -51,7 +53,7 @@ class PurchaseDataTableWidget extends StatelessWidget {
         vertical: 8.0,
       ),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.bottomNavBg(context),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -105,9 +107,10 @@ class PurchaseDataTableWidget extends StatelessWidget {
                     SizedBox(
                       child: Text(
                         purchase.invoiceNo ?? '-',
-                        style: const TextStyle(
+                        style:  TextStyle(
                           fontWeight: FontWeight.w600,
-                          fontSize: 14,
+                          fontSize: 14,            color: AppColors.text(context),
+
                           overflow: TextOverflow.ellipsis,
                         ),
                         maxLines: 1,
@@ -130,6 +133,7 @@ class PurchaseDataTableWidget extends StatelessWidget {
                     style: TextStyle(
                       color: _getPaymentStatusColor(purchase.paymentStatus.toString()),
                       fontWeight: FontWeight.w600,
+
                       fontSize: 12,
                     ),
                   ),
@@ -145,26 +149,44 @@ class PurchaseDataTableWidget extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Date
-                _buildDetailRow(
-                  icon: Iconsax.calendar,
-                  label: 'Date',
-                  value: _formatDate(purchase.purchaseDate.toString()),
-                ),
-                const SizedBox(height: 8),
 
-                // Supplier
-                _buildDetailRow(
-                  icon: Iconsax.user,
-                  label: 'Supplier',
-                  value: purchase.supplierName ?? '-',
-                ),
+                Row(children: [
+                  Expanded(
+                    child: _buildDetailRow(
+                        icon: Iconsax.calendar,
+                        label: 'Date',
+                        value: _formatDate(purchase.purchaseDate.toString()),
+                        context: context
+                    ),
+                  ),
+
+                  // Supplier
+                  Expanded(
+                    child: _buildDetailRow(
+                        icon: Iconsax.user,
+                        label: 'Supplier',
+                        value: purchase.supplierName ?? '-',
+                        context: context
+                    ),
+                  ),
+
+                  if (purchase.paymentMethod?.isNotEmpty == true)
+                    Expanded(
+                      child: _buildDetailRow(
+                          icon: Iconsax.wallet,
+                          label: 'Payment Method',
+                          value: purchase.paymentMethod ?? '-',context: context
+                      ),
+                    ),
+                ],),
+
                 const SizedBox(height: 8),
 
                 // Financial Summary
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.grey.shade50,
+                    color: AppColors.bottomNavBg(context),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: Colors.grey.shade200),
                   ),
@@ -178,14 +200,15 @@ class PurchaseDataTableWidget extends StatelessWidget {
                             'Total:',
                             style: TextStyle(
                               fontWeight: FontWeight.w600,
-                              color: Colors.grey.shade700,
+                              color: AppColors.text(context),
                               fontSize: 13,
                             ),
                           ),
                           Text(
                             '৳${totalAmount.toStringAsFixed(2)}',
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w700,
+                            style:  TextStyle(
+                              fontWeight: FontWeight.w700,            color: AppColors.text(context),
+
                               fontSize: 14,
                             ),
                           ),
@@ -201,7 +224,7 @@ class PurchaseDataTableWidget extends StatelessWidget {
                             'Paid:',
                             style: TextStyle(
                               fontWeight: FontWeight.w600,
-                              color: Colors.grey.shade700,
+                              color: AppColors.text(context),
                               fontSize: 13,
                             ),
                           ),
@@ -225,14 +248,15 @@ class PurchaseDataTableWidget extends StatelessWidget {
                             'Due:',
                             style: TextStyle(
                               fontWeight: FontWeight.w600,
-                              color: Colors.grey.shade700,
+                              color: AppColors.text(context),
                               fontSize: 13,
                             ),
                           ),
                           Text(
                             '৳${dueAmount.toStringAsFixed(2)}',
                             style: TextStyle(
-                              color: dueAmount > 0 ? Colors.red : Colors.grey,
+                              color: dueAmount > 0 ? Colors.red :                             AppColors.text(context),
+
                               fontWeight: FontWeight.w700,
                               fontSize: 14,
                             ),
@@ -242,24 +266,18 @@ class PurchaseDataTableWidget extends StatelessWidget {
                     ],
                   ),
                 ),
-                const SizedBox(height: 8),
 
                 // Payment Method
-                if (purchase.paymentMethod?.isNotEmpty == true)
-                  _buildDetailRow(
-                    icon: Iconsax.wallet,
-                    label: 'Payment Method',
-                    value: purchase.paymentMethod ?? '-',
-                  ),
+
               ],
             ),
           ),
 
           // Action Buttons
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
             decoration: BoxDecoration(
-              color: Colors.grey.shade50,
+              color: AppColors.bottomNavBg(context),
               borderRadius: const BorderRadius.only(
                 bottomLeft: Radius.circular(16),
                 bottomRight: Radius.circular(16),
@@ -326,16 +344,18 @@ class PurchaseDataTableWidget extends StatelessWidget {
     required IconData icon,
     required String label,
     required String value,
+    required BuildContext context,
   }) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.start,
       children: [
         Icon(
           icon,
           size: 16,
-          color: Colors.grey.shade600,
+          color: AppColors.text(context),
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: 3),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -344,16 +364,17 @@ class PurchaseDataTableWidget extends StatelessWidget {
                 label,
                 style: TextStyle(
                   fontWeight: FontWeight.w600,
-                  color: Colors.grey.shade700,
+                  color: AppColors.text(context),
                   fontSize: 13,
                 ),
               ),
               const SizedBox(height: 2),
               Text(
                 value,
-                style: const TextStyle(
+                style:  TextStyle(
                   fontSize: 14,
-                  fontWeight: FontWeight.w500,
+                  fontWeight: FontWeight.w500,            color: AppColors.text(context),
+
                 ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,

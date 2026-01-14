@@ -52,7 +52,7 @@ class ProductDataTableWidget extends StatelessWidget {
         vertical: 8.0,
       ),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.bottomNavBg(context),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -133,6 +133,7 @@ class ProductDataTableWidget extends StatelessWidget {
               children: [
                 // Product Name
                 _buildDetailRow(
+                  context: context,
                   icon: Iconsax.box,
                   label: 'Product Name',
                   value: product.name ?? 'N/A',
@@ -141,12 +142,14 @@ class ProductDataTableWidget extends StatelessWidget {
                 const SizedBox(height: 8),
                 Row(children: [
                   Expanded(child:  _buildDetailRow(
+                    context: context,
                     icon: Iconsax.tag,
                     label: 'SKU',
                     value: product.sku ?? 'N/A',
                   ),),
                   SizedBox(width: 8,),
                   Expanded(child:   _buildDetailRow(
+                    context: context,
                     icon: Iconsax.category,
                     label: 'Category',
                     value: product.categoryInfo?.name ?? 'N/A',
@@ -159,12 +162,14 @@ class ProductDataTableWidget extends StatelessWidget {
                 const SizedBox(height: 8),
                 Row(children: [
                   Expanded(child:  _buildDetailRow(
+                    context: context,
                     icon: Iconsax.building,
                     label: 'Brand',
                     value: product.brandInfo?.name ?? 'N/A',
                   ),),
                   SizedBox(width: 8,),
                   Expanded(child: _buildDetailRow(
+                    context: context,
                     icon: Iconsax.ruler,
                     label: 'Unit',
                     value: product.unitInfo?.name ?? 'N/A',
@@ -182,9 +187,9 @@ class ProductDataTableWidget extends StatelessWidget {
 
           // Action Buttons
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: Colors.grey.shade50,
+              color: AppColors.bottomNavBg(context),
               borderRadius: const BorderRadius.only(
                 bottomLeft: Radius.circular(16),
                 bottomRight: Radius.circular(16),
@@ -274,6 +279,7 @@ class ProductDataTableWidget extends StatelessWidget {
   }
 
   Widget _buildDetailRow({
+    required BuildContext context,
     required IconData icon,
     required String label,
     required String value,
@@ -285,7 +291,7 @@ class ProductDataTableWidget extends StatelessWidget {
         Icon(
           icon,
           size: 16,
-          color: Colors.grey.shade600,
+          color: AppColors.text(context),
         ),
         const SizedBox(width: 8),
         Expanded(
@@ -296,7 +302,7 @@ class ProductDataTableWidget extends StatelessWidget {
                 label,
                 style: TextStyle(
                   fontWeight: FontWeight.w600,
-                  color: Colors.grey.shade700,
+                  color: AppColors.text(context),
                   fontSize: 12,
                 ),
               ),
@@ -305,7 +311,7 @@ class ProductDataTableWidget extends StatelessWidget {
                 value,
                 style: TextStyle(
                   fontWeight: isImportant ? FontWeight.w700 : FontWeight.w500,
-                  color: isImportant ? Colors.black : Colors.grey.shade800,
+                  color: isImportant ? AppColors.text(context) :AppColors.primaryColor(context),
                   fontSize: isImportant ? 14 : 13,
                 ),
                 maxLines: 2,

@@ -1,5 +1,6 @@
 // sales_details_screen.dart
 
+import 'package:meherinMart/core/widgets/app_scaffold.dart';
 import 'package:printing/printing.dart';
 
 import '../../../../core/configs/configs.dart';
@@ -22,8 +23,7 @@ class SalesDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.bottomNavBg(context),
+    return AppScaffold(
       appBar: AppBar(
         title: Text('Sale Details', style: const TextStyle(fontSize: 16)),
         centerTitle: false,
@@ -99,17 +99,19 @@ class SalesDetailsScreen extends StatelessWidget {
   // ===================== MOBILE VIEW =====================
   Widget _buildMobileView(BuildContext context,) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Header Card
           _buildMobileHeaderCard(context,),
-          const SizedBox(height: 16),
+          const SizedBox(height: 6),
 
           // Status & Invoice Info
           Card(
             elevation: 2,
+            color: AppColors.bottomNavBg(context),
+
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -124,7 +126,7 @@ class SalesDetailsScreen extends StatelessWidget {
                             'Invoice #',
                             style: TextStyle(
                               fontSize: 12,
-                              color: Colors.grey[600],
+                              color: AppColors.text(context),
                             ),
                           ),
                           const SizedBox(height: 4),
@@ -159,26 +161,26 @@ class SalesDetailsScreen extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 4),
                   const Divider(),
-                  const SizedBox(height: 12),
-                  _buildMobileInfoGrid(),
+                  const SizedBox(height: 4),
+                  _buildMobileInfoGrid(context),
                 ],
               ),
             ),
           ),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
 
           // Items Section
           _buildMobileItemsCard(context,),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
 
           // Summary Section
           _buildMobileSummaryCard(context,),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
 
           // Payment Section
           _buildMobilePaymentCard(context,),
@@ -189,8 +191,8 @@ class SalesDetailsScreen extends StatelessWidget {
 
   Widget _buildMobileHeaderCard(BuildContext context,) {
     return Card(
-      elevation: 3,
-      color: AppColors.primaryColor(context).withValues(alpha:0.05),
+      elevation: 1,
+      color: AppColors.bottomNavBg(context),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -201,10 +203,11 @@ class SalesDetailsScreen extends StatelessWidget {
                 Icon(Icons.receipt_long,
                     color: AppColors.primaryColor(context), size: 20),
                 const SizedBox(width: 8),
-                const Text(
+                 Text(
                   'Sale Details',
                   style: TextStyle(
                     fontSize: 18,
+                    color: AppColors.text(context),
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -215,14 +218,14 @@ class SalesDetailsScreen extends StatelessWidget {
               sale.formattedSaleDate,
               style: TextStyle(
                 fontSize: 14,
-                color: Colors.grey[600],
+                color: AppColors.text(context),
               ),
             ),
             Text(
               sale.formattedTime,
               style: TextStyle(
                 fontSize: 14,
-                color: Colors.grey[600],
+                color: AppColors.text(context),
               ),
             ),
           ],
@@ -231,7 +234,7 @@ class SalesDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMobileInfoGrid() {
+  Widget _buildMobileInfoGrid(BuildContext context) {
     final List<Map<String, String>> infoItems = [
       {'label': 'Customer', 'value': sale.customerName ?? 'Walk-in Customer'},
       {'label': 'Sales Person', 'value': sale.saleByName ?? 'N/A'},
@@ -254,7 +257,7 @@ class SalesDetailsScreen extends StatelessWidget {
                   item['label']!,
                   style: TextStyle(
                     fontSize: 14,
-                    color: Colors.grey[600],
+                    color: AppColors.text(context),
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -263,8 +266,9 @@ class SalesDetailsScreen extends StatelessWidget {
                 flex: 3,
                 child: Text(
                   item['value']!,
-                  style: const TextStyle(
-                    fontSize: 14,
+                  style:  TextStyle(
+                    fontSize: 14,                    color: AppColors.text(context),
+
                     fontWeight: FontWeight.w600,
                   ),
                   textAlign: TextAlign.right,
@@ -290,11 +294,12 @@ class SalesDetailsScreen extends StatelessWidget {
                 Icon(Icons.shopping_cart,
                     color: AppColors.primaryColor(context), size: 20),
                 const SizedBox(width: 8),
-                const Text(
+                 Text(
                   'Items',
                   style: TextStyle(
                     fontSize: 16,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.bold,                    color: AppColors.text(context),
+
                   ),
                 ),
                 const Spacer(),
@@ -302,19 +307,20 @@ class SalesDetailsScreen extends StatelessWidget {
                   '${sale.items?.length ?? 0} items',
                   style: TextStyle(
                     fontSize: 14,
-                    color: Colors.grey[600],
+                    color: AppColors.text(context),
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 12),
             if (sale.items == null || sale.items!.isEmpty)
-              const Center(
+               Center(
                 child: Padding(
                   padding: EdgeInsets.symmetric(vertical: 20),
                   child: Text(
                     'No items found',
-                    style: TextStyle(color: Colors.grey),
+                    style: TextStyle(                    color: AppColors.text(context),
+                    ),
                   ),
                 ),
               )
@@ -328,7 +334,7 @@ class SalesDetailsScreen extends StatelessWidget {
                     margin: const EdgeInsets.only(bottom: 12),
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.grey[50],
+                      color: AppColors.bottomNavBg(context),
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(color: Colors.grey.shade200),
                     ),
@@ -340,9 +346,10 @@ class SalesDetailsScreen extends StatelessWidget {
                             children: [
                               Text(
                                 item.productName ?? 'Unknown Product',
-                                style: const TextStyle(
+                                style:  TextStyle(
                                   fontWeight: FontWeight.w600,
-                                  fontSize: 14,
+                                  fontSize: 14,                    color: AppColors.text(context),
+
                                 ),
                               ),
                               const SizedBox(height: 4),
@@ -352,15 +359,15 @@ class SalesDetailsScreen extends StatelessWidget {
                                     'Qty: ${item.quantity ?? 0}',
                                     style: TextStyle(
                                       fontSize: 13,
-                                      color: Colors.grey[600],
+                                      color: AppColors.text(context),
                                     ),
                                   ),
-                                  const SizedBox(width: 16),
+                                  const SizedBox(width: 8),
                                   Text(
                                     '৳${unitPrice.toStringAsFixed(2)} each',
                                     style: TextStyle(
                                       fontSize: 13,
-                                      color: Colors.grey[600],
+                                      color: AppColors.text(context),
                                     ),
                                   ),
                                 ],
@@ -370,8 +377,9 @@ class SalesDetailsScreen extends StatelessWidget {
                         ),
                         Text(
                           '৳${subtotal.toStringAsFixed(2)}',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
+                          style:  TextStyle(
+                            fontWeight: FontWeight.bold,                    color: AppColors.text(context),
+
                             fontSize: 14,
                           ),
                         ),
@@ -396,9 +404,10 @@ class SalesDetailsScreen extends StatelessWidget {
     final vat = toDouble(sale.overallVatAmount);
 
     return Card(
-      elevation: 3,
+      elevation: 3,                    color: AppColors.bottomNavBg(context),
+
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -407,10 +416,11 @@ class SalesDetailsScreen extends StatelessWidget {
                 Icon(Icons.calculate,
                     color: AppColors.primaryColor(context), size: 20),
                 const SizedBox(width: 8),
-                const Text(
+                 Text(
                   'Summary',
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 16,                    color: AppColors.text(context),
+
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -451,7 +461,8 @@ class SalesDetailsScreen extends StatelessWidget {
             style: TextStyle(
               fontSize: 14,
               fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
-              color: isHighlighted ? AppColors.primaryColor(context) : Colors.black,
+              color: isHighlighted ? AppColors.primaryColor(context) :                  AppColors.text(context),
+
             ),
           ),
           Text(
@@ -459,8 +470,9 @@ class SalesDetailsScreen extends StatelessWidget {
             style: TextStyle(
               fontSize: 14,
               fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
-              color: isHighlighted ? AppColors.primaryColor(context) : Colors.black,
-            ),
+              color: isHighlighted ? AppColors.primaryColor(context) :                     AppColors.text(context),
+
+          ),
           ),
         ],
       ),
@@ -475,7 +487,7 @@ class SalesDetailsScreen extends StatelessWidget {
 
     return Card(
       elevation: 3,
-      color: isDue ? Colors.orange.shade50 : Colors.green.shade50,
+      color: AppColors.bottomNavBg(context),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -501,9 +513,10 @@ class SalesDetailsScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.white,
+                                 color: AppColors.bottomNavBg(context),
+
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
                   color: isDue ? Colors.orange.shade200 : Colors.green.shade200,
@@ -556,7 +569,7 @@ class SalesDetailsScreen extends StatelessWidget {
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w500,
-            color: Colors.grey[700],
+            color: AppColors.text(context),
           ),
         ),
         Text(

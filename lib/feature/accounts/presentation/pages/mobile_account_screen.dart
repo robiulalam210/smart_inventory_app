@@ -1,3 +1,5 @@
+import 'package:meherinMart/core/widgets/app_scaffold.dart';
+
 import '../../../../core/configs/configs.dart';
 import '../../../../core/widgets/app_alert_dialog.dart';
 import '../../../../core/widgets/app_button.dart';
@@ -71,7 +73,7 @@ class _AccountScreenState extends State<MobileAccountScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return AppScaffold(
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showCreateAccountDialog(context),
         child: Icon(Icons.add),
@@ -178,7 +180,7 @@ class _AccountScreenState extends State<MobileAccountScreen> {
         // Search Bar
         Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.bottomNavBg(context),
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(

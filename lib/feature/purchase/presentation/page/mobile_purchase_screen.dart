@@ -1,4 +1,5 @@
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
+import 'package:meherinMart/core/widgets/app_scaffold.dart';
 
 import '../../../../core/configs/configs.dart';
 import '../../../../core/widgets/app_alert_dialog.dart';
@@ -120,64 +121,61 @@ class _PurchaseScreenState extends State<MobilePurchaseScreen> {
   @override
   Widget build(BuildContext context) {
 
-    return Container(
-      color: AppColors.bottomNavBg(context),
-      child: SafeArea(
-        child: Scaffold(
-     appBar: AppBar(),
-          body:  RefreshIndicator(
-            color: AppColors.primaryColor(context),
-            onRefresh: () async {
-              _fetchApi();
-            },
-            child: Container(
-              padding: AppTextStyle.getResponsivePaddingBody(context),
-              child: MultiBlocListener(
-                listeners: [
-                  BlocListener<CreatePurchaseBloc, CreatePurchaseState>(
-                    listener: (context, state) {
-                      if (state is CreatePurchaseLoading) {
-                        appLoader(context, "Creating Purchase, please wait...");
-                      } else if (state is CreatePurchaseSuccess) {
-                        Navigator.pop(context);
-                        _fetchApi();
-                      } else if (state is CreatePurchaseFailed) {
-                        if (context.mounted) {
-                          Navigator.pop(context);
-                          appAlertDialog(
-                            context,
-                            state.content,
-                            title: state.title,
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.pop(context),
-                                child: const Text("Dismiss"),
-                              ),
-                            ],
-                          );
-                        }
-                      }
-                    },
+    return AppScaffold(
+       appBar: AppBar(title: Text("Purchase",style: AppTextStyle.titleMedium(context),),),
+      body:  RefreshIndicator(
+        color: AppColors.primaryColor(context),
+        onRefresh: () async {
+          _fetchApi();
+        },
+        child: Container(        color: AppColors.bottomNavBg(context),
+
+
+          padding: AppTextStyle.getResponsivePaddingBody(context),
+          child: MultiBlocListener(
+            listeners: [
+              BlocListener<CreatePurchaseBloc, CreatePurchaseState>(
+                listener: (context, state) {
+                  if (state is CreatePurchaseLoading) {
+                    appLoader(context, "Creating Purchase, please wait...");
+                  } else if (state is CreatePurchaseSuccess) {
+                    Navigator.pop(context);
+                    _fetchApi();
+                  } else if (state is CreatePurchaseFailed) {
+                    if (context.mounted) {
+                      Navigator.pop(context);
+                      appAlertDialog(
+                        context,
+                        state.content,
+                        title: state.title,
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text("Dismiss"),
+                          ),
+                        ],
+                      );
+                    }
+                  }
+                },
+              ),
+            ],
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+
+                    _buildMobileHeader(),
+                  const SizedBox(height: 6),
+                  SizedBox(
+                    child: _buildPurchaseList(),
                   ),
                 ],
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: [
-
-                        _buildMobileHeader(),
-                      const SizedBox(height: 16),
-                      SizedBox(
-                        child: _buildPurchaseList(),
-                      ),
-                    ],
-                  ),
-                ),
               ),
             ),
           ),
-
         ),
       ),
+
     );
   }
 
@@ -193,7 +191,7 @@ class _PurchaseScreenState extends State<MobilePurchaseScreen> {
         // Search Bar
         Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.bottomNavBg(context),
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
@@ -238,7 +236,6 @@ class _PurchaseScreenState extends State<MobilePurchaseScreen> {
             ],
           ),
         ),
-        const SizedBox(height: 12),
 
         // Filter Chips
         Wrap(

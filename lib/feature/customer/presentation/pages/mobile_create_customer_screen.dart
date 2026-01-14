@@ -40,7 +40,7 @@ class _CreateCustomerScreenState extends State<MobileCreateCustomerScreen> {
               Container(
                 padding: const EdgeInsets.all(4),
                 decoration: BoxDecoration(
-                  color: AppColors.whiteColor(context),
+                  color: AppColors.bottomNavBg(context),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(

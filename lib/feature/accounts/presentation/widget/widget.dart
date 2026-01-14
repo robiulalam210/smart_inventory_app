@@ -57,7 +57,7 @@ class AccountCard extends StatelessWidget {
         vertical: 8.0,
       ),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.bottomNavBg(context),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -150,6 +150,7 @@ class AccountCard extends StatelessWidget {
 
                 // Account Name
                 _buildDetailRow(
+                  context: context,
                   icon: Iconsax.bank,
                   label: 'Account Name',
                   value: account.name ?? 'N/A',
@@ -162,6 +163,7 @@ class AccountCard extends StatelessWidget {
                   Column(
                     children: [
                       _buildDetailRow(
+                        context: context,
                         icon: Iconsax.card,
                         label: 'Account No',
                         value: account.acNumber ?? 'N/A',
@@ -180,14 +182,14 @@ class AccountCard extends StatelessWidget {
                           Icon(
                             Iconsax.building,
                             size: 16,
-                            color: Colors.grey.shade600,
+                            color: AppColors.text(context),
                           ),
                           const SizedBox(width: 8),
                           Text(
                             'Bank/Branch:',
                             style: TextStyle(
                               fontWeight: FontWeight.w600,
-                              color: Colors.grey.shade700,
+                              color: AppColors.text(context),
                               fontSize: 13,
                             ),
                           ),
@@ -205,13 +207,14 @@ class AccountCard extends StatelessWidget {
                                 style: TextStyle(
                                   fontWeight: FontWeight.w600,
                                   fontSize: 13,
+                                  color: AppColors.text(context)
                                 ),
                               ),
                             if (account.branch?.isNotEmpty == true)
                               Text(
                                 account.branch!,
                                 style: TextStyle(
-                                  color: Colors.grey.shade600,
+                                  color: AppColors.text(context),
                                   fontSize: 12,
                                 ),
                               ),
@@ -228,14 +231,14 @@ class AccountCard extends StatelessWidget {
                     Icon(
                       Iconsax.calendar,
                       size: 16,
-                      color: Colors.grey.shade600,
+                      color:AppColors.text(context),
                     ),
                     const SizedBox(width: 8),
                     Text(
                       'Balance: ',
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
-                        color: Colors.grey.shade700,
+                        color: AppColors.text(context),
                         fontSize: 13,
                       ),
                     ),
@@ -258,9 +261,9 @@ class AccountCard extends StatelessWidget {
 
           // Action Buttons
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
             decoration: BoxDecoration(
-              color: Colors.grey.shade50,
+              color: AppColors.bottomNavBg(context),
               borderRadius: const BorderRadius.only(
                 bottomLeft: Radius.circular(16),
                 bottomRight: Radius.circular(16),
@@ -324,6 +327,8 @@ class AccountCard extends StatelessWidget {
   }
 
   Widget _buildDetailRow({
+
+    required BuildContext context,
     required IconData icon,
     required String label,
     required String value,
@@ -338,7 +343,7 @@ class AccountCard extends StatelessWidget {
           Icon(
             icon,
             size: 16,
-            color: Colors.grey.shade600,
+            color: AppColors.text(context),
           ),
           const SizedBox(width: 8),
           Expanded(
@@ -349,7 +354,7 @@ class AccountCard extends StatelessWidget {
                   label,
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
-                    color: Colors.grey.shade700,
+                    color: AppColors.text(context),
                     fontSize: 13,
                   ),
                 ),
@@ -358,7 +363,7 @@ class AccountCard extends StatelessWidget {
                   value,
                   style: TextStyle(
                     fontWeight: isImportant ? FontWeight.w700 : FontWeight.w500,
-                    color: isImportant ? Colors.black : Colors.grey.shade800,
+                    color: isImportant ?AppColors.primaryColor(context) : AppColors.text(context),
                     fontSize: isImportant ? 15 : 14,
                   ),
                   maxLines: 2,

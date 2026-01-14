@@ -106,6 +106,7 @@ class _SupplierPaymentScreenState extends State<MobileSupplierPaymentListScreen>
       lg: 10,
       xl: 10,
       child: Container(
+        color: AppColors.bottomNavBg(context),
         padding: AppTextStyle.getResponsivePaddingBody(context),
         child: SingleChildScrollView(
           child: Column(

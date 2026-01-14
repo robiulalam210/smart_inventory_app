@@ -64,7 +64,7 @@ class PosSaleDataTableWidget extends StatelessWidget {
         vertical: 8.0,
       ),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.bottomNavBg(context),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -115,9 +115,11 @@ class PosSaleDataTableWidget extends StatelessWidget {
                     SizedBox(
                       child: Text(
                         sale.invoiceNo.toString(),
-                        style: const TextStyle(
+                        style:  TextStyle(
                           fontWeight: FontWeight.w600,
                           fontSize: 14,
+                          color: AppColors.text(context),
+
                           overflow: TextOverflow.ellipsis,
                         ),
                         maxLines: 1,
@@ -162,6 +164,7 @@ class PosSaleDataTableWidget extends StatelessWidget {
                         icon: Iconsax.calendar,
                         label: 'Date',
                         value: _formatDate(sale.saleDate),
+                        context: context
                       ),
                     ),
 
@@ -173,6 +176,7 @@ class PosSaleDataTableWidget extends StatelessWidget {
                         icon: Iconsax.user,
                         label: 'Customer',
                         value: sale.customerName.toString(),
+                        context: context
                       ),
                     ),
                   ],
@@ -185,6 +189,7 @@ class PosSaleDataTableWidget extends StatelessWidget {
                   icon: Iconsax.profile_2user,
                   label: 'Sales By',
                   value: sale.saleByName.toString(),
+                  context: context
                 ),
                 const SizedBox(height: 8),
 
@@ -192,7 +197,7 @@ class PosSaleDataTableWidget extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.grey.shade50,
+                    color: AppColors.bottomNavBg(context),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: Colors.grey.shade200),
                   ),
@@ -206,14 +211,15 @@ class PosSaleDataTableWidget extends StatelessWidget {
                             'Total:',
                             style: TextStyle(
                               fontWeight: FontWeight.w600,
-                              color: Colors.grey.shade700,
+                              color: AppColors.text(context),
                               fontSize: 13,
                             ),
                           ),
                           Text(
                             _formatCurrency(payableAmount),
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w700,
+                            style:  TextStyle(
+                              fontWeight: FontWeight.w700,                              color: AppColors.text(context),
+
                               fontSize: 14,
                             ),
                           ),
@@ -229,7 +235,7 @@ class PosSaleDataTableWidget extends StatelessWidget {
                             'Paid:',
                             style: TextStyle(
                               fontWeight: FontWeight.w600,
-                              color: Colors.grey.shade700,
+                              color: AppColors.text(context),
                               fontSize: 13,
                             ),
                           ),
@@ -253,7 +259,7 @@ class PosSaleDataTableWidget extends StatelessWidget {
                             isAdvance ? 'Advance:' : 'Due:',
                             style: TextStyle(
                               fontWeight: FontWeight.w600,
-                              color: Colors.grey.shade700,
+                              color: AppColors.text(context),
                               fontSize: 13,
                             ),
                           ),
@@ -278,7 +284,7 @@ class PosSaleDataTableWidget extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
-              color: Colors.grey.shade50,
+              color: AppColors.bottomNavBg(context),
               borderRadius: const BorderRadius.only(
                 bottomLeft: Radius.circular(16),
                 bottomRight: Radius.circular(16),
@@ -336,11 +342,13 @@ class PosSaleDataTableWidget extends StatelessWidget {
     required IconData icon,
     required String label,
     required String value,
+    required BuildContext context,
   }) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 16, color: Colors.grey.shade600),
+        Icon(icon, size: 16,               color: AppColors.text(context),
+        ),
         const SizedBox(width: 8),
         Expanded(
           child: Column(
@@ -350,16 +358,18 @@ class PosSaleDataTableWidget extends StatelessWidget {
                 label,
                 style: TextStyle(
                   fontWeight: FontWeight.w600,
-                  color: Colors.grey.shade700,
+                  color: AppColors.text(context),
+
                   fontSize: 13,
                 ),
               ),
               const SizedBox(height: 2),
               Text(
                 value,
-                style: const TextStyle(
+                style:  TextStyle(
                   fontSize: 14,
-                  fontWeight: FontWeight.w500,
+                  fontWeight: FontWeight.w500,              color: AppColors.text(context),
+
                 ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
