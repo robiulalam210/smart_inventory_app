@@ -1,9 +1,10 @@
-// lib/feature/report/presentation/screens/profit_loss_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:lottie/lottie.dart';
 import 'package:printing/printing.dart';
+import '../../../../../core/configs/app_images.dart';
 import '/core/configs/app_colors.dart';
 import '/core/configs/app_text.dart';
 import '/core/shared/widgets/sideMenu/sidebar.dart';
@@ -20,11 +21,12 @@ class MobileProfitLossScreen extends StatefulWidget {
   const MobileProfitLossScreen({super.key});
 
   @override
-  State<MobileProfitLossScreen> createState() => _ProfitLossScreenState();
+  State<MobileProfitLossScreen> createState() => _MobileProfitLossScreenState();
 }
 
-class _ProfitLossScreenState extends State<MobileProfitLossScreen> {
+class _MobileProfitLossScreenState extends State<MobileProfitLossScreen> {
   DateRange? selectedDateRange;
+  bool _isFilterExpanded = false;
 
   @override
   void initState() {
@@ -45,51 +47,130 @@ class _ProfitLossScreenState extends State<MobileProfitLossScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isBigScreen = Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
+    final isMobile = Responsive.isMobile(context);
 
-    return Container(
-      color: AppColors.bottomNavBg(context),
-      child: SafeArea(
-        child: ResponsiveRow(
-          children: [
-            if (isBigScreen) _buildSidebar(),
-            _buildContentArea(isBigScreen),
-          ],
-        ),
+    return Scaffold(
+      backgroundColor: AppColors.bottomNavBg(context),
+      appBar: AppBar(
+        title: const Text('Profit & Loss Report'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.picture_as_pdf),
+            onPressed: _generatePdf,
+            tooltip: 'Generate PDF',
+          ),
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: () => _fetchProfitLossReport(),
+            tooltip: 'Refresh',
+          ),
+        ],
       ),
-    );
-  }
-
-  Widget _buildSidebar() => ResponsiveCol(
-    xs: 0,
-    sm: 1,
-    md: 1,
-    lg: 2,
-    xl: 2,
-    child: Container(color: Colors.white, child: const Sidebar()),
-  );
-
-  Widget _buildContentArea(bool isBigScreen) {
-    return ResponsiveCol(
-      xs: 12,
-      lg: 10,
-      child: RefreshIndicator(
+      body: RefreshIndicator(
         onRefresh: () async => _fetchProfitLossReport(),
-        child: Container(
-          padding: AppTextStyle.getResponsivePaddingBody(context),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              // Filter Section
+              if (isMobile) _buildMobileFilterSection(),
 
+              const SizedBox(height: 16),
+
+              // Summary Cards
               _buildProfitLossCards(),
-              const SizedBox(height: 8),
-              SizedBox(child: _buildReportContent()),
+
+              const SizedBox(height: 16),
+
+              // Report Content
+              _buildReportContent(),
             ],
           ),
         ),
       ),
+      floatingActionButton: isMobile
+          ? FloatingActionButton(
+        onPressed: () {
+          setState(() => _isFilterExpanded = !_isFilterExpanded);
+        },
+        child: Icon(_isFilterExpanded ? Icons.filter_alt_off : Icons.filter_alt),
+        tooltip: 'Toggle Filters',
+      )
+          : null,
     );
   }
 
+  Widget _buildMobileFilterSection() {
+    return Card(
+      child: ExpansionPanelList(
+        elevation: 0,
+        expandedHeaderPadding: EdgeInsets.zero,
+        expansionCallback: (int index, bool isExpanded) {
+          setState(() => _isFilterExpanded = !isExpanded);
+        },
+        children: [
+          ExpansionPanel(
+            headerBuilder: (context, isExpanded) {
+              return const ListTile(
+                leading: Icon(Icons.calendar_today),
+                title: Text('Date Range Filter'),
+              );
+            },
+            body: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  // Date Range Picker
+                  CustomDateRangeField(
+                    isLabel: true,
+                    selectedDateRange: selectedDateRange,
+                    onDateRangeSelected: (value) {
+                      setState(() => selectedDateRange = value);
+                      if (value != null) {
+                        _fetchProfitLossReport(from: value.start, to: value.end);
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Action Buttons
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: () {
+                            setState(() => selectedDateRange = null);
+                            context.read<ProfitLossBloc>().add(ClearProfitLossFilters());
+                            _fetchProfitLossReport();
+                          },
+                          icon: const Icon(Icons.clear_all, size: 18),
+                          label: const Text('Clear Filter'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.grey[200],
+                            foregroundColor: Colors.grey[800],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: _generatePdf,
+                          icon: const Icon(Icons.picture_as_pdf, size: 18),
+                          label: const Text('PDF Report'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            isExpanded: _isFilterExpanded,
+          ),
+        ],
+      ),
+    );
+  }
 
 
   Widget _buildProfitLossCards() {
@@ -98,118 +179,106 @@ class _ProfitLossScreenState extends State<MobileProfitLossScreen> {
         if (state is! ProfitLossSuccess) return const SizedBox();
 
         final summary = state.response.summary;
+        final isMobile = Responsive.isMobile(context);
+
+        if (isMobile) {
+          return Column(
+            children: [
+              // First row: Sales and Purchases
+              Row(
+                children: [
+                  _buildMobileProfitLossCard(
+                    "Sales",
+                    summary.totalSales.toStringAsFixed(2),
+                    Icons.trending_up,
+                    Colors.blue,
+                    isMobile: true,
+                  ),
+                  const SizedBox(width: 8),
+                  _buildMobileProfitLossCard(
+                    "Purchases",
+                    summary.totalPurchase.toStringAsFixed(2),
+                    Icons.shopping_cart,
+                    Colors.orange,
+                    isMobile: true,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+
+              // Second row: Expenses and Gross Profit
+              Row(
+                children: [
+                  _buildMobileProfitLossCard(
+                    "Expenses",
+                    summary.totalExpenses.toStringAsFixed(2),
+                    Icons.money_off,
+                    Colors.red,
+                    isMobile: true,
+                  ),
+                  const SizedBox(width: 8),
+                  _buildMobileProfitLossCard(
+                    "Gross Profit",
+                    summary.grossProfit.toStringAsFixed(2),
+                    Icons.attach_money,
+                    Colors.green,
+                    isMobile: true,
+                    isProfit: true,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+
+              // Third row: Net Profit (full width)
+              _buildMobileProfitLossCard(
+                "Net Profit",
+                summary.netProfit.toStringAsFixed(2),
+                Icons.account_balance_wallet,
+                summary.netProfit >= 0 ? Colors.green : Colors.red,
+                isMobile: true,
+                isProfit: true,
+                isNetProfit: true,
+              ),
+            ],
+          );
+        }
 
         return Wrap(
           spacing: 8,
           runSpacing: 8,
           children: [
-            _buildProfitLossCard(
+            _buildMobileProfitLossCard(
               "Total Sales",
               summary.totalSales.toStringAsFixed(2),
               Icons.trending_up,
               Colors.blue,
             ),
-            _buildProfitLossCard(
+            _buildMobileProfitLossCard(
               "Total Purchases",
               summary.totalPurchase.toStringAsFixed(2),
               Icons.shopping_cart,
               Colors.orange,
             ),
-            _buildProfitLossCard(
+            _buildMobileProfitLossCard(
               "Total Expenses",
               summary.totalExpenses.toStringAsFixed(2),
               Icons.money_off,
               Colors.red,
             ),
-            _buildProfitLossCard(
+            _buildMobileProfitLossCard(
               "Gross Profit",
               summary.grossProfit.toStringAsFixed(2),
               Icons.attach_money,
               Colors.green,
               isProfit: true,
             ),
-            _buildProfitLossCard(
+            _buildMobileProfitLossCard(
               "Net Profit",
               summary.netProfit.toStringAsFixed(2),
               Icons.account_balance_wallet,
               summary.netProfit >= 0 ? Colors.green : Colors.red,
               isProfit: true,
-            ),       SizedBox(
-              width: 260,
-              child: CustomDateRangeField(
-                isLabel: false,
-                selectedDateRange: selectedDateRange,
-                onDateRangeSelected: (value) {
-                  setState(() => selectedDateRange = value);
-                  if (value != null) {
-                    _fetchProfitLossReport(from: value.start, to: value.end);
-                  }
-                },
-              ),
-            ),
-            const SizedBox(width: 4),
-            AppButton(
-                size: 100,
-                name: "Pdf", onPressed: (){
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => Scaffold(
-                    backgroundColor: Colors.red,
-                    body: PdfPreview.builder(
-                      useActions: true,
-                      allowSharing: false,
-                      canDebug: false,
-                      canChangeOrientation: false,
-                      canChangePageFormat: false,
-                      dynamicLayout: true,
-                      build: (format) => generateProfitLossReportPdf(
-                        state.response,
-
-                      ),
-                      pdfPreviewPageDecoration:
-                      BoxDecoration(color: AppColors.white),
-                      actionBarTheme: PdfActionBarTheme(
-                        backgroundColor: AppColors.primaryColor(context),
-                        iconColor: Colors.white,
-                        textStyle: const TextStyle(color: Colors.white),
-                      ),
-                      actions: [
-                        IconButton(
-                          onPressed: () => AppRoutes.pop(context),
-                          icon: const Icon(Icons.cancel, color: Colors.red),
-                        ),
-                      ],
-                      pagesBuilder: (context, pages) {
-                        debugPrint('Rendering ${pages.length} pages');
-                        return PageView.builder(
-                          itemCount: pages.length,
-                          scrollDirection: Axis.vertical,
-                          itemBuilder: (context, index) {
-                            final page = pages[index];
-                            return Container(
-                              color: Colors.grey,
-                              alignment: Alignment.center,
-                              padding: const EdgeInsets.all(8.0),
-                              child: Image(image: page.image, fit: BoxFit.contain),
-                            );
-                          },
-                        );
-                      },
-                    ),
-                  ),
-                ),
-              );
-
-            }),
-            const SizedBox(width: 4),
-            AppButton(
-              name: "Clear",size: 80,
-              onPressed: () {
-                setState(() => selectedDateRange = null);
-                context.read<ProfitLossBloc>().add(ClearProfitLossFilters());
-                _fetchProfitLossReport();
-              },
+              isNetProfit: true,
             ),
           ],
         );
@@ -217,50 +286,77 @@ class _ProfitLossScreenState extends State<MobileProfitLossScreen> {
     );
   }
 
-  Widget _buildProfitLossCard(String title, String value, IconData icon, Color color, {bool isProfit = false}) {
-    return Container(
-      width: 200,
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.2),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
+  Widget _buildMobileProfitLossCard(
+      String title,
+      String value,
+      IconData icon,
+      Color color, {
+        bool isMobile = false,
+        bool isProfit = false,
+        bool isNetProfit = false,
+      }) {
+    return Expanded(
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(8),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.2),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
+          border: Border.all(
+            color: color.withOpacity(isProfit ? 0.3 : 0.1),
+            width: isProfit ? 2 : 1,
           ),
-        ],
-        border: isProfit ? Border.all(color: color.withValues(alpha: 0.3), width: 2) : null,
-      ),
-      child: Row(
-        children: [
-          Icon(icon, color: color, size: 32),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
               children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey,
-                    fontWeight: FontWeight.w500,
-                  ),
+                Icon(icon,
+                    color: color,
+                    size: isMobile ? 24 : 28
                 ),
-                Text(
-                  value,
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: isProfit ? color :AppColors.blackColor(context),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: isMobile ? 12 : 14,
+                      color: Colors.grey[700],
+                      fontWeight: FontWeight.w600,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
             ),
-          ),
-        ],
+            const SizedBox(height: 8),
+            Text(
+              value,
+              style: TextStyle(
+                fontSize: isNetProfit ? 20 : (isMobile ? 16 : 18),
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
+            ),
+            // if (isProfit && !isNetProfit)
+              // Text(
+              //   summary.netProfit >= 0 ? 'Profit' : 'Loss',
+              //   style: TextStyle(
+              //     fontSize: 10,
+              //     color: color.withOpacity(0.8),
+              //   ),
+              // ),
+          ],
+        ),
       ),
     );
   }
@@ -282,42 +378,31 @@ class _ProfitLossScreenState extends State<MobileProfitLossScreen> {
         } else if (state is ProfitLossSuccess) {
           final summary = state.response.summary;
 
-          return SingleChildScrollView(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Expense Breakdown Section
-                Column(children: [
-                  if (summary.expenseBreakdown.isNotEmpty) ...[
-                    _buildSectionTitle("Expense Breakdown"),
-                    const SizedBox(height: 8),
-                    SizedBox(
+                // Profit & Loss Summary
+                _buildSectionTitle("Profit & Loss Summary"),
+                const SizedBox(height: 12),
+                ProfitLossSummaryCard(summary: summary, isMobile: true),
 
-                        width: 500,
-                        child: ExpenseBreakdownTableCard(expenses: summary.expenseBreakdown)),
-                    const SizedBox(height: 8),
-                  ] else ...[
-                    _buildEmptyState("No expense breakdown available"),
-                  ],
-                ],),
-                SizedBox(width: 10,),
+                const SizedBox(height: 24),
 
-                // Profit & Loss Summary Section
-               Column(children: [
-                 _buildSectionTitle("Profit & Loss Summary"),
-                 const SizedBox(height: 8),
-                 SizedBox(
-                     width: 300,
-                     child: ProfitLossSummaryCard(summary: summary)),
-               ],)
+                // Expense Breakdown
+                if (summary.expenseBreakdown.isNotEmpty) ...[
+                  _buildSectionTitle("Expense Breakdown"),
+                  const SizedBox(height: 12),
+                  ExpenseBreakdownList(expenses: summary.expenseBreakdown),
+                ],
 
-                // Export/Print Section
-                // const SizedBox(height: 8),
-                // _buildExportSection(),
+                // Additional actions
+                const SizedBox(height: 24),
+                _buildMobileActionButtons(),
               ],
-            ),
-          );
+            );
+
+
         } else if (state is ProfitLossFailed) {
           return _buildErrorState(state.content);
         }
@@ -329,23 +414,51 @@ class _ProfitLossScreenState extends State<MobileProfitLossScreen> {
   Widget _buildSectionTitle(String title) {
     return Text(
       title,
-      style: AppTextStyle.cardTitle(context).copyWith(
+      style: TextStyle(
         fontSize: 18,
         fontWeight: FontWeight.bold,
+        color: AppColors.blackColor(context),
       ),
     );
   }
 
+  Widget _buildMobileActionButtons() {
+    return Row(
+      children: [
+        Expanded(
+          child: ElevatedButton.icon(
+            onPressed: _generatePdf,
+            icon: const Icon(Icons.picture_as_pdf),
+            label: const Text('Export PDF'),
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: OutlinedButton.icon(
+            onPressed: () => _fetchProfitLossReport(),
+            icon: const Icon(Icons.refresh),
+            label: const Text('Refresh'),
+            style: OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
 
   Widget _buildEmptyState(String message) {
     return Container(
-      padding: const EdgeInsets.all(10),
+      padding: const EdgeInsets.all(32),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(8),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.1),
+            color: Colors.grey.withOpacity(0.1),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -354,11 +467,7 @@ class _ProfitLossScreenState extends State<MobileProfitLossScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.bar_chart_outlined,
-            size: 48,
-            color: Colors.grey.withValues(alpha: 0.5),
-          ),
+          Lottie.asset(AppImages.noData, width: 150, height: 150),
           const SizedBox(height: 16),
           Text(
             message,
@@ -367,6 +476,7 @@ class _ProfitLossScreenState extends State<MobileProfitLossScreen> {
               fontWeight: FontWeight.w600,
               color: Colors.grey,
             ),
+            textAlign: TextAlign.center,
           ),
         ],
       ),
@@ -374,7 +484,8 @@ class _ProfitLossScreenState extends State<MobileProfitLossScreen> {
   }
 
   Widget _buildErrorState(String error) {
-    return Center(
+    return Container(
+      padding: const EdgeInsets.all(32),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -387,6 +498,7 @@ class _ProfitLossScreenState extends State<MobileProfitLossScreen> {
               fontWeight: FontWeight.w600,
               color: Colors.grey,
             ),
+            textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
           Text(
@@ -404,270 +516,255 @@ class _ProfitLossScreenState extends State<MobileProfitLossScreen> {
     );
   }
 
+  void _generatePdf() {
+    final state = context.read<ProfitLossBloc>().state;
+    if (state is ProfitLossSuccess) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => Scaffold(
+            appBar: AppBar(
+              title: const Text('PDF Preview'),
+              actions: [
+                IconButton(
+                  onPressed: () => Navigator.pop(context),
+                  icon: const Icon(Icons.close),
+                ),
+              ],
+            ),
+            body: PdfPreview(
+              build: (format) => generateProfitLossReportPdf(state.response),
+              canChangeOrientation: false,
+              canChangePageFormat: false,
+              canDebug: false,
+            ),
+          ),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('No data available to generate PDF'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+    }
+  }
 }
 
-class ExpenseBreakdownTableCard extends StatelessWidget {
+class ExpenseBreakdownList extends StatelessWidget {
   final List<ExpenseBreakdown> expenses;
 
-  const ExpenseBreakdownTableCard({super.key, required this.expenses});
+  const ExpenseBreakdownList({super.key, required this.expenses});
 
   @override
   Widget build(BuildContext context) {
-    final verticalScrollController = ScrollController();
-    final horizontalScrollController = ScrollController();
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final totalWidth = constraints.maxWidth;
-        const numColumns = 3; // Head, Subhead, Amount
-        const minColumnWidth = 150.0;
-
-        final dynamicColumnWidth =
-        (totalWidth / numColumns).clamp(minColumnWidth, double.infinity);
-
-        return Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8),
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withValues(alpha: 0.1),
-                blurRadius: 4,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Scrollbar(
-            controller: verticalScrollController,
-            thumbVisibility: true,
-            child: SingleChildScrollView(
-              controller: verticalScrollController,
-              scrollDirection: Axis.vertical,
-              child: ClipRRect(
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: expenses.length,
+      itemBuilder: (context, index) {
+        final expense = expenses[index];
+        return Card(
+          margin: const EdgeInsets.only(bottom: 8),
+          child: ListTile(
+            contentPadding: const EdgeInsets.all(16),
+            leading: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.red.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8),
-                child: Scrollbar(
-                  controller: horizontalScrollController,
-                  thumbVisibility: true,
-                  child: SingleChildScrollView(
-                    controller: horizontalScrollController,
-                    scrollDirection: Axis.horizontal,
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 5),
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(minWidth: totalWidth),
-                        child: DataTable(
-                          dataRowMinHeight: 40,
-                          dataRowMaxHeight: 40,
-                          columnSpacing: 8,
-                          horizontalMargin: 12,
-                          dividerThickness: 0.5,
-                          headingRowHeight: 40,
-                          headingTextStyle: TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            fontFamily: GoogleFonts.inter().fontFamily,
-                          ),
-                          headingRowColor: WidgetStateProperty.all(
-                            AppColors.primaryColor(context),
-                          ),
-                          dataTextStyle: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w500,
-                            fontFamily: GoogleFonts.inter().fontFamily,
-                          ),
-                          columns: _buildColumns(dynamicColumnWidth),
-                          rows: expenses.asMap().entries.map((entry) {
-                            final expense = entry.value;
-                            return DataRow(
-                              cells: [
-                                _buildDataCell(expense.head, dynamicColumnWidth),
-                                _buildDataCell(expense.subhead, dynamicColumnWidth),
-                                _buildAmountCell(expense.total, dynamicColumnWidth),
-                              ],
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                    ),
+              ),
+              child: Icon(Icons.money_off, color: Colors.red),
+            ),
+            title: Text(
+              expense.head,
+              style: const TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 14,
+              ),
+            ),
+            subtitle: Text(
+              expense.subhead,
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey[600],
+              ),
+            ),
+            trailing: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  '\$${expense.total.toStringAsFixed(2)}',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    color: Colors.red,
                   ),
                 ),
-              ),
+                const SizedBox(height: 4),
+                Text(
+                  'Expense',
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: Colors.grey[500],
+                  ),
+                ),
+              ],
             ),
           ),
         );
       },
     );
   }
-
-  List<DataColumn> _buildColumns(double columnWidth) {
-    return [
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Expense Head', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Subhead', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Amount', textAlign: TextAlign.center),
-        ),
-      ),
-    ];
-  }
-
-  DataCell _buildDataCell(String text, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Text(
-          text,
-          style: const TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w500,
-            color: Colors.black87,
-          ),
-          textAlign: TextAlign.center,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildAmountCell(double amount, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: Colors.red.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Text(
-              amount.toStringAsFixed(2),
-              style: const TextStyle(
-                color: Colors.red,
-                fontWeight: FontWeight.w600,
-                fontSize: 11,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
 }
 
 class ProfitLossSummaryCard extends StatelessWidget {
   final ProfitLossSummary summary;
+  final bool isMobile;
 
-  const ProfitLossSummaryCard({super.key, required this.summary});
+  const ProfitLossSummaryCard({
+    super.key,
+    required this.summary,
+    this.isMobile = false,
+  });
 
   @override
   Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Revenue Section
+            _buildSummarySection(
+              title: "REVENUE",
+              items: [
+                _buildSummaryItem("Total Sales", summary.totalSales, isPositive: true),
+              ],
+              color: Colors.blue,
+            ),
+
+            // Cost of Goods Sold
+            _buildSummarySection(
+              title: "COST OF GOODS SOLD",
+              items: [
+                _buildSummaryItem("Total Purchases", summary.totalPurchase, isPositive: false),
+              ],
+              color: Colors.orange,
+            ),
+
+            // Gross Profit
+            _buildSummarySection(
+              title: "GROSS PROFIT",
+              items: [
+                _buildSummaryItem("Gross Profit", summary.grossProfit, isPositive: summary.grossProfit >= 0),
+              ],
+              color: Colors.green,
+              isHighlighted: true,
+            ),
+
+            // Operating Expenses
+            _buildSummarySection(
+              title: "OPERATING EXPENSES",
+              items: [
+                _buildSummaryItem("Total Expenses", summary.totalExpenses, isPositive: false),
+              ],
+              color: Colors.red,
+            ),
+
+            // Net Profit/Loss
+            _buildSummarySection(
+              title: "NET PROFIT/LOSS",
+              items: [
+                _buildSummaryItem("Net Profit/Loss", summary.netProfit, isPositive: summary.netProfit >= 0),
+              ],
+              color: summary.netProfit >= 0 ? Colors.green : Colors.red,
+              isHighlighted: true,
+              isNetProfit: true,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSummarySection({
+    required String title,
+    required List<Widget> items,
+    required Color color,
+    bool isHighlighted = false,
+    bool isNetProfit = false,
+  }) {
     return Container(
-      padding: const EdgeInsets.all(10),
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isHighlighted ? color.withOpacity(0.1) : Colors.transparent,
         borderRadius: BorderRadius.circular(8),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.2),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        border: Border.all(
+          color: color.withOpacity(0.2),
+          width: isHighlighted ? 2 : 1,
+        ),
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _buildSummaryRow("Total Revenue", summary.totalSales, isRevenue: true),
-          _buildSummaryRow("Cost of Goods Sold", summary.totalPurchase, isExpense: true),
-          _buildDivider(),
-          _buildSummaryRow("Gross Profit", summary.grossProfit, isProfit: true),
-          _buildSummaryRow("Operating Expenses", summary.totalExpenses, isExpense: true),
-          _buildDivider(),
-          _buildSummaryRow(
-              "NET PROFIT/LOSS",
-              summary.netProfit,
-              isNet: true,
-              isPositive: summary.netProfit >= 0
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: isMobile ? 12 : 14,
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
           ),
+          const SizedBox(height: 8),
+          ...items,
+          if (isNetProfit)
+            const SizedBox(height: 8),
+          if (isNetProfit)
+            Divider(
+              color: color.withOpacity(0.3),
+              thickness: 2,
+            ),
         ],
       ),
     );
   }
 
-  Widget _buildSummaryRow(String label, double amount, {
-    bool isRevenue = false,
-    bool isExpense = false,
-    bool isProfit = false,
-    bool isNet = false,
-    bool isPositive = true
-  }) {
-
-    final isNegative = amount < 0;
-
-    Color getAmountColor() {
-      if (isNet) return isPositive ? Colors.green : Colors.red;
-      if (isProfit) return Colors.green;
-      if (isExpense) return Colors.red;
-      if (isRevenue) return Colors.blue;
-      return Colors.black;
-    }
-
-    String getFormattedAmount() {
-      if (isNet && isNegative) return '-${amount.abs().toStringAsFixed(2)}';
-      return amount.toStringAsFixed(2);
-    }
+  Widget _buildSummaryItem(String label, double amount, {bool isPositive = true}) {
+    final amountColor = isPositive ? Colors.green : Colors.red;
+    final prefix = isPositive ? '' : '-';
+    final formattedAmount = amount.abs().toStringAsFixed(2);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
+      padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Expanded(
-            flex: 2,
             child: Text(
               label,
               style: TextStyle(
-                fontWeight: isNet ? FontWeight.bold : FontWeight.w600,
-                fontSize: isNet ? 14 : 14,
-                color: isNet ? getAmountColor() : Colors.black87,
+                fontSize: isMobile ? 14 : 16,
+                color: Colors.black87,
               ),
             ),
           ),
-          Expanded(
-            flex: 1,
-            child: Text(
-              getFormattedAmount(),
-              style: TextStyle(
-                fontWeight: isNet ? FontWeight.bold : FontWeight.w600,
-                fontSize: isNet ? 16 : 14,
-                color: getAmountColor(),
-              ),
-              textAlign: TextAlign.right,
+          Text(
+            '\$$prefix$formattedAmount',
+            style: TextStyle(
+              fontSize: isMobile ? 14 : 16,
+              fontWeight: FontWeight.bold,
+              color: amountColor,
             ),
           ),
         ],
       ),
     );
   }
-
-  Widget _buildDivider() {
-    return const Divider(
-      color: Colors.grey,
-      thickness: 1,
-      height: 10,
-    );
-  }
 }
+
+// Keep your existing ExpenseBreakdownTableCard class for desktop view

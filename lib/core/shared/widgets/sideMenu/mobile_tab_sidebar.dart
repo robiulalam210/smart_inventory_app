@@ -21,6 +21,16 @@ import '../../../../feature/profile/presentation/pages/moble_profile_screen.dart
 import '../../../../feature/purchase/presentation/page/mobile_create_purchase_screen.dart';
 import '../../../../feature/purchase/presentation/page/mobile_purchase_screen.dart';
 import '../../../../feature/report/presentation/page/customer_due_advance_screen/mobile_customer_due_advance_screen.dart';
+import '../../../../feature/report/presentation/page/customer_ledger_screen/mobile_customer_ledger_screen.dart';
+import '../../../../feature/report/presentation/page/expense_report_screen/mobile_expense_report_screen.dart';
+import '../../../../feature/report/presentation/page/low_stock_screen/mobile_low_stock_screen.dart';
+import '../../../../feature/report/presentation/page/profit_loss_screen/mobile_profit_loss_screen.dart';
+import '../../../../feature/report/presentation/page/purchase_report_screen/mobile_purchase_report_screen.dart';
+import '../../../../feature/report/presentation/page/sales_report_page/mobile_sales_report_screen.dart';
+import '../../../../feature/report/presentation/page/stock_report_screen/mobile_stock_report_screen.dart';
+import '../../../../feature/report/presentation/page/supplier_due_advance_screen/mobile_supplier_due_advance_screen.dart';
+import '../../../../feature/report/presentation/page/supplier_ledger_screen/mobile_supplier_ledger_screen.dart';
+import '../../../../feature/report/presentation/page/top_products_screen/mobile_top_products_screen.dart';
 import '../../../../feature/return/bad_stock/mobile_bad_stock_screen.dart';
 import '../../../../feature/return/purchase_return/presentation/purchase_return/mobile_purchase_return_screen.dart';
 import '../../../../feature/return/sales_return/presentation/page/mobile_sales_return_page.dart';
@@ -335,37 +345,38 @@ class MobileTabSidebar extends StatelessWidget {
         AppRoutes.push(context, MobilePurchaseReturnScreen());
         break;
       case 19: // Sale List
-      // AppRoutes.push(context, MobilePurchaseReturnScreen());
+      AppRoutes.push(context, MobileSalesReportScreen());
         break;
       case 20: // Sale List
-      // AppRoutes.push(context, MobilePurchaseReturnScreen());
+      AppRoutes.push(context, MobilePurchaseReportScreen());
         break;
       case 21: // Sale List
-      // AppRoutes.push(context, MobilePurchaseReturnScreen());
+      AppRoutes.push(context, MobileProfitLossScreen());
         break;
       case 22: // Sale List
-      // AppRoutes.push(context, MobilePurchaseReturnScreen());
+      AppRoutes.push(context, MobileTopProductsScreen());
         break;
       case 23: // Sale List
-      // AppRoutes.push(context, MobilePurchaseReturnScreen());
+      AppRoutes.push(context, MobileLowStockScreen());
         break;
       case 24: // Sale List
-      // AppRoutes.push(context, MobilePurchaseReturnScreen());
+      AppRoutes.push(context, MobileStockReportScreen());
         break;
       case 25: // Sale List
-      // AppRoutes.push(context, MobilePurchaseReturnScreen());
+      AppRoutes.push(context, MobileCustomerLedgerScreen());
         break;
       case 26: // Sale List
       AppRoutes.push(context, MobileCustomerDueAdvanceScreen());
         break;
       case 27: // Sale List
-      // AppRoutes.push(context, MobilePurchaseReturnScreen());
+      AppRoutes.push(context, MobileSupplierLedgerScreen());
         break;
       case 28: // Sale List
-      // AppRoutes.push(context, MobilePurchaseReturnScreen());
+      AppRoutes.push(context, MobileSupplierDueAdvanceScreen());
         break;
       case 29: // Sale List
-      // AppRoutes.push(context, MobilePurchaseReturnScreen());
+        AppRoutes.push(context, MobileExpenseReportScreen());
+
         break;
       case 30: // Sale List
       // AppRoutes.push(context, MobilePurchaseReturnScreen());

@@ -2,36 +2,30 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:hugeicons/hugeicons.dart';
-import 'package:iconsax/iconsax.dart';
 import 'package:lottie/lottie.dart';
 import 'package:printing/printing.dart';
 import '/core/configs/app_colors.dart';
 import '/core/configs/app_images.dart';
-import '/core/configs/app_text.dart';
-import '/core/shared/widgets/sideMenu/sidebar.dart';
-import '/core/widgets/app_button.dart';
 import '/core/widgets/app_dropdown.dart';
 import '/core/widgets/date_range.dart';
 import '/feature/report/presentation/page/supplier_ledger_screen/pdf.dart';
 import '/feature/supplier/presentation/bloc/supplier_invoice/supplier_invoice_bloc.dart';
 
-import '../../../../../core/configs/app_routes.dart';
-import '../../../../../responsive.dart';
 import '../../../../supplier/data/model/supplier_active_model.dart';
 import '../../../data/model/supplier_ledger_model.dart';
 import '../../bloc/supplier_ledger_bloc/supplier_ledger_bloc.dart';
 
-class SupplierLedgerScreen extends StatefulWidget {
-  const SupplierLedgerScreen({super.key});
+class MobileSupplierLedgerScreen extends StatefulWidget {
+  const MobileSupplierLedgerScreen({super.key});
 
   @override
-  State<SupplierLedgerScreen> createState() => _SupplierLedgerScreenState();
+  State<MobileSupplierLedgerScreen> createState() => _MobileSupplierLedgerScreenState();
 }
 
-class _SupplierLedgerScreenState extends State<SupplierLedgerScreen> {
+class _MobileSupplierLedgerScreenState extends State<MobileSupplierLedgerScreen> {
   SupplierActiveModel? _selectedSupplier;
   DateRange? selectedDateRange;
+  bool _isFilterExpanded = false;
 
   @override
   void initState() {
@@ -53,230 +47,213 @@ class _SupplierLedgerScreenState extends State<SupplierLedgerScreen> {
     ));
   }
 
+  String _formatCurrency(double value) => '\$${value.toStringAsFixed(2)}';
+
   @override
   Widget build(BuildContext context) {
-    final isBigScreen = Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
-
-    return Container(
-      color: AppColors.bottomNavBg(context),
-      child: SafeArea(
-        child: ResponsiveRow(
-          children: [
-            if (isBigScreen) _buildSidebar(),
-            _buildContentArea(isBigScreen),
-          ],
-        ),
+    return Scaffold(
+      backgroundColor: AppColors.bottomNavBg(context),
+      appBar: AppBar(
+        title: const Text('Supplier Ledger'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.picture_as_pdf),
+            onPressed: _generatePdf,
+            tooltip: 'Generate PDF',
+          ),
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: () => _fetchApi(),
+            tooltip: 'Refresh',
+          ),
+        ],
       ),
-    );
-  }
-
-  Widget _buildSidebar() => ResponsiveCol(
-    xs: 0,
-    sm: 1,
-    md: 1,
-    lg: 2,
-    xl: 2,
-    child: Container(color: Colors.white, child: const Sidebar()),
-  );
-
-  Widget _buildContentArea(bool isBigScreen) {
-    return ResponsiveCol(
-      xs: 12,
-      lg: 10,
-      child: RefreshIndicator(
+      body: RefreshIndicator(
         onRefresh: () async => _fetchApi(),
-        child: Container(
-          padding: AppTextStyle.getResponsivePaddingBody(context),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              _buildHeader(),
-              const SizedBox(height: 4),
-              _buildFilterRow(),
-              _buildSummaryCards(),
-              const SizedBox(height: 4),
-              SizedBox(child: _buildLedgerTable()),
+              // Filter Section
+              _buildMobileFilterSection(),
+              const SizedBox(height: 16),
+
+              // Supplier Summary
+              _buildSupplierSummary(),
+              const SizedBox(height: 16),
+
+              // Ledger Transactions
+              _buildLedgerTransactions(),
             ],
           ),
         ),
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          setState(() => _isFilterExpanded = !_isFilterExpanded);
+        },
+        child: Icon(_isFilterExpanded ? Icons.filter_alt_off : Icons.filter_alt),
+        tooltip: 'Toggle Filters',
+      ),
     );
   }
 
-  Widget _buildHeader() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "Supplier Ledger Report",
-              style: AppTextStyle.cardTitle(context).copyWith(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              "Monitor supplier transactions and balances",
-              style: GoogleFonts.inter(
-                fontSize: 14,
-                color: Colors.grey,
-              ),
-            ),
-          ],
-        ),
-
-      ],
-    );
-  }
-
-  Widget _buildFilterRow() {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: [
-        // 📅 Date Range Picker
-        SizedBox(
-          width: 260,
-          child: CustomDateRangeField(
-            isLabel: false,
-            selectedDateRange: selectedDateRange,
-            onDateRangeSelected: (value) {
-              setState(() => selectedDateRange = value);
-              if (value != null) {
-                _fetchApi(
-                  from: value.start,
-                  to: value.end,
-                  supplier: _selectedSupplier?.id?.toString(),
-                );
-              }
-            },
-          ),
-        ),
-        const SizedBox(width: 12),
-
-        // 👥 Supplier Dropdown
-        SizedBox(
-          width: 220,
-          child: BlocBuilder<SupplierInvoiceBloc, SupplierInvoiceState>(
-            builder: (context, state) {
-              if (state is SupplierActiveListLoading) {
-                return AppDropdown<SupplierActiveModel>(
-                  label: "Supplier",
-                  hint: "Loading suppliers...",
-                  isRequired: false,
-                  isLabel: true,
-                  itemList: [],
-                  onChanged: (v){},
-                );
-              }
-
-              if (state is SupplierActiveListFailed) {
-                return AppDropdown<SupplierActiveModel>(
-                  label: "Supplier",
-                  hint: "Failed to load suppliers",
-                  isRequired: false,   isLabel: true,
-                  itemList: [],
-                  onChanged: (v){},
-                );
-              }
-
-              if (state is SupplierActiveListSuccess) {
-                final supplierList = context.read<SupplierInvoiceBloc>().supplierActiveList;
-
-                final List<SupplierActiveModel> options = [
-
-                  ...supplierList,
-                ];
-
-                return AppDropdown<SupplierActiveModel>(
-                  label: "Supplier",
-                  hint: "Select Supplier",
-                  isRequired: false,   isLabel: true,
-                  value: _selectedSupplier,
-                  itemList: options,
-                  onChanged: (newVal) {
-                    setState(() {
-                      _selectedSupplier = newVal;
-                    });
-                    _fetchApi(
-                      supplier: newVal?.id?.toString(),
-                      from: selectedDateRange?.start,
-                      to: selectedDateRange?.end,
-                    );
-                  },
-                );
-              }
-
-              return AppDropdown<SupplierActiveModel>(
-                label: "Supplier",
-                hint: "Loading suppliers...",
-                isRequired: false,
-                itemList: [],
-                onChanged: (v){},
+  Widget _buildMobileFilterSection() {
+    return Card(
+      child: ExpansionPanelList(
+        elevation: 0,
+        expandedHeaderPadding: EdgeInsets.zero,
+        expansionCallback: (int index, bool isExpanded) {
+          setState(() => _isFilterExpanded = !isExpanded);
+        },
+        children: [
+          ExpansionPanel(
+            headerBuilder: (context, isExpanded) {
+              return const ListTile(
+                leading: Icon(Icons.filter_alt),
+                title: Text('Filters'),
               );
             },
+            body: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  // Date Range Picker
+                  CustomDateRangeField(
+                    isLabel: true,
+                    selectedDateRange: selectedDateRange,
+                    onDateRangeSelected: (value) {
+                      setState(() => selectedDateRange = value);
+                      if (value != null) {
+                        _fetchApi(
+                          from: value.start,
+                          to: value.end,
+                          supplier: _selectedSupplier?.id?.toString(),
+                        );
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Supplier Dropdown
+                  BlocBuilder<SupplierInvoiceBloc, SupplierInvoiceState>(
+                    builder: (context, state) {
+                      if (state is SupplierActiveListLoading) {
+                        return AppDropdown<SupplierActiveModel>(
+                          label: "Supplier",
+                          hint: "Loading suppliers...",
+                          isLabel: true,
+                          itemList: [],
+                          onChanged: (v){},
+                        );
+                      }
+
+                      if (state is SupplierActiveListFailed) {
+                        return AppDropdown<SupplierActiveModel>(
+                          label: "Supplier",
+                          hint: "Failed to load suppliers",
+                          isLabel: true,
+                          itemList: [],
+                          onChanged: (v){},
+                        );
+                      }
+
+                      final supplierList = context.read<SupplierInvoiceBloc>().supplierActiveList;
+
+                      return AppDropdown<SupplierActiveModel>(
+                        label: "Supplier",
+                        hint: "Select Supplier",
+                        isLabel: true,
+                        value: _selectedSupplier,
+                        itemList: supplierList,
+                        onChanged: (newVal) {
+                          setState(() {
+                            _selectedSupplier = newVal;
+                          });
+                          _fetchApi(
+                            supplier: newVal?.id?.toString(),
+                            from: selectedDateRange?.start,
+                            to: selectedDateRange?.end,
+                          );
+                        },
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Action Buttons
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: () {
+                            setState(() {
+                              selectedDateRange = null;
+                              _selectedSupplier = null;
+                              _isFilterExpanded = false;
+                            });
+                            context.read<SupplierLedgerBloc>().add(ClearSupplierLedgerFilters());
+                            _fetchApi();
+                          },
+                          icon: const Icon(Icons.clear_all, size: 18),
+                          label: const Text('Clear Filters'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.grey[200],
+                            foregroundColor: Colors.grey[800],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: _generatePdf,
+                          icon: const Icon(Icons.picture_as_pdf, size: 18),
+                          label: const Text('PDF Report'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            isExpanded: _isFilterExpanded,
           ),
-        ),
-        const SizedBox(width: 12),
-
-        AppButton(name: "Clear", onPressed: (){
-          setState(() {
-            selectedDateRange = null;
-            _selectedSupplier = null;
-          });
-          context.read<SupplierLedgerBloc>().add(ClearSupplierLedgerFilters());
-          _fetchApi();
-        }),
-        // 🧹 Clear Filters Button
-
-      ],
+        ],
+      ),
     );
   }
 
-  Widget _buildSummaryCards() {
+  Widget _buildSupplierSummary() {
     return BlocBuilder<SupplierLedgerBloc, SupplierLedgerState>(
       builder: (context, state) {
-        if (state is! SupplierLedgerSuccess) {
-          return Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(8),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withValues(alpha: 0.1),
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Center(
+        final supplier = _selectedSupplier;
+
+        if (supplier == null) {
+          return Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
               child: Column(
-                mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
                     Icons.business_outlined,
-                    size: 48,
-                    color: Colors.grey.withValues(alpha: 0.5),
+                    size: 60,
+                    color: Colors.grey.withOpacity(0.5),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 16),
                   Text(
-                    "Select a Supplier to View Ledger",
+                    "Select a Supplier",
                     style: GoogleFonts.inter(
-                      fontSize: 16,
+                      fontSize: 18,
                       fontWeight: FontWeight.w600,
                       color: Colors.grey,
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    "Choose a supplier from the dropdown above to see their transaction history",
+                    "Choose a supplier from the dropdown to view their ledger",
                     style: GoogleFonts.inter(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w400,
+                      fontSize: 14,
                       color: Colors.grey,
                     ),
                     textAlign: TextAlign.center,
@@ -287,153 +264,206 @@ class _SupplierLedgerScreenState extends State<SupplierLedgerScreen> {
           );
         }
 
-        final summary = state.response.summary;
-
-        return Container(
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(8),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withValues(alpha: 0.1),
-                blurRadius: 4,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "Supplier: ${_selectedSupplier?.name ?? summary.supplierName}",
-                style: AppTextStyle.cardTitle(context).copyWith(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 12,
-                runSpacing: 12,
+        if (state is! SupplierLedgerSuccess) {
+          return Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
                 children: [
-                  _buildSummaryItem("Opening Balance", "\$${summary.openingBalance.toStringAsFixed(2)}", Icons.account_balance_wallet, Colors.blue),
-                  _buildSummaryItem(
-                      "Closing Balance",
-                      "\$${summary.closingBalance.toStringAsFixed(2)}",
-                      summary.closingBalance > 0 ? Icons.arrow_upward : Icons.arrow_downward,
-                      summary.closingBalance > 0 ? Colors.red : Colors.green,
-                      // subtitle: summary.closingBalance > 0 ? 'Due' : 'Advance'
+                  Text(
+                    supplier.name??"",
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                  _buildSummaryItem("Total Debit", "\$${summary.totalDebit.toStringAsFixed(2)}", Icons.arrow_circle_up, Colors.red),
-                  _buildSummaryItem("Total Credit", "\$${summary.totalCredit.toStringAsFixed(2)}", Icons.arrow_circle_down, Colors.green),
-                  _buildSummaryItem("Total Transactions", summary.totalTransactions.toString(), Icons.receipt_long, Colors.purple),
+                  const SizedBox(height: 8),
+                  const Text(
+                    "Loading ledger data...",
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                  const SizedBox(height: 16),
+                  const CircularProgressIndicator(),
+                ],
+              ),
+            ),
+          );
+        }
 
+        final summary = state.response.summary;
+        final closingBalanceColor = summary.closingBalance > 0 ? Colors.red : Colors.green;
+        final balanceText = summary.closingBalance > 0 ? 'DUE' : 'ADVANCE';
 
-                  AppButton(
-                      size: 100,
-                      name: "Pdf", onPressed: (){
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => Scaffold(
-                          backgroundColor: Colors.red,
-                          body: PdfPreview.builder(
-                            useActions: true,
-                            allowSharing: false,
-                            canDebug: false,
-                            canChangeOrientation: false,
-                            canChangePageFormat: false,
-                            dynamicLayout: true,
-                            build: (format) => generateSupplierLedgerReportPdf(
-                              state.response,
+        return Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.blue.withOpacity(0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.business, color: Colors.blue),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        supplier.name??"",
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
 
-                            ),
-                            pdfPreviewPageDecoration:
-                            BoxDecoration(color: AppColors.white),
-                            actionBarTheme: PdfActionBarTheme(
-                              backgroundColor: AppColors.primaryColor(context),
-                              iconColor: Colors.white,
-                              textStyle: const TextStyle(color: Colors.white),
-                            ),
-                            actions: [
-                              IconButton(
-                                onPressed: () => AppRoutes.pop(context),
-                                icon: const Icon(Icons.cancel, color: Colors.red),
+                // Balance Summary
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: closingBalanceColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Current Balance',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey,
                               ),
-                            ],
-                            pagesBuilder: (context, pages) {
-                              debugPrint('Rendering ${pages.length} pages');
-                              return PageView.builder(
-                                itemCount: pages.length,
-                                scrollDirection: Axis.vertical,
-                                itemBuilder: (context, index) {
-                                  final page = pages[index];
-                                  return Container(
-                                    color: Colors.grey,
-                                    alignment: Alignment.center,
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Image(image: page.image, fit: BoxFit.contain),
-                                  );
-                                },
-                              );
-                            },
+                            ),
+                            Text(
+                              _formatCurrency(summary.closingBalance),
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: closingBalanceColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: closingBalanceColor,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          balanceText,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
                           ),
                         ),
                       ),
-                    );
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
 
-                  }),
-                ],
-              ),
-            ],
+                // Stats Grid
+                GridView.count(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 12,
+                  childAspectRatio: 2.5,
+                  children: [
+                    _buildMobileStatItem(
+                      'Opening',
+                      _formatCurrency(summary.openingBalance),
+                      Icons.account_balance_wallet,
+                      Colors.blue,
+                    ),
+                    _buildMobileStatItem(
+                      'Total Debit',
+                      _formatCurrency(summary.totalDebit),
+                      Icons.arrow_circle_up,
+                      Colors.red,
+                    ),
+                    _buildMobileStatItem(
+                      'Total Credit',
+                      _formatCurrency(summary.totalCredit),
+                      Icons.arrow_circle_down,
+                      Colors.green,
+                    ),
+                    _buildMobileStatItem(
+                      'Transactions',
+                      summary.totalTransactions.toString(),
+                      Icons.receipt_long,
+                      Colors.purple,
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         );
       },
     );
   }
 
-  Widget _buildSummaryItem(String label, String value, IconData icon, Color color, {String? subtitle}) {
+  Widget _buildMobileStatItem(String label, String value, IconData icon, Color color) {
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
+        color: color.withOpacity(0.1),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Row(
-        mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 20, color: color),
+          Container(
+            padding: const EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.2),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, size: 16, color: color),
+          ),
           const SizedBox(width: 8),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: const TextStyle(fontSize: 11, color: Colors.grey, fontWeight: FontWeight.w500),
-              ),
-              Text(
-                value,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: color,
-                ),
-              ),
-              if (subtitle != null)
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
                 Text(
-                  subtitle,
-                  style: const TextStyle(fontSize: 10, color: Colors.grey),
+                  label,
+                  style: const TextStyle(
+                    fontSize: 10,
+                    color: Colors.grey,
+                  ),
                 ),
-            ],
+                Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: color,
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildLedgerTable() {
+  Widget _buildLedgerTransactions() {
     return BlocBuilder<SupplierLedgerBloc, SupplierLedgerState>(
       builder: (context, state) {
         if (state is SupplierLedgerLoading) {
@@ -443,51 +473,282 @@ class _SupplierLedgerScreenState extends State<SupplierLedgerScreen> {
               children: [
                 CircularProgressIndicator(),
                 SizedBox(height: 16),
-                Text("Loading supplier ledger report..."),
+                Text("Loading transactions..."),
               ],
             ),
           );
         } else if (state is SupplierLedgerSuccess) {
           if (state.response.report.isEmpty) {
-            return _buildEmptyState();
+            return _buildEmptyState("No transactions found for the selected period");
           }
-          return SupplierLedgerTableCard(ledgers: state.response.report);
+          return _buildMobileTransactionList(state.response.report);
         } else if (state is SupplierLedgerFailed) {
           return _buildErrorState(state.content);
         }
-        return _buildEmptyState();
+        return _buildEmptyState("Select a supplier to view transactions");
       },
     );
   }
 
-  Widget _buildEmptyState() {
-    return Center(
+  Widget _buildMobileTransactionList(List<SupplierLedger> transactions) {
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: transactions.length,
+      itemBuilder: (context, index) {
+        final transaction = transactions[index];
+        final isDebit = transaction.debit > 0;
+        final isCredit = transaction.credit > 0;
+        final balanceColor = transaction.due > 0 ? Colors.red : Colors.green;
+
+        return Card(
+          margin: const EdgeInsets.only(bottom: 8),
+          child: Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Transaction Header
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        transaction.voucherNo,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: transaction.typeColor.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(transaction.typeIcon, size: 12, color: transaction.typeColor),
+                          const SizedBox(width: 4),
+                          Text(
+                            transaction.type.toUpperCase(),
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              color: transaction.typeColor,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+
+                // Date and Particular
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[200],
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        _formatDate(transaction.date),
+                        style: const TextStyle(fontSize: 10),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        transaction.particular,
+                        style: const TextStyle(fontSize: 12),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+
+                // Amount Details
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    if (isDebit)
+                      Expanded(
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.red.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Column(
+                            children: [
+                              const Text(
+                                'DEBIT',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: Colors.red,
+                                ),
+                              ),
+                              Text(
+                                _formatCurrency(transaction.debit),
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.red,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    if (isDebit && isCredit) const SizedBox(width: 8),
+                    if (isCredit)
+                      Expanded(
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.green.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Column(
+                            children: [
+                              const Text(
+                                'CREDIT',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: Colors.green,
+                                ),
+                              ),
+                              Text(
+                                _formatCurrency(transaction.credit),
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.green,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: balanceColor.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: balanceColor),
+                        ),
+                        child: Column(
+                          children: [
+                            const Text(
+                              'BALANCE',
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: Colors.grey,
+                              ),
+                            ),
+                            Text(
+                              _formatCurrency(transaction.due.abs()),
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: balanceColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+
+                // Details and Method
+                if (transaction.details.isNotEmpty || transaction.method.isNotEmpty)
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 12),
+                      if (transaction.details.isNotEmpty)
+                        Text(
+                          transaction.details,
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: Colors.grey,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      if (transaction.method.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 4.0),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.payment, size: 12, color: Colors.grey),
+                              const SizedBox(width: 4),
+                              Text(
+                                transaction.method,
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                    ],
+                  ),
+
+                // View Details Button
+                const SizedBox(height: 12),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton.icon(
+                    onPressed: () => _showTransactionDetails(context, transaction),
+                    icon: const Icon(Icons.remove_red_eye, size: 14),
+                    label: const Text('View Details'),
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildEmptyState(String message) {
+    return Container(
+      padding: const EdgeInsets.all(32),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Lottie.asset(AppImages.noData, width: 200, height: 200),
+          Lottie.asset(AppImages.noData, width: 150, height: 150),
           const SizedBox(height: 16),
           Text(
-            "No Supplier Ledger Data Found",
+            message,
             style: GoogleFonts.inter(
               fontSize: 16,
               fontWeight: FontWeight.w600,
               color: Colors.grey,
             ),
+            textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
-          Text(
-            "Supplier ledger data will appear here when available",
-            style: GoogleFonts.inter(
-              fontSize: 12,
-              fontWeight: FontWeight.w400,
-              color: Colors.grey,
-            ),
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton(
+          ElevatedButton.icon(
             onPressed: _fetchApi,
-            child: const Text("Refresh"),
+            icon: const Icon(Icons.refresh),
+            label: const Text("Refresh"),
           ),
         ],
       ),
@@ -495,19 +756,21 @@ class _SupplierLedgerScreenState extends State<SupplierLedgerScreen> {
   }
 
   Widget _buildErrorState(String error) {
-    return Center(
+    return Container(
+      padding: const EdgeInsets.all(32),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const Icon(Icons.error_outline, size: 60, color: Colors.red),
           const SizedBox(height: 16),
           Text(
-            "Error Loading Supplier Ledger Report",
+            "Error Loading Transactions",
             style: GoogleFonts.inter(
               fontSize: 16,
               fontWeight: FontWeight.w600,
               color: Colors.grey,
             ),
+            textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
           Text(
@@ -516,551 +779,173 @@ class _SupplierLedgerScreenState extends State<SupplierLedgerScreen> {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 16),
-          ElevatedButton(
+          ElevatedButton.icon(
             onPressed: _fetchApi,
-            child: const Text("Retry"),
+            icon: const Icon(Icons.refresh),
+            label: const Text("Try Again"),
           ),
         ],
       ),
     );
   }
-}
 
-class SupplierLedgerTableCard extends StatelessWidget {
-  final List<SupplierLedger> ledgers;
-  final VoidCallback? onLedgerTap;
+  void _showTransactionDetails(BuildContext context, SupplierLedger transaction) {
+    final balanceColor = transaction.due > 0 ? Colors.red : Colors.green;
 
-  const SupplierLedgerTableCard({
-    super.key,
-    required this.ledgers,
-    this.onLedgerTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final verticalScrollController = ScrollController();
-    final horizontalScrollController = ScrollController();
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final totalWidth = constraints.maxWidth;
-        const numColumns = 11; // #, Date, Voucher No, Type, Particular, Details, Method, Debit, Credit, Balance, Actions
-        const minColumnWidth = 100.0;
-
-        final dynamicColumnWidth =
-        (totalWidth / numColumns).clamp(minColumnWidth, double.infinity);
-
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
         return Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
+          decoration: const BoxDecoration(
             color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withValues(alpha: 0.1),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(20),
+              topRight: Radius.circular(20),
+            ),
           ),
-          child: Scrollbar(
-            controller: verticalScrollController,
-            thumbVisibility: true,
-            child: SingleChildScrollView(
-              controller: verticalScrollController,
-              scrollDirection: Axis.vertical,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: Scrollbar(
-                  controller: horizontalScrollController,
-                  thumbVisibility: true,
-                  child: SingleChildScrollView(
-                    controller: horizontalScrollController,
-                    scrollDirection: Axis.horizontal,
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 5),
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(minWidth: totalWidth),
-                        child: DataTable(
-                          dataRowMinHeight: 40,
-                          dataRowMaxHeight: 40,
-                          columnSpacing: 8,
-                          horizontalMargin: 12,
-                          dividerThickness: 0.5,
-                          headingRowHeight: 40,
-                          headingTextStyle: TextStyle(
-                            color: Colors.white,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                            fontFamily: GoogleFonts.inter().fontFamily,
-                          ),
-                          headingRowColor: WidgetStateProperty.all(
-                            AppColors.primaryColor(context),
-                          ),
-                          dataTextStyle: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w500,
-                            fontFamily: GoogleFonts.inter().fontFamily,
-                          ),
-                          columns: _buildColumns(dynamicColumnWidth),
-                          rows: ledgers.asMap().entries.map((entry) {
-                            final ledger = entry.value;
-                            return DataRow(
-                              onSelectChanged: onLedgerTap != null
-                                  ? (_) => onLedgerTap!()
-                                  : null,
-                              cells: [
-                                _buildIndexCell(entry.key + 1, dynamicColumnWidth * 0.6),
-                                _buildDateCell(ledger.date, dynamicColumnWidth),
-                                _buildVoucherCell(ledger.voucherNo, dynamicColumnWidth),
-                                _buildTypeCell(ledger, dynamicColumnWidth),
-                                _buildParticularCell(ledger.particular, dynamicColumnWidth),
-                                _buildDetailsCell(ledger.details, dynamicColumnWidth),
-                                _buildMethodCell(ledger.method, dynamicColumnWidth),
-                                _buildDebitCell(ledger.debit, dynamicColumnWidth),
-                                _buildCreditCell(ledger.credit, dynamicColumnWidth),
-                                _buildBalanceCell(ledger.due, dynamicColumnWidth),
-                                _buildActionCell(ledger, context, dynamicColumnWidth),
-                              ],
-                            );
-                          }).toList(),
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Transaction Details',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.close),
+                  ),
+                ],
+              ),
+              const Divider(),
+              const SizedBox(height: 16),
+
+              // Transaction Details
+              _buildMobileDetailRow('Voucher No:', transaction.voucherNo),
+              _buildMobileDetailRow('Date:', _formatDate(transaction.date)),
+              _buildMobileDetailRow('Type:', transaction.type.toUpperCase()),
+              _buildMobileDetailRow('Particular:', transaction.particular),
+              _buildMobileDetailRow('Details:', transaction.details),
+              _buildMobileDetailRow('Payment Method:', transaction.method),
+              _buildMobileDetailRow('Debit Amount:', _formatCurrency(transaction.debit)),
+              _buildMobileDetailRow('Credit Amount:', _formatCurrency(transaction.credit)),
+              _buildMobileDetailRow('Balance:', _formatCurrency(transaction.due)),
+
+              // Type Badge
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: transaction.typeColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: transaction.typeColor),
+                ),
+                child: Row(
+                  children: [
+                    Icon(transaction.typeIcon, color: transaction.typeColor),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'Transaction Type: ${transaction.type}',
+                        style: TextStyle(
+                          color: transaction.typeColor,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
-                  ),
+                  ],
                 ),
               ),
-            ),
+
+              // Balance Status
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: balanceColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: balanceColor),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      transaction.due > 0 ? Icons.arrow_circle_up : Icons.arrow_circle_down,
+                      color: balanceColor,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        transaction.due > 0 ? 'Supplier OWES you' : 'You OWE supplier',
+                        style: TextStyle(
+                          color: balanceColor,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Close'),
+                ),
+              ),
+            ],
           ),
         );
       },
     );
   }
 
-  List<DataColumn> _buildColumns(double columnWidth) {
-    return [
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth * 0.6,
-          child: const Text('#', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Date', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Voucher No', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Type', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Particular', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth * 1.2,
-          child: const Text('Details', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Method', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Debit', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Credit', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Balance', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Actions', textAlign: TextAlign.center),
-        ),
-      ),
-    ];
-  }
-
-  DataCell _buildIndexCell(int index, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Center(
-          child: Text(
-            index.toString(),
-            style: const TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.w600,
-              color: Colors.black87,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildDateCell(DateTime date, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Text(
-          _formatDate(date),
-          style: const TextStyle(
-            fontSize: 10,
-            fontWeight: FontWeight.w500,
-            color: Colors.black87,
-          ),
-          textAlign: TextAlign.center,
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildVoucherCell(String voucherNo, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Text(
-          voucherNo,
-          style: const TextStyle(
-            fontSize: 10,
-            fontWeight: FontWeight.w600,
-            color: Colors.black87,
-          ),
-          textAlign: TextAlign.center,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildTypeCell(SupplierLedger ledger, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-            decoration: BoxDecoration(
-              color: ledger.typeColor.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(ledger.typeIcon, size: 12, color: ledger.typeColor),
-                const SizedBox(width: 4),
-                Text(
-                  ledger.type,
-                  style: TextStyle(
-                    color: ledger.typeColor,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 9,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildParticularCell(String particular, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Text(
-          particular,
-          style: const TextStyle(
-            fontSize: 10,
-            fontWeight: FontWeight.w500,
-            color: Colors.black87,
-          ),
-          textAlign: TextAlign.center,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildDetailsCell(String details, double width) {
-    return DataCell(
-      Tooltip(
-        message: details,
-        child: SizedBox(
-          width: width,
-          child: Text(
-            details.length > 30 ? '${details.substring(0, 30)}...' : details,
-            style: const TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.w500,
-              color: Colors.black87,
-            ),
-            textAlign: TextAlign.center,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildMethodCell(String method, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Text(
-          method,
-          style: const TextStyle(
-            fontSize: 10,
-            fontWeight: FontWeight.w500,
-            color: Colors.black87,
-          ),
-          textAlign: TextAlign.center,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildDebitCell(double debit, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Center(
-          child: debit > 0
-              ? Container(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-            decoration: BoxDecoration(
-              color: Colors.red.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Text(
-              '\$${debit.toStringAsFixed(2)}',
-              style: const TextStyle(
-                color: Colors.red,
-                fontWeight: FontWeight.w600,
-                fontSize: 10,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          )
-              : const Text(
-            '-',
-            style: TextStyle(
-              fontSize: 10,
-              color: Colors.grey,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildCreditCell(double credit, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Center(
-          child: credit > 0
-              ? Container(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-            decoration: BoxDecoration(
-              color: Colors.green.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Text(
-              '\$${credit.toStringAsFixed(2)}',
-              style: const TextStyle(
-                color: Colors.green,
-                fontWeight: FontWeight.w600,
-                fontSize: 10,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          )
-              : const Text(
-            '-',
-            style: TextStyle(
-              fontSize: 10,
-              color: Colors.grey,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildBalanceCell(double balance, double width) {
-    final isPositive = balance > 0;
-
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-            decoration: BoxDecoration(
-              color: isPositive ? Colors.red.withValues(alpha: 0.1) : Colors.green.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(4),
-              border: Border.all(
-                color: isPositive ? Colors.red : Colors.green,
-              ),
-            ),
-            child: Text(
-              '\$${balance.abs().toStringAsFixed(2)}',
-              style: TextStyle(
-                color: isPositive ? Colors.red : Colors.green,
-                fontWeight: FontWeight.w600,
-                fontSize: 10,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildActionCell(SupplierLedger ledger, BuildContext context, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // View Details Button
-            _buildActionButton(
-              icon: HugeIcons.strokeRoundedView,
-              color: Colors.blue,
-              tooltip: 'View transaction details',
-              onPressed: () => _showTransactionDetails(context, ledger),
-            ),
-
-            // Payment Button (if balance is positive/owed)
-            if (ledger.due > 0)
-              _buildActionButton(
-                icon: Iconsax.money_send,
-                color: Colors.orange,
-                tooltip: 'Make payment',
-                onPressed: () => _makePayment(context, ledger),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildActionButton({
-    required IconData icon,
-    required Color color,
-    required String tooltip,
-    required VoidCallback onPressed,
-  }) {
-    return IconButton(
-      onPressed: onPressed,
-      icon: Icon(icon, size: 16, color: color),
-      tooltip: tooltip,
-      padding: EdgeInsets.zero,
-      constraints: const BoxConstraints(minWidth: 25, minHeight: 25),
-    );
-  }
-
-  void _showTransactionDetails(BuildContext context, SupplierLedger ledger) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return Dialog(
-          child: Container(
-            width: MediaQuery.of(context).size.width * 0.40,
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "Transaction Details",
-                  style: AppTextStyle.cardLevelHead(context),
-                ),
-                const SizedBox(height: 16),
-                _buildDetailRow('Voucher No:', ledger.voucherNo),
-                _buildDetailRow('Date:', _formatDate(ledger.date)),
-                _buildDetailRow('Type:', ledger.type),
-                _buildDetailRow('Particular:', ledger.particular),
-                _buildDetailRow('Details:', ledger.details),
-                _buildDetailRow('Method:', ledger.method),
-                _buildDetailRow('Debit:', '\$${ledger.debit.toStringAsFixed(2)}'),
-                _buildDetailRow('Credit:', '\$${ledger.credit.toStringAsFixed(2)}'),
-                _buildDetailRow('Balance:', '\$${ledger.due.toStringAsFixed(2)}'),
-
-                const SizedBox(height: 20),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('Close'),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildDetailRow(String label, String value) {
+  Widget _buildMobileDetailRow(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            width: 100,
+          Expanded(
+            flex: 2,
             child: Text(
               label,
               style: const TextStyle(
-                fontWeight: FontWeight.w600,
-                fontSize: 12,
+                fontSize: 14,
                 color: Colors.grey,
+                fontWeight: FontWeight.w500,
               ),
             ),
           ),
-          const SizedBox(width: 8),
           Expanded(
+            flex: 3,
             child: Text(
               value,
               style: const TextStyle(
-                fontSize: 12,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
               ),
+              textAlign: TextAlign.right,
             ),
           ),
         ],
@@ -1068,14 +953,39 @@ class SupplierLedgerTableCard extends StatelessWidget {
     );
   }
 
-  void _makePayment(BuildContext context, SupplierLedger ledger) {
-    // Implement payment functionality
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Making payment for voucher ${ledger.voucherNo}'),
-        duration: const Duration(seconds: 2),
-      ),
-    );
+  void _generatePdf() {
+    final state = context.read<SupplierLedgerBloc>().state;
+    if (state is SupplierLedgerSuccess) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => Scaffold(
+            appBar: AppBar(
+              title: const Text('Supplier Ledger PDF'),
+              actions: [
+                IconButton(
+                  onPressed: () => Navigator.pop(context),
+                  icon: const Icon(Icons.close),
+                ),
+              ],
+            ),
+            body: PdfPreview(
+              build: (format) => generateSupplierLedgerReportPdf(state.response),
+              canChangeOrientation: false,
+              canChangePageFormat: false,
+              canDebug: false,
+            ),
+          ),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('No supplier ledger data available'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+    }
   }
 
   String _formatDate(DateTime date) {

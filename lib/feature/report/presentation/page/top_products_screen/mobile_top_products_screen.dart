@@ -1,6 +1,8 @@
-// lib/feature/report/presentation/screens/top_products_screen.dart
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:lottie/lottie.dart';
 import 'package:printing/printing.dart';
 import '/core/core.dart';
 import '/core/widgets/date_range.dart';
@@ -13,11 +15,12 @@ class MobileTopProductsScreen extends StatefulWidget {
   const MobileTopProductsScreen({super.key});
 
   @override
-  State<MobileTopProductsScreen> createState() => _TopProductsScreenState();
+  State<MobileTopProductsScreen> createState() => _MobileTopProductsScreenState();
 }
 
-class _TopProductsScreenState extends State<MobileTopProductsScreen> {
+class _MobileTopProductsScreenState extends State<MobileTopProductsScreen> {
   DateRange? selectedDateRange;
+  bool _isFilterExpanded = false;
 
   @override
   void initState() {
@@ -33,65 +36,156 @@ class _TopProductsScreenState extends State<MobileTopProductsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isBigScreen =
-        Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
 
-    return Container(
-      color: AppColors.bottomNavBg(context),
-      child: SafeArea(
-        child: ResponsiveRow(
-          children: [
-            if (isBigScreen) _buildSidebar(),
-            _buildContentArea(isBigScreen),
-          ],
-        ),
+    return Scaffold(
+      backgroundColor: AppColors.bottomNavBg(context),
+      appBar: AppBar(
+        title: const Text('Top Products Report'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.picture_as_pdf),
+            onPressed: _generatePdf,
+            tooltip: 'Generate PDF',
+          ),
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: () => _fetchTopProductsReport(),
+            tooltip: 'Refresh',
+          ),
+        ],
       ),
-    );
-  }
-
-  Widget _buildSidebar() => ResponsiveCol(
-    xs: 0,
-    sm: 1,
-    md: 1,
-    lg: 2,
-    xl: 2,
-    child: Container(color: Colors.white, child: const Sidebar()),
-  );
-
-  Widget _buildContentArea(bool isBigScreen) {
-    return ResponsiveCol(
-      xs: 12,
-      lg: 10,
-      child: RefreshIndicator(
+      body: RefreshIndicator(
         onRefresh: () async => _fetchTopProductsReport(),
-        child: Container(
-          padding: AppTextStyle.getResponsivePaddingBody(context),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              _buildFilterRow(),
-              const SizedBox(height: 6),
+              // Filter Section
+        _buildMobileFilterSection(),
+
+              const SizedBox(height: 16),
+
+              // Summary Cards
               _buildSummaryCards(),
-              const SizedBox(height: 6),
-              SizedBox(child: _buildTopProductsTable()),
-            ],
+
+              const SizedBox(height: 16),
+
+              // Top Products List
+          BlocBuilder<TopProductsBloc, TopProductsState>(
+            builder: (context, state) {
+              if (state is TopProductsLoading) {
+                return const Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      CircularProgressIndicator(),
+                      SizedBox(height: 16),
+                      Text("Loading top products..."),
+                    ],
+                  ),
+                );
+              } else if (state is TopProductsSuccess) {
+                if (state.response.report.isEmpty) {
+                  return _buildEmptyState();
+                }
+                return
+                  _buildMobileProductsList(state.response.report);
+              } else if (state is TopProductsFailed) {
+                return _buildErrorState(state.content);
+              }
+              return _buildEmptyState();
+            },
+          ),            ],
           ),
         ),
       ),
+      floatingActionButton:
+          FloatingActionButton(
+        onPressed: () {
+          setState(() => _isFilterExpanded = !_isFilterExpanded);
+        },
+        child: Icon(_isFilterExpanded ? Icons.filter_alt_off : Icons.filter_alt),
+        tooltip: 'Toggle Filters',
+      )
+         ,
     );
   }
 
-  Widget _buildFilterRow() {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        // 📅 Date Range Picker
+  Widget _buildMobileFilterSection() {
+    return Card(
+      child: ExpansionPanelList(
+        elevation: 0,
+        expandedHeaderPadding: EdgeInsets.zero,
+        expansionCallback: (int index, bool isExpanded) {
+          setState(() => _isFilterExpanded = !isExpanded);
+        },
+        children: [
+          ExpansionPanel(
+            headerBuilder: (context, isExpanded) {
+              return const ListTile(
+                leading: Icon(Icons.calendar_today),
+                title: Text('Date Range Filter'),
+              );
+            },
+            body: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  // Date Range Picker
+                  CustomDateRangeField(
+                    isLabel: true,
+                    selectedDateRange: selectedDateRange,
+                    onDateRangeSelected: (value) {
+                      setState(() => selectedDateRange = value);
+                      if (value != null) {
+                        _fetchTopProductsReport(from: value.start, to: value.end);
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 12),
 
-
-        // Clear Filters Button
-      ],
+                  // Action Buttons
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: () {
+                            setState(() {
+                              selectedDateRange = null;
+                              _isFilterExpanded = false;
+                            });
+                            context.read<TopProductsBloc>().add(ClearTopProductsFilters());
+                            _fetchTopProductsReport();
+                          },
+                          icon: const Icon(Icons.clear_all, size: 18),
+                          label: const Text('Clear Filter'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.grey[200],
+                            foregroundColor: Colors.grey[800],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: _generatePdf,
+                          icon: const Icon(Icons.picture_as_pdf, size: 18),
+                          label: const Text('PDF Report'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            isExpanded: _isFilterExpanded,
+          ),
+        ],
+      ),
     );
   }
+
 
   Widget _buildSummaryCards() {
     return BlocBuilder<TopProductsBloc, TopProductsState>(
@@ -100,201 +194,474 @@ class _TopProductsScreenState extends State<MobileTopProductsScreen> {
 
         final summary = state.response.summary;
 
-        return Wrap(
-          spacing: 6,
-          runSpacing: 6,
-          children: [
-            _buildSummaryCard(
-              "Total Products",
-              summary.totalProducts.toString(),
-              Icons.inventory_2,
-              AppColors.primaryColor(context),
-            ),
-            _buildSummaryCard(
-              "Total Quantity Sold",
-              summary.totalQuantitySold.toString(),
-              Icons.shopping_cart_checkout,
-              Colors.green,
-            ),
-            _buildSummaryCard(
-              "Total Sales",
-              "\$${summary.totalSales.toStringAsFixed(2)}",
-              Icons.attach_money,
-              Colors.blue,
-            ),
-            _buildSummaryCard(
-              "Average per Product",
-              "\$${(summary.totalSales / summary.totalProducts).toStringAsFixed(2)}",
-              Icons.analytics,
-              Colors.orange,
-            ),
-            AppButton(
-                size: 100,
-                name: "Pdf", onPressed: (){
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => Scaffold(
-                    backgroundColor: Colors.red,
-                    body: PdfPreview.builder(
-                      useActions: true,
-                      allowSharing: false,
-                      canDebug: false,
-                      canChangeOrientation: false,
-                      canChangePageFormat: false,
-                      dynamicLayout: true,
-                      build: (format) => generateTopProductsReportPdf(
-                        state.response,
 
+          return Column(
+            children: [
+              // First row: Products and Quantity
+              Row(
+                children: [
+                  _buildMobileSummaryCard(
+                    "Products",
+                    summary.totalProducts.toString(),
+                    Icons.inventory_2,
+                    AppColors.primaryColor(context),
+                    isMobile: true,
+                  ),
+                  const SizedBox(width: 8),
+                  _buildMobileSummaryCard(
+                    "Quantity Sold",
+                    summary.totalQuantitySold.toString(),
+                    Icons.shopping_cart_checkout,
+                    Colors.green,
+                    isMobile: true,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+
+              // Second row: Sales and Average
+              Row(
+                children: [
+                  _buildMobileSummaryCard(
+                    "Total Sales",
+                    "\$${summary.totalSales.toStringAsFixed(2)}",
+                    Icons.attach_money,
+                    Colors.blue,
+                    isMobile: true,
+                  ),
+                  const SizedBox(width: 8),
+                  _buildMobileSummaryCard(
+                    "Avg/Product",
+                    "\$${(summary.totalSales / summary.totalProducts).toStringAsFixed(2)}",
+                    Icons.analytics,
+                    Colors.orange,
+                    isMobile: true,
+                  ),
+                ],
+              ),
+            ],
+          );
+
+
+      },
+    );
+  }
+
+  Widget _buildMobileSummaryCard(
+      String title,
+      String value,
+      IconData icon,
+      Color color, {
+        bool isMobile = false,
+      }) {
+    return Expanded(
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(8),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.2),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Icon(icon, color: color, size: isMobile ? 24 : 28),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: isMobile ? 10 : 12,
+                      color: Colors.grey,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  Text(
+                    value,
+                    style: TextStyle(
+                      fontSize: isMobile ? 14 : 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.blackColor(context),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+
+
+  Widget _buildMobileProductsList(List<TopProductModel> products) {
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: products.length,
+      itemBuilder: (context, index) {
+        final product = products[index];
+        final rank = index + 1;
+        final totalRevenue = products.fold(
+          0.0,
+              (sum, p) => sum + p.totalSoldPrice,
+        );
+        final percentage = (product.totalSoldPrice / totalRevenue * 100);
+
+        return Card(
+          margin: const EdgeInsets.only(bottom: 8),
+          child: Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Rank Badge
+                    Container(
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        color: _getRankColor(rank).withOpacity(0.1),
+                        shape: BoxShape.circle,
+                        border: Border.all(color: _getRankColor(rank), width: 2),
                       ),
-                      pdfPreviewPageDecoration:
-                      BoxDecoration(color: AppColors.white),
-                      actionBarTheme: PdfActionBarTheme(
-                        backgroundColor: AppColors.primaryColor(context),
-                        iconColor: Colors.white,
-                        textStyle: const TextStyle(color: Colors.white),
-                      ),
-                      actions: [
-                        IconButton(
-                          onPressed: () => AppRoutes.pop(context),
-                          icon: const Icon(Icons.cancel, color: Colors.red),
+                      child: Center(
+                        child: Text(
+                          rank.toString(),
+                          style: TextStyle(
+                            color: _getRankColor(rank),
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
                         ),
-                      ],
-                      pagesBuilder: (context, pages) {
-                        debugPrint('Rendering ${pages.length} pages');
-                        return PageView.builder(
-                          itemCount: pages.length,
-                          scrollDirection: Axis.vertical,
-                          itemBuilder: (context, index) {
-                            final page = pages[index];
-                            return Container(
-                              color: Colors.grey,
-                              alignment: Alignment.center,
-                              padding: const EdgeInsets.all(8.0),
-                              child: Image(image: page.image, fit: BoxFit.contain),
-                            );
-                          },
-                        );
-                      },
+                      ),
+                    ),
+
+                    // Performance Indicator
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: _getPerformanceColor(percentage).withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        '${percentage.toStringAsFixed(1)}%',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: _getPerformanceColor(percentage),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+
+                // Product Name
+                Text(
+                  product.productName,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 8),
+
+                // Product Details Grid
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    _buildMobileDetailItem(
+                      'Price',
+                      '\$${product.sellingPrice.toStringAsFixed(2)}',
+                      Colors.blue,
+                    ),
+                    _buildMobileDetailItem(
+                      'Sold',
+                      product.totalSoldQuantity.toString(),
+                      Colors.green,
+                    ),
+                    _buildMobileDetailItem(
+                      'Revenue',
+                      '\$${product.totalSoldPrice.toStringAsFixed(2)}',
+                      Colors.purple,
+                    ),
+                  ],
+                ),
+
+                // Performance Bar
+                const SizedBox(height: 12),
+                Container(
+                  height: 6,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(3),
+                  ),
+                  child: FractionallySizedBox(
+                    alignment: Alignment.centerLeft,
+                    widthFactor: percentage / 100,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: _getPerformanceColor(percentage),
+                        borderRadius: BorderRadius.circular(3),
+                      ),
                     ),
                   ),
                 ),
-              );
+                const SizedBox(height: 8),
 
-            }),
-            SizedBox(
-              width: 260,
-              child: CustomDateRangeField(
-                isLabel: false,
-                selectedDateRange: selectedDateRange,
-                onDateRangeSelected: (value) {
-                  setState(() => selectedDateRange = value);
-                  if (value != null) {
-                    _fetchTopProductsReport(from: value.start, to: value.end);
-                  }
-                },
-              ),
+                // View Details Button
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton.icon(
+                    onPressed: () => _showMobileProductDetails(context, product),
+                    icon: const Icon(Icons.remove_red_eye, size: 16),
+                    label: const Text('View Details'),
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    ),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(width: 6),
-            AppButton(
-              name: "Clear",size: 80,
-              onPressed: () {
-                setState(() => selectedDateRange = null);
-                context.read<TopProductsBloc>().add(ClearTopProductsFilters());
-                _fetchTopProductsReport();
-              },
-            ),
-          ],
+          ),
         );
       },
     );
   }
 
-  Widget _buildSummaryCard(
-    String title,
-    String value,
-    IconData icon,
-    Color color,
-  ) {
-    return Container(
-      width: 170,
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.2),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
+  Widget _buildMobileDetailItem(String label, String value, Color color) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 10,
+            color: Colors.grey,
           ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Icon(icon, color: color, size: 30),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                Text(
-                  value,
-                  style:  TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color:AppColors.blackColor(context),
-                  ),
-                ),
-              ],
-            ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            color: color,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
-  Widget _buildTopProductsTable() {
-    return BlocBuilder<TopProductsBloc, TopProductsState>(
-      builder: (context, state) {
-        if (state is TopProductsLoading) {
-          return const Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                CircularProgressIndicator(),
-                SizedBox(height: 16),
-                Text("Loading top products report..."),
-              ],
+  void _showMobileProductDetails(BuildContext context, TopProductModel product) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        final totalRevenue = product.totalSoldPrice;
+        final avgSale = totalRevenue / product.totalSoldQuantity;
+
+        return Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(20),
+              topRight: Radius.circular(20),
             ),
-          );
-        } else if (state is TopProductsSuccess) {
-          if (state.response.report.isEmpty) {
-            return _buildEmptyState();
-          }
-          return TopProductsTableCard(products: state.response.report);
-        } else if (state is TopProductsFailed) {
-          return _buildErrorState(state.content);
-        }
-        return _buildEmptyState();
+          ),
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      product.productName,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.close),
+                  ),
+                ],
+              ),
+              const Divider(),
+              const SizedBox(height: 16),
+
+              // Product Details
+              _buildMobileDetailRow('Selling Price:', '\$${product.sellingPrice.toStringAsFixed(2)}'),
+              _buildMobileDetailRow('Quantity Sold:', product.totalSoldQuantity.toString()),
+              _buildMobileDetailRow('Total Revenue:', '\$${totalRevenue.toStringAsFixed(2)}'),
+              _buildMobileDetailRow('Average per Sale:', '\$${avgSale.toStringAsFixed(2)}'),
+
+              // Performance Metrics
+              const SizedBox(height: 24),
+              const Text(
+                'Performance Metrics',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.blue.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Column(
+                        children: [
+                          Icon(Icons.trending_up, color: Colors.blue),
+                          const SizedBox(height: 8),
+                          const Text(
+                            'Top Seller',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          // Text(
+                          //   '#${product.indexOf(product) + 1}',
+                          //   style: const TextStyle(
+                          //     fontSize: 16,
+                          //     fontWeight: FontWeight.bold,
+                          //     color: Colors.blue,
+                          //   ),
+                          // ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.green.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Column(
+                        children: [
+                          Icon(Icons.attach_money, color: Colors.green),
+                          const SizedBox(height: 8),
+                          const Text(
+                            'Revenue Rank',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          // Text(
+                          //   '#${_getRevenueRank(product, products)}',
+                          //   style: const TextStyle(
+                          //     fontSize: 16,
+                          //     fontWeight: FontWeight.bold,
+                          //     color: Colors.green,
+                          //   ),
+                          // ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Close'),
+                ),
+              ),
+            ],
+          ),
+        );
       },
     );
   }
 
+  Widget _buildMobileDetailRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        children: [
+          Expanded(
+            flex: 2,
+            child: Text(
+              label,
+              style: const TextStyle(
+                fontSize: 14,
+                color: Colors.grey,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 3,
+            child: Text(
+              value,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+              textAlign: TextAlign.right,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildEmptyState() {
-    return Center(
+    return Container(
+      padding: const EdgeInsets.all(32),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Lottie.asset(AppImages.noData, width: 200, height: 200),
+          Lottie.asset(AppImages.noData, width: 150, height: 150),
           const SizedBox(height: 16),
           Text(
             "No Top Products Data Found",
@@ -303,20 +670,22 @@ class _TopProductsScreenState extends State<MobileTopProductsScreen> {
               fontWeight: FontWeight.w600,
               color: Colors.grey,
             ),
+            textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
           Text(
-            "Top products data will appear here when available",
+            "Top performing products will appear here",
             style: GoogleFonts.inter(
               fontSize: 12,
               fontWeight: FontWeight.w400,
               color: Colors.grey,
             ),
+            textAlign: TextAlign.center,
           ),
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: _fetchTopProductsReport,
-            child: const Text("Refresh"),
+            child: const Text("Refresh Data"),
           ),
         ],
       ),
@@ -324,19 +693,21 @@ class _TopProductsScreenState extends State<MobileTopProductsScreen> {
   }
 
   Widget _buildErrorState(String error) {
-    return Center(
+    return Container(
+      padding: const EdgeInsets.all(32),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const Icon(Icons.error_outline, size: 60, color: Colors.red),
           const SizedBox(height: 16),
           Text(
-            "Error Loading Top Products Report",
+            "Error Loading Top Products",
             style: GoogleFonts.inter(
               fontSize: 16,
               fontWeight: FontWeight.w600,
               color: Colors.grey,
             ),
+            textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
           Text(
@@ -347,509 +718,74 @@ class _TopProductsScreenState extends State<MobileTopProductsScreen> {
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: _fetchTopProductsReport,
-            child: const Text("Retry"),
+            child: const Text("Try Again"),
           ),
         ],
       ),
     );
   }
-}
 
-class TopProductsTableCard extends StatelessWidget {
-  final List<TopProductModel> products;
-  final VoidCallback? onProductTap;
-
-  const TopProductsTableCard({
-    super.key,
-    required this.products,
-    this.onProductTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final verticalScrollController = ScrollController();
-    final horizontalScrollController = ScrollController();
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final totalWidth = constraints.maxWidth;
-        const numColumns =
-            7; // #, Product Name, Price, Quantity Sold, Total Revenue, Performance, Actions
-        const minColumnWidth = 120.0;
-
-        final dynamicColumnWidth = (totalWidth / numColumns).clamp(
-          minColumnWidth,
-          double.infinity,
-        );
-
-        return Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withValues(alpha: 0.1),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Scrollbar(
-            controller: verticalScrollController,
-            thumbVisibility: true,
-            child: SingleChildScrollView(
-              controller: verticalScrollController,
-              scrollDirection: Axis.vertical,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: Scrollbar(
-                  controller: horizontalScrollController,
-                  thumbVisibility: true,
-                  child: SingleChildScrollView(
-                    controller: horizontalScrollController,
-                    scrollDirection: Axis.horizontal,
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 5),
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(minWidth: totalWidth),
-                        child: DataTable(
-                          dataRowMinHeight: 40,
-                          dataRowMaxHeight: 40,
-                          columnSpacing: 8,
-                          horizontalMargin: 12,
-                          dividerThickness: 0.5,
-                          headingRowHeight: 40,
-                          headingTextStyle: TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            fontFamily: GoogleFonts.inter().fontFamily,
-                          ),
-                          headingRowColor: WidgetStateProperty.all(
-                            AppColors.primaryColor(context),
-                          ),
-                          dataTextStyle: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w500,
-                            fontFamily: GoogleFonts.inter().fontFamily,
-                          ),
-                          columns: _buildColumns(dynamicColumnWidth),
-                          rows: products.asMap().entries.map((entry) {
-                            final product = entry.value;
-                            return DataRow(
-                              onSelectChanged: onProductTap != null
-                                  ? (_) => onProductTap!()
-                                  : null,
-                              cells: [
-                                _buildRankCell(
-                                  entry.key + 1,
-                                  dynamicColumnWidth * 0.6,
-                                ),
-                                _buildProductNameCell(
-                                  product.productName,
-                                  dynamicColumnWidth,
-                                ),
-                                _buildPriceCell(
-                                  product.sellingPrice,
-                                  dynamicColumnWidth,
-                                ),
-                                _buildQuantityCell(
-                                  product.totalSoldQuantity,
-                                  dynamicColumnWidth,
-                                ),
-                                _buildRevenueCell(
-                                  product.totalSoldPrice,
-                                  dynamicColumnWidth,
-                                ),
-                                _buildPerformanceCell(
-                                  product,
-                                  products,
-                                  dynamicColumnWidth,
-                                ),
-                                _buildActionCell(
-                                  product,
-                                  context,
-                                  dynamicColumnWidth,
-                                ),
-                              ],
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  List<DataColumn> _buildColumns(double columnWidth) {
-    return [
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth * 0.6,
-          child: const Text('#', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Product Name', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Price', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Quantity Sold', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Total Revenue', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Performance', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Actions', textAlign: TextAlign.center),
-        ),
-      ),
-    ];
-  }
-
-  DataCell _buildRankCell(int rank, double width) {
-    Color getRankColor() {
-      switch (rank) {
-        case 1:
-          return Colors.amber;
-        case 2:
-          return Colors.grey;
-        case 3:
-          return Colors.orange;
-        default:
-          return Colors.blue;
-      }
-    }
-
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Center(
-          child: Container(
-            width: 28,
-            height: 28,
-            decoration: BoxDecoration(
-              color: getRankColor().withValues(alpha: 0.1),
-              shape: BoxShape.circle,
-              border: Border.all(color: getRankColor(), width: 2),
-            ),
-            child: Center(
-              child: Text(
-                rank.toString(),
-                style: TextStyle(
-                  color: getRankColor(),
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12,
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildProductNameCell(String productName, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Text(
-          productName,
-          style: const TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w500,
-            color: Colors.black87,
-          ),
-          textAlign: TextAlign.center,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildPriceCell(double price, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: Colors.blue.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Text(
-              '\$${price.toStringAsFixed(2)}',
-              style: const TextStyle(
-                color: Colors.blue,
-                fontWeight: FontWeight.w600,
-                fontSize: 11,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildQuantityCell(int quantity, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: Colors.green.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Text(
-              quantity.toString(),
-              style: const TextStyle(
-                color: Colors.green,
-                fontWeight: FontWeight.w600,
-                fontSize: 11,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildRevenueCell(double revenue, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: Colors.purple.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Text(
-              '\$${revenue.toStringAsFixed(2)}',
-              style: const TextStyle(
-                color: Colors.purple,
-                fontWeight: FontWeight.w600,
-                fontSize: 11,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildPerformanceCell(
-    TopProductModel product,
-    List<TopProductModel> allProducts,
-    double width,
-  ) {
-    final totalRevenue = allProducts.fold(
-      0.0,
-      (sum, p) => sum + p.totalSoldPrice,
-    );
-    final percentage = (product.totalSoldPrice / totalRevenue * 100);
-
-    Color getPerformanceColor() {
-      if (percentage > 50) return Colors.green;
-      if (percentage > 25) return Colors.orange;
-      return Colors.red;
-    }
-
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Progress bar
-            Container(
-              height: 6,
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(3),
-              ),
-              child: FractionallySizedBox(
-                alignment: Alignment.centerLeft,
-                widthFactor: percentage / 100,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: getPerformanceColor(),
-                    borderRadius: BorderRadius.circular(3),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              '${percentage.toStringAsFixed(1)}%',
-              style: TextStyle(
-                fontSize: 10,
-                color: getPerformanceColor(),
-                fontWeight: FontWeight.w600,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildActionCell(
-    TopProductModel product,
-    BuildContext context,
-    double width,
-  ) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // View Button
-            _buildActionButton(
-              icon: HugeIcons.strokeRoundedView,
-              color: Colors.green,
-              tooltip: 'View product details',
-              onPressed: () => _showProductDetails(context, product),
-            ),
-
-            // Analytics Button
-            _buildActionButton(
-              icon: Iconsax.chart,
-              color: Colors.blue,
-              tooltip: 'View sales analytics',
-              onPressed: () => _showSalesAnalytics(context, product),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildActionButton({
-    required IconData icon,
-    required Color color,
-    required String tooltip,
-    required VoidCallback onPressed,
-  }) {
-    return IconButton(
-      onPressed: onPressed,
-      icon: Icon(icon, size: 18, color: color),
-      tooltip: tooltip,
-      padding: EdgeInsets.zero,
-      constraints: const BoxConstraints(minWidth: 30, minHeight: 30),
-    );
-  }
-
-  void _showProductDetails(BuildContext context, TopProductModel product) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return Dialog(
-          child: Container(
-            width: AppSizes.width(context) * 0.40,
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Product Performance - ${product.productName}',
-                  style: AppTextStyle.cardLevelHead(context),
-                ),
-                const SizedBox(height: 16),
-                _buildDetailRow('Product Name:', product.productName),
-                _buildDetailRow(
-                  'Selling Price:',
-                  '\$${product.sellingPrice.toStringAsFixed(2)}',
-                ),
-                _buildDetailRow(
-                  'Quantity Sold:',
-                  product.totalSoldQuantity.toString(),
-                ),
-                _buildDetailRow(
-                  'Total Revenue:',
-                  '\$${product.totalSoldPrice.toStringAsFixed(2)}',
-                ),
-
-                const SizedBox(height: 20),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('Close'),
-                  ),
+  void _generatePdf() {
+    final state = context.read<TopProductsBloc>().state;
+    if (state is TopProductsSuccess) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => Scaffold(
+            appBar: AppBar(
+              title: const Text('Top Products PDF'),
+              actions: [
+                IconButton(
+                  onPressed: () => Navigator.pop(context),
+                  icon: const Icon(Icons.close),
                 ),
               ],
             ),
-          ),
-        );
-      },
-    );
-  }
-
-  void _showSalesAnalytics(BuildContext context, TopProductModel product) {
-    // Implement sales analytics view
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Opening sales analytics for ${product.productName}'),
-        duration: const Duration(seconds: 2),
-      ),
-    );
-  }
-
-  Widget _buildDetailRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 120,
-            child: Text(
-              label,
-              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
+            body: PdfPreview(
+              build: (format) => generateTopProductsReportPdf(state.response),
+              canChangeOrientation: false,
+              canChangePageFormat: false,
+              canDebug: false,
             ),
           ),
-          const SizedBox(width: 8),
-          Expanded(child: Text(value, style: const TextStyle(fontSize: 12))),
-        ],
-      ),
-    );
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('No top products data available'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+    }
+  }
+
+  Color _getRankColor(int rank) {
+    switch (rank) {
+      case 1:
+        return Colors.amber;
+      case 2:
+        return Colors.grey;
+      case 3:
+        return Colors.orange;
+      default:
+        return Colors.blue;
+    }
+  }
+
+  Color _getPerformanceColor(double percentage) {
+    if (percentage > 50) return Colors.green;
+    if (percentage > 25) return Colors.orange;
+    return Colors.red;
+  }
+
+  int _getRevenueRank(TopProductModel product, List<TopProductModel> products) {
+    // Sort products by revenue descending
+    final sorted = List<TopProductModel>.from(products)
+      ..sort((a, b) => b.totalSoldPrice.compareTo(a.totalSoldPrice));
+
+    return sorted.indexOf(product) + 1;
   }
 }
+
+// Keep your existing TopProductsTableCard class for desktop view
