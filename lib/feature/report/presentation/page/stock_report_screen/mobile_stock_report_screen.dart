@@ -1,6 +1,8 @@
-// lib/feature/report/presentation/screens/stock_report_screen.dart
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:lottie/lottie.dart';
 import 'package:printing/printing.dart';
 import '/core/core.dart';
 import '/core/widgets/date_range.dart';
@@ -13,13 +15,14 @@ class MobileStockReportScreen extends StatefulWidget {
   const MobileStockReportScreen({super.key});
 
   @override
-  State<MobileStockReportScreen> createState() => _StockReportScreenState();
+  State<MobileStockReportScreen> createState() => _MobileStockReportScreenState();
 }
 
-class _StockReportScreenState extends State<MobileStockReportScreen> {
+class _MobileStockReportScreenState extends State<MobileStockReportScreen> {
   DateRange? selectedDateRange;
   String _sortBy = 'value';
   bool _sortAscending = false;
+  bool _isFilterExpanded = false;
 
   @override
   void initState() {
@@ -71,47 +74,128 @@ class _StockReportScreenState extends State<MobileStockReportScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isBigScreen = Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
+    return Scaffold(
+      backgroundColor: AppColors.bottomNavBg(context),
+      appBar: AppBar(
+        title: const Text('Stock Report'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.picture_as_pdf),
+            onPressed: _generatePdf,
+            tooltip: 'Generate PDF',
+          ),
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: () => _fetchStockReport(),
+            tooltip: 'Refresh',
+          ),
+        ],
+      ),
+      body: RefreshIndicator(
+        onRefresh: () async => _fetchStockReport(),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Filter Section
+              _buildMobileFilterSection(),
+              const SizedBox(height: 16),
 
-    return Container(
-      color: AppColors.bottomNavBg(context),
-      child: SafeArea(
-        child: ResponsiveRow(
-          children: [
-            if (isBigScreen) _buildSidebar(),
-            _buildContentArea(isBigScreen),
-          ],
+              // Summary Cards
+              _buildSummaryCards(),
+              const SizedBox(height: 16),
+
+              // Sort Options
+              _buildSortOptions(),
+              const SizedBox(height: 16),
+
+              // Stock List
+              _buildStockList(),
+            ],
+          ),
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          setState(() => _isFilterExpanded = !_isFilterExpanded);
+        },
+        child: Icon(_isFilterExpanded ? Icons.filter_alt_off : Icons.filter_alt),
+        tooltip: 'Toggle Filters',
       ),
     );
   }
 
-  Widget _buildSidebar() => ResponsiveCol(
-    xs: 0,
-    sm: 1,
-    md: 1,
-    lg: 2,
-    xl: 2,
-    child: Container(color: Colors.white, child: const Sidebar()),
-  );
+  Widget _buildMobileFilterSection() {
+    return Card(
+      child: ExpansionPanelList(
+        elevation: 0,
+        expandedHeaderPadding: EdgeInsets.zero,
+        expansionCallback: (int index, bool isExpanded) {
+          setState(() => _isFilterExpanded = !isExpanded);
+        },
+        children: [
+          ExpansionPanel(
+            headerBuilder: (context, isExpanded) {
+              return const ListTile(
+                leading: Icon(Icons.calendar_today),
+                title: Text('Date Range Filter'),
+              );
+            },
+            body: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  // Date Range Picker
+                  CustomDateRangeField(
+                    isLabel: true,
+                    selectedDateRange: selectedDateRange,
+                    onDateRangeSelected: (value) {
+                      setState(() => selectedDateRange = value);
+                      if (value != null) {
+                        _fetchStockReport(from: value.start, to: value.end);
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 12),
 
-
-  Widget _buildContentArea(bool isBigScreen) {
-    return ResponsiveCol(
-      xs: 12,
-      lg: 10,
-      child: RefreshIndicator(
-        onRefresh: () async => _fetchStockReport(),
-        child: Container(
-          padding: AppTextStyle.getResponsivePaddingBody(context),
-          child: Column(
-            children: [
-              _buildSummaryCards(),
-              const SizedBox(height: 8),
-              SizedBox(child: _buildStockTable()),
-            ],
+                  // Action Buttons
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: () {
+                            setState(() {
+                              selectedDateRange = null;
+                              _isFilterExpanded = false;
+                            });
+                            context.read<StockReportBloc>().add(ClearStockReportFilters());
+                            _fetchStockReport();
+                          },
+                          icon: const Icon(Icons.clear_all, size: 18),
+                          label: const Text('Clear Filter'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.grey[200],
+                            foregroundColor: Colors.grey[800],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: _generatePdf,
+                          icon: const Icon(Icons.picture_as_pdf, size: 18),
+                          label: const Text('PDF Report'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            isExpanded: _isFilterExpanded,
           ),
-        ),
+        ],
       ),
     );
   }
@@ -129,243 +213,194 @@ class _StockReportScreenState extends State<MobileStockReportScreen> {
         final lowStockCount = products.where((p) => p.currentStock > 0 && p.currentStock <= 10).length;
         final highValueProducts = products.where((p) => p.value > 1000).length;
 
-        return Wrap(
-          spacing: 8,
-          runSpacing: 8,
+        return Column(
           children: [
-            _buildSummaryCard(
-              "Total Products",
-              summary.totalProducts.toString(),
-              Icons.inventory_2,
-              AppColors.primaryColor(context),
-            ),
-            _buildSummaryCard(
-              "Total Stock ",
-              "\$${summary.totalStockValue.toStringAsFixed(2)}",
-              Icons.attach_money,
-              Colors.green,
-            ),
-            _buildSummaryCard(
-              "Total Quantity",
-              summary.totalStockQuantity.toString(),
-              Icons.shopping_cart,
-              Colors.blue,
-            ),
-            _buildSummaryCard(
-              "Avg Stock ",
-              "\$${summary.averageStockValue.toStringAsFixed(2)}",
-              Icons.analytics,
-              Colors.orange,
-            ),
-            _buildSummaryCard(
-              "Out of Stock",
-              outOfStockCount.toString(),
-              Icons.error_outline,
-              Colors.red,
-            ),
-            _buildSummaryCard(
-              "Low Stock",
-              lowStockCount.toString(),
-              Icons.warning,
-              Colors.orange,
-            ),
-            _buildSummaryCard(
-              "High Value Items",
-              highValueProducts.toString(),
-              Icons.star,
-              Colors.purple,
-            ),
-
-            // Date Range Picker
-            SizedBox(
-              width: 270,
-              child: CustomDateRangeField(
-                isLabel: false,
-                selectedDateRange: selectedDateRange,
-                onDateRangeSelected: (value) {
-                  setState(() => selectedDateRange = value);
-                  if (value != null) {
-                    _fetchStockReport(from: value.start, to: value.end);
-                  }
-                },
-              ),
-            ),
-
-            // Sort Options
-            BlocBuilder<StockReportBloc, StockReportState>(
-              builder: (context, state) {
-                if (state is! StockReportSuccess) return const SizedBox();
-
-                return Container(
-                  height: 40,
-                  width: 200,
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.grey.shade300),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.sort, size: 16, color: Colors.grey),
-                      const SizedBox(width: 4),
-                      const Text('Sort by:', style: TextStyle(fontSize: 12)),
-                      const SizedBox(width: 4),
-                      DropdownButton<String>(
-                        value: _sortBy,
-                        icon: const Icon(Icons.arrow_drop_down, size: 16),
-                        elevation: 16,
-                        style: const TextStyle(fontSize: 12, color: Colors.black),
-                        underline: const SizedBox(),
-                        onChanged: (String? newValue) {
-                          if (newValue != null) {
-                            _handleSort(newValue, _sortAscending);
-                          }
-                        },
-                        items: const [
-                          DropdownMenuItem(value: 'name', child: Text('Name')),
-                          DropdownMenuItem(value: 'category', child: Text('Category')),
-                          DropdownMenuItem(value: 'stock', child: Text('Stock')),
-                          DropdownMenuItem(value: 'value', child: Text('Value')),
-                          DropdownMenuItem(value: 'profit_margin', child: Text('Margin')),
-                        ],
-                      ),
-                      IconButton(
-                        icon: Icon(
-                          _sortAscending ? Icons.arrow_upward : Icons.arrow_downward,
-                          size: 16,
-                        ),
-                        onPressed: () {
-                          _handleSort(_sortBy, !_sortAscending);
-                        },
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
-
-            // Clear Filters Button
-            AppButton(
-              size: 100,
-              name: "Clear",
-              onPressed: () {
-                setState(() => selectedDateRange = null);
-                context.read<StockReportBloc>().add(ClearStockReportFilters());
-                _fetchStockReport();
-              },
-            ),
-            gapW16,
-            AppButton(
-                size: 100,
-                color: AppColors.primaryColor(context),
-                name: "Pdf", onPressed: (){
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => Scaffold(
-                    backgroundColor: Colors.red,
-                    body: PdfPreview.builder(
-                      useActions: true,
-                      allowSharing: false,
-                      canDebug: false,
-                      canChangeOrientation: false,
-                      canChangePageFormat: false,
-                      dynamicLayout: true,
-                      build: (format) => generateStockReportPdf(
-                        state.response,
-
-                      ),
-                      pdfPreviewPageDecoration:
-                      BoxDecoration(color: AppColors.white),
-                      actionBarTheme: PdfActionBarTheme(
-                        backgroundColor: AppColors.primaryColor(context),
-                        iconColor: Colors.white,
-                        textStyle: const TextStyle(color: Colors.white),
-                      ),
-                      actions: [
-                        IconButton(
-                          onPressed: () => AppRoutes.pop(context),
-                          icon: const Icon(Icons.cancel, color: Colors.red),
-                        ),
-                      ],
-                      pagesBuilder: (context, pages) {
-                        debugPrint('Rendering ${pages.length} pages');
-                        return PageView.builder(
-                          itemCount: pages.length,
-                          scrollDirection: Axis.vertical,
-                          itemBuilder: (context, index) {
-                            final page = pages[index];
-                            return Container(
-                              color: Colors.grey,
-                              alignment: Alignment.center,
-                              padding: const EdgeInsets.all(8.0),
-                              child: Image(image: page.image, fit: BoxFit.contain),
-                            );
-                          },
-                        );
-                      },
-                    ),
-                  ),
+            // First row
+            Row(
+              children: [
+                _buildMobileSummaryCard(
+                  "Total Products",
+                  summary.totalProducts.toString(),
+                  Icons.inventory_2,
+                  AppColors.primaryColor(context),
                 ),
-              );
+                const SizedBox(width: 8),
+                _buildMobileSummaryCard(
+                  "Stock Value",
+                  "\$${summary.totalStockValue.toStringAsFixed(2)}",
+                  Icons.attach_money,
+                  Colors.green,
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
 
-            }),
+            // Second row
+            Row(
+              children: [
+                _buildMobileSummaryCard(
+                  "Total Quantity",
+                  summary.totalStockQuantity.toString(),
+                  Icons.shopping_cart,
+                  Colors.blue,
+                ),
+                const SizedBox(width: 8),
+                _buildMobileSummaryCard(
+                  "Avg Value",
+                  "\$${summary.averageStockValue.toStringAsFixed(2)}",
+                  Icons.analytics,
+                  Colors.orange,
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
 
+            // Third row (alerts)
+            if (outOfStockCount > 0 || lowStockCount > 0)
+              Row(
+                children: [
+                  if (outOfStockCount > 0)
+                    Expanded(
+                      child: _buildMobileSummaryCard(
+                        "Out of Stock",
+                        outOfStockCount.toString(),
+                        Icons.error_outline,
+                        Colors.red,
+                      ),
+                    ),
+                  if (outOfStockCount > 0) const SizedBox(width: 8),
+                  if (lowStockCount > 0)
+                    Expanded(
+                      child: _buildMobileSummaryCard(
+                        "Low Stock",
+                        lowStockCount.toString(),
+                        Icons.warning,
+                        Colors.orange,
+                      ),
+                    ),
+                ],
+              ),
           ],
         );
       },
     );
   }
 
-  Widget _buildSummaryCard(String title, String value, IconData icon, Color color) {
-    return Container(
-      width: 140,
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.1),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Icon(icon, color: color, size: 28),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 11,
-                    color: Colors.grey,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                Text(
-                  value,
-                  style:  TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color:AppColors.blackColor(context),
-                  ),
-                ),
-              ],
+  Widget _buildMobileSummaryCard(String title, String value, IconData icon, Color color) {
+    return Expanded(
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(8),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.2),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
             ),
-          ),
-        ],
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: color, size: 20),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 10,
+                      color: Colors.grey,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  Text(
+                    value,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: color,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildStockTable() {
+  Widget _buildSortOptions() {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Sort Options',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: DropdownButtonFormField<String>(
+                    value: _sortBy,
+                    decoration: const InputDecoration(
+                      labelText: 'Sort by',
+                      border: OutlineInputBorder(),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 12),
+                    ),
+                    items: const [
+                      DropdownMenuItem(value: 'name', child: Text('Product Name')),
+                      DropdownMenuItem(value: 'category', child: Text('Category')),
+                      DropdownMenuItem(value: 'stock', child: Text('Stock Level')),
+                      DropdownMenuItem(value: 'value', child: Text('Stock Value')),
+                      DropdownMenuItem(value: 'profit_margin', child: Text('Profit Margin')),
+                    ],
+                    onChanged: (String? newValue) {
+                      if (newValue != null) {
+                        _handleSort(newValue, _sortAscending);
+                      }
+                    },
+                  ),
+                ),
+                const SizedBox(width: 12),
+                IconButton(
+                  icon: Icon(
+                    _sortAscending ? Icons.arrow_upward : Icons.arrow_downward,
+                    color: Colors.blue,
+                  ),
+                  onPressed: () {
+                    _handleSort(_sortBy, !_sortAscending);
+                  },
+                  tooltip: _sortAscending ? 'Ascending' : 'Descending',
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStockList() {
     return BlocBuilder<StockReportBloc, StockReportState>(
       builder: (context, state) {
         if (state is StockReportLoading) {
@@ -384,12 +419,7 @@ class _StockReportScreenState extends State<MobileStockReportScreen> {
             return _buildEmptyState();
           }
           final sortedProducts = _getSortedProducts(state.response.report);
-          return StockReportTableCard(
-            products: sortedProducts,
-            sortBy: _sortBy,
-            sortAscending: _sortAscending,
-            onSort: _handleSort,
-          );
+          return _buildMobileStockList(sortedProducts);
         } else if (state is StockReportFailed) {
           return _buildErrorState(state.content);
         }
@@ -398,12 +428,289 @@ class _StockReportScreenState extends State<MobileStockReportScreen> {
     );
   }
 
+  Widget _buildMobileStockList(List<StockProduct> products) {
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: products.length,
+      itemBuilder: (context, index) {
+        final product = products[index];
+        final isOutOfStock = product.currentStock == 0;
+        final isLowStock = product.currentStock > 0 && product.currentStock <= 10;
+
+        return Card(
+          margin: const EdgeInsets.only(bottom: 8),
+          child: Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Product Header
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Product Name and Category
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            product.productName,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 4),
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[200],
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Text(
+                                  product.category,
+                                  style: const TextStyle(fontSize: 10),
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[200],
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Text(
+                                  product.brand,
+                                  style: const TextStyle(fontSize: 10),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // Stock Status Indicator
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: product.stockStatusColor.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Column(
+                        children: [
+                          Text(
+                            product.currentStock.toString(),
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: product.stockStatusColor,
+                            ),
+                          ),
+                          Text(
+                            product.stockStatus,
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: product.stockStatusColor,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 12),
+
+                // Pricing Row
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    _buildPriceItem('Cost', '\$${product.avgPurchasePrice.toStringAsFixed(2)}', Colors.orange),
+                    _buildPriceItem('Selling', '\$${product.sellingPrice.toStringAsFixed(2)}', Colors.blue),
+                    _buildPriceItem('Value', '\$${product.value.toStringAsFixed(2)}', Colors.green),
+                  ],
+                ),
+
+                const SizedBox(height: 12),
+
+                // Profitability and Margin
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: product.profitabilityColor.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Column(
+                          children: [
+                            const Text(
+                              'Profit Margin',
+                              style: TextStyle(fontSize: 10, color: Colors.grey),
+                            ),
+                            Text(
+                              '${product.profitMargin.toStringAsFixed(1)}%',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: product.profitabilityColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: product.profitabilityColor.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Column(
+                          children: [
+                            const Text(
+                              'Profitability',
+                              style: TextStyle(fontSize: 10, color: Colors.grey),
+                            ),
+                            Text(
+                              product.profitability,
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: product.profitabilityColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+
+                // Stock Progress Bar
+                const SizedBox(height: 12),
+                Container(
+                  height: 6,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(3),
+                  ),
+                  child: FractionallySizedBox(
+                    alignment: Alignment.centerLeft,
+                    widthFactor: product.currentStock / (product.currentStock + product.currentStock),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: product.stockStatusColor,
+                        borderRadius: BorderRadius.circular(3),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Stock Level',
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                    Text(
+                      '${product.currentStock} units',
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        color: product.stockStatusColor,
+                      ),
+                    ),
+                  ],
+                ),
+
+                // Warning Banner
+                if (isOutOfStock || isLowStock)
+                  Container(
+                    margin: const EdgeInsets.only(top: 12),
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: (isOutOfStock ? Colors.red : Colors.orange).withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: isOutOfStock ? Colors.red : Colors.orange,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          isOutOfStock ? Icons.error_outline : Icons.warning,
+                          color: isOutOfStock ? Colors.red : Colors.orange,
+                          size: 16,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            isOutOfStock
+                                ? 'Out of stock - Immediate restock needed!'
+                                : 'Low stock - Consider restocking soon',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: isOutOfStock ? Colors.red : Colors.orange,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildPriceItem(String label, String value, Color color) {
+    return Column(
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 10,
+            color: Colors.grey,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            color: color,
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildEmptyState() {
-    return Center(
+    return Container(
+      padding: const EdgeInsets.all(32),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Lottie.asset(AppImages.noData, width: 200, height: 200),
+          Lottie.asset(AppImages.noData, width: 150, height: 150),
           const SizedBox(height: 16),
           Text(
             "No Stock Data Found",
@@ -412,6 +719,7 @@ class _StockReportScreenState extends State<MobileStockReportScreen> {
               fontWeight: FontWeight.w600,
               color: Colors.grey,
             ),
+            textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
           Text(
@@ -421,11 +729,12 @@ class _StockReportScreenState extends State<MobileStockReportScreen> {
               fontWeight: FontWeight.w400,
               color: Colors.grey,
             ),
+            textAlign: TextAlign.center,
           ),
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: _fetchStockReport,
-            child: const Text("Refresh"),
+            child: const Text("Refresh Data"),
           ),
         ],
       ),
@@ -433,7 +742,8 @@ class _StockReportScreenState extends State<MobileStockReportScreen> {
   }
 
   Widget _buildErrorState(String error) {
-    return Center(
+    return Container(
+      padding: const EdgeInsets.all(32),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -446,6 +756,7 @@ class _StockReportScreenState extends State<MobileStockReportScreen> {
               fontWeight: FontWeight.w600,
               color: Colors.grey,
             ),
+            textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
           Text(
@@ -456,461 +767,45 @@ class _StockReportScreenState extends State<MobileStockReportScreen> {
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: _fetchStockReport,
-            child: const Text("Retry"),
+            child: const Text("Try Again"),
           ),
         ],
       ),
     );
   }
-}
 
-class StockReportTableCard extends StatelessWidget {
-  final List<StockProduct> products;
-  final String sortBy;
-  final bool sortAscending;
-  final Function(String, bool) onSort;
-
-  const StockReportTableCard({
-    super.key,
-    required this.products,
-    required this.sortBy,
-    required this.sortAscending,
-    required this.onSort,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final verticalScrollController = ScrollController();
-    final horizontalScrollController = ScrollController();
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final totalWidth = constraints.maxWidth;
-        const numColumns = 12; // SL, Product Name, Category, Brand, Avg Cost, Selling Price, Current Stock, Stock Value, Potential Value, Profit Margin, Stock Status, Profitability
-        const minColumnWidth = 100.0;
-
-        final dynamicColumnWidth =
-        (totalWidth / numColumns).clamp(minColumnWidth, double.infinity);
-
-        return Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withValues(alpha: 0.1),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Scrollbar(
-            controller: verticalScrollController,
-            thumbVisibility: true,
-            child: SingleChildScrollView(
-              controller: verticalScrollController,
-              scrollDirection: Axis.vertical,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: Scrollbar(
-                  controller: horizontalScrollController,
-                  thumbVisibility: true,
-                  child: SingleChildScrollView(
-                    controller: horizontalScrollController,
-                    scrollDirection: Axis.horizontal,
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 5),
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(minWidth: totalWidth),
-                        child: DataTable(
-                          dataRowMinHeight: 40,
-                          dataRowMaxHeight: 40,
-                          columnSpacing: 8,
-                          horizontalMargin: 12,
-                          dividerThickness: 0.5,
-                          headingRowHeight: 40,
-                          headingTextStyle: TextStyle(
-                            color: Colors.white,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                            fontFamily: GoogleFonts.inter().fontFamily,
-                          ),
-                          headingRowColor: WidgetStateProperty.all(
-                            AppColors.primaryColor(context),
-                          ),
-                          dataTextStyle: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w500,
-                            fontFamily: GoogleFonts.inter().fontFamily,
-                          ),
-                          sortColumnIndex: _getSortColumnIndex(sortBy),
-                          sortAscending: sortAscending,
-                          columns: _buildColumns(dynamicColumnWidth),
-                          rows: products.asMap().entries.map((entry) {
-                            final product = entry.value;
-                            return DataRow(
-                              cells: [
-                                _buildIndexCell(entry.key + 1, dynamicColumnWidth * 0.6),
-                                _buildProductNameCell(product, dynamicColumnWidth * 1.5),
-                                _buildCategoryCell(product.category, dynamicColumnWidth),
-                                _buildBrandCell(product.brand, dynamicColumnWidth * 1.2),
-                                _buildPriceCell(product.avgPurchasePrice, dynamicColumnWidth, isCost: true),
-                                _buildPriceCell(product.sellingPrice, dynamicColumnWidth, isSelling: true),
-                                _buildStockCell(product, dynamicColumnWidth),
-                                _buildValueCell(product.value, dynamicColumnWidth),
-                                _buildPotentialValueCell(product, dynamicColumnWidth),
-                                _buildProfitMarginCell(product, dynamicColumnWidth),
-                                _buildStockStatusCell(product, dynamicColumnWidth),
-                                _buildProfitabilityCell(product, dynamicColumnWidth),
-                              ],
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                    ),
-                  ),
+  void _generatePdf() {
+    final state = context.read<StockReportBloc>().state;
+    if (state is StockReportSuccess) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => Scaffold(
+            appBar: AppBar(
+              title: const Text('Stock Report PDF'),
+              actions: [
+                IconButton(
+                  onPressed: () => Navigator.pop(context),
+                  icon: const Icon(Icons.close),
                 ),
-              ),
+              ],
             ),
-          ),
-        );
-      },
-    );
-  }
-
-  List<DataColumn> _buildColumns(double columnWidth) {
-    return [
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth * 0.6,
-          child: const Text('SL', textAlign: TextAlign.center),
-        ),
-      ),
-      _buildSortableColumn('Product Name', 'name', columnWidth * 1.5),
-      _buildSortableColumn('Category', 'category', columnWidth),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth * 1.2,
-          child: const Text('Brand', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Avg Cost', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Selling Price', textAlign: TextAlign.center),
-        ),
-      ),
-      _buildSortableColumn('Current Stock', 'stock', columnWidth),
-      _buildSortableColumn('Stock Value', 'value', columnWidth),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Potential Value', textAlign: TextAlign.center),
-        ),
-      ),
-      _buildSortableColumn('Profit Margin', 'profit_margin', columnWidth),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Stock Status', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Profitability', textAlign: TextAlign.center),
-        ),
-      ),
-    ];
-  }
-
-  DataColumn _buildSortableColumn(String label, String columnId, double width) {
-    return DataColumn(
-      label: SizedBox(
-        width: width,
-        child: Text(
-          label,
-          textAlign: TextAlign.center,
-        ),
-      ),
-      onSort: (columnIndex, ascending) {
-        onSort(columnId, ascending);
-      },
-    );
-  }
-
-  DataCell _buildIndexCell(int index, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Center(
-          child: Text(
-            index.toString(),
-            style: const TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.w600,
-              color: Colors.black87,
+            body: PdfPreview(
+              build: (format) => generateStockReportPdf(state.response),
+              canChangeOrientation: false,
+              canChangePageFormat: false,
+              canDebug: false,
             ),
           ),
         ),
-      ),
-    );
-  }
-
-  DataCell _buildProductNameCell(StockProduct product, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Tooltip(
-          message: product.productName,
-          child: Text(
-            product.productName,
-            style: const TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.w500,
-              color: Colors.black87,
-            ),
-            textAlign: TextAlign.center,
-            overflow: TextOverflow.ellipsis,
-            maxLines: 2,
-          ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('No stock data available'),
+          backgroundColor: Colors.orange,
         ),
-      ),
-    );
-  }
-
-  DataCell _buildCategoryCell(String category, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Text(
-          category,
-          style: const TextStyle(
-            fontSize: 10,
-            fontWeight: FontWeight.w500,
-            color: Colors.black87,
-          ),
-          textAlign: TextAlign.center,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildBrandCell(String brand, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Text(
-          brand,
-          style: const TextStyle(
-            fontSize: 10,
-            fontWeight: FontWeight.w500,
-            color: Colors.black87,
-          ),
-          textAlign: TextAlign.center,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildPriceCell(double price, double width, {bool isCost = false, bool isSelling = false}) {
-    Color getPriceColor() {
-      if (isCost) return Colors.orange;
-      if (isSelling) return Colors.blue;
-      return Colors.grey;
-    }
-
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-            decoration: BoxDecoration(
-              color: getPriceColor().withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Text(
-              price.toStringAsFixed(2),
-              style: TextStyle(
-                color: getPriceColor(),
-                fontWeight: FontWeight.w600,
-                fontSize: 10,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildStockCell(StockProduct product, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: product.stockStatusColor.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(4),
-              border: Border.all(color: product.stockStatusColor),
-            ),
-            child: Text(
-              product.currentStock.toString(),
-              style: TextStyle(
-                color: product.stockStatusColor,
-                fontWeight: FontWeight.w600,
-                fontSize: 10,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildValueCell(double value, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-            decoration: BoxDecoration(
-              color: Colors.green.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Text(
-              '\$${value.toStringAsFixed(2)}',
-              style: const TextStyle(
-                color: Colors.green,
-                fontWeight: FontWeight.w600,
-                fontSize: 10,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildPotentialValueCell(StockProduct product, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Center(
-          child: Text(
-            '\$${product.potentialValue.toStringAsFixed(2)}',
-            style: TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.w500,
-              color: product.potentialValue > product.value ? Colors.blue : Colors.grey,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildProfitMarginCell(StockProduct product, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-            decoration: BoxDecoration(
-              color: product.profitabilityColor.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Text(
-              '${product.profitMargin.toStringAsFixed(1)}%',
-              style: TextStyle(
-                color: product.profitabilityColor,
-                fontWeight: FontWeight.w600,
-                fontSize: 10,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildStockStatusCell(StockProduct product, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-            decoration: BoxDecoration(
-              color: product.stockStatusColor.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Text(
-              product.stockStatus,
-              style: TextStyle(
-                color: product.stockStatusColor,
-                fontWeight: FontWeight.w600,
-                fontSize: 9,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildProfitabilityCell(StockProduct product, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-            decoration: BoxDecoration(
-              color: product.profitabilityColor.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Text(
-              product.profitability,
-              style: TextStyle(
-                color: product.profitabilityColor,
-                fontWeight: FontWeight.w600,
-                fontSize: 9,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  int _getSortColumnIndex(String sortBy) {
-    switch (sortBy) {
-      case 'name': return 1;
-      case 'category': return 2;
-      case 'stock': return 6;
-      case 'value': return 7;
-      case 'profit_margin': return 9;
-      default: return 7;
+      );
     }
   }
 }
