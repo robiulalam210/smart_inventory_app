@@ -128,7 +128,7 @@ class _MoneyReceiptScreenState extends State<MobileMoneyReceiptList> {
   Widget build(BuildContext context) {
 
     return Scaffold(
-      appBar: AppBar(title: Text("Money receipt"),),
+      appBar: AppBar(title: Text("Money receipt",style: AppTextStyle.titleMedium(context),),),
       body: SafeArea(
         child: RefreshIndicator(
           color: AppColors.primaryColor(context),
@@ -217,7 +217,7 @@ class _MoneyReceiptScreenState extends State<MobileMoneyReceiptList> {
         // Search Bar
         Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.bottomNavBg(context),
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
@@ -258,7 +258,6 @@ class _MoneyReceiptScreenState extends State<MobileMoneyReceiptList> {
             ],
           ),
         ),
-        const SizedBox(height: 12),
 
         // Filter Chips
         Wrap(
@@ -295,7 +294,7 @@ class _MoneyReceiptScreenState extends State<MobileMoneyReceiptList> {
               ),
           ],
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 4),
 
         // Action Buttons
         Row(

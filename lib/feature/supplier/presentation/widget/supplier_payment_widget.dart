@@ -65,7 +65,7 @@ class SupplierPaymentWidget extends StatelessWidget {
         vertical: 8.0,
       ),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.bottomNavBg(context),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -121,8 +121,9 @@ class SupplierPaymentWidget extends StatelessWidget {
                       Flexible(
                         child: Text(
                           payment.spNo ?? '-',
-                          style: const TextStyle(
+                          style:  TextStyle(
                             fontWeight: FontWeight.w700,
+                            color: AppColors.text(context),
                             fontSize: 14,
                           ),
                           overflow: TextOverflow.ellipsis,
@@ -159,40 +160,45 @@ class SupplierPaymentWidget extends StatelessWidget {
 
           // Payment Details
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(8),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Supplier Info
-                _buildDetailRow(
-                  icon: Iconsax.user,
-                  label: 'Supplier',
-                  value: payment.supplierName ?? '-',
-                  isImportant: true,
-                ),
-                const SizedBox(height: 12),
-
-                // Phone
-                if (payment.supplierPhone?.isNotEmpty == true)
-                  Column(
-                    children: [
-                      _buildDetailRow(
-                        icon: Iconsax.call,
-                        label: 'Phone',
-                        value: payment.supplierPhone!,
-                        onTap: () {
-                          // Add phone call functionality
-                        },
-                      ),
-                      const SizedBox(height: 12),
-                    ],
+                Row(children: [
+                  Expanded(
+                    child: _buildDetailRow(
+                      context: context,
+                      icon: Iconsax.user,
+                      label: 'Supplier',
+                      value: payment.supplierName ?? '-',
+                      isImportant: true,
+                    ),
                   ),
+                  const SizedBox(width: 12),
+                  if (payment.supplierPhone?.isNotEmpty == true)
+
+                    Expanded(
+                      child: _buildDetailRow(
+                      context: context,
+                      icon: Iconsax.call,
+                      label: 'Phone',
+                      value: payment.supplierPhone!,
+                      onTap: () {
+                        // Add phone call functionality
+                      },
+                                        ),
+                    ),
+                ],),
+                // Supplier Info
+SizedBox(height: 8,),
+
+
 
                 // Payment Details Grid
                 Container(
-                  padding: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.grey.shade50,
+                    color: AppColors.bottomNavBg(context),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: Colors.grey.shade200,
@@ -266,9 +272,9 @@ class SupplierPaymentWidget extends StatelessWidget {
 
           // Action Buttons
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
             decoration: BoxDecoration(
-              color: Colors.grey.shade50,
+              color: AppColors.bottomNavBg(context),
               borderRadius: const BorderRadius.only(
                 bottomLeft: Radius.circular(16),
                 bottomRight: Radius.circular(16),
@@ -388,6 +394,7 @@ class SupplierPaymentWidget extends StatelessWidget {
   }
 
   Widget _buildDetailRow({
+    required BuildContext context,
     required IconData icon,
     required String label,
     required String value,
@@ -402,7 +409,7 @@ class SupplierPaymentWidget extends StatelessWidget {
           Icon(
             icon,
             size: 18,
-            color: Colors.grey.shade600,
+            color: AppColors.text(context),
           ),
           const SizedBox(width: 8),
           Expanded(
@@ -413,7 +420,7 @@ class SupplierPaymentWidget extends StatelessWidget {
                   label,
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
-                    color: Colors.grey.shade700,
+                    color: AppColors.text(context),
                     fontSize: 13,
                   ),
                 ),
@@ -422,7 +429,7 @@ class SupplierPaymentWidget extends StatelessWidget {
                   value,
                   style: TextStyle(
                     fontWeight: isImportant ? FontWeight.w700 : FontWeight.w500,
-                    color: isImportant ? Colors.black : Colors.grey.shade800,
+                    color: isImportant ? AppColors.primaryColor(context): AppColors.text(context),
                     fontSize: isImportant ? 15 : 14,
                   ),
                   maxLines: 2,

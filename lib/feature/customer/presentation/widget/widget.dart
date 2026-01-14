@@ -74,7 +74,7 @@ class CustomerTableCard extends StatelessWidget {
         vertical: 8.0,
       ),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.bottomNavBg(context),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -178,6 +178,7 @@ class CustomerTableCard extends StatelessWidget {
                   label: 'Name',
                   value: customer.name ?? 'N/A',
                   isImportant: true,
+                  context: context
                 ),
                 const SizedBox(height: 8),
 
@@ -185,6 +186,7 @@ class CustomerTableCard extends StatelessWidget {
                 _buildDetailRow(
                   icon: Iconsax.call,
                   label: 'Phone',
+                  context: context,
                   value: customer.phone ?? 'N/A',
                   onTap: customer.phone != null
                       ? () {
@@ -200,6 +202,7 @@ class CustomerTableCard extends StatelessWidget {
                     children: [
                       _buildDetailRow(
                         icon: Iconsax.sms,
+                        context: context,
                         label: 'Email',
                         value: customer.email ?? 'N/A',
                         onTap: () {
@@ -220,14 +223,14 @@ class CustomerTableCard extends StatelessWidget {
                           Icon(
                             Iconsax.location,
                             size: 16,
-                            color: Colors.grey.shade600,
+                            color: AppColors.text(context),
                           ),
                           const SizedBox(width: 8),
                           Text(
                             'Address:',
                             style: TextStyle(
                               fontWeight: FontWeight.w600,
-                              color: Colors.grey.shade700,
+                              color:AppColors.text(context),
                               fontSize: 13,
                             ),
                           ),
@@ -239,7 +242,7 @@ class CustomerTableCard extends StatelessWidget {
                         child: Text(
                           customer.address!,
                           style: TextStyle(
-                            color: Colors.grey.shade600,
+                            color: AppColors.text(context),
                             fontSize: 13,
                           ),
                           maxLines: 2,
@@ -254,9 +257,9 @@ class CustomerTableCard extends StatelessWidget {
 
           // Action Buttons
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
             decoration: BoxDecoration(
-              color: Colors.grey.shade50,
+              color: AppColors.bottomNavBg(context),
               borderRadius: const BorderRadius.only(
                 bottomLeft: Radius.circular(16),
                 bottomRight: Radius.circular(16),
@@ -317,6 +320,7 @@ class CustomerTableCard extends StatelessWidget {
   }
 
   Widget _buildDetailRow({
+    required BuildContext context,
     required IconData icon,
     required String label,
     required String value,
@@ -331,7 +335,7 @@ class CustomerTableCard extends StatelessWidget {
           Icon(
             icon,
             size: 16,
-            color: Colors.grey.shade600,
+            color: AppColors.text(context),
           ),
           const SizedBox(width: 8),
           Expanded(
@@ -342,7 +346,7 @@ class CustomerTableCard extends StatelessWidget {
                   label,
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
-                    color: Colors.grey.shade700,
+                    color: AppColors.text(context),
                     fontSize: 12,
                   ),
                 ),
@@ -351,7 +355,7 @@ class CustomerTableCard extends StatelessWidget {
                   value,
                   style: TextStyle(
                     fontWeight: isImportant ? FontWeight.w700 : FontWeight.w500,
-                    color: isImportant ? Colors.black : Colors.grey.shade800,
+                    color: isImportant ? AppColors.primaryColor(context) : AppColors.text(context),
                     fontSize: isImportant ? 14 : 13,
                   ),
                   maxLines: 2,

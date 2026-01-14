@@ -164,7 +164,7 @@ class _PosSaleScreenState extends State<MobilePosSaleScreen> {
         // Search Bar
         Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.bottomNavBg(context),
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
@@ -206,7 +206,6 @@ class _PosSaleScreenState extends State<MobilePosSaleScreen> {
             ],
           ),
         ),
-        const SizedBox(height: 12),
 
         // Filter Chips
         Wrap(

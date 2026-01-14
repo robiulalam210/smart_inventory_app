@@ -53,7 +53,7 @@ class MoneyReceiptDataTableWidget extends StatelessWidget {
         vertical: 8.0,
       ),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.bottomNavBg(context),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -107,9 +107,10 @@ class MoneyReceiptDataTableWidget extends StatelessWidget {
                     SizedBox(
                       child: Text(
                         receipt.mrNo ?? '-',
-                        style: const TextStyle(
+                        style:  TextStyle(
                           fontWeight: FontWeight.w600,
                           fontSize: 14,
+                          color: AppColors.text(context),
                           overflow: TextOverflow.ellipsis,
                         ),
                         maxLines: 1,
@@ -151,12 +152,14 @@ class MoneyReceiptDataTableWidget extends StatelessWidget {
                     icon: Iconsax.user,
                     label: 'Customer',
                     value: receipt.customerName ?? '-',
+                    context: context
                   ),),
                   SizedBox(width: 8,),
                   Expanded(child:  _buildDetailRow(
                     icon: Iconsax.profile_2user,
                     label: 'Seller',
                     value: receipt.sellerName ?? '-',
+                    context: context
                   ),),
 
                 ],),
@@ -171,12 +174,14 @@ class MoneyReceiptDataTableWidget extends StatelessWidget {
                     icon: Iconsax.calendar,
                     label: 'Payment Date',
                     value: _formatDate(receipt.paymentDate),
+                    context: context
                   ),),
                   SizedBox(width: 8,),
                   Expanded(child:  _buildDetailRow(
                     icon: Iconsax.wallet,
                     label: 'Payment Method',
                     value: receipt.paymentMethod ?? '-',
+                    context: context
                   ),),
 
                 ],),
@@ -193,6 +198,7 @@ class MoneyReceiptDataTableWidget extends StatelessWidget {
                         icon: Iconsax.call,
                         label: 'Phone',
                         value: receipt.customerPhone!,
+                        context: context
                       ),
                       const SizedBox(height: 8),
                     ],
@@ -202,7 +208,7 @@ class MoneyReceiptDataTableWidget extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.grey.shade50,
+                    color: AppColors.bottomNavBg(context),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: Colors.grey.shade200),
                   ),
@@ -216,14 +222,15 @@ class MoneyReceiptDataTableWidget extends StatelessWidget {
                             'Amount:',
                             style: TextStyle(
                               fontWeight: FontWeight.w600,
-                              color: Colors.grey.shade700,
+                              color: AppColors.text(context),
                               fontSize: 13,
                             ),
                           ),
                           Text(
                             '৳${amount.toStringAsFixed(2)}',
-                            style: const TextStyle(
+                            style:  TextStyle(
                               fontWeight: FontWeight.w700,
+                              color: AppColors.text(context),
                               fontSize: 14,
                             ),
                           ),
@@ -239,14 +246,15 @@ class MoneyReceiptDataTableWidget extends StatelessWidget {
                             'Total Before:',
                             style: TextStyle(
                               fontWeight: FontWeight.w600,
-                              color: Colors.grey.shade700,
+                              color: AppColors.text(context),
                               fontSize: 13,
                             ),
                           ),
                           Text(
                             '৳${totalBefore.toStringAsFixed(2)}',
-                            style: const TextStyle(
+                            style:  TextStyle(
                               fontWeight: FontWeight.w700,
+                              color: AppColors.text(context),
                               fontSize: 14,
                             ),
                           ),
@@ -263,7 +271,7 @@ class MoneyReceiptDataTableWidget extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
             decoration: BoxDecoration(
-              color: Colors.grey.shade50,
+              color: AppColors.bottomNavBg(context),
               borderRadius: const BorderRadius.only(
                 bottomLeft: Radius.circular(16),
                 bottomRight: Radius.circular(16),
@@ -330,6 +338,7 @@ class MoneyReceiptDataTableWidget extends StatelessWidget {
     required IconData icon,
     required String label,
     required String value,
+    required BuildContext context,
   }) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -337,7 +346,7 @@ class MoneyReceiptDataTableWidget extends StatelessWidget {
         Icon(
           icon,
           size: 16,
-          color: Colors.grey.shade600,
+          color: AppColors.text(context),
         ),
         const SizedBox(width: 8),
         Expanded(
@@ -348,15 +357,16 @@ class MoneyReceiptDataTableWidget extends StatelessWidget {
                 label,
                 style: TextStyle(
                   fontWeight: FontWeight.w600,
-                  color: Colors.grey.shade700,
+                  color: AppColors.text(context),
                   fontSize: 13,
                 ),
               ),
               const SizedBox(height: 2),
               Text(
                 value,
-                style: const TextStyle(
+                style:  TextStyle(
                   fontSize: 14,
+                  color: AppColors.text(context),
                   fontWeight: FontWeight.w500,
                 ),
                 maxLines: 2,

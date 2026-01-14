@@ -632,9 +632,9 @@ class _MoneyReceiptListScreenState extends State<MobileMoneyReceiptForm> {
 
   Widget _buildMobileSummarySection() {
     return Container(
-      padding: const EdgeInsets.all(0),
+      padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color:AppColors.bottomNavBg(context),
         borderRadius: BorderRadius.circular(6),
       ),
       child: Column(

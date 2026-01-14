@@ -38,7 +38,7 @@ class PaginationBar extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.bottomNavBg(context),
         borderRadius: const BorderRadius.only(
           bottomLeft: Radius.circular(8),
           bottomRight: Radius.circular(8),
@@ -59,9 +59,10 @@ class PaginationBar extends StatelessWidget {
               'Showing $from to $to of $count',
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
+              style:  TextStyle(
                 fontSize: 14,
-                color: Colors.grey,
+                color: AppColors.text(context),
+
               ),
             ),
           ),
@@ -93,9 +94,10 @@ class PaginationBar extends StatelessWidget {
       ) {
     return Row(
       children: [
-        const Text(
+         Text(
           'Show:',
-          style: TextStyle(fontSize: 14, color: Colors.grey),
+          style: TextStyle(fontSize: 14,               color: AppColors.text(context),
+          ),
         ),
         const SizedBox(width: 8),
 
@@ -126,9 +128,10 @@ class PaginationBar extends StatelessWidget {
   Widget _buildPageSizeOnly(BuildContext context ,List<int> availablePageSizes) {
     return Row(
       children: [
-        const Text(
+         Text(
           'Show:',
-          style: TextStyle(fontSize: 14, color: Colors.grey),
+          style: TextStyle(fontSize: 14,               color: AppColors.text(context),
+          ),
         ),
         const SizedBox(width: 8),
         _pageSizeDropdown(context ,availablePageSizes),
@@ -223,7 +226,7 @@ class PaginationBar extends StatelessWidget {
       child: TextButton(
         onPressed: () => onPageChanged(page),
         style: TextButton.styleFrom(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 3),
           backgroundColor:
           isActive ? AppColors.primaryColor(context) : Colors.transparent,
           shape: RoundedRectangleBorder(
@@ -239,7 +242,8 @@ class PaginationBar extends StatelessWidget {
           page.toString(),
           style: TextStyle(
             fontSize: 14,
-            color: isActive ? Colors.white : Colors.black,
+            color: isActive ? Colors.white :                              AppColors.text(context)
+          ,
             fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
           ),
         ),

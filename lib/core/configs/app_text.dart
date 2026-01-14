@@ -3,53 +3,45 @@ import 'configs.dart';
 class AppTextStyle {
   static const String fontFamily = 'Roboto';
 
-  static TextStyle titleLarge(BuildContext context) =>
-      Theme.of(context).textTheme.titleLarge!.copyWith(
-        fontFamily: fontFamily,
-        color: AppColors.text(context),
-      );
+  static TextStyle titleLarge(BuildContext context) => Theme.of(context)
+      .textTheme
+      .titleLarge!
+      .copyWith(fontFamily: fontFamily, color: AppColors.text(context));
 
-  static TextStyle headlineMedium(BuildContext context) =>
-      Theme.of(context).textTheme.headlineMedium!.copyWith(
-        fontFamily: fontFamily,
-        color: AppColors.text(context),
-      );
+  static TextStyle headlineMedium(BuildContext context) => Theme.of(context)
+      .textTheme
+      .headlineMedium!
+      .copyWith(fontFamily: fontFamily, color: AppColors.text(context));
 
-  static TextStyle headlineSmall(BuildContext context) =>
-      Theme.of(context).textTheme.headlineSmall!.copyWith(
-        fontFamily: fontFamily,
-        color: AppColors.text(context),
-      );
+  static TextStyle headlineSmall(BuildContext context) => Theme.of(context)
+      .textTheme
+      .headlineSmall!
+      .copyWith(fontFamily: fontFamily, color: AppColors.text(context));
 
-  static TextStyle titleMedium(BuildContext context) =>
-      Theme.of(context).textTheme.titleMedium!.copyWith(
-        fontFamily: fontFamily,
-        color: AppColors.text(context),
-      );
+  static TextStyle titleMedium(BuildContext context) => Theme.of(context)
+      .textTheme
+      .titleMedium!
+      .copyWith(fontFamily: fontFamily, color: AppColors.text(context));
 
-  static TextStyle titleSmall(BuildContext context) =>
-      Theme.of(context).textTheme.titleSmall!.copyWith(
-        fontFamily: fontFamily,
-        color: AppColors.text(context),
-      );
+  static TextStyle titleSmall(BuildContext context) => Theme.of(context)
+      .textTheme
+      .titleSmall!
+      .copyWith(fontFamily: fontFamily, color: AppColors.text(context));
 
-  static TextStyle displaySmall(BuildContext context) =>
-      Theme.of(context).textTheme.displaySmall!.copyWith(
-        fontFamily: fontFamily,
-        color: AppColors.text(context),
-      );
+  static TextStyle displaySmall(BuildContext context) => Theme.of(context)
+      .textTheme
+      .displaySmall!
+      .copyWith(fontFamily: fontFamily, color: AppColors.text(context));
 
-  static TextStyle bodySmall(BuildContext context) =>
-      Theme.of(context).textTheme.bodySmall!.copyWith(
-        fontFamily: fontFamily,
-        color: AppColors.text(context),
-      );
+  static TextStyle bodySmall(BuildContext context) => Theme.of(context)
+      .textTheme
+      .bodySmall!
+      .copyWith(fontFamily: fontFamily, color: AppColors.text(context));
 
-  static TextStyle bodyLarge(BuildContext context) =>
-      Theme.of(context).textTheme.bodyLarge!.copyWith(
-        fontFamily: fontFamily,
-        color: AppColors.text(context),
-      );
+  static TextStyle bodyLarge(BuildContext context) => Theme.of(context)
+      .textTheme
+      .bodyLarge!
+      .copyWith(fontFamily: fontFamily, color: AppColors.text(context));
 
   static TextStyle appBarTitle(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
@@ -57,15 +49,15 @@ class AppTextStyle {
 
     return Responsive.isMobile(context)
         ? textTheme.labelLarge!.copyWith(
-      color: color,
-      fontFamily: fontFamily,
-      fontWeight: FontWeight.w500,
-    )
+            color: color,
+            fontFamily: fontFamily,
+            fontWeight: FontWeight.w500,
+          )
         : textTheme.headlineSmall!.copyWith(
-      color: color,
-      fontFamily: fontFamily,
-      fontWeight: FontWeight.w600,
-    );
+            color: color,
+            fontFamily: fontFamily,
+            fontWeight: FontWeight.w600,
+          );
   }
 
   static TextStyle titleBold(BuildContext context) => TextStyle(
@@ -100,7 +92,7 @@ class AppTextStyle {
 
   static TextStyle headerTitle(BuildContext context) =>
       Theme.of(context).textTheme.bodyLarge!.copyWith(
-        color: AppColors.blackColor(context),
+        color: AppColors.text(context),
         fontFamily: fontFamily,
         fontWeight: FontWeight.w700,
       );
@@ -117,15 +109,15 @@ class AppTextStyle {
 
     return Responsive.isMobile(context)
         ? textTheme.bodyMedium!.copyWith(
-      fontFamily: fontFamily,
-      color: AppColors.whiteColor(context),
-      fontWeight: FontWeight.w700,
-    )
+            fontFamily: fontFamily,
+            color: AppColors.whiteColor(context),
+            fontWeight: FontWeight.w700,
+          )
         : textTheme.headlineSmall!.copyWith(
-      color: AppColors.whiteColor(context),
-      fontFamily: fontFamily,
-      fontWeight: FontWeight.w700,
-    );
+            color: AppColors.whiteColor(context),
+            fontFamily: fontFamily,
+            fontWeight: FontWeight.w700,
+          );
   }
 
   static TextStyle drawerConditionTextStyle(BuildContext context, isTrue) {
@@ -133,15 +125,15 @@ class AppTextStyle {
 
     return Responsive.isMobile(context)
         ? textTheme.bodyMedium!.copyWith(
-      fontFamily: fontFamily,
-      fontWeight: FontWeight.w700,
-      color: AppColors.text(context),
-    )
+            fontFamily: fontFamily,
+            fontWeight: FontWeight.w700,
+            color: AppColors.text(context),
+          )
         : textTheme.headlineSmall!.copyWith(
-      fontFamily: fontFamily,
-      fontWeight: FontWeight.w700,
-      color: AppColors.text(context),
-    );
+            fontFamily: fontFamily,
+            fontWeight: FontWeight.w700,
+            color: AppColors.text(context),
+          );
   }
 
   static TextStyle cardTitle(BuildContext context) {
@@ -149,24 +141,26 @@ class AppTextStyle {
 
     return Responsive.isMobile(context)
         ? textTheme.labelSmall!.copyWith(
-      fontFamily: fontFamily,
-      fontWeight: FontWeight.w500,
-      color: AppColors.text(context),
-    )
+            fontFamily: fontFamily,
+            fontWeight: FontWeight.w500,
+            color: AppColors.text(context),
+          )
         : textTheme.labelLarge!.copyWith(
-      fontFamily: fontFamily,        fontSize: 14,
+            fontFamily: fontFamily,
+            fontSize: 14,
 
-      fontWeight: FontWeight.w400,
-      color: AppColors.text(context),
-    );
+            fontWeight: FontWeight.w500,
+            color: AppColors.text(context),
+          );
   }
 
   static TextStyle cardLevelHead(BuildContext context) =>
       Theme.of(context).textTheme.labelSmall!.copyWith(
         color: AppColors.text(context),
-        fontFamily: fontFamily,        fontSize: 12,
+        fontFamily: fontFamily,
+        fontSize: 12,
 
-        fontWeight: FontWeight.w400,
+        fontWeight: FontWeight.w500,
       );
 
   static TextStyle cardLevelText(BuildContext context) =>
@@ -182,15 +176,15 @@ class AppTextStyle {
 
     return Responsive.isMobile(context)
         ? textTheme.labelSmall!.copyWith(
-      fontFamily: fontFamily,
-      color: AppColors.whiteColor(context),
-      fontWeight: FontWeight.w500,
-    )
+            fontFamily: fontFamily,
+            color: AppColors.whiteColor(context),
+            fontWeight: FontWeight.w500,
+          )
         : textTheme.bodyMedium!.copyWith(
-      color: AppColors.whiteColor(context),
-      fontFamily: fontFamily,
-      fontWeight: FontWeight.w600,
-    );
+            color: AppColors.whiteColor(context),
+            fontFamily: fontFamily,
+            fontWeight: FontWeight.w600,
+          );
   }
 
   static TextStyle searchTextStyle(BuildContext context) =>
@@ -212,17 +206,17 @@ class AppTextStyle {
 
     return Responsive.isMobile(context)
         ? textTheme.labelLarge!.copyWith(
-      fontFamily: fontFamily,
-      color: AppColors.whiteColor(context),
-      fontSize: 14,
-      fontWeight: FontWeight.w300,
-    )
+            fontFamily: fontFamily,
+            color: AppColors.whiteColor(context),
+            fontSize: 14,
+            fontWeight: FontWeight.w300,
+          )
         : textTheme.bodyLarge!.copyWith(
-      color: AppColors.whiteColor(context),
-      fontFamily: fontFamily,
-      fontSize: 14,
-      fontWeight: FontWeight.w300,
-    );
+            color: AppColors.whiteColor(context),
+            fontFamily: fontFamily,
+            fontSize: 14,
+            fontWeight: FontWeight.w300,
+          );
   }
 
   static TextStyle errorTextStyle(BuildContext context) =>

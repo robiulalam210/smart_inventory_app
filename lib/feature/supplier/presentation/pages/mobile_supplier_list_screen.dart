@@ -76,6 +76,22 @@ class _SupplierScreenState extends State<MobileSupplierListScreen> {
         title: Text("Supplier List", style: AppTextStyle.titleMedium(context)),
       ),
 
+      floatingActionButton: FloatingActionButton(onPressed: (){
+        showDialog(
+          context: context,
+          builder: (context) {
+            return Dialog(
+              insetPadding: const EdgeInsets.all(20),
+              child: SizedBox(
+                // width: AppSizes.width(context) * 0.5,
+                height: AppSizes.height(context) * 0.5,
+                child: const MobileCreateSupplierScreen(),
+              ),
+            );
+          },
+        );
+
+      },child: Icon(Icons.add),),
       body: SafeArea(
         child: Container(
           padding: AppTextStyle.getResponsivePaddingBody(context),
@@ -144,7 +160,7 @@ class _SupplierScreenState extends State<MobileSupplierListScreen> {
                       // Search Bar with Icon Button
                       Container(
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: AppColors.bottomNavBg(context),
                           borderRadius: BorderRadius.circular(12),
                           boxShadow: [
                             BoxShadow(
@@ -199,7 +215,7 @@ class _SupplierScreenState extends State<MobileSupplierListScreen> {
                           ],
                         ),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 8),
 
                       // Filter Chips and Create Button
                       Row(
@@ -225,29 +241,9 @@ class _SupplierScreenState extends State<MobileSupplierListScreen> {
                               ),
                             ),
                           const Spacer(),
-                          // Create Button
-                          AppButton(
-                            onPressed: () {
-                              showDialog(
-                                context: context,
-                                builder: (context) {
-                                  return Dialog(
-                                    insetPadding: const EdgeInsets.all(20),
-                                    child: SizedBox(
-                                      // width: AppSizes.width(context) * 0.5,
-                                      height: AppSizes.height(context) * 0.5,
-                                      child: const MobileCreateSupplierScreen(),
-                                    ),
-                                  );
-                                },
-                              );
-                            },
-                            size: 150,
-                            name: 'New Supplier',
-                          ),
+
                         ],
                       ),
-                      const SizedBox(height: 16),
                     ],
                   ),
                   SizedBox(

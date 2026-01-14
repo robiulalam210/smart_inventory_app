@@ -50,7 +50,7 @@ class SupplierDataTableWidget extends StatelessWidget {
         vertical: 8.0,
       ),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.bottomNavBg(context),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -103,8 +103,8 @@ class SupplierDataTableWidget extends StatelessWidget {
                     const SizedBox(width: 8),
                     Text(
                       supplier.supplierNo ?? '-',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w600,
+                      style:  TextStyle(
+                        fontWeight: FontWeight.w600,color: AppColors.text(context),
                         fontSize: 14,
                       ),
                     ),
@@ -123,6 +123,7 @@ class SupplierDataTableWidget extends StatelessWidget {
               children: [
                 // Name Row
                 _buildDetailRow(
+                  context: context,
                   icon: Iconsax.user,
                   label: 'Name',
                   value: supplier.name ?? '-',
@@ -132,6 +133,7 @@ class SupplierDataTableWidget extends StatelessWidget {
 
                 // Phone Row
                 _buildDetailRow(
+                  context: context,
                   icon: Iconsax.call,
                   label: 'Phone',
                   value: supplier.phone ?? '-',
@@ -153,14 +155,14 @@ class SupplierDataTableWidget extends StatelessWidget {
                           Icon(
                             Iconsax.location,
                             size: 18,
-                            color: Colors.grey.shade600,
+                            color:AppColors.text(context),
                           ),
                           const SizedBox(width: 8),
                           Text(
                             'Address:',
                             style: TextStyle(
                               fontWeight: FontWeight.w600,
-                              color: Colors.grey.shade700,
+                              color: AppColors.text(context),
                               fontSize: 13,
                             ),
                           ),
@@ -168,11 +170,11 @@ class SupplierDataTableWidget extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Padding(
-                        padding: const EdgeInsets.only(left: 26),
+                        padding: const EdgeInsets.only(left: 20),
                         child: Text(
                           supplier.address!,
                           style: TextStyle(
-                            color: Colors.grey.shade600,
+                            color: AppColors.text(context),
                             fontSize: 13,
                           ),
                           maxLines: 2,
@@ -187,7 +189,7 @@ class SupplierDataTableWidget extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.grey.shade50,
+                    color: AppColors.bottomNavBg(context),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: Colors.grey.shade200,
@@ -227,24 +229,28 @@ class SupplierDataTableWidget extends StatelessWidget {
                         childAspectRatio: 2.5,
                         children: [
                           _buildFinancialCard(
+                            context: context,
                             label: 'Purchases',
                             value: '৳${supplier.totalPurchases.toString()}',
                             icon: Iconsax.shopping_cart,
                             color: Colors.blue,
                           ),
                           _buildFinancialCard(
+                            context: context,
                             label: 'Paid',
                             value: '৳${supplier.totalPaid.toString()}',
                             icon: Iconsax.wallet_check,
                             color: Colors.green,
                           ),
                           _buildFinancialCard(
+                            context: context,
                             label: 'Due',
                             value: '৳${supplier.totalDue.toString()}',
                             icon: Iconsax.wallet_minus,
                             color: Colors.orange,
                           ),
                           _buildFinancialCard(
+                            context: context,
                             label: 'Advance',
                             value: '৳${supplier.advanceBalance ?? '0.00'}',
                             icon: Iconsax.wallet_add,
@@ -263,9 +269,9 @@ class SupplierDataTableWidget extends StatelessWidget {
 
           // Action Buttons
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
             decoration: BoxDecoration(
-              color: Colors.grey.shade50,
+              color: AppColors.bottomNavBg(context),
               borderRadius: const BorderRadius.only(
                 bottomLeft: Radius.circular(16),
                 bottomRight: Radius.circular(16),
@@ -326,6 +332,7 @@ class SupplierDataTableWidget extends StatelessWidget {
   }
 
   Widget _buildDetailRow({
+    required BuildContext context,
     required IconData icon,
     required String label,
     required String value,
@@ -340,7 +347,7 @@ class SupplierDataTableWidget extends StatelessWidget {
           Icon(
             icon,
             size: 18,
-            color: Colors.grey.shade600,
+            color: AppColors.text(context),
           ),
           const SizedBox(width: 8),
           Expanded(
@@ -351,7 +358,7 @@ class SupplierDataTableWidget extends StatelessWidget {
                   label,
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
-                    color: Colors.grey.shade700,
+                    color: AppColors.text(context),
                     fontSize: 13,
                   ),
                 ),
@@ -360,7 +367,7 @@ class SupplierDataTableWidget extends StatelessWidget {
                   value,
                   style: TextStyle(
                     fontWeight: isImportant ? FontWeight.w700 : FontWeight.w500,
-                    color: isImportant ? Colors.black : Colors.grey.shade800,
+                    color: isImportant ? AppColors.primaryColor(context) : AppColors.text(context),
                     fontSize: isImportant ? 15 : 14,
                   ),
                   maxLines: 2,
@@ -375,6 +382,7 @@ class SupplierDataTableWidget extends StatelessWidget {
   }
 
   Widget _buildFinancialCard({
+    required BuildContext context,
     required String label,
     required String value,
     required IconData icon,
@@ -400,7 +408,7 @@ class SupplierDataTableWidget extends StatelessWidget {
                   label,
                   style: TextStyle(
                     fontSize: 10,
-                    color: Colors.grey.shade600,
+                    color: AppColors.text(context),
                     fontWeight: FontWeight.w500,
                   ),
                 ),
