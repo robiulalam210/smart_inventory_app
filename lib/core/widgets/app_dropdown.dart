@@ -11,8 +11,8 @@ class AppDropdown<T> extends FormField<T> {
     required this.itemList,
     required this.onChanged,
     this.isSearch = false,
-    this.isNeedAll,
-    this.isNeedText,
+    this.isNeedAll = false,
+    this.allItem,
     this.isLabel = false,
     super.validator,
   }) : super(
@@ -21,21 +21,20 @@ class AppDropdown<T> extends FormField<T> {
       final context = state.context;
       final bool showLabel = !(isLabel ?? false);
 
+      // ✅ SAFE LISTS
       final List<T> items = [...itemList];
       final List<String> displayTexts =
       itemList.map((e) => e.toString()).toList();
 
-      if (isNeedAll ?? false) {
-        items.insert(0, "All" as T);
-        displayTexts.insert(0, "All");
-      }
-      if (isNeedText ?? false) {
-        items.insert(0, "Text" as T);
-        displayTexts.insert(0, "Text");
+      // ✅ INSERT "ALL" AS T (NOT STRING)
+      if (isNeedAll && allItem != null) {
+        items.insert(0, allItem as T);
+        displayTexts.insert(0, allItem.toString());
       }
 
       final TextEditingController controller = TextEditingController(
-          text: state.value != null ? state.value.toString() : "");
+        text: state.value != null ? state.value.toString() : "",
+      );
 
       final LayerLink layerLink = LayerLink();
       OverlayEntry? overlayEntry;
@@ -68,27 +67,22 @@ class AppDropdown<T> extends FormField<T> {
                     shrinkWrap: true,
                     itemCount: displayTexts.length,
                     separatorBuilder: (_, __) =>
-                    const Divider(height: 1, color: Colors.grey),
+                    const Divider(height: 1),
                     itemBuilder: (context, index) {
-                      final text = displayTexts[index];
                       return InkWell(
                         onTap: () {
                           final selectedItem = items[index];
                           state.didChange(selectedItem);
                           onChanged(selectedItem);
-                          controller.text = text;
+                          controller.text = displayTexts[index];
                           removeOverlay();
                         },
-                        child: Container(
+                        child: Padding(
                           padding: const EdgeInsets.symmetric(
                               vertical: 8, horizontal: 12),
                           child: Text(
-                            text,
-                            style: const TextStyle(
-                              fontSize: 14, // small but readable
-                              fontWeight: FontWeight.w400,
-                              color: Colors.black87,
-                            ),
+                            displayTexts[index],
+                            style: const TextStyle(fontSize: 14),
                           ),
                         ),
                       );
@@ -115,27 +109,20 @@ class AppDropdown<T> extends FormField<T> {
                   children: [
                     Text(
                       label,
-                      style:  TextStyle(
-                        fontSize: 12, // small label
+                      style: TextStyle(
+                        fontSize: 12,
                         fontWeight: FontWeight.w500,
-                        color:AppColors.text(context)
+                        color: AppColors.text(context),
                       ),
                     ),
-                    if (isRequired) const SizedBox(width: 4),
                     if (isRequired)
-                      const Text(
-                        "*",
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.red,
-                        ),
-                      ),
+                      const Text("*",
+                          style: TextStyle(color: Colors.red)),
                   ],
                 ),
               if (showLabel) const SizedBox(height: 4),
               SizedBox(
-                height: 32, // small TextField
+                height: 32,
                 child: TextField(
                   controller: controller,
                   readOnly: !isSearch,
@@ -143,30 +130,14 @@ class AppDropdown<T> extends FormField<T> {
                     if (!isSearch) showOverlay();
                   },
                   onChanged: (v) {
-                    if (isSearch) showOverlay(); // filter overlay
+                    if (isSearch) showOverlay();
                   },
-                  style:  TextStyle(
-                    fontSize: 13, // small but readable
-                    fontWeight: FontWeight.w400,
-                      color:AppColors.text(context)
-                  ),
                   decoration: InputDecoration(
                     hintText: hint,
-                    isDense: false,
-                    filled: false,
-                    hintStyle:  TextStyle(
-                      fontSize: 13,
-                        color:AppColors.text(context)
-                    ),
                     contentPadding: const EdgeInsets.symmetric(
                         horizontal: 10, vertical: 4),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(6),
-                      borderSide: BorderSide(
-                        color: state.hasError
-                            ? Colors.red
-                            : Colors.grey.shade400,
-                      ),
                     ),
                     suffixIcon: controller.text.isNotEmpty
                         ? InkWell(
@@ -175,34 +146,17 @@ class AppDropdown<T> extends FormField<T> {
                         state.didChange(null);
                         removeOverlay();
                       },
-                      child: const Icon(
-                        Icons.clear_rounded,
-                        size: 18,
-                      ),
+                      child: const Icon(Icons.clear, size: 18),
                     )
                         : InkWell(
-                      onTap: () {
-                        showOverlay();
-                      },
+                      onTap: showOverlay,
                       child: const Icon(
-                        Icons.arrow_drop_down,
-                        size: 18,
-                      ),
+                          Icons.arrow_drop_down,
+                          size: 18),
                     ),
                   ),
                 ),
               ),
-              if (state.hasError)
-                Padding(
-                  padding: const EdgeInsets.only(left: 6, top: 2),
-                  child: Text(
-                    state.errorText!,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Colors.red,
-                    ),
-                  ),
-                ),
             ],
           ),
         ),
@@ -215,8 +169,8 @@ class AppDropdown<T> extends FormField<T> {
   final bool isRequired;
   final bool? isLabel;
   final bool isSearch;
-  final bool? isNeedAll;
-  final bool? isNeedText;
+  final bool isNeedAll;
+  final T? allItem; // ✅ IMPORTANT
   final List<T> itemList;
   final void Function(T?) onChanged;
 }

@@ -6,6 +6,7 @@ import '../core/widgets/app_scaffold.dart';
 import 'common/presentation/cubit/theme_cubit.dart';
 import 'lab_dashboard/presentation/pages/mobile_dashboard_screen.dart';
 import '/core/core.dart';
+import 'sales/presentation/pages/mobile_pos_sale_screen.dart';
 
 class MobileRootScreen extends StatefulWidget {
   final int initialPageIndex;
@@ -20,12 +21,13 @@ class _MobileRootScreenState extends State<MobileRootScreen> {
 
   final List<Widget> screens = [
 
-    MobileSalesScreen(),
+    MobilePosSaleScreen(),
     MobilePurchaseScreen(),
     DashBoardScreen(),
-    Container(
-      child: Text("Report Screen"),
-    ),
+Scaffold(
+  body:     SafeArea(child: Center(child: Text("Report Screen"))),
+
+),
     MobileProfileScreen(),
   ];
 
@@ -85,10 +87,10 @@ class _MobileRootScreenState extends State<MobileRootScreen> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
-                          _buildNavButton(HugeIcons.strokeRoundedHome04, 0, value, primary, isDark),
-                          _buildNavButton(HugeIcons.strokeRoundedPatient, 1, value, primary, isDark),
+                          _buildNavButton(HugeIcons.strokeRoundedSaleTag02, 0, value, primary, isDark),
+                          _buildNavButton(HugeIcons.strokeRoundedInvoice04, 1, value, primary, isDark),
                           const SizedBox(width: 56), // FAB space
-                          _buildNavButton(HugeIcons.strokeRoundedGoogleDoc, 3, value, primary, isDark),
+                          _buildNavButton(HugeIcons.strokeRoundedChartBarLine, 3, value, primary, isDark),
                           _buildNavButton(HugeIcons.strokeRoundedUser, 4, value, primary, isDark),
                         ],
                       ),
@@ -115,7 +117,7 @@ class _MobileRootScreenState extends State<MobileRootScreen> {
                           child: Icon(
                             HugeIcons.strokeRoundedHome04,
                             color: AppColors.text(context),
-                            size: AppSizes.radius,
+                            size: AppSizes.preferredBottom,
                           ),
                         ),
                       ),
@@ -157,7 +159,7 @@ class _MobileRootScreenState extends State<MobileRootScreen> {
           SizedBox(height: AppSizes.paddingInside / 2),
           Icon(
             icon,
-            size: AppSizes.bodyPadding,
+            size: AppSizes.preferredBottom,
             color: selected
                 ? primary
                 : isDark

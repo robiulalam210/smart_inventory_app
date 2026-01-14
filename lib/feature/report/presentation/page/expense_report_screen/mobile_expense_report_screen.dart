@@ -1,4 +1,8 @@
-// lib/feature/report/presentation/screens/expense_report_screen.dart
+// Updated: 2026-01-14 — mobile view only
+// Fixes: replace non-existent Color.withValues -> withOpacity,
+// consistent currency formatting, guard against division by zero,
+// PDF preview background color, and minor UI tweaks.
+
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -24,14 +28,14 @@ import '../../../../expense/expense_sub_head/presentation/bloc/expense_sub_head/
 import '../../../data/model/expense_report_model.dart';
 import '../../bloc/expense_report_bloc/expense_report_bloc.dart';
 
-class ExpenseReportScreen extends StatefulWidget {
-  const ExpenseReportScreen({super.key});
+class MobileExpenseReportScreen extends StatefulWidget {
+  const MobileExpenseReportScreen({super.key});
 
   @override
-  State<ExpenseReportScreen> createState() => _ExpenseReportScreenState();
+  State<MobileExpenseReportScreen> createState() => _ExpenseReportScreenState();
 }
 
-class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
+class _ExpenseReportScreenState extends State<MobileExpenseReportScreen> {
   DateRange? selectedDateRange;
   ExpenseHeadModel? _selectedExpenseHead;
   ExpenseSubHeadModel? _selectedExpenseSubHead;
@@ -105,7 +109,6 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
     );
   }
 
-
   void _onPaymentMethodChanged(String? newValue) {
     setState(() {
       _selectedPaymentMethod = newValue;
@@ -126,12 +129,10 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
       showCustomToast(
         context: context,
         title: 'Alert!',
-        description:
-        'End date cannot be before start date',
+        description: 'End date cannot be before start date',
         icon: Icons.error,
         primaryColor: Colors.redAccent,
       );
-
       return;
     }
 
@@ -149,6 +150,8 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
     _filterDebounceTimer?.cancel();
     super.dispose();
   }
+
+  String _formatCurrency(double value) => '\$${value.toStringAsFixed(2)}';
 
   @override
   Widget build(BuildContext context) {
@@ -338,7 +341,7 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
               borderRadius: BorderRadius.circular(8),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.grey.withValues(alpha: 0.1),
+                  color: Colors.grey.withOpacity(0.1),
                   blurRadius: 4,
                   offset: const Offset(0, 2),
                 ),
@@ -351,7 +354,7 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
                   Icon(
                     Icons.analytics_outlined,
                     size: 48,
-                    color: Colors.grey.withValues(alpha: 0.5),
+                    color: Colors.grey.withOpacity(0.5),
                   ),
                   const SizedBox(height: 12),
                   Text(
@@ -379,6 +382,7 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
         }
 
         final summary = state.response.summary;
+        final avgExpense = summary.totalCount > 0 ? (summary.totalAmount / summary.totalCount) : 0.0;
 
         return Wrap(
           spacing: 12,
@@ -392,13 +396,13 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
             ),
             _buildSummaryCard(
               "Total Amount",
-              "\$${summary.totalAmount.toStringAsFixed(2)}",
+              _formatCurrency(summary.totalAmount),
               Icons.attach_money,
               Colors.red,
             ),
             _buildSummaryCard(
               "Average Expense",
-              "\$${(summary.totalAmount / summary.totalCount).toStringAsFixed(2)}",
+              _formatCurrency(avgExpense),
               Icons.trending_up,
               Colors.green,
             ),
@@ -410,58 +414,56 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
             ),
             AppButton(
                 size: 100,
-                name: "Pdf", onPressed: (){
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => Scaffold(
-                    backgroundColor: Colors.red,
-                    body: PdfPreview.builder(
-                      useActions: true,
-                      allowSharing: false,
-                      canDebug: false,
-                      canChangeOrientation: false,
-                      canChangePageFormat: false,
-                      dynamicLayout: true,
-                      build: (format) => generateExpenseReportPdf(
-                        state.response,
-
-                      ),
-                      pdfPreviewPageDecoration:
-                      BoxDecoration(color: AppColors.white),
-                      actionBarTheme: PdfActionBarTheme(
-                        backgroundColor: AppColors.primaryColor(context),
-                        iconColor: Colors.white,
-                        textStyle: const TextStyle(color: Colors.white),
-                      ),
-                      actions: [
-                        IconButton(
-                          onPressed: () => AppRoutes.pop(context),
-                          icon: const Icon(Icons.cancel, color: Colors.red),
-                        ),
-                      ],
-                      pagesBuilder: (context, pages) {
-                        debugPrint('Rendering ${pages.length} pages');
-                        return PageView.builder(
-                          itemCount: pages.length,
-                          scrollDirection: Axis.vertical,
-                          itemBuilder: (context, index) {
-                            final page = pages[index];
-                            return Container(
-                              color: Colors.grey,
-                              alignment: Alignment.center,
-                              padding: const EdgeInsets.all(8.0),
-                              child: Image(image: page.image, fit: BoxFit.contain),
+                name: "Pdf",
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => Scaffold(
+                        backgroundColor: AppColors.white,
+                        body: PdfPreview.builder(
+                          useActions: true,
+                          allowSharing: false,
+                          canDebug: false,
+                          canChangeOrientation: false,
+                          canChangePageFormat: false,
+                          dynamicLayout: true,
+                          build: (format) => generateExpenseReportPdf(
+                            state.response,
+                          ),
+                          pdfPreviewPageDecoration: BoxDecoration(color: AppColors.white),
+                          actionBarTheme: PdfActionBarTheme(
+                            backgroundColor: AppColors.primaryColor(context),
+                            iconColor: Colors.white,
+                            textStyle: const TextStyle(color: Colors.white),
+                          ),
+                          actions: [
+                            IconButton(
+                              onPressed: () => AppRoutes.pop(context),
+                              icon: const Icon(Icons.cancel, color: Colors.red),
+                            ),
+                          ],
+                          pagesBuilder: (context, pages) {
+                            debugPrint('Rendering ${pages.length} pages');
+                            return PageView.builder(
+                              itemCount: pages.length,
+                              scrollDirection: Axis.vertical,
+                              itemBuilder: (context, index) {
+                                final page = pages[index];
+                                return Container(
+                                  color: Colors.grey,
+                                  alignment: Alignment.center,
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Image(image: page.image, fit: BoxFit.contain),
+                                );
+                              },
                             );
                           },
-                        );
-                      },
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-              );
-
-            }),
+                  );
+                }),
           ],
         );
       },
@@ -469,11 +471,11 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
   }
 
   Widget _buildSummaryCard(
-    String title,
-    String value,
-    IconData icon,
-    Color color,
-  ) {
+      String title,
+      String value,
+      IconData icon,
+      Color color,
+      ) {
     return Container(
       width: 250,
       padding: const EdgeInsets.all(12),
@@ -482,7 +484,7 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
         borderRadius: BorderRadius.circular(8),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.2),
+            color: Colors.grey.withOpacity(0.2),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -493,7 +495,7 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
           Container(
             padding: const EdgeInsets.all(4),
             decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
+              color: color.withOpacity(0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(icon, color: color, size: 24),
@@ -627,7 +629,7 @@ class ExpenseReportDataTable extends StatelessWidget {
   Widget build(BuildContext context) {
     final totalAmount = expenses.fold(
       0.0,
-      (sum, expense) => sum + expense.amount,
+          (sum, expense) => sum + expense.amount,
     );
 
     return Card(
@@ -640,7 +642,7 @@ class ExpenseReportDataTable extends StatelessWidget {
             _buildTableSummary(totalAmount),
             const SizedBox(height: 4),
             // Data table
-            SizedBox(child: _buildDataTable()),
+            SizedBox(child: _buildDataTable(context)),
           ],
         ),
       ),
@@ -675,12 +677,12 @@ class ExpenseReportDataTable extends StatelessWidget {
     );
   }
 
-  Widget _buildDataTable() {
+  Widget _buildDataTable(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
         final totalWidth = constraints.maxWidth;
         const numColumns =
-            8; // #, Date, Head, Sub Head, Amount, Payment Method, Note, Actions
+        8; // #, Date, Head, Sub Head, Amount, Payment Method, Note, Actions
         const minColumnWidth = 100.0;
 
         final dynamicColumnWidth = (totalWidth / numColumns).clamp(
@@ -695,7 +697,7 @@ class ExpenseReportDataTable extends StatelessWidget {
               scrollDirection: Axis.horizontal,
               child: DataTable(
                 headingRowColor: WidgetStateProperty.resolveWith<Color>(
-                  (states) => AppColors.primaryColor(context),
+                      (states) => AppColors.primaryColor(context),
                 ),
                 columnSpacing: 12,
                 dataRowMinHeight: 40,
@@ -839,14 +841,14 @@ class ExpenseReportDataTable extends StatelessWidget {
                                 vertical: 4,
                               ),
                               decoration: BoxDecoration(
-                                color: Colors.red.withValues(alpha: 0.1),
+                                color: Colors.red.withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(4),
                                 border: Border.all(
-                                  color: Colors.red.withValues(alpha: 0.3),
+                                  color: Colors.red.withOpacity(0.3),
                                 ),
                               ),
                               child: Text(
-                                expense.amount.toStringAsFixed(2),
+                                '\$${expense.amount.toStringAsFixed(2)}',
                                 style: const TextStyle(
                                   color: Colors.red,
                                   fontWeight: FontWeight.bold,
@@ -870,7 +872,7 @@ class ExpenseReportDataTable extends StatelessWidget {
                               decoration: BoxDecoration(
                                 color: _getPaymentMethodColor(
                                   expense.paymentMethod,
-                                ).withValues(alpha: 0.1),
+                                ).withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: Text(
