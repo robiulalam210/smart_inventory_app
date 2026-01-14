@@ -59,7 +59,7 @@ class ExpenseHeadTableCard extends StatelessWidget {
         vertical: 8.0,
       ),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.bottomNavBg(context),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -113,8 +113,9 @@ class ExpenseHeadTableCard extends StatelessWidget {
                     FittedBox(
                       child: Text(
                         expenseHead.name.toString().capitalize(),
-                        style: const TextStyle(
+                        style:  TextStyle(
                           fontWeight: FontWeight.w600,
+                          color: AppColors.text(context),
                           fontSize: 14,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -152,9 +153,9 @@ class ExpenseHeadTableCard extends StatelessWidget {
 
           // Action Buttons
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
             decoration: BoxDecoration(
-              color: Colors.grey.shade50,
+              color: AppColors.bottomNavBg(context),
               borderRadius: const BorderRadius.only(
                 bottomLeft: Radius.circular(16),
                 bottomRight: Radius.circular(16),

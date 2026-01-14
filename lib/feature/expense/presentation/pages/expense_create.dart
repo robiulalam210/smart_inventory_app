@@ -226,7 +226,7 @@ class _ExpenseCreateScreenState extends State<ExpenseCreateScreen> {
             width: MediaQuery.of(context).size.width,
             decoration: BoxDecoration(
               shape: BoxShape.rectangle,
-              color: AppColors.whiteColor(context),
+              color: AppColors.bottomNavBg(context),
               borderRadius: BorderRadius.circular(AppSizes.borderRadiusSize),
             ),
             padding: AppTextStyle.getResponsivePaddingBody(context),
@@ -257,6 +257,7 @@ class _ExpenseCreateScreenState extends State<ExpenseCreateScreen> {
                   },
                   child: Column(
                     children: [
+                      SizedBox(height: 20,),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -264,8 +265,9 @@ class _ExpenseCreateScreenState extends State<ExpenseCreateScreen> {
                             widget.id == null
                                 ? 'Create Expense '
                                 : 'Update Expense',
-                            style: const TextStyle(
+                            style:  TextStyle(
                               fontSize: 20,
+                              color: AppColors.text(context),
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -564,6 +566,8 @@ class _ExpenseCreateScreenState extends State<ExpenseCreateScreen> {
                         name: widget.name ?? "Create",
                         onPressed: _showConfirmationDialog,
                       ),
+
+                      SizedBox(height: 20,),
                     ],
                   ),
                 ),

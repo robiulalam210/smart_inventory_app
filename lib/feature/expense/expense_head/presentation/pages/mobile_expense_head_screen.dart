@@ -127,7 +127,7 @@ class _ExpenseHeadScreenState extends State<MobileExpenseHeadScreen> {
         // Search Bar
         Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color:AppColors.bottomNavBg(context),
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
