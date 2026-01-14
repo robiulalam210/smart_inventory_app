@@ -275,7 +275,6 @@ class _MoneyReceiptScreenState extends State<MoneyReceiptScreen> {
 
                       return AppDropdown<CustomerActiveModel>(
                         label: "Customer",
-                        context: context,
                         isSearch: true,
                         isLabel: true,
                         hint: selectedCustomer?.name ?? "Select Customer",
@@ -290,17 +289,6 @@ class _MoneyReceiptScreenState extends State<MoneyReceiptScreen> {
                             customer: newVal?.id.toString() ?? '',
                           );
                         },
-                        itemBuilder: (item) => DropdownMenuItem<CustomerActiveModel>(
-                          value: item,
-                          child: Text(
-                            item.name ?? 'Unknown Customer',
-                            style:  TextStyle(
-                              color:AppColors.blackColor(context),
-                              fontFamily: 'Quicksand',
-                              fontWeight: FontWeight.w300,
-                            ),
-                          ),
-                        ),
                       );
                     },
                   );
@@ -321,7 +309,6 @@ class _MoneyReceiptScreenState extends State<MoneyReceiptScreen> {
 
                       return AppDropdown<UsersListModel>(
                         label: "Seller",
-                        context: context,
                         hint: selectedSeller?.username ?? "Select Seller",
                         isLabel: true,
                         isRequired: false,
@@ -335,17 +322,6 @@ class _MoneyReceiptScreenState extends State<MoneyReceiptScreen> {
                             seller: newVal?.id.toString() ?? '',
                           );
                         },
-                        itemBuilder: (item) => DropdownMenuItem<UsersListModel>(
-                          value: item,
-                          child: Text(
-                            item.username ?? 'Unknown Seller',
-                            style:  TextStyle(
-                              color:AppColors.blackColor(context),
-                              fontFamily: 'Quicksand',
-                              fontWeight: FontWeight.w300,
-                            ),
-                          ),
-                        ),
                       );
                     },
                   );

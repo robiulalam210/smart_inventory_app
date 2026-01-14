@@ -154,7 +154,8 @@ class AppTextStyle {
       color: AppColors.text(context),
     )
         : textTheme.labelLarge!.copyWith(
-      fontFamily: fontFamily,
+      fontFamily: fontFamily,        fontSize: 14,
+
       fontWeight: FontWeight.w400,
       color: AppColors.text(context),
     );
@@ -163,7 +164,8 @@ class AppTextStyle {
   static TextStyle cardLevelHead(BuildContext context) =>
       Theme.of(context).textTheme.labelSmall!.copyWith(
         color: AppColors.text(context),
-        fontFamily: fontFamily,
+        fontFamily: fontFamily,        fontSize: 12,
+
         fontWeight: FontWeight.w400,
       );
 
@@ -171,6 +173,7 @@ class AppTextStyle {
       Theme.of(context).textTheme.labelSmall!.copyWith(
         fontFamily: fontFamily,
         color: AppColors.text(context),
+        fontSize: 12,
         fontWeight: FontWeight.w500,
       );
 

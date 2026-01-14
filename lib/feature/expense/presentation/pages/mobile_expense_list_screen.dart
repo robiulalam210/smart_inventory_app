@@ -427,7 +427,6 @@ class _ExpenseListScreenState extends State<MobileExpenseListScreen> {
                           ),
                           const SizedBox(height: 8),
                           AppDropdown<ExpenseHeadModel>(
-                            context: context,
                             hint: "Select Expense Head",
                             isNeedAll: true,
                             value: _selectedExpenseHead,
@@ -438,10 +437,7 @@ class _ExpenseListScreenState extends State<MobileExpenseListScreen> {
                                 _selectedExpenseSubHead = null;
                               });
                             },
-                            itemBuilder: (item) => DropdownMenuItem(
-                              value: item,
-                              child: Text(item.name ?? 'Unnamed Head'),
-                            ), label: '',
+                            label: '',
                           ),
                         ],
                       );

@@ -215,7 +215,6 @@ class _SourceCreateState extends State<SourceCreate> {
                         : constraints.maxWidth * 0.5,
                     child: AppDropdown(
                       label: "Status",
-                      context: context,
                       hint: context.read<SourceBloc>().selectedState.isEmpty
                           ? "Select Status"
                           : context.read<SourceBloc>().selectedState,
@@ -231,17 +230,6 @@ class _SourceCreateState extends State<SourceCreate> {
                               .toString();
                         });
                       },
-                      itemBuilder: (item) => DropdownMenuItem(
-                        value: item,
-                        child: Text(
-                          item.toString(),
-                          style:  TextStyle(
-                            color:AppColors.blackColor(context),
-                            fontFamily: 'Quicksand',
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
                     ),
                   );
                 },

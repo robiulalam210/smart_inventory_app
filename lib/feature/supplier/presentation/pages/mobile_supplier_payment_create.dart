@@ -237,7 +237,6 @@ class _MobileSupplierPaymentCreateState extends State<MobileSupplierPaymentCreat
       builder: (context, state) {
         return AppDropdown(
           label: "Supplier",
-          context: context,
           hint: context.read<SupplierPaymentBloc>().selectCustomerModel?.name ?? "Select Supplier",
           isRequired: true,
           value: context.read<SupplierPaymentBloc>().selectCustomerModel,
@@ -257,10 +256,7 @@ class _MobileSupplierPaymentCreateState extends State<MobileSupplierPaymentCreat
             setState(() {});
           },
           validator: (value) => value == null ? 'Please select Supplier' : null,
-          itemBuilder: (item) => DropdownMenuItem(
-            value: item,
-            child: Text(item.toString(), style:  TextStyle(color:AppColors.blackColor(context))),
-          ),
+
         );
       },
     );
@@ -271,7 +267,6 @@ class _MobileSupplierPaymentCreateState extends State<MobileSupplierPaymentCreat
       builder: (context, state) {
         return AppDropdown(
           label: "Collected By",
-          context: context,
           isRequired: true,
           value: context.read<SupplierPaymentBloc>().selectUserModel,
           itemList: context.read<UserBloc>().list,
@@ -281,10 +276,7 @@ class _MobileSupplierPaymentCreateState extends State<MobileSupplierPaymentCreat
             setState(() {});
           },
           validator: (value) => value == null ? 'Please select Collected By' : null,
-          itemBuilder: (item) => DropdownMenuItem(
-            value: item,
-            child: Text(item.toString(), style:  TextStyle(color:AppColors.blackColor(context))),
-          ),
+
         );
       },
     );
@@ -293,7 +285,6 @@ class _MobileSupplierPaymentCreateState extends State<MobileSupplierPaymentCreat
   Widget _buildPaymentToDropdown() {
     return AppDropdown(
       label: "Payment To",
-      context: context,
       isRequired: true,
       value: context.read<SupplierPaymentBloc>().selectedPaymentToState,
       itemList: context.read<SupplierPaymentBloc>().paymentTo,
@@ -305,10 +296,7 @@ class _MobileSupplierPaymentCreateState extends State<MobileSupplierPaymentCreat
         setState(() {});
       },
       validator: (value) => value == null ? 'Please select Payment To' : null,
-      itemBuilder: (item) => DropdownMenuItem(
-        value: item,
-        child: Text(item.toString(), style:  TextStyle(color:AppColors.blackColor(context))),
-      ),
+
     );
   }
 
@@ -321,7 +309,6 @@ class _MobileSupplierPaymentCreateState extends State<MobileSupplierPaymentCreat
       builder: (context, state) {
         return AppDropdown(
           label: "Invoice",
-          context: context,
           isRequired: true,
           value: context.read<SupplierInvoiceBloc>().supplierInvoiceListModel,
           itemList: context.read<SupplierInvoiceBloc>().supplierListModel,
@@ -335,10 +322,7 @@ class _MobileSupplierPaymentCreateState extends State<MobileSupplierPaymentCreat
             setState(() {});
           },
           validator: (value) => value == null ? 'Please select Invoice' : null,
-          itemBuilder: (item) => DropdownMenuItem(
-            value: item,
-            child: Text(item.toString(), style:  TextStyle(color:AppColors.blackColor(context))),
-          ),
+
         );
       },
     );
@@ -347,7 +331,6 @@ class _MobileSupplierPaymentCreateState extends State<MobileSupplierPaymentCreat
   Widget _buildPaymentMethodDropdown() {
     return AppDropdown(
       label: "Payment Method",
-      context: context,
       isRequired: true,
       value: context.read<SupplierPaymentBloc>().selectedPaymentMethod.isEmpty
           ? null
@@ -363,10 +346,7 @@ class _MobileSupplierPaymentCreateState extends State<MobileSupplierPaymentCreat
         setState(() {});
       },
       validator: (value) => value == null ? 'Please select a payment method' : null,
-      itemBuilder: (item) => DropdownMenuItem(
-        value: item,
-        child: Text(item.toString(), style:  TextStyle(color:AppColors.blackColor(context))),
-      ),
+
     );
   }
 
@@ -383,7 +363,6 @@ class _MobileSupplierPaymentCreateState extends State<MobileSupplierPaymentCreat
 
         return AppDropdown(
           label: "Account",
-          context: context,
           isRequired: true,
           value: context.read<SupplierPaymentBloc>().selectedAccount.isEmpty
               ? null
@@ -402,10 +381,7 @@ class _MobileSupplierPaymentCreateState extends State<MobileSupplierPaymentCreat
             }
           },
           validator: (value) => value == null ? 'Please select an account' : null,
-          itemBuilder: (item) => DropdownMenuItem(
-            value: item.toString(),
-            child: Text(item.toString(), style:  TextStyle(color:AppColors.blackColor(context))),
-          ),
+
         );
       },
     );

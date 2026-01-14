@@ -264,7 +264,6 @@ class _PurchaseReturnScreenState extends State<MobilePurchaseReturnScreen> {
                             ];
                             return AppDropdown<SupplierActiveModel>(
                               label: "Supplier",
-                              context: context,
                               isSearch: true,
                               hint: "Select Supplier",
                               isNeedAll: false,
@@ -280,20 +279,6 @@ class _PurchaseReturnScreenState extends State<MobilePurchaseReturnScreen> {
                                   from: selectedDateRange?.start ?? startDate,
                                   to: selectedDateRange?.end ?? endDate,
                                   supplierId: _selectedSupplier?.id?.toString(),
-                                );
-                              },
-                              itemBuilder: (item) {
-                                final isAllOption = item.id == null;
-                                return DropdownMenuItem<SupplierActiveModel>(
-                                  value: item,
-                                  child: Text(
-                                    isAllOption ? 'All Suppliers' : '${item.name} (${item.phone})',
-                                    style: TextStyle(
-                                      color: isAllOption ? AppColors.primaryColor(context) :AppColors.blackColor(context),
-                                      fontFamily: 'Quicksand',
-                                      fontWeight: isAllOption ? FontWeight.bold : FontWeight.w300,
-                                    ),
-                                  ),
                                 );
                               },
                             );
@@ -373,7 +358,6 @@ class _PurchaseReturnScreenState extends State<MobilePurchaseReturnScreen> {
                         ];
                         return AppDropdown<SupplierActiveModel>(
                           label: "Supplier",
-                          context: context,
                           isSearch: true,
                           hint: "Select Supplier",
                           isNeedAll: false,
@@ -389,20 +373,6 @@ class _PurchaseReturnScreenState extends State<MobilePurchaseReturnScreen> {
                               from: selectedDateRange?.start ?? startDate,
                               to: selectedDateRange?.end ?? endDate,
                               supplierId: _selectedSupplier?.id?.toString(),
-                            );
-                          },
-                          itemBuilder: (item) {
-                            final isAllOption = item.id == null;
-                            return DropdownMenuItem<SupplierActiveModel>(
-                              value: item,
-                              child: Text(
-                                isAllOption ? 'All Suppliers' : '${item.name} (${item.phone})',
-                                style: TextStyle(
-                                  color: isAllOption ? AppColors.primaryColor(context) :AppColors.blackColor(context),
-                                  fontFamily: 'Quicksand',
-                                  fontWeight: isAllOption ? FontWeight.bold : FontWeight.w300,
-                                ),
-                              ),
                             );
                           },
                         );

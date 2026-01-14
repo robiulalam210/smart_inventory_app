@@ -224,7 +224,6 @@ class _CreatePurchaseReturnScreenState
                           }
 
                           return AppDropdown<SupplierActiveModel>(
-                            context: context,
                             label: "Supplier ",
                             hint: "Select Supplier",
                             isRequired: true,
@@ -248,17 +247,6 @@ class _CreatePurchaseReturnScreenState
                               }
                             },
                             validator: (value) => value == null ? 'Please select a supplier' : null,
-                            itemBuilder: (item) => DropdownMenuItem<SupplierActiveModel>(
-                              value: item,
-                              child: Text(
-                                item.name ?? 'Unknown',
-                                style:  TextStyle(
-                                  color:AppColors.blackColor(context),
-                                  fontFamily: 'Quicksand',
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
                           );
                         },
                       ),
@@ -277,7 +265,6 @@ class _CreatePurchaseReturnScreenState
                           final hasInvoices = bloc.invoiceList.isNotEmpty;
 
                           return AppDropdown<PurchaseInvoiceModel>(
-                            context: context,
                             label: "Invoice Number ",
                             hint: hasInvoices ? "Select Invoice Number" : "No invoices available",
                             isRequired: true,
@@ -296,17 +283,6 @@ class _CreatePurchaseReturnScreenState
                               if (!hasInvoices) return 'No invoices available for this supplier';
                               return null;
                             },
-                            itemBuilder: (item) => DropdownMenuItem<PurchaseInvoiceModel>(
-                              value: item,
-                              child: Text(
-                                item.invoiceNo ?? 'Unknown',
-                                style:  TextStyle(
-                                  color:AppColors.blackColor(context),
-                                  fontFamily: 'Quicksand',
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
                           );
                         },
                       ),
@@ -417,7 +393,6 @@ class _CreatePurchaseReturnScreenState
                   children: [
                     Expanded(
                       child: AppDropdown<String>(
-                        context: context,
                         label: "Return Charge Type",
                         hint: "Select Type",
                         isRequired: true,
@@ -431,17 +406,6 @@ class _CreatePurchaseReturnScreenState
                             });
                           }
                         },
-                        itemBuilder: (item) => DropdownMenuItem<String>(
-                          value: item,
-                          child: Text(
-                            item == 'fixed' ? 'Fixed Amount' : 'Percentage',
-                            style:  TextStyle(
-                              color:AppColors.blackColor(context),
-                              fontFamily: 'Quicksand',
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -566,28 +530,16 @@ class _CreatePurchaseReturnScreenState
       builder: (context, state) {
         return AppDropdown<String>(
           label: "Payment Method",
-          context: context,
           hint: _selectedPaymentMethod ?? "Select Payment Method",
           isRequired: true,
           value: _selectedPaymentMethod,
-          itemList: ['cash', 'bank', 'mobile', 'card', 'credit'],
+          itemList: ['cash', 'bank', 'mobile'],
           onChanged: (newVal) {
             setState(() {
               _selectedPaymentMethod = newVal;
             });
           },
           validator: (value) => value == null ? 'Please select Payment Method' : null,
-          itemBuilder: (item) => DropdownMenuItem(
-            value: item,
-            child: Text(
-              item.toUpperCase(),
-              style: TextStyle(
-                color:AppColors.blackColor(context),
-                fontFamily: 'Quicksand',
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
         );
       },
     );
@@ -598,7 +550,6 @@ class _CreatePurchaseReturnScreenState
       builder: (context, state) {
         return AppDropdown<AccountActiveModel>(
           label: "Account ",
-          context: context,
           hint: _selectedAccount?.name ?? "Select Account",
           isRequired: true,
           value: _selectedAccount,
@@ -609,28 +560,6 @@ class _CreatePurchaseReturnScreenState
             });
           },
           validator: (value) => value == null ? 'Please select Account' : null,
-          itemBuilder: (item) => DropdownMenuItem<AccountActiveModel>(
-            value: item,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  item.name ?? 'Unknown Account',
-                  style: TextStyle(
-                    color:AppColors.blackColor(context),
-                    fontFamily: 'Quicksand',
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                if (item.acType != null)
-                  Text(
-                    'Type: ${item.acType}',
-                    style: TextStyle(color: AppColors.grey, fontSize: 12),
-                  ),
-              ],
-            ),
-          ),
         );
       },
     );

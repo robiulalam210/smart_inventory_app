@@ -449,7 +449,6 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                             builder: (context, state) {
                               return AppDropdown<SupplierActiveModel>(
                                 label: "Supplier",
-                                context: context,
                                 hint: "Select Supplier",
                                 isLabel: false,
                                 isRequired: true,
@@ -471,17 +470,7 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                                       ? 'Please select Supplier'
                                       : null;
                                 },
-                                itemBuilder: (item) => DropdownMenuItem(
-                                  value: item,
-                                  child: Text(
-                                    item.toString(),
-                                    style:  TextStyle(
-                                      color:AppColors.blackColor(context),
-                                      fontFamily: 'Quicksand',
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ),
+
                               );
                             },
                           ),
@@ -701,7 +690,6 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
           builder: (context, state) {
             return AppDropdown<SupplierActiveModel>(
               label: "Supplier",
-              context: context,
               hint: "Select Supplier",
               isLabel: false,
               isRequired: true,
@@ -715,17 +703,7 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
               validator: (value) {
                 return value == null ? 'Please select Supplier' : null;
               },
-              itemBuilder: (item) => DropdownMenuItem(
-                value: item,
-                child: Text(
-                  item.toString(),
-                  style:  TextStyle(
-                    color:AppColors.blackColor(context),
-                    fontFamily: 'Quicksand',
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
+
             );
           },
         ),
@@ -884,7 +862,6 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
 
                     return AppDropdown(
                       label: "Category",
-                      context: context,
                       hint: selectedCategory.isEmpty
                           ? "Select Category"
                           : selectedCategory,
@@ -918,10 +895,7 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                       },
                       // validator: (value) =>
                       // value == null ? 'Please select Category' : null,
-                      itemBuilder: (item) => DropdownMenuItem(
-                        value: item,
-                        child: Text(item.toString()),
-                      ),
+
                     );
                   },
                 ),
@@ -962,7 +936,6 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                         .toList();
 
                     return AppDropdown<ProductModelStockModel>(
-                      context: context,
                       isRequired: false,
                       isLabel: true,
                       isSearch: true,
@@ -975,10 +948,7 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                       onChanged: (newVal) => onProductChanged(index, newVal),
                       validator: (value) =>
                       value == null ? 'Please select Product' : null,
-                      itemBuilder: (item) => DropdownMenuItem(
-                        value: item,
-                        child: Text(item.toString()),
-                      ),
+
                     );
                   },
                 ),
@@ -1591,7 +1561,6 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
               Expanded(
                 child: AppDropdown<String>(
                   label: "Payment Method",
-                  context: context,
                   hint:
                   context
                       .read<CreatePurchaseBloc>()
@@ -1624,17 +1593,7 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                         ? 'Please select a payment method'
                         : null;
                   },
-                  itemBuilder: (item) => DropdownMenuItem(
-                    value: item,
-                    child: Text(
-                      item.toString().toUpperCase(),
-                      style:  TextStyle(
-                        color:AppColors.blackColor(context),
-                        fontFamily: 'Quicksand',
-                        fontWeight: FontWeight.w300,
-                      ),
-                    ),
-                  ),
+
                 ),
               ),
               const SizedBox(width: 10),
@@ -1671,7 +1630,6 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
 
                       return AppDropdown<AccountActiveModel>(
                         label: "Account",
-                        context: context,
                         hint: "Select Account",
                         isLabel: false,
                         isRequired: true,
@@ -1702,18 +1660,7 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                               ? 'Please select an account'
                               : null;
                         },
-                        itemBuilder: (item) =>
-                            DropdownMenuItem<AccountActiveModel>(
-                              value: item,
-                              child: Text(
-                                "${item.name} (${item.acType})",
-                                style:  TextStyle(
-                                  color:AppColors.blackColor(context),
-                                  fontFamily: 'Quicksand',
-                                  fontWeight: FontWeight.w300,
-                                ),
-                              ),
-                            ),
+
                       );
                     } else if (state is AccountListFailed) {
                       return Center(

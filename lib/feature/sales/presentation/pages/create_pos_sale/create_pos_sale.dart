@@ -494,7 +494,6 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                 child: BlocBuilder<CustomerBloc, CustomerState>(
                   builder: (context, state) {
                     return AppDropdown(
-                      context: context,
                       label: "Customer",
                       hint: bloc.selectClintModel?.name ?? "Select Customer",
                       isSearch: true,
@@ -521,17 +520,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                       },
                       validator: (value) =>
                           value == null ? 'Please select Customer' : null,
-                      itemBuilder: (item) => DropdownMenuItem(
-                        value: item,
-                        child: Text(
-                          item.toString(),
-                          style:  TextStyle(
-                            color:AppColors.blackColor(context),
-                            fontFamily: 'Quicksand',
-                            fontWeight: FontWeight.w300,
-                          ),
-                        ),
-                      ),
+
                     );
                   },
                 ),
@@ -545,7 +534,6 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                 child: BlocBuilder<UserBloc, UserState>(
                   builder: (context, state) {
                     return AppDropdown(
-                      context: context,
                       label: "Sales By",
                       hint: bloc.selectSalesModel?.username ?? "Select Sales",
                       isSearch: true,
@@ -559,17 +547,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                       },
                       validator: (value) =>
                           value == null ? 'Please select Sales' : null,
-                      itemBuilder: (item) => DropdownMenuItem(
-                        value: item,
-                        child: Text(
-                          item.toString(),
-                          style:  TextStyle(
-                            color:AppColors.blackColor(context),
-                            fontFamily: 'Quicksand',
-                            fontWeight: FontWeight.w300,
-                          ),
-                        ),
-                      ),
+
                     );
                   },
                 ),
@@ -635,7 +613,6 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
 
                     return AppDropdown(
                       label: "Category",
-                      context: context,
                       hint: selectedCategory.isEmpty
                           ? "Select Category"
                           : selectedCategory,
@@ -669,10 +646,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                       },
                       // validator: (value) =>
                       // value == null ? 'Please select Category' : null,
-                      itemBuilder: (item) => DropdownMenuItem(
-                        value: item,
-                        child: Text(item.toString()),
-                      ),
+
                     );
                   },
                 ),
@@ -713,7 +687,6 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                         .toList();
 
                     return AppDropdown<ProductModelStockModel>(
-                      context: context,
                       isRequired: false,
                       isLabel: true,
                       isSearch: true,
@@ -726,10 +699,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                       onChanged: (newVal) => onProductChanged(index, newVal),
                       validator: (value) =>
                           value == null ? 'Please select Product' : null,
-                      itemBuilder: (item) => DropdownMenuItem(
-                        value: item,
-                        child: Text(item.toString()),
-                      ),
+
                     );
                   },
                 ),
@@ -1244,7 +1214,6 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
             children: [
               Expanded(
                 child: AppDropdown(
-                  context: context,
                   label: "Payment Method",
                   hint: bloc.selectedPaymentMethod.isEmpty
                       ? "Select Payment Method"
@@ -1262,10 +1231,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                   },
                   validator: (value) =>
                       value == null ? 'Please select a payment method' : null,
-                  itemBuilder: (item) => DropdownMenuItem(
-                    value: item,
-                    child: Text(item.toString()),
-                  ),
+
                 ),
               ),
               const SizedBox(width: 5),
@@ -1288,7 +1254,6 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                       bloc.accountModel = selectedAccount;
 
                       return AppDropdown<AccountActiveModel>(
-                        context: context,
                         label: "Account",
                         hint: bloc.accountModel == null
                             ? "Select Account"
@@ -1304,10 +1269,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                         },
                         validator: (value) =>
                             value == null ? 'Please select an account' : null,
-                        itemBuilder: (item) => DropdownMenuItem(
-                          value: item,
-                          child: Text(item.toString()),
-                        ),
+
                       );
                     } else {
                       return Container();

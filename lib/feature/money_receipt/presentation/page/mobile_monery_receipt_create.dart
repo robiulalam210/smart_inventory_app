@@ -380,7 +380,6 @@ class _MoneyReceiptListScreenState extends State<MobileMoneyReceiptForm> {
             final customerBloc = context.read<CustomerBloc>();
             return AppDropdown(
               label: "Customer",
-              context: context,
               isSearch: true,
               hint: moneyReceiptBloc.selectCustomerModel?.name?.toString() ?? "Select Customer",
               isNeedAll: false,
@@ -407,17 +406,7 @@ class _MoneyReceiptListScreenState extends State<MobileMoneyReceiptForm> {
                 }
                 return null;
               },
-              itemBuilder: (item) => DropdownMenuItem(
-                value: item,
-                child: Text(
-                  item.toString(),
-                  style:  TextStyle(
-                    color:AppColors.blackColor(context),
-                    fontFamily: 'Quicksand',
-                    fontWeight: FontWeight.w300,
-                  ),
-                ),
-              ),
+
             );
           },
         ),
@@ -433,7 +422,6 @@ class _MoneyReceiptListScreenState extends State<MobileMoneyReceiptForm> {
 
             return AppDropdown(
               label: "Collected By",
-              context: context,
               hint: moneyReceiptBloc.selectUserModel?.username?.toString() ?? "Select Collected By",
               isLabel: false,
               isRequired: true,
@@ -451,17 +439,7 @@ class _MoneyReceiptListScreenState extends State<MobileMoneyReceiptForm> {
                 }
                 return null;
               },
-              itemBuilder: (item) => DropdownMenuItem(
-                value: item,
-                child: Text(
-                  item.username ?? "Unknown",
-                  style:  TextStyle(
-                    color:AppColors.blackColor(context),
-                    fontFamily: 'Quicksand',
-                    fontWeight: FontWeight.w300,
-                  ),
-                ),
-              ),
+
             );
           },
         ),
@@ -510,7 +488,6 @@ class _MoneyReceiptListScreenState extends State<MobileMoneyReceiptForm> {
           builder: (context, selectedPaymentTo, child) {
             return AppDropdown<String>(
               label: "Payment To",
-              context: context,
               hint: selectedPaymentTo.isNotEmpty ? selectedPaymentTo : "Select Payment To",
               isLabel: false,
               isRequired: true,
@@ -530,17 +507,7 @@ class _MoneyReceiptListScreenState extends State<MobileMoneyReceiptForm> {
                 }
                 return null;
               },
-              itemBuilder: (item) => DropdownMenuItem(
-                value: item,
-                child: Text(
-                  item.toString(),
-                  style:  TextStyle(
-                    color:AppColors.blackColor(context),
-                    fontFamily: 'Quicksand',
-                    fontWeight: FontWeight.w300,
-                  ),
-                ),
-              ),
+
             );
           },
         ),
@@ -557,7 +524,6 @@ class _MoneyReceiptListScreenState extends State<MobileMoneyReceiptForm> {
                     final posSaleBloc = context.read<PosSaleBloc>();
                     return AppDropdown<PosSaleModel>(
                       label: "Invoice",
-                      context: context,
                       hint: selectedPosSale?.invoiceNo?.toString() ?? "Select Invoice",
                       isNeedAll: false,
                       isRequired: true,
@@ -576,17 +542,7 @@ class _MoneyReceiptListScreenState extends State<MobileMoneyReceiptForm> {
                         }
                         return null;
                       },
-                      itemBuilder: (item) => DropdownMenuItem(
-                        value: item,
-                        child: Text(
-                          item.toString(),
-                          style:  TextStyle(
-                            color:AppColors.blackColor(context),
-                            fontFamily: 'Quicksand',
-                            fontWeight: FontWeight.w300,
-                          ),
-                        ),
-                      ),
+
                     );
                   },
                 );
@@ -608,7 +564,6 @@ class _MoneyReceiptListScreenState extends State<MobileMoneyReceiptForm> {
           builder: (context, selectedPaymentMethod, child) {
             return AppDropdown<String>(
               label: "Payment Method",
-              context: context,
               hint: selectedPaymentMethod ?? "Select Payment Method",
               isLabel: false,
               isRequired: true,
@@ -628,17 +583,7 @@ class _MoneyReceiptListScreenState extends State<MobileMoneyReceiptForm> {
                 }
                 return null;
               },
-              itemBuilder: (item) => DropdownMenuItem(
-                value: item,
-                child: Text(
-                  item.toString(),
-                  style:  TextStyle(
-                    color:AppColors.blackColor(context),
-                    fontFamily: 'Quicksand',
-                    fontWeight: FontWeight.w300,
-                  ),
-                ),
-              ),
+
             );
           },
         ),
@@ -763,7 +708,6 @@ class _MoneyReceiptListScreenState extends State<MobileMoneyReceiptForm> {
     }
 
     return AppDropdown<AccountActiveModel>(
-      context: context,
       label: "Account",
       hint: filteredList.isEmpty
           ? "No accounts available"
@@ -796,17 +740,7 @@ class _MoneyReceiptListScreenState extends State<MobileMoneyReceiptForm> {
         }
         return null;
       },
-      itemBuilder: (item) => DropdownMenuItem(
-        value: item,
-        child: Text(
-          "${item.name ?? 'Unknown'}${item.acNumber != null && item.acNumber!.isNotEmpty ? ' - ${item.acNumber}' : ''}",
-          style:  TextStyle(
-            color:AppColors.blackColor(context),
-            fontFamily: 'Quicksand',
-            fontWeight: FontWeight.w300,
-          ),
-        ),
-      ),
+
     );
   }
 

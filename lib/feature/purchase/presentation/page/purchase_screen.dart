@@ -239,7 +239,6 @@ class _PurchaseScreenState extends State<PurchaseScreen> {
                 builder: (context, state) {
                   return AppDropdown<SupplierActiveModel>(
                     label: "",
-                    context: context,
                     hint: "Select Supplier",
                     isLabel: true,
                     isRequired: false,
@@ -253,17 +252,8 @@ class _PurchaseScreenState extends State<PurchaseScreen> {
                       );
                     },
                     validator: (value) => null,
-                    itemBuilder: (item) => DropdownMenuItem<SupplierActiveModel>(
-                      value: item,
-                      child: Text(
-                        item.name ?? 'Unknown Supplier',
-                        style:  TextStyle(
-                          color:AppColors.blackColor(context),
-                          fontFamily: 'Quicksand',
-                          fontWeight: FontWeight.w300,
-                        ),
-                      ),
-                    ),
+
+
                   );
                 },
               ),
@@ -277,7 +267,6 @@ class _PurchaseScreenState extends State<PurchaseScreen> {
                 builder: (context, value, child) {
                   return AppDropdown<String>(
                     label: "Payment Status",
-                    context: context,
                     hint: "Select Payment Status",
                     isNeedAll: true,
                     isRequired: false,
@@ -291,17 +280,7 @@ class _PurchaseScreenState extends State<PurchaseScreen> {
                       );
                     },
                     validator: (value) => null,
-                    itemBuilder: (item) => DropdownMenuItem<String>(
-                      value: item,
-                      child: Text(
-                        item,
-                        style:  TextStyle(
-                          color:AppColors.blackColor(context),
-                          fontFamily: 'Quicksand',
-                          fontWeight: FontWeight.w300,
-                        ),
-                      ),
-                    ),
+
                   );
                 },
               ),

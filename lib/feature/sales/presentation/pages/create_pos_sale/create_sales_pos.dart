@@ -414,7 +414,6 @@ class _SalesScreenState extends State<SalesScreen> {
           child: BlocBuilder<CustomerBloc, CustomerState>(
             builder: (context, state) {
               return AppDropdown(
-                context: context,
                 label: "Customer",
                 hint: bloc.selectClintModel?.name ?? "Select Customer",
                 isSearch: true,
@@ -436,17 +435,7 @@ class _SalesScreenState extends State<SalesScreen> {
                 },
                 validator: (value) =>
                 value == null ? 'Please select Customer' : null,
-                itemBuilder: (item) => DropdownMenuItem(
-                  value: item,
-                  child: Text(
-                    item.toString(),
-                    style:  TextStyle(
-                      color:AppColors.blackColor(context),
-                      fontFamily: 'Quicksand',
-                      fontWeight: FontWeight.w300,
-                    ),
-                  ),
-                ),
+
               );
             },
           ),
@@ -460,7 +449,6 @@ class _SalesScreenState extends State<SalesScreen> {
           child: BlocBuilder<UserBloc, UserState>(
             builder: (context, state) {
               return AppDropdown(
-                context: context,
                 label: "Sales By",
                 hint: bloc.selectSalesModel?.username ?? "Select Sales",
                 isSearch: true,
@@ -474,17 +462,7 @@ class _SalesScreenState extends State<SalesScreen> {
                 },
                 validator: (value) =>
                 value == null ? 'Please select Sales' : null,
-                itemBuilder: (item) => DropdownMenuItem(
-                  value: item,
-                  child: Text(
-                    item.toString(),
-                    style:  TextStyle(
-                      color:AppColors.blackColor(context),
-                      fontFamily: 'Quicksand',
-                      fontWeight: FontWeight.w300,
-                    ),
-                  ),
-                ),
+
               );
             },
           ),
@@ -1310,7 +1288,6 @@ class _SalesScreenState extends State<SalesScreen> {
                   children: [
                     Expanded(
                       child: AppDropdown(
-                        context: context,
                         label: "Payment Method",
                         hint: context.read<CreatePosSaleBloc>().selectedPaymentMethod.isEmpty
                             ? "Select Payment Method"
@@ -1327,10 +1304,7 @@ class _SalesScreenState extends State<SalesScreen> {
                           setState(() {});
                         },
                         validator: (value) => value == null ? 'Please select a payment method' : null,
-                        itemBuilder: (item) => DropdownMenuItem(
-                          value: item,
-                          child: Text(item.toString()),
-                        ),
+
                       ),
                     ),
                     const SizedBox(width: 5),
@@ -1349,7 +1323,6 @@ class _SalesScreenState extends State<SalesScreen> {
                             final selectedAccount = bloc.accountModel ?? (filteredList.isNotEmpty ? filteredList.first : null);
                             bloc.accountModel = selectedAccount;
                             return AppDropdown<AccountActiveModel>(
-                              context: context,
                               label: "Account",
                               hint: bloc.accountModel == null ? "Select Account" : bloc.accountModel!.name.toString(),
                               isLabel: false,
@@ -1362,7 +1335,6 @@ class _SalesScreenState extends State<SalesScreen> {
                                 setState(() {});
                               },
                               validator: (value) => value == null ? 'Please select an account' : null,
-                              itemBuilder: (item) => DropdownMenuItem(value: item, child: Text(item.toString())),
                             );
                           } else {
                             return Container();
@@ -1484,7 +1456,6 @@ class _SalesScreenState extends State<SalesScreen> {
                         final categoryList = categoriesBloc.list;
                         return AppDropdown(
                           label: "Category",
-                          context: context,
                           hint: "Select Category",
                           isLabel: false,
                           isNeedAll: true,
@@ -1494,7 +1465,6 @@ class _SalesScreenState extends State<SalesScreen> {
                           onChanged: (v) => setState(() {
                             selectedCategoryFilter = v?.toString() ?? '';
                           }),
-                          itemBuilder: (item) => DropdownMenuItem(value: item, child: Text(item)),
                         );
                       },
                     ),
@@ -1506,7 +1476,6 @@ class _SalesScreenState extends State<SalesScreen> {
                         final brandList = brandBloc.brandModel;
                         return AppDropdown(
                           label: "Brand",
-                          context: context,
                           hint: "Select Brand",
                           isLabel: false,
                           isNeedAll: true,
@@ -1516,7 +1485,6 @@ class _SalesScreenState extends State<SalesScreen> {
                           onChanged: (v) => setState(() {
                             selectedBrandFilter = v?.toString() ?? '';
                           }),
-                          itemBuilder: (item) => DropdownMenuItem(value: item, child: Text(item)),
                         );
                       },
                     ),

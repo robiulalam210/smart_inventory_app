@@ -296,7 +296,6 @@ class _ExpenseCreateScreenState extends State<ExpenseCreateScreen> {
                                     }
 
                                     return AppDropdown<ExpenseHeadModel>(
-                                      context: context,
                                       label: "Expense Head",
                                       hint:
                                           _selectedExpenseHead?.name ??
@@ -313,18 +312,7 @@ class _ExpenseCreateScreenState extends State<ExpenseCreateScreen> {
                                             ? 'Please select Expense Head'
                                             : null;
                                       },
-                                      itemBuilder: (item) =>
-                                          DropdownMenuItem<ExpenseHeadModel>(
-                                            value: item,
-                                            child: Text(
-                                              item.name ?? 'Unnamed Head',
-                                              style:  TextStyle(
-                                                color:AppColors.blackColor(context),
-                                                fontFamily: 'Quicksand',
-                                                fontWeight: FontWeight.w300,
-                                              ),
-                                            ),
-                                          ),
+
                                     );
                                   },
                                 ),
@@ -352,7 +340,6 @@ class _ExpenseCreateScreenState extends State<ExpenseCreateScreen> {
                                         : <ExpenseSubHeadModel>[];
 
                                     return AppDropdown<ExpenseSubHeadModel>(
-                                      context: context,
                                       label: "Expense Sub Head (Optional)",
                                       hint:
                                           _selectedExpenseSubHead?.name ??
@@ -362,18 +349,7 @@ class _ExpenseCreateScreenState extends State<ExpenseCreateScreen> {
                                       value: _selectedExpenseSubHead,
                                       itemList: subHeads,
                                       onChanged: _onExpenseSubHeadChanged,
-                                      itemBuilder: (item) =>
-                                          DropdownMenuItem<ExpenseSubHeadModel>(
-                                            value: item,
-                                            child: Text(
-                                              item.name ?? 'Unnamed Sub Head',
-                                              style:  TextStyle(
-                                                color:AppColors.blackColor(context),
-                                                fontFamily: 'Quicksand',
-                                                fontWeight: FontWeight.w300,
-                                              ),
-                                            ),
-                                          ),
+
                                     );
                                   },
                                 ),
@@ -387,7 +363,6 @@ class _ExpenseCreateScreenState extends State<ExpenseCreateScreen> {
                           Expanded(
                             child: widget.id == null
                                 ? AppDropdown<String>(
-                                    context: context,
                                     label: "Payment Method",
                                     hint: expenseBloc.selectedPayment.isEmpty
                                         ? "Select Payment Method"
@@ -410,18 +385,7 @@ class _ExpenseCreateScreenState extends State<ExpenseCreateScreen> {
                                           ? 'Please select a payment method'
                                           : null;
                                     },
-                                    itemBuilder: (item) =>
-                                        DropdownMenuItem<String>(
-                                          value: item,
-                                          child: Text(
-                                            item.toString(),
-                                            style:  TextStyle(
-                                              color:AppColors.blackColor(context),
-                                              fontFamily: 'Quicksand',
-                                              fontWeight: FontWeight.w300,
-                                            ),
-                                          ),
-                                        ),
+
                                   )
                                 : Container(),
                           ),
@@ -449,7 +413,6 @@ class _ExpenseCreateScreenState extends State<ExpenseCreateScreen> {
                                             : state.list;
 
                                         return AppDropdown<dynamic>(
-                                          context: context,
                                           label: "Account",
                                           hint: "Select Account",
                                           isLabel: false,
@@ -483,18 +446,7 @@ class _ExpenseCreateScreenState extends State<ExpenseCreateScreen> {
                                                 ? 'Please select an account'
                                                 : null;
                                           },
-                                          itemBuilder: (item) =>
-                                              DropdownMenuItem(
-                                                value: item,
-                                                child: Text(
-                                                  item.toString(),
-                                                  style:  TextStyle(
-                                                    color:AppColors.blackColor(context),
-                                                    fontFamily: 'Quicksand',
-                                                    fontWeight: FontWeight.w300,
-                                                  ),
-                                                ),
-                                              ),
+
                                         );
                                       } else if (state is AccountActiveListFailed) {
                                         return Center(

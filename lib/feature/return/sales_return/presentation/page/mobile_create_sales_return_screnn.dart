@@ -390,7 +390,6 @@ class _CreateSalesReturnScreenState
         return AppDropdown<SalesInvoiceModel>(
           label: "Receipt Number",
           isSearch: true,
-          context: context,
           hint: _selectedInvoice?.invoiceNo ?? "Select Receipt Number",
           isRequired: true,
           value: _selectedInvoice,
@@ -402,35 +401,6 @@ class _CreateSalesReturnScreenState
           },
           validator: (value) =>
               value == null ? 'Please select Receipt Number' : null,
-          itemBuilder: (item) => DropdownMenuItem<SalesInvoiceModel>(
-            value: item,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  item.invoiceNo ?? 'Unknown',
-                  style: TextStyle(
-                    color:AppColors.blackColor(context),
-                    fontFamily: 'Quicksand',
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                Text(
-                  'Customer: ${item.customerName ?? "Walk-in Customer"}',
-                  style: TextStyle(color: AppColors.grey, fontSize: 12),
-                ),
-                Text(
-                  'Total: ৳${item.grandTotal?.toStringAsFixed(2) ?? "0.00"}',
-                  style: TextStyle(
-                    color: AppColors.primaryColor(context),
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-          ),
         );
       },
     );
@@ -518,7 +488,6 @@ class _CreateSalesReturnScreenState
                 flex: 2,
                 child: AppDropdown<String>(
                   label: "Type",
-                  context: context,
                   hint: _returnChargeType ?? "Select",
                   value: _returnChargeType,
                   itemList: ['fixed', 'percentage'],
@@ -528,17 +497,6 @@ class _CreateSalesReturnScreenState
                       _calculateTotals();
                     });
                   },
-                  itemBuilder: (item) => DropdownMenuItem(
-                    value: item,
-                    child: Text(
-                      item == 'percentage' ? '%' : 'Fixed',
-                      style: TextStyle(
-                        color:AppColors.blackColor(context),
-                        fontFamily: 'Quicksand',
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
                 ),
               ),
 
@@ -572,11 +530,10 @@ class _CreateSalesReturnScreenState
       builder: (context, state) {
         return AppDropdown<String>(
           label: "Payment Method ",
-          context: context,
           hint: _selectedPaymentMethod ?? "Select Payment Method",
           isRequired: true,
           value: _selectedPaymentMethod,
-          itemList: ['cash', 'bank', 'mobile', 'card', 'credit'],
+          itemList: ['cash', 'bank', 'mobile'],
           onChanged: (newVal) {
             setState(() {
               _selectedPaymentMethod = newVal;
@@ -584,17 +541,6 @@ class _CreateSalesReturnScreenState
           },
           validator: (value) =>
               value == null ? 'Please select Payment Method' : null,
-          itemBuilder: (item) => DropdownMenuItem(
-            value: item,
-            child: Text(
-              item.toUpperCase(),
-              style: TextStyle(
-                color:AppColors.blackColor(context),
-                fontFamily: 'Quicksand',
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
         );
       },
     );
@@ -605,7 +551,6 @@ class _CreateSalesReturnScreenState
       builder: (context, state) {
         return AppDropdown<AccountActiveModel>(
           label: "Account",
-          context: context,
           hint: _selectedAccount?.name ?? "Select Account",
           isRequired: true,
           value: _selectedAccount,
@@ -616,28 +561,6 @@ class _CreateSalesReturnScreenState
             });
           },
           validator: (value) => value == null ? 'Please select Account' : null,
-          itemBuilder: (item) => DropdownMenuItem<AccountActiveModel>(
-            value: item,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  item.name ?? 'Unknown Account',
-                  style: TextStyle(
-                    color:AppColors.blackColor(context),
-                    fontFamily: 'Quicksand',
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                if (item.acType != null)
-                  Text(
-                    'Type: ${item.acType}',
-                    style: TextStyle(color: AppColors.grey, fontSize: 12),
-                  ),
-              ],
-            ),
-          ),
         );
       },
     );

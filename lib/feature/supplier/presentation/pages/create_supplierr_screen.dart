@@ -154,7 +154,7 @@ class _CreateSupplierScreenState extends State<CreateSupplierScreen> {
                   widget.id.toString() == ""
                       ? Container()
                       : AppDropdown(
-                    label: "Status",context: context,
+                    label: "Status",
                     hint:
                     context.read<SupplierListBloc>().selectedState.isEmpty
                         ? "Select Status"
@@ -169,17 +169,7 @@ class _CreateSupplierScreenState extends State<CreateSupplierScreen> {
                       context.read<SupplierListBloc>().selectedState =
                           newVal.toString();
                     },
-                    itemBuilder: (item) => DropdownMenuItem(
-                      value: item,
-                      child: Text(
-                        item.toString(),
-                        style:  TextStyle(
-                          color:AppColors.blackColor(context),
-                          fontFamily: 'Quicksand',
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
+
                   ),
                   SizedBox(height: AppSizes.height(context) * 0.04),
 

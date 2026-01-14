@@ -200,7 +200,6 @@ class _SalesReturnScreenState extends State<SalesReturnScreen> {
             builder: (context, state) {
               return AppDropdown<CustomerActiveModel>(
                 label: "Customer",
-                context: context,
                 isSearch: true,
                 hint: _selectedCustomer?.name ?? "Select Customer",
                 isNeedAll: true,
@@ -215,20 +214,6 @@ class _SalesReturnScreenState extends State<SalesReturnScreen> {
                   _fetchSalesReturnList(
                     from: selectedDateRange?.start,
                     to: selectedDateRange?.end,
-                  );
-                },
-                itemBuilder: (item) {
-                  final isAllOption = item.id == null;
-                  return DropdownMenuItem<CustomerActiveModel>(
-                    value: item,
-                    child: Text(
-                      isAllOption ? 'All Customers' : '${item.name} (${item.phone})',
-                      style: TextStyle(
-                        color: isAllOption ? AppColors.primaryColor(context) :AppColors.blackColor(context),
-                        fontFamily: 'Quicksand',
-                        fontWeight: isAllOption ? FontWeight.bold : FontWeight.w300,
-                      ),
-                    ),
                   );
                 },
               );

@@ -248,7 +248,6 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
             SizedBox(
               width: 240,
               child: AppDropdown<String>(
-                context: context,
                 label: "Payment Method",
                 hint: "Select Payment Method",
                 isNeedAll: true,
@@ -257,17 +256,6 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
                 value: _selectedPaymentMethod,
                 itemList: paymentMethods,
                 onChanged: _onPaymentMethodChanged,
-                itemBuilder: (item) => DropdownMenuItem<String>(
-                  value: item,
-                  child: Text(
-                    item,
-                    style:  TextStyle(
-                      color:AppColors.blackColor(context),
-                      fontFamily: 'Quicksand',
-                      fontWeight: FontWeight.w300,
-                    ),
-                  ),
-                ),
               ),
             ),
             const SizedBox(width: 4),
@@ -277,7 +265,6 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
                 builder: (context, state) {
                   if (state is ExpenseHeadListLoading) {
                     return AppDropdown<ExpenseHeadModel>(
-                      context: context,
                       label: "Expense Head",
                       hint: "Loading expense heads...",
                       isNeedAll: true,
@@ -286,17 +273,11 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
                       value: null,
                       itemList: [],
                       onChanged: (v) {},
-                      itemBuilder: (item) =>
-                          const DropdownMenuItem<ExpenseHeadModel>(
-                            value: null,
-                            child: Text('Loading...'),
-                          ),
                     );
                   }
 
                   if (state is ExpenseHeadListFailed) {
                     return AppDropdown<ExpenseHeadModel>(
-                      context: context,
                       label: "Expense Head",
                       hint: "Failed to load expense heads",
                       isNeedAll: true,
@@ -305,16 +286,10 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
                       isLabel: true,
                       itemList: [],
                       onChanged: (v) {},
-                      itemBuilder: (item) =>
-                          const DropdownMenuItem<ExpenseHeadModel>(
-                            value: null,
-                            child: Text('Error loading heads'),
-                          ),
                     );
                   }
 
                   return AppDropdown<ExpenseHeadModel>(
-                    context: context,
                     label: "Expense Head",
                     hint: "Select Expense Head",
                     isNeedAll: true,
@@ -323,17 +298,6 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
                     value: _selectedExpenseHead,
                     itemList: context.read<ExpenseHeadBloc>().list,
                     onChanged: _onExpenseHeadChanged,
-                    itemBuilder: (item) => DropdownMenuItem<ExpenseHeadModel>(
-                      value: item,
-                      child: Text(
-                        item.name ?? 'Unnamed Head',
-                        style:  TextStyle(
-                          color:AppColors.blackColor(context),
-                          fontFamily: 'Quicksand',
-                          fontWeight: FontWeight.w300,
-                        ),
-                      ),
-                    ),
                   );
                 },
               ),

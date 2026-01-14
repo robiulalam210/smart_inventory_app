@@ -165,31 +165,21 @@ class _SupplierLedgerScreenState extends State<SupplierLedgerScreen> {
               if (state is SupplierActiveListLoading) {
                 return AppDropdown<SupplierActiveModel>(
                   label: "Supplier",
-                  context: context,
                   hint: "Loading suppliers...",
                   isRequired: false,
                   isLabel: true,
                   itemList: [],
                   onChanged: (v){},
-                  itemBuilder: (item) => const DropdownMenuItem<SupplierActiveModel>(
-                    value: null,
-                    child: Text('Loading...'),
-                  ),
                 );
               }
 
               if (state is SupplierActiveListFailed) {
                 return AppDropdown<SupplierActiveModel>(
                   label: "Supplier",
-                  context: context,
                   hint: "Failed to load suppliers",
                   isRequired: false,   isLabel: true,
                   itemList: [],
                   onChanged: (v){},
-                  itemBuilder: (item) => const DropdownMenuItem<SupplierActiveModel>(
-                    value: null,
-                    child: Text('Error loading suppliers'),
-                  ),
                 );
               }
 
@@ -203,7 +193,6 @@ class _SupplierLedgerScreenState extends State<SupplierLedgerScreen> {
 
                 return AppDropdown<SupplierActiveModel>(
                   label: "Supplier",
-                  context: context,
                   hint: "Select Supplier",
                   isRequired: false,   isLabel: true,
                   value: _selectedSupplier,
@@ -218,34 +207,15 @@ class _SupplierLedgerScreenState extends State<SupplierLedgerScreen> {
                       to: selectedDateRange?.end,
                     );
                   },
-                  itemBuilder: (item) {
-                    final isAllOption = item.id == null;
-                    return DropdownMenuItem<SupplierActiveModel>(
-                      value: item,
-                      child: Text(
-                        item.name ?? 'Unknown Supplier',
-                        style: TextStyle(
-                          color: isAllOption ? AppColors.primaryColor(context) :AppColors.blackColor(context),
-                          fontFamily: 'Quicksand',
-                          fontWeight: isAllOption ? FontWeight.bold : FontWeight.w300,
-                        ),
-                      ),
-                    );
-                  },
                 );
               }
 
               return AppDropdown<SupplierActiveModel>(
                 label: "Supplier",
-                context: context,
                 hint: "Loading suppliers...",
                 isRequired: false,
                 itemList: [],
                 onChanged: (v){},
-                itemBuilder: (item) => const DropdownMenuItem<SupplierActiveModel>(
-                  value: null,
-                  child: Text('Loading...'),
-                ),
               );
             },
           ),

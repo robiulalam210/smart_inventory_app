@@ -124,7 +124,6 @@ class _CreateSupplierScreenState extends State<MobileCreateSupplierScreen> {
   Widget _buildStatusDropdown() {
     return AppDropdown(
       label: "Status",
-      context: context,
       hint: context.read<SupplierListBloc>().selectedState.isEmpty
           ? "Select Status"
           : context.read<SupplierListBloc>().selectedState,
@@ -138,17 +137,7 @@ class _CreateSupplierScreenState extends State<MobileCreateSupplierScreen> {
           context.read<SupplierListBloc>().selectedState = newVal.toString();
         });
       },
-      itemBuilder: (item) => DropdownMenuItem(
-        value: item,
-        child: Text(
-          item.toString(),
-          style:  TextStyle(
-            color:AppColors.blackColor(context),
-            fontFamily: 'Quicksand',
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
+
     );
   }
 

@@ -117,7 +117,6 @@ class _CustomerLedgerScreenState extends State<CustomerLedgerScreen> {
             builder: (context, state) {
               return AppDropdown<CustomerActiveModel>(
                 label: "Customer",
-                context: context,
                 isSearch: true,
                 hint: context.read<CustomerLedgerBloc>().selectedCustomer?.name ?? "Select Customer",
                 isNeedAll: false,
@@ -138,17 +137,6 @@ class _CustomerLedgerScreenState extends State<CustomerLedgerScreen> {
                 validator: (value) {
                   return value == null ? 'Please select Customer' : null;
                 },
-                itemBuilder: (item) => DropdownMenuItem<CustomerActiveModel>(
-                  value: item,
-                  child: Text(
-                    item.name ?? 'Unknown Customer',
-                    style:  TextStyle(
-                      color:AppColors.blackColor(context),
-                      fontFamily: 'Quicksand',
-                      fontWeight: FontWeight.w300,
-                    ),
-                  ),
-                ),
               );
             },
           ),

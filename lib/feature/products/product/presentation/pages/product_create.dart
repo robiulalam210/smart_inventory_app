@@ -290,7 +290,6 @@ class _ProductsFormState extends State<ProductsForm> {
                                   : constraints.maxWidth * 0.5,
                               child: AppDropdown(
                                 label: "Status",
-                                context: context,
                                 hint:
                                     context
                                         .read<ProductsBloc>()
@@ -313,17 +312,6 @@ class _ProductsFormState extends State<ProductsForm> {
                                         newVal.toString();
                                   });
                                 },
-                                itemBuilder: (item) => DropdownMenuItem(
-                                  value: item,
-                                  child: Text(
-                                    item.toString(),
-                                    style:  TextStyle(
-                                      color:AppColors.blackColor(context),
-                                      fontFamily: 'Quicksand',
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ),
                               ),
                             );
                           },
@@ -421,7 +409,6 @@ class _ProductsFormState extends State<ProductsForm> {
 
         return AppDropdown(
           label: "Category",
-          context: context,
           hint: selectedCategory.isEmpty ? "Select Category" : selectedCategory,
           isLabel: false,
           isNeedAll: false,
@@ -441,8 +428,7 @@ class _ProductsFormState extends State<ProductsForm> {
             });
           },
           validator: (value) => value == null ? 'Please select Category' : null,
-          itemBuilder: (item) =>
-              DropdownMenuItem(value: item, child: Text(item.toString())),
+
         );
       },
     );
@@ -455,7 +441,6 @@ class _ProductsFormState extends State<ProductsForm> {
         final unitList = unitBloc.list;
 
         return AppDropdown(
-          context: context,
           label: "Unit ",
           hint: selectedUnit.isEmpty ? "Select Unit" : selectedUnit,
           isLabel: false,
@@ -475,8 +460,7 @@ class _ProductsFormState extends State<ProductsForm> {
             });
           },
           validator: (value) => value == null ? 'Please select Unit' : null,
-          itemBuilder: (item) =>
-              DropdownMenuItem(value: item, child: Text(item.toString())),
+
         );
       },
     );
@@ -489,7 +473,6 @@ class _ProductsFormState extends State<ProductsForm> {
         final groupsList = groupsBloc.list;
 
         return AppDropdown(
-          context: context,
           label: "Groups ",
           hint: selectedGroup.isEmpty ? "Select Groups" : selectedGroup,
           isLabel: false,
@@ -508,8 +491,7 @@ class _ProductsFormState extends State<ProductsForm> {
               groupsBloc.selectedIdState = matchingUnit.id?.toString() ?? "";
             });
           },
-          itemBuilder: (item) =>
-              DropdownMenuItem(value: item, child: Text(item.toString())),
+
         );
       },
     );
@@ -522,7 +504,6 @@ class _ProductsFormState extends State<ProductsForm> {
         final sourceList = sourceBloc.list;
 
         return AppDropdown(
-          context: context,
           label: "Source ",
           hint: selectedSource.isEmpty ? "Select Source" : selectedSource,
           isLabel: false,
@@ -541,8 +522,7 @@ class _ProductsFormState extends State<ProductsForm> {
               sourceBloc.selectedIdState = matchingUnit.id?.toString() ?? "";
             });
           },
-          itemBuilder: (item) =>
-              DropdownMenuItem(value: item, child: Text(item.toString())),
+
         );
       },
     );
@@ -556,7 +536,6 @@ class _ProductsFormState extends State<ProductsForm> {
 
         return AppDropdown(
           label: "Brand",
-          context: context,
           hint: selectedBrand.isEmpty ? "Select Brand" : selectedBrand,
           isLabel: false,
           isNeedAll: false,
@@ -574,8 +553,6 @@ class _ProductsFormState extends State<ProductsForm> {
               brandBloc.selectedId = matchingBrand.id?.toString() ?? "";
             });
           },
-          itemBuilder: (item) =>
-              DropdownMenuItem(value: item, child: Text(item.toString())),
         );
       },
     );

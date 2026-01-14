@@ -118,7 +118,6 @@ class _SaleReportScreenState extends State<SaleReportScreen> {
             builder: (context, state) {
               return AppDropdown<CustomerActiveModel>(
                 label: "Customer",
-                context: context,
                 isSearch: true,
                 isLabel: true,
                 hint: "Select Customer",
@@ -134,17 +133,6 @@ class _SaleReportScreenState extends State<SaleReportScreen> {
                     seller: context.read<SalesReportBloc>().selectedSeller?.id.toString() ?? '',
                   );
                 },
-                itemBuilder: (item) => DropdownMenuItem<CustomerActiveModel>(
-                  value: item,
-                  child: Text(
-                    item.name ?? 'Unknown Customer',
-                    style:  TextStyle(
-                      color:AppColors.blackColor(context),
-                      fontFamily: 'Quicksand',
-                      fontWeight: FontWeight.w300,
-                    ),
-                  ),
-                ),
               );
             },
           ),
@@ -158,7 +146,6 @@ class _SaleReportScreenState extends State<SaleReportScreen> {
             builder: (context, state) {
               return AppDropdown<UsersListModel>(
                 label: "Seller",
-                context: context,
                 hint: "Select Seller",
                 isLabel: true,
                 isRequired: false,
@@ -173,17 +160,6 @@ class _SaleReportScreenState extends State<SaleReportScreen> {
                     seller: newVal?.id.toString() ?? '',
                   );
                 },
-                itemBuilder: (item) => DropdownMenuItem<UsersListModel>(
-                  value: item,
-                  child: Text(
-                    item.username ?? 'Unknown Seller',
-                    style:  TextStyle(
-                      color:AppColors.blackColor(context),
-                      fontFamily: 'Quicksand',
-                      fontWeight: FontWeight.w300,
-                    ),
-                  ),
-                ),
               );
             },
           ),

@@ -207,7 +207,6 @@ class _GroupsCreateState extends State<GroupsCreate> {
                         : constraints.maxWidth * 0.5,
                     child: AppDropdown(
                       label: "Status",
-                      context: context,
                       hint: context.read<GroupsBloc>().selectedState.isEmpty
                           ? "Select Status"
                           : context.read<GroupsBloc>().selectedState,
@@ -223,17 +222,7 @@ class _GroupsCreateState extends State<GroupsCreate> {
                               .toString();
                         });
                       },
-                      itemBuilder: (item) => DropdownMenuItem(
-                        value: item,
-                        child: Text(
-                          item.toString(),
-                          style:  TextStyle(
-                            color:AppColors.blackColor(context),
-                            fontFamily: 'Quicksand',
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
+
                     ),
                   );
                 },

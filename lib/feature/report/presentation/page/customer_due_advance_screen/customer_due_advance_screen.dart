@@ -200,7 +200,6 @@ class _CustomerDueAdvanceScreenState extends State<CustomerDueAdvanceScreen> {
             builder: (context, state) {
               if (state is CustomerListLoading) {
                 return AppDropdown<CustomerActiveModel>(
-                  context: context,
                   label: "Customer",
                   hint: "Loading customers...",
                   isNeedAll: true,
@@ -208,15 +207,10 @@ class _CustomerDueAdvanceScreenState extends State<CustomerDueAdvanceScreen> {
                   isLabel: false,
                   itemList: [],
                   onChanged: (v){},
-                  itemBuilder: (item) => const DropdownMenuItem<CustomerActiveModel>(
-                    value: null,
-                    child: Text('Loading...'),
-                  ),
                 );
               }
 
               return AppDropdown<CustomerActiveModel>(
-                context: context,
                 label: "Customer", isLabel: true,
                 hint: "Select Customer",
                 isNeedAll: true,
@@ -224,20 +218,6 @@ class _CustomerDueAdvanceScreenState extends State<CustomerDueAdvanceScreen> {
                 value: _selectedCustomer,
                 itemList: context.read<CustomerBloc>().activeCustomer,
                 onChanged: _onCustomerChanged,
-                itemBuilder: (item) {
-                  final isAllOption = item.id == null;
-                  return DropdownMenuItem<CustomerActiveModel>(
-                    value: item,
-                    child: Text(
-                      isAllOption ? 'All Customers' : '${item.name} (${item.phone})',
-                      style: TextStyle(
-                        color: isAllOption ? AppColors.primaryColor(context) :AppColors.blackColor(context),
-                        fontFamily: 'Quicksand',
-                        fontWeight: isAllOption ? FontWeight.bold : FontWeight.w300,
-                      ),
-                    ),
-                  );
-                },
               );
             },
           ),
@@ -249,7 +229,6 @@ class _CustomerDueAdvanceScreenState extends State<CustomerDueAdvanceScreen> {
           width: 200,
 
           child: AppDropdown<String>(
-            context: context,
             label: "Status",
             hint: "Select Status",
             isNeedAll: false,
@@ -258,17 +237,6 @@ class _CustomerDueAdvanceScreenState extends State<CustomerDueAdvanceScreen> {
             value: _selectedStatus,
             itemList: statusOptions,
             onChanged: _onStatusChanged,
-            itemBuilder: (item) => DropdownMenuItem<String>(
-              value: item,
-              child: Text(
-                statusLabels[item] ?? item,
-                style:  TextStyle(
-                  color:AppColors.blackColor(context),
-                  fontFamily: 'Quicksand',
-                  fontWeight: FontWeight.w300,
-                ),
-              ),
-            ),
           ),
         ),
         const SizedBox(width: 12),

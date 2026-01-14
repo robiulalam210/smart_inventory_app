@@ -218,7 +218,6 @@ class _AccountScreenState extends State<AccountScreen> {
             valueListenable: selectedAccountTypeNotifier,
             builder: (context, value, child) {
               return AppDropdown<String>(
-                context: context,
                 hint: "Select Account Type",
                 isNeedAll: true,
                 isLabel: false,
@@ -230,17 +229,7 @@ class _AccountScreenState extends State<AccountScreen> {
                   _fetchApi(accountType: newVal?.toLowerCase() ?? '');
                 },
                 validator: (value) => null,
-                itemBuilder: (item) => DropdownMenuItem<String>(
-                  value: item,
-                  child: Text(
-                    item,
-                    style:  TextStyle(
-                      color:AppColors.blackColor(context),
-                      fontFamily: 'Quicksand',
-                      fontWeight: FontWeight.w300,
-                    ),
-                  ),
-                ),
+                
                 label: '',
               );
             },
