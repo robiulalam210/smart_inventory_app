@@ -6,16 +6,12 @@ import 'package:lottie/lottie.dart';
 import 'package:printing/printing.dart';
 import '/core/configs/app_colors.dart';
 import '/core/configs/app_images.dart';
-import '/core/configs/app_text.dart';
-import '/core/widgets/app_button.dart';
 import '/core/widgets/app_dropdown.dart';
 import '/core/widgets/date_range.dart';
 import '/feature/customer/data/model/customer_active_model.dart';
 import '/feature/customer/presentation/bloc/customer/customer_bloc.dart';
 import '/feature/report/presentation/page/customer_due_advance_screen/pdf.dart';
 
-import '../../../../../core/configs/app_routes.dart';
-import '../../../../../responsive.dart';
 import '../../../data/model/customer_due_advance_report_model.dart';
 import '../../bloc/customer_due_advance_bloc/customer_due_advance_bloc.dart';
 
