@@ -14,11 +14,7 @@ class BrandTableCard extends StatelessWidget {
   final List<BrandModel> brands;
   final VoidCallback? onBrandTap;
 
-  const BrandTableCard({
-    super.key,
-    required this.brands,
-    this.onBrandTap,
-  });
+  const BrandTableCard({super.key, required this.brands, this.onBrandTap});
 
   @override
   Widget build(BuildContext context) {
@@ -38,8 +34,10 @@ class BrandTableCard extends StatelessWidget {
         const numColumns = 4;
         const minColumnWidth = 100.0;
 
-        final dynamicColumnWidth =
-        (totalWidth / numColumns).clamp(minColumnWidth, double.infinity);
+        final dynamicColumnWidth = (totalWidth / numColumns).clamp(
+          minColumnWidth,
+          double.infinity,
+        );
 
         return Container(
           decoration: BoxDecoration(
@@ -97,10 +95,23 @@ class BrandTableCard extends StatelessWidget {
                                   ? (_) => onBrandTap!()
                                   : null,
                               cells: [
-                                _buildDataCell('${entry.key + 1}', dynamicColumnWidth * 0.6),
-                                _buildDataCell(brand.name ?? "N/A", dynamicColumnWidth),
-                                _buildStatusCell(brand.isActive ?? false, dynamicColumnWidth),
-                                _buildActionCell(brand, context, dynamicColumnWidth),
+                                _buildDataCell(
+                                  '${entry.key + 1}',
+                                  dynamicColumnWidth * 0.6,
+                                ),
+                                _buildDataCell(
+                                  brand.name ?? "N/A",
+                                  dynamicColumnWidth,
+                                ),
+                                _buildStatusCell(
+                                  brand.isActive ?? false,
+                                  dynamicColumnWidth,
+                                ),
+                                _buildActionCell(
+                                  brand,
+                                  context,
+                                  dynamicColumnWidth,
+                                ),
                               ],
                             );
                           }).toList(),
@@ -137,20 +148,22 @@ class BrandTableCard extends StatelessWidget {
         separatorBuilder: (context, index) => const Divider(height: 1),
         itemBuilder: (context, index) {
           final brand = brands[index];
-          return _buildMobileBrandCard(context,brand, index);
+          return _buildMobileBrandCard(context, brand, index);
         },
       ),
     );
   }
 
-  Widget _buildMobileBrandCard(BuildContext context,BrandModel brand, int index) {
+  Widget _buildMobileBrandCard(
+    BuildContext context,
+    BrandModel brand,
+    int index,
+  ) {
     final isActive = brand.isActive ?? false;
 
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: index.isEven ? Colors.grey.withValues(alpha: 0.03) : Colors.white,
-      ),
+      decoration: BoxDecoration(color: AppColors.bottomNavBg(context)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -177,19 +190,19 @@ class BrandTableCard extends StatelessWidget {
             ],
           ),
 
-          const SizedBox(height: 12),
+          const SizedBox(height: 6),
 
           // Brand Name
           Text(
             brand.name ?? "N/A",
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: Colors.black87,
+              color: AppColors.text(context),
             ),
           ),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
 
           // Action Buttons
           Row(
@@ -198,7 +211,7 @@ class BrandTableCard extends StatelessWidget {
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: () => _showEditDialog(context, brand),
-                  icon: const Icon(Icons.edit, size: 16),
+                  icon: const Icon(Iconsax.edit, size: 16),
                   label: const Text('Edit'),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Colors.blue,
@@ -211,7 +224,10 @@ class BrandTableCard extends StatelessWidget {
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: () => _confirmDelete(context, brand),
-                  icon: const Icon(Icons.delete, size: 16),
+                  icon: const Icon(
+                    HugeIcons.strokeRoundedDeleteThrow,
+                    size: 16,
+                  ),
                   label: const Text('Delete'),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Colors.red,
@@ -231,7 +247,9 @@ class BrandTableCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: isActive ? Colors.green.withValues(alpha: 0.1) : Colors.red.withValues(alpha: 0.1),
+        color: isActive
+            ? Colors.green.withValues(alpha: 0.1)
+            : Colors.red.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
@@ -311,7 +329,9 @@ class BrandTableCard extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: isActive ? Colors.green.withValues(alpha: 0.1) : Colors.red.withValues(alpha: 0.1),
+              color: isActive
+                  ? Colors.green.withValues(alpha: 0.1)
+                  : Colors.red.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
@@ -329,7 +349,11 @@ class BrandTableCard extends StatelessWidget {
     );
   }
 
-  DataCell _buildActionCell(BrandModel brand, BuildContext context, double width) {
+  DataCell _buildActionCell(
+    BrandModel brand,
+    BuildContext context,
+    double width,
+  ) {
     return DataCell(
       SizedBox(
         width: width,
@@ -375,9 +399,7 @@ class BrandTableCard extends StatelessWidget {
   Future<void> _confirmDelete(BuildContext context, BrandModel brand) async {
     final shouldDelete = await showDeleteConfirmationDialog(context);
     if (shouldDelete && context.mounted) {
-      context.read<BrandBloc>().add(
-        DeleteBrand(id: brand.id.toString()),
-      );
+      context.read<BrandBloc>().add(DeleteBrand(id: brand.id.toString()));
     }
   }
 

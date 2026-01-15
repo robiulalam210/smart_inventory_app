@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lottie/lottie.dart';
+import 'package:meherinMart/core/widgets/app_scaffold.dart';
 import '/feature/products/groups/presentation/pages/create_groups.dart';
 import '../../../../../core/configs/app_colors.dart';
 import '../../../../../core/configs/app_images.dart';
@@ -44,13 +45,18 @@ class _GroupsScreenState extends State<MobileGroupsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    return AppScaffold(
+      appBar: AppBar(
+        title: Text("Group", style: AppTextStyle.titleMedium(context)),
+      ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: AppColors.primaryColor(context),
 
-
-    return Scaffold(
-      appBar: AppBar(title: Text("Group",style: AppTextStyle.titleMedium(context),),),
-      floatingActionButton: FloatingActionButton( onPressed: () => _showCreateDialog(context),child: Icon(Icons.add),),
+        onPressed: () => _showCreateDialog(context),
+        child: Icon(Icons.add),
+      ),
       body: SafeArea(
-        child:ResponsiveCol(
+        child: ResponsiveCol(
           xs: 12,
           sm: 12,
           md: 12,
@@ -65,18 +71,16 @@ class _GroupsScreenState extends State<MobileGroupsScreen> {
               child: SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 child: Container(
-                  padding: const EdgeInsets.all(12)
-                  ,
+                  padding: const EdgeInsets.all(12),
                   child: buildContent(),
                 ),
               ),
             ),
           ),
-        )
+        ),
       ),
     );
   }
-
 
   Widget buildContent() {
     return BlocListener<GroupsBloc, GroupsState>(
@@ -148,25 +152,20 @@ class _GroupsScreenState extends State<MobileGroupsScreen> {
   }
 
   Widget _buildHeaderRow() {
-
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Search Field
-          CustomSearchTextFormField(
-            controller: context.read<GroupsBloc>().filterTextController,
-            onChanged: (value) {
-              _fetchApi(filterText: value);
-            },
-            isRequiredLabel: false,
-            hintText: "group name",
-          ),
-         
-        ],
-      );
-
-
-
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // Search Field
+        CustomSearchTextFormField(
+          controller: context.read<GroupsBloc>().filterTextController,
+          onChanged: (value) {
+            _fetchApi(filterText: value);
+          },
+          isRequiredLabel: false,
+          hintText: "group name",
+        ),
+      ],
+    );
   }
 
   Widget _buildGroupsList() {
@@ -183,15 +182,10 @@ class _GroupsScreenState extends State<MobileGroupsScreen> {
           if (state.list.isEmpty) {
             return Padding(
               padding: const EdgeInsets.all(20),
-              child: Center(
-                child: Lottie.asset(AppImages.noData),
-              ),
+              child: Center(child: Lottie.asset(AppImages.noData)),
             );
           } else {
-            return GroupsTableCard(
-              groups: state.list,
-              onGroupTap: () {},
-            );
+            return GroupsTableCard(groups: state.list, onGroupTap: () {});
           }
         } else if (state is GroupsListFailed) {
           return Center(

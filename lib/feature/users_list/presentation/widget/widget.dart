@@ -1,5 +1,5 @@
+import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-
 import '../../../../core/configs/configs.dart';
 import '../../data/model/user_model.dart';
 
@@ -13,282 +13,55 @@ class UserTableCard extends StatelessWidget {
     this.onUserTap,
   });
 
+  bool _isMobile(BuildContext context) =>
+      MediaQuery.of(context).size.width < 768;
+
   @override
   Widget build(BuildContext context) {
     if (users.isEmpty) {
       return _buildEmptyState();
     }
 
-    final verticalScrollController = ScrollController();
-    final horizontalScrollController = ScrollController();
+    return _isMobile(context)
+        ? _buildMobileList(context)
+        : _buildDesktopTable(context);
+  }
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final totalWidth = constraints.maxWidth;
-        const minColumnWidth = 100.0;
+  // =========================
+  // 📱 MOBILE VIEW
+  // =========================
+  Widget _buildMobileList(BuildContext context) {
+    return ListView.separated(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: users.length,
+      separatorBuilder: (_, _) => const SizedBox(height: 8),
+      itemBuilder: (context, index) {
+        final user = users[index];
 
-        // Calculate dynamic column width based on totalWidth
-        final dynamicColumnWidth =
-        (totalWidth / 8).clamp(minColumnWidth, double.infinity);
-
-        return Container(
-          decoration: BoxDecoration(
+        return Card(
+          elevation: 1,
+          color: AppColors.bottomNavBg(context),
+          shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withValues(alpha: 0.1),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
           ),
-          child: Scrollbar(
-            controller: verticalScrollController,
-            thumbVisibility: true,
-            child: SingleChildScrollView(
-              controller: verticalScrollController,
-              scrollDirection: Axis.vertical,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: Scrollbar(
-                  controller: horizontalScrollController,
-                  thumbVisibility: true,
-                  child: SingleChildScrollView(
-                    controller: horizontalScrollController,
-                    scrollDirection: Axis.horizontal,
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 5),
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(minWidth: totalWidth),
-                        child: DataTable(
-                          dataRowMinHeight: 40,
-                          dataRowMaxHeight: 40,
-                          columnSpacing: 8,
-                          horizontalMargin: 12,
-                          dividerThickness: 0.5,
-                          headingRowHeight: 40,
-                          headingTextStyle: TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            fontFamily: GoogleFonts.inter().fontFamily,
-                          ),
-                          headingRowColor: WidgetStateProperty.all(
-                            AppColors.primaryColor(context),
-                          ),
-                          dataTextStyle: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w500,
-                            fontFamily: GoogleFonts.inter().fontFamily,
-                          ),
-                          columns: _buildColumns(dynamicColumnWidth),
-                          rows: users.asMap().entries.map((entry) {
-                            final user = entry.value;
-                            return DataRow(
-                              onSelectChanged: onUserTap != null
-                                  ? (_) => onUserTap!()
-                                  : null,
-                              cells: [
-                                _buildDataCell(
-                                    '${entry.key + 1}', dynamicColumnWidth * 0.5),
-                                _buildDataCell(
-                                    '${user.firstName ?? ""} ${user.lastName ?? ""}'.trim(),
-                                    dynamicColumnWidth),
-                                _buildDataCell(user.email ?? "N/A", dynamicColumnWidth),
-                                _buildDataCell(user.role ?? "N/A", dynamicColumnWidth),
-                                _buildDataCell(user.phone ?? "N/A", dynamicColumnWidth),
-                                _buildDataCell(user.company?.name ?? "N/A", dynamicColumnWidth),
-                                _buildStatusCell(_getUserStatus(user), dynamicColumnWidth),
-                                _buildActionCell(user, context, dynamicColumnWidth),
-                              ],
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  List<DataColumn> _buildColumns(double columnWidth) {
-    return [
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth * 0.5,
-          child: const Text('No.', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Full Name', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Email', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Role', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Phone', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Company', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Status', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Actions', textAlign: TextAlign.center),
-        ),
-      ),
-    ];
-  }
-
-  DataCell _buildDataCell(String text, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Text(
-          text,
-          style: const TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w500,
-            color: Colors.black87,
-          ),
-          textAlign: TextAlign.center,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ),
-    );
-  }
-
-  bool _getUserStatus(UsersListModel user) {
-    if (user.isActive != null) {
-      return user.isActive!;
-    }
-    return false;
-  }
-
-  DataCell _buildStatusCell(bool isActive, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: isActive
-                  ? Colors.green.withValues(alpha: 0.1)
-                  : Colors.red.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Text(
-              isActive ? 'Active' : 'Inactive',
-              style: TextStyle(
-                color: isActive ? Colors.green : Colors.red,
-                fontWeight: FontWeight.w600,
-                fontSize: 11,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildActionCell(
-      UsersListModel user, BuildContext context, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _buildActionButton(
-              icon: Icons.visibility,
-              color: Colors.green,
-              tooltip: 'View user details',
-              onPressed: () => _showViewDialog(context, user),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildActionButton({
-    required IconData icon,
-    required Color color,
-    required String tooltip,
-    required VoidCallback onPressed,
-  }) {
-    return IconButton(
-      onPressed: onPressed,
-      icon: Icon(icon, size: 18, color: color),
-      tooltip: tooltip,
-      padding: EdgeInsets.zero,
-      constraints: const BoxConstraints(minWidth: 30, minHeight: 30),
-    );
-  }
-
-  void _showViewDialog(BuildContext context, UsersListModel user) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return Dialog(
-          child: Container(
-            width: AppSizes.width(context) * 0.40,
-            padding: const EdgeInsets.all(20),
+          child: Padding(
+            padding: const EdgeInsets.all(8),
             child: Column(
-              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'User Details',
-                  style: AppTextStyle.cardLevelHead(context),
-                ),
-                const SizedBox(height: 16),
-                _buildDetailRow(
-                    'Full Name:', '${user.firstName ?? ""} ${user.lastName ?? ""}'.trim()),
-                _buildDetailRow('Username:', user.username ?? 'N/A'),
-                _buildDetailRow('Email:', user.email ?? 'N/A'),
-                _buildDetailRow('Role:', user.role ?? 'N/A'),
-                _buildDetailRow('Phone:', user.phone ?? 'N/A'),
-                _buildDetailRow('Company:', user.company?.name ?? 'N/A'),
-                _buildDetailRow('Status:', _getUserStatus(user) ? 'Active' : 'Inactive'),
-                const SizedBox(height: 20),
+                _mobileHeader(user,context),
+                const SizedBox(height: 6),
+                _mobileInfo('Email', user.email,context),
+                _mobileInfo('Phone', user.phone,context),
+                _mobileInfo('Role', user.role,context),
+                _mobileInfo('Company', user.company?.name,context),
+                const SizedBox(height: 6),
                 Align(
                   alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('Close'),
+                  child: IconButton(
+                    icon: const Icon(Icons.visibility, color: Colors.green),
+                    onPressed: () => _showViewDialog(context, user),
                   ),
                 ),
               ],
@@ -299,37 +72,43 @@ class UserTableCard extends StatelessWidget {
     );
   }
 
-  Widget _buildDetailRow(String label, String value) {
+  Widget _mobileHeader(UsersListModel user,BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Expanded(
+          child: Text(
+            '${user.firstName ?? ''} ${user.lastName ?? ''}'.trim(),
+            style:  TextStyle(
+              fontWeight: FontWeight.w600,
+              color: AppColors.text(context),
+              fontSize: 14,
+            ),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+        _statusChip(_getUserStatus(user)),
+      ],
+    );
+  }
+
+  Widget _mobileInfo(String label, String? value,BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 100,
-            child: Text(
-              label,
-              style: const TextStyle(
-                fontWeight: FontWeight.w600,
-                fontSize: 12,
-              ),
-            ),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              value,
-              style: const TextStyle(
-                fontSize: 12,
-              ),
-            ),
-          ),
-        ],
+      padding: const EdgeInsets.symmetric(vertical: 2),
+      child: Text(
+        '$label: ${value ?? "N/A"}',
+        style: AppTextStyle.body(context),
       ),
     );
   }
 
-  Widget _buildEmptyState() {
+  // =========================
+  // 💻 DESKTOP VIEW
+  // =========================
+  Widget _buildDesktopTable(BuildContext context) {
+    final verticalController = ScrollController();
+    final horizontalController = ScrollController();
+
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
@@ -342,34 +121,175 @@ class UserTableCard extends StatelessWidget {
           ),
         ],
       ),
-      padding: const EdgeInsets.all(40),
+      child: Scrollbar(
+        controller: verticalController,
+        thumbVisibility: true,
+        child: SingleChildScrollView(
+          controller: verticalController,
+          child: Scrollbar(
+            controller: horizontalController,
+            thumbVisibility: true,
+            child: SingleChildScrollView(
+              controller: horizontalController,
+              scrollDirection: Axis.horizontal,
+              child: DataTable(
+                headingRowColor: WidgetStateProperty.all(
+                  AppColors.primaryColor(context),
+                ),
+                headingTextStyle: GoogleFonts.inter(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
+                ),
+                dataTextStyle: GoogleFonts.inter(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
+                ),
+                columns: const [
+                  DataColumn(label: Text('No.')),
+                  DataColumn(label: Text('Full Name')),
+                  DataColumn(label: Text('Email')),
+                  DataColumn(label: Text('Role')),
+                  DataColumn(label: Text('Phone')),
+                  DataColumn(label: Text('Company')),
+                  DataColumn(label: Text('Status')),
+                  DataColumn(label: Text('Actions')),
+                ],
+                rows: users.asMap().entries.map((entry) {
+                  final user = entry.value;
+                  return DataRow(cells: [
+                    DataCell(Text('${entry.key + 1}')),
+                    DataCell(Text(
+                        '${user.firstName ?? ""} ${user.lastName ?? ""}'.trim())),
+                    DataCell(Text(user.email ?? 'N/A')),
+                    DataCell(Text(user.role ?? 'N/A')),
+                    DataCell(Text(user.phone ?? 'N/A')),
+                    DataCell(Text(user.company?.name ?? 'N/A')),
+                    DataCell(_statusChip(_getUserStatus(user))),
+                    DataCell(
+                      IconButton(
+                        icon: const Icon(Icons.visibility,
+                            size: 18, color: Colors.green),
+                        onPressed: () =>
+                            _showViewDialog(context, user),
+                      ),
+                    ),
+                  ]);
+                }).toList(),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // =========================
+  // 🔹 COMMON WIDGETS
+  // =========================
+  bool _getUserStatus(UsersListModel user) {
+    return user.isActive ?? false;
+  }
+
+  Widget _statusChip(bool isActive) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: isActive
+            ? Colors.green.withValues(alpha: 0.1)
+            : Colors.red.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Text(
+        isActive ? 'Active' : 'Inactive',
+        style: TextStyle(
+          color: isActive ? Colors.green : Colors.red,
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+
+  // =========================
+  // 🧾 VIEW DIALOG (RESPONSIVE)
+  // =========================
+  void _showViewDialog(BuildContext context, UsersListModel user) {
+    showDialog(
+      context: context,
+      builder: (_) {
+        return Dialog(
+          child: Container(
+            color: AppColors.bottomNavBg(context),
+            width: MediaQuery.of(context).size.width < 768
+                ? double.infinity
+                : AppSizes.width(context) * 0.4,
+            padding: const EdgeInsets.all(20),
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('User Details',
+                      style: AppTextStyle.cardLevelHead(context)),
+                  const SizedBox(height: 16),
+                  _detailRow('Full Name',
+                      '${user.firstName ?? ""} ${user.lastName ?? ""}'.trim(),context),
+                  _detailRow('Username', user.username,context),
+                  _detailRow('Email', user.email,context),
+                  _detailRow('Role', user.role,context),
+                  _detailRow('Phone', user.phone,context),
+                  _detailRow('Company', user.company?.name,context),
+                  _detailRow('Status',
+                      _getUserStatus(user) ? 'Active' : 'Inactive',context),
+                  const SizedBox(height: 16),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Close'),
+                    ),
+                  )
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _detailRow(String label, String? value,BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 100,
+            child: Text(label,
+                style:
+                 TextStyle(fontWeight: FontWeight.w600, fontSize: 12,color: AppColors.text(context))),
+          ),
+          Expanded(
+            child: Text(value ?? 'N/A',
+                style:  TextStyle(fontSize: 12,color: AppColors.text(context))),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // =========================
+  // 🚫 EMPTY STATE
+  // =========================
+  Widget _buildEmptyState() {
+    return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.people_outline,
-            size: 48,
-            color: Colors.grey.withValues(alpha: 0.5),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'No Users Found',
-            style: GoogleFonts.inter(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: Colors.grey,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Create your first user to get started',
-            style: GoogleFonts.inter(
-              fontSize: 12,
-              fontWeight: FontWeight.w400,
-              color: Colors.grey,
-            ),
-            textAlign: TextAlign.center,
-          ),
+        children: const [
+          Icon(Icons.people_outline, size: 48, color: Colors.grey),
+          SizedBox(height: 8),
+          Text('No Users Found',
+              style: TextStyle(fontWeight: FontWeight.w600)),
         ],
       ),
     );

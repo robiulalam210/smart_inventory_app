@@ -51,6 +51,7 @@ class _BrandCreateState extends State<BrandCreate> {
             widget.id == null
                 ? 'Are you sure you want to create this brand?'
                 : 'Are you sure you want to update this brand?',
+            style: AppTextStyle.body(context),
           ),
           actions: [
             TextButton(
@@ -139,6 +140,7 @@ class _BrandCreateState extends State<BrandCreate> {
 
   Widget _buildDialogContent() {
     return Container(
+      color: AppColors.bottomNavBg(context),
       width: AppSizes.width(context) * 0.40,
       padding: const EdgeInsets.all(20),
       child: Form(
@@ -208,9 +210,8 @@ class _BrandCreateState extends State<BrandCreate> {
                         : constraints.maxWidth * 0.5,
                     child: AppDropdown(
                       label: "Status",
-                      hint: context.read<BrandBloc>().selectedState.isEmpty
-                          ? "Select Status"
-                          : context.read<BrandBloc>().selectedState,
+                      hint:  "Select Status"
+                          ,
                       isLabel: false,
                       value:
                       context.read<BrandBloc>().selectedState.isEmpty
@@ -232,27 +233,21 @@ class _BrandCreateState extends State<BrandCreate> {
             // Buttons Row
             Row(
               children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () => Navigator.pop(context),
-                    style: OutlinedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(vertical: 12),
-                      side: BorderSide(color: AppColors.primaryColor(context)),
-                    ),
-                    child: Text(
-                      'Cancel',
-                      style: TextStyle(
-                        color: AppColors.primaryColor(context),
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ),
+                AppButton(
+                  isOutlined: true,
+                  size: 120,
+                  color: AppColors.primaryColor(context),
+                  borderColor: AppColors.primaryColor(context),
+                  textColor: AppColors.errorColor(context),
+                  name:  'Cancel',    onPressed: () => Navigator.pop(context),)
+
+,
                 SizedBox(width: 10),
                 Expanded(
                   child: BlocBuilder<BrandBloc, BrandState>(
                     builder: (context, state) {
                       return AppButton(
+                        size: 100,
                         name: widget.id == null ? 'Create' : 'Update',
                         onPressed: (state is BrandAddLoading)
                             ? null

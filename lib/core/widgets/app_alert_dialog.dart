@@ -8,32 +8,28 @@ Future<void> appAlertDialog(BuildContext context, String content,
     {List<Widget> actions = const <Widget>[],
     bool barrierDismissible = false,
     String? title,
-    Color color = AppColors.defaultPrimary,
+    Color color = AppColors.textLight,
     IconData icon = Icons.warning}) async {
   final alert = CupertinoAlertDialog(
     // titlePadding: EdgeInsets.zero,
-    title: Container(
-        decoration: BoxDecoration(
-            color: color,
-            borderRadius:
-                const BorderRadius.vertical(top: Radius.circular(27))),
-        padding: const EdgeInsets.all(AppSizes.bodyPadding),
-        child: Row(
-          children: [
-            Icon(
-              icon,
-              color: AppColors.text(context)
-            ),
-            const SizedBox(
-              width: 10,
-            ),
-            Text(
-              title ?? "Notice",
-              style:  TextStyle(color: AppColors.bottomNavBg(context)),
-            ),
-          ],
-        )),
-    content: content.isEmpty ? null : Text(content),
+    title: Row(
+      children: [
+        Icon(
+          icon,
+          color: AppColors.text(context)
+        ),
+        const SizedBox(
+          width: 10,
+        ),
+        Text(
+          title ?? "Notice",
+          style:  TextStyle(color: AppColors.text(context)),
+        ),
+      ],
+    ),
+    content: content.isEmpty ? null : Text(content,style: TextStyle(
+      color: AppColors.text(context)
+    ),),
     actions: actions,
   );
 

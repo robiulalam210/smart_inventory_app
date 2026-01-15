@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:meherinMart/core/configs/app_text.dart';
 import '../configs/app_colors.dart';
 
 Future<void> appShowInfo(
@@ -26,10 +27,11 @@ Future<void> appShowInfo(
 
   final alert = AlertDialog.adaptive(
     backgroundColor: AppColors.bottomNavBg(context),
-      title: Text(title ?? 'Sorry'),
+      title: Text(title ?? 'Sorry',style: AppTextStyle.titleMedium(context),),
       content: Text(
         content ?? 'Something went wrong',
-        maxLines: 7,
+        maxLines: 7
+          ,style: AppTextStyle.body(context),
         overflow: TextOverflow.ellipsis,
       ),
       actions: actions);

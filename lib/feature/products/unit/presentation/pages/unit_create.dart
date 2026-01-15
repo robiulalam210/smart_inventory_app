@@ -25,11 +25,12 @@ class _UnitCreateState extends State<UnitCreate> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Confirm'),
+          title:  Text('Confirm',style: AppTextStyle.titleMedium(context),),
           content: Text(
             widget.id == null
                 ? 'Are you sure you want to create this unit?'
                 : 'Are you sure you want to update this unit?',
+            style: AppTextStyle.body(context),
           ),
           actions: [
             TextButton(
@@ -120,6 +121,7 @@ class _UnitCreateState extends State<UnitCreate> {
 
   Widget _buildDialogContent() {
     return Container(
+      color: AppColors.bottomNavBg(context),
       // width: AppSizes.width(context) * 0.40,
       padding: const EdgeInsets.all(20),
       child: Form(
@@ -221,9 +223,8 @@ class _UnitCreateState extends State<UnitCreate> {
                         : constraints.maxWidth * 0.5,
                     child: AppDropdown(
                       label: "Status",
-                      hint: context.read<UnitBloc>().selectedState.isEmpty
-                          ? "Select Status"
-                          : context.read<UnitBloc>().selectedState,
+                      hint:  "Select Status"
+                         ,
                       isLabel: false,
                       value:
                       context.read<UnitBloc>().selectedState.isEmpty
@@ -246,27 +247,21 @@ class _UnitCreateState extends State<UnitCreate> {
             // Buttons Row
             Row(
               children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () => Navigator.pop(context),
-                    style: OutlinedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(vertical: 12),
-                      side: BorderSide(color: AppColors.primaryColor(context)),
-                    ),
-                    child: Text(
-                      'Cancel',
-                      style: TextStyle(
-                        color: AppColors.primaryColor(context),
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ),
+                AppButton(
+                  isOutlined: true,
+                  size: 120,
+                  color: AppColors.primaryColor(context),
+                  borderColor: AppColors.primaryColor(context),
+                  textColor: AppColors.errorColor(context),
+                  name:  'Cancel',    onPressed: () => Navigator.pop(context),)
+
+                ,
                 SizedBox(width: 10),
                 Expanded(
                   child: BlocBuilder<UnitBloc, UnitState>(
                     builder: (context, state) {
                       return AppButton(
+                        size: 120,
                         name: widget.id == null ? 'Create' : 'Update',
                         onPressed: (state is UnitAddLoading)
                             ? null

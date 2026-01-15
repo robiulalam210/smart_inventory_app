@@ -8,10 +8,7 @@ import '../../../../core/configs/app_urls.dart';
 import '../models/login_mod.dart';
 
 Future<LoginModel> loginService({required Map payload}) async {
-  logger.f("call loginService");
   Uri url = Uri.parse(AppUrls.login);
-  logger.f("url $url");
-  logger.f("payload $payload");
 
   final headers = {"Content-Type": "application/json"};
 
@@ -22,34 +19,41 @@ Future<LoginModel> loginService({required Map payload}) async {
 
     logger.i("login response: ${response.body}");
 
+    /// ✅ SUCCESS
     if (response.statusCode == 200) {
       final parsed = loginModelFromJson(response.body);
 
-      // Determine success by token availability
       if (parsed.tokens?.access != null &&
           parsed.tokens!.access!.isNotEmpty) {
         parsed.success = true;
         parsed.message = "Login successful";
       } else {
         parsed.success = false;
-        parsed.message = "Invalid credentials or missing token";
+        parsed.message = "Invalid credentials";
       }
-
       return parsed;
-    } else {
+    }
+
+    /// ❌ UNAUTHORIZED (401)
+    if (response.statusCode == 401) {
+      final Map<String, dynamic> body = jsonDecode(response.body);
+
       return LoginModel(
         success: false,
-        message: "Server error: ${response.statusCode}",
+        message: body['error'] ?? "Invalid username or password",
       );
     }
-  } on TimeoutException catch (e) {
-    logger.e("TimeoutException in loginService: $e");
+
+    /// ❌ OTHER ERRORS
+    return LoginModel(
+      success: false,
+      message: "Server error (${response.statusCode})",
+    );
+  } on TimeoutException {
     return LoginModel(success: false, message: "Request timed out");
-  } on SocketException catch (e) {
-    logger.e("SocketException in loginService: $e");
+  } on SocketException {
     return LoginModel(success: false, message: "No internet connection");
   } catch (e) {
-    logger.e("Exception in loginService: $e");
     return LoginModel(success: false, message: "Unexpected error occurred");
   }
 }

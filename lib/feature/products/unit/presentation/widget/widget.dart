@@ -27,7 +27,7 @@ class MobileUnitTableCard extends StatelessWidget {
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       itemCount: units.length,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       itemBuilder: (context, index) {
         final unit = units[index];
         return _buildUnitCard(context, unit, index + 1);
@@ -39,7 +39,7 @@ class MobileUnitTableCard extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 1,
-      color: AppColors.white,
+      color: AppColors.bottomNavBg(context),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
@@ -77,7 +77,7 @@ class MobileUnitTableCard extends StatelessWidget {
                       style: GoogleFonts.inter(
                         fontWeight: FontWeight.w600,
                         fontSize: 16,
-                        color: Colors.black87,
+                        color:AppColors.text(context),
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -88,7 +88,7 @@ class MobileUnitTableCard extends StatelessWidget {
               const SizedBox(height: 4),
 
               // Unit Details
-              _buildDetailRow('Code:', unit.code?.capitalize() ?? 'N/A'),
+              _buildDetailRow('Code:', unit.code?.capitalize() ?? 'N/A',context),
 
               // Action Buttons
               Row(
@@ -98,7 +98,7 @@ class MobileUnitTableCard extends StatelessWidget {
                   _buildActionButton(
                     context,
                     'Edit',
-                    Icons.edit,
+                    Iconsax.edit,
                     Colors.blue,
                         () => _showEditDialog(context, unit),
                   ),
@@ -107,7 +107,7 @@ class MobileUnitTableCard extends StatelessWidget {
                   _buildActionButton(
                     context,
                     'Delete',
-                    Icons.delete,
+                    HugeIcons.strokeRoundedDeleteThrow,
                     Colors.red,
                         () => _confirmDelete(context, unit),
                   ),
@@ -120,7 +120,7 @@ class MobileUnitTableCard extends StatelessWidget {
     );
   }
 
-  Widget _buildDetailRow(String label, String value) {
+  Widget _buildDetailRow(String label, String value,BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 4),
       child: Row(
@@ -131,7 +131,7 @@ class MobileUnitTableCard extends StatelessWidget {
               label,
               style: GoogleFonts.inter(
                 fontSize: 12,
-                color: Colors.grey.shade600,
+                color: AppColors.text(context),
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -142,7 +142,7 @@ class MobileUnitTableCard extends StatelessWidget {
               value,
               style: GoogleFonts.inter(
                 fontSize: 12,
-                color: Colors.black87,
+                color: AppColors.text(context),
                 fontWeight: FontWeight.w400,
               ),
               overflow: TextOverflow.ellipsis,
