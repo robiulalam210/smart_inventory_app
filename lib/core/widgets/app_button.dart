@@ -146,7 +146,7 @@ class _AppButtonState extends State<AppButton> {
           valueColor: AlwaysStoppedAnimation<Color>(
             widget.isOutlined
                 ? (widget.color ?? AppColors.primaryColor(context))
-                : Colors.white,
+                : AppColors.text(context),
           ),
         ),
       );

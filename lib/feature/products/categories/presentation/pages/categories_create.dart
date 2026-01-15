@@ -25,6 +25,7 @@ class _CategoriesCreateState extends State<CategoriesCreate> {
             widget.id == null
                 ? 'Are you sure you want to create this category?'
                 : 'Are you sure you want to update this category?',
+            style: AppTextStyle.body(context),
           ),
           actions: [
             TextButton(
@@ -115,6 +116,7 @@ class _CategoriesCreateState extends State<CategoriesCreate> {
 
   Widget _buildDialogContent() {
     return Container(
+      color: AppColors.bottomNavBg(context),
       width: AppSizes.width(context) * 0.40,
       padding: const EdgeInsets.all(20),
       child: Form(
@@ -181,9 +183,8 @@ class _CategoriesCreateState extends State<CategoriesCreate> {
                         : constraints.maxWidth * 0.5,
                     child: AppDropdown(
                       label: "Status",
-                      hint: context.read<CategoriesBloc>().selectedState.isEmpty
-                          ? "Select Status"
-                          : context.read<CategoriesBloc>().selectedState,
+                      hint: "Select Status"
+                        ,
                       isLabel: false,
                       value:
                       context.read<CategoriesBloc>().selectedState.isEmpty
@@ -207,20 +208,15 @@ class _CategoriesCreateState extends State<CategoriesCreate> {
             Row(
               children: [
                 Expanded(
-                  child: OutlinedButton(
-                    onPressed: () => Navigator.pop(context),
-                    style: OutlinedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(vertical: 12),
-                      side: BorderSide(color: AppColors.primaryColor(context)),
-                    ),
-                    child: Text(
-                      'Cancel',
-                      style: TextStyle(
-                        color: AppColors.primaryColor(context),
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
+                  child:
+                  AppButton(
+                    isOutlined: true,
+                    color: AppColors.primaryColor(context),
+                    borderColor: AppColors.primaryColor(context),
+                    textColor: AppColors.errorColor(context),
+                    name:  'Cancel',    onPressed: () => Navigator.pop(context),)
+
+
                 ),
                 SizedBox(width: 10),
                 Expanded(

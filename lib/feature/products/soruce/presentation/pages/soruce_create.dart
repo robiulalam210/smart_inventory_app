@@ -41,11 +41,12 @@ class _SourceCreateState extends State<SourceCreate> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Confirm'),
+          title:  Text('Confirm',style: AppTextStyle.titleMedium(context),),
           content: Text(
             widget.id == null
                 ? 'Are you sure you want to create this source?'
                 : 'Are you sure you want to update this source?',
+            style: AppTextStyle.body(context),
           ),
           actions: [
             TextButton(
@@ -150,6 +151,7 @@ class _SourceCreateState extends State<SourceCreate> {
 
   Widget _buildDialogContent() {
     return Container(
+      color: AppColors.bottomNavBg(context),
       width: AppSizes.width(context) * 0.40,
       padding: const EdgeInsets.all(20),
       child: Form(
@@ -215,9 +217,8 @@ class _SourceCreateState extends State<SourceCreate> {
                         : constraints.maxWidth * 0.5,
                     child: AppDropdown(
                       label: "Status",
-                      hint: context.read<SourceBloc>().selectedState.isEmpty
-                          ? "Select Status"
-                          : context.read<SourceBloc>().selectedState,
+                      hint:  "Select Status"
+                          ,
                       isLabel: false,
                       value:
                       context.read<SourceBloc>().selectedState.isEmpty
@@ -240,22 +241,15 @@ class _SourceCreateState extends State<SourceCreate> {
             // Buttons Row
             Row(
               children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () => Navigator.pop(context),
-                    style: OutlinedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(vertical: 12),
-                      side: BorderSide(color: AppColors.primaryColor(context)),
-                    ),
-                    child: Text(
-                      'Cancel',
-                      style: TextStyle(
-                        color: AppColors.primaryColor(context),
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ),
+                AppButton(
+                  isOutlined: true,
+                  size: 120,
+                  color: AppColors.primaryColor(context),
+                  borderColor: AppColors.primaryColor(context),
+                  textColor: AppColors.errorColor(context),
+                  name:  'Cancel',    onPressed: () => Navigator.pop(context),)
+
+                ,
                 SizedBox(width: 10),
                 Expanded(
                   child: BlocBuilder<SourceBloc, SourceState>(

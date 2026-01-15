@@ -49,6 +49,7 @@ class _GroupsCreateState extends State<GroupsCreate> {
             widget.id == null
                 ? 'Are you sure you want to create this group?'
                 : 'Are you sure you want to update this group?',
+            style: AppTextStyle.body(context),
           ),
           actions: [
             TextButton(
@@ -137,6 +138,7 @@ class _GroupsCreateState extends State<GroupsCreate> {
 
   Widget _buildDialogContent() {
     return Container(
+      color: AppColors.bottomNavBg(context),
       width: AppSizes.width(context) * 0.40,
       padding: const EdgeInsets.all(20),
       child: Form(
@@ -207,9 +209,8 @@ class _GroupsCreateState extends State<GroupsCreate> {
                         : constraints.maxWidth * 0.5,
                     child: AppDropdown(
                       label: "Status",
-                      hint: context.read<GroupsBloc>().selectedState.isEmpty
-                          ? "Select Status"
-                          : context.read<GroupsBloc>().selectedState,
+                      hint:  "Select Status"
+                          ,
                       isLabel: false,
                       value:
                       context.read<GroupsBloc>().selectedState.isEmpty
@@ -233,21 +234,16 @@ class _GroupsCreateState extends State<GroupsCreate> {
             Row(
               children: [
                 Expanded(
-                  child: OutlinedButton(
+                  child: AppButton(
+                    name: 'Cancel',
+                    isOutlined: true,
+                    color: AppColors.primaryColor(context),
+                    borderColor: AppColors.primaryColor(context),
+                    textColor: AppColors.primaryColor(context),
                     onPressed: () => Navigator.pop(context),
-                    style: OutlinedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(vertical: 12),
-                      side: BorderSide(color: AppColors.primaryColor(context)),
-                    ),
-                    child: Text(
-                      'Cancel',
-                      style: TextStyle(
-                        color: AppColors.primaryColor(context),
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
                   ),
                 ),
+
                 SizedBox(width: 10),
                 Expanded(
                   child: BlocBuilder<GroupsBloc, GroupsState>(

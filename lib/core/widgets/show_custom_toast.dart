@@ -15,11 +15,11 @@ void showCustomToast({
     type: type,
     style: style,
     autoCloseDuration: duration,
-    title: Text(title),
+    title: Text(title,style: AppTextStyle.titleMedium(context),),
     description: RichText(
       text: TextSpan(
         text: description,
-        style: const TextStyle(color: Colors.black),
+        style: AppTextStyle.body(context),
       ),
     ),
     alignment: Alignment.topRight,

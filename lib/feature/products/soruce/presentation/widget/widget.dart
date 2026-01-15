@@ -26,7 +26,7 @@ class MobileSourceTableCard extends StatelessWidget {
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       itemCount: sources.length,
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
       itemBuilder: (context, index) {
         final source = sources[index];
         return _buildSourceCard(context, source, index + 1);
@@ -38,7 +38,7 @@ class MobileSourceTableCard extends StatelessWidget {
     final isActive = _getSourceStatus(source);
 
     return Card(
-      color: AppColors.white,
+      color: AppColors.bottomNavBg(context),
       margin: const EdgeInsets.only(bottom: 6),
       elevation: 1,
       shape: RoundedRectangleBorder(
@@ -78,7 +78,7 @@ class MobileSourceTableCard extends StatelessWidget {
                       style: GoogleFonts.inter(
                         fontWeight: FontWeight.w600,
                         fontSize: 16,
-                        color: Colors.black87,
+                        color: AppColors.text(context),
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -86,6 +86,7 @@ class MobileSourceTableCard extends StatelessWidget {
                   _buildStatusChip(isActive),
                 ],
               ),
+              SizedBox(height: 8,),
 
               // Action Buttons
               Row(
@@ -95,7 +96,7 @@ class MobileSourceTableCard extends StatelessWidget {
                   _buildActionButton(
                     context,
                     'Edit',
-                    Icons.edit,
+                    Iconsax.edit,
                     Colors.blue,
                         () => _showEditDialog(context, source),
                   ),
@@ -104,7 +105,7 @@ class MobileSourceTableCard extends StatelessWidget {
                   _buildActionButton(
                     context,
                     'Delete',
-                    Icons.delete,
+                    HugeIcons.strokeRoundedDeleteThrow,
                     Colors.red,
                         () => _confirmDelete(context, source),
                   ),

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lottie/lottie.dart';
+import 'package:meherinMart/core/configs/app_colors.dart';
+import 'package:meherinMart/core/widgets/app_scaffold.dart';
 import '../../../../../core/configs/app_images.dart';
 import '../../../../../core/configs/app_routes.dart';
 import '../../../../../core/configs/app_text.dart';
@@ -37,11 +39,15 @@ class _BrandScreenState extends State<MobileBrandScreen> {
 
   @override
   Widget build(BuildContext context) {
-
-
-    return Scaffold(
-      appBar: AppBar(title: Text("Brand",style: AppTextStyle.titleMedium(context),),),
-      floatingActionButton: FloatingActionButton( onPressed: () => _showCreateDialog(context),child: Icon(Icons.add),),
+    return AppScaffold(
+      appBar: AppBar(
+        title: Text("Brand", style: AppTextStyle.titleMedium(context)),
+      ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: AppColors.primaryColor(context),
+        onPressed: () => _showCreateDialog(context),
+        child: Icon(Icons.add),
+      ),
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: () async {
@@ -50,8 +56,7 @@ class _BrandScreenState extends State<MobileBrandScreen> {
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
             child: Container(
-              padding:const EdgeInsets.all(12)
-                  ,
+              padding: const EdgeInsets.all(12),
               child: buildContent(),
             ),
           ),
@@ -59,9 +64,6 @@ class _BrandScreenState extends State<MobileBrandScreen> {
       ),
     );
   }
-
-
-
 
   Widget buildContent() {
     return BlocListener<BrandBloc, BrandState>(
@@ -112,27 +114,24 @@ class _BrandScreenState extends State<MobileBrandScreen> {
   }
 
   Widget _buildHeaderRow() {
-
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Search Field
-          CustomSearchTextFormField(
-            controller: dataBloc.filterTextController,
-            onClear: () {
-              dataBloc.filterTextController.clear();
-              _fetchApi();
-            },
-            onChanged: (value) {
-              _fetchApi(filterText: value);
-            },
-            hintText: "brand name",
-            isRequiredLabel: false,
-          ),
-
-        ],
-      );
-
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // Search Field
+        CustomSearchTextFormField(
+          controller: dataBloc.filterTextController,
+          onClear: () {
+            dataBloc.filterTextController.clear();
+            _fetchApi();
+          },
+          onChanged: (value) {
+            _fetchApi(filterText: value);
+          },
+          hintText: "brand name",
+          isRequiredLabel: false,
+        ),
+      ],
+    );
   }
 
   Widget _buildBrandsList() {

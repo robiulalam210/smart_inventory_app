@@ -1,4 +1,6 @@
 
+import 'package:meherinMart/core/widgets/app_scaffold.dart';
+
 import '/feature/products/soruce/presentation/pages/soruce_create.dart';
 
 import '../../../../../core/configs/configs.dart';
@@ -33,11 +35,12 @@ class _SourceScreenState extends State<MobileSourceScreen> {
   @override
   Widget build(BuildContext context) {
 
-    return Scaffold(
+    return AppScaffold(
       appBar: AppBar(
         title: Text("Source", style: AppTextStyle.titleMedium(context)),
       ),
       floatingActionButton: FloatingActionButton(
+        backgroundColor: AppColors.primaryColor(context),
         onPressed: () {
           showDialog(
             context: context,
@@ -114,23 +117,25 @@ class _SourceScreenState extends State<MobileSourceScreen> {
               child: SingleChildScrollView(
                 child: Column(
                   children: [
-                    CustomSearchTextFormField(
-                      controller: context
-                          .read<SourceBloc>()
-                          .filterTextController,
-                      onClear: () {
-                        context
-                            .read<SourceBloc>()
-                            .filterTextController
-                            .clear();
-                        _fetchApiData();
-                      },
-                      onChanged: (value) {
-                        _fetchApiData(filterText: value);
-                      },
-                      isRequiredLabel: false,
-                      hintText: "Name", // Pass dynamic hintText if needed
-                    ),
+               Padding(padding: EdgeInsets.symmetric(horizontal: 0),
+               child:      CustomSearchTextFormField(
+                 controller: context
+                     .read<SourceBloc>()
+                     .filterTextController,
+                 onClear: () {
+                   context
+                       .read<SourceBloc>()
+                       .filterTextController
+                       .clear();
+                   _fetchApiData();
+                 },
+                 onChanged: (value) {
+                   _fetchApiData(filterText: value);
+                 },
+                 isRequiredLabel: false,
+                 hintText: "Name", // Pass dynamic hintText if needed
+               ),
+               ),
                 
                     SizedBox(
                       child: BlocBuilder<SourceBloc, SourceState>(

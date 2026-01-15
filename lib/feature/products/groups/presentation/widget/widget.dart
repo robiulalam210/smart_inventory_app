@@ -9,11 +9,7 @@ class GroupsTableCard extends StatelessWidget {
   final List<GroupsModel> groups;
   final VoidCallback? onGroupTap;
 
-  const GroupsTableCard({
-    super.key,
-    required this.groups,
-    this.onGroupTap,
-  });
+  const GroupsTableCard({super.key, required this.groups, this.onGroupTap});
 
   @override
   Widget build(BuildContext context) {
@@ -33,13 +29,15 @@ class GroupsTableCard extends StatelessWidget {
         const numColumns = 4;
         const minColumnWidth = 100.0;
 
-        final dynamicColumnWidth =
-        (totalWidth / numColumns).clamp(minColumnWidth, double.infinity);
+        final dynamicColumnWidth = (totalWidth / numColumns).clamp(
+          minColumnWidth,
+          double.infinity,
+        );
 
         return Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(10),
-            color: Colors.white,
+            color: AppColors.bottomNavBg(context),
             boxShadow: [
               BoxShadow(
                 color: Colors.grey.withValues(alpha: 0.1),
@@ -89,10 +87,23 @@ class GroupsTableCard extends StatelessWidget {
                             final group = entry.value;
                             return DataRow(
                               cells: [
-                                _buildDataCell('${entry.key + 1}', dynamicColumnWidth * 0.6),
-                                _buildDataCell(group.name?.capitalize() ?? "N/A", dynamicColumnWidth),
-                                _buildStatusCell(_getGroupStatus(group), dynamicColumnWidth),
-                                _buildActionCell(group, context, dynamicColumnWidth),
+                                _buildDataCell(
+                                  '${entry.key + 1}',
+                                  dynamicColumnWidth * 0.6,
+                                ),
+                                _buildDataCell(
+                                  group.name?.capitalize() ?? "N/A",
+                                  dynamicColumnWidth,
+                                ),
+                                _buildStatusCell(
+                                  _getGroupStatus(group),
+                                  dynamicColumnWidth,
+                                ),
+                                _buildActionCell(
+                                  group,
+                                  context,
+                                  dynamicColumnWidth,
+                                ),
                               ],
                             );
                           }).toList(),
@@ -129,19 +140,23 @@ class GroupsTableCard extends StatelessWidget {
         separatorBuilder: (context, index) => const Divider(height: 1),
         itemBuilder: (context, index) {
           final group = groups[index];
-          return _buildMobileGroupCard(context,group, index);
+          return _buildMobileGroupCard(context, group, index);
         },
       ),
     );
   }
 
-  Widget _buildMobileGroupCard(BuildContext context,GroupsModel group, int index) {
+  Widget _buildMobileGroupCard(
+    BuildContext context,
+    GroupsModel group,
+    int index,
+  ) {
     final isActive = _getGroupStatus(group);
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: index.isEven ? Colors.grey.withValues(alpha: 0.03) : Colors.white,
+        color:AppColors.bottomNavBg(context),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -167,18 +182,16 @@ class GroupsTableCard extends StatelessWidget {
               ),
               Text(
                 group.name?.capitalize() ?? "N/A",
-                style: const TextStyle(
+                style:  TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: Colors.black87,
+                  color: AppColors.text(context)
                 ),
               ),
 
               _buildStatusChip(isActive),
             ],
           ),
-
-
 
           // Action Buttons
           Row(
@@ -200,7 +213,10 @@ class GroupsTableCard extends StatelessWidget {
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: () => _confirmDelete(context, group),
-                  icon: const Icon(HugeIcons.strokeRoundedDeleteThrow, size: 16),
+                  icon: const Icon(
+                    HugeIcons.strokeRoundedDeleteThrow,
+                    size: 16,
+                  ),
                   label: const Text('Delete'),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Colors.red,
@@ -220,7 +236,9 @@ class GroupsTableCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: isActive ? Colors.green.withValues(alpha: 0.1) : Colors.red.withValues(alpha: 0.1),
+        color: isActive
+            ? Colors.green.withValues(alpha: 0.1)
+            : Colors.red.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
@@ -309,7 +327,9 @@ class GroupsTableCard extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: isActive ? Colors.green.withValues(alpha: 0.1) : Colors.red.withValues(alpha: 0.1),
+              color: isActive
+                  ? Colors.green.withValues(alpha: 0.1)
+                  : Colors.red.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
@@ -327,7 +347,11 @@ class GroupsTableCard extends StatelessWidget {
     );
   }
 
-  DataCell _buildActionCell(GroupsModel group, BuildContext context, double width) {
+  DataCell _buildActionCell(
+    GroupsModel group,
+    BuildContext context,
+    double width,
+  ) {
     return DataCell(
       SizedBox(
         width: width,
@@ -373,9 +397,7 @@ class GroupsTableCard extends StatelessWidget {
   Future<void> _confirmDelete(BuildContext context, GroupsModel group) async {
     final shouldDelete = await showDeleteConfirmationDialog(context);
     if (shouldDelete && context.mounted) {
-      context.read<GroupsBloc>().add(
-        DeleteGroups(group.id.toString()),
-      );
+      context.read<GroupsBloc>().add(DeleteGroups(group.id.toString()));
     }
   }
 
@@ -445,4 +467,3 @@ class GroupsTableCard extends StatelessWidget {
     );
   }
 }
-

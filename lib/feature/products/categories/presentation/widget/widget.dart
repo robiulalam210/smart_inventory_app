@@ -29,26 +29,29 @@ class CategoriesListMobile extends StatelessWidget {
       child: categories.isEmpty
           ? _buildEmptyState(context)
           : ListView.builder(
-        shrinkWrap: true,
-        padding: const EdgeInsets.only(
-          top: 8,
-          bottom: 20,
-          left: 4,
-          right: 4,
-        ),
-        itemCount: categories.length,
-        itemBuilder: (context, index) {
-          final category = categories[index];
-          return _buildCategoryCard(context, category, index + 1);
-        },
-      ),
+              shrinkWrap: true,
+              padding: const EdgeInsets.only(
+                top: 8,
+                bottom: 20,
+                left: 4,
+                right: 4,
+              ),
+              itemCount: categories.length,
+              itemBuilder: (context, index) {
+                final category = categories[index];
+                return _buildCategoryCard(context, category, index + 1);
+              },
+            ),
     );
   }
 
   Widget _buildCategoryCard(
-      BuildContext context, CategoryModel category, int index) {
+    BuildContext context,
+    CategoryModel category,
+    int index,
+  ) {
     final isActive = _getCategoryStatus(category);
-// You can manage selection state if needed
+    // You can manage selection state if needed
 
     return GestureDetector(
       onTap: () {
@@ -59,15 +62,12 @@ class CategoriesListMobile extends StatelessWidget {
         // _showCategoryDetails(context, category);
       },
       child: Card(
-        color: Colors.white,
+        color: AppColors.bottomNavBg(context),
         margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
         elevation: 1,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
-          side: BorderSide(
-            color: Colors.grey.shade200,
-            width: 1,
-          ),
+          side: BorderSide(color: Colors.grey.shade200, width: 1),
         ),
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -84,7 +84,9 @@ class CategoriesListMobile extends StatelessWidget {
                     width: 28,
                     height: 28,
                     decoration: BoxDecoration(
-                      color: AppColors.primaryColor(context).withValues(alpha: 0.1),
+                      color: AppColors.primaryColor(
+                        context,
+                      ).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Center(
@@ -103,7 +105,7 @@ class CategoriesListMobile extends StatelessWidget {
                     style: GoogleFonts.inter(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
-                      color: Colors.black87,
+                      color: AppColors.text(context),
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -160,7 +162,9 @@ class CategoriesListMobile extends StatelessWidget {
                       label: const Text('Edit'),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: Colors.blue,
-                        side: BorderSide(color: Colors.blue.withValues(alpha: 0.3)),
+                        side: BorderSide(
+                          color: Colors.blue.withValues(alpha: 0.3),
+                        ),
                         padding: const EdgeInsets.symmetric(vertical: 8),
                       ),
                     ),
@@ -169,21 +173,22 @@ class CategoriesListMobile extends StatelessWidget {
                   Expanded(
                     child: OutlinedButton.icon(
                       onPressed: () => _confirmDelete(context, category),
-                      icon: const Icon(HugeIcons.strokeRoundedDeleteThrow, size: 16),
+                      icon: const Icon(
+                        HugeIcons.strokeRoundedDeleteThrow,
+                        size: 16,
+                      ),
                       label: const Text('Delete'),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: Colors.red,
-                        side: BorderSide(color: Colors.red.withValues(alpha: 0.3)),
+                        side: BorderSide(
+                          color: Colors.red.withValues(alpha: 0.3),
+                        ),
                         padding: const EdgeInsets.symmetric(vertical: 8),
                       ),
                     ),
                   ),
                 ],
               ),
-
-
-
-
 
               // Description (if available)
               if (category.description?.isNotEmpty == true)
@@ -202,14 +207,12 @@ class CategoriesListMobile extends StatelessWidget {
                     ),
                   ],
                 ),
-
             ],
           ),
         ),
       ),
     );
   }
-
 
   bool _getCategoryStatus(CategoryModel category) {
     // Handle different status representations
@@ -227,11 +230,11 @@ class CategoriesListMobile extends StatelessWidget {
     return category.isActive ?? false;
   }
 
-
   Future<void> _confirmDelete(
-      BuildContext context, CategoryModel category) async {
-    final shouldDelete = await showDeleteConfirmationDialog(context,
-       );
+    BuildContext context,
+    CategoryModel category,
+  ) async {
+    final shouldDelete = await showDeleteConfirmationDialog(context);
 
     if (shouldDelete && context.mounted) {
       context.read<CategoriesBloc>().add(
@@ -244,7 +247,9 @@ class CategoriesListMobile extends StatelessWidget {
     // Pre-fill the form
     final categoriesBloc = context.read<CategoriesBloc>();
     categoriesBloc.nameController.text = category.name ?? "";
-    categoriesBloc.selectedState = category.isActive == true ? "Active" : "Inactive";
+    categoriesBloc.selectedState = category.isActive == true
+        ? "Active"
+        : "Inactive";
 
     showDialog(
       context: context,
@@ -262,9 +267,7 @@ class CategoriesListMobile extends StatelessWidget {
             child: SingleChildScrollView(
               child: Padding(
                 padding: const EdgeInsets.all(4),
-                child: CategoriesCreate(
-                  id: category.id.toString(),
-                ),
+                child: CategoriesCreate(id: category.id.toString()),
               ),
             ),
           ),
@@ -272,8 +275,6 @@ class CategoriesListMobile extends StatelessWidget {
       },
     );
   }
-
-
 
   Widget _buildEmptyState(BuildContext context) {
     return SingleChildScrollView(
@@ -335,9 +336,7 @@ class CategoriesListMobile extends StatelessWidget {
                     builder: (context) {
                       return Dialog(
                         insetPadding: const EdgeInsets.all(16),
-                        child: SingleChildScrollView(
-                          child: CategoriesCreate(),
-                        ),
+                        child: SingleChildScrollView(child: CategoriesCreate()),
                       );
                     },
                   );
@@ -375,6 +374,7 @@ class CategoriesListMobile extends StatelessWidget {
     );
   }
 }
+
 class CategoriesTableCard extends StatelessWidget {
   final List<CategoryModel> categories;
   final VoidCallback? onCategoryTap;
@@ -400,8 +400,10 @@ class CategoriesTableCard extends StatelessWidget {
         const numColumns = 4; // No., Category Name, Status, Actions
         const minColumnWidth = 100.0;
 
-        final dynamicColumnWidth =
-        (totalWidth / numColumns).clamp(minColumnWidth, double.infinity);
+        final dynamicColumnWidth = (totalWidth / numColumns).clamp(
+          minColumnWidth,
+          double.infinity,
+        );
 
         return Container(
           decoration: BoxDecoration(
@@ -462,10 +464,23 @@ class CategoriesTableCard extends StatelessWidget {
                                   ? (_) => onCategoryTap!()
                                   : null,
                               cells: [
-                                _buildDataCell('${entry.key + 1}', dynamicColumnWidth * 0.6),
-                                _buildDataCell(category.name?.capitalize() ?? "N/A", dynamicColumnWidth),
-                                _buildStatusCell(_getCategoryStatus(category), dynamicColumnWidth),
-                                _buildActionCell(category, context, dynamicColumnWidth),
+                                _buildDataCell(
+                                  '${entry.key + 1}',
+                                  dynamicColumnWidth * 0.6,
+                                ),
+                                _buildDataCell(
+                                  category.name?.capitalize() ?? "N/A",
+                                  dynamicColumnWidth,
+                                ),
+                                _buildStatusCell(
+                                  _getCategoryStatus(category),
+                                  dynamicColumnWidth,
+                                ),
+                                _buildActionCell(
+                                  category,
+                                  context,
+                                  dynamicColumnWidth,
+                                ),
                               ],
                             );
                           }).toList(),
@@ -549,7 +564,9 @@ class CategoriesTableCard extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: isActive ? Colors.green.withValues(alpha: 0.1) : Colors.red.withValues(alpha: 0.1),
+              color: isActive
+                  ? Colors.green.withValues(alpha: 0.1)
+                  : Colors.red.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
@@ -567,7 +584,11 @@ class CategoriesTableCard extends StatelessWidget {
     );
   }
 
-  DataCell _buildActionCell(CategoryModel category, BuildContext context, double width) {
+  DataCell _buildActionCell(
+    CategoryModel category,
+    BuildContext context,
+    double width,
+  ) {
     return DataCell(
       SizedBox(
         width: width,
@@ -610,11 +631,14 @@ class CategoriesTableCard extends StatelessWidget {
     );
   }
 
-  Future<void> _confirmDelete(BuildContext context, CategoryModel category) async {
+  Future<void> _confirmDelete(
+    BuildContext context,
+    CategoryModel category,
+  ) async {
     final shouldDelete = await showDeleteConfirmationDialog(context);
     if (shouldDelete && context.mounted) {
       context.read<CategoriesBloc>().add(
-          DeleteCategories(id: category.id.toString())
+        DeleteCategories(id: category.id.toString()),
       );
     }
   }
@@ -623,8 +647,9 @@ class CategoriesTableCard extends StatelessWidget {
     // Pre-fill the form
     final categoriesBloc = context.read<CategoriesBloc>();
     categoriesBloc.nameController.text = category.name ?? "";
-    categoriesBloc.selectedState = category.isActive == true ? "Active" : "Inactive";
-
+    categoriesBloc.selectedState = category.isActive == true
+        ? "Active"
+        : "Inactive";
 
     showDialog(
       context: context,
@@ -632,9 +657,7 @@ class CategoriesTableCard extends StatelessWidget {
         return Dialog(
           child: SizedBox(
             width: AppSizes.width(context) * 0.50,
-            child: CategoriesCreate(
-              id: category.id.toString(),
-            ),
+            child: CategoriesCreate(id: category.id.toString()),
           ),
         );
       },

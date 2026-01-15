@@ -42,6 +42,7 @@ class _UnitScreenState extends State<MobileUnitScreen> {
         title: Text("Unit", style: AppTextStyle.titleMedium(context)),
       ),
       floatingActionButton: FloatingActionButton(
+        backgroundColor: AppColors.primaryColor(context),
         onPressed: () {
           context.read<UnitBloc>().nameController.clear();
           context.read<UnitBloc>().shortNameController.clear();
@@ -126,28 +127,24 @@ class _UnitScreenState extends State<MobileUnitScreen> {
                   }
                 },
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        SizedBox(
-                          width: 350,
-                          child:  CustomSearchTextFormField(
-                            controller: context.read<UnitBloc>().filterTextController,
-                            onChanged: (value) {
-                              _fetchApiData(filterText: value);
-                            },
-                            onClear: () {
-                              context.read<UnitBloc>().filterTextController.clear();
-                              _fetchApiData();
-                            },
-                            isRequiredLabel: false,
-                            hintText: "Name", // Pass dynamic hintText if needed
-                          ),
-                        ),
-
-
-                      ],),
+                  SizedBox(child:   Container(
+                    padding: EdgeInsets.symmetric(horizontal: 12),
+                    // width: 350,
+                    child:  CustomSearchTextFormField(
+                      controller: context.read<UnitBloc>().filterTextController,
+                      onChanged: (value) {
+                        _fetchApiData(filterText: value);
+                      },
+                      onClear: () {
+                        context.read<UnitBloc>().filterTextController.clear();
+                        _fetchApiData();
+                      },
+                      isRequiredLabel: false,
+                      hintText: "Name", // Pass dynamic hintText if needed
+                    ),
+                  ),),
 
 
                     SizedBox(

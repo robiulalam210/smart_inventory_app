@@ -1,4 +1,6 @@
 
+import 'package:meherinMart/core/widgets/app_scaffold.dart';
+
 import '../../../../core/configs/configs.dart';
 import '../../../../core/widgets/app_alert_dialog.dart';
 import '../../../../core/widgets/app_loader.dart';
@@ -36,7 +38,7 @@ class _UsersScreenState extends State<MoblieUsersScreen> {
   @override
   Widget build(BuildContext context) {
 
-    return Scaffold(
+    return AppScaffold(
    appBar: AppBar(title: Text("Staff",style: AppTextStyle.titleMedium(context),),),
       body: SafeArea(
         child: _buildContentArea()
@@ -92,28 +94,23 @@ class _UsersScreenState extends State<MoblieUsersScreen> {
           },
           child: Column(
             children: [
-              Row(
-                children: [
-                  SizedBox(
-                    width: 400,
-                    child: CustomSearchTextFormField(
-                      controller: context.read<UserBloc>().filterTextController,
-                      onChanged: (value) {
-                        _fetchApi(
-                          filterText: value,
-                        );
-                      },
+              SizedBox(
+                // width: 400,
+                child: CustomSearchTextFormField(
+                  controller: context.read<UserBloc>().filterTextController,
+                  onChanged: (value) {
+                    _fetchApi(
+                      filterText: value,
+                    );
+                  },
 
-                      onClear: () {
-                        _fetchApi();
-                        context.read<UserBloc>().filterTextController.clear();
-                      },
-                      hintText:
-                      "by Name,Email or Phone number", // Pass dynamic hintText if needed
-                    ),
-                  ),
-
-                ],
+                  onClear: () {
+                    _fetchApi();
+                    context.read<UserBloc>().filterTextController.clear();
+                  },
+                  hintText:
+                  "by Name,Email or Phone number", // Pass dynamic hintText if needed
+                ),
               ),
               gapH8,
               BlocBuilder<UserBloc, UserState>(
