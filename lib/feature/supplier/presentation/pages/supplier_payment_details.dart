@@ -1,3 +1,4 @@
+import 'package:meherinMart/core/widgets/app_scaffold.dart';
 import 'package:printing/printing.dart';
 import '/feature/supplier/presentation/pages/pdf/generate_supplier_payment.dart';
 import '../../../../core/configs/configs.dart';
@@ -13,10 +14,9 @@ class SupplierPaymentDetailsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDesktop = MediaQuery.of(context).size.width > 768;
 
-    return Scaffold(
-      backgroundColor: AppColors.bottomNavBg(context),
+    return AppScaffold(
       appBar: AppBar(
-        title: Text('Supplier Payment - ${payment.spNo}'),
+        title: Text('Supplier Payment - ${payment.spNo}',style: AppTextStyle.titleMedium(context),),
         actions: [
           IconButton(
             icon: const Icon(Icons.print),
@@ -41,7 +41,7 @@ class SupplierPaymentDetailsScreen extends StatelessWidget {
             child: Column(
               children: [
                 _buildHeaderCard(context),
-                const SizedBox(height: 16),
+                const SizedBox(height: 8),
                 _buildPaymentInfoCard(context,),
               ],
             ),
@@ -83,6 +83,7 @@ class SupplierPaymentDetailsScreen extends StatelessWidget {
   Widget _buildHeaderCard(BuildContext context,) {
     return Card(
       elevation: 3,
+      color: AppColors.bottomNavBg(context),
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -95,7 +96,7 @@ class SupplierPaymentDetailsScreen extends StatelessWidget {
                   child: Text(
                     'Supplier Payment: ${payment.spNo}',
                     style:  TextStyle(
-                      fontSize: 20,
+                      fontSize: 16,
                       fontWeight: FontWeight.bold,
                       color: AppColors.primaryColor(context),
                     ),
@@ -122,54 +123,55 @@ class SupplierPaymentDetailsScreen extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 16),
-            _buildDesktopInfoGrid(),
+            const SizedBox(height: 8),
+            _buildDesktopInfoGrid(context),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildDesktopInfoGrid() {
+  Widget _buildDesktopInfoGrid(BuildContext context) {
     return GridView.count(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       crossAxisCount: 2,
-      crossAxisSpacing: 16,
-      mainAxisSpacing: 12,
+      crossAxisSpacing: 8,
+      mainAxisSpacing: 8,
       childAspectRatio: 4,
       children: [
-        _buildInfoItem('Payment No', payment.spNo ?? '-'),
-        _buildInfoItem('Payment Date', _formatDate(payment.paymentDate)),
-        _buildInfoItem('Supplier', payment.supplierName ?? '-'),
-        _buildInfoItem('Prepared By', payment.preparedByName ?? '-'),
-        _buildInfoItem('Payment Method', payment.paymentMethod ?? '-'),
-        _buildInfoItem('Payment Type', payment.paymentType ?? '-'),
+        _buildInfoItem('Payment No', payment.spNo ?? '-',context),
+        _buildInfoItem('Payment Date', _formatDate(payment.paymentDate),context),
+        _buildInfoItem('Supplier', payment.supplierName ?? '-',context),
+        _buildInfoItem('Prepared By', payment.preparedByName ?? '-',context),
+        _buildInfoItem('Payment Method', payment.paymentMethod ?? '-',context),
+        _buildInfoItem('Payment Type', payment.paymentType ?? '-',context),
         if (payment.supplierPhone != null)
-          _buildInfoItem('Phone', payment.supplierPhone!),
+          _buildInfoItem('Phone', payment.supplierPhone!,context),
         if (payment.purchaseInvoiceNo != null)
-          _buildInfoItem('Purchase Invoice', payment.purchaseInvoiceNo!),
+          _buildInfoItem('Purchase Invoice', payment.purchaseInvoiceNo!,context),
       ],
     );
   }
 
-  Widget _buildInfoItem(String label, String value) {
+  Widget _buildInfoItem(String label, String value,BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: const TextStyle(
+          style:  TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w500,
-            color: Colors.grey,
+            color: AppColors.text(context),
           ),
         ),
         const SizedBox(height: 4),
         Text(
           value,
-          style: const TextStyle(
+          style:  TextStyle(
             fontSize: 14,
+            color: AppColors.text(context),
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -182,19 +184,21 @@ class SupplierPaymentDetailsScreen extends StatelessWidget {
 
     return Card(
       elevation: 3,
+      color: AppColors.bottomNavBg(context),
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+             Text(
               'Payment Information',
               style: TextStyle(
-                fontSize: 18,
+                fontSize: 16,
+                color: AppColors.text(context),
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 8),
             _buildPaymentDetails(context,amount),
           ],
         ),
@@ -206,7 +210,7 @@ class SupplierPaymentDetailsScreen extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.blue.shade50,
+        color: AppColors.bottomNavBg(context),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: Colors.blue.shade200),
       ),
@@ -239,7 +243,7 @@ class SupplierPaymentDetailsScreen extends StatelessWidget {
           label,
           style: TextStyle(
             fontWeight: FontWeight.w500,
-            color: Colors.grey.shade700,
+            color: AppColors.text(context),
           ),
         ),
         Text(
@@ -247,7 +251,7 @@ class SupplierPaymentDetailsScreen extends StatelessWidget {
           style: TextStyle(
             fontWeight: isAmount ? FontWeight.bold : FontWeight.normal,
             fontSize: isAmount ? 16 : 14,
-            color: isAmount ? AppColors.primaryColor(context) : Colors.black,
+            color: isAmount ? AppColors.primaryColor(context) :AppColors.text(context),
           ),
         ),
       ],
@@ -266,10 +270,11 @@ class SupplierPaymentDetailsScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+             Text(
               'Payment Summary',
               style: TextStyle(
                 fontSize: 18,
+                color: AppColors.text(context),
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -345,19 +350,20 @@ class SupplierPaymentDetailsScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+             Text(
               'Affected Purchase Invoices',
               style: TextStyle(
                 fontSize: 18,
+                color: AppColors.text(context),
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 16),
             if (affectedInvoices.isEmpty)
-              const Center(
+               Center(
                 child: Text(
                   'No affected purchase invoices',
-                  style: TextStyle(color: Colors.grey),
+                  style: TextStyle(color: AppColors.text(context),),
                 ),
               ),
             if (affectedInvoices.isNotEmpty)
@@ -384,7 +390,7 @@ class SupplierPaymentDetailsScreen extends StatelessWidget {
           Expanded(
             child: Text(
               invoice.invoiceNo ?? 'Unknown Invoice',
-              style: const TextStyle(fontWeight: FontWeight.w500),
+              style:  TextStyle(fontWeight: FontWeight.w500,color: AppColors.text(context)),
             ),
           ),
           Text(

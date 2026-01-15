@@ -117,7 +117,7 @@ class _MobileSupplierPaymentCreateState extends State<MobileSupplierPaymentCreat
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: AppColors.whiteColor(context),
+        color: AppColors.bottomNavBg(context),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
@@ -156,7 +156,7 @@ class _MobileSupplierPaymentCreateState extends State<MobileSupplierPaymentCreat
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.whiteColor(context),
+        color: AppColors.bottomNavBg(context),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(

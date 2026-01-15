@@ -76,6 +76,7 @@ class _AccountScreenState extends State<MobileAccountScreen> {
   Widget build(BuildContext context) {
     return AppScaffold(
       floatingActionButton: FloatingActionButton(
+        backgroundColor: AppColors.primaryColor(context),
         onPressed: () => _showCreateAccountDialog(context),
         child: Icon(Icons.add),
       ),
@@ -404,10 +405,11 @@ class _AccountScreenState extends State<MobileAccountScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
+                         Text(
                           "Filter Accounts",
                           style: TextStyle(
                             fontSize: 18,
+                            color: AppColors.text(context),
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -420,9 +422,10 @@ class _AccountScreenState extends State<MobileAccountScreen> {
                     const SizedBox(height: 10),
 
                     // Account Type Filter
-                    const Text(
+                     Text(
                       "Account Type",
                       style: TextStyle(
+                        color: AppColors.text(context),
                         fontWeight: FontWeight.w600,
                         fontSize: 14,
                       ),

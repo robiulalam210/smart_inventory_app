@@ -56,11 +56,12 @@ class _ExpenseSubCreateScreenState extends State<ExpenseSubCreateScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(widget.id == null ? 'Create Expense Sub Head' : 'Update Expense Sub Head'),
+          title: Text(widget.id == null ? 'Create Expense Sub Head' : 'Update Expense Sub Head',style: AppTextStyle.titleMedium(context),),
           content: Text(
             widget.id == null
                 ? 'Are you sure you want to create this expense sub head?'
                 : 'Are you sure you want to update this expense sub head?',
+            style: AppTextStyle.body(context),
           ),
           actions: [
             TextButton(

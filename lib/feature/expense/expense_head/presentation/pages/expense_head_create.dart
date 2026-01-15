@@ -44,11 +44,12 @@ class _ExpenseHeadCreateState extends State<ExpenseHeadCreate> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Confirm'),
+          title:  Text('Confirm',style: AppTextStyle.titleMedium(context)),
           content: Text(
             widget.id == null
                 ? 'Are you sure you want to create this expense head?'
                 : 'Are you sure you want to update this expense head?',
+            style: AppTextStyle.body(context),
           ),
           actions: [
             TextButton(
@@ -135,7 +136,7 @@ class _ExpenseHeadCreateState extends State<ExpenseHeadCreate> {
             width: MediaQuery.of(context).size.width,
             decoration: BoxDecoration(
               shape: BoxShape.rectangle,
-              color: AppColors.whiteColor(context),
+              color: AppColors.bottomNavBg(context),
               borderRadius: BorderRadius.circular(AppSizes.radius),
             ),
             child: Padding(
@@ -155,8 +156,9 @@ class _ExpenseHeadCreateState extends State<ExpenseHeadCreate> {
                             widget.id == null
                                 ? 'Create Expense Head'
                                 : 'Update Expense Head',
-                            style: const TextStyle(
+                            style:  TextStyle(
                               fontSize: 16,
+                              color: AppColors.text(context),
                               fontWeight: FontWeight.bold,
                             ),
                           ),

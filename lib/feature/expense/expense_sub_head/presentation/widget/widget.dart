@@ -605,7 +605,10 @@ class ExpenseSubHeadTableCard extends StatelessWidget {
       context: context,
       builder: (context) {
         return Dialog(
-          child: SizedBox(
+
+          child: Container(
+            color: AppColors.bottomNavBg(context),
+
             width: Responsive.isMobile(context)
                 ? double.infinity
                 : AppSizes.width(context) * 0.50,
