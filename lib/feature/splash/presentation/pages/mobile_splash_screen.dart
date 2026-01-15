@@ -1,10 +1,10 @@
 import 'dart:io';
 
+import 'package:meherinMart/core/widgets/app_scaffold.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/widgets/app_show_info.dart';
 import '../../../auth/presentation/pages/mobile_login_scr.dart';
-import '../../../lab_dashboard/presentation/pages/mobile_dashboard_screen.dart';
 import '../../../../core/configs/configs.dart';
 import '../../../mobile_root.dart';
 import '../bloc/splash/splash_bloc.dart';
@@ -51,8 +51,7 @@ class _MobileSplashScreenState extends State<MobileSplashScreen>
       host: 'robi.meherinmart.xyz',
     );
 
-    return Scaffold(
-      backgroundColor: AppColors.whiteColor(context),
+    return AppScaffold(
       body: BlocListener<SplashBloc, SplashState>(
         listener: (context, state) {
           // Maintenance: block UI
@@ -128,65 +127,73 @@ class _MobileSplashScreenState extends State<MobileSplashScreen>
             AppRoutes.pushAndRemoveUntil(context, const MobileRootScreen());
           }
         },
-        child: Container(
-          decoration: BoxDecoration(gradient: AppColors.primaryGradient(context)),
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              // Bottom developer credit
-              Column(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 20),
-                    child: TextButton(
-                      onPressed: () => _launchInBrowser(developerUrl),
-                      child: const Text.rich(
-                        TextSpan(
-                          text: 'Developed by ',
-                          style: TextStyle(fontSize: 12, color: Colors.white),
-                          children: [
-                            TextSpan(
-                              text: "Meherin Mart",
-                              style: TextStyle(
-                                fontWeight: FontWeight.w600,
-                                fontSize: 12,
-                                color: Colors.red,
+        child: SafeArea(
+          child: Container(
+            decoration: BoxDecoration(color: AppColors.bottomNavBg(context)),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                // Bottom developer credit
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 20),
+                      child: TextButton(
+                        onPressed: () => _launchInBrowser(developerUrl),
+                        child:  Text.rich(
+                          TextSpan(
+                            text: 'Developed by ',
+                            style: TextStyle(fontSize: 12, color: AppColors.text(context)),
+                            children: [
+                              TextSpan(
+                                text: "Meherin Mart",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 12,
+
+                                  color: AppColors.primaryColor(context)
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                ),
 
-              // Center animation & name
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Hero(
-                    tag: 1,
-                    child: Lottie.asset(
-                      AppImages.splashLottie,
-                      width: Responsive.isMobile(context)
-                          ? AppSizes.width(context) * 0.8
-                          : AppSizes.width(context) * 0.42,
+                // Center animation & name
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Image.asset(AppImages.logo,
+                        width: Responsive.isMobile(context)
+                              ? AppSizes.width(context) * 0.8
+                              : AppSizes.width(context) * 0.42,
                     ),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    AppConstants.appName,
-                    style: TextStyle(
-                      fontSize: 30,
-                      color: AppColors.white,
-                      fontWeight: FontWeight.w600,
+                    // Hero(
+                    //   tag: 1,
+                    //   child: Lottie.asset(
+                    //     AppImages.splashLottie,
+                    //     width: Responsive.isMobile(context)
+                    //         ? AppSizes.width(context) * 0.8
+                    //         : AppSizes.width(context) * 0.42,
+                    //   ),
+                    // ),
+                    const SizedBox(height: 10),
+                    Text(
+                      AppConstants.appName,
+                      style: TextStyle(
+                        fontSize: 30,
+                        color: AppColors.text(context),
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ],
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),

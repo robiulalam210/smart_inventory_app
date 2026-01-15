@@ -1,3 +1,4 @@
+
 import 'package:meherinMart/core/widgets/app_scaffold.dart';
 
 import '../../../../core/configs/configs.dart';
@@ -208,11 +209,18 @@ class _AccountScreenState extends State<MobileAccountScreen> {
                 ),
               ),
               IconButton(
-                icon: Icon(Iconsax.filter, color: AppColors.primaryColor(context)),
+                icon: Icon(
+                  Iconsax.filter,
+                  color: AppColors.primaryColor(context),
+                ),
                 onPressed: () => _showMobileFilterSheet(context),
               ),
               IconButton(
-                onPressed: () => _fetchApi(),
+                onPressed: (){
+                  _clearAccountBlocData();
+
+                  _fetchApi();
+                },
                 icon: const Icon(Icons.refresh),
                 tooltip: "Refresh",
               ),
@@ -331,8 +339,6 @@ class _AccountScreenState extends State<MobileAccountScreen> {
     );
   }
 
-
-
   void _showEditDialog(
     BuildContext context,
     AccountModel account,
@@ -354,7 +360,6 @@ class _AccountScreenState extends State<MobileAccountScreen> {
         return Dialog(
           insetPadding: const EdgeInsets.all(20),
           child: SizedBox(
-
             child: CreateAccountScreen(
               id: account.id.toString(),
               submitText: "Update Account",
@@ -373,7 +378,10 @@ class _AccountScreenState extends State<MobileAccountScreen> {
     accountBloc.bankNameController.clear();
     accountBloc.branchNameController.clear();
     accountBloc.accountOpeningBalanceController.clear();
+    selectedAccountTypeNotifier.value=null;
     accountBloc.selectedState = "";
+    filterTextController.clear();
+    selectedAccountTypeNotifier.value = null;
   }
 
   void _showMobileFilterSheet(BuildContext context) {
@@ -386,111 +394,125 @@ class _AccountScreenState extends State<MobileAccountScreen> {
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setState) {
-            return Container(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        "Filter Accounts",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+            return SafeArea(
+              child: Container(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          "Filter Accounts",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
+                        IconButton(
+                          icon: const Icon(Icons.close),
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
 
-                  // Account Type Filter
-                  const Text(
-                    "Account Type",
-                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
-                  ),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    children: ["All", "Cash", "Bank", "Mobile Banking"].map((
-                      type,
-                    ) {
-                      final bool isSelected =
-                          selectedAccountTypeNotifier.value == type ||
-                          (type == "All" &&
-                              selectedAccountTypeNotifier.value == null);
-                      return FilterChip(
-                        label: Text(type),
-                        selected: isSelected,
-                        onSelected: (selected) {
-                          setState(() {
-                            selectedAccountTypeNotifier.value = selected
-                                ? type
-                                : null;
-                          });
-                        },
-                        selectedColor: AppColors.primaryColor(context).withValues(alpha: 0.2),
-                        checkmarkColor: AppColors.primaryColor(context),
-                      );
-                    }).toList(),
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Action Buttons
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton(
-                          onPressed: () {
+                    // Account Type Filter
+                    const Text(
+                      "Account Type",
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Wrap(
+                      spacing: 6,
+                      children: ["All", "Cash", "Bank", "Mobile Banking"].map((
+                        type,
+                      ) {
+                        final bool isSelected =
+                            selectedAccountTypeNotifier.value == type ||
+                            (type == "All" &&
+                                selectedAccountTypeNotifier.value == null);
+                        return FilterChip(
+                          label: Text(type, style: AppTextStyle.body(context)),
+                          selected: isSelected,
+                          onSelected: (selected) {
                             setState(() {
-                              filterTextController.clear();
-                              selectedAccountTypeNotifier.value = null;
+                              selectedAccountTypeNotifier.value = selected
+                                  ? type
+                                  : null;
                             });
-                            Navigator.pop(context);
-                            _fetchApi();
                           },
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
+                          selectedColor: AppColors.primaryColor(
+                            context,
+                          ).withValues(alpha: 0.2),
+                          checkmarkColor: AppColors.primaryColor(context),
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 10),
+
+                    // Action Buttons
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () {
+                              setState(() {
+                                filterTextController.clear();
+                                selectedAccountTypeNotifier.value = null;
+                              });
+                              Navigator.pop(context);
+                              _fetchApi();
+                            },
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            child: Text(
+                              "Clear All",
+                              style: AppTextStyle.body(
+                                context,
+                              ).copyWith(color: AppColors.error),
                             ),
                           ),
-                          child: const Text("Clear All"),
                         ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: () {
-                            Navigator.pop(context);
-                            _fetchApi(
-                              filterText: filterTextController.text,
-                              accountType:
-                                  selectedAccountTypeNotifier.value
-                                      ?.toLowerCase() ??
-                                  '',
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primaryColor(context),
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                              _fetchApi(
+                                filterText: filterTextController.text,
+                                accountType:
+                                    selectedAccountTypeNotifier.value
+                                        ?.toLowerCase() ??
+                                    '',
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primaryColor(context),
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
                             ),
+                            child:  Text("Apply Filters",style: AppTextStyle.body(
+                              context,
+                            ).copyWith(color: AppColors.text(context)),),
                           ),
-                          child: const Text("Apply Filters"),
                         ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: MediaQuery.of(context).viewInsets.bottom),
-                ],
+                      ],
+                    ),
+                    SizedBox(height: MediaQuery.of(context).viewInsets.bottom),
+                  ],
+                ),
               ),
             );
           },
