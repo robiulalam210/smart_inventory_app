@@ -222,7 +222,11 @@ class _CustomerScreenState extends State<MobileCustomerScreen> {
                 onPressed: () => _showMobileFilterSheet(context),
               ),
               IconButton(
-                onPressed: () => _fetchApi(),
+                onPressed: (){
+                  filterTextController.clear();
+                  selectedStatusNotifier.value = null;
+                  _fetchApi();
+                },
                 icon: const Icon(Icons.refresh),
                 tooltip: "Refresh",
               ),
@@ -355,106 +359,116 @@ class _CustomerScreenState extends State<MobileCustomerScreen> {
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setState) {
-            return Container(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        "Filter Customers",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+            return SafeArea(
+              child: Container(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          "Filter Customers",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-
-                  // Status Filter
-                  const Text(
-                    "Status",
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
+                        IconButton(
+                          icon: const Icon(Icons.close),
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                      ],
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    children: ["All", "Active", "Inactive"].map((status) {
-                      final bool isSelected =
-                          selectedStatusNotifier.value == status ||
-                              (status == "All" && selectedStatusNotifier.value == null);
-                      return FilterChip(
-                        label: Text(status),
-                        selected: isSelected,
-                        onSelected: (selected) {
-                          setState(() {
-                            selectedStatusNotifier.value = selected ? status : null;
-                          });
-                        },
-                        selectedColor: AppColors.primaryColor(context).withValues(alpha: 0.2),
-                        checkmarkColor: AppColors.primaryColor(context),
-                      );
-                    }).toList(),
-                  ),
-                  const SizedBox(height: 24),
+                    const SizedBox(height: 10),
 
-                  // Action Buttons
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton(
-                          onPressed: () {
+                    // Status Filter
+                    const Text(
+                      "Status",
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      children: ["All", "Active", "Inactive"].map((status) {
+                        final bool isSelected =
+                            selectedStatusNotifier.value == status ||
+                                (status == "All" && selectedStatusNotifier.value == null);
+                        return FilterChip(
+                          label: Text(status),
+                          selected: isSelected,
+                          onSelected: (selected) {
                             setState(() {
-                              filterTextController.clear();
-                              selectedStatusNotifier.value = null;
+                              selectedStatusNotifier.value = selected ? status : null;
                             });
-                            Navigator.pop(context);
-                            _fetchApi();
                           },
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
+                          selectedColor: AppColors.primaryColor(context).withValues(alpha: 0.2),
+                          checkmarkColor: AppColors.primaryColor(context),
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 10),
+
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () {
+                              setState(() {
+                                filterTextController.clear();
+                                selectedStatusNotifier.value = null;
+                              });
+                              Navigator.pop(context);
+                              _fetchApi();
+                            },
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            child: Text(
+                              "Clear All",
+                              style: AppTextStyle.body(
+                                context,
+                              ).copyWith(color: AppColors.error),
                             ),
                           ),
-                          child: const Text("Clear All"),
                         ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: () {
-                            Navigator.pop(context);
-                            _fetchApi(
-                              filterText: filterTextController.text,
-                              status: selectedStatusNotifier.value?.toLowerCase() ?? '',
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primaryColor(context),
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                              _fetchApi(
+                                filterText: filterTextController.text,
+                                status: selectedStatusNotifier.value?.toLowerCase() ?? '',
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primaryColor(context),
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
                             ),
+                            child:  Text("Apply Filters",style: AppTextStyle.body(
+                              context,
+                            ).copyWith(color: AppColors.text(context)),),
                           ),
-                          child: const Text("Apply Filters"),
                         ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: MediaQuery.of(context).viewInsets.bottom),
-                ],
+                      ],
+                    ),
+                    // Action Buttons
+
+                    SizedBox(height: MediaQuery.of(context).viewInsets.bottom),
+                  ],
+                ),
               ),
             );
           },

@@ -59,26 +59,18 @@ class PaginationBar extends StatelessWidget {
               'Showing $from to $to of $count',
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style:  TextStyle(
-                fontSize: 14,
-                color: AppColors.text(context),
-
-              ),
+              style: TextStyle(fontSize: 14, color: AppColors.text(context)),
             ),
           ),
 
-          const SizedBox(width: 8),
 
           /// RIGHT — PAGINATION (SCROLLABLE)
           Flexible(
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: showPaginationControls
-                  ? _buildFullPaginationControls(
-                context,
-                availablePageSizes,
-              )
-                  : _buildPageSizeOnly(context ,availablePageSizes),
+                  ? _buildFullPaginationControls(context, availablePageSizes)
+                  : _buildPageSizeOnly(context, availablePageSizes),
             ),
           ),
         ],
@@ -89,30 +81,29 @@ class PaginationBar extends StatelessWidget {
   // ================= FULL PAGINATION =================
 
   Widget _buildFullPaginationControls(
-      BuildContext context,
-      List<int> availablePageSizes,
-      ) {
+    BuildContext context,
+    List<int> availablePageSizes,
+  ) {
     return Row(
       children: [
-         Text(
-          'Show:',
-          style: TextStyle(fontSize: 14,               color: AppColors.text(context),
-          ),
-        ),
-        const SizedBox(width: 8),
+        // Text(
+        //   'Show:',
+        //   style: TextStyle(fontSize: 14, color: AppColors.text(context)),
+        // ),
+        // const SizedBox(width: 4),
 
-        _pageSizeDropdown(context ,availablePageSizes),
+        _pageSizeDropdown(context, availablePageSizes),
 
-        const SizedBox(width: 12),
+        const SizedBox(width: 4),
 
         IconButton(
           icon: const Icon(Icons.chevron_left),
-          onPressed:
-          currentPage > 1 ? () => onPageChanged(currentPage - 1) : null,
+          onPressed: currentPage > 1
+              ? () => onPageChanged(currentPage - 1)
+              : null,
         ),
 
-        ..._buildPageNumbers(context),
-
+        // ..._buildPageNumbers(context),
         IconButton(
           icon: const Icon(Icons.chevron_right),
           onPressed: currentPage < totalPages
@@ -125,23 +116,25 @@ class PaginationBar extends StatelessWidget {
 
   // ================= PAGE SIZE ONLY =================
 
-  Widget _buildPageSizeOnly(BuildContext context ,List<int> availablePageSizes) {
+  Widget _buildPageSizeOnly(
+    BuildContext context,
+    List<int> availablePageSizes,
+  ) {
     return Row(
       children: [
-         Text(
-          'Show:',
-          style: TextStyle(fontSize: 14,               color: AppColors.text(context),
-          ),
-        ),
-        const SizedBox(width: 8),
-        _pageSizeDropdown(context ,availablePageSizes),
+        // Text(
+        //   'Show:',
+        //   style: TextStyle(fontSize: 14, color: AppColors.text(context)),
+        // ),
+        // const SizedBox(width: 4),
+        _pageSizeDropdown(context, availablePageSizes),
       ],
     );
   }
 
   // ================= DROPDOWN =================
 
-  Widget _pageSizeDropdown(BuildContext context ,List<int> availablePageSizes) {
+  Widget _pageSizeDropdown(BuildContext context, List<int> availablePageSizes) {
     return Container(
       height: 35,
       padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -153,7 +146,7 @@ class PaginationBar extends StatelessWidget {
       child: DropdownButton<int>(
         value: pageSize,
         underline: const SizedBox(),
-        icon:  Icon(
+        icon: Icon(
           Icons.arrow_drop_down,
           size: 20,
           color: AppColors.primaryColor(context),
@@ -167,7 +160,7 @@ class PaginationBar extends StatelessWidget {
             value: value,
             child: Text(
               value.toString(),
-              style:  TextStyle(color: AppColors.primaryColor(context)),
+              style: TextStyle(color: AppColors.primaryColor(context)),
             ),
           );
         }).toList(),
@@ -185,32 +178,29 @@ class PaginationBar extends StatelessWidget {
     final bool isSmallScreen = MediaQuery.of(context).size.width < 380;
     final int maxVisiblePages = isSmallScreen ? 3 : 5;
 
-    int startPage = (currentPage - (maxVisiblePages ~/ 2))
-        .clamp(1, totalPages);
-    int endPage = (startPage + maxVisiblePages - 1)
-        .clamp(1, totalPages);
+    int startPage = (currentPage - (maxVisiblePages ~/ 2)).clamp(1, totalPages);
+    int endPage = (startPage + maxVisiblePages - 1).clamp(1, totalPages);
 
     if (endPage - startPage + 1 < maxVisiblePages) {
-      startPage = (endPage - maxVisiblePages + 1)
-          .clamp(1, totalPages);
+      startPage = (endPage - maxVisiblePages + 1).clamp(1, totalPages);
     }
 
     if (startPage > 1) {
-      pages.add(_pageButton(context ,1));
+      pages.add(_pageButton(context, 1));
       if (startPage > 2) {
         pages.add(const Text('...', style: TextStyle(color: Colors.grey)));
       }
     }
 
     for (int i = startPage; i <= endPage; i++) {
-      pages.add(_pageButton(context ,i));
+      pages.add(_pageButton(context, i));
     }
 
     if (endPage < totalPages) {
       if (endPage < totalPages - 1) {
         pages.add(const Text('...', style: TextStyle(color: Colors.grey)));
       }
-      pages.add(_pageButton(context ,totalPages));
+      pages.add(_pageButton(context, totalPages));
     }
 
     return pages;
@@ -218,7 +208,7 @@ class PaginationBar extends StatelessWidget {
 
   // ================= PAGE BUTTON =================
 
-  Widget _pageButton(BuildContext context ,int page) {
+  Widget _pageButton(BuildContext context, int page) {
     final bool isActive = page == currentPage;
 
     return Container(
@@ -227,8 +217,9 @@ class PaginationBar extends StatelessWidget {
         onPressed: () => onPageChanged(page),
         style: TextButton.styleFrom(
           padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 3),
-          backgroundColor:
-          isActive ? AppColors.primaryColor(context) : Colors.transparent,
+          backgroundColor: isActive
+              ? AppColors.primaryColor(context)
+              : Colors.transparent,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(4),
             side: BorderSide(
@@ -242,8 +233,7 @@ class PaginationBar extends StatelessWidget {
           page.toString(),
           style: TextStyle(
             fontSize: 14,
-            color: isActive ? Colors.white :                              AppColors.text(context)
-          ,
+            color: isActive ? Colors.white : AppColors.text(context),
             fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
           ),
         ),

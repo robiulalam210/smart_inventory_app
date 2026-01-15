@@ -4,6 +4,7 @@ class AppImages{
   static const String loginLottie ='assets/jsons/login.json';
   static const String noData ="assets/jsons/no_data.json";
   static const String loginBg ="assets/images/login_bg.jpg";
+  static const String logo ="assets/images/logo.png";
   static const String loginIcon ="assets/images/login_icon.png";
 
   static  String man = "assets/icons/man.png";
