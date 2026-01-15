@@ -114,7 +114,7 @@ class _MobileAccountTransferFormState extends State<MobileAccountTransferForm> {
                   // Quick Transfer Toggle
                   Container(
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: AppColors.bottomNavBg(context),
                       borderRadius: BorderRadius.circular(12),
                       boxShadow: [
                         BoxShadow(
@@ -144,7 +144,7 @@ class _MobileAccountTransferFormState extends State<MobileAccountTransferForm> {
                               "Complete transfer immediately",
                               style: TextStyle(
                                 fontSize: 12,
-                                color: Colors.grey.shade600,
+                                color: AppColors.text(context),
                               ),
                             ),
                           ],
@@ -173,6 +173,7 @@ class _MobileAccountTransferFormState extends State<MobileAccountTransferForm> {
                   _buildAccountSection(
                     title: "From Account",
                     isFromAccount: true,
+                    context: context
                   ),
                   const SizedBox(height: 8),
 
@@ -180,13 +181,14 @@ class _MobileAccountTransferFormState extends State<MobileAccountTransferForm> {
                   _buildAccountSection(
                     title: "To Account",
                     isFromAccount: false,
+                    context: context
                   ),
                   const SizedBox(height: 8),
 
                   // Transfer Details Card
                   Container(
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: AppColors.bottomNavBg(context),
                       borderRadius: BorderRadius.circular(12),
                       boxShadow: [
                         BoxShadow(
@@ -252,10 +254,11 @@ class _MobileAccountTransferFormState extends State<MobileAccountTransferForm> {
   Widget _buildAccountSection({
     required String title,
     required bool isFromAccount,
+    required BuildContext context,
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.bottomNavBg(context),
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -328,9 +331,7 @@ class _MobileAccountTransferFormState extends State<MobileAccountTransferForm> {
                           selectedAccount?.name ?? "Select Account",
                           style: TextStyle(
                             fontSize: 14,
-                            color: selectedAccount != null
-                                ? Colors.black
-                                : Colors.black,
+                            color: AppColors.text(context),
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -340,9 +341,9 @@ class _MobileAccountTransferFormState extends State<MobileAccountTransferForm> {
                             padding: const EdgeInsets.only(top: 4),
                             child: Text(
                               "Acc. No: ${selectedAccount.acNumber}",
-                              style: const TextStyle(
+                              style:  TextStyle(
                                 fontSize: 12,
-                                color: Colors.black,
+                                color:AppColors.text(context),
                               ),
                             ),
                           ),
@@ -374,6 +375,7 @@ class _MobileAccountTransferFormState extends State<MobileAccountTransferForm> {
       builder: (context) {
         return SafeArea(
           child: Container(
+            color: AppColors.bottomNavBg(context),
             padding: const EdgeInsets.all(8),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -395,11 +397,13 @@ class _MobileAccountTransferFormState extends State<MobileAccountTransferForm> {
 
                     Text(
                       "Select ${isFromAccount ? 'From' : 'To'} Account",
-                      style: const TextStyle(
+                      style:  TextStyle(
                         fontWeight: FontWeight.w600,
+                        color: AppColors.text(context),
                         fontSize: 16,
                       ),
                     ),
+                    SizedBox(width: 20,),
                     IconButton(
                       onPressed: () {
                         AppRoutes.pop(context);
@@ -485,7 +489,7 @@ class _MobileAccountTransferFormState extends State<MobileAccountTransferForm> {
           style: TextStyle(
             fontWeight: FontWeight.w500,
             fontSize: 14,
-            color: Colors.grey.shade700,
+            color: AppColors.text(context),
           ),
         ),
         const SizedBox(height: 8),
@@ -494,6 +498,7 @@ class _MobileAccountTransferFormState extends State<MobileAccountTransferForm> {
           keyboardType: TextInputType.number,
           decoration: InputDecoration(
             hintText: "Enter amount",
+            hintStyle: AppTextStyle.body(context),
             prefixIcon: const Icon(Icons.currency_rupee, size: 20),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
@@ -528,7 +533,7 @@ class _MobileAccountTransferFormState extends State<MobileAccountTransferForm> {
           style: TextStyle(
             fontWeight: FontWeight.w500,
             fontSize: 14,
-            color: Colors.grey.shade700,
+            color: AppColors.text(context),
           ),
         ),
         const SizedBox(height: 8),
@@ -539,7 +544,7 @@ class _MobileAccountTransferFormState extends State<MobileAccountTransferForm> {
               value: type,
               child: Text(
                 type.replaceAll('_', ' ').toUpperCase(),
-                style: const TextStyle(fontSize: 14),
+                style:  AppTextStyle.body(context)
               ),
             );
           }).toList(),
@@ -550,6 +555,7 @@ class _MobileAccountTransferFormState extends State<MobileAccountTransferForm> {
           },
           decoration: InputDecoration(
             hintText: "Select type",
+            hintStyle: AppTextStyle.body(context),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
               borderSide: BorderSide(color: Colors.grey.shade300),
@@ -579,7 +585,7 @@ class _MobileAccountTransferFormState extends State<MobileAccountTransferForm> {
           style: TextStyle(
             fontWeight: FontWeight.w500,
             fontSize: 14,
-            color: Colors.grey.shade700,
+            color: AppColors.text(context),
           ),
         ),
         const SizedBox(height: 8),
@@ -617,6 +623,7 @@ class _MobileAccountTransferFormState extends State<MobileAccountTransferForm> {
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
             decoration: BoxDecoration(
+              color: AppColors.bottomNavBg(context),
               borderRadius: BorderRadius.circular(8),
               border: Border.all(color: Colors.grey.shade300),
             ),
@@ -625,7 +632,7 @@ class _MobileAccountTransferFormState extends State<MobileAccountTransferForm> {
                 Icon(
                   Icons.calendar_today,
                   size: 20,
-                  color: Colors.grey.shade600,
+                  color: AppColors.text(context),
                 ),
                 const SizedBox(width: 12),
                 Text(
@@ -635,8 +642,8 @@ class _MobileAccountTransferFormState extends State<MobileAccountTransferForm> {
                   style: TextStyle(
                     fontSize: 14,
                     color: transferBloc.dateController.text.isNotEmpty
-                        ? Colors.black87
-                        : Colors.grey.shade600,
+                        ? AppColors.text(context)
+                        :AppColors.text(context),
                   ),
                 ),
               ],
@@ -656,7 +663,7 @@ class _MobileAccountTransferFormState extends State<MobileAccountTransferForm> {
           style: TextStyle(
             fontWeight: FontWeight.w500,
             fontSize: 14,
-            color: Colors.grey.shade700,
+            color: AppColors.text(context),
           ),
         ),
         const SizedBox(height: 8),
@@ -664,6 +671,7 @@ class _MobileAccountTransferFormState extends State<MobileAccountTransferForm> {
           controller: transferBloc.referenceNoController,
           decoration: InputDecoration(
             hintText: "Enter reference number",
+            hintStyle: AppTextStyle.body(context),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
               borderSide: BorderSide(color: Colors.grey.shade300),
@@ -687,7 +695,7 @@ class _MobileAccountTransferFormState extends State<MobileAccountTransferForm> {
           style: TextStyle(
             fontWeight: FontWeight.w500,
             fontSize: 14,
-            color: Colors.grey.shade700,
+            color: AppColors.text(context),
           ),
         ),
         const SizedBox(height: 8),
@@ -719,7 +727,7 @@ class _MobileAccountTransferFormState extends State<MobileAccountTransferForm> {
           style: TextStyle(
             fontWeight: FontWeight.w500,
             fontSize: 14,
-            color: Colors.grey.shade700,
+            color: AppColors.text(context),
           ),
         ),
         const SizedBox(height: 8),

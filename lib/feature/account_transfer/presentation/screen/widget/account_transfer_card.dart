@@ -41,7 +41,7 @@ class MobileAccountTransferCard extends StatelessWidget {
 
   Widget _buildTransferCard(BuildContext context, AccountTransferModel transfer) {
     return Card(
-      color: AppColors.whiteColor(context),
+      color: AppColors.bottomNavBg(context),
       margin: const EdgeInsets.only(bottom: 8),
       elevation: 0,
       shape: RoundedRectangleBorder(
@@ -65,7 +65,7 @@ class MobileAccountTransferCard extends StatelessWidget {
                       style: GoogleFonts.inter(
                         fontWeight: FontWeight.w600,
                         fontSize: 16,
-                        color: Colors.black87,
+                        color: AppColors.text(context),
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -77,9 +77,9 @@ class MobileAccountTransferCard extends StatelessWidget {
               const SizedBox(height: 6),
 
               // Transfer Details
-              _buildDetailRow('Date:', _formatDate(transfer.transferDate)),
-              _buildDetailRow('From:', transfer.fromAccount?.name ?? 'N/A'),
-              _buildDetailRow('To:', transfer.toAccount?.name ?? 'N/A'),
+              _buildDetailRow('Date:', _formatDate(transfer.transferDate),context),
+              _buildDetailRow('From:', transfer.fromAccount?.name ?? 'N/A',context),
+              _buildDetailRow('To:', transfer.toAccount?.name ?? 'N/A',context),
 
 
               // Amount and Type Row
@@ -172,7 +172,7 @@ class MobileAccountTransferCard extends StatelessWidget {
     );
   }
 
-  Widget _buildDetailRow(String label, String value) {
+  Widget _buildDetailRow(String label, String value,BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 4),
       child: Row(
@@ -183,7 +183,7 @@ class MobileAccountTransferCard extends StatelessWidget {
               label,
               style: GoogleFonts.inter(
                 fontSize: 12,
-                color: Colors.grey.shade600,
+                color: AppColors.text(context),
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -194,7 +194,7 @@ class MobileAccountTransferCard extends StatelessWidget {
               value,
               style: GoogleFonts.inter(
                 fontSize: 12,
-                color: Colors.black87,
+                color: AppColors.text(context),
                 fontWeight: FontWeight.w400,
               ),
               overflow: TextOverflow.ellipsis,

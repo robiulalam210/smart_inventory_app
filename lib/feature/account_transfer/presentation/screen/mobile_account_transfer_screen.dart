@@ -177,7 +177,7 @@ class _MobileAccountTransferScreenState extends State<MobileAccountTransferScree
   Widget _buildMobileHeader() {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Colors.transparent,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -440,177 +440,188 @@ class _MobileAccountTransferScreenState extends State<MobileAccountTransferScree
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setState) {
-            return Container(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        "Filter Transfers",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        "Date Range",
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 14,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      CustomDateRangeField(
-                        isLabel: false,
-                        selectedDateRange: selectedDateRange,
-                        onDateRangeSelected: (value) {
-                          setState(() {
-                            selectedDateRange = value;
-                          });
-                        },
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Status Filter
-                  const Text(
-                    "Status",
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    children: ["All", "pending", "completed", "failed", "cancelled"].map((status) {
-                      final bool isSelected =
-                          selectedStatusNotifier.value == status ||
-                              (status == "All" && selectedStatusNotifier.value == null);
-                      return FilterChip(
-                        label: Text(status.toUpperCase()),
-                        selected: isSelected,
-                        onSelected: (selected) {
-                          setState(() {
-                            selectedStatusNotifier.value = selected ? (status == "All" ? null : status) : null;
-                          });
-                        },
-                        selectedColor: AppColors.primaryColor(context).withValues(alpha: 0.2),
-                        checkmarkColor: AppColors.primaryColor(context),
-                      );
-                    }).toList(),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Transfer Type Filter
-                  const Text(
-                    "Transfer Type",
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    children: ["All", "internal", "external", "adjustment"].map((type) {
-                      final bool isSelected =
-                          selectedTransferTypeNotifier.value == type ||
-                              (type == "All" && selectedTransferTypeNotifier.value == null);
-                      return FilterChip(
-                        label: Text(type.toUpperCase()),
-                        selected: isSelected,
-                        onSelected: (selected) {
-                          setState(() {
-                            selectedTransferTypeNotifier.value = selected ? (type == "All" ? null : type) : null;
-                          });
-                        },
-                        selectedColor: AppColors.primaryColor(context).withValues(alpha: 0.2),
-                        checkmarkColor: AppColors.primaryColor(context),
-                      );
-                    }).toList(),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Reversal Filter
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        "Reversal Only",
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 14,
-                        ),
-                      ),
-                      Switch(
-                        value: isReversalNotifier.value ?? false,
-                        onChanged: (value) {
-                          setState(() {
-                            isReversalNotifier.value = value;
-                          });
-                        },
-                        activeThumbColor: AppColors.primaryColor(context),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Action Buttons
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton(
-                          onPressed: () {
-                            Navigator.pop(context);
-                            _clearAllFilters();
-                          },
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
+            return SafeArea(
+              child: Container(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                         Text(
+                          "Filter Transfers",
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: AppColors.text(context),
+                            fontWeight: FontWeight.bold,
                           ),
-                          child: const Text("Clear All"),
                         ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: () {
-                            Navigator.pop(context);
-                            _fetchApi();
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primaryColor(context),
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
+                        IconButton(
+                          icon: const Icon(Icons.close),
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                         Text(
+                          "Date Range",
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.text(context),
+                            fontSize: 14,
                           ),
-                          child: const Text("Apply Filters"),
                         ),
+                        const SizedBox(height: 8),
+                        CustomDateRangeField(
+                          isLabel: false,
+                          selectedDateRange: selectedDateRange,
+                          onDateRangeSelected: (value) {
+                            setState(() {
+                              selectedDateRange = value;
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Status Filter
+                     Text(
+                      "Status",
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.text(context),
+                        fontSize: 14,
                       ),
-                    ],
-                  ),
-                  SizedBox(height: MediaQuery.of(context).viewInsets.bottom),
-                ],
+                    ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      children: ["All", "pending", "completed", "failed", "cancelled"].map((status) {
+                        final bool isSelected =
+                            selectedStatusNotifier.value == status ||
+                                (status == "All" && selectedStatusNotifier.value == null);
+                        return FilterChip(
+                          label: Text(status.toUpperCase()),
+                          selected: isSelected,
+                          onSelected: (selected) {
+                            setState(() {
+                              selectedStatusNotifier.value = selected ? (status == "All" ? null : status) : null;
+                            });
+                          },
+                          selectedColor: AppColors.primaryColor(context).withValues(alpha: 0.2),
+                          checkmarkColor: AppColors.primaryColor(context),
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Transfer Type Filter
+                     Text(
+                      "Transfer Type",
+                      style: TextStyle(
+                        color: AppColors.text(context),
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      children: ["All", "internal", "external", "adjustment"].map((type) {
+                        final bool isSelected =
+                            selectedTransferTypeNotifier.value == type ||
+                                (type == "All" && selectedTransferTypeNotifier.value == null);
+                        return FilterChip(
+                          label: Text(type.toUpperCase()),
+                          selected: isSelected,
+                          onSelected: (selected) {
+                            setState(() {
+                              selectedTransferTypeNotifier.value = selected ? (type == "All" ? null : type) : null;
+                            });
+                          },
+                          selectedColor: AppColors.primaryColor(context).withValues(alpha: 0.2),
+                          checkmarkColor: AppColors.primaryColor(context),
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Reversal Filter
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                         Text(
+                          "Reversal Only",
+                          style: TextStyle(
+                            color: AppColors.text(context),
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                          ),
+                        ),
+                        Switch(
+                          value: isReversalNotifier.value ?? false,
+                          onChanged: (value) {
+                            setState(() {
+                              isReversalNotifier.value = value;
+                            });
+                          },
+                          activeThumbColor: AppColors.primaryColor(context),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+
+                    // Action Buttons
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                              _clearAllFilters();
+                            },
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 4),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            child: const Text("Clear All"),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                              _fetchApi(
+                                status: selectedStatusNotifier.value,
+                                transferType: selectedTransferTypeNotifier.value,
+                                
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primaryColor(context),
+                              padding: const EdgeInsets.symmetric(vertical: 4),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            child:  Text("Apply Filters",style: AppTextStyle.body(context),),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: MediaQuery.of(context).viewInsets.bottom),
+                  ],
+                ),
               ),
             );
           },

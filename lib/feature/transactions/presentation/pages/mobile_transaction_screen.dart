@@ -1,4 +1,5 @@
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
+import 'package:meherinMart/core/widgets/app_scaffold.dart';
 import '../../../../core/configs/configs.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/coustom_search_text_field.dart';
@@ -96,41 +97,31 @@ class _TransactionScreenState extends State<MobileTransactionScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return AppScaffold(
       appBar: AppBar(title:  Text("Transaction",style: AppTextStyle.titleMedium(context),)),
       body: SafeArea(
-        child: _buildContentArea(),
-      ),
-    );
-  }
-
-  Widget _buildContentArea() {
-    return ResponsiveCol(
-      xs: 12,
-      sm: 12,
-      md: 12,
-      lg: 10,
-      xl: 10,
-      child: RefreshIndicator(
-        color: AppColors.primaryColor(context),
-        onRefresh: () async {
-          _fetchTransactions();
-        },
-        child: SingleChildScrollView(
-          padding: AppTextStyle.getResponsivePaddingBody(context),
-          child: Column(
-            children: [
-              _buildMobileHeader(),
-              const SizedBox(height: 8),
-              SizedBox(
-                child: _buildTransactionList(),
-              ),
-            ],
+        child: RefreshIndicator(
+          color: AppColors.primaryColor(context),
+          onRefresh: () async {
+            _fetchTransactions();
+          },
+          child: SingleChildScrollView(
+            padding: AppTextStyle.getResponsivePaddingBody(context),
+            child: Column(
+              children: [
+                _buildMobileHeader(),
+                const SizedBox(height: 8),
+                SizedBox(
+                  child: _buildTransactionList(),
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
+
 
   Widget _buildMobileHeader() {
     return Column(
@@ -139,7 +130,7 @@ class _TransactionScreenState extends State<MobileTransactionScreen> {
         // Search Bar
         Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Colors.transparent,
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
@@ -162,7 +153,7 @@ class _TransactionScreenState extends State<MobileTransactionScreen> {
                       filterTextController.clear();
                       _fetchTransactions();
                     },
-                    hintText: "Search transactions...",
+                    hintText: "transactions...",
                   ),
                 ),
               ),
@@ -297,150 +288,162 @@ class _TransactionScreenState extends State<MobileTransactionScreen> {
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setState) {
-            return Container(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        "Filter Transactions",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+            return SafeArea(
+              child: Container(
+                color: AppColors.bottomNavBg(context),
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                         Text(
+                          "Filter Transactions",
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: AppColors.text(context),
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-
-                  // Date Range Picker - Using CustomDateRangeField
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        "Date Range",
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 14,
+                        IconButton(
+                          icon: const Icon(Icons.close),
+                          onPressed: () => Navigator.pop(context),
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                      CustomDateRangeField(
-                        isLabel: false,
-                        selectedDateRange: selectedDateRange,
-                        onDateRangeSelected: (value) {
-                          setState(() {
-                            selectedDateRange = value;
-                          });
-                        },
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-
-                  // Transaction Type Filter
-                  const Text(
-                    "Transaction Type",
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
+                      ],
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    children: ["All", "Credit", "Debit"].map((type) {
-                      final bool isSelected =
-                          selectedTransactionTypeNotifier.value == type ||
-                              (type == "All" && selectedTransactionTypeNotifier.value == null);
-                      return FilterChip(
-                        label: Text(type),
-                        selected: isSelected,
-                        onSelected: (selected) {
-                          setState(() {
-                            selectedTransactionTypeNotifier.value = selected ? type : null;
-                          });
-                        },
-                        selectedColor: AppColors.primaryColor(context).withValues(alpha: 0.2),
-                        checkmarkColor: AppColors.primaryColor(context),
-                      );
-                    }).toList(),
-                  ),
-                  const SizedBox(height: 8),
-
-                  // Status Filter
-                  const Text(
-                    "Status",
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    children: ["All", "Completed", "Pending", "Failed"].map((status) {
-                      final bool isSelected =
-                          selectedStatusNotifier.value == status ||
-                              (status == "All" && selectedStatusNotifier.value == null);
-                      return FilterChip(
-                        label: Text(status),
-                        selected: isSelected,
-                        onSelected: (selected) {
-                          setState(() {
-                            selectedStatusNotifier.value = selected ? status : null;
-                          });
-                        },
-                        selectedColor: AppColors.primaryColor(context).withValues(alpha: 0.2),
-                        checkmarkColor: AppColors.primaryColor(context),
-                      );
-                    }).toList(),
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Action Buttons
-                  Row(
-                    children: [
-                      Expanded(
-                        child: AppButton(
-                          color: AppColors.error,
-                          onPressed: () {
+                    const SizedBox(height: 20),
+              
+                    // Date Range Picker - Using CustomDateRangeField
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                         Text(
+                          "Date Range",
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.text(context),
+                            fontSize: 14,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        CustomDateRangeField(
+                          isLabel: false,
+                          selectedDateRange: selectedDateRange,
+                          onDateRangeSelected: (value) {
                             setState(() {
-                              filterTextController.clear();
-                              selectedTransactionTypeNotifier.value = null;
-                              selectedStatusNotifier.value = null;
-                              selectedAccountNotifier.value = null;
-                              selectedDateRange = null;
+                              selectedDateRange = value;
                             });
-                            Navigator.pop(context);
-                            _fetchTransactions();
                           },
-                          name: "Clear All",
                         ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+              
+                    // Transaction Type Filter
+                     Text(
+                      "Transaction Type",
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.text(context),
+                        fontSize: 14,
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: AppButton(
-                          onPressed: () {
-                            Navigator.pop(context);
-                            _fetchTransactions();
+                    ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      children: ["All", "Credit", "Debit"].map((type) {
+                        final bool isSelected =
+                            selectedTransactionTypeNotifier.value == type ||
+                                (type == "All" && selectedTransactionTypeNotifier.value == null);
+                        return FilterChip(
+                          label: Text(type),
+                          selected: isSelected,
+                          onSelected: (selected) {
+                            setState(() {
+                              selectedTransactionTypeNotifier.value = selected ? type : null;
+                            });
                           },
+                          selectedColor: AppColors.primaryColor(context).withValues(alpha: 0.2),
+                          checkmarkColor: AppColors.primaryColor(context),
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 8),
+              
+                    // Status Filter
+                     Text(
+                      "Status",
+                      style: TextStyle(
+                        color: AppColors.text(context),
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      children: ["All", "Completed", "Pending", "Failed"].map((status) {
+                        final bool isSelected =
+                            selectedStatusNotifier.value == status ||
+                                (status == "All" && selectedStatusNotifier.value == null);
+                        return FilterChip(
+                          label: Text(status),
+                          selected: isSelected,
+                          onSelected: (selected) {
+                            setState(() {
+                              selectedStatusNotifier.value = selected ? status : null;
+                            });
+                          },
+                          selectedColor: AppColors.primaryColor(context).withValues(alpha: 0.2),
+                          checkmarkColor: AppColors.primaryColor(context),
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 24),
+              
+                    // Action Buttons
+                    Row(
+                      children: [
+                        Expanded(
+                          child: AppButton(
+                            color: AppColors.error,
+                            onPressed: () {
+                              setState(() {
+                                filterTextController.clear();
+                                selectedTransactionTypeNotifier.value = null;
+                                selectedStatusNotifier.value = null;
+                                selectedAccountNotifier.value = null;
+                                selectedDateRange = null;
+                              });
+                              Navigator.pop(context);
+                              _fetchTransactions();
+                            },
+                            name: "Clear All",
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: AppButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                              _fetchTransactions(
+                                transactionType: selectedTransactionTypeNotifier.value.toString(),
+                                status: selectedStatusNotifier.value.toString(),
 
-                         name: "Apply Filters",
+
+                              );
+                            },
+              
+                           name: "Apply Filters",
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: MediaQuery.of(context).viewInsets.bottom),
-                ],
+                      ],
+                    ),
+                    SizedBox(height: MediaQuery.of(context).viewInsets.bottom),
+                  ],
+                ),
               ),
             );
           },

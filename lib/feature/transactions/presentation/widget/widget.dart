@@ -20,7 +20,7 @@ class TransactionCard extends StatelessWidget {
     }
 
     return Responsive.isMobile(context)
-        ? _buildMobileListView()
+        ? _buildMobileListView(context)
         : _buildDesktopTable();
   }
 
@@ -123,11 +123,11 @@ class TransactionCard extends StatelessWidget {
     );
   }
 
-  Widget _buildMobileListView() {
+  Widget _buildMobileListView(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
-        color: Colors.white,
+        color: AppColors.bottomNavBg(context),
         boxShadow: [
           BoxShadow(
             color: Colors.grey.withValues(alpha: 0.1),
@@ -143,22 +143,23 @@ class TransactionCard extends StatelessWidget {
         separatorBuilder: (context, index) => const Divider(height: 1),
         itemBuilder: (context, index) {
           final transaction = transactions[index];
-          return _buildMobileTransactionCard(transaction, index);
+          return _buildMobileTransactionCard(transaction, index,context);
         },
       ),
     );
   }
 
-  Widget _buildMobileTransactionCard(TransactionsModel transaction, int index) {
+  Widget _buildMobileTransactionCard(TransactionsModel transaction, int index,BuildContext context) {
     final isCredit = transaction.transactionType?.toLowerCase() == 'credit';
     final amountColor = isCredit ? Colors.green : Colors.red;
     final prefix = isCredit ? '+' : '-';
     final amount = double.tryParse(transaction.amount ?? "0") ?? 0;
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      margin: EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: index.isEven ? Colors.grey.withValues(alpha:0.03) : Colors.white,
+        color: AppColors.bottomNavBg(context),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -170,10 +171,10 @@ class TransactionCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   transaction.transactionNo ?? "N/A",
-                  style: const TextStyle(
+                  style:  TextStyle(
                     fontWeight: FontWeight.w600,
                     fontSize: 14,
-                    color: Colors.black87,
+                    color: AppColors.text(context),
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -190,9 +191,9 @@ class TransactionCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   transaction.accountName ?? "N/A",
-                  style: const TextStyle(
+                  style:  TextStyle(
                     fontSize: 13,
-                    color: Colors.black87,
+                    color: AppColors.text(context),
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -220,9 +221,9 @@ class TransactionCard extends StatelessWidget {
                 transaction.transactionDate != null
                     ? '${transaction.transactionDate!.day}/${transaction.transactionDate!.month}/${transaction.transactionDate!.year}'
                     : 'N/A',
-                style: const TextStyle(
+                style:  TextStyle(
                   fontSize: 12,
-                  color: Colors.grey,
+                  color: AppColors.text(context),
                 ),
               ),
             ],
@@ -239,15 +240,15 @@ class TransactionCard extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
-                    color: Colors.grey[700],
+                    color: AppColors.text(context),
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   transaction.description!,
-                  style: const TextStyle(
+                  style:  TextStyle(
                     fontSize: 13,
-                    color: Colors.black87,
+                    color: AppColors.text(context),
                   ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
