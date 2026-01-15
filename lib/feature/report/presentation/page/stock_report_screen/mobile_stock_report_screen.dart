@@ -30,10 +30,7 @@ class _MobileStockReportScreenState extends State<MobileStockReportScreen> {
     _fetchStockReport();
   }
 
-  void _fetchStockReport({
-    DateTime? from,
-    DateTime? to,
-  }) {
+  void _fetchStockReport({DateTime? from, DateTime? to}) {
     context.read<StockReportBloc>().add(FetchStockReport(
       context: context,
       from: from,
@@ -98,19 +95,12 @@ class _MobileStockReportScreenState extends State<MobileStockReportScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Filter Section
               _buildMobileFilterSection(),
               const SizedBox(height: 16),
-
-              // Summary Cards
               _buildSummaryCards(),
               const SizedBox(height: 16),
-
-              // Sort Options
               _buildSortOptions(),
               const SizedBox(height: 16),
-
-              // Stock List
               _buildStockList(),
             ],
           ),
@@ -146,7 +136,6 @@ class _MobileStockReportScreenState extends State<MobileStockReportScreen> {
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 children: [
-                  // Date Range Picker
                   CustomDateRangeField(
                     isLabel: true,
                     selectedDateRange: selectedDateRange,
@@ -158,8 +147,6 @@ class _MobileStockReportScreenState extends State<MobileStockReportScreen> {
                     },
                   ),
                   const SizedBox(height: 12),
-
-                  // Action Buttons
                   Row(
                     children: [
                       Expanded(
@@ -208,59 +195,60 @@ class _MobileStockReportScreenState extends State<MobileStockReportScreen> {
         final summary = state.response.summary;
         final products = state.response.report;
 
-        // Calculate additional metrics
         final outOfStockCount = products.where((p) => p.currentStock == 0).length;
         final lowStockCount = products.where((p) => p.currentStock > 0 && p.currentStock <= 10).length;
-        final highValueProducts = products.where((p) => p.value > 1000).length;
 
         return Column(
           children: [
-            // First row
             Row(
               children: [
-                _buildMobileSummaryCard(
-                  "Total Products",
-                  summary.totalProducts.toString(),
-                  Icons.inventory_2,
-                  AppColors.primaryColor(context),
+                Flexible(
+                  child: _buildMobileSummaryCard(
+                    "Total Products",
+                    summary.totalProducts.toString(),
+                    Icons.inventory_2,
+                    AppColors.primaryColor(context),
+                  ),
                 ),
                 const SizedBox(width: 8),
-                _buildMobileSummaryCard(
-                  "Stock Value",
-                  "\$${summary.totalStockValue.toStringAsFixed(2)}",
-                  Icons.attach_money,
-                  Colors.green,
+                Flexible(
+                  child: _buildMobileSummaryCard(
+                    "Stock Value",
+                    "\$${summary.totalStockValue.toStringAsFixed(2)}",
+                    Icons.attach_money,
+                    Colors.green,
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: 8),
-
-            // Second row
             Row(
               children: [
-                _buildMobileSummaryCard(
-                  "Total Quantity",
-                  summary.totalStockQuantity.toString(),
-                  Icons.shopping_cart,
-                  Colors.blue,
+                Flexible(
+                  child: _buildMobileSummaryCard(
+                    "Total Quantity",
+                    summary.totalStockQuantity.toString(),
+                    Icons.shopping_cart,
+                    Colors.blue,
+                  ),
                 ),
                 const SizedBox(width: 8),
-                _buildMobileSummaryCard(
-                  "Avg Value",
-                  "\$${summary.averageStockValue.toStringAsFixed(2)}",
-                  Icons.analytics,
-                  Colors.orange,
+                Flexible(
+                  child: _buildMobileSummaryCard(
+                    "Avg Value",
+                    "\$${summary.averageStockValue.toStringAsFixed(2)}",
+                    Icons.analytics,
+                    Colors.orange,
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: 8),
-
-            // Third row (alerts)
             if (outOfStockCount > 0 || lowStockCount > 0)
               Row(
                 children: [
                   if (outOfStockCount > 0)
-                    Expanded(
+                    Flexible(
                       child: _buildMobileSummaryCard(
                         "Out of Stock",
                         outOfStockCount.toString(),
@@ -268,9 +256,9 @@ class _MobileStockReportScreenState extends State<MobileStockReportScreen> {
                         Colors.red,
                       ),
                     ),
-                  if (outOfStockCount > 0) const SizedBox(width: 8),
+                  if (outOfStockCount > 0 && lowStockCount > 0) const SizedBox(width: 8),
                   if (lowStockCount > 0)
-                    Expanded(
+                    Flexible(
                       child: _buildMobileSummaryCard(
                         "Low Stock",
                         lowStockCount.toString(),
@@ -287,57 +275,47 @@ class _MobileStockReportScreenState extends State<MobileStockReportScreen> {
   }
 
   Widget _buildMobileSummaryCard(String title, String value, IconData icon, Color color) {
-    return Expanded(
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 8),
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(8),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.2),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.2),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              shape: BoxShape.circle,
             ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, color: color, size: 20),
+            child: Icon(icon, color: color, size: 20),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(fontSize: 10, color: Colors.grey, fontWeight: FontWeight.w500),
+                ),
+                Text(
+                  value,
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: color),
+                ),
+              ],
             ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 10,
-                      color: Colors.grey,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  Text(
-                    value,
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: color,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -349,13 +327,7 @@ class _MobileStockReportScreenState extends State<MobileStockReportScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Sort Options',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            const Text('Sort Options', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             Row(
               children: [
@@ -445,21 +417,16 @@ class _MobileStockReportScreenState extends State<MobileStockReportScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Product Header
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Product Name and Category
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             product.productName,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -472,10 +439,7 @@ class _MobileStockReportScreenState extends State<MobileStockReportScreen> {
                                   color: Colors.grey[200],
                                   borderRadius: BorderRadius.circular(4),
                                 ),
-                                child: Text(
-                                  product.category,
-                                  style: const TextStyle(fontSize: 10),
-                                ),
+                                child: Text(product.category, style: const TextStyle(fontSize: 10)),
                               ),
                               const SizedBox(width: 4),
                               Container(
@@ -484,18 +448,13 @@ class _MobileStockReportScreenState extends State<MobileStockReportScreen> {
                                   color: Colors.grey[200],
                                   borderRadius: BorderRadius.circular(4),
                                 ),
-                                child: Text(
-                                  product.brand,
-                                  style: const TextStyle(fontSize: 10),
-                                ),
+                                child: Text(product.brand, style: const TextStyle(fontSize: 10)),
                               ),
                             ],
                           ),
                         ],
                       ),
                     ),
-
-                    // Stock Status Indicator
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
@@ -504,30 +463,16 @@ class _MobileStockReportScreenState extends State<MobileStockReportScreen> {
                       ),
                       child: Column(
                         children: [
-                          Text(
-                            product.currentStock.toString(),
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: product.stockStatusColor,
-                            ),
-                          ),
-                          Text(
-                            product.stockStatus,
-                            style: TextStyle(
-                              fontSize: 10,
-                              color: product.stockStatusColor,
-                            ),
-                          ),
+                          Text(product.currentStock.toString(),
+                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: product.stockStatusColor)),
+                          Text(product.stockStatus,
+                              style: TextStyle(fontSize: 10, color: product.stockStatusColor)),
                         ],
                       ),
                     ),
                   ],
                 ),
-
                 const SizedBox(height: 12),
-
-                // Pricing Row
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -536,10 +481,7 @@ class _MobileStockReportScreenState extends State<MobileStockReportScreen> {
                     _buildPriceItem('Value', '\$${product.value.toStringAsFixed(2)}', Colors.green),
                   ],
                 ),
-
                 const SizedBox(height: 12),
-
-                // Profitability and Margin
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -552,18 +494,9 @@ class _MobileStockReportScreenState extends State<MobileStockReportScreen> {
                         ),
                         child: Column(
                           children: [
-                            const Text(
-                              'Profit Margin',
-                              style: TextStyle(fontSize: 10, color: Colors.grey),
-                            ),
-                            Text(
-                              '${product.profitMargin.toStringAsFixed(1)}%',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: product.profitabilityColor,
-                              ),
-                            ),
+                            const Text('Profit Margin', style: TextStyle(fontSize: 10, color: Colors.grey)),
+                            Text('${product.profitMargin.toStringAsFixed(1)}%',
+                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: product.profitabilityColor)),
                           ],
                         ),
                       ),
@@ -578,41 +511,24 @@ class _MobileStockReportScreenState extends State<MobileStockReportScreen> {
                         ),
                         child: Column(
                           children: [
-                            const Text(
-                              'Profitability',
-                              style: TextStyle(fontSize: 10, color: Colors.grey),
-                            ),
-                            Text(
-                              product.profitability,
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                                color: product.profitabilityColor,
-                              ),
-                            ),
+                            const Text('Profitability', style: TextStyle(fontSize: 10, color: Colors.grey)),
+                            Text(product.profitability,
+                                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: product.profitabilityColor)),
                           ],
                         ),
                       ),
                     ),
                   ],
                 ),
-
-                // Stock Progress Bar
                 const SizedBox(height: 12),
                 Container(
                   height: 6,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(3),
-                  ),
+                  decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(3)),
                   child: FractionallySizedBox(
                     alignment: Alignment.centerLeft,
-                    widthFactor: product.currentStock / (product.currentStock + product.currentStock),
+                    widthFactor: 1.0,
                     child: Container(
-                      decoration: BoxDecoration(
-                        color: product.stockStatusColor,
-                        borderRadius: BorderRadius.circular(3),
-                      ),
+                      decoration: BoxDecoration(color: product.stockStatusColor, borderRadius: BorderRadius.circular(3)),
                     ),
                   ),
                 ),
@@ -620,25 +536,11 @@ class _MobileStockReportScreenState extends State<MobileStockReportScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      'Stock Level',
-                      style: TextStyle(
-                        fontSize: 10,
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                    Text(
-                      '${product.currentStock} units',
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                        color: product.stockStatusColor,
-                      ),
-                    ),
+                    Text('Stock Level', style: TextStyle(fontSize: 10, color: Colors.grey[600])),
+                    Text('${product.currentStock} units',
+                        style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: product.stockStatusColor)),
                   ],
                 ),
-
-                // Warning Banner
                 if (isOutOfStock || isLowStock)
                   Container(
                     margin: const EdgeInsets.only(top: 12),
@@ -646,17 +548,12 @@ class _MobileStockReportScreenState extends State<MobileStockReportScreen> {
                     decoration: BoxDecoration(
                       color: (isOutOfStock ? Colors.red : Colors.orange).withOpacity(0.1),
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: isOutOfStock ? Colors.red : Colors.orange,
-                      ),
+                      border: Border.all(color: isOutOfStock ? Colors.red : Colors.orange),
                     ),
                     child: Row(
                       children: [
-                        Icon(
-                          isOutOfStock ? Icons.error_outline : Icons.warning,
-                          color: isOutOfStock ? Colors.red : Colors.orange,
-                          size: 16,
-                        ),
+                        Icon(isOutOfStock ? Icons.error_outline : Icons.warning,
+                            color: isOutOfStock ? Colors.red : Colors.orange, size: 16),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
@@ -664,10 +561,9 @@ class _MobileStockReportScreenState extends State<MobileStockReportScreen> {
                                 ? 'Out of stock - Immediate restock needed!'
                                 : 'Low stock - Consider restocking soon',
                             style: TextStyle(
-                              fontSize: 12,
-                              color: isOutOfStock ? Colors.red : Colors.orange,
-                              fontWeight: FontWeight.bold,
-                            ),
+                                fontSize: 12,
+                                color: isOutOfStock ? Colors.red : Colors.orange,
+                                fontWeight: FontWeight.bold),
                           ),
                         ),
                       ],
@@ -684,22 +580,9 @@ class _MobileStockReportScreenState extends State<MobileStockReportScreen> {
   Widget _buildPriceItem(String label, String value, Color color) {
     return Column(
       children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 10,
-            color: Colors.grey,
-          ),
-        ),
+        Text(label, style: const TextStyle(fontSize: 10, color: Colors.grey)),
         const SizedBox(height: 2),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-            color: color,
-          ),
-        ),
+        Text(value, style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: color)),
       ],
     );
   }
@@ -712,30 +595,15 @@ class _MobileStockReportScreenState extends State<MobileStockReportScreen> {
         children: [
           Lottie.asset(AppImages.noData, width: 150, height: 150),
           const SizedBox(height: 16),
-          Text(
-            "No Stock Data Found",
-            style: GoogleFonts.inter(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: Colors.grey,
-            ),
-            textAlign: TextAlign.center,
-          ),
+          Text("No Stock Data Found",
+              style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.grey),
+              textAlign: TextAlign.center),
           const SizedBox(height: 8),
-          Text(
-            "Stock data will appear here when available",
-            style: GoogleFonts.inter(
-              fontSize: 12,
-              fontWeight: FontWeight.w400,
-              color: Colors.grey,
-            ),
-            textAlign: TextAlign.center,
-          ),
+          Text("Stock data will appear here when available",
+              style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w400, color: Colors.grey),
+              textAlign: TextAlign.center),
           const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: _fetchStockReport,
-            child: const Text("Refresh Data"),
-          ),
+          ElevatedButton(onPressed: _fetchStockReport, child: const Text("Refresh Data")),
         ],
       ),
     );
@@ -749,26 +617,13 @@ class _MobileStockReportScreenState extends State<MobileStockReportScreen> {
         children: [
           const Icon(Icons.error_outline, size: 60, color: Colors.red),
           const SizedBox(height: 16),
-          Text(
-            "Error Loading Stock Report",
-            style: GoogleFonts.inter(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: Colors.grey,
-            ),
-            textAlign: TextAlign.center,
-          ),
+          Text("Error Loading Stock Report",
+              style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.grey),
+              textAlign: TextAlign.center),
           const SizedBox(height: 8),
-          Text(
-            error,
-            style: const TextStyle(fontSize: 14, color: Colors.red),
-            textAlign: TextAlign.center,
-          ),
+          Text(error, style: const TextStyle(fontSize: 14, color: Colors.red), textAlign: TextAlign.center),
           const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: _fetchStockReport,
-            child: const Text("Try Again"),
-          ),
+          ElevatedButton(onPressed: _fetchStockReport, child: const Text("Try Again")),
         ],
       ),
     );
@@ -784,10 +639,7 @@ class _MobileStockReportScreenState extends State<MobileStockReportScreen> {
             appBar: AppBar(
               title: const Text('Stock Report PDF'),
               actions: [
-                IconButton(
-                  onPressed: () => Navigator.pop(context),
-                  icon: const Icon(Icons.close),
-                ),
+                IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close)),
               ],
             ),
             body: PdfPreview(
@@ -801,10 +653,7 @@ class _MobileStockReportScreenState extends State<MobileStockReportScreen> {
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('No stock data available'),
-          backgroundColor: Colors.orange,
-        ),
+        const SnackBar(content: Text('No stock data available'), backgroundColor: Colors.orange),
       );
     }
   }

@@ -671,3 +671,209 @@ class ProfitLossSummaryCard extends StatelessWidget {
     );
   }
 }
+
+
+// ----------------- EXPENSE BREAKDOWN LIST -----------------
+class ExpenseBreakdownList extends StatelessWidget {
+  final List<ExpenseBreakdown> expenses;
+
+  const ExpenseBreakdownList({super.key, required this.expenses});
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: expenses.length,
+      itemBuilder: (context, index) {
+        final expense = expenses[index];
+        return Card(
+          margin: const EdgeInsets.only(bottom: 8),
+          child: ListTile(
+            contentPadding: const EdgeInsets.all(16),
+            leading: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.red.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(Icons.money_off, color: Colors.red),
+            ),
+            title: Text(
+              expense.head,
+              style: const TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 14,
+              ),
+            ),
+            subtitle: Text(
+              expense.subhead,
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey[600],
+              ),
+            ),
+            trailing: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  '\$${expense.total.toStringAsFixed(2)}',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    color: Colors.red,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Expense',
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: Colors.grey[500],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+// ----------------- PROFIT & LOSS SUMMARY CARD -----------------
+// class ProfitLossSummaryCard extends StatelessWidget {
+//   final ProfitLossSummary summary;
+//   final bool isMobile;
+//
+//   const ProfitLossSummaryCard({
+//     super.key,
+//     required this.summary,
+//     this.isMobile = false,
+//   });
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return Card(
+//       child: Padding(
+//         padding: const EdgeInsets.all(16.0),
+//         child: Column(
+//           crossAxisAlignment: CrossAxisAlignment.stretch,
+//           children: [
+//             _buildSummarySection(
+//               title: "REVENUE",
+//               items: [
+//                 _buildSummaryItem("Total Sales", summary.totalSales, isPositive: true),
+//               ],
+//               color: Colors.blue,
+//             ),
+//             _buildSummarySection(
+//               title: "COST OF GOODS SOLD",
+//               items: [
+//                 _buildSummaryItem("Total Purchases", summary.totalPurchase, isPositive: false),
+//               ],
+//               color: Colors.orange,
+//             ),
+//             _buildSummarySection(
+//               title: "GROSS PROFIT",
+//               items: [
+//                 _buildSummaryItem("Gross Profit", summary.grossProfit, isPositive: summary.grossProfit >= 0),
+//               ],
+//               color: Colors.green,
+//               isHighlighted: true,
+//             ),
+//             _buildSummarySection(
+//               title: "OPERATING EXPENSES",
+//               items: [
+//                 _buildSummaryItem("Total Expenses", summary.totalExpenses, isPositive: false),
+//               ],
+//               color: Colors.red,
+//             ),
+//             _buildSummarySection(
+//               title: "NET PROFIT/LOSS",
+//               items: [
+//                 _buildSummaryItem("Net Profit/Loss", summary.netProfit, isPositive: summary.netProfit >= 0),
+//               ],
+//               color: summary.netProfit >= 0 ? Colors.green : Colors.red,
+//               isHighlighted: true,
+//               isNetProfit: true,
+//             ),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+//
+//   Widget _buildSummarySection({
+//     required String title,
+//     required List<Widget> items,
+//     required Color color,
+//     bool isHighlighted = false,
+//     bool isNetProfit = false,
+//   }) {
+//     return Container(
+//       margin: const EdgeInsets.only(bottom: 12),
+//       padding: const EdgeInsets.all(12),
+//       decoration: BoxDecoration(
+//         color: isHighlighted ? color.withOpacity(0.1) : Colors.transparent,
+//         borderRadius: BorderRadius.circular(8),
+//         border: Border.all(
+//           color: color.withOpacity(0.2),
+//           width: isHighlighted ? 2 : 1,
+//         ),
+//       ),
+//       child: Column(
+//         crossAxisAlignment: CrossAxisAlignment.stretch,
+//         children: [
+//           Text(
+//             title,
+//             style: TextStyle(
+//               fontSize: isMobile ? 12 : 14,
+//               fontWeight: FontWeight.bold,
+//               color: color,
+//             ),
+//           ),
+//           const SizedBox(height: 8),
+//           ...items,
+//           if (isNetProfit) ...[
+//             const SizedBox(height: 8),
+//             Divider(color: color.withOpacity(0.3), thickness: 2),
+//           ]
+//         ],
+//       ),
+//     );
+//   }
+//
+//   Widget _buildSummaryItem(String label, double amount, {bool isPositive = true}) {
+//     final amountColor = isPositive ? Colors.green : Colors.red;
+//     final prefix = isPositive ? '' : '-';
+//     final formattedAmount = amount.abs().toStringAsFixed(2);
+//
+//     return Padding(
+//       padding: const EdgeInsets.symmetric(vertical: 4),
+//       child: Row(
+//         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//         children: [
+//           Expanded(
+//             child: Text(
+//               label,
+//               style: TextStyle(
+//                 fontSize: isMobile ? 14 : 16,
+//                 color: Colors.black87,
+//               ),
+//             ),
+//           ),
+//           Text(
+//             '\$$prefix$formattedAmount',
+//             style: TextStyle(
+//               fontSize: isMobile ? 14 : 16,
+//               fontWeight: FontWeight.bold,
+//               color: amountColor,
+//             ),
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+// }

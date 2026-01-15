@@ -290,8 +290,8 @@ class _MobileCustomerLedgerScreenState extends State<MobileCustomerLedgerScreen>
         final openingBalance = _calculateOpeningBalance(transactions);
         final totalDebit = transactions.fold(0.0, (sum, t) => sum + t.debit);
         final totalCredit = transactions.fold(0.0, (sum, t) => sum + t.credit);
-        final salesCount = transactions.where((t) => t.type.toLowerCase() == 'sale').length;
-        final paymentsCount = transactions.where((t) => t.type.toLowerCase() == 'payment').length;
+        // final salesCount = transactions.where((t) => t.type.toLowerCase() == 'sale').length;
+        // final paymentsCount = transactions.where((t) => t.type.toLowerCase() == 'payment').length;
 
         return Card(
           child: Padding(

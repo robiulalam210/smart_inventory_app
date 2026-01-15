@@ -118,26 +118,7 @@ class _MobileReportsTabScreenState extends State<MobileReportsTabScreen>
     super.dispose();
   }
 
-  void _refreshCurrentTab() {
-    // Refresh functionality for current tab
-    // You can implement this based on your needs
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Refreshing ${_tabs[_currentIndex].title}...'),
-        duration: const Duration(milliseconds: 500),
-      ),
-    );
-  }
 
-  void _exportCurrentTab() {
-    // Export/PDF functionality
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Exporting ${_tabs[_currentIndex].title}...'),
-        duration: const Duration(milliseconds: 500),
-      ),
-    );
-  }
 
 
 

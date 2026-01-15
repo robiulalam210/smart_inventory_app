@@ -1,5 +1,4 @@
 import 'package:easy_localization/easy_localization.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import '../feature/common/presentation/cubit/theme_cubit.dart';
 import '../feature/splash/presentation/pages/mobile_splash_screen.dart';
 import '/feature/account_transfer/presentation/bloc/account_transfer/account_transfer_bloc.dart';
