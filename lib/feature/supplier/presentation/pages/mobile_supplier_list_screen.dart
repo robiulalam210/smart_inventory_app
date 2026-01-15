@@ -194,7 +194,7 @@ class _SupplierScreenState extends State<MobileSupplierListScreen> {
                             ),
                             // Filter Icon Button
                             Container(
-                              margin: const EdgeInsets.only(right: 8),
+                              margin: const EdgeInsets.only(right: 0),
                               decoration: BoxDecoration(
                                 color: AppColors.primaryColor(context).withValues(
                                   alpha: 0.1,
@@ -211,6 +211,16 @@ class _SupplierScreenState extends State<MobileSupplierListScreen> {
                                   _showMobileFilterSheet(context);
                                 },
                               ),
+                            ),
+                            IconButton(
+                              onPressed: (){
+                                dataBloc.selectedState = "";
+                                filterTextController.clear();
+
+        _fetchApi();
+                              },
+                              icon: const Icon(Icons.refresh),
+                              tooltip: "Refresh",
                             ),
                           ],
                         ),
@@ -349,104 +359,113 @@ class _SupplierScreenState extends State<MobileSupplierListScreen> {
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setState) {
-            return Container(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Header
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        "Filter Suppliers",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+            return SafeArea(
+              child: Container(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Header
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          "Filter Suppliers",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  // Status Filter
-                  const Text(
-                    "Status",
-                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
-                  ),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    children: ["All", "Active", "Inactive"].map((status) {
-                      final bool isSelected =
-                          dataBloc.selectedState == status ||
-                          (status == "All" && dataBloc.selectedState.isEmpty);
-                      return FilterChip(
-                        label: Text(status),
-                        selected: isSelected,
-                        onSelected: (selected) {
-                          setState(() {
-                            dataBloc.selectedState = selected ? status : "";
-                          });
-                        },
-                        selectedColor: AppColors.primaryColor(context).withValues(alpha:0.2),
-                        checkmarkColor: AppColors.primaryColor(context),
-                      );
-                    }).toList(),
-                  ),
-                  const SizedBox(height: 24),
-                  // Action Buttons
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton(
-                          onPressed: () {
+                        IconButton(
+                          icon: const Icon(Icons.close),
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    // Status Filter
+                    const Text(
+                      "Status",
+                      style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14,),
+                    ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 4,
+                      children: ["All", "Active", "Inactive"].map((status) {
+                        final bool isSelected =
+                            dataBloc.selectedState == status ||
+                            (status == "All" && dataBloc.selectedState.isEmpty);
+                        return FilterChip(
+                          label: Text(status),
+                          selected: isSelected,
+                          onSelected: (selected) {
                             setState(() {
-                              dataBloc.selectedState = "";
-                              filterTextController.clear();
+                              dataBloc.selectedState = selected ? status : "";
                             });
-                            Navigator.pop(context);
-                            _fetchApi();
                           },
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
+                          selectedColor: AppColors.primaryColor(context).withValues(alpha:0.2),
+                          checkmarkColor: AppColors.primaryColor(context),
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () {
+                              setState(() {
+                                dataBloc.selectedState = "";
+                                filterTextController.clear();
+                              });
+                              Navigator.pop(context);
+                              _fetchApi();
+                            },
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            child: Text(
+                              "Clear All",
+                              style: AppTextStyle.body(
+                                context,
+                              ).copyWith(color: AppColors.error),
                             ),
                           ),
-                          child: const Text("Clear All"),
                         ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: () {
-                            Navigator.pop(context);
-                            _fetchApi(
-                              filterText: filterTextController.text,
-                              status: dataBloc.selectedState == "All"
-                                  ? ""
-                                  : dataBloc.selectedState,
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primaryColor(context),
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                              _fetchApi(
+                                filterText: filterTextController.text,
+                                status: dataBloc.selectedState == "All"
+                                    ? ""
+                                    : dataBloc.selectedState,
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primaryColor(context),
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
                             ),
+                            child:  Text("Apply Filters",style: AppTextStyle.body(
+                              context,
+                            ).copyWith(color: AppColors.text(context)),),
                           ),
-                          child: const Text("Apply Filters"),
                         ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: MediaQuery.of(context).viewInsets.bottom),
-                ],
+                      ],
+                    ),
+                    // Action Buttons
+                    SizedBox(height: MediaQuery.of(context).viewInsets.bottom),
+                  ],
+                ),
               ),
             );
           },
