@@ -84,8 +84,11 @@ class _PurchaseScreenState extends State<MobilePurchaseScreen> {
       FetchPurchaseList(
         context,
         filterText: filterText,
-        supplier: supplier,
-        paymentStatus: paymentStatus,
+        supplier: (supplier.isNotEmpty && supplier != 'null') ? supplier : '',
+        paymentStatus:
+        (paymentStatus.isNotEmpty && paymentStatus != 'null')
+            ? paymentStatus
+            : '',
         startDate: from,
         endDate: to,
         pageNumber: pageNumber,
@@ -229,7 +232,9 @@ class _PurchaseScreenState extends State<MobilePurchaseScreen> {
                 icon: const Icon(Icons.refresh),
                 tooltip: "Refresh",
               ),  IconButton(
-                onPressed: () => _clearFilters,
+                onPressed: (){ _clearFilters();
+
+                },
                 icon:  Icon(HugeIcons.strokeRoundedCancelSquare),
                 tooltip: "Clear",
               ),
@@ -261,7 +266,7 @@ class _PurchaseScreenState extends State<MobilePurchaseScreen> {
             if (selectedDateRange != null)
               Chip(
                 label: Text(
-                  '${_formatDate(selectedDateRange!.start)} - ${_formatDate(selectedDateRange!.end)}',
+                  '${AppWidgets().convertDateTimeDDMMYYYY(selectedDateRange!.start)} - ${AppWidgets().convertDateTimeDDMMYYYY(selectedDateRange!.end)}',
                 ),
                 onDeleted: () {
                   setState(() => selectedDateRange = null);
@@ -363,12 +368,9 @@ class _PurchaseScreenState extends State<MobilePurchaseScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
+                       Text(
                         "Filter Purchases",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: AppTextStyle.titleMedium(context)
                       ),
                       IconButton(
                         icon: const Icon(Icons.close),
@@ -376,102 +378,60 @@ class _PurchaseScreenState extends State<MobilePurchaseScreen> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 10),
 
                   // Supplier Filter
                   BlocBuilder<SupplierInvoiceBloc, SupplierInvoiceState>(
                     builder: (context, state) {
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            "Supplier",
-                            style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 14,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          AppDropdown<SupplierActiveModel>(
-                            label: "",
-                            hint: "Select Supplier",
-                            isLabel: false,
-                            isRequired: false,
-                            isNeedAll: true,
-                            value: null,
-                            itemList: context.read<SupplierInvoiceBloc>().supplierActiveList,
-                            onChanged: (newVal) {
-                              setState(() {
-                                selectedSupplierNotifier.value = newVal?.id?.toString();
-                              });
-                            },
+                      return AppDropdown<SupplierActiveModel>(
+                        label: "",
+                        hint: "Select Supplier",
+                        isLabel: false,
+                        isRequired: false,
+                        isNeedAll: true,
+                        value: null,
+                        itemList: context.read<SupplierInvoiceBloc>().supplierActiveList,
+                        onChanged: (newVal) {
+                          setState(() {
+                            selectedSupplierNotifier.value = newVal?.id?.toString();
+                          });
+                        },
 
-                          ),
-                        ],
                       );
                     },
                   ),
-                  const SizedBox(height: 16),
 
                   // Payment Status Filter
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        "Payment Status",
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 14,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Wrap(
-                        spacing: 8,
-                        children: ["All", "Paid", "Pending", "Partial"].map((status) {
-                          final bool isSelected =
-                              selectedPaymentMethodNotifier.value == status ||
-                                  (status == "All" && selectedPaymentMethodNotifier.value == null);
-                          return FilterChip(
-                            label: Text(status),
-                            selected: isSelected,
-                            onSelected: (selected) {
-                              setState(() {
-                                selectedPaymentMethodNotifier.value = selected ? status : null;
-                              });
-                            },
-                            selectedColor: AppColors.primaryColor(context).withValues(alpha: 0.2),
-                            checkmarkColor: AppColors.primaryColor(context),
-                          );
-                        }).toList(),
-                      ),
-                    ],
+                  Wrap(
+                    spacing: 8,
+                    children: ["All", "Paid", "Pending", "Partial"].map((status) {
+                      final bool isSelected =
+                          selectedPaymentMethodNotifier.value == status ||
+                              (status == "All" && selectedPaymentMethodNotifier.value == null);
+                      return FilterChip(
+                        label: Text(status),
+                        selected: isSelected,
+                        onSelected: (selected) {
+                          setState(() {
+                            selectedPaymentMethodNotifier.value = selected ? status : null;
+                          });
+                        },
+                        selectedColor: AppColors.primaryColor(context).withValues(alpha: 0.2),
+                        checkmarkColor: AppColors.primaryColor(context),
+                      );
+                    }).toList(),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 8),
 
                   // Date Range
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        "Date Range",
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 14,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      CustomDateRangeField(
-                        isLabel: false,
-                        selectedDateRange: selectedDateRange,
-                        onDateRangeSelected: (value) {
-                          setState(() => selectedDateRange = value);
-                        },
-                      ),
-                    ],
+                  CustomDateRangeField(
+                    isLabel: false,
+                    selectedDateRange: selectedDateRange,
+                    onDateRangeSelected: (value) {
+                      setState(() => selectedDateRange = value);
+                    },
                   ),
                   const SizedBox(height: 24),
-
-                  // Action Buttons
                   Row(
                     children: [
                       Expanded(
@@ -484,15 +444,26 @@ class _PurchaseScreenState extends State<MobilePurchaseScreen> {
                               selectedDateRange = null;
                             });
                             Navigator.pop(context);
-                            _fetchApi();
+                            _fetchApi(
+                              to: selectedDateRange?.start,
+                              from: selectedDateRange?.end,
+                              filterText: filterTextController.text,
+                              supplier: selectedSupplierNotifier.value??"",
+                              paymentStatus: selectedPaymentMethodNotifier.value??""
+                            );
                           },
                           style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            padding: const EdgeInsets.symmetric(vertical: 8),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
                           ),
-                          child: const Text("Clear All"),
+                          child: Text(
+                            "Clear All",
+                            style: AppTextStyle.body(
+                              context,
+                            ).copyWith(color: AppColors.error),
+                          ),
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -504,16 +475,20 @@ class _PurchaseScreenState extends State<MobilePurchaseScreen> {
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.primaryColor(context),
-                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            padding: const EdgeInsets.symmetric(vertical: 8),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
                           ),
-                          child: const Text("Apply Filters"),
+                          child:  Text("Apply Filters",style: AppTextStyle.body(
+                            context,
+                          ).copyWith(color: AppColors.text(context)),),
                         ),
                       ),
                     ],
                   ),
+                  // Action Buttons
+
                   SizedBox(height: MediaQuery.of(context).viewInsets.bottom),
                 ],
               ),
@@ -524,7 +499,4 @@ class _PurchaseScreenState extends State<MobilePurchaseScreen> {
     );
   }
 
-  String _formatDate(DateTime date) {
-    return '${date.day}/${date.month}/${date.year}';
-  }
 }

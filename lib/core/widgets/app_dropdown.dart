@@ -68,7 +68,7 @@ class AppDropdown<T> extends FormField<T> {
                     padding: EdgeInsets.zero,
                     shrinkWrap: true,
                     itemCount: displayTexts.length,
-                    separatorBuilder: (_, __) =>
+                    separatorBuilder: (_, _) =>
                     const Divider(height: 1),
                     itemBuilder: (_, index) {
                       return InkWell(
