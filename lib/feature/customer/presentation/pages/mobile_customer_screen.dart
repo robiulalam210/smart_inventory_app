@@ -73,7 +73,9 @@ class _CustomerScreenState extends State<MobileCustomerScreen> {
   Widget build(BuildContext context) {
 
     return AppScaffold(
-      floatingActionButton: FloatingActionButton(  onPressed: () => _showCreateCustomerDialog(context),child: Icon(Icons.add),),
+      floatingActionButton: FloatingActionButton( 
+        backgroundColor: AppColors.primaryColor(context),
+        onPressed: () => _showCreateCustomerDialog(context),child: Icon(Icons.add),),
       appBar: AppBar(title: Text("Customer",style: AppTextStyle.titleMedium(context),),),
       body: SafeArea(
         child:   _buildContentArea(),
@@ -361,6 +363,7 @@ class _CustomerScreenState extends State<MobileCustomerScreen> {
           builder: (context, setState) {
             return SafeArea(
               child: Container(
+                color: AppColors.bottomNavBg(context),
                 padding: const EdgeInsets.all(20),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -369,10 +372,11 @@ class _CustomerScreenState extends State<MobileCustomerScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
+                         Text(
                           "Filter Customers",
                           style: TextStyle(
                             fontSize: 18,
+                            color: AppColors.text(context),
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -385,9 +389,10 @@ class _CustomerScreenState extends State<MobileCustomerScreen> {
                     const SizedBox(height: 10),
 
                     // Status Filter
-                    const Text(
+                     Text(
                       "Status",
                       style: TextStyle(
+                        color: AppColors.text(context),
                         fontWeight: FontWeight.w600,
                         fontSize: 14,
                       ),

@@ -1,4 +1,5 @@
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
+import 'package:meherinMart/core/widgets/app_scaffold.dart';
 
 import '../../../../core/configs/configs.dart';
 import '../../../../core/widgets/app_alert_dialog.dart';
@@ -73,15 +74,19 @@ class _SupplierPaymentScreenState extends State<MobileSupplierPaymentListScreen>
   @override
   Widget build(BuildContext context) {
 
-    return Scaffold(
-      floatingActionButton: FloatingActionButton(        onPressed: () {
+    return AppScaffold(
+      floatingActionButton: FloatingActionButton(   
+        backgroundColor: AppColors.primaryColor(context),
+        onPressed: () {
         showDialog(
           context: context,
           builder: (context) {
             return Dialog(
 
               insetPadding: const EdgeInsets.all(16),
-              child: SizedBox(
+              child: Container(
+                color: AppColors.bottomNavBg(context),
+
                 // width: double.infinity,
                 // height: AppSizes.height(context) * 0.8,
                 child: const MobileSupplierPaymentCreate(),

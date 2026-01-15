@@ -255,7 +255,7 @@ class _CreateSalesReturnScreenState
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: AppColors.bottomNavBg(context),
         borderRadius: BorderRadius.circular(12),
       ),
       padding: AppTextStyle.getResponsivePaddingBody(context),
@@ -450,7 +450,7 @@ class _CreateSalesReturnScreenState
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: Colors.grey.shade50,
+        color: AppColors.bottomNavBg(context),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: Colors.grey.shade300),
       ),
@@ -742,13 +742,13 @@ class _CreateSalesReturnScreenState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: TextStyle(fontSize: 11, color: Colors.grey)),
+        Text(label, style: TextStyle(fontSize: 11, color: AppColors.text(context),)),
         Text(
           '৳${amount.toStringAsFixed(2)}',
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.bold,
-            color: isTotal ? AppColors.primaryColor(context) :AppColors.blackColor(context),
+            color: isTotal ? AppColors.primaryColor(context) :AppColors.text(context),
           ),
         ),
       ],
@@ -759,7 +759,7 @@ class _CreateSalesReturnScreenState
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.blue.shade50,
+        color:AppColors.bottomNavBg(context),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: Colors.blue.shade200),
       ),
@@ -778,13 +778,15 @@ class _CreateSalesReturnScreenState
 
           // Subtotal
           _buildSummaryRow(
+            context: context,
             label: 'Subtotal:',
             value: double.tryParse(subtotalController.text) ?? 0.0,
-            color: Colors.black87,
+            color:  AppColors.text(context),
           ),
 
           // Return Charge
           _buildSummaryRow(
+            context: context,
             label: 'Return Charge:',
             value: double.tryParse(returnChargeAmountController.text) ?? 0.0,
             color: Colors.orange.shade700,
@@ -795,6 +797,7 @@ class _CreateSalesReturnScreenState
 
           // Total Amount
           _buildSummaryRow(
+            context: context,
             label: 'Total Return Amount:',
             value: double.tryParse(totalAmountController.text) ?? 0.0,
             color: AppColors.primaryColor(context),
@@ -806,6 +809,7 @@ class _CreateSalesReturnScreenState
   }
 
   Widget _buildSummaryRow({
+    required BuildContext context,
     required String label,
     required double value,
     required Color color,
@@ -830,7 +834,7 @@ class _CreateSalesReturnScreenState
               if (showType && _returnChargeType == 'percentage')
                 Text(
                   ' (${returnChargeController.text}%)',
-                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                  style: TextStyle(fontSize: 12, color:  AppColors.text(context),),
                 ),
             ],
           ),

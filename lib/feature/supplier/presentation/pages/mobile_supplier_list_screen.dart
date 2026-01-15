@@ -1,4 +1,6 @@
 
+import 'package:meherinMart/core/widgets/app_scaffold.dart';
+
 import '../../../../core/configs/configs.dart';
 import '../../../../core/widgets/app_alert_dialog.dart';
 import '../../../../core/widgets/app_button.dart';
@@ -71,12 +73,14 @@ class _SupplierScreenState extends State<MobileSupplierListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return AppScaffold(
       appBar: AppBar(
         title: Text("Supplier List", style: AppTextStyle.titleMedium(context)),
       ),
 
-      floatingActionButton: FloatingActionButton(onPressed: (){
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: AppColors.primaryColor(context),
+        onPressed: (){
         showDialog(
           context: context,
           builder: (context) {
@@ -188,7 +192,7 @@ class _SupplierScreenState extends State<MobileSupplierListScreen> {
                                   onChanged: (value) {
                                     _fetchApi(filterText: value);
                                   },
-                                  hintText: "Search suppliers...",
+                                  hintText: " suppliers...",
                                 ),
                               ),
                             ),
@@ -361,6 +365,7 @@ class _SupplierScreenState extends State<MobileSupplierListScreen> {
           builder: (context, setState) {
             return SafeArea(
               child: Container(
+                color: AppColors.bottomNavBg(context),
                 padding: const EdgeInsets.all(20),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -370,10 +375,11 @@ class _SupplierScreenState extends State<MobileSupplierListScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
+                         Text(
                           "Filter Suppliers",
                           style: TextStyle(
                             fontSize: 18,
+                            color: AppColors.text(context),
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -385,9 +391,11 @@ class _SupplierScreenState extends State<MobileSupplierListScreen> {
                     ),
                     const SizedBox(height: 10),
                     // Status Filter
-                    const Text(
+                     Text(
                       "Status",
-                      style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14,),
+                      style: TextStyle(fontWeight: FontWeight.w600,
+                        color: AppColors.text(context),
+                        fontSize: 14,),
                     ),
                     const SizedBox(height: 8),
                     Wrap(

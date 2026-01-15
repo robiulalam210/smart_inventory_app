@@ -1,6 +1,5 @@
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
 
-
 import '../../../../core/configs/configs.dart';
 import '../../../../core/widgets/app_alert_dialog.dart';
 import '../../../../core/widgets/app_button.dart';
@@ -57,11 +56,9 @@ class _ExpenseListScreenState extends State<MobileExpenseListScreen> {
   @override
   void dispose() {
     _searchController.dispose();
-    dataBloc.filterTextController.dispose();
-      super.dispose();
+    // dataBloc.filterTextController.dispose();
+    super.dispose();
   }
-
-
 
   void _fetchApi({
     String filterText = '',
@@ -86,21 +83,18 @@ class _ExpenseListScreenState extends State<MobileExpenseListScreen> {
     );
   }
 
-
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
-      floatingActionButton: FloatingActionButton(                onPressed: () => _showCreateDialog(context),
-      child: Icon(Icons.add),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: AppColors.primaryColor(context),
+        onPressed: () => _showCreateDialog(context),
+        child: Icon(Icons.add),
       ),
-     appBar: AppBar(title: Text("Expense List"),),
-      body: SafeArea(
-        child:    _buildContentArea(),
-      ),
+      appBar: AppBar(title: Text("Expense List")),
+      body: SafeArea(child: _buildContentArea()),
     );
   }
-
 
   Widget _buildContentArea() {
     return ResponsiveCol(
@@ -119,12 +113,9 @@ class _ExpenseListScreenState extends State<MobileExpenseListScreen> {
             return SingleChildScrollView(
               child: Column(
                 children: [
-
-                    _buildMobileHeader(context),
+                  _buildMobileHeader(context),
                   const SizedBox(height: 8),
-                  SizedBox(
-                    child: _buildExpenseList(state),
-                  ),
+                  SizedBox(child: _buildExpenseList(state)),
                 ],
               ),
             );
@@ -180,7 +171,6 @@ class _ExpenseListScreenState extends State<MobileExpenseListScreen> {
     }
   }
 
-
   Widget _buildMobileHeader(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -210,7 +200,7 @@ class _ExpenseListScreenState extends State<MobileExpenseListScreen> {
                     },
                     onClear: () {
                       dataBloc.filterTextController.clear();
-                                          _fetchApi();
+                      _fetchApi();
                     },
                     hintText: "Search expenses...",
                   ),
@@ -263,8 +253,6 @@ class _ExpenseListScreenState extends State<MobileExpenseListScreen> {
               ),
           ],
         ),
-
-
       ],
     );
   }
@@ -317,10 +305,7 @@ class _ExpenseListScreenState extends State<MobileExpenseListScreen> {
             style: TextStyle(fontSize: 16, color: Colors.grey),
           ),
           const SizedBox(height: 16),
-          AppButton(
-            name: "Refresh",
-            onPressed: () => _fetchApi(),
-          ),
+          AppButton(name: "Refresh", onPressed: () => _fetchApi()),
         ],
       ),
     );
@@ -345,10 +330,7 @@ class _ExpenseListScreenState extends State<MobileExpenseListScreen> {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 16),
-          AppButton(
-            name: "Retry",
-            onPressed: () => _fetchApi(),
-          ),
+          AppButton(name: "Retry", onPressed: () => _fetchApi()),
         ],
       ),
     );
@@ -394,10 +376,11 @@ class _ExpenseListScreenState extends State<MobileExpenseListScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
+                       Text(
                         "Filter Expenses",
                         style: TextStyle(
                           fontSize: 18,
+                          color: AppColors.text(context),
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -407,7 +390,7 @@ class _ExpenseListScreenState extends State<MobileExpenseListScreen> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 10),
 
                   // Expense Head Filter
                   BlocBuilder<ExpenseHeadBloc, ExpenseHeadState>(
@@ -418,14 +401,14 @@ class _ExpenseListScreenState extends State<MobileExpenseListScreen> {
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
+                           Text(
                             "Expense Head",
                             style: TextStyle(
                               fontWeight: FontWeight.w600,
-                              fontSize: 14,
+                              fontSize: 14,                          color: AppColors.text(context),
+
                             ),
                           ),
-                          const SizedBox(height: 8),
                           AppDropdown<ExpenseHeadModel>(
                             hint: "Select Expense Head",
                             isNeedAll: true,
@@ -443,15 +426,16 @@ class _ExpenseListScreenState extends State<MobileExpenseListScreen> {
                       );
                     },
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 4),
 
                   // Date Range
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                       Text(
                         "Date Range",
-                        style: TextStyle(
+                        style: TextStyle(                          color: AppColors.text(context),
+
                           fontWeight: FontWeight.w600,
                           fontSize: 14,
                         ),
@@ -466,7 +450,7 @@ class _ExpenseListScreenState extends State<MobileExpenseListScreen> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 20),
 
                   // Action Buttons
                   Row(
@@ -483,7 +467,7 @@ class _ExpenseListScreenState extends State<MobileExpenseListScreen> {
                             _fetchApi();
                           },
                           style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            padding: const EdgeInsets.symmetric(vertical: 4),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
@@ -500,12 +484,12 @@ class _ExpenseListScreenState extends State<MobileExpenseListScreen> {
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.primaryColor(context),
-                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            padding: const EdgeInsets.symmetric(vertical: 4),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
                           ),
-                          child: const Text("Apply Filters"),
+                          child:  Text("Apply Filters",style: AppTextStyle.body(context),),
                         ),
                       ),
                     ],

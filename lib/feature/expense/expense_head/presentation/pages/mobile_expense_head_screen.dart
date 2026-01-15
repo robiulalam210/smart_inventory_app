@@ -50,24 +50,14 @@ class _ExpenseHeadScreenState extends State<MobileExpenseHeadScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
+        backgroundColor: AppColors.primaryColor(context),
         child: Icon(Icons.add),
         onPressed: () => _showCreateDialog(context),
       ),
       appBar: AppBar(
         title: Text("Expense Head", style: AppTextStyle.titleMedium(context)),
       ),
-      body: SafeArea(child: _buildContentArea()),
-    );
-  }
-
-  Widget _buildContentArea() {
-    return ResponsiveCol(
-      xs: 12,
-      sm: 12,
-      md: 12,
-      lg: 10,
-      xl: 10,
-      child: SizedBox(
+      body: SafeArea(child: SizedBox(
         child: RefreshIndicator(
           color: AppColors.primaryColor(context),
           onRefresh: () async {
@@ -91,9 +81,11 @@ class _ExpenseHeadScreenState extends State<MobileExpenseHeadScreen> {
             ),
           ),
         ),
-      ),
+      ),),
     );
   }
+
+
 
   void _handleBlocState(ExpenseHeadState state) {
     if (state is ExpenseHeadAddLoading) {
@@ -162,10 +154,7 @@ class _ExpenseHeadScreenState extends State<MobileExpenseHeadScreen> {
                   ),
                 ),
               ),
-              IconButton(
-                icon: Icon(Iconsax.filter, color: AppColors.primaryColor(context)),
-                onPressed: () => _showMobileFilterOptions(context),
-              ),
+
             ],
           ),
         ),
@@ -226,46 +215,4 @@ class _ExpenseHeadScreenState extends State<MobileExpenseHeadScreen> {
     );
   }
 
-  void _showMobileFilterOptions(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) {
-        return Container(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Filter Options',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  // Apply filters
-                },
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 50),
-                ),
-                child: const Text('Apply Filters'),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
 }

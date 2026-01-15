@@ -51,6 +51,7 @@ class _ExpenseHeadScreenState extends State<MobileExpenseSubHeadScreen> {
 
     return Scaffold(
       floatingActionButton: FloatingActionButton(
+        backgroundColor: AppColors.primaryColor(context),
 
         child: Icon(Icons.add),
         onPressed: () {
@@ -65,7 +66,7 @@ class _ExpenseHeadScreenState extends State<MobileExpenseSubHeadScreen> {
                   child: Container(
                     decoration: BoxDecoration(
                       shape: BoxShape.rectangle,
-                      color: AppColors.whiteColor(context),
+                      color: AppColors.bottomNavBg(context),
                       borderRadius: BorderRadius.circular(AppSizes.radius),
                     ),
                     width: double.infinity,
@@ -78,60 +79,47 @@ class _ExpenseHeadScreenState extends State<MobileExpenseSubHeadScreen> {
           );
         },
       ),
-      appBar: AppBar(title: Text("Expense Sub Head"),),
+      appBar: AppBar(title: Text("Expense Sub Head",style: AppTextStyle.titleMedium(context),),),
 
       body: SafeArea(
-        child:    _buildContentArea(),
-      ),
-    );
-  }
+        child:  SizedBox(
+          child: RefreshIndicator(
+            color: AppColors.primaryColor(context),
+            onRefresh: () async {
+              _fetchApiData();
+            },
+            child: Container(
+              padding: AppTextStyle.getResponsivePaddingBody(context),
+              child: BlocListener<ExpenseSubHeadBloc, ExpenseSubHeadState>(
+                listener: (context, state) {
+                  if (state is ExpenseSubHeadAddLoading) {
+                    appLoader(context, "Expense Sub Head, please wait...");
+                  } else if (state is ExpenseSubHeadAddSuccess) {
+                    Navigator.pop(context); // Close loader dialog
+                    Navigator.pop(context); // Close loader dialog
+                    _fetchApiData(); // Reload warehouse list
+                  } else if (state is ExpenseSubHeadAddFailed) {
+                    Navigator.pop(context); // Close loader dialog
+                    Navigator.pop(context); // Close loader dialog
+                    _fetchApiData();
+                    appAlertDialog(
+                      context,
+                      state.content,
+                      title: state.title,
+                      actions: [
+                        TextButton(
+                          onPressed: () => AppRoutes.pop(context),
+                          child: const Text("Dismiss"),
+                        ),
+                      ],
+                    );
+                  }
+                },
+                child: Column(
+                  children: [
 
 
-  Widget _buildContentArea() {
-    return ResponsiveCol(
-      xs: 12,
-      sm: 12,
-      md: 12,
-      lg: 10,
-      xl: 10,
-      child: SizedBox(
-        child: RefreshIndicator(
-          color: AppColors.primaryColor(context),
-          onRefresh: () async {
-            _fetchApiData();
-          },
-          child: Container(
-            padding: AppTextStyle.getResponsivePaddingBody(context),
-            child: BlocListener<ExpenseSubHeadBloc, ExpenseSubHeadState>(
-              listener: (context, state) {
-                if (state is ExpenseSubHeadAddLoading) {
-                  appLoader(context, "Expense Sub Head, please wait...");
-                } else if (state is ExpenseSubHeadAddSuccess) {
-                  Navigator.pop(context); // Close loader dialog
-                  Navigator.pop(context); // Close loader dialog
-                  _fetchApiData(); // Reload warehouse list
-                } else if (state is ExpenseSubHeadAddFailed) {
-                  Navigator.pop(context); // Close loader dialog
-                  Navigator.pop(context); // Close loader dialog
-                  _fetchApiData();
-                  appAlertDialog(
-                    context,
-                    state.content,
-                    title: state.title,
-                    actions: [
-                      TextButton(
-                        onPressed: () => AppRoutes.pop(context),
-                        child: const Text("Dismiss"),
-                      ),
-                    ],
-                  );
-                }
-              },
-              child: Column(
-                children: [
-
-
-                  // Mobile/Tablet layout
+                    // Mobile/Tablet layout
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
@@ -158,32 +146,33 @@ class _ExpenseHeadScreenState extends State<MobileExpenseSubHeadScreen> {
 
                       ],
                     ),
-                  SizedBox(
-                    child: BlocBuilder<ExpenseSubHeadBloc, ExpenseSubHeadState>(
-                      builder: (context, state) {
-                        if (state is ExpenseSubHeadListLoading) {
-                          return const Center(
-                            child: CircularProgressIndicator(),
-                          );
-                        } else if (state is ExpenseSubHeadListSuccess) {
-                          if (state.list.isEmpty) {
+                    SizedBox(
+                      child: BlocBuilder<ExpenseSubHeadBloc, ExpenseSubHeadState>(
+                        builder: (context, state) {
+                          if (state is ExpenseSubHeadListLoading) {
+                            return const Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          } else if (state is ExpenseSubHeadListSuccess) {
+                            if (state.list.isEmpty) {
+                              return Center(
+                                child: Lottie.asset(AppImages.noData),
+                              );
+                            } else {
+                              return ExpenseSubHeadTableCard(expenseSubHeads: state.list,);
+                            }
+                          } else if (state is ExpenseSubHeadListFailed) {
                             return Center(
-                              child: Lottie.asset(AppImages.noData),
+                              child: Text('Failed to load  : ${state.content}'),
                             );
                           } else {
-                            return ExpenseSubHeadTableCard(expenseSubHeads: state.list,);
+                            return Center(child: Lottie.asset(AppImages.noData));
                           }
-                        } else if (state is ExpenseSubHeadListFailed) {
-                          return Center(
-                            child: Text('Failed to load  : ${state.content}'),
-                          );
-                        } else {
-                          return Center(child: Lottie.asset(AppImages.noData));
-                        }
-                      },
+                        },
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -191,4 +180,7 @@ class _ExpenseHeadScreenState extends State<MobileExpenseSubHeadScreen> {
       ),
     );
   }
+
+
+
 }
