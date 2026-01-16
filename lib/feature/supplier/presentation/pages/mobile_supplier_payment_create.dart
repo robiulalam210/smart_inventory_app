@@ -204,12 +204,14 @@ class _MobileSupplierPaymentCreateState extends State<MobileSupplierPaymentCreat
         AppButton(
           size: 100,
           name: "Cancel",
-          color: Colors.grey,
+          isOutlined: true,
+          color: AppColors.primaryColor(context),
+          textColor: AppColors.errorColor(context),
           onPressed: () => Navigator.of(context).pop(),
         ),
         gapW16,
         AppButton(
-          size: 180,
+          size: 160,
           name: "Create Payment",
           onPressed: _submitPayment,
         ),

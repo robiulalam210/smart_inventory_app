@@ -389,7 +389,9 @@ class _MoneyReceiptListScreenState extends State<SupplierPaymentForm> {
                 _buildTwoColumnRow(
                   firstChild: AppButton(
                     name: "Cancel",
-                    color: Colors.grey,
+                    color: AppColors.primaryColor(context),
+                    textColor: AppColors.errorColor(context),
+                    isOutlined: true,
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                   secondChild: AppButton(

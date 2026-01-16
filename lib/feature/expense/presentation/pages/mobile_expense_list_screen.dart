@@ -176,45 +176,29 @@ class _ExpenseListScreenState extends State<MobileExpenseListScreen> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         // Search Bar
-        Container(
-          decoration: BoxDecoration(
-            color: AppColors.bottomNavBg(context),
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withValues(alpha: 0.1),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
+        Row(
+          children: [
+            Expanded(
+              child: CustomSearchTextFormField(
+                controller: dataBloc.filterTextController,
+                onChanged: (value) {
+                  _fetchApi(filterText: value);
+                },
+                onClear: () {
+                  dataBloc.filterTextController.clear();
+                  _fetchApi();
+                },
+                hintText: "Expenses...",
               ),
-            ],
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: CustomSearchTextFormField(
-                    controller: dataBloc.filterTextController,
-                    onChanged: (value) {
-                      _fetchApi(filterText: value);
-                    },
-                    onClear: () {
-                      dataBloc.filterTextController.clear();
-                      _fetchApi();
-                    },
-                    hintText: "Search expenses...",
-                  ),
-                ),
+            ),
+            IconButton(
+              icon: Icon(
+                Iconsax.filter,
+                color: AppColors.primaryColor(context),
               ),
-              IconButton(
-                icon: Icon(
-                  Iconsax.filter,
-                  color: AppColors.primaryColor(context),
-                ),
-                onPressed: () => _showMobileFilterSheet(context),
-              ),
-            ],
-          ),
+              onPressed: () => _showMobileFilterSheet(context),
+            ),
+          ],
         ),
 
         // Filter Chips
@@ -342,15 +326,21 @@ class _ExpenseListScreenState extends State<MobileExpenseListScreen> {
       builder: (context) {
         return Dialog(
           insetPadding: const EdgeInsets.all(10),
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              maxWidth: Responsive.isMobile(context)
-                  ? AppSizes.width(context)
-                  : AppSizes.width(context) * 0.5,
-              maxHeight: AppSizes.height(context) * 0.8,
-              minHeight: AppSizes.height(context) * 0.6,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppSizes.radius),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(AppSizes.radius),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: Responsive.isMobile(context)
+                    ? AppSizes.width(context)
+                    : AppSizes.width(context) * 0.5,
+                maxHeight: AppSizes.height(context) * 0.8,
+                minHeight: AppSizes.height(context) * 0.6,
+              ),
+              child: const MobileExpenseCreate(),
             ),
-            child: const MobileExpenseCreate(),
           ),
         );
       },

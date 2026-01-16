@@ -266,7 +266,7 @@ class _ExpenseCreateScreenState extends State<ExpenseCreateScreen> {
                                 ? 'Create Expense '
                                 : 'Update Expense',
                             style:  TextStyle(
-                              fontSize: 20,
+                              fontSize: 16,
                               color: AppColors.text(context),
                               fontWeight: FontWeight.bold,
                             ),
@@ -559,13 +559,31 @@ class _ExpenseCreateScreenState extends State<ExpenseCreateScreen> {
                         },
                       ),
 
-                      const SizedBox(height: 10),
-
-                      // Submit Button
-                      AppButton(
-                        name: widget.name ?? "Create",
-                        onPressed: _showConfirmationDialog,
+                      const SizedBox(height: 20),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          AppButton(
+                            size: 120,
+                            name:  "Cancel",
+                            isOutlined: true,
+                            textColor: AppColors.errorColor(context),
+                            borderColor: AppColors.primaryColor(context),
+                            onPressed: (){
+                              AppRoutes.pop(context);
+                            },
+                          ),
+                          SizedBox(width: 10,),
+                          AppButton(
+                            size: 120,
+                            name: widget.name ?? "Create",
+                            onPressed: _showConfirmationDialog,
+                          ),
+                        ],
                       ),
+                      // Submit Button
+
 
                       SizedBox(height: 20,),
                     ],

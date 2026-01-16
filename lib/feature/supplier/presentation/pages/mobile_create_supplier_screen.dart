@@ -103,16 +103,35 @@ class _CreateSupplierScreenState extends State<MobileCreateSupplierScreen> {
                 ],
 
                 const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    AppButton(
+                      size: 120,
+                      name:  "Cancel",
+                      isOutlined: true,
+                      textColor: AppColors.errorColor(context),
+                      borderColor: AppColors.primaryColor(context),
+                      onPressed: (){
+                        AppRoutes.pop(context);
+                      },
+                    ),
+                    SizedBox(width: 10,),
+                    AppButton(
+                      size: 120,
+                      name: widget.submitText.isEmpty ? "Submit" : widget.submitText,
+                      onPressed: () {
+                        if (formKey.currentState!.validate()) {
+                          _createOrUpdateSupplier();
+                        }
+                      },
+                    ),
 
-                // Submit Button
-                AppButton(
-                  name: widget.submitText.isEmpty ? "Submit" : widget.submitText,
-                  onPressed: () {
-                    if (formKey.currentState!.validate()) {
-                      _createOrUpdateSupplier();
-                    }
-                  },
+                  ],
                 ),
+                // Submit Button
+
               ],
             ),
           ),
