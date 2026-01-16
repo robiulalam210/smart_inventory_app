@@ -50,7 +50,7 @@ class _CreateCustomerScreenState extends State<CreateCustomerScreen> {
                 Container(
                   padding: const EdgeInsets.all(4),
                   decoration: BoxDecoration(
-                    color: AppColors.whiteColor(context),
+                    color: AppColors.bottomNavBg(context),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
@@ -216,9 +216,8 @@ class _CreateCustomerScreenState extends State<CreateCustomerScreen> {
           width: isSmallScreen ? double.infinity : constraints.maxWidth * 0.5,
           child: AppDropdown(
             label: "Status",
-            hint: context.read<CustomerBloc>().selectedState.isEmpty
-                ? "Select Status"
-                : context.read<CustomerBloc>().selectedState,
+            hint:  "Select Status"
+              ,
             isLabel: false,
             value: context.read<CustomerBloc>().selectedState.isEmpty
                 ? null

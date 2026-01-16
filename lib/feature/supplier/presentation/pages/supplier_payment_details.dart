@@ -25,7 +25,7 @@ class SupplierPaymentDetailsScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: isDesktop ? _buildDesktopView(context) : _buildMobileView(context,),
+      body: SafeArea(child: isDesktop ? _buildDesktopView(context) : _buildMobileView(context,)),
     );
   }
 
@@ -82,7 +82,7 @@ class SupplierPaymentDetailsScreen extends StatelessWidget {
 
   Widget _buildHeaderCard(BuildContext context,) {
     return Card(
-      elevation: 3,
+      elevation: 0,
       color: AppColors.bottomNavBg(context),
       child: Padding(
         padding: const EdgeInsets.all(20),
@@ -138,7 +138,7 @@ class SupplierPaymentDetailsScreen extends StatelessWidget {
       crossAxisCount: 2,
       crossAxisSpacing: 8,
       mainAxisSpacing: 8,
-      childAspectRatio: 4,
+      childAspectRatio: 3,
       children: [
         _buildInfoItem('Payment No', payment.spNo ?? '-',context),
         _buildInfoItem('Payment Date', _formatDate(payment.paymentDate),context),
@@ -183,7 +183,7 @@ class SupplierPaymentDetailsScreen extends StatelessWidget {
     final amount = double.tryParse(payment.amount ?? '0') ?? 0;
 
     return Card(
-      elevation: 3,
+      elevation: 0,
       color: AppColors.bottomNavBg(context),
       child: Padding(
         padding: const EdgeInsets.all(20),
@@ -264,7 +264,8 @@ class SupplierPaymentDetailsScreen extends StatelessWidget {
     final after = summary?.afterPayment;
 
     return Card(
-      elevation: 3,
+      elevation: 0,      color: AppColors.bottomNavBg(context),
+
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -344,7 +345,8 @@ class SupplierPaymentDetailsScreen extends StatelessWidget {
     final affectedInvoices = payment.paymentSummary?.affectedInvoices ?? [];
 
     return Card(
-      elevation: 3,
+      elevation: 0,
+      color: AppColors.bottomNavBg(context),
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(

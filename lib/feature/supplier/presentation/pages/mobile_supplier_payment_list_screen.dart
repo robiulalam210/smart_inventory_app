@@ -84,12 +84,22 @@ class _SupplierPaymentScreenState extends State<MobileSupplierPaymentListScreen>
             return Dialog(
 
               insetPadding: const EdgeInsets.all(16),
-              child: Container(
-                color: AppColors.bottomNavBg(context),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    color: AppColors.bottomNavBg(context),
 
-                // width: double.infinity,
-                // height: AppSizes.height(context) * 0.8,
-                child: const MobileSupplierPaymentCreate(),
+                  ),
+
+                  // width: double.infinity,
+                  // height: AppSizes.height(context) * 0.8,
+                  child: const MobileSupplierPaymentCreate(),
+                ),
               ),
             );
           },
@@ -113,12 +123,18 @@ class _SupplierPaymentScreenState extends State<MobileSupplierPaymentListScreen>
       child: Container(
         color: AppColors.bottomNavBg(context),
         padding: AppTextStyle.getResponsivePaddingBody(context),
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              _buildFilterSection(),
-              _buildSupplierPaymentList(),
-            ],
+        child: RefreshIndicator(
+          onRefresh: ()async{
+            _fetchApi();
+          },
+          child: SingleChildScrollView(
+            physics: AlwaysScrollableScrollPhysics(),
+            child: Column(
+              children: [
+                _buildFilterSection(),
+                _buildSupplierPaymentList(),
+              ],
+            ),
           ),
         ),
       ),
@@ -142,11 +158,13 @@ class _SupplierPaymentScreenState extends State<MobileSupplierPaymentListScreen>
                   onClear: () {
                     _searchController.clear();
                     _fetchApi();
+                    FocusScope.of(context).unfocus();
+
                   },
                   onChanged: (value) {
                     _fetchApi(filterText: value);
                   },
-                  hintText: "Search payments...",
+                  hintText: "payments...",
                 ),
                 const SizedBox(height: 12),
 

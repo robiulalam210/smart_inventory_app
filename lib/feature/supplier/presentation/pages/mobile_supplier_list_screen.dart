@@ -153,34 +153,35 @@ class _SupplierScreenState extends State<MobileSupplierListScreen> {
                 );
               }
             },
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  // Mobile/Tablet layout
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      // Search Bar with Icon Button
-                      Container(
-                        decoration: BoxDecoration(
-                          color: AppColors.bottomNavBg(context),
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey.withValues(alpha: 0.1),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                ),
+            child:  RefreshIndicator(
+              onRefresh: ()async{
+                _fetchApi();
+              },
+              child: SingleChildScrollView(
+                physics: AlwaysScrollableScrollPhysics(),
+                child: Column(
+                  children: [
+                    // Mobile/Tablet layout
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        // Search Bar with Icon Button
+                        Container(
+                          decoration: BoxDecoration(
+                            color: AppColors.bottomNavBg(context),
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withValues(alpha: 0.1),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
                                 child: CustomSearchTextFormField(
                                   controller: filterTextController,
                                   forSearch: true,
@@ -188,6 +189,8 @@ class _SupplierScreenState extends State<MobileSupplierListScreen> {
                                   onClear: () {
                                     filterTextController.clear();
                                     _fetchApi();
+                                    FocusScope.of(context).unfocus();
+
                                   },
                                   onChanged: (value) {
                                     _fetchApi(filterText: value);
@@ -195,155 +198,155 @@ class _SupplierScreenState extends State<MobileSupplierListScreen> {
                                   hintText: " suppliers...",
                                 ),
                               ),
-                            ),
-                            // Filter Icon Button
-                            Container(
-                              margin: const EdgeInsets.only(right: 0),
-                              decoration: BoxDecoration(
-                                color: AppColors.primaryColor(context).withValues(
-                                  alpha: 0.1,
+                              // Filter Icon Button
+                              Container(
+                                margin: const EdgeInsets.only(right: 0),
+                                decoration: BoxDecoration(
+                                  color: AppColors.primaryColor(context).withValues(
+                                    alpha: 0.1,
+                                  ),
+                                  shape: BoxShape.circle,
                                 ),
-                                shape: BoxShape.circle,
-                              ),
-                              child: IconButton(
-                                icon: Icon(
-                                  Iconsax.filter,
-                                  color: AppColors.primaryColor(context),
-                                  size: 20,
+                                child: IconButton(
+                                  icon: Icon(
+                                    Iconsax.filter,
+                                    color: AppColors.primaryColor(context),
+                                    size: 20,
+                                  ),
+                                  onPressed: () {
+                                    _showMobileFilterSheet(context);
+                                  },
                                 ),
-                                onPressed: () {
-                                  _showMobileFilterSheet(context);
-                                },
                               ),
-                            ),
-                            IconButton(
-                              onPressed: (){
-                                dataBloc.selectedState = "";
-                                filterTextController.clear();
+                              IconButton(
+                                onPressed: (){
+                                  dataBloc.selectedState = "";
+                                  filterTextController.clear();
 
-        _fetchApi();
-                              },
-                              icon: const Icon(Icons.refresh),
-                              tooltip: "Refresh",
-                            ),
+                      _fetchApi();
+                                },
+                                icon: const Icon(Icons.refresh),
+                                tooltip: "Refresh",
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+
+                        // Filter Chips and Create Button
+                        Row(
+                          children: [
+                            // Filter Chip
+                            if (dataBloc.selectedState.isNotEmpty &&
+                                dataBloc.selectedState != "All")
+                              Container(
+                                margin: const EdgeInsets.only(right: 8),
+                                child: Chip(
+                                  label: Text(dataBloc.selectedState),
+                                  backgroundColor: AppColors.primaryColor(context)
+                                      .withValues(alpha: 0.1),
+                                  deleteIcon: const Icon(Icons.close, size: 16),
+                                  onDeleted: () {
+                                    setState(() {
+                                      dataBloc.selectedState = "";
+                                    });
+                                    _fetchApi(
+                                      filterText: filterTextController.text,
+                                    );
+                                  },
+                                ),
+                              ),
+                            const Spacer(),
+
                           ],
                         ),
-                      ),
-                      const SizedBox(height: 8),
-
-                      // Filter Chips and Create Button
-                      Row(
-                        children: [
-                          // Filter Chip
-                          if (dataBloc.selectedState.isNotEmpty &&
-                              dataBloc.selectedState != "All")
-                            Container(
-                              margin: const EdgeInsets.only(right: 8),
-                              child: Chip(
-                                label: Text(dataBloc.selectedState),
-                                backgroundColor: AppColors.primaryColor(context)
-                                    .withValues(alpha: 0.1),
-                                deleteIcon: const Icon(Icons.close, size: 16),
-                                onDeleted: () {
-                                  setState(() {
-                                    dataBloc.selectedState = "";
-                                  });
-                                  _fetchApi(
-                                    filterText: filterTextController.text,
-                                  );
-                                },
-                              ),
-                            ),
-                          const Spacer(),
-
-                        ],
-                      ),
-                    ],
-                  ),
-                  SizedBox(
-                    child: BlocBuilder<SupplierListBloc, SupplierListState>(
-                      builder: (context, state) {
-                        if (state is SupplierListLoading) {
-                          return const Center(child: CircularProgressIndicator());
-                        } else if (state is SupplierListSuccess) {
-                          if (state.list.isEmpty) {
-                            return Center(child: Lottie.asset(AppImages.noData));
-                          } else {
-                            return Column(
-                              children: [
-                                SizedBox(
-                                  child: SupplierDataTableWidget(
-                                    suppliers: state.list,
-                                    onEdit: (v) {
-                                      context
-                                              .read<SupplierListBloc>()
-                                              .customerNameController
-                                              .text =
-                                          v.name ?? "";
-                                      context
-                                              .read<SupplierListBloc>()
-                                              .customerNumberController
-                                              .text =
-                                          v.phone ?? "";
-                                      context
-                                              .read<SupplierListBloc>()
-                                              .addressController
-                                              .text =
-                                          v.address ?? "";
-                                      context
-                                              .read<SupplierListBloc>()
-                                              .customerEmailController
-                                              .text =
-                                          v.email ?? "";
-                                      context
-                                          .read<SupplierListBloc>()
-                                          .selectedState = v.isActive == true
-                                          ? "Active"
-                                          : "Inactive";
-                                      _showEditDialog(context, v);
-                                    },
-                                    onDelete: (v) async {
-                                      bool shouldDelete =
-                                          await showDeleteConfirmationDialog(
-                                            context,
-                                          );
-                                      if (!shouldDelete) return;
-
-                                      context.read<SupplierListBloc>().add(
-                                        DeleteSupplierList(v.id.toString()),
-                                      );
-                                    },
-                                  ),
-                                ),
-                                // Add pagination
-                                PaginationBar(
-                                  count: state.count,
-                                  totalPages: state.totalPages,
-                                  currentPage: state.currentPage,
-                                  pageSize: state.pageSize,
-                                  from: state.from,
-                                  to: state.to,
-                                  onPageChanged: (page) =>
-                                      _fetchSupplierList(pageNumber: page),
-                                  onPageSizeChanged: (newSize) =>
-                                      _fetchSupplierList(pageSize: newSize),
-                                ),
-                              ],
-                            );
-                          }
-                        } else if (state is SupplierListFailed) {
-                          return Center(
-                            child: Text(
-                              'Failed to load suppliers: ${state.content}',
-                            ),
-                          );
-                        } else {
-                          return Center(child: Lottie.asset(AppImages.noData));
-                        }
-                      },
+                      ],
                     ),
-                  ),
-                ],
+                    SizedBox(
+                      child: BlocBuilder<SupplierListBloc, SupplierListState>(
+                        builder: (context, state) {
+                          if (state is SupplierListLoading) {
+                            return const Center(child: CircularProgressIndicator());
+                          } else if (state is SupplierListSuccess) {
+                            if (state.list.isEmpty) {
+                              return Center(child: Lottie.asset(AppImages.noData));
+                            } else {
+                              return Column(
+                                children: [
+                                  SizedBox(
+                                    child: SupplierDataTableWidget(
+                                      suppliers: state.list,
+                                      onEdit: (v) {
+                                        context
+                                                .read<SupplierListBloc>()
+                                                .customerNameController
+                                                .text =
+                                            v.name ?? "";
+                                        context
+                                                .read<SupplierListBloc>()
+                                                .customerNumberController
+                                                .text =
+                                            v.phone ?? "";
+                                        context
+                                                .read<SupplierListBloc>()
+                                                .addressController
+                                                .text =
+                                            v.address ?? "";
+                                        context
+                                                .read<SupplierListBloc>()
+                                                .customerEmailController
+                                                .text =
+                                            v.email ?? "";
+                                        context
+                                            .read<SupplierListBloc>()
+                                            .selectedState = v.isActive == true
+                                            ? "Active"
+                                            : "Inactive";
+                                        _showEditDialog(context, v);
+                                      },
+                                      onDelete: (v) async {
+                                        bool shouldDelete =
+                                            await showDeleteConfirmationDialog(
+                                              context,
+                                            );
+                                        if (!shouldDelete) return;
+
+                                        context.read<SupplierListBloc>().add(
+                                          DeleteSupplierList(v.id.toString()),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                  // Add pagination
+                                  PaginationBar(
+                                    count: state.count,
+                                    totalPages: state.totalPages,
+                                    currentPage: state.currentPage,
+                                    pageSize: state.pageSize,
+                                    from: state.from,
+                                    to: state.to,
+                                    onPageChanged: (page) =>
+                                        _fetchSupplierList(pageNumber: page),
+                                    onPageSizeChanged: (newSize) =>
+                                        _fetchSupplierList(pageSize: newSize),
+                                  ),
+                                ],
+                              );
+                            }
+                          } else if (state is SupplierListFailed) {
+                            return Center(
+                              child: Text(
+                                'Failed to load suppliers: ${state.content}',
+                              ),
+                            );
+                          } else {
+                            return Center(child: Lottie.asset(AppImages.noData));
+                          }
+                        },
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -489,7 +492,7 @@ class _SupplierScreenState extends State<MobileSupplierListScreen> {
       builder: (context) {
         return Dialog(
           child: SizedBox(
-            width: AppSizes.width(context) * 0.50,
+            width: AppSizes.width(context) * 0.80,
             child: CreateSupplierScreen(
               id: customer.id.toString(),
               submitText: "Update Supplier",

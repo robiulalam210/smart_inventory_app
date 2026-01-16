@@ -87,7 +87,6 @@ class _MobileCreateAccountScreenState
                   ],
                 ),
 
-                const SizedBox(height: 12),
 
                 /// ACCOUNT TYPE
                 ValueListenableBuilder<String>(
@@ -112,7 +111,6 @@ class _MobileCreateAccountScreenState
                   },
                 ),
 
-                const SizedBox(height: 10),
 
                 /// ACCOUNT NAME
                 AppTextField(
@@ -126,7 +124,6 @@ class _MobileCreateAccountScreenState
                       : null, keyboardType: TextInputType.text,
                 ),
 
-                const SizedBox(height: 10),
 
                 /// OPENING BALANCE
                 AppTextField(
@@ -146,7 +143,6 @@ class _MobileCreateAccountScreenState
                   },
                 ),
 
-                const SizedBox(height: 10),
 
                 /// ACCOUNT NUMBER
                 ValueListenableBuilder<String>(
@@ -173,7 +169,6 @@ class _MobileCreateAccountScreenState
                   },
                 ),
 
-                const SizedBox(height: 10),
 
                 /// BANK DETAILS
                 ValueListenableBuilder<String>(
@@ -190,6 +185,15 @@ class _MobileCreateAccountScreenState
                           accountBloc.bankNameController,
                           hintText: "Bank Name",
                           isRequired: true,
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return 'Please enter bank name';
+                            }
+                            if (value.trim().length < 2) {
+                              return 'Bank name must be at least 2 characters';
+                            }
+                            return null;
+                          },
                         ),
                         const SizedBox(height: 10),
                         AppTextField(keyboardType: TextInputType.text,
@@ -197,13 +201,22 @@ class _MobileCreateAccountScreenState
                           accountBloc.branchNameController,
                           hintText: "Branch Name",
                           isRequired: true,
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return 'Please enter branch name';
+                            }
+                            if (value.trim().length < 2) {
+                              return 'Branch name must be at least 2 characters';
+                            }
+                            return null;
+                          },
                         ),
                       ],
                     );
                   },
                 ),
 
-                const SizedBox(height: 16),
+                const SizedBox(height: 10),
 
                 /// BUTTONS
                 Row(

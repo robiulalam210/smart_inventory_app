@@ -9,7 +9,7 @@ Future<void> appLoader(BuildContext context,String msg) async{
       mainAxisSize: MainAxisSize.min,
       children: [
         Lottie.asset('assets/jsons/loader.json',height: 100,width: 100,),
-        Text("$msg\n"),
+        Text("$msg\n",style: AppTextStyle.body(context),),
       ],),
   );
   await showDialog(

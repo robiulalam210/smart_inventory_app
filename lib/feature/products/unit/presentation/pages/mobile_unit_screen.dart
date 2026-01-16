@@ -137,53 +137,59 @@ class _UnitScreenState extends State<MobileUnitScreen> {
                     );
                   }
                 },
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                    SizedBox(child:   Container(
-                      padding: EdgeInsets.symmetric(horizontal: 0),
-                      // width: 350,
-                      child:  CustomSearchTextFormField(
-                        controller: context.read<UnitBloc>().filterTextController,
-                        onChanged: (value) {
-                          _fetchApiData(filterText: value);
-                        },
-                        onClear: () {
-                          context.read<UnitBloc>().filterTextController.clear();
-                          _fetchApiData();
-                          FocusScope.of(context).unfocus();
-                        },
-                        isRequiredLabel: false,
-                        hintText: "Name", // Pass dynamic hintText if needed
-                      ),
-                    ),),
-
-
-                      SizedBox(
-                        child: BlocBuilder<UnitBloc, UnitState>(
-                          builder: (context, state) {
-                            if (state is UnitListLoading) {
-                              return const Center(child: CircularProgressIndicator());
-                            } else if (state is UnitListSuccess) {
-                              if (state.list.isEmpty) {
-                                return Center(child: Lottie.asset(AppImages.noData));
-                              } else {
-                                return MobileUnitTableCard(units: state.list,);
-                              }
-                            } else if (state is UnitListFailed) {
-                              return Center(
-                                child: Text(
-                                  'Failed to load unit screen: ${state.content}',
-                                ),
-                              );
-                            } else {
-                              return Container();
-                            }
+                child:  RefreshIndicator(
+                  onRefresh: ()async{
+                    _fetchApiData();
+                  },
+                  child: SingleChildScrollView(
+                    physics: AlwaysScrollableScrollPhysics(),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                      SizedBox(child:   Container(
+                        padding: EdgeInsets.symmetric(horizontal: 0),
+                        // width: 350,
+                        child:  CustomSearchTextFormField(
+                          controller: context.read<UnitBloc>().filterTextController,
+                          onChanged: (value) {
+                            _fetchApiData(filterText: value);
                           },
+                          onClear: () {
+                            context.read<UnitBloc>().filterTextController.clear();
+                            _fetchApiData();
+                            FocusScope.of(context).unfocus();
+                          },
+                          isRequiredLabel: false,
+                          hintText: "Name", // Pass dynamic hintText if needed
                         ),
-                      ),
-                    ],
+                      ),),
+
+
+                        SizedBox(
+                          child: BlocBuilder<UnitBloc, UnitState>(
+                            builder: (context, state) {
+                              if (state is UnitListLoading) {
+                                return const Center(child: CircularProgressIndicator());
+                              } else if (state is UnitListSuccess) {
+                                if (state.list.isEmpty) {
+                                  return Center(child: Lottie.asset(AppImages.noData));
+                                } else {
+                                  return MobileUnitTableCard(units: state.list,);
+                                }
+                              } else if (state is UnitListFailed) {
+                                return Center(
+                                  child: Text(
+                                    'Failed to load unit screen: ${state.content}',
+                                  ),
+                                );
+                              } else {
+                                return Container();
+                              }
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),

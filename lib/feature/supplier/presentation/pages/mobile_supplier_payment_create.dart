@@ -80,10 +80,12 @@ class _MobileSupplierPaymentCreateState extends State<MobileSupplierPaymentCreat
                 children: [
 
                   _buildSupplierInfoSection(),
-                  const SizedBox(height: 6),
+                  // const SizedBox(height: 6),
                   _buildPaymentInfoSection(),
-                  const SizedBox(height: 15),
+                  const SizedBox(height: 8),
                   _buildActionButtons(),
+                  const SizedBox(height: 20),
+
                 ],
               ),
             ],

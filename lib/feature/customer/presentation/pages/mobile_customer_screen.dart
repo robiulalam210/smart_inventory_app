@@ -103,12 +103,12 @@ class _CustomerScreenState extends State<MobileCustomerScreen> {
               _handleBlocState(state);
             },
             builder: (context, state) {
-              return SingleChildScrollView(
+              return  SingleChildScrollView(
+                physics: AlwaysScrollableScrollPhysics(),
                 child: Column(
                   children: [
-                
+
                       _buildMobileHeader(),
-                    const SizedBox(height: 8),
                     SizedBox(
                       child: _buildCustomerList(state),
                     ),
@@ -163,6 +163,7 @@ class _CustomerScreenState extends State<MobileCustomerScreen> {
         );
       }
     } else if (state is CustomerAddFailed) {
+      _fetchApi();
       if (context.mounted) {
         Navigator.pop(context);
         appAlertDialog(
@@ -186,54 +187,40 @@ class _CustomerScreenState extends State<MobileCustomerScreen> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         // Search Bar
-        Container(
-          decoration: BoxDecoration(
-            color: AppColors.bottomNavBg(context),
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withValues(alpha: 0.1),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: CustomSearchTextFormField(
-                    controller: filterTextController,
-                    onChanged: (value) => _fetchApi(filterText: value),
-                    onClear: () {
-                      filterTextController.clear();
-                      selectedStatusNotifier.value = null;
-                      _fetchApi();
-                    },
-                    isRequiredLabel: false,
-                    hintText: "Search customers...",
-                  ),
-                ),
-              ),
-              IconButton(
-                icon: Icon(
-                  Iconsax.filter,
-                  color: AppColors.primaryColor(context),
-                ),
-                onPressed: () => _showMobileFilterSheet(context),
-              ),
-              IconButton(
-                onPressed: (){
+        Row(
+          children: [
+            Expanded(
+              child: CustomSearchTextFormField(
+                controller: filterTextController,
+                onChanged: (value) => _fetchApi(filterText: value),
+                onClear: () {
                   filterTextController.clear();
                   selectedStatusNotifier.value = null;
                   _fetchApi();
+                  FocusScope.of(context).unfocus();
+
                 },
-                icon: const Icon(Icons.refresh),
-                tooltip: "Refresh",
+                isRequiredLabel: false,
+                hintText: "customers...",
               ),
-            ],
-          ),
+            ),
+            IconButton(
+              icon: Icon(
+                Iconsax.filter,
+                color: AppColors.primaryColor(context),
+              ),
+              onPressed: () => _showMobileFilterSheet(context),
+            ),
+            IconButton(
+              onPressed: (){
+                filterTextController.clear();
+                selectedStatusNotifier.value = null;
+                _fetchApi();
+              },
+              icon: const Icon(Icons.refresh),
+              tooltip: "Refresh",
+            ),
+          ],
         ),
         const SizedBox(height: 12),
 
