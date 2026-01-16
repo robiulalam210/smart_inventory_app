@@ -1,21 +1,22 @@
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
 import 'package:meherinMart/core/widgets/app_scaffold.dart';
-
-import '../../../../core/configs/configs.dart';
-import '../../../../core/widgets/app_dropdown.dart';
-import '../../../../core/widgets/coustom_search_text_field.dart';
-import '../../../../core/widgets/date_range.dart';
-import '../../../customer/data/model/customer_active_model.dart';
-import '../../../customer/presentation/bloc/customer/customer_bloc.dart';
-import '../../../products/product/presentation/bloc/products/products_bloc.dart';
-import '../../../products/product/presentation/widget/pagination.dart';
-import '../../../users_list/data/model/user_model.dart';
-import '../../../users_list/presentation/bloc/users/user_bloc.dart';
-import '../bloc/possale/possale_bloc.dart';
-import '../widgets/widget.dart';
+import 'package:meherinMart/core/configs/configs.dart';
+import 'package:meherinMart/core/widgets/app_dropdown.dart';
+import 'package:meherinMart/core/widgets/coustom_search_text_field.dart';
+import 'package:meherinMart/core/widgets/date_range.dart';
+import 'package:meherinMart/feature/customer/data/model/customer_active_model.dart';
+import 'package:meherinMart/feature/customer/presentation/bloc/customer/customer_bloc.dart';
+import 'package:meherinMart/feature/products/product/presentation/bloc/products/products_bloc.dart';
+import 'package:meherinMart/feature/products/product/presentation/widget/pagination.dart';
+import 'package:meherinMart/feature/users_list/data/model/user_model.dart';
+import 'package:meherinMart/feature/users_list/presentation/bloc/users/user_bloc.dart';
+import 'package:meherinMart/feature/sales/presentation/bloc/possale/possale_bloc.dart';
+import 'package:meherinMart/feature/sales/presentation/widgets/widget.dart';
+import 'package:lottie/lottie.dart';
 
 class MobilePosSaleScreen extends StatefulWidget {
   const MobilePosSaleScreen({super.key, this.posSale});
+
   final String? posSale;
 
   @override
@@ -34,10 +35,10 @@ class _PosSaleScreenState extends State<MobilePosSaleScreen> {
     super.initState();
     filterTextController.clear();
 
-    selectedDateRange = DateRange(
-      DateTime(now.year, now.month - 1, now.day),
-      DateTime(now.year, now.month, now.day),
-    );
+    // FIXED: Proper date calculation for last month
+    // Don't use now.month - 1 directly - handle month rollover properly
+    selectedDateRange = _getDefaultDateRange();
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<UserBloc>().add(
         FetchUserList(context, dropdownFilter: "?status=1"),
@@ -45,14 +46,34 @@ class _PosSaleScreenState extends State<MobilePosSaleScreen> {
       context.read<CustomerBloc>().add(FetchCustomerActiveList(context));
       context.read<ProductsBloc>().add(FetchProductsStockList(context));
 
+      // Debug: Print the dates being used
+      print('INIT STATE - Now: $now');
+      print('INIT STATE - Now year: ${now.year}');
+      print('INIT STATE - Selected range: $selectedDateRange');
+      print('INIT STATE - Start year: ${selectedDateRange?.start?.year}');
+      print('INIT STATE - End year: ${selectedDateRange?.end?.year}');
 
-
-      _fetchApi(
-
-      );
-
-
+      _fetchApi();
     });
+  }
+
+  // FIXED: Proper method to get default date range
+  DateRange _getDefaultDateRange() {
+    final today = DateTime.now();
+    final lastMonth = DateTime(today.year, today.month - 1, today.day);
+
+    // Handle year rollover if month is January
+    if (today.month == 1) {
+      return DateRange(
+        DateTime(today.year - 1, 12, today.day), // December of last year
+        today, // Today
+      );
+    } else {
+      return DateRange(
+        lastMonth, // Last month
+        today, // Today
+      );
+    }
   }
 
   @override
@@ -62,6 +83,7 @@ class _PosSaleScreenState extends State<MobilePosSaleScreen> {
     selectedSellerNotifier.dispose();
     super.dispose();
   }
+
   void _fetchApi({
     String filterText = '',
     String customer = '',
@@ -78,7 +100,6 @@ class _PosSaleScreenState extends State<MobilePosSaleScreen> {
       filter += "&search=$filterText";
     }
 
-    // ✅ prevent "null" string
     if (customer.isNotEmpty && customer != 'null') {
       filter += "&customer=$customer";
     }
@@ -88,17 +109,51 @@ class _PosSaleScreenState extends State<MobilePosSaleScreen> {
     }
 
     if (from != null && to != null) {
-      filter +=
-      "&start_date=${from.toIso8601String()}&end_date=${to.toIso8601String()}";
+      // FIX: Make end date INCLUSIVE of entire day
+      String formatDateStart(DateTime date) {
+        return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}T00:00:00';
+      }
+
+      String formatDateEnd(DateTime date) {
+        // Add 1 day and subtract 1 second to include entire end date
+        final nextDay = DateTime(date.year, date.month, date.day + 1);
+        return '${nextDay.year}-${nextDay.month.toString().padLeft(2, '0')}-${nextDay.day.toString().padLeft(2, '0')}T00:00:00';
+      }
+
+      // Make sure 'from' is before 'to'
+      if (from.isAfter(to)) {
+        final temp = from;
+        from = to;
+        to = temp;
+        print('Swapped dates: from was after to');
+      }
+
+      print('=== FILTERING WITH INCLUSIVE DATES ===');
+      print('From (start of day): ${formatDateStart(from)}');
+      print('To (end of day+1): ${formatDateEnd(to)}');
+
+      filter += "&start_date=${formatDateStart(from)}&end_date=${formatDateEnd(to)}";
     }
+
+    print('API URL: /api/sales/$filter');
 
     context.read<PosSaleBloc>().add(
       FetchPosSaleList(context, dropdownFilter: filter),
     );
   }
-
-
   void _fetchProductList({required int pageNumber, required int pageSize}) {
+    // Debug: Print what's being sent
+    print('=== DEBUG: Fetching Product List ===');
+    print('Current date: ${DateTime.now()}');
+    print('Selected date range: $selectedDateRange');
+
+    if (selectedDateRange != null) {
+      print('Start date: ${selectedDateRange!.start}');
+      print('Start year: ${selectedDateRange!.start?.year}');
+      print('End date: ${selectedDateRange!.end}');
+      print('End year: ${selectedDateRange!.end?.year}');
+    }
+
     _fetchApi(
       pageNumber: pageNumber,
       filterText: filterTextController.text,
@@ -111,33 +166,29 @@ class _PosSaleScreenState extends State<MobilePosSaleScreen> {
 
   void _clearFilters() {
     setState(() {
-      selectedDateRange = DateRange(
-        DateTime(now.year, now.month - 1, now.day),
-        DateTime(now.year, now.month, now.day),
-      );
+      selectedDateRange = _getDefaultDateRange(); // Use fixed method
     });
     filterTextController.clear();
     selectedCustomerNotifier.value = null;
     selectedSellerNotifier.value = null;
-    selectedDateRange = null;
+
     // Clear bloc states
     context.read<PosSaleBloc>().selectCustomerModel = null;
     context.read<PosSaleBloc>().selectUserModel = null;
 
+    print('Cleared filters, default date range set');
     _fetchApi();
   }
 
   @override
   Widget build(BuildContext context) {
-
-
     return AppScaffold(
       appBar: AppBar(
         backgroundColor: AppColors.bottomNavBg(context),
-        title: Text("Sales List",style: AppTextStyle.titleMedium(context),),
+        title: Text("Sales List", style: AppTextStyle.titleMedium(context)),
       ),
       body: SafeArea(
-        child:ResponsiveCol(
+        child: ResponsiveCol(
           xs: 12,
           lg: 10,
           child: RefreshIndicator(
@@ -148,76 +199,52 @@ class _PosSaleScreenState extends State<MobilePosSaleScreen> {
               child: SingleChildScrollView(
                 child: Column(
                   children: [
-
                     _buildMobileHeader(),
                     const SizedBox(height: 8),
-                    SizedBox(
-                      child: _buildDataTable(),
-                    ),
+                    SizedBox(child: _buildDataTable()),
                   ],
                 ),
               ),
             ),
           ),
-        )
+        ),
       ),
     );
   }
-
-
-
-
 
   Widget _buildMobileHeader() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         // Search Bar
-        Container(
-          decoration: BoxDecoration(
-            color: AppColors.bottomNavBg(context),
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withValues(alpha: 0.1),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  child: CustomSearchTextFormField(
-                    controller: filterTextController,
-                    onChanged: (value) => _fetchApi(filterText: value),
-                    onClear: () {
-                      filterTextController.clear();
-                      _fetchApi();
-                    },
-                    hintText: "sales...",
-                  ),
-                ),
-              ),
-              IconButton(
-                icon: Icon(
-                  Iconsax.filter,
-                  color: AppColors.primaryColor(context),
-                ),
-                onPressed: () => _showMobileFilterSheet(context),
-              ),
-
-              IconButton(
-                onPressed: () {
-                  _clearFilters();
+        Row(
+          children: [
+            Expanded(
+              child: CustomSearchTextFormField(
+                controller: filterTextController,
+                onChanged: (value) => _fetchApi(filterText: value),
+                onClear: () {
+                  filterTextController.clear();
+                  _fetchApi();
                 },
-                icon: const Icon(Icons.refresh),
-                tooltip: "Refresh",
+                hintText: "sales...",
               ),
-            ],
-          ),
+            ),
+            IconButton(
+              icon: Icon(
+                Iconsax.filter,
+                color: AppColors.primaryColor(context),
+              ),
+              onPressed: () => _showMobileFilterSheet(context),
+            ),
+            IconButton(
+              onPressed: () {
+                _clearFilters();
+              },
+              icon: const Icon(Icons.refresh),
+              tooltip: "Refresh",
+            ),
+          ],
         ),
 
         // Filter Chips
@@ -243,7 +270,6 @@ class _PosSaleScreenState extends State<MobilePosSaleScreen> {
                   _fetchApi();
                 },
               ),
-
             if (selectedDateRange != null)
               Chip(
                 label: Text(
@@ -256,7 +282,6 @@ class _PosSaleScreenState extends State<MobilePosSaleScreen> {
               ),
           ],
         ),
-
       ],
     );
   }
@@ -272,9 +297,7 @@ class _PosSaleScreenState extends State<MobilePosSaleScreen> {
           }
           return Column(
             children: [
-              SizedBox(
-                child: PosSaleDataTableWidget(sales: state.list),
-              ),
+              SizedBox(child: PosSaleDataTableWidget(sales: state.list)),
               const SizedBox(height: 6),
               PaginationBar(
                 count: state.count,
@@ -287,10 +310,8 @@ class _PosSaleScreenState extends State<MobilePosSaleScreen> {
                   pageNumber: page,
                   pageSize: state.pageSize,
                 ),
-                onPageSizeChanged: (newSize) => _fetchProductList(
-                  pageNumber: 1,
-                  pageSize: newSize,
-                ),
+                onPageSizeChanged: (newSize) =>
+                    _fetchProductList(pageNumber: 1, pageSize: newSize),
               ),
             ],
           );
@@ -346,9 +367,9 @@ class _PosSaleScreenState extends State<MobilePosSaleScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                         Text(
+                        Text(
                           "Filter POS Sales",
-                          style: AppTextStyle.titleMedium(context)
+                          style: AppTextStyle.titleMedium(context),
                         ),
                         IconButton(
                           icon: const Icon(Icons.close),
@@ -356,8 +377,8 @@ class _PosSaleScreenState extends State<MobilePosSaleScreen> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 20),
-              
+                    const SizedBox(height: 10),
+
                     // Customer Filter
                     BlocBuilder<CustomerBloc, CustomerState>(
                       builder: (context, state) {
@@ -376,11 +397,10 @@ class _PosSaleScreenState extends State<MobilePosSaleScreen> {
                               selectedCustomerNotifier.value = newVal?.id.toString();
                             });
                           },
-                        
                         );
                       },
                     ),
-              
+
                     // Seller Filter
                     BlocBuilder<UserBloc, UserState>(
                       builder: (context, state) {
@@ -398,18 +418,17 @@ class _PosSaleScreenState extends State<MobilePosSaleScreen> {
                               selectedSellerNotifier.value = newVal?.id.toString();
                             });
                           },
-                        
                         );
                       },
                     ),
-              
+
                     // Date Range
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-              
-                        
-                      ],
+                    CustomDateRangeField(
+                      isLabel: false,
+                      selectedDateRange: selectedDateRange,
+                      onDateRangeSelected: (value) {
+                        setState(() => selectedDateRange = value);
+                      },
                     ),
                     const SizedBox(height: 10),
                     Row(
@@ -436,9 +455,7 @@ class _PosSaleScreenState extends State<MobilePosSaleScreen> {
                             ),
                             child: Text(
                               "Clear All",
-                              style: AppTextStyle.body(
-                                context,
-                              ).copyWith(color: AppColors.error),
+                              style: AppTextStyle.body(context).copyWith(color: AppColors.error),
                             ),
                           ),
                         ),
@@ -447,12 +464,17 @@ class _PosSaleScreenState extends State<MobilePosSaleScreen> {
                           child: ElevatedButton(
                             onPressed: () {
                               Navigator.pop(context);
+                              // Debug before fetching
+                              print('=== APPLYING FILTERS ===');
+                              print('From: ${selectedDateRange?.start}');
+                              print('To: ${selectedDateRange?.end}');
+
                               _fetchApi(
                                 filterText: filterTextController.text,
-                                to:selectedDateRange?.start ,
-                                from:selectedDateRange?.end ,
-                                customer: selectedCustomerNotifier.value.toString(),
-                                seller: selectedSellerNotifier.value.toString()
+                                from: selectedDateRange?.start,
+                                to: selectedDateRange?.end,
+                                customer: selectedCustomerNotifier.value?.toString() ?? '',
+                                seller: selectedSellerNotifier.value?.toString() ?? '',
                               );
                             },
                             style: ElevatedButton.styleFrom(
@@ -462,15 +484,14 @@ class _PosSaleScreenState extends State<MobilePosSaleScreen> {
                                 borderRadius: BorderRadius.circular(10),
                               ),
                             ),
-                            child:  Text("Apply Filters",style: AppTextStyle.body(
-                              context,
-                            ).copyWith(color: AppColors.text(context)),),
+                            child: Text(
+                              "Apply Filters",
+                              style: AppTextStyle.body(context).copyWith(color: AppColors.text(context)),
+                            ),
                           ),
                         ),
                       ],
                     ),
-                    // Action Buttons
-                
                     SizedBox(height: MediaQuery.of(context).viewInsets.bottom),
                   ],
                 ),
@@ -481,5 +502,4 @@ class _PosSaleScreenState extends State<MobilePosSaleScreen> {
       },
     );
   }
-
 }
