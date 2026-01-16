@@ -61,13 +61,17 @@ class CategoriesListMobile extends StatelessWidget {
         // Optionally show category details
         // _showCategoryDetails(context, category);
       },
-      child: Card(
-        color: AppColors.bottomNavBg(context),
+      child: Container(
+
         margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-        elevation: 1,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-          side: BorderSide(color: Colors.grey.shade200, width: 1),
+        decoration: BoxDecoration(
+          color: AppColors.bottomNavBg(context),
+          borderRadius: BorderRadius.circular(AppSizes.radius),
+
+          border: Border.all(
+            color: AppColors.greyColor(context).withValues(alpha: 0.5),
+            width: 0.5,
+          ),
         ),
         child: Padding(
           padding: const EdgeInsets.all(16),

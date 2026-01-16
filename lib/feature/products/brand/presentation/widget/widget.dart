@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:iconsax/iconsax.dart';
 import '../../../../../core/configs/app_colors.dart';
+import '../../../../../core/configs/app_sizes.dart';
 import '../../../../../core/widgets/delete_dialog.dart';
 import '../../../../../responsive.dart';
 import '../../data/model/brand_model.dart';
@@ -23,7 +24,7 @@ class BrandTableCard extends StatelessWidget {
     }
 
     return Responsive.isMobile(context)
-        ? _buildMobileListView()
+        ? _buildMobileListView(context)
         : _buildDesktopTable();
   }
 
@@ -128,11 +129,11 @@ class BrandTableCard extends StatelessWidget {
     );
   }
 
-  Widget _buildMobileListView() {
+  Widget _buildMobileListView(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
-        color: Colors.white,
+        color: AppColors.bottomNavBg(context),
         boxShadow: [
           BoxShadow(
             color: Colors.grey.withValues(alpha: 0.1),
@@ -145,7 +146,7 @@ class BrandTableCard extends StatelessWidget {
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         itemCount: brands.length,
-        separatorBuilder: (context, index) => const Divider(height: 1),
+        separatorBuilder: (context, index) =>  SizedBox(height: 8),
         itemBuilder: (context, index) {
           final brand = brands[index];
           return _buildMobileBrandCard(context, brand, index);
@@ -163,8 +164,15 @@ class BrandTableCard extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(color: AppColors.bottomNavBg(context)),
-      child: Column(
+      decoration: BoxDecoration(
+        color: AppColors.bottomNavBg(context),
+        borderRadius: BorderRadius.circular(AppSizes.radius),
+
+        border: Border.all(
+          color: AppColors.greyColor(context).withValues(alpha: 0.5),
+          width: 0.5,
+        ),
+      ),      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Header row with No. and Status

@@ -36,12 +36,16 @@ class MobileUnitTableCard extends StatelessWidget {
   }
 
   Widget _buildUnitCard(BuildContext context, UnitsModel unit, int index) {
-    return Card(
+    return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      elevation: 1,
-      color: AppColors.bottomNavBg(context),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+      decoration: BoxDecoration(
+        color: AppColors.bottomNavBg(context),
+        borderRadius: BorderRadius.circular(AppSizes.radius),
+
+        border: Border.all(
+          color: AppColors.greyColor(context).withValues(alpha: 0.5),
+          width: 0.5,
+        ),
       ),
       child: InkWell(
         onTap: () => onUnitTap?.call(),

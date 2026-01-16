@@ -37,12 +37,16 @@ class MobileSourceTableCard extends StatelessWidget {
   Widget _buildSourceCard(BuildContext context, SourceModel source, int index) {
     final isActive = _getSourceStatus(source);
 
-    return Card(
-      color: AppColors.bottomNavBg(context),
+    return Container(
       margin: const EdgeInsets.only(bottom: 6),
-      elevation: 1,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+      decoration: BoxDecoration(
+        color: AppColors.bottomNavBg(context),
+        borderRadius: BorderRadius.circular(AppSizes.radius),
+
+        border: Border.all(
+          color: AppColors.greyColor(context).withValues(alpha: 0.5),
+          width: 0.5,
+        ),
       ),
       child: InkWell(
         onTap: () => onSourceTap?.call(),

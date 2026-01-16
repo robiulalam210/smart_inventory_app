@@ -1,5 +1,8 @@
 import 'dart:async';
 
+import 'package:easy_localization/easy_localization.dart';
+import 'package:meherinMart/core/widgets/app_scaffold.dart';
+
 import '../../../../core/core.dart';
 import '../../../../core/database/login_local_storage.dart';
 import '../../../feature.dart';
@@ -86,7 +89,7 @@ class _MobileLoginScrState extends State<MobileLoginScr>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return AppScaffold(
       body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) async {
           if (state is AuthAuthenticated || state is AuthAuthenticatedOffline) {
@@ -123,127 +126,153 @@ class _MobileLoginScrState extends State<MobileLoginScr>
           onTap: () => FocusScope.of(context).unfocus(),
           child: SafeArea(
             child: SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 18,
-                  vertical: 24,
-                ),
-                child: FadeTransition(
-                  opacity: fadeAnimation,
-                  child: SlideTransition(
-                    position: slideAnimation,
-                    child: Column(
-                      children: [
-                        const SizedBox(height: 30),
+              child: FadeTransition(
+                opacity: fadeAnimation,
+                child: SlideTransition(
+                  position: slideAnimation,
+                  child: Column(
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [languageDropdown(context)],
+                      ),
 
-                        /// Logo Floating
-                        AnimatedOpacity(
-                          opacity: _visible ? 1 : 0,
+                      /// Logo Floating
+                      AnimatedOpacity(
+                        opacity: _visible ? 1 : 0,
+                        duration: const Duration(milliseconds: 600),
+                        child: AnimatedScale(
+                          scale: _visible ? 1 : 0.7,
                           duration: const Duration(milliseconds: 600),
-                          child: AnimatedScale(
-                            scale: _visible ? 1 : 0.7,
-                            duration: const Duration(milliseconds: 600),
-                            child: Image.asset(
-                              "assets/images/logo.png",
-                              height: 180,
-                            ),
+                          child: Image.asset(
+                            "assets/images/logo.png",
+                            height: 180,
                           ),
                         ),
+                      ),
 
-                        const SizedBox(height: 15),
+                      const SizedBox(height: 5),
 
-                        const Text(
-                          "Welcome Back 👋",
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                       Text(
+                        "welcome_back".tr(),
+                        style: AppTextStyle.titleLarge(context)
+                      ),
 
-                        const SizedBox(height: 10),
+                      const SizedBox(height: 10),
 
-                        /// Glass Card
-                        AnimatedContainer(
-                          duration: const Duration(milliseconds: 600),
-                          padding: const EdgeInsets.all(24),
+                      /// Glass Card
+                      AnimatedContainer(
+                        duration: const Duration(milliseconds: 600),
+                        padding: const EdgeInsets.all(24),
 
-                          child: Form(
-                            key: _formKey,
-                            child: Column(
-                              children: [
-                                AppTextField(
-                                  labelText: "Username / Email",
-                                  hintText: "Enter your username or email",
-                                  controller: emailCon,
-                                  keyboardType: TextInputType.emailAddress,
-                                  focusNode: _emailFocus,
-                                  textInputAction: TextInputAction.next,
-                                  validator: (v) =>
-                                      v!.isEmpty ? "Required" : null,
-                                  onFieldSubmitted: (_) =>
-                                      _passwordFocus.requestFocus(),
-                                ),
-                                const SizedBox(height: 8),
+                        child: Form(
+                          key: _formKey,
+                          child: Column(
+                            children: [
+                              AppTextField(
+                                labelText: "email".tr(),
+                                hintText: "enter_email".tr(),
+                                controller: emailCon,
+                                keyboardType: TextInputType.emailAddress,
+                                focusNode: _emailFocus,
+                                textInputAction: TextInputAction.next,
+                                validator: (v) =>
+                                    v!.isEmpty ? 'enter_valid_email'.tr() : null,
+                                onFieldSubmitted: (_) =>
+                                    _passwordFocus.requestFocus(),
+                              ),
 
-                          AppTextField( labelText: "Password", hintText: "Enter password", controller: passwordCon, obscureText: hidePassword, focusNode: _passwordFocus, textInputAction: TextInputAction.done, validator: (v) => v!.isEmpty ? "Required" : null, suffixIcon: IconButton( icon: Icon( hidePassword ? Iconsax.eye_slash : Iconsax.eye, ), onPressed: () { setState(() { hidePassword = !hidePassword; }); }, ), onFieldSubmitted: (_) => _submit(), keyboardType: TextInputType.text, ),
-                                Align(
-                                  alignment: Alignment.centerRight,
-                                  child: TextButton(
-                                    onPressed: () {},
-                                    child: const Text("Forgot password?"),
+                              AppTextField(
+                                labelText: "password".tr(),
+                                hintText: "enter_password".tr(),
+                                controller: passwordCon,
+                                obscureText: hidePassword,
+                                focusNode: _passwordFocus,
+                                textInputAction: TextInputAction.done,
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'please_enter_password'.tr();
+                                  }
+
+                                  return null;
+                                },
+                                suffixIcon: IconButton(
+                                  icon: Icon(
+                                    hidePassword
+                                        ? Iconsax.eye_slash
+                                        : Iconsax.eye,
                                   ),
-                                ),
-
-                                const SizedBox(height: 6),
-
-                                BlocBuilder<AuthBloc, AuthState>(
-                                  builder: (context, state) {
-                                    final loading = state is AuthLoading;
-
-                                    return GestureDetector(
-                                      onTap: loading ? null : _submit,
-                                      child: AnimatedContainer(
-                                        duration: const Duration(
-                                          milliseconds: 200,
-                                        ),
-                                        height: 48,
-                                        alignment: Alignment.center,
-                                        decoration: BoxDecoration(
-                                          color: loading
-                                              ? Colors.indigo.shade200
-                                              : Colors.indigo,
-                                          borderRadius: BorderRadius.circular(
-                                            12,
-                                          ),
-                                        ),
-                                        child: loading
-                                            ? const SizedBox(
-                                                width: 22,
-                                                height: 22,
-                                                child:
-                                                    CircularProgressIndicator(
-                                                      strokeWidth: 2,
-                                                      color: Colors.white,
-                                                    ),
-                                              )
-                                            : const Text(
-                                                "Log In",
-                                                style: TextStyle(
-                                                  color: Colors.white,
-                                                  fontSize: 16,
-                                                  fontWeight: FontWeight.w600,
-                                                ),
-                                              ),
-                                      ),
-                                    );
+                                  onPressed: () {
+                                    setState(() {
+                                      hidePassword = !hidePassword;
+                                    });
                                   },
                                 ),
-                              ],
-                            ),
+                                onFieldSubmitted: (_) => _submit(),
+                                keyboardType: TextInputType.text,
+                              ),
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: TextButton(
+                                  onPressed: () {},
+                                  child: const Text("Forgot password?"),
+                                ),
+                              ),
+
+                              const SizedBox(height: 6),
+
+                              BlocBuilder<AuthBloc, AuthState>(
+                                builder: (context, state) {
+                                  final loading = state is AuthLoading;
+
+                                  return GestureDetector(
+                                    onTap: loading ? null : _submit,
+                                    child: AnimatedContainer(
+                                      duration: const Duration(
+                                        milliseconds: 200,
+                                      ),
+                                      height: 40,
+                                      alignment: Alignment.center,
+                                      decoration: BoxDecoration(
+                                        gradient: loading
+                                            ? AppColors.primaryGradient(
+                                                context,
+                                              ).withOpacity(0.3)
+                                            : AppColors.primaryGradient(
+                                                context,
+                                              ),
+                                        // color: loading
+                                        //     ? Colors.indigo.shade200
+                                        //     : Colors.indigo,
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: loading
+                                          ? const SizedBox(
+                                              width: 22,
+                                              height: 22,
+                                              child: CircularProgressIndicator(
+                                                strokeWidth: 2,
+                                                color: Colors.white,
+                                              ),
+                                            )
+                                          : const Text(
+                                              "Log In",
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ],
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -253,4 +282,71 @@ class _MobileLoginScrState extends State<MobileLoginScr>
       ),
     );
   }
+}
+
+Widget languageDropdown(BuildContext context) {
+  final currentCode = context.locale.languageCode;
+
+  return PopupMenuButton<String>(
+    initialValue: currentCode,
+    tooltip: 'Select language',
+    onSelected: (value) {
+      context.setLocale(Locale(value));
+    },
+    itemBuilder: (context) => [
+      _languageMenuItem(
+        context,
+        value: 'en',
+        title: 'English',
+        groupValue: currentCode,
+      ),
+      _languageMenuItem(
+        context,
+        value: 'bn',
+        title: 'বাংলা',
+        groupValue: currentCode,
+      ),
+    ],
+    child: Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        // color: Theme.of(context).highlightColor,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.translate, size: 18),
+          const SizedBox(width: 6),
+          Text(
+            currentCode == 'bn' ? 'বাংলা' : 'English',
+            style: AppTextStyle.body(context),
+          ),
+          // const Icon(Icons.arrow_drop_down),
+        ],
+      ),
+    ),
+  );
+}
+
+PopupMenuItem<String> _languageMenuItem(
+  BuildContext context, {
+  required String value,
+  required String title,
+  required String groupValue,
+}) {
+  return PopupMenuItem<String>(
+    value: value,
+
+    child: Row(
+      children: [
+        Radio<String>(
+          value: value,
+          groupValue: groupValue,
+          onChanged: (_) {}, // handled by PopupMenuButton
+        ),
+        Text(title, style: AppTextStyle.body(context)),
+      ],
+    ),
+  );
 }

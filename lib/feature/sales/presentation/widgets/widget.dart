@@ -65,15 +65,12 @@ class PosSaleDataTableWidget extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         color: AppColors.bottomNavBg(context),
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.1),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-        border: Border.all(color: Colors.grey.shade200, width: 1),
+        borderRadius: BorderRadius.circular(AppSizes.radius),
+
+        border: Border.all(
+          color: AppColors.greyColor(context).withValues(alpha: 0.5),
+          width: 0.5,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -115,7 +112,7 @@ class PosSaleDataTableWidget extends StatelessWidget {
                     SizedBox(
                       child: Text(
                         sale.invoiceNo.toString(),
-                        style:  TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.w600,
                           fontSize: 14,
                           color: AppColors.text(context),
@@ -164,7 +161,7 @@ class PosSaleDataTableWidget extends StatelessWidget {
                         icon: Iconsax.calendar,
                         label: 'Date',
                         value: _formatDate(sale.saleDate),
-                        context: context
+                        context: context,
                       ),
                     ),
 
@@ -176,7 +173,7 @@ class PosSaleDataTableWidget extends StatelessWidget {
                         icon: Iconsax.user,
                         label: 'Customer',
                         value: sale.customerName.toString(),
-                        context: context
+                        context: context,
                       ),
                     ),
                   ],
@@ -189,7 +186,7 @@ class PosSaleDataTableWidget extends StatelessWidget {
                   icon: Iconsax.profile_2user,
                   label: 'Sales By',
                   value: sale.saleByName.toString(),
-                  context: context
+                  context: context,
                 ),
                 const SizedBox(height: 8),
 
@@ -217,8 +214,9 @@ class PosSaleDataTableWidget extends StatelessWidget {
                           ),
                           Text(
                             _formatCurrency(payableAmount),
-                            style:  TextStyle(
-                              fontWeight: FontWeight.w700,                              color: AppColors.text(context),
+                            style: TextStyle(
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.text(context),
 
                               fontSize: 14,
                             ),
@@ -347,8 +345,7 @@ class PosSaleDataTableWidget extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 16,               color: AppColors.text(context),
-        ),
+        Icon(icon, size: 16, color: AppColors.text(context)),
         const SizedBox(width: 8),
         Expanded(
           child: Column(
@@ -366,10 +363,10 @@ class PosSaleDataTableWidget extends StatelessWidget {
               const SizedBox(height: 2),
               Text(
                 value,
-                style:  TextStyle(
+                style: TextStyle(
                   fontSize: 14,
-                  fontWeight: FontWeight.w500,              color: AppColors.text(context),
-
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.text(context),
                 ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
