@@ -92,7 +92,7 @@ class _MobileProfileScreenState extends State<MobileProfileScreen> {
 
     return AppScaffold(
       appBar: AppBar(
-        title: const Text("Profile").tr(),
+        title: const Text("profile").tr(),
         centerTitle: true,
         actions: [
           IconButton(
@@ -212,7 +212,7 @@ class _MobileProfileScreenState extends State<MobileProfileScreen> {
                           Expanded(
                             child: _buildQuickActionButton(
                               icon: Icons.security,
-                              label: "Permissions".tr(),
+                              label: "permissions".tr(),
                               color: primary,
                               onTap: () => _showPermissionsDialog(),
                             ),
@@ -221,7 +221,7 @@ class _MobileProfileScreenState extends State<MobileProfileScreen> {
                           Expanded(
                             child: _buildQuickActionButton(
                               icon: Icons.lock,
-                              label: "Security".tr(),
+                              label: "security".tr(),
                               color: primary,
                               onTap: () => _showSecurityDialog(),
                             ),
@@ -380,15 +380,15 @@ class _MobileProfileScreenState extends State<MobileProfileScreen> {
                         onTap: () {
                           appAdaptiveDialog(
                             context: context,
-                            title: "Log Out",
-                            message: "Are you sure you want to log out?",
+                            title: "logout".tr(),
+                            message: "are_you_sure_you_want_to_log_out".tr(),
                             actions: [
                               AdaptiveDialogAction(
-                                text: "Cancel",
+                                text: "cancel".tr(),
                                 onPressed: () => Navigator.pop(context),
                               ),
                               AdaptiveDialogAction(
-                                text: "Log Out",
+                                text: "yes".tr(),
                                 isDestructive: true,
                                 onPressed: ()async {
                                   await AuthLocalDB.clear();
@@ -472,7 +472,7 @@ class _MobileProfileScreenState extends State<MobileProfileScreen> {
 
   Widget _buildProfileDialog(ProfilePermissionModel pp) {
     return AlertDialog(
-      title: Text('Edit Profile'.tr()),
+      title: Text('edit_profile'.tr()),
       content: SingleChildScrollView(
         child: Form(
           key: _formKey,
@@ -483,7 +483,7 @@ class _MobileProfileScreenState extends State<MobileProfileScreen> {
               TextFormField(
                 controller: _firstNameController,
                 decoration: InputDecoration(
-                  labelText: 'First Name'.tr(),
+                  labelText: 'first_name'.tr(),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
@@ -491,7 +491,7 @@ class _MobileProfileScreenState extends State<MobileProfileScreen> {
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter first name'.tr();
+                    return 'please_enter_first_name'.tr();
                   }
                   return null;
                 },
@@ -500,7 +500,7 @@ class _MobileProfileScreenState extends State<MobileProfileScreen> {
               TextFormField(
                 controller: _lastNameController,
                 decoration: InputDecoration(
-                  labelText: 'Last Name'.tr(),
+                  labelText: 'last_name'.tr(),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
@@ -508,7 +508,7 @@ class _MobileProfileScreenState extends State<MobileProfileScreen> {
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter last name'.tr();
+                    return 'please_enter_last_name'.tr();
                   }
                   return null;
                 },
@@ -517,7 +517,7 @@ class _MobileProfileScreenState extends State<MobileProfileScreen> {
               TextFormField(
                 controller: _emailController,
                 decoration: InputDecoration(
-                  labelText: 'Email Address'.tr(),
+                  labelText: 'email_address'.tr(),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
@@ -526,11 +526,11 @@ class _MobileProfileScreenState extends State<MobileProfileScreen> {
                 keyboardType: TextInputType.emailAddress,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter email address'.tr();
+                    return 'please_enter_email_address'.tr();
                   }
                   if (!RegExp(r'^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$')
                       .hasMatch(value)) {
-                    return 'Please enter a valid email address'.tr();
+                    return 'please_enter_valid_email_address'.tr();
                   }
                   return null;
                 },
@@ -539,7 +539,7 @@ class _MobileProfileScreenState extends State<MobileProfileScreen> {
               TextFormField(
                 controller: _phoneController,
                 decoration: InputDecoration(
-                  labelText: 'Phone Number'.tr(),
+                  labelText: 'phone_number'.tr(),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
@@ -554,7 +554,7 @@ class _MobileProfileScreenState extends State<MobileProfileScreen> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: Text('Cancel'.tr()),
+          child: Text('cancel'.tr()),
         ),
         ElevatedButton(
           onPressed: () {
@@ -563,7 +563,7 @@ class _MobileProfileScreenState extends State<MobileProfileScreen> {
               Navigator.pop(context);
             }
           },
-          child: Text('Update'.tr()),
+          child: Text('update'.tr()),
         ),
       ],
     );
@@ -589,14 +589,14 @@ class _MobileProfileScreenState extends State<MobileProfileScreen> {
     final permissions = permissionData.data?.permissions;
 
     return AlertDialog(
-      title: Text('Module Permissions'.tr()),
+      title: Text('module_permissions'.tr()),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Your access permissions for system modules'.tr(),
+              'module_permissions_desc'.tr(),
               style: TextStyle(
                 color: Colors.grey[600],
                 fontSize: 14,
@@ -606,37 +606,37 @@ class _MobileProfileScreenState extends State<MobileProfileScreen> {
 
             if (permissions != null) ...[
               _buildDialogPermissionItem(
-                'Dashboard',
+                'dashboard'.tr(),
                 Icons.dashboard,
                 permissions.dashboard?.view ?? false,
               ),
               const SizedBox(height: 12),
               _buildDialogPermissionItem(
-                'Sales',
+                'sales',
                 Icons.shopping_cart,
                 [
-                  _buildPermissionItem(
-                      'View', permissions.sales?.view ?? false),
-                  _buildPermissionItem(
-                      'Create', permissions.sales?.create ?? false),
-                  _buildPermissionItem(
-                      'Edit', permissions.sales?.edit ?? false),
-                  _buildPermissionItem(
-                      'Delete', permissions.sales?.delete ?? false),
+                  _buildPermissionItem('view'.tr(),
+                      permissions.moneyReceipt?.view ?? false),
+                  _buildPermissionItem('create'.tr(),
+                      permissions.moneyReceipt?.create ?? false),
+                  _buildPermissionItem('edit'.tr(),
+                      permissions.moneyReceipt?.edit ?? false),
+                  _buildPermissionItem('delete'.tr(),
+                      permissions.moneyReceipt?.delete ?? false),
                 ],
               ),
               const SizedBox(height: 12),
               _buildDialogPermissionItem(
-                'Money Receipt',
+                'money_receipt'.tr(),
                 Icons.receipt,
                 [
-                  _buildPermissionItem('View',
+                  _buildPermissionItem('view'.tr(),
                       permissions.moneyReceipt?.view ?? false),
-                  _buildPermissionItem('Create',
+                  _buildPermissionItem('create'.tr(),
                       permissions.moneyReceipt?.create ?? false),
-                  _buildPermissionItem('Edit',
+                  _buildPermissionItem('edit'.tr(),
                       permissions.moneyReceipt?.edit ?? false),
-                  _buildPermissionItem('Delete',
+                  _buildPermissionItem('delete'.tr(),
                       permissions.moneyReceipt?.delete ?? false),
                 ],
               ),
@@ -651,7 +651,7 @@ class _MobileProfileScreenState extends State<MobileProfileScreen> {
                     ),
                     const SizedBox(height: 12),
                     Text(
-                      'No permissions data available'.tr(),
+                      'no_permissions_data'.tr(),
                       style: TextStyle(
                         fontSize: 14,
                         color: Colors.grey[600],
@@ -666,7 +666,7 @@ class _MobileProfileScreenState extends State<MobileProfileScreen> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: Text('Close'.tr()),
+          child: Text('close'.tr()),
         ),
       ],
     );
@@ -701,7 +701,7 @@ class _MobileProfileScreenState extends State<MobileProfileScreen> {
             const SizedBox(height: 12),
             if (permissions is bool)
               _buildPermissionItem(
-                  permissions ? 'Allowed' : 'Denied', permissions)
+                  permissions ? 'allowed'.tr() : 'denied'.tr(), permissions)
             else if (permissions is List<Widget>)
               Wrap(
                 spacing: 8,
@@ -719,7 +719,7 @@ class _MobileProfileScreenState extends State<MobileProfileScreen> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Change Password'.tr()),
+          title: Text('change_password'.tr()),
           content: SingleChildScrollView(
             child: Form(
               key: _passwordFormKey,
@@ -729,7 +729,7 @@ class _MobileProfileScreenState extends State<MobileProfileScreen> {
                   TextFormField(
                     controller: _currentPasswordController,
                     decoration: InputDecoration(
-                      labelText: 'Current Password'.tr(),
+                      labelText: 'current_password'.tr(),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -738,7 +738,7 @@ class _MobileProfileScreenState extends State<MobileProfileScreen> {
                     obscureText: true,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please enter current password'.tr();
+                        return 'please_enter_current_password'.tr();
                       }
                       return null;
                     },
@@ -747,7 +747,7 @@ class _MobileProfileScreenState extends State<MobileProfileScreen> {
                   TextFormField(
                     controller: _newPasswordController,
                     decoration: InputDecoration(
-                      labelText: 'New Password'.tr(),
+                      labelText: 'new_password'.tr(),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -756,10 +756,10 @@ class _MobileProfileScreenState extends State<MobileProfileScreen> {
                     obscureText: true,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please enter new password'.tr();
+                        return 'please_enter_new_password'.tr();
                       }
                       if (value.length < 6) {
-                        return 'Password must be at least 6 characters'.tr();
+                        return 'password_min_length_6'.tr();
                       }
                       return null;
                     },
@@ -768,7 +768,7 @@ class _MobileProfileScreenState extends State<MobileProfileScreen> {
                   TextFormField(
                     controller: _confirmPasswordController,
                     decoration: InputDecoration(
-                      labelText: 'Confirm New Password'.tr(),
+                      labelText: 'confirm_new_password'.tr(),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -777,10 +777,10 @@ class _MobileProfileScreenState extends State<MobileProfileScreen> {
                     obscureText: true,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please confirm new password'.tr();
+                        return 'please_confirm_new_password'.tr();
                       }
                       if (value != _newPasswordController.text) {
-                        return 'Passwords do not match'.tr();
+                        return 'passwords_do_not_match'.tr();
                       }
                       return null;
                     },
@@ -792,7 +792,7 @@ class _MobileProfileScreenState extends State<MobileProfileScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text('Cancel'.tr()),
+              child: Text('cancel'.tr()),
             ),
             BlocBuilder<ProfileBloc, ProfileState>(
               builder: (context, state) {
@@ -807,7 +807,7 @@ class _MobileProfileScreenState extends State<MobileProfileScreen> {
                   },
                   child: state is PasswordChanging
                       ? const CircularProgressIndicator()
-                      : Text('Change Password'.tr()),
+                      : Text('change_password'.tr()),
                 );
               },
             ),
@@ -817,18 +817,15 @@ class _MobileProfileScreenState extends State<MobileProfileScreen> {
     );
   }
 
-  // Remaining methods stay the same as before...
-  // (_handleStateChanges, _buildLoadingState, _buildErrorState, _populateFormFields,
-  // _updateProfile, _changePassword, _clearPasswordFields, _showImagePickerOptions,
-  // and all the helper widgets)
+
 
   void _handleStateChanges(BuildContext context, ProfileState state) {
     if (state is ProfileUpdateSuccess) {
       _loadProfileData();
       showCustomToast(
         context: context,
-        title: 'Success!'.tr(),
-        description: 'Profile updated successfully'.tr(),
+        title: 'success'.tr(),
+        description: 'profile_updated_successfully'.tr(),
         icon: Icons.check_circle,
         primaryColor: Colors.green,
       );
@@ -845,8 +842,8 @@ class _MobileProfileScreenState extends State<MobileProfileScreen> {
       _loadProfileData();
       showCustomToast(
         context: context,
-        title: 'Success!'.tr(),
-        description: 'Password changed successfully'.tr(),
+        title: 'success'.tr(),
+        description: 'password_changed_successfully'.tr(),
         icon: Icons.check_circle,
         primaryColor: Colors.green,
       );
@@ -896,7 +893,7 @@ class _MobileProfileScreenState extends State<MobileProfileScreen> {
             ),
             const SizedBox(height: 12),
             Text(
-              state.content ?? 'Something went wrong'.tr(),
+              state.content ?? 'something_went_wrong'.tr(),
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 14,
@@ -907,7 +904,7 @@ class _MobileProfileScreenState extends State<MobileProfileScreen> {
             SizedBox(
               width: 200,
               child: AppButton(
-                name: "Try Again".tr(),
+                name: "try_again".tr(),
                 onPressed: onRetry,
               ),
             ),
@@ -988,7 +985,7 @@ class _MobileProfileScreenState extends State<MobileProfileScreen> {
               ),
               const SizedBox(height: 16),
               Text(
-                'Update Profile Picture'.tr(),
+                'update_profile_picture'.tr(),
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
@@ -996,13 +993,13 @@ class _MobileProfileScreenState extends State<MobileProfileScreen> {
               ),
               const SizedBox(height: 8),
               Text(
-                'Choose an option to update your profile picture'.tr(),
+                'update_profile_picture_desc'.tr(),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 20),
               ListTile(
                 leading: const Icon(Icons.photo_library),
-                title: Text('Choose from Gallery'.tr()),
+                title: Text('choose_from_gallery'.tr()),
                 onTap: () {
                   Navigator.pop(context);
                   // TODO: Implement gallery image picker
@@ -1010,7 +1007,7 @@ class _MobileProfileScreenState extends State<MobileProfileScreen> {
               ),
               ListTile(
                 leading: const Icon(Icons.camera_alt),
-                title: Text('Take a Photo'.tr()),
+                title: Text('take_photo'.tr()),
                 onTap: () {
                   Navigator.pop(context);
                   // TODO: Implement camera image picker
@@ -1129,9 +1126,10 @@ void _showThemeColorBottomSheet(
             ),
             const SizedBox(height: 16),
             Text(
-              'Choose Theme Color'.tr(),
-              style: const TextStyle(
+              'choose_theme_color'.tr(),
+              style:  TextStyle(
                 fontSize: 18,
+                color: AppColors.text(context),
                 fontWeight: FontWeight.w600,
               ),
             ),

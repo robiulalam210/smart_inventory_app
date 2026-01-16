@@ -112,11 +112,11 @@ class _MobileLoginScrState extends State<MobileLoginScr>
             appAlertDialog(
               context,
               state.message,
-              title: "Login Failed",
+              title: "login_failed".tr(),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text("OK"),
+                  child:  Text("ok".tr()),
                 ),
               ],
             );
@@ -216,7 +216,7 @@ class _MobileLoginScrState extends State<MobileLoginScr>
                                 alignment: Alignment.centerRight,
                                 child: TextButton(
                                   onPressed: () {},
-                                  child: const Text("Forgot password?"),
+                                  child:  Text("forgot_password".tr()),
                                 ),
                               ),
 
@@ -256,8 +256,8 @@ class _MobileLoginScrState extends State<MobileLoginScr>
                                                 color: Colors.white,
                                               ),
                                             )
-                                          : const Text(
-                                              "Log In",
+                                          :  Text(
+                                              "login".tr(),
                                               style: TextStyle(
                                                 color: Colors.white,
                                                 fontSize: 16,
@@ -289,7 +289,7 @@ Widget languageDropdown(BuildContext context) {
 
   return PopupMenuButton<String>(
     initialValue: currentCode,
-    tooltip: 'Select language',
+    tooltip: 'select_language'.tr(),
     onSelected: (value) {
       context.setLocale(Locale(value));
     },
