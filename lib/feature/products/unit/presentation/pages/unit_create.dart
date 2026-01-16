@@ -155,7 +155,7 @@ class _UnitCreateState extends State<UnitCreate> {
               ],
             ),
 
-            SizedBox(height: 20),
+            SizedBox(height: 10),
 
             // Name Input Field
             // Name Input Field

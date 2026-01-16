@@ -199,14 +199,6 @@ import 'configs.dart';
   static const secondaryMintGreen = Color(0xFFB5E4CA);
   static const secondaryPaleYellow = Color(0xFFFFD88D);
 
-  static  LinearGradient linearGradient=LinearGradient(
-      begin: Alignment.topLeft,
-      end: const Alignment(0.80, 0.80),
-      colors: [
-        Colors.green.shade50,
-        Colors.blue.shade50,
-      ]
-  );
 
 
 

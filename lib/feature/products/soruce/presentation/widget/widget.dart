@@ -37,12 +37,16 @@ class MobileSourceTableCard extends StatelessWidget {
   Widget _buildSourceCard(BuildContext context, SourceModel source, int index) {
     final isActive = _getSourceStatus(source);
 
-    return Card(
-      color: AppColors.bottomNavBg(context),
+    return Container(
       margin: const EdgeInsets.only(bottom: 6),
-      elevation: 1,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+      decoration: BoxDecoration(
+        color: AppColors.bottomNavBg(context),
+        borderRadius: BorderRadius.circular(AppSizes.radius),
+
+        border: Border.all(
+          color: AppColors.greyColor(context).withValues(alpha: 0.5),
+          width: 0.5,
+        ),
       ),
       child: InkWell(
         onTap: () => onSourceTap?.call(),
@@ -211,19 +215,27 @@ class MobileSourceTableCard extends StatelessWidget {
     final sourceBloc = context.read<SourceBloc>();
     sourceBloc.nameController.text = source.name ?? "";
     sourceBloc.selectedState = source.isActive == true ? "Active" : "Inactive";
+
     showDialog(
       context: context,
       builder: (context) {
         return Dialog(
-          child: SizedBox(
-            width: Responsive.isMobile(context)
-                ? MediaQuery.of(context).size.width * 0.9
-                : MediaQuery.of(context).size.width * 0.5,
-            child: SourceCreate(id: source.id.toString()),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: SizedBox(
+                width: Responsive.isMobile(context)
+                    ? MediaQuery.of(context).size.width * 0.9
+                    : MediaQuery.of(context).size.width * 0.5,
+                child: SourceCreate()),
           ),
         );
       },
     );
+
+
 
   }
 
@@ -520,20 +532,23 @@ class SourceTableCard extends StatelessWidget {
     final sourceBloc = context.read<SourceBloc>();
     sourceBloc.nameController.text = source.name ?? "";
     sourceBloc.selectedState = source.isActive == true ? "Active" : "Inactive";
-
     showDialog(
       context: context,
       builder: (context) {
         return Dialog(
-          child: SizedBox(
-            width: AppSizes.width(context) * 0.50,
-            child: SourceCreate(
-              id: source.id.toString(),
-            ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: SizedBox(
+                width: AppSizes.width(context) * 0.50,
+                child: SourceCreate()),
           ),
         );
       },
     );
+
   }
 
   Widget _buildEmptyState() {

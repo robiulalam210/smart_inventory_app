@@ -181,7 +181,7 @@ class _SourceCreateState extends State<SourceCreate> {
               ],
             ),
 
-            SizedBox(height: 20),
+            SizedBox(height: 10),
 
             // Name Input Field
             AppTextField(

@@ -192,7 +192,7 @@ class CustomSearchTextFormField extends StatelessWidget {
   Widget _buildTextField(BuildContext context) {
     return ConstrainedBox(
       constraints: const BoxConstraints(
-        maxHeight: 38,
+        maxHeight: 42,
         minHeight: 35,
       ),
       child: TextFormField(
@@ -219,10 +219,18 @@ class CustomSearchTextFormField extends StatelessWidget {
             fontSize: 14,
           ),
           prefixIcon: prefixIcon ?? (forSearch ? _buildDefaultSearchIcon(context) : null),
-          suffixIcon:  _buildClearButton(context),
+          suffixIcon: ValueListenableBuilder<TextEditingValue>(
+            valueListenable: controller,
+            builder: (context, value, _) {
+              if (value.text.isEmpty) {
+                return const SizedBox.shrink();
+              }
+              return _buildClearButton(context);
+            },
+          ),
           counterText: "", // Hide counter text when maxLength is set
           contentPadding: const EdgeInsets.symmetric(
-            vertical: 8.0,
+            vertical: 10.0,
             horizontal: 12.0,
           ),
           filled: !enabled,
@@ -278,6 +286,7 @@ class CustomSearchTextFormField extends StatelessWidget {
       onPressed: onClear ?? () {
         controller.clear();
         onChanged("");
+
       },
       padding: EdgeInsets.zero,
       constraints: const BoxConstraints(

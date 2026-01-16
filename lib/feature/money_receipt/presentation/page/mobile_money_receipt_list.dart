@@ -294,34 +294,8 @@ class _MoneyReceiptScreenState extends State<MobileMoneyReceiptList> {
               ),
           ],
         ),
-        const SizedBox(height: 4),
 
         // Action Buttons
-        Row(
-          children: [
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: () => _showMobileFilterSheet(context),
-                icon: const Icon(Iconsax.filter, size: 16),
-                label: const Text('More Filters'),
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: _clearFilters,
-                icon: const Icon(Icons.clear_all, size: 16),
-                label: const Text('Clear All'),
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                ),
-              ),
-            ),
-          ],
-        ),
       ],
     );
   }

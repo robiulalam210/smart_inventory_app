@@ -123,6 +123,7 @@ class _BrandScreenState extends State<MobileBrandScreen> {
           onClear: () {
             dataBloc.filterTextController.clear();
             _fetchApi();
+            FocusScope.of(context).unfocus();
           },
           onChanged: (value) {
             _fetchApi(filterText: value);
@@ -172,11 +173,17 @@ class _BrandScreenState extends State<MobileBrandScreen> {
       context: context,
       builder: (context) {
         return Dialog(
-          child: SizedBox(
-            width: Responsive.isMobile(context)
-                ? MediaQuery.of(context).size.width * 0.9
-                : MediaQuery.of(context).size.width * 0.5,
-            child: const BrandCreate(),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: SizedBox(
+              width: Responsive.isMobile(context)
+                  ? MediaQuery.of(context).size.width * 0.9
+                  : MediaQuery.of(context).size.width * 0.5,
+              child: const BrandCreate(),
+            ),
           ),
         );
       },

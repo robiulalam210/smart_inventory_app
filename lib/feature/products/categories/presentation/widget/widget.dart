@@ -61,13 +61,17 @@ class CategoriesListMobile extends StatelessWidget {
         // Optionally show category details
         // _showCategoryDetails(context, category);
       },
-      child: Card(
-        color: AppColors.bottomNavBg(context),
+      child: Container(
+
         margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-        elevation: 1,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-          side: BorderSide(color: Colors.grey.shade200, width: 1),
+        decoration: BoxDecoration(
+          color: AppColors.bottomNavBg(context),
+          borderRadius: BorderRadius.circular(AppSizes.radius),
+
+          border: Border.all(
+            color: AppColors.greyColor(context).withValues(alpha: 0.5),
+            width: 0.5,
+          ),
         ),
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -256,17 +260,17 @@ class CategoriesListMobile extends StatelessWidget {
       barrierDismissible: false,
       builder: (context) {
         return Dialog(
-          insetPadding: const EdgeInsets.all(16),
+          insetPadding: const EdgeInsets.all(0),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
           child: ConstrainedBox(
             constraints: BoxConstraints(
-              maxHeight: MediaQuery.of(context).size.height * 0.9,
+              // maxHeight: MediaQuery.of(context).size.height * 0.9,
             ),
             child: SingleChildScrollView(
               child: Padding(
-                padding: const EdgeInsets.all(4),
+                padding: const EdgeInsets.all(0),
                 child: CategoriesCreate(id: category.id.toString()),
               ),
             ),
@@ -335,8 +339,13 @@ class CategoriesListMobile extends StatelessWidget {
                     context: context,
                     builder: (context) {
                       return Dialog(
-                        insetPadding: const EdgeInsets.all(16),
-                        child: SingleChildScrollView(child: CategoriesCreate()),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: ClipRRect(
+                            borderRadius: BorderRadius.circular(16),
+
+                            child: CategoriesCreate()),
                       );
                     },
                   );
@@ -655,9 +664,15 @@ class CategoriesTableCard extends StatelessWidget {
       context: context,
       builder: (context) {
         return Dialog(
-          child: SizedBox(
-            width: AppSizes.width(context) * 0.50,
-            child: CategoriesCreate(id: category.id.toString()),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: SizedBox(
+              width: AppSizes.width(context) * 0.50,
+              child: CategoriesCreate(id: category.id.toString()),
+            ),
           ),
         );
       },

@@ -161,6 +161,16 @@ class _GroupsScreenState extends State<MobileGroupsScreen> {
           onChanged: (value) {
             _fetchApi(filterText: value);
           },
+          onClear: (){
+            context
+                .read<GroupsBloc>()
+                .filterTextController
+                .clear();
+            _fetchApi();
+            FocusScope.of(context).unfocus();
+
+
+          },
           isRequiredLabel: false,
           hintText: "group name",
         ),
@@ -206,11 +216,17 @@ class _GroupsScreenState extends State<MobileGroupsScreen> {
       context: context,
       builder: (context) {
         return Dialog(
-          child: SizedBox(
-            width: Responsive.isMobile(context)
-                ? MediaQuery.of(context).size.width * 0.9
-                : MediaQuery.of(context).size.width * 0.5,
-            child: const GroupsCreate(),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: SizedBox(
+              width: Responsive.isMobile(context)
+                  ? MediaQuery.of(context).size.width * 0.9
+                  : MediaQuery.of(context).size.width * 0.5,
+              child: const GroupsCreate(),
+            ),
           ),
         );
       },

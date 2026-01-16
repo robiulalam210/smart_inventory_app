@@ -13,7 +13,6 @@ import '../bloc/products/products_bloc.dart';
 import '../widget/pagination.dart';
 import '../widget/widget.dart';
 import 'mobile_product_create.dart';
-import 'product_create.dart';
 
 class MobileProductScreen extends StatefulWidget {
   const MobileProductScreen({super.key});
@@ -72,6 +71,7 @@ class _ProductsScreenState extends State<MobileProductScreen> {
       ),
 
       floatingActionButton: FloatingActionButton(
+        backgroundColor: AppColors.primaryColor(context),
         onPressed: () => _showCreateProductDialog(context),
         child: Icon(Icons.add),
       ),

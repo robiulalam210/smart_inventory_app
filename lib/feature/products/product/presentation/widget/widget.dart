@@ -53,20 +53,13 @@ class ProductDataTableWidget extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         color: AppColors.bottomNavBg(context),
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.1),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(AppSizes.radius),
+
         border: Border.all(
-          color: Colors.grey.shade200,
-          width: 1,
+          color: AppColors.greyColor(context).withValues(alpha: 0.5),
+          width: 0.5,
         ),
-      ),
-      child: Column(
+      ),      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Header with SL and Status

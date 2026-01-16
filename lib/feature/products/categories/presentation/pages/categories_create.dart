@@ -116,7 +116,11 @@ class _CategoriesCreateState extends State<CategoriesCreate> {
 
   Widget _buildDialogContent() {
     return Container(
-      color: AppColors.bottomNavBg(context),
+
+      decoration: BoxDecoration(
+        borderRadius: BorderRadiusGeometry.circular(16),
+        color: AppColors.bottomNavBg(context),
+      ),
       width: AppSizes.width(context) * 0.40,
       padding: const EdgeInsets.all(20),
       child: Form(

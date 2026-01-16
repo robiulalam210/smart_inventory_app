@@ -23,7 +23,7 @@ class AccountCardDashbord extends StatelessWidget {
         leading: Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-              shape: BoxShape.circle, gradient: AppColors.linearGradient),
+              shape: BoxShape.circle, gradient: AppColors.primaryGradient(context)),
           child: Text(
             index.toString(),
             style: const TextStyle(fontWeight: FontWeight.w600),

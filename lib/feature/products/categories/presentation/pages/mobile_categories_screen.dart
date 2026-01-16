@@ -55,8 +55,12 @@ class _CategoriesScreenState extends State<MobileCategoriesScreen> {
             context: context,
             builder: (context) {
               return Dialog(
-                insetPadding: const EdgeInsets.all(16),
-                child: CategoriesCreate(),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: CategoriesCreate()),
               );
             },
           );
@@ -114,6 +118,8 @@ class _CategoriesScreenState extends State<MobileCategoriesScreen> {
                           onClear: () {
                             dataBloc.filterTextController.clear();
                             _fetchApiData();
+                            FocusScope.of(context).unfocus();
+
                           },
                           hintText: "categories...",
                           isRequiredLabel: false,

@@ -10,6 +10,7 @@ class AppTextField extends StatelessWidget {
       super.key,
       this.onChanged,
       this.validator,
+      this.fillColor,
       this.obscureText,
       this.suffixIcon,
       this.prefixIcon,
@@ -35,6 +36,8 @@ class AppTextField extends StatelessWidget {
   final String? labelText;
   final String hintText;
   final bool? autofocus;
+  final Color? fillColor;
+
   final bool readOnly;
   final FocusNode? focusNode;
   final void Function()? onEditingComplete;
@@ -83,37 +86,35 @@ class AppTextField extends StatelessWidget {
               onEditingComplete: onEditingComplete,
               readOnly: readOnly,
               decoration: InputDecoration(
-                // fillColor: fillColor,
-                contentPadding: EdgeInsets.symmetric(
-                    horizontal: AppSizes.paddingInside,
-                    vertical: AppSizes.paddingInside),
-                isDense: true,
-                hintText: hintText,
-                hintStyle: TextStyle(
-                  color:  AppColors.text(context),
-                  fontWeight: FontWeight.w300,
-                  fontSize: 14,
-                ),
-
-                errorMaxLines: 2,
                 prefixIcon: prefixIcon,
                 suffixIcon: suffixIcon,
-                errorBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(AppSizes.radius),
-                    borderSide: BorderSide(color: AppColors.error, width: 0.7)),
-                focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(AppSizes.radius),
-                    borderSide:
-                        BorderSide(color:  AppColors.text(context), width: 0.7)),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppSizes.radius),
-                  borderSide: BorderSide(color: AppColors.border, width: 0.7),
+                hintText: hintText,
+                hintStyle: TextStyle(
+                  fontSize: 14,
+                  color: AppColors.grey,
                 ),
-                focusedErrorBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppSizes.radius),
-                  borderSide: BorderSide(color: AppColors.error, width: 0.7),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                filled: true,
+                fillColor: fillColor ??
+                    AppColors.primaryColor(context).withValues(alpha: 0.05), // theme background
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppSizes.radiusSmall),
+                  borderSide: BorderSide(color: AppColors.greyColor(context).withValues(alpha: 0.5), width: 0.5),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppSizes.radiusSmall),
+                  borderSide: BorderSide(color: AppColors.primaryColor(context), width: 0.5),
+                ),
+                errorBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppSizes.radiusSmall),
+                  borderSide:  BorderSide(color: AppColors.errorColor(context), width: 0.5),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppSizes.radiusSmall),
+                  borderSide: BorderSide(color: AppColors.greyColor(context).withValues(alpha: 0.5), width: 0.5),
                 ),
               ),
+
               onFieldSubmitted: onFieldSubmitted,
               onTapOutside: (event) => FocusScope.of(context).unfocus(),
             ),

@@ -40,12 +40,16 @@ class MobileAccountTransferCard extends StatelessWidget {
   }
 
   Widget _buildTransferCard(BuildContext context, AccountTransferModel transfer) {
-    return Card(
-      color: AppColors.bottomNavBg(context),
+    return Container(
       margin: const EdgeInsets.only(bottom: 8),
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+      decoration: BoxDecoration(
+        color: AppColors.bottomNavBg(context),
+        borderRadius: BorderRadius.circular(AppSizes.radius),
+
+        border: Border.all(
+          color: AppColors.greyColor(context).withValues(alpha: 0.5),
+          width: 0.5,
+        ),
       ),
       child: InkWell(
         onTap: () => _showTransferDetails(context, transfer),

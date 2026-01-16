@@ -124,7 +124,6 @@ class GroupsTableCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
-        color: Colors.white,
         boxShadow: [
           BoxShadow(
             color: Colors.grey.withValues(alpha: 0.1),
@@ -137,7 +136,7 @@ class GroupsTableCard extends StatelessWidget {
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         itemCount: groups.length,
-        separatorBuilder: (context, index) => const Divider(height: 1),
+        separatorBuilder: (context, index) => const SizedBox(height: 6),
         itemBuilder: (context, index) {
           final group = groups[index];
           return _buildMobileGroupCard(context, group, index);
@@ -156,7 +155,13 @@ class GroupsTableCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color:AppColors.bottomNavBg(context),
+        color: AppColors.bottomNavBg(context),
+        borderRadius: BorderRadius.circular(AppSizes.radius),
+
+        border: Border.all(
+          color: AppColors.greyColor(context).withValues(alpha: 0.5),
+          width: 0.5,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -410,11 +415,17 @@ class GroupsTableCard extends StatelessWidget {
       context: context,
       builder: (context) {
         return Dialog(
-          child: SizedBox(
-            width: Responsive.isMobile(context)
-                ? MediaQuery.of(context).size.width * 0.9
-                : MediaQuery.of(context).size.width * 0.5,
-            child: GroupsCreate(id: group.id.toString()),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: SizedBox(
+              width: Responsive.isMobile(context)
+                  ? MediaQuery.of(context).size.width * 0.9
+                  : MediaQuery.of(context).size.width * 0.5,
+              child: GroupsCreate(id: group.id.toString()),
+            ),
           ),
         );
       },

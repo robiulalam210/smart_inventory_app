@@ -160,6 +160,12 @@ class TransactionCard extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: AppColors.bottomNavBg(context),
+        borderRadius: BorderRadius.circular(AppSizes.radius),
+
+        border: Border.all(
+          color: AppColors.greyColor(context).withValues(alpha: 0.5),
+          width: 0.5,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

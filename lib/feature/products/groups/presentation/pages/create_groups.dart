@@ -172,7 +172,7 @@ class _GroupsCreateState extends State<GroupsCreate> {
               ],
             ),
 
-            SizedBox(height: 20),
+            SizedBox(height: 10),
 
             // Name Input Field
             AppTextField(
