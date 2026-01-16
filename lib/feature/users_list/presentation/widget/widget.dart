@@ -82,7 +82,7 @@ class UserTableCard extends StatelessWidget {
       children: [
         Expanded(
           child: Text(
-            '${user.firstName ?? ''} ${user.lastName ?? ''}'.trim(),
+            (user.fullName ?? 'N/A'),
             style:  TextStyle(
               fontWeight: FontWeight.w600,
               color: AppColors.text(context),

@@ -260,17 +260,17 @@ class CategoriesListMobile extends StatelessWidget {
       barrierDismissible: false,
       builder: (context) {
         return Dialog(
-          insetPadding: const EdgeInsets.all(16),
+          insetPadding: const EdgeInsets.all(0),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
           child: ConstrainedBox(
             constraints: BoxConstraints(
-              maxHeight: MediaQuery.of(context).size.height * 0.9,
+              // maxHeight: MediaQuery.of(context).size.height * 0.9,
             ),
             child: SingleChildScrollView(
               child: Padding(
-                padding: const EdgeInsets.all(4),
+                padding: const EdgeInsets.all(0),
                 child: CategoriesCreate(id: category.id.toString()),
               ),
             ),
@@ -339,8 +339,13 @@ class CategoriesListMobile extends StatelessWidget {
                     context: context,
                     builder: (context) {
                       return Dialog(
-                        insetPadding: const EdgeInsets.all(16),
-                        child: SingleChildScrollView(child: CategoriesCreate()),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: ClipRRect(
+                            borderRadius: BorderRadius.circular(16),
+
+                            child: CategoriesCreate()),
                       );
                     },
                   );
@@ -659,9 +664,15 @@ class CategoriesTableCard extends StatelessWidget {
       context: context,
       builder: (context) {
         return Dialog(
-          child: SizedBox(
-            width: AppSizes.width(context) * 0.50,
-            child: CategoriesCreate(id: category.id.toString()),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: SizedBox(
+              width: AppSizes.width(context) * 0.50,
+              child: CategoriesCreate(id: category.id.toString()),
+            ),
           ),
         );
       },

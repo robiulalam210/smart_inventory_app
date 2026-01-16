@@ -1,4 +1,3 @@
-
 import 'package:meherinMart/core/widgets/app_scaffold.dart';
 
 import '/feature/products/soruce/presentation/pages/soruce_create.dart';
@@ -20,12 +19,14 @@ class MobileSourceScreen extends StatefulWidget {
 
 class _SourceScreenState extends State<MobileSourceScreen> {
   late var sourceBloc = context.read<SourceBloc>();
-@override
+
+  @override
   void initState() {
-  _fetchApiData();
-  // TODO: implement initState
+    _fetchApiData();
+    // TODO: implement initState
     super.initState();
   }
+
   void _fetchApiData({String filterText = '', int pageNumber = 0}) {
     context.read<SourceBloc>().add(
       FetchSourceList(context, filterText: filterText, pageNumber: pageNumber),
@@ -34,7 +35,6 @@ class _SourceScreenState extends State<MobileSourceScreen> {
 
   @override
   Widget build(BuildContext context) {
-
     return AppScaffold(
       appBar: AppBar(
         title: Text("Source", style: AppTextStyle.titleMedium(context)),
@@ -45,14 +45,23 @@ class _SourceScreenState extends State<MobileSourceScreen> {
           showDialog(
             context: context,
             builder: (context) {
-              return Dialog(child: SourceCreate());
+              return Dialog(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: SourceCreate(),
+                ),
+              );
             },
           );
+
         },
         child: Icon(Icons.add),
       ),
       body: SafeArea(
-        child:  SizedBox(
+        child: SizedBox(
           child: Container(
             padding: AppTextStyle.getResponsivePaddingBody(context),
             child: BlocListener<SourceBloc, SourceState>(
@@ -117,34 +126,41 @@ class _SourceScreenState extends State<MobileSourceScreen> {
               child: SingleChildScrollView(
                 child: Column(
                   children: [
-               Padding(padding: EdgeInsets.symmetric(horizontal: 0),
-               child:      CustomSearchTextFormField(
-                 controller: context
-                     .read<SourceBloc>()
-                     .filterTextController,
-                 onClear: () {
-                   context
-                       .read<SourceBloc>()
-                       .filterTextController
-                       .clear();
-                   _fetchApiData();
-                 },
-                 onChanged: (value) {
-                   _fetchApiData(filterText: value);
-                 },
-                 isRequiredLabel: false,
-                 hintText: "Name", // Pass dynamic hintText if needed
-               ),
-               ),
-                
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 0),
+                      child: CustomSearchTextFormField(
+                        controller: context
+                            .read<SourceBloc>()
+                            .filterTextController,
+                        onClear: () {
+                          context
+                              .read<SourceBloc>()
+                              .filterTextController
+                              .clear();
+                          _fetchApiData();
+                          FocusScope.of(context).unfocus();
+
+                        },
+                        onChanged: (value) {
+                          _fetchApiData(filterText: value);
+                        },
+                        isRequiredLabel: false,
+                        hintText: "Name", // Pass dynamic hintText if needed
+                      ),
+                    ),
+
                     SizedBox(
                       child: BlocBuilder<SourceBloc, SourceState>(
                         builder: (context, state) {
                           if (state is SourceListLoading) {
-                            return const Center(child: CircularProgressIndicator());
+                            return const Center(
+                              child: CircularProgressIndicator(),
+                            );
                           } else if (state is SourceListSuccess) {
                             if (state.list.isEmpty) {
-                              return Center(child: Lottie.asset(AppImages.noData));
+                              return Center(
+                                child: Lottie.asset(AppImages.noData),
+                              );
                             } else {
                               return MobileSourceTableCard(sources: state.list);
                             }
@@ -167,7 +183,4 @@ class _SourceScreenState extends State<MobileSourceScreen> {
       ),
     );
   }
-
-
-
 }

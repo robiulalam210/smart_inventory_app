@@ -27,7 +27,7 @@ class MobileUnitTableCard extends StatelessWidget {
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       itemCount: units.length,
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
       itemBuilder: (context, index) {
         final unit = units[index];
         return _buildUnitCard(context, unit, index + 1);
@@ -227,15 +227,24 @@ class MobileUnitTableCard extends StatelessWidget {
     unitBloc.nameController.text = unit.name ?? "";
     unitBloc.shortNameController.text = unit.code ?? "";
     unitBloc.selectedState = unit.isActive == true ? "Active" : "Inactive";
+
+
     showDialog(
       context: context,
       builder: (context) {
         return Dialog(
-          child: SizedBox(
-            width: Responsive.isMobile(context)
-                ? MediaQuery.of(context).size.width * 0.9
-                : MediaQuery.of(context).size.width * 0.5,
-            child: UnitCreate(id: unit.id.toString()),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadiusGeometry.circular(16),
+
+            child: SizedBox(
+              width: Responsive.isMobile(context)
+                  ? MediaQuery.of(context).size.width * 0.9
+                  : MediaQuery.of(context).size.width * 0.5,
+              child: UnitCreate(id: unit.id.toString()),
+            ),
           ),
         );
       },
@@ -539,10 +548,17 @@ class UnitTableCard extends StatelessWidget {
       context: context,
       builder: (context) {
         return Dialog(
-          child: SizedBox(
-            width: AppSizes.width(context) * 0.50,
-            child: UnitCreate(
-              id: unit.id.toString(),
+
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadiusGeometry.circular(16),
+            child: SizedBox(
+              width: AppSizes.width(context) * 0.50,
+              child: UnitCreate(
+                id: unit.id.toString(),
+              ),
             ),
           ),
         );

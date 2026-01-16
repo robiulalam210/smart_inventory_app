@@ -215,19 +215,27 @@ class MobileSourceTableCard extends StatelessWidget {
     final sourceBloc = context.read<SourceBloc>();
     sourceBloc.nameController.text = source.name ?? "";
     sourceBloc.selectedState = source.isActive == true ? "Active" : "Inactive";
+
     showDialog(
       context: context,
       builder: (context) {
         return Dialog(
-          child: SizedBox(
-            width: Responsive.isMobile(context)
-                ? MediaQuery.of(context).size.width * 0.9
-                : MediaQuery.of(context).size.width * 0.5,
-            child: SourceCreate(id: source.id.toString()),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: SizedBox(
+                width: Responsive.isMobile(context)
+                    ? MediaQuery.of(context).size.width * 0.9
+                    : MediaQuery.of(context).size.width * 0.5,
+                child: SourceCreate()),
           ),
         );
       },
     );
+
+
 
   }
 
@@ -524,20 +532,23 @@ class SourceTableCard extends StatelessWidget {
     final sourceBloc = context.read<SourceBloc>();
     sourceBloc.nameController.text = source.name ?? "";
     sourceBloc.selectedState = source.isActive == true ? "Active" : "Inactive";
-
     showDialog(
       context: context,
       builder: (context) {
         return Dialog(
-          child: SizedBox(
-            width: AppSizes.width(context) * 0.50,
-            child: SourceCreate(
-              id: source.id.toString(),
-            ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: SizedBox(
+                width: AppSizes.width(context) * 0.50,
+                child: SourceCreate()),
           ),
         );
       },
     );
+
   }
 
   Widget _buildEmptyState() {
