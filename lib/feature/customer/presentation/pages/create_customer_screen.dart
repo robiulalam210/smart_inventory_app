@@ -154,16 +154,35 @@ class _CreateCustomerScreenState extends State<CreateCustomerScreen> {
                 ],
 
                 SizedBox(height: AppSizes.height(context) * 0.01),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    AppButton(
+                      size: 140,
+                      name:  "Cancel",
+                      isOutlined: true,
+                      textColor: AppColors.errorColor(context),
+                      borderColor: AppColors.primaryColor(context),
+                      onPressed: (){
+                        AppRoutes.pop(context);
+                      },
+                    ),
+                    SizedBox(width: 10,),
+                    AppButton(
+                      size: 140,
+                      name: widget.submitText.isEmpty ? "Create Customer" : widget.submitText,
+                      onPressed: () {
+                        if (formKey.currentState!.validate()) {
+                          _createOrUpdateCustomer();
+                        }
+                      },
+                    ),
 
-                // Submit Button
-                AppButton(
-                  name: widget.submitText.isEmpty ? "Create Customer" : widget.submitText,
-                  onPressed: () {
-                    if (formKey.currentState!.validate()) {
-                      _createOrUpdateCustomer();
-                    }
-                  },
+                  ],
                 ),
+                // Submit Button
+
               ],
             ),
           ),

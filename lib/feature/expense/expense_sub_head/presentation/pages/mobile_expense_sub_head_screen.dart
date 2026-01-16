@@ -60,9 +60,11 @@ class _ExpenseHeadScreenState extends State<MobileExpenseSubHeadScreen> {
             context: context,
             builder: (context) {
               return Dialog(
-                // insetPadding: const EdgeInsets.all(16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
                 child: ClipRRect(
-                  borderRadius: BorderRadiusGeometry.circular(AppSizes.radius),
+                  borderRadius: BorderRadius.circular(16),
                   child: Container(
                     decoration: BoxDecoration(
                       shape: BoxShape.rectangle,
@@ -139,6 +141,7 @@ class _ExpenseHeadScreenState extends State<MobileExpenseSubHeadScreen> {
                                 .read<ExpenseSubHeadBloc>()
                                 .filterTextController
                                 .clear();
+                            FocusScope.of(context).unfocus();
                             _fetchApiData();
                           },
                           hintText: "expense sub heads...",

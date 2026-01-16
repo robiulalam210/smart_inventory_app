@@ -57,7 +57,7 @@ class ExpenseSubHeadTableCard extends StatelessWidget {
   ) {
     return Container(
       margin: EdgeInsets.symmetric(
-        horizontal: isMobile ? 6.0 : 12.0,
+        horizontal: isMobile ? 0.0 : 12.0,
         vertical: 8.0,
       ),
       decoration: BoxDecoration(
@@ -602,22 +602,27 @@ class ExpenseSubHeadTableCard extends StatelessWidget {
       context: context,
       builder: (context) {
         return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: Container(
+              color: AppColors.bottomNavBg(context),
 
-          child: Container(
-            color: AppColors.bottomNavBg(context),
-
-            width: Responsive.isMobile(context)
-                ? double.infinity
-                : AppSizes.width(context) * 0.50,
-            // height: Responsive.isMobile(context)
-            //     ? AppSizes.height(context) * 0.8
-            //     : null,
-            child: ExpenseSubCreateScreen(
-              id: expenseSubHead.id.toString(),
-              name: expenseSubHead.name,
-              selectedHead: ExpenseHeadModel(
-                id: expenseSubHead.head,
-                name: expenseSubHead.headName,
+              width: Responsive.isMobile(context)
+                  ? double.infinity
+                  : AppSizes.width(context) * 0.50,
+              // height: Responsive.isMobile(context)
+              //     ? AppSizes.height(context) * 0.8
+              //     : null,
+              child: ExpenseSubCreateScreen(
+                id: expenseSubHead.id.toString(),
+                name: expenseSubHead.name,
+                selectedHead: ExpenseHeadModel(
+                  id: expenseSubHead.head,
+                  name: expenseSubHead.headName,
+                ),
               ),
             ),
           ),

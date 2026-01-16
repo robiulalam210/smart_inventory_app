@@ -174,15 +174,36 @@ class _CreateSupplierScreenState extends State<CreateSupplierScreen> {
                   SizedBox(height: AppSizes.height(context) * 0.02),
 
                   // Submit Button
-                  AppButton(
-                    // size: 150,
-                    name: widget.submitText.isEmpty ? "Create Supplier" : widget.submitText,
-                    onPressed: () {
-                      if (formKey.currentState!.validate()) {
-                        _createOrUpdateSupplier();
-                      }
-                    },
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      AppButton(
+                        size: 120,
+                        name:  "Cancel",
+                        isOutlined: true,
+                        textColor: AppColors.errorColor(context),
+                        borderColor: AppColors.primaryColor(context),
+                        onPressed: (){
+                          AppRoutes.pop(context);
+                        },
+                      ),
+                      SizedBox(width: 10,),
+                      AppButton(
+
+                        size: 130,
+                        name: widget.submitText.isEmpty ? "Create Supplier" : widget.submitText,
+                        onPressed: () {
+                          if (formKey.currentState!.validate()) {
+                            _createOrUpdateSupplier();
+                          }
+                        },
+                      ),
+
+                    ],
                   ),
+
                   SizedBox(height: AppSizes.height(context) * 0.02),
                 ],
               ),

@@ -56,7 +56,7 @@ class ExpenseTableCard extends StatelessWidget {
 
     return Container(
       margin: EdgeInsets.symmetric(
-        horizontal: isMobile ? 8.0 : 16.0,
+        horizontal: isMobile ? 0.0 : 16.0,
         vertical: 8.0,
       ),
       decoration: BoxDecoration(
@@ -651,6 +651,8 @@ class ExpenseTableCard extends StatelessWidget {
                 id: expense.head,
                 name: expense.headName,
               ),
+
+
               selectedExpenseSubHead: ExpenseSubHeadModel(
                 id: expense.subhead,
                 name: expense.subheadName,

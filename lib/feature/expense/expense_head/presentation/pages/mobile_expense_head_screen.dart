@@ -132,26 +132,23 @@ class _ExpenseHeadScreenState extends State<MobileExpenseHeadScreen> {
           child: Row(
             children: [
               Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: CustomSearchTextFormField(
-                    isRequiredLabel: false,
-                    controller: context
+                child: CustomSearchTextFormField(
+                  isRequiredLabel: false,
+                  controller: context
+                      .read<ExpenseHeadBloc>()
+                      .filterTextController,
+                  onChanged: (value) {
+                    _fetchApiData(filterText: value);
+                  },
+                  onClear: () {
+                    context
                         .read<ExpenseHeadBloc>()
-                        .filterTextController,
-                    onChanged: (value) {
-                      _fetchApiData(filterText: value);
-                    },
-                    onClear: () {
-                      context
-                          .read<ExpenseHeadBloc>()
-                          .filterTextController
-                          .clear();
-                      _searchController.clear();
-                      _fetchApiData();
-                    },
-                    hintText: "Search expense head...",
-                  ),
+                        .filterTextController
+                        .clear();
+                    _searchController.clear();
+                    _fetchApiData();
+                  },
+                  hintText: "Expense head...",
                 ),
               ),
 
@@ -198,8 +195,11 @@ class _ExpenseHeadScreenState extends State<MobileExpenseHeadScreen> {
       builder: (context) {
         return Dialog(
           insetPadding: const EdgeInsets.all(20),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppSizes.radius),
+          ),
           child: ClipRRect(
-            borderRadius: BorderRadiusGeometry.circular(AppSizes.radius),
+            borderRadius: BorderRadius.circular(AppSizes.radius),
             child: ConstrainedBox(
               constraints: BoxConstraints(
                 maxWidth: Responsive.isMobile(context)

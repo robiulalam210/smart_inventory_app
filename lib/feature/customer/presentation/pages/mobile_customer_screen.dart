@@ -323,15 +323,20 @@ class _CustomerScreenState extends State<MobileCustomerScreen> {
       context: context,
       builder: (context) {
         return Dialog(
-          insetPadding: const EdgeInsets.all(20),
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              // maxWidth: Responsive.isMobile(context)
-              //     ? AppSizes.width(context)
-              //     : AppSizes.width(context) * 0.55,
-              // maxHeight: AppSizes.height(context) * 0.8,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppSizes.radius),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(AppSizes.radius),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                // maxWidth: Responsive.isMobile(context)
+                //     ? AppSizes.width(context)
+                //     : AppSizes.width(context) * 0.55,
+                // maxHeight: AppSizes.height(context) * 0.8,
+              ),
+              child: const MobileCreateCustomerScreen(),
             ),
-            child: const MobileCreateCustomerScreen(),
           ),
         );
       },

@@ -258,19 +258,42 @@ class _ExpenseSubCreateScreenState extends State<ExpenseSubCreateScreen> {
                       ),
 
                       SizedBox(height: AppSizes.height(context) * 0.03),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          AppButton(
+                            size: 120,
+                            name:  "Cancel",
+                            isOutlined: true,
+                            textColor: AppColors.errorColor(context),
+                            borderColor: AppColors.primaryColor(context),
+                            onPressed: (){
+                              AppRoutes.pop(context);
+                            },
+                          ),
+                          SizedBox(width: 10,),
+                          BlocBuilder<ExpenseSubHeadBloc, ExpenseSubHeadState>(
+                            builder: (context, state) {
+                              return
+
+
+
+                                AppButton(
+                                  size: 120,
+                                  name: widget.id == null ? 'Create' : 'Update',
+                                  onPressed: state is ExpenseSubHeadAddLoading
+                                      ? null
+                                      : _showConfirmationDialog,
+
+                                );
+                            },
+                          ),
+
+                        ],
+                      ),
 
                       // Submit Button
-                      BlocBuilder<ExpenseSubHeadBloc, ExpenseSubHeadState>(
-                        builder: (context, state) {
-                          return AppButton(
-                            name: widget.id == null ? 'Create' : 'Update',
-                            onPressed: state is ExpenseSubHeadAddLoading
-                                ? null
-                                : _showConfirmationDialog,
-
-                          );
-                        },
-                      ),
                     ],
                   ),
                 ),

@@ -200,18 +200,38 @@ class _ExpenseHeadCreateState extends State<ExpenseHeadCreate> {
                       SizedBox(height: AppSizes.height(context) * 0.03),
 
                       // Submit Button
-                      Center(
-                        child: BlocBuilder<ExpenseHeadBloc, ExpenseHeadState>(
-                          builder: (context, state) {
-                            return AppButton(
-                              name: widget.id == null ? 'Create' : 'Update',
-                              onPressed: state is ExpenseHeadAddLoading
-                                  ? null
-                                  : _showConfirmationDialog,
-                            );
-                          },
-                        ),
+
+
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          AppButton(
+                            size: 120,
+                            name:  "Cancel",
+                            isOutlined: true,
+                            textColor: AppColors.errorColor(context),
+                            borderColor: AppColors.primaryColor(context),
+                            onPressed: (){
+                              AppRoutes.pop(context);
+                            },
+                          ),
+                          SizedBox(width: 10,),
+                          BlocBuilder<ExpenseHeadBloc, ExpenseHeadState>(
+                            builder: (context, state) {
+                              return AppButton(
+                                size: 120,
+                                name: widget.id == null ? 'Create' : 'Update',
+                                onPressed: state is ExpenseHeadAddLoading
+                                    ? null
+                                    : _showConfirmationDialog,
+                              );
+                            },
+                          ),
+
+                        ],
                       ),
+
                     ],
                   ),
                 ),
