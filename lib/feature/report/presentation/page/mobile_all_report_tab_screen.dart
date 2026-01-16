@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:meherinMart/core/configs/app_colors.dart';
 import 'package:meherinMart/core/widgets/app_scaffold.dart';
 import 'package:meherinMart/feature/report/presentation/page/profit_loss_screen/mobile_profit_loss_screen.dart';
 import 'package:meherinMart/feature/report/presentation/page/stock_report_screen/mobile_stock_report_screen.dart';
@@ -136,14 +137,9 @@ class _MobileReportsTabScreenState extends State<MobileReportsTabScreen>
             Container(
               height: 48,
               decoration: BoxDecoration(
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.1),
-                    blurRadius: 2,
-                    offset: const Offset(0, 1),
-                  ),
-                ],
+           
+                color: AppColors.bottomNavBg(context),
+                
               ),
               child: TabBar(
                 controller: _tabController,
@@ -161,7 +157,7 @@ class _MobileReportsTabScreenState extends State<MobileReportsTabScreen>
                 indicatorWeight: 3,
                 indicatorColor: _tabs[_currentIndex].color,
                 labelColor: _tabs[_currentIndex].color,
-                unselectedLabelColor: Colors.grey,
+                unselectedLabelColor: AppColors.text(context),
                 tabs: _tabs.map((tab) {
                   return Tab(
                     icon: Icon(tab.icon, size: 18),

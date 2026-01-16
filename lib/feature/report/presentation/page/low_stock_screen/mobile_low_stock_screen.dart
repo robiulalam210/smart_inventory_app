@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
+import 'package:meherinMart/core/configs/app_text.dart';
+import 'package:meherinMart/core/widgets/app_scaffold.dart';
 import 'package:printing/printing.dart';
 import '../../../data/model/low_stock_model.dart';
 import '/core/configs/app_colors.dart';
@@ -36,18 +38,17 @@ class _MobileLowStockScreenState extends State<MobileLowStockScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.bottomNavBg(context),
+    return AppScaffold(
       appBar: AppBar(
-        title: const Text('Low Stock Alert'),
+        title:  Text('Low Stock Alert',style: AppTextStyle.titleMedium(context),),
         actions: [
           IconButton(
-            icon: const Icon(Icons.picture_as_pdf),
+            icon:  Icon(Icons.picture_as_pdf,color: AppColors.text(context),),
             onPressed: _generatePdf,
             tooltip: 'Generate PDF',
           ),
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon:  Icon(Icons.refresh,color:  AppColors.text(context),),
             onPressed: () => _fetchLowStockReport(),
             tooltip: 'Refresh',
           ),
@@ -56,69 +57,77 @@ class _MobileLowStockScreenState extends State<MobileLowStockScreen> {
       body: RefreshIndicator(
         onRefresh: () async => _fetchLowStockReport(),
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.symmetric(horizontal: 12.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               _buildHeaderInfo(),
-              const SizedBox(height: 16),
+              const SizedBox(height: 4),
               _buildAlertCards(),
-              const SizedBox(height: 16),
+              const SizedBox(height: 8),
               _buildLowStockList(),
             ],
           ),
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
+        
         onPressed: _showRestockAlert,
         icon: const Icon(Icons.notification_important),
         label: const Text('Restock Alert'),
-        backgroundColor: Colors.orange,
+        backgroundColor: AppColors.primaryColor(context),
         foregroundColor: Colors.white,
       ),
     );
   }
 
   Widget _buildHeaderInfo() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.red.withOpacity(0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(Icons.warning_amber, color: Colors.red),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    'Low Stock Items',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.red,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'Monitor products that require immediate attention. Critical items are out of stock, while low stock items are below alert levels.',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey[600],
-              ),
-            ),
-          ],
+    return Container(
+      margin: const EdgeInsets.only(bottom: 6),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.bottomNavBg(context),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: AppColors.greyColor(context).withValues(alpha: 0.5),
+          width: 0.5,
         ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.red.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.warning_amber, color: Colors.red),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Low Stock Items',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.red,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Monitor products that require immediate attention. Critical items are out of stock, while low stock items are below alert levels.',
+            style: TextStyle(
+              fontSize: 12,
+              color: AppColors.text(context)
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -136,9 +145,10 @@ class _MobileLowStockScreenState extends State<MobileLowStockScreen> {
           children: [
             if (criticalItems > 0)
               Card(
-                color: Colors.red,
+                elevation: 0,
+                color: AppColors.bottomNavBg(context),
                 child: Padding(
-                  padding: const EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.all(8.0),
                   child: Column(
                     children: [
                       Row(
@@ -184,9 +194,9 @@ class _MobileLowStockScreenState extends State<MobileLowStockScreen> {
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               crossAxisCount: 2,
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 12,
-              childAspectRatio: 1.5,
+              crossAxisSpacing: 8,
+              mainAxisSpacing: 8,
+              childAspectRatio: 1.9,
               children: [
                 _buildMobileAlertCard('Total Items', summary.totalLowStockItems.toString(), Icons.inventory_2, AppColors.primaryColor(context)),
                 _buildMobileAlertCard('Critical', criticalItems.toString(), Icons.dangerous, Colors.red),
@@ -202,7 +212,10 @@ class _MobileLowStockScreenState extends State<MobileLowStockScreen> {
 
   Widget _buildMobileAlertCard(String title, String value, IconData icon, Color color) {
     return Card(
+      elevation: 0,
+      color: AppColors.bottomNavBg(context),
       child: Padding(
+
         padding: const EdgeInsets.all(12.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -256,8 +269,9 @@ class _MobileLowStockScreenState extends State<MobileLowStockScreen> {
       itemBuilder: (context, index) {
         final product = products[index];
         return Card(
+          
           margin: const EdgeInsets.only(bottom: 8),
-          color: product.totalStockQuantity == 0 ? Colors.red.withOpacity(0.05) : Colors.orange.withOpacity(0.05),
+          color: product.totalStockQuantity == 0 ? Colors.red.withValues(alpha: 0.05) : Colors.orange.withValues(alpha: 0.05),
           child: Padding(
             padding: const EdgeInsets.all(12.0),
             child: Column(
@@ -269,7 +283,7 @@ class _MobileLowStockScreenState extends State<MobileLowStockScreen> {
                       width: 40,
                       height: 40,
                       decoration: BoxDecoration(
-                        color: product.statusColor.withOpacity(0.1),
+                        color: product.statusColor.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Icon(product.totalStockQuantity == 0 ? Icons.dangerous : Icons.warning, color: product.statusColor),
@@ -319,7 +333,7 @@ class _MobileLowStockScreenState extends State<MobileLowStockScreen> {
   Widget _buildStockDetailItem(String label, String value, Color color) {
     return Column(
       children: [
-        Text(label, style: const TextStyle(fontSize: 10, color: Colors.grey)),
+        Text(label, style:  TextStyle(fontSize: 10, color: AppColors.text(context))),
         const SizedBox(height: 2),
         Text(value, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: color)),
       ],

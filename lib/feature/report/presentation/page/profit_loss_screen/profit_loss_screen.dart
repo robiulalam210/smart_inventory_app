@@ -576,27 +576,25 @@ class ProfitLossSummaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(10),
+      margin: const EdgeInsets.only(bottom: 6),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.bottomNavBg(context),
         borderRadius: BorderRadius.circular(8),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.2),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        border: Border.all(
+          color: AppColors.greyColor(context).withValues(alpha: 0.5),
+          width: 0.5,
+        ),
       ),
       child: Column(
         children: [
-          _buildSummaryRow("Total Revenue", summary.totalSales, isRevenue: true),
-          _buildSummaryRow("Cost of Goods Sold", summary.totalPurchase, isExpense: true),
+          _buildSummaryRow(context,"Total Revenue", summary.totalSales, isRevenue: true),
+          _buildSummaryRow(context,"Cost of Goods Sold", summary.totalPurchase, isExpense: true),
           _buildDivider(),
-          _buildSummaryRow("Gross Profit", summary.grossProfit, isProfit: true),
-          _buildSummaryRow("Operating Expenses", summary.totalExpenses, isExpense: true),
+          _buildSummaryRow(context,"Gross Profit", summary.grossProfit, isProfit: true),
+          _buildSummaryRow(context,"Operating Expenses", summary.totalExpenses, isExpense: true),
           _buildDivider(),
-          _buildSummaryRow(
+          _buildSummaryRow(context,
               "NET PROFIT/LOSS",
               summary.netProfit,
               isNet: true,
@@ -607,7 +605,7 @@ class ProfitLossSummaryCard extends StatelessWidget {
     );
   }
 
-  Widget _buildSummaryRow(String label, double amount, {
+  Widget _buildSummaryRow(BuildContext context,String label, double amount, {
     bool isRevenue = false,
     bool isExpense = false,
     bool isProfit = false,
@@ -622,7 +620,7 @@ class ProfitLossSummaryCard extends StatelessWidget {
       if (isProfit) return Colors.green;
       if (isExpense) return Colors.red;
       if (isRevenue) return Colors.blue;
-      return Colors.black;
+      return AppColors.text(context);
     }
 
     String getFormattedAmount() {
@@ -687,22 +685,29 @@ class ExpenseBreakdownList extends StatelessWidget {
       itemCount: expenses.length,
       itemBuilder: (context, index) {
         final expense = expenses[index];
-        return Card(
-          margin: const EdgeInsets.only(bottom: 8),
-          child: ListTile(
-            contentPadding: const EdgeInsets.all(16),
+        return Container(
+          margin: const EdgeInsets.only(bottom: 6),
+          decoration: BoxDecoration(
+            color: AppColors.bottomNavBg(context),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: AppColors.greyColor(context).withValues(alpha: 0.5),
+              width: 0.5,
+            ),
+          ),          child: ListTile(
             leading: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.red.withOpacity(0.1),
+                color: Colors.red.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(Icons.money_off, color: Colors.red),
             ),
             title: Text(
               expense.head,
-              style: const TextStyle(
+              style:  TextStyle(
                 fontWeight: FontWeight.w600,
+                color: AppColors.text(context),
                 fontSize: 14,
               ),
             ),
@@ -710,7 +715,7 @@ class ExpenseBreakdownList extends StatelessWidget {
               expense.subhead,
               style: TextStyle(
                 fontSize: 12,
-                color: Colors.grey[600],
+                color: AppColors.text(context),
               ),
             ),
             trailing: Column(
@@ -718,7 +723,7 @@ class ExpenseBreakdownList extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
-                  '\$${expense.total.toStringAsFixed(2)}',
+                  expense.total.toStringAsFixed(2),
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
@@ -730,7 +735,7 @@ class ExpenseBreakdownList extends StatelessWidget {
                   'Expense',
                   style: TextStyle(
                     fontSize: 10,
-                    color: Colors.grey[500],
+                    color: AppColors.text(context),
                   ),
                 ),
               ],

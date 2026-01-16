@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
+import 'package:meherinMart/core/widgets/app_scaffold.dart';
 import 'package:printing/printing.dart';
 import '/core/core.dart';
 
@@ -18,7 +19,8 @@ class MobileSalesReportScreen extends StatefulWidget {
   const MobileSalesReportScreen({super.key});
 
   @override
-  State<MobileSalesReportScreen> createState() => _MobileSaleReportScreenState();
+  State<MobileSalesReportScreen> createState() =>
+      _MobileSaleReportScreenState();
 }
 
 class _MobileSaleReportScreenState extends State<MobileSalesReportScreen> {
@@ -32,7 +34,9 @@ class _MobileSaleReportScreenState extends State<MobileSalesReportScreen> {
     filterTextController.clear();
 
     // Load dropdown data
-    context.read<UserBloc>().add(FetchUserList(context, dropdownFilter: "?status=1"));
+    context.read<UserBloc>().add(
+      FetchUserList(context, dropdownFilter: "?status=1"),
+    );
     context.read<CustomerBloc>().add(FetchCustomerActiveList(context));
 
     // Fetch initial sales report
@@ -45,13 +49,15 @@ class _MobileSaleReportScreenState extends State<MobileSalesReportScreen> {
     DateTime? from,
     DateTime? to,
   }) {
-    context.read<SalesReportBloc>().add(FetchSalesReport(
-      context: context,
-      customer: customer,
-      seller: seller,
-      from: from,
-      to: to,
-    ));
+    context.read<SalesReportBloc>().add(
+      FetchSalesReport(
+        context: context,
+        customer: customer,
+        seller: seller,
+        from: from,
+        to: to,
+      ),
+    );
   }
 
   @override
@@ -64,18 +70,17 @@ class _MobileSaleReportScreenState extends State<MobileSalesReportScreen> {
   Widget build(BuildContext context) {
     final isMobile = Responsive.isMobile(context);
 
-    return Scaffold(
-      backgroundColor: AppColors.bottomNavBg(context),
+    return AppScaffold(
       appBar: AppBar(
         title: const Text('Sales Report'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.picture_as_pdf),
+            icon: Icon(Icons.picture_as_pdf, color: AppColors.text(context)),
             onPressed: _generatePdf,
             tooltip: 'Generate PDF',
           ),
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: Icon(Icons.refresh, color: AppColors.text(context)),
             onPressed: () => _fetchSalesReport(),
             tooltip: 'Refresh',
           ),
@@ -84,20 +89,19 @@ class _MobileSaleReportScreenState extends State<MobileSalesReportScreen> {
       body: RefreshIndicator(
         onRefresh: () async => _fetchSalesReport(),
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
+          padding:  EdgeInsets.symmetric(horizontal: 12.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // Filter Section (Expandable for mobile)
-              if (isMobile) _buildMobileFilterSection(),
-              if (!isMobile) _buildDesktopFilterRow(),
+              _buildMobileFilterSection(),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: 8),
 
               // Summary Cards
               _buildSummaryCards(),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: 8),
 
               // Data Table/List
               _buildDataDisplay(isMobile),
@@ -107,34 +111,49 @@ class _MobileSaleReportScreenState extends State<MobileSalesReportScreen> {
       ),
       floatingActionButton: isMobile
           ? FloatingActionButton(
-        onPressed: () {
-          setState(() => _isExpanded = !_isExpanded);
-        },
-        child: Icon(_isExpanded ? Icons.filter_alt_off : Icons.filter_alt),
-        tooltip: 'Toggle Filters',
-      )
+              backgroundColor: AppColors.primaryColor(context),
+              onPressed: () {
+                setState(() => _isExpanded = !_isExpanded);
+              },
+              tooltip: 'Toggle Filters',
+              child: Icon(
+                _isExpanded ? Icons.filter_alt_off : Icons.filter_alt,
+                color: AppColors.whiteColor(context),
+              ),
+            )
           : null,
     );
   }
 
   Widget _buildMobileFilterSection() {
     return Card(
+      elevation: 0,
+      color: AppColors.bottomNavBg(context),
       child: ExpansionPanelList(
         elevation: 0,
         expandedHeaderPadding: EdgeInsets.zero,
-        expansionCallback: (int index, bool isExpanded) {
-          setState(() => _isExpanded = !isExpanded);
+        expansionCallback: (index, isExpanded) {
+          setState(() {
+            _isExpanded = !_isExpanded;
+          });
         },
         children: [
           ExpansionPanel(
+            isExpanded: _isExpanded,
             headerBuilder: (context, isExpanded) {
-              return const ListTile(
-                leading: Icon(Icons.filter_alt),
-                title: Text('Filters'),
+              return ListTile(
+                leading: Icon(Icons.filter_alt, color: AppColors.text(context)),
+                title: Text('Filters',style: AppTextStyle.bodyLarge(context),),
+
+                onTap: () {
+                  setState(() {
+                    _isExpanded = !_isExpanded;
+                  });
+                },
               );
             },
             body: Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(0.0),
               child: Column(
                 children: [
                   // Customer Dropdown
@@ -154,13 +173,18 @@ class _MobileSaleReportScreenState extends State<MobileSalesReportScreen> {
                             from: selectedDateRange?.start,
                             to: selectedDateRange?.end,
                             customer: newVal?.id.toString() ?? '',
-                            seller: context.read<SalesReportBloc>().selectedSeller?.id.toString() ?? '',
+                            seller:
+                                context
+                                    .read<SalesReportBloc>()
+                                    .selectedSeller
+                                    ?.id
+                                    .toString() ??
+                                '',
                           );
                         },
                       );
                     },
                   ),
-                  const SizedBox(height: 12),
 
                   // Seller Dropdown
                   BlocBuilder<UserBloc, UserState>(
@@ -177,14 +201,19 @@ class _MobileSaleReportScreenState extends State<MobileSalesReportScreen> {
                           _fetchSalesReport(
                             from: selectedDateRange?.start,
                             to: selectedDateRange?.end,
-                            customer: context.read<SalesReportBloc>().selectedCustomer?.id.toString() ?? '',
+                            customer:
+                                context
+                                    .read<SalesReportBloc>()
+                                    .selectedCustomer
+                                    ?.id
+                                    .toString() ??
+                                '',
                             seller: newVal?.id.toString() ?? '',
                           );
                         },
                       );
                     },
                   ),
-                  const SizedBox(height: 12),
 
                   // Date Range Picker
                   CustomDateRangeField(
@@ -197,13 +226,25 @@ class _MobileSaleReportScreenState extends State<MobileSalesReportScreen> {
                         _fetchSalesReport(
                           from: value.start,
                           to: value.end,
-                          customer: context.read<SalesReportBloc>().selectedCustomer?.id.toString() ?? '',
-                          seller: context.read<SalesReportBloc>().selectedSeller?.id.toString() ?? '',
+                          customer:
+                              context
+                                  .read<SalesReportBloc>()
+                                  .selectedCustomer
+                                  ?.id
+                                  .toString() ??
+                              '',
+                          seller:
+                              context
+                                  .read<SalesReportBloc>()
+                                  .selectedSeller
+                                  ?.id
+                                  .toString() ??
+                              '',
                         );
                       }
                     },
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 6),
 
                   // Clear Filters Button
                   SizedBox(
@@ -211,7 +252,9 @@ class _MobileSaleReportScreenState extends State<MobileSalesReportScreen> {
                     child: ElevatedButton.icon(
                       onPressed: () {
                         setState(() => selectedDateRange = null);
-                        context.read<SalesReportBloc>().add(ClearSalesReportFilters());
+                        context.read<SalesReportBloc>().add(
+                          ClearSalesReportFilters(),
+                        );
                         _fetchSalesReport();
                       },
                       icon: const Icon(Icons.clear_all, size: 18),
@@ -225,123 +268,8 @@ class _MobileSaleReportScreenState extends State<MobileSalesReportScreen> {
                 ],
               ),
             ),
-            isExpanded: _isExpanded,
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildDesktopFilterRow() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Filters',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 12),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Customer Dropdown
-                Expanded(
-                  child: BlocBuilder<CustomerBloc, CustomerState>(
-                    builder: (context, state) {
-                      return AppDropdown<CustomerActiveModel>(
-                        label: "Customer",
-                        isSearch: true,
-                        isLabel: true,
-                        hint: "Select Customer",
-                        isNeedAll: true,
-                        isRequired: false,
-                        value: context.read<SalesReportBloc>().selectedCustomer,
-                        itemList: context.read<CustomerBloc>().activeCustomer,
-                        onChanged: (newVal) {
-                          _fetchSalesReport(
-                            from: selectedDateRange?.start,
-                            to: selectedDateRange?.end,
-                            customer: newVal?.id.toString() ?? '',
-                            seller: context.read<SalesReportBloc>().selectedSeller?.id.toString() ?? '',
-                          );
-                        },
-                      );
-                    },
-                  ),
-                ),
-                const SizedBox(width: 12),
-
-                // Seller Dropdown
-                Expanded(
-                  child: BlocBuilder<UserBloc, UserState>(
-                    builder: (context, state) {
-                      return AppDropdown<UsersListModel>(
-                        label: "Seller",
-                        hint: "Select Seller",
-                        isLabel: true,
-                        isRequired: false,
-                        isNeedAll: true,
-                        value: context.read<SalesReportBloc>().selectedSeller,
-                        itemList: context.read<UserBloc>().list,
-                        onChanged: (newVal) {
-                          _fetchSalesReport(
-                            from: selectedDateRange?.start,
-                            to: selectedDateRange?.end,
-                            customer: context.read<SalesReportBloc>().selectedCustomer?.id.toString() ?? '',
-                            seller: newVal?.id.toString() ?? '',
-                          );
-                        },
-                      );
-                    },
-                  ),
-                ),
-                const SizedBox(width: 12),
-
-                // Date Range Picker
-                Expanded(
-                  child: CustomDateRangeField(
-                    isLabel: true,
-                    // label: 'Date Range',
-                    selectedDateRange: selectedDateRange,
-                    onDateRangeSelected: (value) {
-                      setState(() => selectedDateRange = value);
-                      if (value != null) {
-                        _fetchSalesReport(
-                          from: value.start,
-                          to: value.end,
-                          customer: context.read<SalesReportBloc>().selectedCustomer?.id.toString() ?? '',
-                          seller: context.read<SalesReportBloc>().selectedSeller?.id.toString() ?? '',
-                        );
-                      }
-                    },
-                  ),
-                ),
-                const SizedBox(width: 12),
-
-                // Clear Button
-                SizedBox(
-                  width: 100,
-                  child: ElevatedButton.icon(
-                    onPressed: () {
-                      setState(() => selectedDateRange = null);
-                      context.read<SalesReportBloc>().add(ClearSalesReportFilters());
-                      _fetchSalesReport();
-                    },
-                    icon: const Icon(Icons.clear_all, size: 18),
-                    label: const Text('Clear'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.grey[200],
-                      foregroundColor: Colors.grey[800],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -352,83 +280,43 @@ class _MobileSaleReportScreenState extends State<MobileSalesReportScreen> {
         if (state is! SalesReportSuccess) return const SizedBox();
 
         final summary = state.response.summary;
-        final isMobile = Responsive.isMobile(context);
 
-        if (isMobile) {
-          return Column(
-            children: [
-              Row(
-                children: [
-                  _buildSummaryCard(
-                    "Total Sales",
-                    "\$${summary.totalSales.toStringAsFixed(2)}",
-                    Icons.shopping_cart,
-                    AppColors.primaryColor(context),
-                  ),
-                  const SizedBox(width: 8),
-                  _buildSummaryCard(
-                    "Total Profit",
-                    "\$${summary.totalProfit.toStringAsFixed(2)}",
-                    Icons.trending_up,
-                    Colors.green,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  _buildSummaryCard(
-                    "Collected",
-                    "\$${summary.totalCollected.toStringAsFixed(2)}",
-                    Icons.payment,
-                    Colors.blue,
-                  ),
-                  const SizedBox(width: 8),
-                  _buildSummaryCard(
-                    "Total Due",
-                    "\$${summary.totalDue.toStringAsFixed(2)}",
-                    Icons.money_off,
-                    Colors.orange,
-                  ),
-                ],
-              ),
-            ],
-          );
-        }
-
-        return Wrap(
-          spacing: 8,
-          runSpacing: 8,
+        return Column(
           children: [
-            _buildSummaryCard(
-              "Total Sales",
-              "\$${summary.totalSales.toStringAsFixed(2)}",
-              Icons.shopping_cart,
-              AppColors.primaryColor(context),
+            Row(
+              children: [
+                _buildSummaryCard(
+                  "Total Sales",
+                  "\$${summary.totalSales.toStringAsFixed(2)}",
+                  Icons.shopping_cart,
+                  AppColors.primaryColor(context),
+                ),
+                const SizedBox(width: 8),
+                _buildSummaryCard(
+                  "Total Profit",
+                  "\$${summary.totalProfit.toStringAsFixed(2)}",
+                  Icons.trending_up,
+                  Colors.green,
+                ),
+              ],
             ),
-            _buildSummaryCard(
-              "Total Profit",
-              "\$${summary.totalProfit.toStringAsFixed(2)}",
-              Icons.trending_up,
-              Colors.green,
-            ),
-            _buildSummaryCard(
-              "Total Collected",
-              "\$${summary.totalCollected.toStringAsFixed(2)}",
-              Icons.payment,
-              Colors.blue,
-            ),
-            _buildSummaryCard(
-              "Total Due",
-              "\$${summary.totalDue.toStringAsFixed(2)}",
-              Icons.money_off,
-              Colors.orange,
-            ),
-            _buildSummaryCard(
-              "Transactions",
-              summary.totalTransactions.toString(),
-              Icons.receipt,
-              Colors.purple,
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                _buildSummaryCard(
+                  "Collected",
+                  "\$${summary.totalCollected.toStringAsFixed(2)}",
+                  Icons.payment,
+                  Colors.blue,
+                ),
+                const SizedBox(width: 8),
+                _buildSummaryCard(
+                  "Total Due",
+                  "\$${summary.totalDue.toStringAsFixed(2)}",
+                  Icons.money_off,
+                  Colors.orange,
+                ),
+              ],
             ),
           ],
         );
@@ -436,23 +324,25 @@ class _MobileSaleReportScreenState extends State<MobileSalesReportScreen> {
     );
   }
 
-  Widget _buildSummaryCard(String title, String value, IconData icon, Color color) {
+  Widget _buildSummaryCard(
+    String title,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
     final isMobile = Responsive.isMobile(context);
 
     return Expanded(
       child: Container(
-        margin: const EdgeInsets.only(bottom: 8),
+        margin: const EdgeInsets.only(bottom: 6),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.bottomNavBg(context),
           borderRadius: BorderRadius.circular(8),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.2),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
-            ),
-          ],
+          border: Border.all(
+            color: AppColors.greyColor(context).withValues(alpha: 0.5),
+            width: 0.5,
+          ),
         ),
         child: Row(
           children: [
@@ -466,7 +356,7 @@ class _MobileSaleReportScreenState extends State<MobileSalesReportScreen> {
                     title,
                     style: TextStyle(
                       fontSize: isMobile ? 10 : 12,
-                      color: Colors.grey,
+                      color: AppColors.text(context),
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -475,7 +365,7 @@ class _MobileSaleReportScreenState extends State<MobileSalesReportScreen> {
                     style: TextStyle(
                       fontSize: isMobile ? 14 : 18,
                       fontWeight: FontWeight.bold,
-                      color: AppColors.blackColor(context),
+                      color: AppColors.text(context),
                     ),
                   ),
                 ],
@@ -505,9 +395,7 @@ class _MobileSaleReportScreenState extends State<MobileSalesReportScreen> {
           if (state.response.report.isEmpty) {
             return _buildEmptyState();
           }
-          return
-              _buildMobileReportList(state.response.report)
-             ;
+          return _buildMobileReportList(state.response.report);
         } else if (state is SalesReportFailed) {
           return _buildErrorState(state.content);
         }
@@ -523,7 +411,15 @@ class _MobileSaleReportScreenState extends State<MobileSalesReportScreen> {
       itemCount: reports.length,
       itemBuilder: (context, index) {
         final report = reports[index];
-        return Card(
+        return Container(
+          decoration: BoxDecoration(
+            color: AppColors.bottomNavBg(context),
+            border: Border.all(
+              color: AppColors.greyColor(context).withValues(alpha: 0.5),
+              width: 0.5,
+            ),
+            borderRadius: BorderRadius.circular(AppSizes.radius),
+          ),
           margin: const EdgeInsets.only(bottom: 8),
           child: Padding(
             padding: const EdgeInsets.all(12.0),
@@ -535,15 +431,22 @@ class _MobileSaleReportScreenState extends State<MobileSalesReportScreen> {
                   children: [
                     Text(
                       report.invoiceNo,
-                      style: const TextStyle(
+                      style:  TextStyle(
                         fontWeight: FontWeight.bold,
+                        color: AppColors.text(context),
+
                         fontSize: 16,
                       ),
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
-                        color: _getStatusColor(report.paymentStatus).withOpacity(0.1),
+                        color: _getStatusColor(
+                          report.paymentStatus,
+                        ).withOpacity(0.1),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
@@ -557,15 +460,15 @@ class _MobileSaleReportScreenState extends State<MobileSalesReportScreen> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 4),
                 Text(
                   report.customerName,
-                  style: const TextStyle(color: Colors.grey),
+                  style:  AppTextStyle.body(context),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   _formatDate(report.saleDate),
-                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  style:  AppTextStyle.body(context),
                 ),
                 const SizedBox(height: 12),
                 Row(
@@ -583,18 +486,18 @@ class _MobileSaleReportScreenState extends State<MobileSalesReportScreen> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
                 Divider(color: Colors.grey[300]),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
+                     Text(
                       'Seller:',
-                      style: TextStyle(fontSize: 12, color: Colors.grey),
+                      style:  AppTextStyle.body(context),
                     ),
                     Text(
                       report.salesBy,
-                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+                      style:  AppTextStyle.body(context),
+
                     ),
                   ],
                 ),
@@ -610,9 +513,7 @@ class _MobileSaleReportScreenState extends State<MobileSalesReportScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: const TextStyle(fontSize: 11, color: Colors.grey),
+        Text(label,                   style:  AppTextStyle.body(context),
         ),
         Text(
           value,

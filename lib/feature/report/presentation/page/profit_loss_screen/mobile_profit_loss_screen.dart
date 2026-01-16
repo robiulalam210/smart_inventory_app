@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
 import 'package:lottie/lottie.dart';
+import 'package:meherinMart/core/core.dart';
+import 'package:meherinMart/core/widgets/app_scaffold.dart';
 import 'package:printing/printing.dart';
 
 import '../../../../../core/configs/app_images.dart';
@@ -44,17 +46,16 @@ class _MobileProfitLossScreenState extends State<MobileProfitLossScreen> {
   Widget build(BuildContext context) {
     final isMobile = Responsive.isMobile(context);
 
-    return Scaffold(
-      backgroundColor: AppColors.bottomNavBg(context),
+    return AppScaffold(
       appBar: AppBar(
-        title: const Text('Profit & Loss Report'),
+        title:  Text('Profit & Loss Report',style: AppTextStyle.titleMedium(context),),
         actions: [
           IconButton(
-            icon: const Icon(Icons.picture_as_pdf),
+            icon:  Icon(Icons.picture_as_pdf,color: AppColors.text(context),),
             onPressed: _generatePdf,
           ),
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon:  Icon(Icons.refresh,color:AppColors.text(context),),
             onPressed: () => _fetchProfitLossReport(),
           ),
         ],
@@ -62,14 +63,24 @@ class _MobileProfitLossScreenState extends State<MobileProfitLossScreen> {
       body: RefreshIndicator(
         onRefresh: () async => _fetchProfitLossReport(),
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.symmetric(horizontal: 12),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              if (isMobile) _buildMobileFilterSection(),
-              const SizedBox(height: 16),
+              CustomDateRangeField(
+                isLabel: true,
+                selectedDateRange: selectedDateRange,
+                onDateRangeSelected: (value) {
+                  setState(() => selectedDateRange = value);
+                  if (value != null) {
+                    _fetchProfitLossReport(
+                      from: value.start,
+                      to: value.end,
+                    );
+                  }
+                },
+              ),              const SizedBox(height: 8),
               _buildProfitLossCards(),
-              const SizedBox(height: 16),
               _buildReportContent(),
             ],
           ),
@@ -77,12 +88,14 @@ class _MobileProfitLossScreenState extends State<MobileProfitLossScreen> {
       ),
       floatingActionButton: isMobile
           ? FloatingActionButton(
+        backgroundColor: AppColors.primaryColor(context),
         onPressed: () =>
             setState(() => _isFilterExpanded = !_isFilterExpanded),
         child: Icon(
           _isFilterExpanded
               ? Icons.filter_alt_off
               : Icons.filter_alt,
+          color: AppColors.white,
         ),
       )
           : null,
@@ -91,71 +104,6 @@ class _MobileProfitLossScreenState extends State<MobileProfitLossScreen> {
 
   // ---------------------------------------------------------------------------
   // FILTER
-  Widget _buildMobileFilterSection() {
-    return Card(
-      child: ExpansionPanelList(
-        elevation: 0,
-        expandedHeaderPadding: EdgeInsets.zero,
-        expansionCallback: (_, isExpanded) =>
-            setState(() => _isFilterExpanded = !isExpanded),
-        children: [
-          ExpansionPanel(
-            isExpanded: _isFilterExpanded,
-            headerBuilder: (_, __) => const ListTile(
-              leading: Icon(Icons.calendar_today),
-              title: Text('Date Range Filter'),
-            ),
-            body: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                children: [
-                  CustomDateRangeField(
-                    isLabel: true,
-                    selectedDateRange: selectedDateRange,
-                    onDateRangeSelected: (value) {
-                      setState(() => selectedDateRange = value);
-                      if (value != null) {
-                        _fetchProfitLossReport(
-                          from: value.start,
-                          to: value.end,
-                        );
-                      }
-                    },
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          onPressed: () {
-                            setState(() => selectedDateRange = null);
-                            context
-                                .read<ProfitLossBloc>()
-                                .add(ClearProfitLossFilters());
-                            _fetchProfitLossReport();
-                          },
-                          icon: const Icon(Icons.clear_all),
-                          label: const Text('Clear'),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          onPressed: _generatePdf,
-                          icon: const Icon(Icons.picture_as_pdf),
-                          label: const Text('PDF'),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   // ---------------------------------------------------------------------------
   // SUMMARY CARDS
@@ -234,21 +182,15 @@ class _MobileProfitLossScreenState extends State<MobileProfitLossScreen> {
         bool highlight = false,
       }) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 8),
+      margin: const EdgeInsets.only(bottom: 6),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.bottomNavBg(context),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: color.withOpacity(highlight ? 0.3 : 0.1),
-          width: highlight ? 2 : 1,
+          color: AppColors.greyColor(context).withValues(alpha: 0.5),
+          width: 0.5,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 4,
-          )
-        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

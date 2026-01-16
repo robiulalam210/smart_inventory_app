@@ -105,7 +105,7 @@ class AppDropdown<T> extends FormField<T> {
       return SizedBox(
         height: showLabel
             ? (isMobile ? 83 : 66)
-            : (isMobile ? 55 : 50),
+            : (isMobile ? 60 : 50),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
