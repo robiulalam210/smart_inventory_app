@@ -106,7 +106,8 @@ class _AccountScreenState extends State<MobileAccountScreen> {
               _handleBlocState(state);
             },
             builder: (context, state) {
-              return SingleChildScrollView(
+              return  SingleChildScrollView(
+                physics: AlwaysScrollableScrollPhysics(),
                 child: Column(
                   children: [
                     _buildMobileHeader(),
@@ -180,55 +181,44 @@ class _AccountScreenState extends State<MobileAccountScreen> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         // Search Bar
-        Container(
-          decoration: BoxDecoration(
-            color: AppColors.bottomNavBg(context),
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withValues(alpha: 0.1),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: CustomSearchTextFormField(
-                    isRequiredLabel: false,
-                    controller: filterTextController,
-                    onChanged: (value) => _fetchApi(filterText: value),
-                    onClear: () {
-                      filterTextController.clear();
-                      _fetchApi();
-                    },
-                    hintText: "Search accounts...",
-                  ),
-                ),
-              ),
-              IconButton(
-                icon: Icon(
-                  Iconsax.filter,
-                  color: AppColors.primaryColor(context),
-                ),
-                onPressed: () => _showMobileFilterSheet(context),
-              ),
-              IconButton(
-                onPressed: (){
-                  _clearAccountBlocData();
+        Row(
+          children: [
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 0),
+                child: CustomSearchTextFormField(
+                  isRequiredLabel: false,
+                  controller: filterTextController,
+                  onChanged: (value) => _fetchApi(filterText: value),
+                  onClear: () {
+                    filterTextController.clear();
+                    _fetchApi();
+                    FocusScope.of(context).unfocus();
 
-                  _fetchApi();
-                },
-                icon: const Icon(Icons.refresh),
-                tooltip: "Refresh",
+                  },
+                  hintText: "accounts...",
+                ),
               ),
-            ],
-          ),
+            ),
+            IconButton(
+              padding: EdgeInsets.all(0),
+              icon: Icon(
+                Iconsax.filter,
+                color: AppColors.primaryColor(context),
+              ),
+              onPressed: () => _showMobileFilterSheet(context),
+            ),
+            IconButton(
+              onPressed: (){
+                _clearAccountBlocData();
+
+                _fetchApi();
+              },
+              icon: const Icon(Icons.refresh),
+              tooltip: "Refresh",
+            ),
+          ],
         ),
-        const SizedBox(height: 12),
 
         // Filter Chips
         ValueListenableBuilder<String?>(

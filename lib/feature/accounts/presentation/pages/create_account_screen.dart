@@ -54,7 +54,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.whiteColor(context),
+        color: AppColors.bottomNavBg(context),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Padding(
@@ -97,9 +97,8 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                         builder: (context, selectedType, child) {
                           return AppDropdown(
                             label: "Account Type",
-                            hint: selectedType.isEmpty
-                                ? "Select Account type"
-                                : selectedType,
+                            hint: "Select Account type",
+
                             isRequired: true,
                             isNeedAll: false,
                             value: selectedType.isEmpty ? null : selectedType,

@@ -58,7 +58,6 @@ class _CreateCustomerScreenState extends State<MobileCreateCustomerScreen> {
                 ),
               ),
 
-              const SizedBox(height: 8),
 
               // Row 1: Customer Name & Phone
               _buildTwoColumnRow(
@@ -113,7 +112,6 @@ class _CreateCustomerScreenState extends State<MobileCreateCustomerScreen> {
               // Status dropdown (only in edit mode)
               if (widget.id.isNotEmpty) ...[
                 _buildStatusDropdown(),
-                const SizedBox(height: 8),
               ],
 
               // Submit button
@@ -125,6 +123,8 @@ class _CreateCustomerScreenState extends State<MobileCreateCustomerScreen> {
                   }
                 },
               ),
+              const SizedBox(height: 16),
+
             ],
           ),
         ),
@@ -168,9 +168,8 @@ class _CreateCustomerScreenState extends State<MobileCreateCustomerScreen> {
           width: isSmallScreen ? double.infinity : constraints.maxWidth * 0.5,
           child: AppDropdown(
             label: "Status",
-            hint: context.read<CustomerBloc>().selectedState.isEmpty
-                ? "Select Status"
-                : context.read<CustomerBloc>().selectedState,
+            hint:  "Select Status"
+              ,
             isLabel: false,
             value: context.read<CustomerBloc>().selectedState.isEmpty
                 ? null

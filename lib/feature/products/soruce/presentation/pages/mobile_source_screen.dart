@@ -123,58 +123,64 @@ class _SourceScreenState extends State<MobileSourceScreen> {
                   );
                 }
               },
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 0),
-                      child: CustomSearchTextFormField(
-                        controller: context
-                            .read<SourceBloc>()
-                            .filterTextController,
-                        onClear: () {
-                          context
+              child: RefreshIndicator(
+                onRefresh: ()async{
+                  _fetchApiData();
+                },
+                child: SingleChildScrollView(
+                  physics: AlwaysScrollableScrollPhysics(),
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 0),
+                        child: CustomSearchTextFormField(
+                          controller: context
                               .read<SourceBloc>()
-                              .filterTextController
-                              .clear();
-                          _fetchApiData();
-                          FocusScope.of(context).unfocus();
+                              .filterTextController,
+                          onClear: () {
+                            context
+                                .read<SourceBloc>()
+                                .filterTextController
+                                .clear();
+                            _fetchApiData();
+                            FocusScope.of(context).unfocus();
 
-                        },
-                        onChanged: (value) {
-                          _fetchApiData(filterText: value);
-                        },
-                        isRequiredLabel: false,
-                        hintText: "Name", // Pass dynamic hintText if needed
+                          },
+                          onChanged: (value) {
+                            _fetchApiData(filterText: value);
+                          },
+                          isRequiredLabel: false,
+                          hintText: "Name", // Pass dynamic hintText if needed
+                        ),
                       ),
-                    ),
 
-                    SizedBox(
-                      child: BlocBuilder<SourceBloc, SourceState>(
-                        builder: (context, state) {
-                          if (state is SourceListLoading) {
-                            return const Center(
-                              child: CircularProgressIndicator(),
-                            );
-                          } else if (state is SourceListSuccess) {
-                            if (state.list.isEmpty) {
+                      SizedBox(
+                        child: BlocBuilder<SourceBloc, SourceState>(
+                          builder: (context, state) {
+                            if (state is SourceListLoading) {
+                              return const Center(
+                                child: CircularProgressIndicator(),
+                              );
+                            } else if (state is SourceListSuccess) {
+                              if (state.list.isEmpty) {
+                                return Center(
+                                  child: Lottie.asset(AppImages.noData),
+                                );
+                              } else {
+                                return MobileSourceTableCard(sources: state.list);
+                              }
+                            } else if (state is SourceListFailed) {
                               return Center(
-                                child: Lottie.asset(AppImages.noData),
+                                child: Text('Failed to load : ${state.content}'),
                               );
                             } else {
-                              return MobileSourceTableCard(sources: state.list);
+                              return Container();
                             }
-                          } else if (state is SourceListFailed) {
-                            return Center(
-                              child: Text('Failed to load : ${state.content}'),
-                            );
-                          } else {
-                            return Container();
-                          }
-                        },
+                          },
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),

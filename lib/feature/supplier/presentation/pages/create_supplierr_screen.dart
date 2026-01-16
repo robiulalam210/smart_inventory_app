@@ -67,7 +67,7 @@ class _CreateSupplierScreenState extends State<CreateSupplierScreen> {
                   Container(
                     padding: const EdgeInsets.all(4),
                     decoration: BoxDecoration(
-                      color: AppColors.whiteColor(context),
+                      color: AppColors.bottomNavBg(context),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Row(
@@ -171,7 +171,7 @@ class _CreateSupplierScreenState extends State<CreateSupplierScreen> {
                     },
 
                   ),
-                  SizedBox(height: AppSizes.height(context) * 0.04),
+                  SizedBox(height: AppSizes.height(context) * 0.02),
 
                   // Submit Button
                   AppButton(
@@ -183,6 +183,7 @@ class _CreateSupplierScreenState extends State<CreateSupplierScreen> {
                       }
                     },
                   ),
+                  SizedBox(height: AppSizes.height(context) * 0.02),
                 ],
               ),
             ),
