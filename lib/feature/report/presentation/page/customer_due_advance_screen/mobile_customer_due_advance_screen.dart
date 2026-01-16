@@ -3,7 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
+import 'package:meherinMart/core/configs/app_text.dart';
+import 'package:meherinMart/core/widgets/app_scaffold.dart';
 import 'package:printing/printing.dart';
+import '../../../../../core/configs/app_sizes.dart';
 import '/core/configs/app_colors.dart';
 import '/core/configs/app_images.dart';
 import '/core/widgets/app_dropdown.dart';
@@ -95,18 +98,17 @@ class _MobileCustomerDueAdvanceScreenState
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.bottomNavBg(context),
+    return AppScaffold(
       appBar: AppBar(
-        title: const Text('Customer Due & Advance'),
+        title:  Text('Customer Due & Advance',style: AppTextStyle.titleMedium(context),),
         actions: [
           IconButton(
-            icon: const Icon(Icons.picture_as_pdf),
+            icon:  Icon(Icons.picture_as_pdf,color: AppColors.text(context),),
             onPressed: _generatePdf,
             tooltip: 'Generate PDF',
           ),
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon:  Icon(Icons.refresh,color: AppColors.text(context),),
             onPressed: () => _fetchApi(),
             tooltip: 'Refresh',
           ),
@@ -115,17 +117,16 @@ class _MobileCustomerDueAdvanceScreenState
       body: RefreshIndicator(
         onRefresh: () async => _fetchApi(),
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.symmetric(horizontal: 12.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // Filter Section
               _buildMobileFilterSection(),
-              const SizedBox(height: 16),
+              const SizedBox(height: 8),
 
               // Summary Cards
               _buildSummaryCards(),
-              const SizedBox(height: 16),
 
               // Customer List
               _buildCustomerList(),
@@ -134,11 +135,12 @@ class _MobileCustomerDueAdvanceScreenState
         ),
       ),
       floatingActionButton: FloatingActionButton(
+        backgroundColor: AppColors.primaryColor(context),
         onPressed: () {
           setState(() => _isFilterExpanded = !_isFilterExpanded);
         },
-        child: Icon(_isFilterExpanded ? Icons.filter_alt_off : Icons.filter_alt),
         tooltip: 'Toggle Filters',
+        child: Icon(_isFilterExpanded ? Icons.filter_alt_off : Icons.filter_alt,color: AppColors.whiteColor(context)),
       ),
     );
   }
@@ -350,22 +352,19 @@ class _MobileCustomerDueAdvanceScreenState
         margin: const EdgeInsets.only(bottom: 8),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Colors.white,
+         color:    AppColors.bottomNavBg(context),
           borderRadius: BorderRadius.circular(8),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.1),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
-            ),
-          ],
+          border: Border.all(
+            color: AppColors.greyColor(context).withValues(alpha: 0.5),width: 0.5
+          )
+
         ),
         child: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
+                color: color.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(icon, color: color, size: 20),
@@ -377,9 +376,9 @@ class _MobileCustomerDueAdvanceScreenState
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
+                    style:  TextStyle(
                       fontSize: 10,
-                      color: Colors.grey,
+                      color:AppColors.text(context),
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -440,10 +439,18 @@ class _MobileCustomerDueAdvanceScreenState
             ? '\$${customer.netBalance.toStringAsFixed(2)}'
             : '-\$${customer.netBalance.abs().toStringAsFixed(2)}';
 
-        return Card(
+        return Container(
+          decoration: BoxDecoration(
+            color: AppColors.bottomNavBg(context),
+            border: Border.all(
+              color: AppColors.greyColor(context).withValues(alpha: 0.5),
+              width: 0.5,
+            ),
+            borderRadius: BorderRadius.circular(AppSizes.radius),
+          ),
           margin: const EdgeInsets.only(bottom: 8),
           child: Padding(
-            padding: const EdgeInsets.all(12.0),
+            padding: const EdgeInsets.all(8.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -469,10 +476,7 @@ class _MobileCustomerDueAdvanceScreenState
                         children: [
                           Text(
                             customer.customerName,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: AppTextStyle.body(context),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -502,7 +506,7 @@ class _MobileCustomerDueAdvanceScreenState
                                   ),
                                   child: Text(
                                     customer.email,
-                                    style: const TextStyle(fontSize: 10),
+                                    style: AppTextStyle.bodySmall(context),
                                   ),
                                 ),
                             ],
@@ -512,7 +516,7 @@ class _MobileCustomerDueAdvanceScreenState
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 6),
 
                 // Amount Cards
                 Row(
@@ -520,9 +524,9 @@ class _MobileCustomerDueAdvanceScreenState
                     if (hasDue)
                       Expanded(
                         child: Container(
-                          padding: const EdgeInsets.all(8),
+                          padding: const EdgeInsets.all(6),
                           decoration: BoxDecoration(
-                            color: Colors.red.withOpacity(0.1),
+                            color: Colors.red.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Column(
@@ -535,7 +539,7 @@ class _MobileCustomerDueAdvanceScreenState
                                 ),
                               ),
                               Text(
-                                '\$${customer.presentDue.toStringAsFixed(2)}',
+                                customer.presentDue.toStringAsFixed(2),
                                 style: const TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.bold,
@@ -546,13 +550,13 @@ class _MobileCustomerDueAdvanceScreenState
                           ),
                         ),
                       ),
-                    if (hasDue) const SizedBox(width: 8),
+                    if (hasDue) const SizedBox(width: 4),
                     if (hasAdvance)
                       Expanded(
                         child: Container(
-                          padding: const EdgeInsets.all(8),
+                          padding: const EdgeInsets.all(6),
                           decoration: BoxDecoration(
-                            color: Colors.green.withOpacity(0.1),
+                            color: Colors.green.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Column(
@@ -565,7 +569,7 @@ class _MobileCustomerDueAdvanceScreenState
                                 ),
                               ),
                               Text(
-                                '\$${customer.presentAdvance.toStringAsFixed(2)}',
+                                '${customer.presentAdvance.toStringAsFixed(2)}',
                                 style: const TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.bold,
@@ -578,7 +582,7 @@ class _MobileCustomerDueAdvanceScreenState
                       ),
                   ],
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 6),
 
                 // Net Balance
                 Container(
@@ -610,7 +614,7 @@ class _MobileCustomerDueAdvanceScreenState
                     ],
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 6),
 
                 // Status Badge
                 Container(
@@ -640,29 +644,15 @@ class _MobileCustomerDueAdvanceScreenState
                 // Action Buttons
                 Row(
                   children: [
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: () => _showCustomerDetails(context, customer),
-                        icon: const Icon(Icons.remove_red_eye, size: 16),
-                        label: const Text('Details'),
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                        ),
+                    OutlinedButton.icon(
+                      onPressed: () => _showCustomerDetails(context, customer),
+                      icon: const Icon(Icons.remove_red_eye, size: 16),
+                      label: const Text('Details'),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 8,horizontal: 10),
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: () => _viewCustomerLedger(context, customer),
-                        icon: const Icon(Icons.book, size: 16),
-                        label: const Text('Ledger'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                        ),
-                      ),
-                    ),
+
                   ],
                 ),
               ],
@@ -756,8 +746,8 @@ class _MobileCustomerDueAdvanceScreenState
       backgroundColor: Colors.transparent,
       builder: (context) {
         return Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
+          decoration:  BoxDecoration(
+            color: AppColors.bottomNavBg(context),
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(20),
               topRight: Radius.circular(20),
@@ -784,11 +774,9 @@ class _MobileCustomerDueAdvanceScreenState
                 children: [
                   Text(
                     customer.customerName,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                                      style: AppTextStyle.bodyLarge(context),
+
+        ),
                   IconButton(
                     onPressed: () => Navigator.pop(context),
                     icon: const Icon(Icons.close),
@@ -796,22 +784,22 @@ class _MobileCustomerDueAdvanceScreenState
                 ],
               ),
               const Divider(),
-              const SizedBox(height: 16),
+              const SizedBox(height: 4),
 
               // Customer Details
-              _buildMobileDetailRow('Phone:', customer.phone),
-              _buildMobileDetailRow('Email:', customer.email),
-              _buildMobileDetailRow('Due Amount:', '\$${customer.presentDue.toStringAsFixed(2)}'),
-              _buildMobileDetailRow('Advance Amount:', '\$${customer.presentAdvance.toStringAsFixed(2)}'),
-              _buildMobileDetailRow('Net Balance:', netBalanceText),
-              _buildMobileDetailRow('Status:', customer.balanceStatus),
+              _buildMobileDetailRow('Phone:', customer.phone,context),
+              _buildMobileDetailRow('Email:', customer.email,context),
+              _buildMobileDetailRow('Due Amount:', '\$${customer.presentDue.toStringAsFixed(2)}',context),
+              _buildMobileDetailRow('Advance Amount:', '\$${customer.presentAdvance.toStringAsFixed(2)}',context),
+              _buildMobileDetailRow('Net Balance:', netBalanceText,context),
+              _buildMobileDetailRow('Status:', customer.balanceStatus,context),
 
               // Status Card
-              const SizedBox(height: 16),
+              const SizedBox(height: 6),
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: customer.balanceStatusColor.withOpacity(0.1),
+                  color: customer.balanceStatusColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(color: customer.balanceStatusColor),
                 ),
@@ -832,15 +820,7 @@ class _MobileCustomerDueAdvanceScreenState
                 ),
               ),
 
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: () => _viewCustomerLedger(context, customer),
-                  icon: const Icon(Icons.book),
-                  label: const Text('View Full Ledger'),
-                ),
-              ),
+
             ],
           ),
         );
@@ -848,7 +828,7 @@ class _MobileCustomerDueAdvanceScreenState
     );
   }
 
-  Widget _buildMobileDetailRow(String label, String value) {
+  Widget _buildMobileDetailRow(String label, String value,BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
@@ -857,9 +837,9 @@ class _MobileCustomerDueAdvanceScreenState
             flex: 2,
             child: Text(
               label,
-              style: const TextStyle(
+              style:  TextStyle(
                 fontSize: 14,
-                color: Colors.grey,
+                color: AppColors.text(context),
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -868,9 +848,11 @@ class _MobileCustomerDueAdvanceScreenState
             flex: 3,
             child: Text(
               value,
-              style: const TextStyle(
+              style:  TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
+                color: AppColors.text(context),
+
               ),
               textAlign: TextAlign.right,
             ),

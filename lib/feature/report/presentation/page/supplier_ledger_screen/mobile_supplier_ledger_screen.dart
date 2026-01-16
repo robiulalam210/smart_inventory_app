@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
+import 'package:meherinMart/core/configs/app_text.dart';
+import 'package:meherinMart/core/widgets/app_scaffold.dart';
 import 'package:printing/printing.dart';
 import '/core/configs/app_colors.dart';
 import '/core/configs/app_images.dart';
@@ -19,10 +21,12 @@ class MobileSupplierLedgerScreen extends StatefulWidget {
   const MobileSupplierLedgerScreen({super.key});
 
   @override
-  State<MobileSupplierLedgerScreen> createState() => _MobileSupplierLedgerScreenState();
+  State<MobileSupplierLedgerScreen> createState() =>
+      _MobileSupplierLedgerScreenState();
 }
 
-class _MobileSupplierLedgerScreenState extends State<MobileSupplierLedgerScreen> {
+class _MobileSupplierLedgerScreenState
+    extends State<MobileSupplierLedgerScreen> {
   SupplierActiveModel? _selectedSupplier;
   DateRange? selectedDateRange;
   bool _isFilterExpanded = false;
@@ -34,35 +38,35 @@ class _MobileSupplierLedgerScreenState extends State<MobileSupplierLedgerScreen>
     _fetchApi();
   }
 
-  void _fetchApi({
-    String? supplier,
-    DateTime? from,
-    DateTime? to,
-  }) {
-    context.read<SupplierLedgerBloc>().add(FetchSupplierLedgerReport(
-      context: context,
-      supplierId: supplier != null ? int.tryParse(supplier) : null,
-      from: from,
-      to: to,
-    ));
+  void _fetchApi({String? supplier, DateTime? from, DateTime? to}) {
+    context.read<SupplierLedgerBloc>().add(
+      FetchSupplierLedgerReport(
+        context: context,
+        supplierId: supplier != null ? int.tryParse(supplier) : null,
+        from: from,
+        to: to,
+      ),
+    );
   }
 
   String _formatCurrency(double value) => '\$${value.toStringAsFixed(2)}';
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.bottomNavBg(context),
+    return AppScaffold(
       appBar: AppBar(
-        title: const Text('Supplier Ledger'),
+        title: Text(
+          'Supplier Ledger',
+          style: AppTextStyle.titleMedium(context),
+        ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.picture_as_pdf),
+            icon: Icon(Icons.picture_as_pdf, color: AppColors.text(context)),
             onPressed: _generatePdf,
             tooltip: 'Generate PDF',
           ),
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: Icon(Icons.refresh, color: AppColors.text(context)),
             onPressed: () => _fetchApi(),
             tooltip: 'Refresh',
           ),
@@ -71,17 +75,17 @@ class _MobileSupplierLedgerScreenState extends State<MobileSupplierLedgerScreen>
       body: RefreshIndicator(
         onRefresh: () async => _fetchApi(),
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.symmetric(horizontal: 12.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // Filter Section
               _buildMobileFilterSection(),
-              const SizedBox(height: 16),
+              const SizedBox(height: 8),
 
               // Supplier Summary
               _buildSupplierSummary(),
-              const SizedBox(height: 16),
+              const SizedBox(height: 8),
 
               // Ledger Transactions
               _buildLedgerTransactions(),
@@ -90,17 +94,23 @@ class _MobileSupplierLedgerScreenState extends State<MobileSupplierLedgerScreen>
         ),
       ),
       floatingActionButton: FloatingActionButton(
+        backgroundColor: AppColors.primaryColor(context),
         onPressed: () {
           setState(() => _isFilterExpanded = !_isFilterExpanded);
         },
-        child: Icon(_isFilterExpanded ? Icons.filter_alt_off : Icons.filter_alt),
         tooltip: 'Toggle Filters',
+        child: Icon(
+          _isFilterExpanded ? Icons.filter_alt_off : Icons.filter_alt,
+          color: AppColors.whiteColor(context),
+        ),
       ),
     );
   }
 
   Widget _buildMobileFilterSection() {
     return Card(
+      elevation: 0,
+      color: AppColors.bottomNavBg(context),
       child: ExpansionPanelList(
         elevation: 0,
         expandedHeaderPadding: EdgeInsets.zero,
@@ -110,13 +120,17 @@ class _MobileSupplierLedgerScreenState extends State<MobileSupplierLedgerScreen>
         children: [
           ExpansionPanel(
             headerBuilder: (context, isExpanded) {
-              return const ListTile(
-                leading: Icon(Icons.filter_alt),
-                title: Text('Filters'),
+              return ListTile(
+                leading: Icon(Icons.filter_alt, color: AppColors.text(context)),
+                title: Text('Filters', style: AppTextStyle.body(context)),
+                onTap: () {
+                  _isFilterExpanded = !_isFilterExpanded;
+                  setState(() {});
+                },
               );
             },
             body: Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.symmetric(horizontal: 0.0),
               child: Column(
                 children: [
                   // Date Range Picker
@@ -134,7 +148,7 @@ class _MobileSupplierLedgerScreenState extends State<MobileSupplierLedgerScreen>
                       }
                     },
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 4),
 
                   // Supplier Dropdown
                   BlocBuilder<SupplierInvoiceBloc, SupplierInvoiceState>(
@@ -145,7 +159,7 @@ class _MobileSupplierLedgerScreenState extends State<MobileSupplierLedgerScreen>
                           hint: "Loading suppliers...",
                           isLabel: true,
                           itemList: [],
-                          onChanged: (v){},
+                          onChanged: (v) {},
                         );
                       }
 
@@ -155,11 +169,13 @@ class _MobileSupplierLedgerScreenState extends State<MobileSupplierLedgerScreen>
                           hint: "Failed to load suppliers",
                           isLabel: true,
                           itemList: [],
-                          onChanged: (v){},
+                          onChanged: (v) {},
                         );
                       }
 
-                      final supplierList = context.read<SupplierInvoiceBloc>().supplierActiveList;
+                      final supplierList = context
+                          .read<SupplierInvoiceBloc>()
+                          .supplierActiveList;
 
                       return AppDropdown<SupplierActiveModel>(
                         label: "Supplier",
@@ -180,40 +196,6 @@ class _MobileSupplierLedgerScreenState extends State<MobileSupplierLedgerScreen>
                       );
                     },
                   ),
-                  const SizedBox(height: 12),
-
-                  // Action Buttons
-                  Row(
-                    children: [
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          onPressed: () {
-                            setState(() {
-                              selectedDateRange = null;
-                              _selectedSupplier = null;
-                              _isFilterExpanded = false;
-                            });
-                            context.read<SupplierLedgerBloc>().add(ClearSupplierLedgerFilters());
-                            _fetchApi();
-                          },
-                          icon: const Icon(Icons.clear_all, size: 18),
-                          label: const Text('Clear Filters'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.grey[200],
-                            foregroundColor: Colors.grey[800],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          onPressed: _generatePdf,
-                          icon: const Icon(Icons.picture_as_pdf, size: 18),
-                          label: const Text('PDF Report'),
-                        ),
-                      ),
-                    ],
-                  ),
                 ],
               ),
             ),
@@ -231,6 +213,8 @@ class _MobileSupplierLedgerScreenState extends State<MobileSupplierLedgerScreen>
 
         if (supplier == null) {
           return Card(
+            elevation: 0,
+            color: AppColors.bottomNavBg(context),
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
@@ -238,15 +222,15 @@ class _MobileSupplierLedgerScreenState extends State<MobileSupplierLedgerScreen>
                   Icon(
                     Icons.business_outlined,
                     size: 60,
-                    color: Colors.grey.withOpacity(0.5),
+                    color: Colors.grey.withValues(alpha: 0.5),
                   ),
                   const SizedBox(height: 16),
                   Text(
                     "Select a Supplier",
                     style: GoogleFonts.inter(
-                      fontSize: 18,
+                      fontSize: 16,
                       fontWeight: FontWeight.w600,
-                      color: Colors.grey,
+                      color: AppColors.text(context),
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -254,7 +238,7 @@ class _MobileSupplierLedgerScreenState extends State<MobileSupplierLedgerScreen>
                     "Choose a supplier from the dropdown to view their ledger",
                     style: GoogleFonts.inter(
                       fontSize: 14,
-                      color: Colors.grey,
+                      color: AppColors.text(context),
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -271,7 +255,7 @@ class _MobileSupplierLedgerScreenState extends State<MobileSupplierLedgerScreen>
               child: Column(
                 children: [
                   Text(
-                    supplier.name??"",
+                    supplier.name ?? "",
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -291,12 +275,16 @@ class _MobileSupplierLedgerScreenState extends State<MobileSupplierLedgerScreen>
         }
 
         final summary = state.response.summary;
-        final closingBalanceColor = summary.closingBalance > 0 ? Colors.red : Colors.green;
+        final closingBalanceColor = summary.closingBalance > 0
+            ? Colors.red
+            : Colors.green;
         final balanceText = summary.closingBalance > 0 ? 'DUE' : 'ADVANCE';
 
         return Card(
+          elevation: 0,
+          color: AppColors.bottomNavBg(context),
           child: Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(8.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -313,22 +301,24 @@ class _MobileSupplierLedgerScreenState extends State<MobileSupplierLedgerScreen>
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        supplier.name??"",
-                        style: const TextStyle(
-                          fontSize: 20,
+                        supplier.name ?? "",
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: AppColors.text(context),
+
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 4),
 
                 // Balance Summary
                 Container(
-                  padding: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: closingBalanceColor.withOpacity(0.1),
+                    color: closingBalanceColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
@@ -337,11 +327,11 @@ class _MobileSupplierLedgerScreenState extends State<MobileSupplierLedgerScreen>
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
+                            Text(
                               'Current Balance',
                               style: TextStyle(
                                 fontSize: 12,
-                                color: Colors.grey,
+                                color: AppColors.text(context),
                               ),
                             ),
                             Text(
@@ -356,7 +346,10 @@ class _MobileSupplierLedgerScreenState extends State<MobileSupplierLedgerScreen>
                         ),
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
                         decoration: BoxDecoration(
                           color: closingBalanceColor,
                           borderRadius: BorderRadius.circular(20),
@@ -373,7 +366,7 @@ class _MobileSupplierLedgerScreenState extends State<MobileSupplierLedgerScreen>
                     ],
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 6),
 
                 // Stats Grid
                 GridView.count(
@@ -418,11 +411,16 @@ class _MobileSupplierLedgerScreenState extends State<MobileSupplierLedgerScreen>
     );
   }
 
-  Widget _buildMobileStatItem(String label, String value, IconData icon, Color color) {
+  Widget _buildMobileStatItem(
+    String label,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -430,7 +428,7 @@ class _MobileSupplierLedgerScreenState extends State<MobileSupplierLedgerScreen>
           Container(
             padding: const EdgeInsets.all(4),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.2),
+              color: color.withValues(alpha: 0.2),
               shape: BoxShape.circle,
             ),
             child: Icon(icon, size: 16, color: color),
@@ -442,9 +440,9 @@ class _MobileSupplierLedgerScreenState extends State<MobileSupplierLedgerScreen>
               children: [
                 Text(
                   label,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 10,
-                    color: Colors.grey,
+                    color: AppColors.text(context),
                   ),
                 ),
                 Text(
@@ -479,7 +477,9 @@ class _MobileSupplierLedgerScreenState extends State<MobileSupplierLedgerScreen>
           );
         } else if (state is SupplierLedgerSuccess) {
           if (state.response.report.isEmpty) {
-            return _buildEmptyState("No transactions found for the selected period");
+            return _buildEmptyState(
+              "No transactions found for the selected period",
+            );
           }
           return _buildMobileTransactionList(state.response.report);
         } else if (state is SupplierLedgerFailed) {
@@ -502,9 +502,11 @@ class _MobileSupplierLedgerScreenState extends State<MobileSupplierLedgerScreen>
         final balanceColor = transaction.due > 0 ? Colors.red : Colors.green;
 
         return Card(
-          margin: const EdgeInsets.only(bottom: 8),
+          color: AppColors.bottomNavBg(context),
+
+          margin: const EdgeInsets.only(bottom: 6),
           child: Padding(
-            padding: const EdgeInsets.all(12.0),
+            padding: const EdgeInsets.all(8.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -515,22 +517,31 @@ class _MobileSupplierLedgerScreenState extends State<MobileSupplierLedgerScreen>
                     Expanded(
                       child: Text(
                         transaction.voucherNo,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 16,
+                          color: AppColors.text(context),
+
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
-                        color: transaction.typeColor.withOpacity(0.1),
+                        color: transaction.typeColor.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(transaction.typeIcon, size: 12, color: transaction.typeColor),
+                          Icon(
+                            transaction.typeIcon,
+                            size: 12,
+                            color: transaction.typeColor,
+                          ),
                           const SizedBox(width: 4),
                           Text(
                             transaction.type.toUpperCase(),
@@ -545,34 +556,43 @@ class _MobileSupplierLedgerScreenState extends State<MobileSupplierLedgerScreen>
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 4),
 
                 // Date and Particular
                 Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
-                        color: Colors.grey[200],
+                        color: AppColors.bottomNavBg(context),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
                         _formatDate(transaction.date),
-                        style: const TextStyle(fontSize: 10),
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: AppColors.text(context),
+                        ),
                       ),
                     ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         transaction.particular,
-                        style: const TextStyle(fontSize: 12),
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: AppColors.text(context),
+                        ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 6),
 
                 // Amount Details
                 Row(
@@ -583,7 +603,7 @@ class _MobileSupplierLedgerScreenState extends State<MobileSupplierLedgerScreen>
                         child: Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: Colors.red.withOpacity(0.1),
+                            color: Colors.red.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Column(
@@ -613,7 +633,7 @@ class _MobileSupplierLedgerScreenState extends State<MobileSupplierLedgerScreen>
                         child: Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: Colors.green.withOpacity(0.1),
+                            color: Colors.green.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Column(
@@ -642,17 +662,18 @@ class _MobileSupplierLedgerScreenState extends State<MobileSupplierLedgerScreen>
                       child: Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: balanceColor.withOpacity(0.1),
+                          color: balanceColor.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(color: balanceColor),
                         ),
                         child: Column(
                           children: [
-                            const Text(
+                            Text(
                               'BALANCE',
+
                               style: TextStyle(
                                 fontSize: 10,
-                                color: Colors.grey,
+                                color: AppColors.text(context),
                               ),
                             ),
                             Text(
@@ -671,17 +692,18 @@ class _MobileSupplierLedgerScreenState extends State<MobileSupplierLedgerScreen>
                 ),
 
                 // Details and Method
-                if (transaction.details.isNotEmpty || transaction.method.isNotEmpty)
+                if (transaction.details.isNotEmpty ||
+                    transaction.method.isNotEmpty)
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 4),
                       if (transaction.details.isNotEmpty)
                         Text(
                           transaction.details,
-                          style: const TextStyle(
-                            fontSize: 11,
-                            color: Colors.grey,
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: AppColors.text(context),
                           ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
@@ -691,13 +713,17 @@ class _MobileSupplierLedgerScreenState extends State<MobileSupplierLedgerScreen>
                           padding: const EdgeInsets.only(top: 4.0),
                           child: Row(
                             children: [
-                              const Icon(Icons.payment, size: 12, color: Colors.grey),
+                              Icon(
+                                Icons.payment,
+                                size: 12,
+                                color: AppColors.text(context),
+                              ),
                               const SizedBox(width: 4),
                               Text(
                                 transaction.method,
-                                style: const TextStyle(
-                                  fontSize: 11,
-                                  color: Colors.grey,
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: AppColors.text(context),
                                 ),
                               ),
                             ],
@@ -707,15 +733,18 @@ class _MobileSupplierLedgerScreenState extends State<MobileSupplierLedgerScreen>
                   ),
 
                 // View Details Button
-                const SizedBox(height: 12),
                 Align(
                   alignment: Alignment.centerRight,
                   child: TextButton.icon(
-                    onPressed: () => _showTransactionDetails(context, transaction),
+                    onPressed: () =>
+                        _showTransactionDetails(context, transaction),
                     icon: const Icon(Icons.remove_red_eye, size: 14),
                     label: const Text('View Details'),
                     style: TextButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 4,
+                      ),
                     ),
                   ),
                 ),
@@ -789,7 +818,10 @@ class _MobileSupplierLedgerScreenState extends State<MobileSupplierLedgerScreen>
     );
   }
 
-  void _showTransactionDetails(BuildContext context, SupplierLedger transaction) {
+  void _showTransactionDetails(
+    BuildContext context,
+    SupplierLedger transaction,
+  ) {
     final balanceColor = transaction.due > 0 ? Colors.red : Colors.green;
 
     showModalBottomSheet(
@@ -798,8 +830,8 @@ class _MobileSupplierLedgerScreenState extends State<MobileSupplierLedgerScreen>
       backgroundColor: Colors.transparent,
       builder: (context) {
         return Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
+          decoration: BoxDecoration(
+            color: AppColors.bottomNavBg(context),
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(20),
               topRight: Radius.circular(20),
@@ -826,8 +858,10 @@ class _MobileSupplierLedgerScreenState extends State<MobileSupplierLedgerScreen>
                 children: [
                   Text(
                     'Transaction Details',
-                    style: const TextStyle(
-                      fontSize: 18,
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: AppColors.text(context),
+
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -838,18 +872,27 @@ class _MobileSupplierLedgerScreenState extends State<MobileSupplierLedgerScreen>
                 ],
               ),
               const Divider(),
-              const SizedBox(height: 16),
+              const SizedBox(height: 8),
 
               // Transaction Details
-              _buildMobileDetailRow('Voucher No:', transaction.voucherNo),
-              _buildMobileDetailRow('Date:', _formatDate(transaction.date)),
-              _buildMobileDetailRow('Type:', transaction.type.toUpperCase()),
-              _buildMobileDetailRow('Particular:', transaction.particular),
-              _buildMobileDetailRow('Details:', transaction.details),
-              _buildMobileDetailRow('Payment Method:', transaction.method),
-              _buildMobileDetailRow('Debit Amount:', _formatCurrency(transaction.debit)),
-              _buildMobileDetailRow('Credit Amount:', _formatCurrency(transaction.credit)),
-              _buildMobileDetailRow('Balance:', _formatCurrency(transaction.due)),
+              _buildMobileDetailRow('Voucher No:', transaction.voucherNo,context),
+              _buildMobileDetailRow('Date:', _formatDate(transaction.date),context),
+              _buildMobileDetailRow('Type:', transaction.type.toUpperCase(),context),
+              _buildMobileDetailRow('Particular:', transaction.particular,context),
+              _buildMobileDetailRow('Details:', transaction.details,context),
+              _buildMobileDetailRow('Payment Method:', transaction.method,context),
+              _buildMobileDetailRow(
+                'Debit Amount:',
+                _formatCurrency(transaction.debit),context
+              ),
+              _buildMobileDetailRow(
+                'Credit Amount:',
+                _formatCurrency(transaction.credit),context
+              ),
+              _buildMobileDetailRow(
+                'Balance:',
+                _formatCurrency(transaction.due),context
+              ),
 
               // Type Badge
               const SizedBox(height: 16),
@@ -889,13 +932,17 @@ class _MobileSupplierLedgerScreenState extends State<MobileSupplierLedgerScreen>
                 child: Row(
                   children: [
                     Icon(
-                      transaction.due > 0 ? Icons.arrow_circle_up : Icons.arrow_circle_down,
+                      transaction.due > 0
+                          ? Icons.arrow_circle_up
+                          : Icons.arrow_circle_down,
                       color: balanceColor,
                     ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        transaction.due > 0 ? 'Supplier OWES you' : 'You OWE supplier',
+                        transaction.due > 0
+                            ? 'Supplier OWES you'
+                            : 'You OWE supplier',
                         style: TextStyle(
                           color: balanceColor,
                           fontWeight: FontWeight.bold,
@@ -921,7 +968,11 @@ class _MobileSupplierLedgerScreenState extends State<MobileSupplierLedgerScreen>
     );
   }
 
-  Widget _buildMobileDetailRow(String label, String value) {
+  Widget _buildMobileDetailRow(
+    String label,
+    String value,
+    BuildContext context,
+  ) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
@@ -930,9 +981,9 @@ class _MobileSupplierLedgerScreenState extends State<MobileSupplierLedgerScreen>
             flex: 2,
             child: Text(
               label,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
-                color: Colors.grey,
+                color: AppColors.text(context),
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -941,10 +992,10 @@ class _MobileSupplierLedgerScreenState extends State<MobileSupplierLedgerScreen>
             flex: 3,
             child: Text(
               value,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-              ),
+              style:  TextStyle(
+                  color: AppColors.text(context),
+
+                  fontSize: 14, fontWeight: FontWeight.w600),
               textAlign: TextAlign.right,
             ),
           ),
@@ -970,7 +1021,8 @@ class _MobileSupplierLedgerScreenState extends State<MobileSupplierLedgerScreen>
               ],
             ),
             body: PdfPreview(
-              build: (format) => generateSupplierLedgerReportPdf(state.response),
+              build: (format) =>
+                  generateSupplierLedgerReportPdf(state.response),
               canChangeOrientation: false,
               canChangePageFormat: false,
               canDebug: false,

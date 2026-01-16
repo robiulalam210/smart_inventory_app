@@ -1,7 +1,7 @@
+
 import 'dart:developer';
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../../../../../core/widgets/app_scaffold.dart';
@@ -53,10 +53,6 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
   String selectedOverallDeliveryType = 'fixed';
 
   // Track validation state for each step
-  bool _step1Validated = false;
-  bool _step2Validated = false;
-  bool _step3Validated = false;
-  bool _step4Validated = false;
 
   @override
   void initState() {
@@ -106,7 +102,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
 
     // Find matched user
     final matchedUser = userList.firstWhere(
-      (user) => user.id == loginUserId,
+          (user) => user.id == loginUserId,
       orElse: () => userList.first,
     );
 
@@ -137,7 +133,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
           context: context,
           title: 'Warning!',
           description:
-              "Walk-in customer must pay exact amount. No change allowed.",
+          "Walk-in customer must pay exact amount. No change allowed.",
           icon: Icons.warning,
           primaryColor: Colors.orange,
         );
@@ -344,9 +340,9 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
     // Calculate final total
     double finalTotal =
         totalAfterDiscount +
-        overallVat +
-        overallServiceCharge +
-        overallDeliveryCharge;
+            overallVat +
+            overallServiceCharge +
+            overallDeliveryCharge;
 
     return finalTotal;
   }
@@ -507,7 +503,8 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                       'Customer Info',
                       style: AppTextStyle.cardLevelHead(
                         context,
-                      ).copyWith(color: AppColors.text(context)),                    ),
+                      ).copyWith(color: AppColors.text(context)),
+                    ),
                     content: _buildMobileTopFormSection(bloc),
                     isActive: currentStep >= 0,
                     state: _getStepState(0),
@@ -519,7 +516,8 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                       'Products',
                       style: AppTextStyle.cardLevelHead(
                         context,
-                      ).copyWith(color: AppColors.text(context)),                    ),
+                      ).copyWith(color: AppColors.text(context)),
+                    ),
                     content: _buildMobileProductListSection(bloc),
                     isActive: currentStep >= 1,
                     state: _getStepState(1),
@@ -531,7 +529,8 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                       'Charges',
                       style: AppTextStyle.cardLevelHead(
                         context,
-                      ).copyWith(color: AppColors.text(context)),                    ),
+                      ).copyWith(color: AppColors.text(context)),
+                    ),
                     content: _buildMobileChargesSection(bloc),
                     isActive: currentStep >= 2,
                     state: _getStepState(2),
@@ -586,7 +585,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
   }
 
   void _validateStep1() {
-    // First validate the form
+    // Validate form first
     if (!_formKeyStep1.currentState!.validate()) {
       showCustomToast(
         context: context,
@@ -634,13 +633,25 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
       return;
     }
 
-    _step1Validated = true;
     setState(() {
       currentStep += 1;
     });
   }
 
   void _validateStep2() {
+    // Create a form state for step 2 validation
+    final formState = _formKeyStep2.currentState;
+    if (formState != null && !formState.validate()) {
+      showCustomToast(
+        context: context,
+        title: 'Validation Error',
+        description: 'Please fix product selection errors',
+        icon: Icons.error,
+        primaryColor: Colors.red,
+      );
+      return;
+    }
+
     // Validate at least one product is added
     if (products.isEmpty) {
       showCustomToast(
@@ -653,21 +664,8 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
       return;
     }
 
-    // Validate each product
+    // Validate each product has quantity > 0
     for (int i = 0; i < products.length; i++) {
-      final product = products[i];
-
-      if (product["product"] == null) {
-        showCustomToast(
-          context: context,
-          title: 'Validation Error',
-          description: 'Please select a product for item ${i + 1}',
-          icon: Icons.error,
-          primaryColor: Colors.red,
-        );
-        return;
-      }
-
       final quantity = int.tryParse(controllers[i]!["quantity"]!.text) ?? 0;
       if (quantity <= 0) {
         showCustomToast(
@@ -679,15 +677,42 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
         );
         return;
       }
+
+      // Validate stock availability
+      final product = products[i]["product"] as ProductModelStockModel?;
+      if (product != null) {
+        final stockQty = product.stockQty ?? 0;
+        if (quantity > stockQty) {
+          showCustomToast(
+            context: context,
+            title: 'Stock Error',
+            description: 'Insufficient stock for ${product.name}. Available: $stockQty',
+            icon: Icons.error,
+            primaryColor: Colors.red,
+          );
+          return;
+        }
+      }
     }
 
-    _step2Validated = true;
     setState(() {
       currentStep += 1;
     });
   }
 
   void _validateStep3() {
+    // Validate form first
+    if (!_formKeyStep3.currentState!.validate()) {
+      showCustomToast(
+        context: context,
+        title: 'Validation Error',
+        description: 'Please fix the errors in Charges section',
+        icon: Icons.error,
+        primaryColor: Colors.red,
+      );
+      return;
+    }
+
     final bloc = context.read<CreatePosSaleBloc>();
 
     // Validate numeric fields
@@ -721,7 +746,6 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
       return;
     }
 
-    _step3Validated = true;
     setState(() {
       currentStep += 1;
     });
@@ -754,7 +778,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
           context: context,
           title: 'Validation Error',
           description:
-              "Walk-in customer must pay EXACT amount: ${netTotal.toStringAsFixed(2)}",
+          "Walk-in customer must pay EXACT amount: ${netTotal.toStringAsFixed(2)}",
           icon: Icons.error,
           primaryColor: Colors.red,
         );
@@ -810,7 +834,6 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
       }
     }
 
-    _step4Validated = true;
     _submitForm();
   }
 
@@ -833,9 +856,9 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                     isRequired: true,
                     value: bloc.selectClintModel,
                     itemList:
-                        [
-                          CustomerActiveModel(name: 'Walk-in-customer', id: -1),
-                        ] +
+                    [
+                      CustomerActiveModel(name: 'Walk-in-customer', id: -1),
+                    ] +
                         context.read<CustomerBloc>().activeCustomer,
                     onChanged: (newVal) {
                       bloc.selectClintModel = newVal;
@@ -855,17 +878,16 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                       setState(() {});
                     },
                     validator: (value) =>
-                        value == null ? 'Please select Customer' : null,
+                    value == null ? 'Please select Customer' : null,
 
                   );
                 },
               ),
-              const SizedBox(height: 12),
               BlocBuilder<UserBloc, UserState>(
                 builder: (context, state) {
                   return AppDropdown(
                     label: "Sales By",
-                    hint: bloc.selectSalesModel?.username ?? "Select Sales",
+                    hint: "Select Sales",
                     isSearch: true,
                     isNeedAll: false,
                     isRequired: true,
@@ -876,12 +898,11 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                       setState(() {});
                     },
                     validator: (value) =>
-                        value == null ? 'Please select Sales' : null,
+                    value == null ? 'Please select Sales' : null,
 
                   );
                 },
               ),
-              const SizedBox(height: 12),
               CustomInputField(
                 radius: 8,
                 isRequired: true,
@@ -893,9 +914,10 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                 bottom: 15.0,
                 fillColor: AppColors.whiteColor(context),
                 validator: (value) =>
-                    value!.isEmpty ? 'Please enter date' : null,
+                value!.isEmpty ? 'Please enter date' : null,
                 onTap: _selectDate,
               ),
+              SizedBox(height: 20,)
             ],
           ),
         ],
@@ -904,379 +926,385 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
   }
 
   Widget _buildMobileProductListSection(CreatePosSaleBloc bloc) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        ...products.asMap().entries.map((entry) {
-          final index = entry.key;
-          final product = entry.value;
-          final discountApplied = product["discountApplied"] == true;
+    return Form(
+      key: _formKeyStep2,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ...products.asMap().entries.map((entry) {
+            final index = entry.key;
+            final product = entry.value;
+            final discountApplied = product["discountApplied"] == true;
 
-          return Container(
-            margin: const EdgeInsets.only(bottom: 6),
-            padding: const EdgeInsets.all(6.0),
-            decoration: BoxDecoration(
-              color: AppColors.bottomNavBg(context),
-              border: Border.all(color: Colors.grey[300]!),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Product header
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "Product ${index + 1}",
-                      style: AppTextStyle.cardTitle(context),
-                    ),
-                    if (index > 0)
-                      IconButton(
-                        icon: const Icon(
-                          Icons.delete,
-                          color: Colors.red,
-                          size: 20,
+            return Container(
+              margin: const EdgeInsets.only(bottom: 6),
+              padding: const EdgeInsets.all(6.0),
+              decoration: BoxDecoration(
+                color: AppColors.bottomNavBg(context),
+                border: Border.all(color: Colors.grey[300]!),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Product header
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "Product ${index + 1}",
+                        style: AppTextStyle.cardTitle(context),
+                      ),
+                      if (index > 0)
+                        IconButton(
+                          icon: const Icon(
+                            Icons.delete,
+                            color: Colors.red,
+                            size: 20,
+                          ),
+                          onPressed: () => removeProduct(index),
+                          padding: EdgeInsets.zero,
+                        )
+                      else
+                        IconButton(
+                          icon: const Icon(Icons.add_circle, color: Colors.green),
+                          onPressed: addProduct,
                         ),
-                        onPressed: () => removeProduct(index),
-                        padding: EdgeInsets.zero,
-                      )
-                    else
-                      IconButton(
-                        icon: const Icon(Icons.add_circle, color: Colors.green),
-                        onPressed: addProduct,
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+
+                  // Category
+                  BlocBuilder<CategoriesBloc, CategoriesState>(
+                    builder: (context, state) {
+                      final selectedCategory = categoriesBloc.selectedState;
+                      final categoryList = categoriesBloc.list;
+
+                      return AppDropdown(
+                        label: "Category",
+                        hint: selectedCategory.isEmpty
+                            ? "Select Category"
+                            : selectedCategory,
+                        isRequired: false,
+                        isNeedAll: true,
+                        isLabel: true,
+                        isSearch: true,
+                        value: selectedCategory.isEmpty ? null : selectedCategory,
+                        itemList: categoryList.map((e) => e.name ?? "").toList(),
+                        onChanged: (newVal) {
+                          setState(() {
+                            categoriesBloc.selectedState = newVal.toString();
+                            final matchingCategory = categoryList.firstWhere(
+                                  (category) =>
+                              category.name.toString() == newVal.toString(),
+                              orElse: () => CategoryModel(),
+                            );
+                            categoriesBloc.selectedStateId =
+                                matchingCategory.id?.toString() ?? "";
+                            product["product"] = null;
+                            product["product_id"] = null;
+                            controllers[index]!["price"]!.text = "0";
+                            controllers[index]!["quantity"]!.text = "1";
+                            controllers[index]!["discount"]!.text = "0";
+                            updateTotal(index);
+                          });
+                        },
+
+                      );
+                    },
+                  ),
+
+                  // Product
+                  BlocBuilder<ProductsBloc, ProductsState>(
+                    builder: (context, state) {
+                      final selectedCategoryId = categoriesBloc.selectedStateId;
+                      final selectedProductIds = products
+                          .where((p) => p["product_id"] != null)
+                          .map<int>((p) => p["product_id"])
+                          .toList();
+
+                      final filteredProducts = context
+                          .read<ProductsBloc>()
+                          .productList
+                          .where((item) {
+                        final categoryMatch = selectedCategoryId.isEmpty
+                            ? true
+                            : item.category?.toString() == selectedCategoryId;
+                        final notDuplicate =
+                            !selectedProductIds.contains(item.id) ||
+                                item.id == product["product_id"];
+                        return categoryMatch && notDuplicate;
+                      })
+                          .toList();
+
+                      return AppDropdown<ProductModelStockModel>(
+                        isRequired: true,
+                        isLabel: true,
+                        isSearch: true,
+                        label: "Product",
+                        hint: selectedCategoryId.isEmpty
+                            ? "Select Category First"
+                            : "Select Product",
+                        value: product["product"],
+                        itemList: filteredProducts,
+                        onChanged: (newVal) => onProductChanged(index, newVal),
+                        validator: (value) =>
+                        value == null ? 'Please select Product' : null,
+
+                      );
+                    },
+                  ),
+
+                  // Price & Quantity Row
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text("Price", style: AppTextStyle.bodySmall(context)),
+                            const SizedBox(height: 4),
+                            TextFormField(
+                              style: AppTextStyle.cardLevelText(context),
+                              controller: controllers[index]?["price"],
+                              keyboardType: TextInputType.number,
+                              readOnly: true,
+                              decoration: InputDecoration(
+                                filled: true,
+                                fillColor: AppColors.bottomNavBg(context),
+                                contentPadding: const EdgeInsets.all(10),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(5),
+                                  borderSide: BorderSide(
+                                    color: AppColors.primaryColor(
+                                      context,
+                                    ).withValues(alpha: 0.3),
+                                  ),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(5),
+                                  borderSide: BorderSide(
+                                    color: AppColors.primaryColor(
+                                      context,
+                                    ).withValues(alpha: 0.3),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                  ],
-                ),
-                const SizedBox(height: 6),
-
-                // Category
-                BlocBuilder<CategoriesBloc, CategoriesState>(
-                  builder: (context, state) {
-                    final selectedCategory = categoriesBloc.selectedState;
-                    final categoryList = categoriesBloc.list;
-
-                    return AppDropdown(
-                      label: "Category",
-                      hint: selectedCategory.isEmpty
-                          ? "Select Category"
-                          : selectedCategory,
-                      isRequired: false,
-                      isNeedAll: true,
-                      isLabel: true,
-                      isSearch: true,
-                      value: selectedCategory.isEmpty ? null : selectedCategory,
-                      itemList: categoryList.map((e) => e.name ?? "").toList(),
-                      onChanged: (newVal) {
-                        setState(() {
-                          categoriesBloc.selectedState = newVal.toString();
-                          final matchingCategory = categoryList.firstWhere(
-                            (category) =>
-                                category.name.toString() == newVal.toString(),
-                            orElse: () => CategoryModel(),
-                          );
-                          categoriesBloc.selectedStateId =
-                              matchingCategory.id?.toString() ?? "";
-                          product["product"] = null;
-                          product["product_id"] = null;
-                          controllers[index]!["price"]!.text = "0";
-                          controllers[index]!["quantity"]!.text = "1";
-                          controllers[index]!["discount"]!.text = "0";
-                          updateTotal(index);
-                        });
-                      },
-
-                    );
-                  },
-                ),
-
-                // Product
-                BlocBuilder<ProductsBloc, ProductsState>(
-                  builder: (context, state) {
-                    final selectedCategoryId = categoriesBloc.selectedStateId;
-                    final selectedProductIds = products
-                        .where((p) => p["product_id"] != null)
-                        .map<int>((p) => p["product_id"])
-                        .toList();
-
-                    final filteredProducts = context
-                        .read<ProductsBloc>()
-                        .productList
-                        .where((item) {
-                          final categoryMatch = selectedCategoryId.isEmpty
-                              ? true
-                              : item.category?.toString() == selectedCategoryId;
-                          final notDuplicate =
-                              !selectedProductIds.contains(item.id) ||
-                              item.id == product["product_id"];
-                          return categoryMatch && notDuplicate;
-                        })
-                        .toList();
-
-                    return AppDropdown<ProductModelStockModel>(
-                      isRequired: true,
-                      isLabel: true,
-                      isSearch: true,
-                      label: "Product",
-                      hint: selectedCategoryId.isEmpty
-                          ? "Select Category First"
-                          : "Select Product",
-                      value: product["product"],
-                      itemList: filteredProducts,
-                      onChanged: (newVal) => onProductChanged(index, newVal),
-                      validator: (value) =>
-                          value == null ? 'Please select Product' : null,
-
-                    );
-                  },
-                ),
-
-                // Price & Quantity Row
-                Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text("Price", style: AppTextStyle.bodySmall(context)),
-                          const SizedBox(height: 4),
-                          TextFormField(
-                            style: AppTextStyle.cardLevelText(context),
-                            controller: controllers[index]?["price"],
-                            keyboardType: TextInputType.number,
-                            readOnly: true,
-                            decoration: InputDecoration(
-                              filled: true,
-                              fillColor: AppColors.bottomNavBg(context),
-                              contentPadding: const EdgeInsets.all(10),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(5),
-                                borderSide: BorderSide(
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Quantity",
+                              style: AppTextStyle.bodySmall(context),
+                            ),
+                            const SizedBox(height: 4),
+                            Container(
+                              decoration: BoxDecoration(
+                                border: Border.all(
                                   color: AppColors.primaryColor(
                                     context,
                                   ).withValues(alpha: 0.3),
                                 ),
-                              ),
-                              enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(5),
-                                borderSide: BorderSide(
-                                  color: AppColors.primaryColor(
-                                    context,
-                                  ).withValues(alpha: 0.3),
-                                ),
                               ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "Quantity",
-                            style: AppTextStyle.bodySmall(context),
-                          ),
-                          const SizedBox(height: 4),
-                          Container(
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                color: AppColors.primaryColor(
-                                  context,
-                                ).withValues(alpha: 0.3),
-                              ),
-                              borderRadius: BorderRadius.circular(5),
-                            ),
-                            child: Row(
-                              children: [
-                                IconButton(
-                                  icon: const Icon(Icons.remove, size: 18),
-                                  onPressed: () {
-                                    int? currentQuantity = int.tryParse(
-                                      controllers[index]?["quantity"]?.text ??
-                                          "0",
-                                    );
-                                    if (currentQuantity != null &&
-                                        currentQuantity > 1) {
+                              child: Row(
+                                children: [
+                                  IconButton(
+                                    icon: const Icon(Icons.remove, size: 18),
+                                    onPressed: () {
+                                      int? currentQuantity = int.tryParse(
+                                        controllers[index]?["quantity"]?.text ??
+                                            "0",
+                                      );
+                                      if (currentQuantity != null &&
+                                          currentQuantity > 1) {
+                                        controllers[index]!["quantity"]!.text =
+                                            (currentQuantity - 1).toString();
+                                        products[index]["quantity"] =
+                                            controllers[index]!["quantity"]!.text;
+                                        updateTotal(index);
+                                      }
+                                    },
+                                    padding: EdgeInsets.zero,
+                                    constraints: const BoxConstraints(
+                                      minWidth: 36,
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: Text(
+                                      controllers[index]!["quantity"]!.text,
+                                      textAlign: TextAlign.center,
+                                      style: AppTextStyle.cardTitle(context),
+                                    ),
+                                  ),
+                                  IconButton(
+                                    padding: EdgeInsets.zero,
+                                    icon: const Icon(Icons.add, size: 18),
+                                    onPressed: () {
+                                      int currentQuantity =
+                                          int.tryParse(
+                                            controllers[index]!["quantity"]!.text,
+                                          ) ??
+                                              0;
                                       controllers[index]!["quantity"]!.text =
-                                          (currentQuantity - 1).toString();
+                                          (currentQuantity + 1).toString();
                                       products[index]["quantity"] =
                                           controllers[index]!["quantity"]!.text;
                                       updateTotal(index);
-                                    }
-                                  },
-                                  padding: EdgeInsets.zero,
-                                  constraints: const BoxConstraints(
-                                    minWidth: 36,
+                                    },
+                                    constraints: const BoxConstraints(
+                                      minWidth: 36,
+                                    ),
                                   ),
-                                ),
-                                Expanded(
-                                  child: Text(
-                                    controllers[index]!["quantity"]!.text,
-                                    textAlign: TextAlign.center,
-                                    style: AppTextStyle.cardTitle(context),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  // Discount Section
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text("Discount", style: AppTextStyle.bodySmall(context)),
+                      const SizedBox(height: 4),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: AbsorbPointer(
+                              absorbing: discountApplied,
+                              child: CupertinoSegmentedControl<String>(
+                                padding: EdgeInsets.zero,
+                                children: {
+                                  'fixed': Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 4,
+                                      vertical: 8,
+                                    ),
+                                    child: Text(
+                                      'TK',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontFamily: GoogleFonts.playfairDisplay()
+                                            .fontFamily,
+                                        color: product["discount_type"] == 'fixed'
+                                            ? Colors.white
+                                            : Colors.black,
+                                      ),
+                                    ),
                                   ),
-                                ),
-                                IconButton(
-                                  padding: EdgeInsets.zero,
-                                  icon: const Icon(Icons.add, size: 18),
-                                  onPressed: () {
-                                    int currentQuantity =
-                                        int.tryParse(
-                                          controllers[index]!["quantity"]!.text,
-                                        ) ??
-                                        0;
-                                    controllers[index]!["quantity"]!.text =
-                                        (currentQuantity + 1).toString();
-                                    products[index]["quantity"] =
-                                        controllers[index]!["quantity"]!.text;
+                                  'percent': Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 4,
+                                      vertical: 8,
+                                    ),
+                                    child: Text(
+                                      '%',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontFamily: GoogleFonts.playfairDisplay()
+                                            .fontFamily,
+                                        color:
+                                        product["discount_type"] == 'percent'
+                                            ? Colors.white
+                                            : Colors.black,
+                                      ),
+                                    ),
+                                  ),
+                                },
+                                onValueChanged: discountApplied
+                                    ? (_) {}
+                                    : (value) {
+                                  setState(() {
+                                    product["discount_type"] = value;
                                     updateTotal(index);
-                                  },
-                                  constraints: const BoxConstraints(
-                                    minWidth: 36,
+                                  });
+                                },
+                                groupValue: product["discount_type"],
+                                unselectedColor: Colors.grey[300],
+                                selectedColor: AppColors.primaryColor(context),
+                                borderColor: AppColors.primaryColor(context),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: TextFormField(
+                              controller: controllers[index]?["discount"],
+                              style: AppTextStyle.cardLevelText(context),
+                              keyboardType: const TextInputType.numberWithOptions(
+                                decimal: true,
+                              ),
+                              readOnly: discountApplied,
+                              decoration: InputDecoration(
+                                filled: true,
+                                fillColor: AppColors.bottomNavBg(context),
+                                contentPadding: const EdgeInsets.all(10),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(5),
+                                  borderSide: BorderSide(
+                                    color: AppColors.primaryColor(
+                                      context,
+                                    ).withValues(alpha: 0.3),
                                   ),
                                 ),
-                              ],
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(5),
+                                  borderSide: BorderSide(
+                                    color: AppColors.primaryColor(
+                                      context,
+                                    ).withValues(alpha: 0.3),
+                                  ),
+                                ),
+                              ),
+                              onChanged: discountApplied
+                                  ? null
+                                  : (value) {
+                                products[index]["discount"] =
+                                    double.tryParse(value) ?? 0.0;
+                                updateTotal(index);
+                              },
                             ),
                           ),
                         ],
                       ),
-                    ),
-                  ],
-                ),
-
-                // Discount Section
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text("Discount", style: AppTextStyle.bodySmall(context)),
-                    const SizedBox(height: 4),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: AbsorbPointer(
-                            absorbing: discountApplied,
-                            child: CupertinoSegmentedControl<String>(
-                              padding: EdgeInsets.zero,
-                              children: {
-                                'fixed': Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 4,
-                                    vertical: 8,
-                                  ),
-                                  child: Text(
-                                    'TK',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontFamily: GoogleFonts.playfairDisplay()
-                                          .fontFamily,
-                                      color: product["discount_type"] == 'fixed'
-                                          ? Colors.white
-                                          : Colors.black,
-                                    ),
-                                  ),
-                                ),
-                                'percent': Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 4,
-                                    vertical: 8,
-                                  ),
-                                  child: Text(
-                                    '%',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontFamily: GoogleFonts.playfairDisplay()
-                                          .fontFamily,
-                                      color:
-                                          product["discount_type"] == 'percent'
-                                          ? Colors.white
-                                          : Colors.black,
-                                    ),
-                                  ),
-                                ),
-                              },
-                              onValueChanged: discountApplied
-                                  ? (_) {}
-                                  : (value) {
-                                      setState(() {
-                                        product["discount_type"] = value;
-                                        updateTotal(index);
-                                      });
-                                    },
-                              groupValue: product["discount_type"],
-                              unselectedColor: Colors.grey[300],
-                              selectedColor: AppColors.primaryColor(context),
-                              borderColor: AppColors.primaryColor(context),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: TextFormField(
-                            controller: controllers[index]?["discount"],
-                            style: AppTextStyle.cardLevelText(context),
-                            keyboardType: const TextInputType.numberWithOptions(
-                              decimal: true,
-                            ),
-                            readOnly: discountApplied,
-                            decoration: InputDecoration(
-                              filled: true,
-                              fillColor: AppColors.bottomNavBg(context),
-                              contentPadding: const EdgeInsets.all(10),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(5),
-                                borderSide: BorderSide(
-                                  color: AppColors.primaryColor(
-                                    context,
-                                  ).withValues(alpha: 0.3),
-                                ),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(5),
-                                borderSide: BorderSide(
-                                  color: AppColors.primaryColor(
-                                    context,
-                                  ).withValues(alpha: 0.3),
-                                ),
-                              ),
-                            ),
-                            onChanged: discountApplied
-                                ? null
-                                : (value) {
-                                    products[index]["discount"] =
-                                        double.tryParse(value) ?? 0.0;
-                                    updateTotal(index);
-                                  },
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          );
-        }),
-      ],
+                    ],
+                  ),
+                ],
+              ),
+            );
+          }),
+        ],
+      ),
     );
   }
 
   Widget _buildMobileChargesSection(CreatePosSaleBloc bloc) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text("Additional Charges", style:    AppTextStyle.cardLevelHead(
-      context,
-    ).copyWith(color: AppColors.text(context)),),
-        const SizedBox(height: 12),
-        _buildChargesSection(bloc),
-      ],
+    return Form(
+      key: _formKeyStep3,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text("Additional Charges", style:    AppTextStyle.cardLevelHead(
+            context,
+          ).copyWith(color: AppColors.text(context)),),
+          const SizedBox(height: 12),
+          _buildChargesSection(bloc),
+        ],
+      ),
     );
   }
 
@@ -1289,7 +1317,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
           "Overall Discount",
           selectedOverallDiscountType,
           bloc.discountOverAllController,
-          (value) {
+              (value) {
             setState(() {
               selectedOverallDiscountType = value;
               bloc.selectedOverallDiscountType = value;
@@ -1301,7 +1329,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
           "Overall Vat",
           selectedOverallVatType,
           bloc.vatOverAllController,
-          (value) {
+              (value) {
             setState(() {
               selectedOverallVatType = value;
               bloc.selectedOverallVatType = value;
@@ -1313,7 +1341,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
           "Service Charge",
           selectedOverallServiceChargeType,
           bloc.serviceChargeOverAllController,
-          (value) {
+              (value) {
             setState(() {
               selectedOverallServiceChargeType = value;
               bloc.selectedOverallServiceChargeType = value;
@@ -1325,7 +1353,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
           "Delivery Charge",
           selectedOverallDeliveryType,
           bloc.deliveryChargeOverAllController,
-          (value) {
+              (value) {
             setState(() {
               selectedOverallDeliveryType = value;
               bloc.selectedOverallDeliveryType = value;
@@ -1338,11 +1366,11 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
   }
 
   Widget _buildChargeField(
-    String label,
-    String selectedType,
-    TextEditingController controller,
-    Function(String) onTypeChanged,
-  ) {
+      String label,
+      String selectedType,
+      TextEditingController controller,
+      Function(String) onTypeChanged,
+      ) {
     return ResponsiveCol(
       xs: 12,
       sm: 2,
@@ -1393,7 +1421,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                   isRequiredLevle: false,
                   controller: controller,
                   hintText: label,
-                  
+
                   fillColor: AppColors.bottomNavBg(context),
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
@@ -1537,10 +1565,10 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
   }
 
   Widget _buildPaymentSection(
-    CreatePosSaleBloc bloc,
-    bool isWalkInCustomer,
-    double netTotal,
-  ) {
+      CreatePosSaleBloc bloc,
+      bool isWalkInCustomer,
+      double netTotal,
+      ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1581,7 +1609,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                     setState(() {});
                   },
                   validator: (value) =>
-                      value == null ? 'Please select a payment method' : null,
+                  value == null ? 'Please select a payment method' : null,
 
                 ),
               ),
@@ -1594,14 +1622,14 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                     } else if (state is AccountActiveListSuccess) {
                       final filteredList = bloc.selectedPaymentMethod.isNotEmpty
                           ? state.list.where((item) {
-                              return item.acType?.toLowerCase() ==
-                                  bloc.selectedPaymentMethod.toLowerCase();
-                            }).toList()
+                        return item.acType?.toLowerCase() ==
+                            bloc.selectedPaymentMethod.toLowerCase();
+                      }).toList()
                           : state.list;
 
                       final selectedAccount =
                           bloc.accountModel ??
-                          (filteredList.isNotEmpty ? filteredList.first : null);
+                              (filteredList.isNotEmpty ? filteredList.first : null);
                       bloc.accountModel = selectedAccount;
 
                       return AppDropdown<AccountActiveModel>(
@@ -1619,7 +1647,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                           setState(() {});
                         },
                         validator: (value) =>
-                            value == null ? 'Please select an account' : null,
+                        value == null ? 'Please select an account' : null,
 
                       );
                     } else {
@@ -1725,8 +1753,8 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
               label,
               style: isBold
                   ? AppTextStyle.cardLevelHead(
-                      context,
-                    ).copyWith(fontWeight: FontWeight.bold)
+                context,
+              ).copyWith(fontWeight: FontWeight.bold)
                   : AppTextStyle.cardLevelHead(context),
             ),
           ),
@@ -1734,9 +1762,9 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
             value.toStringAsFixed(2),
             style: isBold
                 ? AppTextStyle.cardLevelText(context).copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.primaryColor(context),
-                  )
+              fontWeight: FontWeight.bold,
+              color: AppColors.primaryColor(context),
+            )
                 : AppTextStyle.cardLevelText(context),
           ),
         ],
@@ -1767,13 +1795,13 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
     var transferProducts = products
         .map(
           (product) => {
-            "product_id": int.tryParse(product["product_id"].toString()),
-            "quantity": int.tryParse(product["quantity"].toString()),
-            "unit_price": double.tryParse(product["price"].toString()),
-            "discount": double.tryParse(product["discount"].toString()),
-            "discount_type": product["discount_type"].toString(),
-          },
-        )
+        "product_id": int.tryParse(product["product_id"].toString()),
+        "quantity": int.tryParse(product["quantity"].toString()),
+        "unit_price": double.tryParse(product["price"].toString()),
+        "discount": double.tryParse(product["discount"].toString()),
+        "discount_type": product["discount_type"].toString(),
+      },
+    )
         .toList();
 
     final selectedCustomer = bloc.selectClintModel;

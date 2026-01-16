@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
+import 'package:meherinMart/core/widgets/app_scaffold.dart';
 import 'package:printing/printing.dart';
 import '/core/core.dart';
 import '/core/widgets/date_range.dart';
@@ -16,10 +17,12 @@ class MobilePurchaseReportScreen extends StatefulWidget {
   const MobilePurchaseReportScreen({super.key});
 
   @override
-  State<MobilePurchaseReportScreen> createState() => _MobilePurchaseReportScreenState();
+  State<MobilePurchaseReportScreen> createState() =>
+      _MobilePurchaseReportScreenState();
 }
 
-class _MobilePurchaseReportScreenState extends State<MobilePurchaseReportScreen> {
+class _MobilePurchaseReportScreenState
+    extends State<MobilePurchaseReportScreen> {
   TextEditingController filterTextController = TextEditingController();
   DateRange? selectedDateRange;
   bool _isFilterExpanded = false;
@@ -37,12 +40,14 @@ class _MobilePurchaseReportScreenState extends State<MobilePurchaseReportScreen>
     DateTime? from,
     DateTime? to,
   }) {
-    context.read<PurchaseReportBloc>().add(FetchPurchaseReport(
-      context: context,
-      supplier: supplier,
-      from: from,
-      to: to,
-    ));
+    context.read<PurchaseReportBloc>().add(
+      FetchPurchaseReport(
+        context: context,
+        supplier: supplier,
+        from: from,
+        to: to,
+      ),
+    );
   }
 
   @override
@@ -55,18 +60,20 @@ class _MobilePurchaseReportScreenState extends State<MobilePurchaseReportScreen>
   Widget build(BuildContext context) {
     final isMobile = Responsive.isMobile(context);
 
-    return Scaffold(
-      backgroundColor: AppColors.bottomNavBg(context),
+    return AppScaffold(
       appBar: AppBar(
-        title: const Text('Purchase Report'),
+        title: Text(
+          'Purchase Report',
+          style: AppTextStyle.titleMedium(context),
+        ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.picture_as_pdf),
+            icon: Icon(Icons.picture_as_pdf, color: AppColors.text(context)),
             onPressed: _generatePdf,
             tooltip: 'Generate PDF',
           ),
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: Icon(Icons.refresh, color: AppColors.text(context)),
             onPressed: () => _fetchPurchaseReport(),
             tooltip: 'Refresh',
           ),
@@ -75,20 +82,19 @@ class _MobilePurchaseReportScreenState extends State<MobilePurchaseReportScreen>
       body: RefreshIndicator(
         onRefresh: () async => _fetchPurchaseReport(),
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.symmetric(horizontal: 12.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // Filter Section
-              if (isMobile) _buildMobileFilterSection(),
-              if (!isMobile) _buildDesktopFilterRow(),
+              _buildMobileFilterSection(),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: 8),
 
               // Summary Cards
               _buildSummaryCards(),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: 8),
 
               // Data Display
               _buildDataDisplay(isMobile),
@@ -98,18 +104,24 @@ class _MobilePurchaseReportScreenState extends State<MobilePurchaseReportScreen>
       ),
       floatingActionButton: isMobile
           ? FloatingActionButton(
-        onPressed: () {
-          setState(() => _isFilterExpanded = !_isFilterExpanded);
-        },
-        child: Icon(_isFilterExpanded ? Icons.filter_alt_off : Icons.filter_alt),
-        tooltip: 'Toggle Filters',
-      )
+              backgroundColor: AppColors.primaryColor(context),
+              onPressed: () {
+                setState(() => _isFilterExpanded = !_isFilterExpanded);
+              },
+              tooltip: 'Toggle Filters',
+              child: Icon(
+                _isFilterExpanded ? Icons.filter_alt_off : Icons.filter_alt,
+                color: AppColors.whiteColor(context),
+              ),
+            )
           : null,
     );
   }
 
   Widget _buildMobileFilterSection() {
     return Card(
+      elevation: 0,
+      color: AppColors.bottomNavBg(context),
       child: ExpansionPanelList(
         elevation: 0,
         expandedHeaderPadding: EdgeInsets.zero,
@@ -119,13 +131,18 @@ class _MobilePurchaseReportScreenState extends State<MobilePurchaseReportScreen>
         children: [
           ExpansionPanel(
             headerBuilder: (context, isExpanded) {
-              return const ListTile(
+              return ListTile(
                 leading: Icon(Icons.filter_alt),
-                title: Text('Filters'),
+                title: Text('Filters', style: AppTextStyle.bodyLarge(context)),
+                onTap: () {
+                  setState(() {
+                    _isFilterExpanded = !_isFilterExpanded;
+                  });
+                },
               );
             },
             body: Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(1.0),
               child: Column(
                 children: [
                   // Supplier Dropdown
@@ -138,8 +155,12 @@ class _MobilePurchaseReportScreenState extends State<MobilePurchaseReportScreen>
                         isNeedAll: true,
                         isRequired: false,
                         isLabel: true,
-                        value: context.read<PurchaseReportBloc>().selectedSupplier,
-                        itemList: context.read<SupplierInvoiceBloc>().supplierActiveList,
+                        value: context
+                            .read<PurchaseReportBloc>()
+                            .selectedSupplier,
+                        itemList: context
+                            .read<SupplierInvoiceBloc>()
+                            .supplierActiveList,
                         onChanged: (newVal) {
                           _fetchPurchaseReport(
                             from: selectedDateRange?.start,
@@ -150,7 +171,6 @@ class _MobilePurchaseReportScreenState extends State<MobilePurchaseReportScreen>
                       );
                     },
                   ),
-                  const SizedBox(height: 12),
 
                   // Date Range Picker
                   CustomDateRangeField(
@@ -174,7 +194,9 @@ class _MobilePurchaseReportScreenState extends State<MobilePurchaseReportScreen>
                           selectedDateRange = null;
                           _isFilterExpanded = false;
                         });
-                        context.read<PurchaseReportBloc>().add(ClearPurchaseReportFilters());
+                        context.read<PurchaseReportBloc>().add(
+                          ClearPurchaseReportFilters(),
+                        );
                         _fetchPurchaseReport();
                       },
                       icon: const Icon(Icons.clear_all, size: 18),
@@ -222,8 +244,12 @@ class _MobilePurchaseReportScreenState extends State<MobilePurchaseReportScreen>
                         isNeedAll: true,
                         isRequired: false,
                         isLabel: true,
-                        value: context.read<PurchaseReportBloc>().selectedSupplier,
-                        itemList: context.read<SupplierInvoiceBloc>().supplierActiveList,
+                        value: context
+                            .read<PurchaseReportBloc>()
+                            .selectedSupplier,
+                        itemList: context
+                            .read<SupplierInvoiceBloc>()
+                            .supplierActiveList,
                         onChanged: (newVal) {
                           _fetchPurchaseReport(
                             from: selectedDateRange?.start,
@@ -259,7 +285,9 @@ class _MobilePurchaseReportScreenState extends State<MobilePurchaseReportScreen>
                   child: ElevatedButton.icon(
                     onPressed: () {
                       setState(() => selectedDateRange = null);
-                      context.read<PurchaseReportBloc>().add(ClearPurchaseReportFilters());
+                      context.read<PurchaseReportBloc>().add(
+                        ClearPurchaseReportFilters(),
+                      );
                       _fetchPurchaseReport();
                     },
                     icon: const Icon(Icons.clear_all, size: 18),
@@ -284,81 +312,43 @@ class _MobilePurchaseReportScreenState extends State<MobilePurchaseReportScreen>
         if (state is! PurchaseReportSuccess) return const SizedBox();
 
         final summary = state.response.summary;
-        final isMobile = Responsive.isMobile(context);
 
-        if (isMobile) {
-          return Column(
-            children: [
-              Row(
-                children: [
-                  _buildSummaryCard(
-                    "Total Purchases",
-                    "\$${summary.totalPurchases.toStringAsFixed(2)}",
-                    Icons.shopping_cart,
-                    AppColors.primaryColor(context),
-                    isMobile: true,
-                  ),
-                  const SizedBox(width: 8),
-                  _buildSummaryCard(
-                    "Total Paid",
-                    "\$${summary.totalPaid.toStringAsFixed(2)}",
-                    Icons.payment,
-                    Colors.green,
-                    isMobile: true,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  _buildSummaryCard(
-                    "Total Due",
-                    "\$${summary.totalDue.toStringAsFixed(2)}",
-                    Icons.money_off,
-                    Colors.orange,
-                    isMobile: true,
-                  ),
-                  const SizedBox(width: 8),
-                  _buildSummaryCard(
-                    "Transactions",
-                    summary.totalTransactions.toString(),
-                    Icons.receipt,
-                    Colors.purple,
-                    isMobile: true,
-                  ),
-                ],
-              ),
-            ],
-          );
-        }
-
-        return Wrap(
-          spacing: 8,
-          runSpacing: 8,
+        return Column(
           children: [
-            _buildSummaryCard(
-              "Total Purchases",
-              "\$${summary.totalPurchases.toStringAsFixed(2)}",
-              Icons.shopping_cart,
-              AppColors.primaryColor(context),
+            Row(
+              children: [
+                _buildSummaryCard(
+                  "Total Purchases",
+                  "\$${summary.totalPurchases.toStringAsFixed(2)}",
+                  Icons.shopping_cart,
+                  AppColors.primaryColor(context),
+                ),
+                const SizedBox(width: 8),
+                _buildSummaryCard(
+                  "Total Paid",
+                  "\$${summary.totalPaid.toStringAsFixed(2)}",
+                  Icons.payment,
+                  Colors.green,
+                ),
+              ],
             ),
-            _buildSummaryCard(
-              "Total Paid",
-              "\$${summary.totalPaid.toStringAsFixed(2)}",
-              Icons.payment,
-              Colors.green,
-            ),
-            _buildSummaryCard(
-              "Total Due",
-              "\$${summary.totalDue.toStringAsFixed(2)}",
-              Icons.money_off,
-              Colors.orange,
-            ),
-            _buildSummaryCard(
-              "Transactions",
-              summary.totalTransactions.toString(),
-              Icons.receipt,
-              Colors.purple,
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                _buildSummaryCard(
+                  "Total Due",
+                  "\$${summary.totalDue.toStringAsFixed(2)}",
+                  Icons.money_off,
+                  Colors.orange,
+                ),
+                const SizedBox(width: 8),
+                _buildSummaryCard(
+                  "Transactions",
+                  summary.totalTransactions.toString(),
+                  Icons.receipt,
+                  Colors.purple,
+                ),
+              ],
             ),
           ],
         );
@@ -366,21 +356,25 @@ class _MobilePurchaseReportScreenState extends State<MobilePurchaseReportScreen>
     );
   }
 
-  Widget _buildSummaryCard(String title, String value, IconData icon, Color color, {bool isMobile = false}) {
+  Widget _buildSummaryCard(
+    String title,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
+    final isMobile = Responsive.isMobile(context);
+
     return Expanded(
       child: Container(
-        margin: const EdgeInsets.only(bottom: 8),
+        margin: const EdgeInsets.only(bottom: 6),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.bottomNavBg(context),
           borderRadius: BorderRadius.circular(8),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.2),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
-            ),
-          ],
+          border: Border.all(
+            color: AppColors.greyColor(context).withValues(alpha: 0.5),
+            width: 0.5,
+          ),
         ),
         child: Row(
           children: [
@@ -394,7 +388,7 @@ class _MobilePurchaseReportScreenState extends State<MobilePurchaseReportScreen>
                     title,
                     style: TextStyle(
                       fontSize: isMobile ? 10 : 12,
-                      color: Colors.grey,
+                      color: AppColors.text(context),
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -403,7 +397,7 @@ class _MobilePurchaseReportScreenState extends State<MobilePurchaseReportScreen>
                     style: TextStyle(
                       fontSize: isMobile ? 14 : 18,
                       fontWeight: FontWeight.bold,
-                      color: AppColors.blackColor(context),
+                      color: AppColors.text(context),
                     ),
                   ),
                 ],
@@ -433,9 +427,7 @@ class _MobilePurchaseReportScreenState extends State<MobilePurchaseReportScreen>
           if (state.response.report.isEmpty) {
             return _buildEmptyState();
           }
-          return
-              _buildMobileReportList(state.response.report)
-              ;
+          return _buildMobileReportList(state.response.report);
         } else if (state is PurchaseReportFailed) {
           return _buildErrorState(state.content);
         }
@@ -451,7 +443,15 @@ class _MobilePurchaseReportScreenState extends State<MobilePurchaseReportScreen>
       itemCount: reports.length,
       itemBuilder: (context, index) {
         final report = reports[index];
-        return Card(
+        return Container(
+          decoration: BoxDecoration(
+            color: AppColors.bottomNavBg(context),
+            border: Border.all(
+              color: AppColors.greyColor(context).withValues(alpha: 0.5),
+              width: 0.5,
+            ),
+            borderRadius: BorderRadius.circular(AppSizes.radius),
+          ),
           margin: const EdgeInsets.only(bottom: 8),
           child: Padding(
             padding: const EdgeInsets.all(12.0),
@@ -469,9 +469,14 @@ class _MobilePurchaseReportScreenState extends State<MobilePurchaseReportScreen>
                       ),
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
-                        color: _getStatusColor(report.paymentStatus).withOpacity(0.1),
+                        color: _getStatusColor(
+                          report.paymentStatus,
+                        ).withOpacity(0.1),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
@@ -521,20 +526,26 @@ class _MobilePurchaseReportScreenState extends State<MobilePurchaseReportScreen>
                       Colors.orange,
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
-                        color: Colors.blue.withOpacity(0.1),
+                        color: Colors.blue.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: InkWell(
-                        onTap:() {
+                        onTap: () {
                           _showMobileViewDetails(context, report);
-
-                      },
+                        },
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.remove_red_eye, size: 14, color: Colors.blue),
+                            Icon(
+                              Icons.remove_red_eye,
+                              size: 14,
+                              color: Colors.blue,
+                            ),
                             const SizedBox(width: 4),
                             Text(
                               'View Details',
@@ -562,10 +573,7 @@ class _MobilePurchaseReportScreenState extends State<MobilePurchaseReportScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: const TextStyle(fontSize: 11, color: Colors.grey),
-        ),
+        Text(label, style: AppTextStyle.body(context)),
         Text(
           value,
           style: TextStyle(
@@ -578,15 +586,19 @@ class _MobilePurchaseReportScreenState extends State<MobilePurchaseReportScreen>
     );
   }
 
-  void _showMobileViewDetails(BuildContext context, PurchaseReportModel report) {
+  void _showMobileViewDetails(
+    BuildContext context,
+    PurchaseReportModel report,
+  ) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) {
         return Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
+          decoration:  BoxDecoration(
+            color: AppColors.bottomNavBg(context),
+
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(20),
               topRight: Radius.circular(20),
@@ -626,36 +638,27 @@ class _MobilePurchaseReportScreenState extends State<MobilePurchaseReportScreen>
                 ],
               ),
               const Divider(),
-              const SizedBox(height: 16),
-              _buildMobileDetailItem('Invoice No:', report.invoiceNo),
-              _buildMobileDetailItem('Date:', _formatDate(report.purchaseDate)),
-              _buildMobileDetailItem('Supplier:', report.supplier),
-              _buildMobileDetailItem('Net Total:', '\$${report.netTotal.toStringAsFixed(2)}'),
-              _buildMobileDetailItem('Paid Amount:', '\$${report.paidTotal.toStringAsFixed(2)}'),
-              _buildMobileDetailItem('Due Amount:', '\$${report.dueTotal.toStringAsFixed(2)}'),
-              _buildMobileDetailItem('Status:', report.paymentStatus.toUpperCase()),
-              const SizedBox(height: 24),
-              Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: () => _printMobileReport(context, report),
-                      icon: const Icon(Icons.print, size: 18),
-                      label: const Text('Print'),
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('Close'),
-                    ),
-                  ),
-                ],
+              const SizedBox(height: 4),
+              _buildMobileDetailItem('Invoice No:', report.invoiceNo,context),
+              _buildMobileDetailItem('Date:', _formatDate(report.purchaseDate),context),
+              _buildMobileDetailItem('Supplier:', report.supplier,context),
+              _buildMobileDetailItem(
+                'Net Total:',
+                '\$${report.netTotal.toStringAsFixed(2)}',context
               ),
+              _buildMobileDetailItem(
+                'Paid Amount:',
+                '\$${report.paidTotal.toStringAsFixed(2)}',context
+              ),
+              _buildMobileDetailItem(
+                'Due Amount:',
+                '\$${report.dueTotal.toStringAsFixed(2)}',context
+              ),
+              _buildMobileDetailItem(
+                'Status:',
+                report.paymentStatus.toUpperCase(),context
+              ),
+              const SizedBox(height: 24),
             ],
           ),
         );
@@ -663,7 +666,7 @@ class _MobilePurchaseReportScreenState extends State<MobilePurchaseReportScreen>
     );
   }
 
-  Widget _buildMobileDetailItem(String label, String value) {
+  Widget _buildMobileDetailItem(String label, String value,BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
@@ -672,9 +675,9 @@ class _MobilePurchaseReportScreenState extends State<MobilePurchaseReportScreen>
             flex: 2,
             child: Text(
               label,
-              style: const TextStyle(
+              style:  TextStyle(
                 fontSize: 14,
-                color: Colors.grey,
+                color: AppColors.text(context),
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -683,10 +686,11 @@ class _MobilePurchaseReportScreenState extends State<MobilePurchaseReportScreen>
             flex: 3,
             child: Text(
               value,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-              ),
+              style:  TextStyle(fontSize: 14,
+
+                  color: AppColors.text(context),
+
+                  fontWeight: FontWeight.w600),
               textAlign: TextAlign.right,
             ),
           ),
@@ -835,4 +839,3 @@ class _MobilePurchaseReportScreenState extends State<MobilePurchaseReportScreen>
   }
 }
 
-// Keep your existing PurchaseReportTableCard class for desktop view

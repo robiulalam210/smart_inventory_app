@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
+import 'package:meherinMart/core/widgets/app_scaffold.dart';
 import 'package:printing/printing.dart';
 import '/core/configs/app_colors.dart';
 import '/core/configs/app_images.dart';
@@ -21,10 +22,12 @@ class MobileSupplierDueAdvanceScreen extends StatefulWidget {
   const MobileSupplierDueAdvanceScreen({super.key});
 
   @override
-  State<MobileSupplierDueAdvanceScreen> createState() => _MobileSupplierDueAdvanceScreenState();
+  State<MobileSupplierDueAdvanceScreen> createState() =>
+      _MobileSupplierDueAdvanceScreenState();
 }
 
-class _MobileSupplierDueAdvanceScreenState extends State<MobileSupplierDueAdvanceScreen> {
+class _MobileSupplierDueAdvanceScreenState
+    extends State<MobileSupplierDueAdvanceScreen> {
   DateRange? selectedDateRange;
   Timer? _filterDebounceTimer;
   bool _isFilterExpanded = false;
@@ -35,21 +38,13 @@ class _MobileSupplierDueAdvanceScreenState extends State<MobileSupplierDueAdvanc
     _fetchSupplierDueAdvanceReport();
   }
 
-  void _fetchSupplierDueAdvanceReport({
-    DateTime? from,
-    DateTime? to,
-  }) {
-    context.read<SupplierDueAdvanceBloc>().add(FetchSupplierDueAdvanceReport(
-      context: context,
-      from: from,
-      to: to,
-    ));
+  void _fetchSupplierDueAdvanceReport({DateTime? from, DateTime? to}) {
+    context.read<SupplierDueAdvanceBloc>().add(
+      FetchSupplierDueAdvanceReport(context: context, from: from, to: to),
+    );
   }
 
-  void _fetchWithDebounce({
-    DateTime? from,
-    DateTime? to,
-  }) {
+  void _fetchWithDebounce({DateTime? from, DateTime? to}) {
     _filterDebounceTimer?.cancel();
     _filterDebounceTimer = Timer(const Duration(milliseconds: 500), () {
       _fetchSupplierDueAdvanceReport(from: from, to: to);
@@ -77,18 +72,20 @@ class _MobileSupplierDueAdvanceScreenState extends State<MobileSupplierDueAdvanc
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.bottomNavBg(context),
+    return AppScaffold(
       appBar: AppBar(
-        title: const Text('Supplier Due & Advance'),
+        title: Text(
+          'Supplier Due & Advance',
+          style: AppTextStyle.titleMedium(context),
+        ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.picture_as_pdf),
+            icon: Icon(Icons.picture_as_pdf, color: AppColors.text(context)),
             onPressed: _generatePdf,
             tooltip: 'Generate PDF',
           ),
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: Icon(Icons.refresh, color: AppColors.text(context)),
             onPressed: () => _fetchSupplierDueAdvanceReport(),
             tooltip: 'Refresh',
           ),
@@ -102,94 +99,22 @@ class _MobileSupplierDueAdvanceScreenState extends State<MobileSupplierDueAdvanc
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // Filter Section
-              _buildMobileFilterSection(),
-              const SizedBox(height: 16),
+              CustomDateRangeField(
+                isLabel: true,
+                selectedDateRange: selectedDateRange,
+                onDateRangeSelected: _onDateRangeSelected,
+              ),
+              const SizedBox(height: 8),
 
               // Summary Cards
               _buildSummaryCards(),
-              const SizedBox(height: 16),
+              const SizedBox(height: 8),
 
               // Supplier List
               _buildSupplierList(),
             ],
           ),
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          setState(() => _isFilterExpanded = !_isFilterExpanded);
-        },
-        child: Icon(_isFilterExpanded ? Icons.filter_alt_off : Icons.filter_alt),
-        tooltip: 'Toggle Filters',
-      ),
-    );
-  }
-
-  Widget _buildMobileFilterSection() {
-    return Card(
-      child: ExpansionPanelList(
-        elevation: 0,
-        expandedHeaderPadding: EdgeInsets.zero,
-        expansionCallback: (int index, bool isExpanded) {
-          setState(() => _isFilterExpanded = !isExpanded);
-        },
-        children: [
-          ExpansionPanel(
-            headerBuilder: (context, isExpanded) {
-              return const ListTile(
-                leading: Icon(Icons.calendar_today),
-                title: Text('Date Range Filter'),
-              );
-            },
-            body: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                children: [
-                  // Date Range Picker
-                  CustomDateRangeField(
-                    isLabel: true,
-                    selectedDateRange: selectedDateRange,
-                    onDateRangeSelected: _onDateRangeSelected,
-                  ),
-                  const SizedBox(height: 12),
-
-                  // Action Buttons
-                  Row(
-                    children: [
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          onPressed: () {
-                            setState(() {
-                              selectedDateRange = null;
-                              _isFilterExpanded = false;
-                            });
-                            context.read<SupplierDueAdvanceBloc>().add(ClearSupplierDueAdvanceFilters());
-                            _fetchSupplierDueAdvanceReport();
-                          },
-                          icon: const Icon(Icons.clear_all, size: 18),
-                          label: const Text('Clear Filter'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.grey[200],
-                            foregroundColor: Colors.grey[800],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          onPressed: _generatePdf,
-                          icon: const Icon(Icons.picture_as_pdf, size: 18),
-                          label: const Text('PDF Report'),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            isExpanded: _isFilterExpanded,
-          ),
-        ],
       ),
     );
   }
@@ -199,6 +124,8 @@ class _MobileSupplierDueAdvanceScreenState extends State<MobileSupplierDueAdvanc
       builder: (context, state) {
         if (state is! SupplierDueAdvanceSuccess) {
           return Card(
+            elevation: 0,
+            color: AppColors.primaryColor(context),
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
@@ -206,7 +133,7 @@ class _MobileSupplierDueAdvanceScreenState extends State<MobileSupplierDueAdvanc
                   Icon(
                     Icons.account_balance_wallet_outlined,
                     size: 60,
-                    color: Colors.grey.withOpacity(0.5),
+                    color: Colors.grey.withValues(alpha: 0.5),
                   ),
                   const SizedBox(height: 16),
                   const Text(
@@ -220,10 +147,7 @@ class _MobileSupplierDueAdvanceScreenState extends State<MobileSupplierDueAdvanc
                   const SizedBox(height: 8),
                   const Text(
                     "Apply date filters to view supplier balances",
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey,
-                    ),
+                    style: TextStyle(fontSize: 14, color: Colors.grey),
                     textAlign: TextAlign.center,
                   ),
                 ],
@@ -236,9 +160,15 @@ class _MobileSupplierDueAdvanceScreenState extends State<MobileSupplierDueAdvanc
         final suppliers = state.response.report;
 
         // Calculate additional metrics
-        final suppliersWithDue = suppliers.where((s) => s.presentDue > 0).length;
-        final suppliersWithAdvance = suppliers.where((s) => s.presentAdvance > 0).length;
-        final settledSuppliers = suppliers.where((s) => s.netBalance == 0).length;
+        final suppliersWithDue = suppliers
+            .where((s) => s.presentDue > 0)
+            .length;
+        final suppliersWithAdvance = suppliers
+            .where((s) => s.presentAdvance > 0)
+            .length;
+        final settledSuppliers = suppliers
+            .where((s) => s.netBalance == 0)
+            .length;
         final totalActiveSuppliers = suppliers.length;
 
         return Column(
@@ -256,7 +186,9 @@ class _MobileSupplierDueAdvanceScreenState extends State<MobileSupplierDueAdvanc
                 _buildMobileSummaryCard(
                   "Net Balance",
                   '\$${summary.netBalance.abs().toStringAsFixed(2)}',
-                  summary.netBalance >= 0 ? Icons.arrow_upward : Icons.arrow_downward,
+                  summary.netBalance >= 0
+                      ? Icons.arrow_upward
+                      : Icons.arrow_downward,
                   summary.overallStatusColor,
                 ),
               ],
@@ -314,32 +246,28 @@ class _MobileSupplierDueAdvanceScreenState extends State<MobileSupplierDueAdvanc
   }
 
   Widget _buildMobileSummaryCard(
-      String title,
-      String value,
-      IconData icon,
-      Color color,
-      ) {
+    String title,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
     return Expanded(
       child: Container(
         margin: const EdgeInsets.only(bottom: 8),
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.bottomNavBg(context),
           borderRadius: BorderRadius.circular(8),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.1),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
-            ),
-          ],
+          border: Border.all(
+            color: AppColors.greyColor(context).withValues(alpha: 0.5),
+          ),
         ),
         child: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
+                color: color.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(icon, color: color, size: 20),
@@ -351,9 +279,10 @@ class _MobileSupplierDueAdvanceScreenState extends State<MobileSupplierDueAdvanc
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 10,
-                      color: Colors.grey,
+                      color: AppColors.text(context),
+
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -415,6 +344,8 @@ class _MobileSupplierDueAdvanceScreenState extends State<MobileSupplierDueAdvanc
             : '-\$${supplier.netBalance.abs().toStringAsFixed(2)}';
 
         return Card(
+          elevation: 0,
+          color: AppColors.bottomNavBg(context),
           margin: const EdgeInsets.only(bottom: 8),
           child: Padding(
             padding: const EdgeInsets.all(12.0),
@@ -443,8 +374,9 @@ class _MobileSupplierDueAdvanceScreenState extends State<MobileSupplierDueAdvanc
                         children: [
                           Text(
                             supplier.supplierName,
-                            style: const TextStyle(
+                            style:  TextStyle(
                               fontSize: 16,
+                              color: AppColors.text(context),
                               fontWeight: FontWeight.bold,
                             ),
                             maxLines: 2,
@@ -455,28 +387,41 @@ class _MobileSupplierDueAdvanceScreenState extends State<MobileSupplierDueAdvanc
                             children: [
                               if (supplier.phone.isNotEmpty)
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                    vertical: 2,
+                                  ),
                                   decoration: BoxDecoration(
                                     color: Colors.grey[200],
                                     borderRadius: BorderRadius.circular(4),
                                   ),
                                   child: Text(
                                     supplier.phone,
-                                    style: const TextStyle(fontSize: 10),
+                                    style:  TextStyle(fontSize: 10,
+                                      color: AppColors.text(context),
+
+                                    ),
                                   ),
                                 ),
-                              if (supplier.phone.isNotEmpty && supplier.email.isNotEmpty)
+                              if (supplier.phone.isNotEmpty &&
+                                  supplier.email.isNotEmpty)
                                 const SizedBox(width: 4),
                               if (supplier.email.isNotEmpty)
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                    vertical: 2,
+                                  ),
                                   decoration: BoxDecoration(
                                     color: Colors.grey[200],
                                     borderRadius: BorderRadius.circular(4),
                                   ),
                                   child: Text(
                                     supplier.email,
-                                    style: const TextStyle(fontSize: 10),
+                                    style:  TextStyle(fontSize: 10,
+                                      color: AppColors.text(context),
+
+                                    ),
                                   ),
                                 ),
                             ],
@@ -552,13 +497,13 @@ class _MobileSupplierDueAdvanceScreenState extends State<MobileSupplierDueAdvanc
                       ),
                   ],
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 6),
 
                 // Net Balance
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: supplier.balanceStatusColor.withOpacity(0.1),
+                    color: supplier.balanceStatusColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(color: supplier.balanceStatusColor),
                   ),
@@ -584,19 +529,26 @@ class _MobileSupplierDueAdvanceScreenState extends State<MobileSupplierDueAdvanc
                     ],
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 5),
 
                 // Status Badge
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
-                    color: supplier.balanceStatusColor.withOpacity(0.1),
+                    color: supplier.balanceStatusColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(supplier.balanceStatusIcon, size: 14, color: supplier.balanceStatusColor),
+                      Icon(
+                        supplier.balanceStatusIcon,
+                        size: 14,
+                        color: supplier.balanceStatusColor,
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         supplier.balanceStatus.toUpperCase(),
@@ -609,34 +561,23 @@ class _MobileSupplierDueAdvanceScreenState extends State<MobileSupplierDueAdvanc
                     ],
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 6),
 
                 // Action Buttons
                 Row(
                   children: [
-                    Expanded(
+                    SizedBox(
                       child: OutlinedButton.icon(
-                        onPressed: () => _showSupplierDetails(context, supplier),
+                        onPressed: () =>
+                            _showSupplierDetails(context, supplier),
                         icon: const Icon(Icons.remove_red_eye, size: 16),
-                        label: const Text('Details'),
+                        label: const Text(''),
                         style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          padding: const EdgeInsets.symmetric(vertical: 0),
                         ),
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: () => _viewSupplierLedger(context, supplier),
-                        icon: const Icon(Icons.book, size: 16),
-                        label: const Text('Ledger'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                        ),
-                      ),
-                    ),
+
                   ],
                 ),
               ],
@@ -730,8 +671,8 @@ class _MobileSupplierDueAdvanceScreenState extends State<MobileSupplierDueAdvanc
       backgroundColor: Colors.transparent,
       builder: (context) {
         return Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
+          decoration:  BoxDecoration(
+            color: AppColors.bottomNavBg(context),
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(20),
               topRight: Radius.circular(20),
@@ -758,8 +699,9 @@ class _MobileSupplierDueAdvanceScreenState extends State<MobileSupplierDueAdvanc
                 children: [
                   Text(
                     supplier.supplierName,
-                    style: const TextStyle(
+                    style:  TextStyle(
                       fontSize: 18,
+                      color: AppColors.primaryColor(context),
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -770,13 +712,19 @@ class _MobileSupplierDueAdvanceScreenState extends State<MobileSupplierDueAdvanc
                 ],
               ),
               const Divider(),
-              const SizedBox(height: 16),
+              const SizedBox(height: 4),
 
               // Supplier Details
               _buildMobileDetailRow('Phone:', supplier.phone),
               _buildMobileDetailRow('Email:', supplier.email),
-              _buildMobileDetailRow('Due Amount:', '\$${supplier.presentDue.toStringAsFixed(2)}'),
-              _buildMobileDetailRow('Advance Amount:', '\$${supplier.presentAdvance.toStringAsFixed(2)}'),
+              _buildMobileDetailRow(
+                'Due Amount:',
+                '\$${supplier.presentDue.toStringAsFixed(2)}',
+              ),
+              _buildMobileDetailRow(
+                'Advance Amount:',
+                '\$${supplier.presentAdvance.toStringAsFixed(2)}',
+              ),
               _buildMobileDetailRow('Net Balance:', netBalanceText),
               _buildMobileDetailRow('Status:', supplier.balanceStatus),
 
@@ -791,7 +739,10 @@ class _MobileSupplierDueAdvanceScreenState extends State<MobileSupplierDueAdvanc
                 ),
                 child: Row(
                   children: [
-                    Icon(supplier.balanceStatusIcon, color: supplier.balanceStatusColor),
+                    Icon(
+                      supplier.balanceStatusIcon,
+                      color: supplier.balanceStatusColor,
+                    ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
@@ -807,14 +758,7 @@ class _MobileSupplierDueAdvanceScreenState extends State<MobileSupplierDueAdvanc
               ),
 
               const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: () => _viewSupplierLedger(context, supplier),
-                  icon: const Icon(Icons.book),
-                  label: const Text('View Full Ledger'),
-                ),
-              ),
+
             ],
           ),
         );
@@ -831,9 +775,9 @@ class _MobileSupplierDueAdvanceScreenState extends State<MobileSupplierDueAdvanc
             flex: 2,
             child: Text(
               label,
-              style: const TextStyle(
+              style:  TextStyle(
                 fontSize: 14,
-                color: Colors.grey,
+                color: AppColors.text(context),
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -842,10 +786,11 @@ class _MobileSupplierDueAdvanceScreenState extends State<MobileSupplierDueAdvanc
             flex: 3,
             child: Text(
               value,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-              ),
+              style:  TextStyle(fontSize: 14,
+
+                  color: AppColors.text(context),
+
+                  fontWeight: FontWeight.w600),
               textAlign: TextAlign.right,
             ),
           ),
@@ -854,14 +799,7 @@ class _MobileSupplierDueAdvanceScreenState extends State<MobileSupplierDueAdvanc
     );
   }
 
-  void _viewSupplierLedger(BuildContext context, SupplierDueAdvance supplier) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Opening ledger for ${supplier.supplierName}'),
-        duration: const Duration(seconds: 2),
-      ),
-    );
-  }
+
 
   void _generatePdf() {
     final state = context.read<SupplierDueAdvanceBloc>().state;
@@ -880,7 +818,8 @@ class _MobileSupplierDueAdvanceScreenState extends State<MobileSupplierDueAdvanc
               ],
             ),
             body: PdfPreview(
-              build: (format) => generateSupplierDueAdvanceReportPdf(state.response),
+              build: (format) =>
+                  generateSupplierDueAdvanceReportPdf(state.response),
               canChangeOrientation: false,
               canChangePageFormat: false,
               canDebug: false,

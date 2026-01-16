@@ -4,6 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
+import 'package:meherinMart/core/configs/app_text.dart';
+import 'package:meherinMart/core/widgets/app_scaffold.dart';
 import 'package:printing/printing.dart';
 import '/core/configs/app_colors.dart';
 import '/core/configs/app_images.dart';
@@ -126,18 +128,19 @@ class _MobileExpenseReportScreenState extends State<MobileExpenseReportScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.bottomNavBg(context),
+    return AppScaffold(
       appBar: AppBar(
-        title: const Text('Expense Report'),
+        title:  Text('Expense Report',style: AppTextStyle.titleMedium(context),),
         actions: [
           IconButton(
-            icon: const Icon(Icons.picture_as_pdf),
+            icon:  Icon(Icons.picture_as_pdf,                                  color: AppColors.text(context),
+            ),
             onPressed: _generatePdf,
             tooltip: 'Generate PDF',
           ),
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon:  Icon(Icons.refresh      ,                            color: AppColors.text(context),
+          ),
             onPressed: () => _fetchApi(),
             tooltip: 'Refresh',
           ),
@@ -152,11 +155,10 @@ class _MobileExpenseReportScreenState extends State<MobileExpenseReportScreen> {
             children: [
               // Filter Section
               _buildMobileFilterSection(),
-              const SizedBox(height: 16),
 
               // Summary Cards
               _buildSummaryCards(),
-              const SizedBox(height: 16),
+              const SizedBox(height: 4),
 
               // Expense List
               _buildExpenseList(),
@@ -176,6 +178,8 @@ class _MobileExpenseReportScreenState extends State<MobileExpenseReportScreen> {
 
   Widget _buildMobileFilterSection() {
     return Card(
+      elevation: 0,
+      color: AppColors.bottomNavBg(context),
       child: ExpansionPanelList(
         elevation: 0,
         expandedHeaderPadding: EdgeInsets.zero,
@@ -185,9 +189,16 @@ class _MobileExpenseReportScreenState extends State<MobileExpenseReportScreen> {
         children: [
           ExpansionPanel(
             headerBuilder: (context, isExpanded) {
-              return const ListTile(
-                leading: Icon(Icons.filter_alt),
-                title: Text('Filters'),
+              return  ListTile(
+                leading: Icon(Icons.filter_alt,                color: AppColors.text(context),
+                    ),
+                title: Text('Filters',style: AppTextStyle.titleMedium(context),),
+
+                onTap: (){
+                  setState(() {
+                    _isFilterExpanded=!_isFilterExpanded;
+                  });
+                },
               );
             },
             body: Padding(
@@ -240,7 +251,6 @@ class _MobileExpenseReportScreenState extends State<MobileExpenseReportScreen> {
                       );
                     },
                   ),
-                  const SizedBox(height: 12),
 
                   // Payment Method Dropdown
                   AppDropdown<String>(
@@ -252,43 +262,8 @@ class _MobileExpenseReportScreenState extends State<MobileExpenseReportScreen> {
                     itemList: paymentMethods,
                     onChanged: _onPaymentMethodChanged,
                   ),
-                  const SizedBox(height: 12),
 
-                  // Action Buttons
-                  Row(
-                    children: [
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          onPressed: () {
-                            setState(() {
-                              selectedDateRange = null;
-                              _selectedExpenseHead = null;
-                              _selectedPaymentMethod = null;
-                              _isFilterExpanded = false;
-                            });
-                            context.read<ExpenseReportBloc>().add(
-                              ClearExpenseReportFilters(),
-                            );
-                            _fetchApi();
-                          },
-                          icon: const Icon(Icons.clear_all, size: 18),
-                          label: const Text('Clear Filters'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.grey[200],
-                            foregroundColor: Colors.grey[800],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          onPressed: _generatePdf,
-                          icon: const Icon(Icons.picture_as_pdf, size: 18),
-                          label: const Text('PDF Report'),
-                        ),
-                      ),
-                    ],
-                  ),
+
                 ],
               ),
             ),
@@ -304,6 +279,8 @@ class _MobileExpenseReportScreenState extends State<MobileExpenseReportScreen> {
       builder: (context, state) {
         if (state is! ExpenseReportSuccess) {
           return Card(
+            elevation: 0,
+            color:AppColors.bottomNavBg(context),
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
@@ -311,7 +288,7 @@ class _MobileExpenseReportScreenState extends State<MobileExpenseReportScreen> {
                   Icon(
                     Icons.analytics_outlined,
                     size: 60,
-                    color: Colors.grey.withOpacity(0.5),
+                    color: Colors.grey.withValues(alpha: 0.5),
                   ),
                   const SizedBox(height: 16),
                   const Text(
@@ -432,15 +409,13 @@ class _MobileExpenseReportScreenState extends State<MobileExpenseReportScreen> {
         margin: const EdgeInsets.only(bottom: 8),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color:AppColors.bottomNavBg(context),
           borderRadius: BorderRadius.circular(8),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.1),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
-            ),
-          ],
+          border: Border.all(
+            color:AppColors.greyColor(context).withValues(alpha: 0.5),
+width: 0.5
+          )
+
         ),
         child: Row(
           children: [
@@ -517,6 +492,9 @@ class _MobileExpenseReportScreenState extends State<MobileExpenseReportScreen> {
       children: [
         // Total Summary
         Card(
+          elevation: 0,
+          color:AppColors.bottomNavBg(context),
+
           child: Padding(
             padding: const EdgeInsets.all(12.0),
             child: Row(
@@ -575,6 +553,8 @@ class _MobileExpenseReportScreenState extends State<MobileExpenseReportScreen> {
           itemBuilder: (context, index) {
             final expense = expenses[index];
             return Card(
+              color:AppColors.bottomNavBg(context),
+elevation: 0,
               margin: const EdgeInsets.only(bottom: 8),
               child: Padding(
                 padding: const EdgeInsets.all(12.0),
@@ -588,8 +568,10 @@ class _MobileExpenseReportScreenState extends State<MobileExpenseReportScreen> {
                         Expanded(
                           child: Text(
                             expense.head,
-                            style: const TextStyle(
+                            style:  TextStyle(
                               fontSize: 16,
+                              color:AppColors.text(context),
+
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -597,7 +579,7 @@ class _MobileExpenseReportScreenState extends State<MobileExpenseReportScreen> {
                         Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: Colors.red.withOpacity(0.1),
+                            color: Colors.red.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
@@ -611,7 +593,6 @@ class _MobileExpenseReportScreenState extends State<MobileExpenseReportScreen> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 8),
 
                     // Details Row
                     Row(
@@ -645,7 +626,6 @@ class _MobileExpenseReportScreenState extends State<MobileExpenseReportScreen> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 8),
 
                     // Subhead and Note
                     if (expense.subhead != null || expense.note != null)
@@ -677,7 +657,6 @@ class _MobileExpenseReportScreenState extends State<MobileExpenseReportScreen> {
                       ),
 
                     // View Details Button
-                    const SizedBox(height: 12),
                     Align(
                       alignment: Alignment.centerRight,
                       child: TextButton.icon(
@@ -778,8 +757,8 @@ class _MobileExpenseReportScreenState extends State<MobileExpenseReportScreen> {
       backgroundColor: Colors.transparent,
       builder: (context) {
         return Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
+          decoration:  BoxDecoration(
+            color:AppColors.bottomNavBg(context),
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(20),
               topRight: Radius.circular(20),
@@ -806,8 +785,9 @@ class _MobileExpenseReportScreenState extends State<MobileExpenseReportScreen> {
                 children: [
                   Text(
                     'Expense Details',
-                    style: const TextStyle(
-                      fontSize: 18,
+                    style:  TextStyle(
+                      fontSize: 16,                              color:AppColors.text(context),
+
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -818,7 +798,6 @@ class _MobileExpenseReportScreenState extends State<MobileExpenseReportScreen> {
                 ],
               ),
               const Divider(),
-              const SizedBox(height: 16),
 
               // Expense Details
               _buildMobileDetailRow('Expense Head:', expense.head),
@@ -882,9 +861,9 @@ class _MobileExpenseReportScreenState extends State<MobileExpenseReportScreen> {
             flex: 2,
             child: Text(
               label,
-              style: const TextStyle(
+              style:  TextStyle(
                 fontSize: 14,
-                color: Colors.grey,
+                color:AppColors.text(context),
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -893,8 +872,9 @@ class _MobileExpenseReportScreenState extends State<MobileExpenseReportScreen> {
             flex: 3,
             child: Text(
               value,
-              style: const TextStyle(
-                fontSize: 14,
+              style:  TextStyle(
+                fontSize: 14,                              color:AppColors.text(context),
+
                 fontWeight: FontWeight.w600,
               ),
               textAlign: TextAlign.right,

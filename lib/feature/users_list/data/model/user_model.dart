@@ -37,9 +37,16 @@ class UsersListModel {
 
   @override
   String toString() {
-    // TODO: implement toString
-    return fullName??username??"";
+    return fullName ?? username ?? "";
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+          other is UsersListModel && other.id == id;
+
+  @override
+  int get hashCode => id.hashCode;
   factory UsersListModel.fromJson(Map<String, dynamic> json) => UsersListModel(
     id: json["id"],
     username: json["username"],

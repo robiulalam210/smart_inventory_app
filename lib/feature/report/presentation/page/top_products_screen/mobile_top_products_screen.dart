@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
+import 'package:meherinMart/core/widgets/app_scaffold.dart';
 import 'package:printing/printing.dart';
 import '/core/core.dart';
 import '/core/widgets/date_range.dart';
@@ -15,7 +16,8 @@ class MobileTopProductsScreen extends StatefulWidget {
   const MobileTopProductsScreen({super.key});
 
   @override
-  State<MobileTopProductsScreen> createState() => _MobileTopProductsScreenState();
+  State<MobileTopProductsScreen> createState() =>
+      _MobileTopProductsScreenState();
 }
 
 class _MobileTopProductsScreenState extends State<MobileTopProductsScreen> {
@@ -36,19 +38,20 @@ class _MobileTopProductsScreenState extends State<MobileTopProductsScreen> {
 
   @override
   Widget build(BuildContext context) {
-
-    return Scaffold(
-      backgroundColor: AppColors.bottomNavBg(context),
+    return AppScaffold(
       appBar: AppBar(
-        title: const Text('Top Products Report'),
+        title: Text(
+          'Top Products Report',
+          style: AppTextStyle.titleMedium(context),
+        ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.picture_as_pdf),
+            icon: Icon(Icons.picture_as_pdf, color: AppColors.text(context)),
             onPressed: _generatePdf,
             tooltip: 'Generate PDF',
           ),
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: Icon(Icons.refresh, color: AppColors.text(context)),
             onPressed: () => _fetchTopProductsReport(),
             tooltip: 'Refresh',
           ),
@@ -57,63 +60,64 @@ class _MobileTopProductsScreenState extends State<MobileTopProductsScreen> {
       body: RefreshIndicator(
         onRefresh: () async => _fetchTopProductsReport(),
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.symmetric(horizontal: 12.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // Filter Section
-        _buildMobileFilterSection(),
-
-              const SizedBox(height: 16),
+              CustomDateRangeField(
+                isLabel: true,
+                selectedDateRange: selectedDateRange,
+                onDateRangeSelected: (value) {
+                  setState(() => selectedDateRange = value);
+                  if (value != null) {
+                    _fetchTopProductsReport(from: value.start, to: value.end);
+                  }
+                },
+              ),
+              const SizedBox(height: 8),
 
               // Summary Cards
               _buildSummaryCards(),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: 0),
 
               // Top Products List
-          BlocBuilder<TopProductsBloc, TopProductsState>(
-            builder: (context, state) {
-              if (state is TopProductsLoading) {
-                return const Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      CircularProgressIndicator(),
-                      SizedBox(height: 16),
-                      Text("Loading top products..."),
-                    ],
-                  ),
-                );
-              } else if (state is TopProductsSuccess) {
-                if (state.response.report.isEmpty) {
+              BlocBuilder<TopProductsBloc, TopProductsState>(
+                builder: (context, state) {
+                  if (state is TopProductsLoading) {
+                    return const Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          CircularProgressIndicator(),
+                          SizedBox(height: 16),
+                          Text("Loading top products..."),
+                        ],
+                      ),
+                    );
+                  } else if (state is TopProductsSuccess) {
+                    if (state.response.report.isEmpty) {
+                      return _buildEmptyState();
+                    }
+                    return _buildMobileProductsList(state.response.report);
+                  } else if (state is TopProductsFailed) {
+                    return _buildErrorState(state.content);
+                  }
                   return _buildEmptyState();
-                }
-                return
-                  _buildMobileProductsList(state.response.report);
-              } else if (state is TopProductsFailed) {
-                return _buildErrorState(state.content);
-              }
-              return _buildEmptyState();
-            },
-          ),            ],
+                },
+              ),
+            ],
           ),
         ),
       ),
-      floatingActionButton:
-          FloatingActionButton(
-        onPressed: () {
-          setState(() => _isFilterExpanded = !_isFilterExpanded);
-        },
-        child: Icon(_isFilterExpanded ? Icons.filter_alt_off : Icons.filter_alt),
-        tooltip: 'Toggle Filters',
-      )
-         ,
     );
   }
 
   Widget _buildMobileFilterSection() {
     return Card(
+      elevation: 0,
+      color: AppColors.bottomNavBg(context),
       child: ExpansionPanelList(
         elevation: 0,
         expandedHeaderPadding: EdgeInsets.zero,
@@ -133,16 +137,6 @@ class _MobileTopProductsScreenState extends State<MobileTopProductsScreen> {
               child: Column(
                 children: [
                   // Date Range Picker
-                  CustomDateRangeField(
-                    isLabel: true,
-                    selectedDateRange: selectedDateRange,
-                    onDateRangeSelected: (value) {
-                      setState(() => selectedDateRange = value);
-                      if (value != null) {
-                        _fetchTopProductsReport(from: value.start, to: value.end);
-                      }
-                    },
-                  ),
                   const SizedBox(height: 12),
 
                   // Action Buttons
@@ -155,7 +149,9 @@ class _MobileTopProductsScreenState extends State<MobileTopProductsScreen> {
                               selectedDateRange = null;
                               _isFilterExpanded = false;
                             });
-                            context.read<TopProductsBloc>().add(ClearTopProductsFilters());
+                            context.read<TopProductsBloc>().add(
+                              ClearTopProductsFilters(),
+                            );
                             _fetchTopProductsReport();
                           },
                           icon: const Icon(Icons.clear_all, size: 18),
@@ -186,7 +182,6 @@ class _MobileTopProductsScreenState extends State<MobileTopProductsScreen> {
     );
   }
 
-
   Widget _buildSummaryCards() {
     return BlocBuilder<TopProductsBloc, TopProductsState>(
       builder: (context, state) {
@@ -194,80 +189,74 @@ class _MobileTopProductsScreenState extends State<MobileTopProductsScreen> {
 
         final summary = state.response.summary;
 
+        return Column(
+          children: [
+            // First row: Products and Quantity
+            Row(
+              children: [
+                _buildMobileSummaryCard(
+                  "Products",
+                  summary.totalProducts.toString(),
+                  Icons.inventory_2,
+                  AppColors.primaryColor(context),
+                  isMobile: true,
+                ),
+                const SizedBox(width: 8),
+                _buildMobileSummaryCard(
+                  "Quantity Sold",
+                  summary.totalQuantitySold.toString(),
+                  Icons.shopping_cart_checkout,
+                  Colors.green,
+                  isMobile: true,
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
 
-          return Column(
-            children: [
-              // First row: Products and Quantity
-              Row(
-                children: [
-                  _buildMobileSummaryCard(
-                    "Products",
-                    summary.totalProducts.toString(),
-                    Icons.inventory_2,
-                    AppColors.primaryColor(context),
-                    isMobile: true,
-                  ),
-                  const SizedBox(width: 8),
-                  _buildMobileSummaryCard(
-                    "Quantity Sold",
-                    summary.totalQuantitySold.toString(),
-                    Icons.shopping_cart_checkout,
-                    Colors.green,
-                    isMobile: true,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-
-              // Second row: Sales and Average
-              Row(
-                children: [
-                  _buildMobileSummaryCard(
-                    "Total Sales",
-                    "\$${summary.totalSales.toStringAsFixed(2)}",
-                    Icons.attach_money,
-                    Colors.blue,
-                    isMobile: true,
-                  ),
-                  const SizedBox(width: 8),
-                  _buildMobileSummaryCard(
-                    "Avg/Product",
-                    "\$${(summary.totalSales / summary.totalProducts).toStringAsFixed(2)}",
-                    Icons.analytics,
-                    Colors.orange,
-                    isMobile: true,
-                  ),
-                ],
-              ),
-            ],
-          );
-
-
+            // Second row: Sales and Average
+            Row(
+              children: [
+                _buildMobileSummaryCard(
+                  "Total Sales",
+                  "\$${summary.totalSales.toStringAsFixed(2)}",
+                  Icons.attach_money,
+                  Colors.blue,
+                  isMobile: true,
+                ),
+                const SizedBox(width: 8),
+                _buildMobileSummaryCard(
+                  "Avg/Product",
+                  "\$${(summary.totalSales / summary.totalProducts).toStringAsFixed(2)}",
+                  Icons.analytics,
+                  Colors.orange,
+                  isMobile: true,
+                ),
+              ],
+            ),
+          ],
+        );
       },
     );
   }
 
   Widget _buildMobileSummaryCard(
-      String title,
-      String value,
-      IconData icon,
-      Color color, {
-        bool isMobile = false,
-      }) {
+    String title,
+    String value,
+    IconData icon,
+    Color color, {
+    bool isMobile = false,
+  }) {
     return Expanded(
       child: Container(
-        margin: const EdgeInsets.only(bottom: 8),
+        margin: const EdgeInsets.only(bottom: 6),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.bottomNavBg(context),
           borderRadius: BorderRadius.circular(8),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.2),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
-            ),
-          ],
+          border: Border.all(
+            color: AppColors.greyColor(context).withValues(alpha: 0.5),
+            width: 0.5,
+          ),
         ),
         child: Row(
           children: [
@@ -302,8 +291,6 @@ class _MobileTopProductsScreenState extends State<MobileTopProductsScreen> {
     );
   }
 
-
-
   Widget _buildMobileProductsList(List<TopProductModel> products) {
     return ListView.builder(
       shrinkWrap: true,
@@ -314,130 +301,144 @@ class _MobileTopProductsScreenState extends State<MobileTopProductsScreen> {
         final rank = index + 1;
         final totalRevenue = products.fold(
           0.0,
-              (sum, p) => sum + p.totalSoldPrice,
+          (sum, p) => sum + p.totalSoldPrice,
         );
         final percentage = (product.totalSoldPrice / totalRevenue * 100);
 
-        return Card(
-          margin: const EdgeInsets.only(bottom: 8),
-          child: Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    // Rank Badge
-                    Container(
-                      width: 32,
-                      height: 32,
-                      decoration: BoxDecoration(
-                        color: _getRankColor(rank).withOpacity(0.1),
-                        shape: BoxShape.circle,
-                        border: Border.all(color: _getRankColor(rank), width: 2),
-                      ),
-                      child: Center(
-                        child: Text(
-                          rank.toString(),
-                          style: TextStyle(
-                            color: _getRankColor(rank),
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    // Performance Indicator
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: _getPerformanceColor(percentage).withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text(
-                        '${percentage.toStringAsFixed(1)}%',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: _getPerformanceColor(percentage),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-
-                // Product Name
-                Text(
-                  product.productName,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 8),
-
-                // Product Details Grid
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    _buildMobileDetailItem(
-                      'Price',
-                      '\$${product.sellingPrice.toStringAsFixed(2)}',
-                      Colors.blue,
-                    ),
-                    _buildMobileDetailItem(
-                      'Sold',
-                      product.totalSoldQuantity.toString(),
-                      Colors.green,
-                    ),
-                    _buildMobileDetailItem(
-                      'Revenue',
-                      '\$${product.totalSoldPrice.toStringAsFixed(2)}',
-                      Colors.purple,
-                    ),
-                  ],
-                ),
-
-                // Performance Bar
-                const SizedBox(height: 12),
-                Container(
-                  height: 6,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(3),
-                  ),
-                  child: FractionallySizedBox(
-                    alignment: Alignment.centerLeft,
-                    widthFactor: percentage / 100,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: _getPerformanceColor(percentage),
-                        borderRadius: BorderRadius.circular(3),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 8),
-
-                // View Details Button
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton.icon(
-                    onPressed: () => _showMobileProductDetails(context, product),
-                    icon: const Icon(Icons.remove_red_eye, size: 16),
-                    label: const Text('View Details'),
-                    style: TextButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    ),
-                  ),
-                ),
-              ],
+        return Container(
+          margin: const EdgeInsets.only(bottom: 6),
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: AppColors.bottomNavBg(context),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: AppColors.greyColor(context).withValues(alpha: 0.5),
+              width: 0.5,
             ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // Rank Badge
+                  Container(
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: _getRankColor(rank).withValues(alpha: 0.1),
+                      shape: BoxShape.circle,
+                      border: Border.all(color: _getRankColor(rank), width: 2),
+                    ),
+                    child: Center(
+                      child: Text(
+                        rank.toString(),
+                        style: TextStyle(
+                          color: _getRankColor(rank),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  // Performance Indicator
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: _getPerformanceColor(
+                        percentage,
+                      ).withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      '${percentage.toStringAsFixed(1)}%',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: _getPerformanceColor(percentage),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
+
+              // Product Name
+              Text(
+                product.productName,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: AppColors.text(context),
+                  fontWeight: FontWeight.bold,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 8),
+
+              // Product Details Grid
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _buildMobileDetailItem(
+                    'Price',
+                    '\$${product.sellingPrice.toStringAsFixed(2)}',
+                    Colors.blue,
+                  ),
+                  _buildMobileDetailItem(
+                    'Sold',
+                    product.totalSoldQuantity.toString(),
+                    Colors.green,
+                  ),
+                  _buildMobileDetailItem(
+                    'Revenue',
+                    '\$${product.totalSoldPrice.toStringAsFixed(2)}',
+                    Colors.purple,
+                  ),
+                ],
+              ),
+
+              // Performance Bar
+              const SizedBox(height: 4),
+              Container(
+                height: 6,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(3),
+                ),
+                child: FractionallySizedBox(
+                  alignment: Alignment.centerLeft,
+                  widthFactor: percentage / 100,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: _getPerformanceColor(percentage),
+                      borderRadius: BorderRadius.circular(3),
+                    ),
+                  ),
+                ),
+              ),
+
+              // View Details Button
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton.icon(
+                  onPressed: () => _showMobileProductDetails(context, product),
+                  icon: const Icon(Icons.remove_red_eye, size: 16),
+                  label: const Text('View Details'),
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         );
       },
@@ -448,13 +449,7 @@ class _MobileTopProductsScreenState extends State<MobileTopProductsScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 10,
-            color: Colors.grey,
-          ),
-        ),
+        Text(label, style: const TextStyle(fontSize: 10, color: Colors.grey)),
         const SizedBox(height: 2),
         Text(
           value,
@@ -468,7 +463,10 @@ class _MobileTopProductsScreenState extends State<MobileTopProductsScreen> {
     );
   }
 
-  void _showMobileProductDetails(BuildContext context, TopProductModel product) {
+  void _showMobileProductDetails(
+    BuildContext context,
+    TopProductModel product,
+  ) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -478,8 +476,9 @@ class _MobileTopProductsScreenState extends State<MobileTopProductsScreen> {
         final avgSale = totalRevenue / product.totalSoldQuantity;
 
         return Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
+          decoration:  BoxDecoration(
+            color: AppColors.bottomNavBg(context),
+
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(20),
               topRight: Radius.circular(20),
@@ -522,21 +521,32 @@ class _MobileTopProductsScreenState extends State<MobileTopProductsScreen> {
                 ],
               ),
               const Divider(),
-              const SizedBox(height: 16),
+              const SizedBox(height: 4),
 
               // Product Details
-              _buildMobileDetailRow('Selling Price:', '\$${product.sellingPrice.toStringAsFixed(2)}'),
-              _buildMobileDetailRow('Quantity Sold:', product.totalSoldQuantity.toString()),
-              _buildMobileDetailRow('Total Revenue:', '\$${totalRevenue.toStringAsFixed(2)}'),
-              _buildMobileDetailRow('Average per Sale:', '\$${avgSale.toStringAsFixed(2)}'),
+              _buildMobileDetailRow(
+                'Selling Price:',
+                '\$${product.sellingPrice.toStringAsFixed(2)}',context
+              ),
+              _buildMobileDetailRow(
+                'Quantity Sold:',
+                product.totalSoldQuantity.toString(),context
+              ),
+              _buildMobileDetailRow(
+                'Total Revenue:',
+                '\$${totalRevenue.toStringAsFixed(2)}',context
+              ),
+              _buildMobileDetailRow(
+                'Average per Sale:',
+                '\$${avgSale.toStringAsFixed(2)}',context
+              ),
 
               // Performance Metrics
-              const SizedBox(height: 24),
-              const Text(
+              const SizedBox(height: 12),
+               Text(
                 'Performance Metrics',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold,
+                  color: AppColors.text(context),
                 ),
               ),
               const SizedBox(height: 12),
@@ -546,18 +556,16 @@ class _MobileTopProductsScreenState extends State<MobileTopProductsScreen> {
                     child: Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Colors.blue.withOpacity(0.1),
+                        color: Colors.blue.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Column(
                         children: [
                           Icon(Icons.trending_up, color: Colors.blue),
                           const SizedBox(height: 8),
-                          const Text(
+                           Text(
                             'Top Seller',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey,
+                            style: TextStyle(fontSize: 12,                             color: AppColors.text(context),
                             ),
                           ),
                           const SizedBox(height: 4),
@@ -578,18 +586,18 @@ class _MobileTopProductsScreenState extends State<MobileTopProductsScreen> {
                     child: Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Colors.green.withOpacity(0.1),
+                        color: Colors.green.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Column(
                         children: [
                           Icon(Icons.attach_money, color: Colors.green),
                           const SizedBox(height: 8),
-                          const Text(
+                          Text(
                             'Revenue Rank',
                             style: TextStyle(
                               fontSize: 12,
-                              color: Colors.grey,
+                              color: AppColors.text(context),
                             ),
                           ),
                           const SizedBox(height: 4),
@@ -623,7 +631,7 @@ class _MobileTopProductsScreenState extends State<MobileTopProductsScreen> {
     );
   }
 
-  Widget _buildMobileDetailRow(String label, String value) {
+  Widget _buildMobileDetailRow(String label, String value,BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
@@ -632,9 +640,9 @@ class _MobileTopProductsScreenState extends State<MobileTopProductsScreen> {
             flex: 2,
             child: Text(
               label,
-              style: const TextStyle(
+              style:  TextStyle(
                 fontSize: 14,
-                color: Colors.grey,
+                color: AppColors.text(context),
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -643,10 +651,10 @@ class _MobileTopProductsScreenState extends State<MobileTopProductsScreen> {
             flex: 3,
             child: Text(
               value,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-              ),
+              style:  TextStyle(fontSize: 14,
+                  color: AppColors.text(context),
+
+                  fontWeight: FontWeight.w600),
               textAlign: TextAlign.right,
             ),
           ),
@@ -778,14 +786,4 @@ class _MobileTopProductsScreenState extends State<MobileTopProductsScreen> {
     if (percentage > 25) return Colors.orange;
     return Colors.red;
   }
-
-  int _getRevenueRank(TopProductModel product, List<TopProductModel> products) {
-    // Sort products by revenue descending
-    final sorted = List<TopProductModel>.from(products)
-      ..sort((a, b) => b.totalSoldPrice.compareTo(a.totalSoldPrice));
-
-    return sorted.indexOf(product) + 1;
-  }
 }
-
-// Keep your existing TopProductsTableCard class for desktop view
