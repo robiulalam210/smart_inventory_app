@@ -1371,8 +1371,6 @@ class _SalesScreenState extends State<MobileSalesScreen> {
     final vat = double.tryParse(bloc.vatOverAllController.text) ?? 0.0;
     final serviceCharge =
         double.tryParse(bloc.serviceChargeOverAllController.text) ?? 0.0;
-    final deliveryCharge =
-        double.tryParse(bloc.deliveryChargeOverAllController.text) ?? 0.0;
 
     // Create a preview sale model
     final previewSale = PosSaleModel(

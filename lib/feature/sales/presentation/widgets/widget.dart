@@ -698,8 +698,9 @@ class PosSaleDataTableWidget extends StatelessWidget {
       MaterialPageRoute(
         builder: (context) => Scaffold(
           appBar: AppBar(
-            title: const Text('Sales Invoice'),
-            backgroundColor: AppColors.primaryColor(context),
+            title:  Text('Sales Invoice',style: AppTextStyle.titleMedium(context),),
+            backgroundColor: AppColors.bottomNavBg(context),
+
           ),
           body: PdfPreview.builder(
             useActions: true,
@@ -708,20 +709,34 @@ class PosSaleDataTableWidget extends StatelessWidget {
             canChangeOrientation: false,
             canChangePageFormat: false,
             dynamicLayout: true,
+            pdfPreviewPageDecoration: BoxDecoration(color: AppColors.text(context)),
+            actionBarTheme: PdfActionBarTheme(
+              backgroundColor: AppColors.bottomNavBg(context),
+              iconColor: AppColors.text(context),
+              textStyle: AppTextStyle.body(context),
+            ),
+            actions: [
+              IconButton(
+                onPressed: () => AppRoutes.pop(context),
+                icon: const Icon(Icons.cancel, color: Colors.red),
+              ),
+            ],
             build: (format) => generateSalesPdf(
               sale,
               context.read<ProfileBloc>().permissionModel?.data?.companyInfo,
             ),
             pagesBuilder: (context, pages) {
+              debugPrint('Rendering ${pages.length} pages');
               return PageView.builder(
                 itemCount: pages.length,
                 scrollDirection: Axis.vertical,
                 itemBuilder: (context, index) {
                   final page = pages[index];
                   return Container(
+                    color: Colors.grey,
                     alignment: Alignment.center,
-                    padding: const EdgeInsets.all(8.0),
-                    child: Image(image: page.image, fit: BoxFit.contain),
+                    padding: const EdgeInsets.all(0.0),
+                    child: Image(image: page.image, fit: BoxFit.fill),
                   );
                 },
               );

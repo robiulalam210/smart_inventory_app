@@ -737,14 +737,6 @@ class _MobilePurchaseReportScreenState
     }
   }
 
-  void _printMobileReport(BuildContext context, PurchaseReportModel report) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Printing report for ${report.invoiceNo}'),
-        duration: const Duration(seconds: 2),
-      ),
-    );
-  }
 
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {

@@ -950,13 +950,4 @@ elevation: 0,
     return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
   }
 
-  String _formatDateRange(Map<String, String> dateRange) {
-    try {
-      final start = DateTime.parse(dateRange['start'] ?? DateTime.now().toIso8601String());
-      final end = DateTime.parse(dateRange['end'] ?? DateTime.now().toIso8601String());
-      return '${_formatDate(start)} - ${_formatDate(end)}';
-    } catch (e) {
-      return 'Date Range';
-    }
-  }
 }

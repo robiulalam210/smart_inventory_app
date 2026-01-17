@@ -22,7 +22,6 @@ class MobileTopProductsScreen extends StatefulWidget {
 
 class _MobileTopProductsScreenState extends State<MobileTopProductsScreen> {
   DateRange? selectedDateRange;
-  bool _isFilterExpanded = false;
 
   @override
   void initState() {
@@ -120,73 +119,6 @@ class _MobileTopProductsScreenState extends State<MobileTopProductsScreen> {
     );
   }
 
-  Widget _buildMobileFilterSection() {
-    return Card(
-      elevation: 0,
-      color: AppColors.bottomNavBg(context),
-      child: ExpansionPanelList(
-        elevation: 0,
-        expandedHeaderPadding: EdgeInsets.zero,
-        expansionCallback: (int index, bool isExpanded) {
-          setState(() => _isFilterExpanded = !isExpanded);
-        },
-        children: [
-          ExpansionPanel(
-            headerBuilder: (context, isExpanded) {
-              return const ListTile(
-                leading: Icon(Icons.calendar_today),
-                title: Text('Date Range Filter'),
-              );
-            },
-            body: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                children: [
-                  // Date Range Picker
-                  const SizedBox(height: 12),
-
-                  // Action Buttons
-                  Row(
-                    children: [
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          onPressed: () {
-                            setState(() {
-                              selectedDateRange = null;
-                              _isFilterExpanded = false;
-                            });
-                            context.read<TopProductsBloc>().add(
-                              ClearTopProductsFilters(),
-                            );
-                            _fetchTopProductsReport();
-                          },
-                          icon: const Icon(Icons.clear_all, size: 18),
-                          label: const Text('Clear Filter'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.grey[200],
-                            foregroundColor: Colors.grey[800],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          onPressed: _generatePdf,
-                          icon: const Icon(Icons.picture_as_pdf, size: 18),
-                          label: const Text('PDF Report'),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            isExpanded: _isFilterExpanded,
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildSummaryCards() {
     return BlocBuilder<TopProductsBloc, TopProductsState>(

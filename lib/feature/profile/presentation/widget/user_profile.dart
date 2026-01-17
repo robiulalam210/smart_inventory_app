@@ -13,11 +13,11 @@ Widget buildDoctorAvatar({
   // Construct full URL if image exists
   if(isDoctor){
     fullImageUrl = (imageUrl != null && imageUrl.isNotEmpty)
-        ? "{AppUrls.drProfile}$imageUrl"
+        ? "${AppUrls.baseUrlMain}$imageUrl"
         : "";
   }else{
     fullImageUrl = (imageUrl != null && imageUrl.isNotEmpty)
-        ? "{AppUrls.image}$imageUrl"
+        ? "${AppUrls.baseUrlMain}$imageUrl"
         : "";
   }
 

@@ -9,12 +9,9 @@ import 'package:printing/printing.dart';
 import '/core/configs/app_colors.dart';
 import '/core/configs/app_images.dart';
 import '/core/configs/app_text.dart';
-import '/core/widgets/app_button.dart';
 import '/core/widgets/date_range.dart';
 import '/feature/report/presentation/page/supplier_due_advance_screen/pdf.dart';
 
-import '../../../../../core/configs/app_routes.dart';
-import '../../../../../responsive.dart';
 import '../../../data/model/supplier_due_advance_report_model.dart';
 import '../../bloc/supplier_due_advance_bloc/supplier_due_advance_bloc.dart';
 
@@ -30,7 +27,6 @@ class _MobileSupplierDueAdvanceScreenState
     extends State<MobileSupplierDueAdvanceScreen> {
   DateRange? selectedDateRange;
   Timer? _filterDebounceTimer;
-  bool _isFilterExpanded = false;
 
   @override
   void initState() {
@@ -165,9 +161,6 @@ class _MobileSupplierDueAdvanceScreenState
             .length;
         final suppliersWithAdvance = suppliers
             .where((s) => s.presentAdvance > 0)
-            .length;
-        final settledSuppliers = suppliers
-            .where((s) => s.netBalance == 0)
             .length;
         final totalActiveSuppliers = suppliers.length;
 

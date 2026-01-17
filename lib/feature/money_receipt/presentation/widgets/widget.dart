@@ -49,7 +49,7 @@ class MoneyReceiptDataTableWidget extends StatelessWidget {
 
     return Container(
       margin: EdgeInsets.symmetric(
-        horizontal: isMobile ? 8.0 : 16.0,
+        horizontal: isMobile ? 0.0 : 16.0,
         vertical: 8.0,
       ),
       decoration: BoxDecoration(

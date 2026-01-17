@@ -170,74 +170,74 @@ class PaginationBar extends StatelessWidget {
 
   // ================= PAGE NUMBERS =================
 
-  List<Widget> _buildPageNumbers(BuildContext context) {
-    final List<Widget> pages = [];
-
-    if (totalPages <= 1) return pages;
-
-    final bool isSmallScreen = MediaQuery.of(context).size.width < 380;
-    final int maxVisiblePages = isSmallScreen ? 3 : 5;
-
-    int startPage = (currentPage - (maxVisiblePages ~/ 2)).clamp(1, totalPages);
-    int endPage = (startPage + maxVisiblePages - 1).clamp(1, totalPages);
-
-    if (endPage - startPage + 1 < maxVisiblePages) {
-      startPage = (endPage - maxVisiblePages + 1).clamp(1, totalPages);
-    }
-
-    if (startPage > 1) {
-      pages.add(_pageButton(context, 1));
-      if (startPage > 2) {
-        pages.add(const Text('...', style: TextStyle(color: Colors.grey)));
-      }
-    }
-
-    for (int i = startPage; i <= endPage; i++) {
-      pages.add(_pageButton(context, i));
-    }
-
-    if (endPage < totalPages) {
-      if (endPage < totalPages - 1) {
-        pages.add(const Text('...', style: TextStyle(color: Colors.grey)));
-      }
-      pages.add(_pageButton(context, totalPages));
-    }
-
-    return pages;
-  }
+  // List<Widget> _buildPageNumbers(BuildContext context) {
+  //   final List<Widget> pages = [];
+  //
+  //   if (totalPages <= 1) return pages;
+  //
+  //   final bool isSmallScreen = MediaQuery.of(context).size.width < 380;
+  //   final int maxVisiblePages = isSmallScreen ? 3 : 5;
+  //
+  //   int startPage = (currentPage - (maxVisiblePages ~/ 2)).clamp(1, totalPages);
+  //   int endPage = (startPage + maxVisiblePages - 1).clamp(1, totalPages);
+  //
+  //   if (endPage - startPage + 1 < maxVisiblePages) {
+  //     startPage = (endPage - maxVisiblePages + 1).clamp(1, totalPages);
+  //   }
+  //
+  //   if (startPage > 1) {
+  //     pages.add(_pageButton(context, 1));
+  //     if (startPage > 2) {
+  //       pages.add(const Text('...', style: TextStyle(color: Colors.grey)));
+  //     }
+  //   }
+  //
+  //   for (int i = startPage; i <= endPage; i++) {
+  //     pages.add(_pageButton(context, i));
+  //   }
+  //
+  //   if (endPage < totalPages) {
+  //     if (endPage < totalPages - 1) {
+  //       pages.add(const Text('...', style: TextStyle(color: Colors.grey)));
+  //     }
+  //     pages.add(_pageButton(context, totalPages));
+  //   }
+  //
+  //   return pages;
+  // }
 
   // ================= PAGE BUTTON =================
 
-  Widget _pageButton(BuildContext context, int page) {
-    final bool isActive = page == currentPage;
-
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 2),
-      child: TextButton(
-        onPressed: () => onPageChanged(page),
-        style: TextButton.styleFrom(
-          padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 3),
-          backgroundColor: isActive
-              ? AppColors.primaryColor(context)
-              : Colors.transparent,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(4),
-            side: BorderSide(
-              color: isActive
-                  ? AppColors.primaryColor(context)
-                  : Colors.grey.shade300,
-            ),
-          ),
-        ),
-        child: Text(
-          page.toString(),
-          style: TextStyle(
-            fontSize: 14,
-            color: isActive ? Colors.white : AppColors.text(context),
-            fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
-          ),
-        ),
-      ),
-    );
-  }
+  // Widget _pageButton(BuildContext context, int page) {
+  //   final bool isActive = page == currentPage;
+  //
+  //   return Container(
+  //     margin: const EdgeInsets.symmetric(horizontal: 2),
+  //     child: TextButton(
+  //       onPressed: () => onPageChanged(page),
+  //       style: TextButton.styleFrom(
+  //         padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 3),
+  //         backgroundColor: isActive
+  //             ? AppColors.primaryColor(context)
+  //             : Colors.transparent,
+  //         shape: RoundedRectangleBorder(
+  //           borderRadius: BorderRadius.circular(4),
+  //           side: BorderSide(
+  //             color: isActive
+  //                 ? AppColors.primaryColor(context)
+  //                 : Colors.grey.shade300,
+  //           ),
+  //         ),
+  //       ),
+  //       child: Text(
+  //         page.toString(),
+  //         style: TextStyle(
+  //           fontSize: 14,
+  //           color: isActive ? Colors.white : AppColors.text(context),
+  //           fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
 }

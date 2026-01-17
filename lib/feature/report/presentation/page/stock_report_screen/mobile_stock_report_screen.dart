@@ -24,7 +24,6 @@ class _MobileStockReportScreenState extends State<MobileStockReportScreen> {
   DateRange? selectedDateRange;
   String _sortBy = 'value';
   bool _sortAscending = false;
-  bool _isFilterExpanded = false;
 
   @override
   void initState() {
