@@ -118,9 +118,11 @@ class SalesReturnTableCard extends StatelessWidget {
         final salesReturn = salesReturns[index];
         final statusColor = _getStatusColor(salesReturn.status ?? '');
         return Card(
+
           margin: const EdgeInsets.symmetric(vertical: 4),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          elevation: 1,
+          elevation: 0,
+          color: AppColors.bottomNavBg(context),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             child: Column(
@@ -145,15 +147,19 @@ class SalesReturnTableCard extends StatelessWidget {
                         children: [
                           Text(
                             salesReturn.receiptNo ?? 'N/A',
-                            style: const TextStyle(
+                            style:  TextStyle(
                               fontSize: 14,
+                              color: AppColors.text(context),
                               fontWeight: FontWeight.w700,
                             ),
                           ),
                           const SizedBox(height: 4),
                           Text(
                             salesReturn.customerName ?? 'N/A',
-                            style: const TextStyle(fontSize: 12, color: Colors.black54),
+                            style:  TextStyle(fontSize: 12,
+                              color: AppColors.text(context),
+
+                            ),
                           ),
                         ],
                       ),
@@ -189,7 +195,7 @@ class SalesReturnTableCard extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 4),
                 ExpansionTile(
                   tilePadding: EdgeInsets.zero,
                   title: Row(
@@ -198,11 +204,12 @@ class SalesReturnTableCard extends StatelessWidget {
                       const SizedBox(width: 6),
                       Text(
                         _formatDate(salesReturn.returnDate),
-                        style: const TextStyle(fontSize: 12, color: Colors.black54),
+                        style:  TextStyle(fontSize: 12,                              color: AppColors.text(context),
+                        ),
                       ),
                     ],
                   ),
-                  childrenPadding: const EdgeInsets.only(top: 8),
+                  childrenPadding: const EdgeInsets.only(top: 4),
                   children: [
                     if ((salesReturn.reason ?? '').isNotEmpty) ...[
                       Align(
@@ -217,7 +224,8 @@ class SalesReturnTableCard extends StatelessWidget {
                         alignment: Alignment.centerLeft,
                         child: Text(
                           salesReturn.reason ?? 'No reason provided',
-                          style: const TextStyle(fontSize: 13),
+                          style:  TextStyle(fontSize: 13,                              color: AppColors.text(context),
+                          ),
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -227,7 +235,8 @@ class SalesReturnTableCard extends StatelessWidget {
                         alignment: Alignment.centerLeft,
                         child: Text(
                           'Returned Items (${salesReturn.items.length}):',
-                          style: TextStyle(fontWeight: FontWeight.w700, color:AppColors.blackColor(context)),
+                          style: TextStyle(fontWeight: FontWeight.w700,
+                              color:AppColors.blackColor(context)),
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -235,9 +244,9 @@ class SalesReturnTableCard extends StatelessWidget {
                         padding: const EdgeInsets.only(bottom: 6),
                         child: Row(
                           children: [
-                            Expanded(child: Text(item.productName ?? 'Unknown')),
+                            Expanded(child: Text(item.productName ?? 'Unknown',style: AppTextStyle.body(context),)),
                             const SizedBox(width: 8),
-                            Text('Qty: ${item.quantity}'),
+                            Text('Qty: ${item.quantity}',style: AppTextStyle.body(context)),
                             const SizedBox(width: 12),
                             Text('৳${item.total?.toStringAsFixed(2) ?? "0.00"}',
                                 style: const TextStyle(

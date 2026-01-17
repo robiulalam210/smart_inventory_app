@@ -19,12 +19,14 @@ class SourceScreen extends StatefulWidget {
 
 class _SourceScreenState extends State<SourceScreen> {
   late var sourceBloc = context.read<SourceBloc>();
-@override
+
+  @override
   void initState() {
-  _fetchApiData();
-  // TODO: implement initState
+    _fetchApiData();
+    // TODO: implement initState
     super.initState();
   }
+
   void _fetchApiData({String filterText = '', int pageNumber = 0}) {
     context.read<SourceBloc>().add(
       FetchSourceList(context, filterText: filterText, pageNumber: pageNumber),
@@ -167,18 +169,23 @@ class _SourceScreenState extends State<SourceScreen> {
                           context: context,
                           builder: (context) {
                             return Dialog(
-
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(AppSizes.radius),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(
+                                  AppSizes.radius,
                                 ),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(AppSizes.radius),                              child: SizedBox(
-
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(
+                                  AppSizes.radius,
+                                ),
+                                child: SizedBox(
                                   width: Responsive.isMobile(context)
                                       ? MediaQuery.of(context).size.width * 0.9
                                       : MediaQuery.of(context).size.width * 0.5,
-                                  child: SourceCreate()),
-                            ));
+                                  child: SourceCreate(),
+                                ),
+                              ),
+                            );
                           },
                         );
                       },

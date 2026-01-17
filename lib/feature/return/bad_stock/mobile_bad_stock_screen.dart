@@ -460,9 +460,10 @@ class BadStockTableCard extends StatelessWidget {
       itemBuilder: (context, index) {
         final badStock = badStocks[index];
         return Card(
+          color: AppColors.bottomNavBg(context),
           margin: const EdgeInsets.symmetric(vertical: 4),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          elevation: 1,
+          elevation: 0,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             child: Column(
@@ -487,15 +488,15 @@ class BadStockTableCard extends StatelessWidget {
                         children: [
                           Text(
                             badStock.productName ?? 'Unknown Product',
-                            style: const TextStyle(
-                              fontSize: 14,
+                            style:  TextStyle(
+                              fontSize: 14, color: AppColors.text(context),
                               fontWeight: FontWeight.w700,
                             ),
                           ),
                           const SizedBox(height: 4),
                           Text(
                             'Qty: ${badStock.quantity ?? 0}',
-                            style: const TextStyle(fontSize: 12, color: Colors.black54),
+                            style:  TextStyle(fontSize: 12,  color: AppColors.text(context),),
                           ),
                         ],
                       ),
@@ -513,7 +514,7 @@ class BadStockTableCard extends StatelessWidget {
                           badStock.referenceType != null
                               ? '${badStock.referenceType} #${badStock.referenceId}'
                               : 'No Ref',
-                          style: const TextStyle(fontSize: 11, color: Colors.black45),
+                          style:  TextStyle(fontSize: 11,  color: AppColors.bottomNavBg(context),),
                         ),
                       ],
                     ),
@@ -525,7 +526,7 @@ class BadStockTableCard extends StatelessWidget {
                     alignment: Alignment.centerLeft,
                     child: Text(
                       'Reason:',
-                      style: TextStyle(fontWeight: FontWeight.w700, color:AppColors.blackColor(context)),
+                      style: TextStyle(fontWeight: FontWeight.w700, color:AppColors.text(context)),
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -537,7 +538,6 @@ class BadStockTableCard extends StatelessWidget {
                     ),
                   ),
                 ],
-                const SizedBox(height: 8),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [

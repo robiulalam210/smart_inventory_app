@@ -26,10 +26,20 @@ class GroupsScreen extends StatefulWidget {
 }
 
 class _GroupsScreenState extends State<GroupsScreen> {
+  // Add a ScrollController
+  final ScrollController _scrollController = ScrollController();
+
   @override
   void initState() {
     super.initState();
     _fetchApi();
+  }
+
+  @override
+  void dispose() {
+    // Dispose the scroll controller
+    _scrollController.dispose();
+    super.dispose();
   }
 
   void _fetchApi({String filterText = '', int pageNumber = 0}) {
@@ -89,20 +99,7 @@ class _GroupsScreenState extends State<GroupsScreen> {
       xl: 10,
       child: Container(
         color: AppColors.bottomNavBg(context),
-        child: RefreshIndicator(
-          onRefresh: () async {
-            _fetchApi();
-          },
-          child: SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            child: Container(
-              padding: isMobile
-                  ? const EdgeInsets.all(12)
-                  : AppTextStyle.getResponsivePaddingBody(context),
-              child: buildContent(isMobile),
-            ),
-          ),
-        ),
+        child: buildContent(isMobile),
       ),
     );
   }
@@ -164,14 +161,30 @@ class _GroupsScreenState extends State<GroupsScreen> {
           );
         }
       },
-      child: Column(
-        children: [
-          // Header Row
-          _buildHeaderRow(isMobile),
-          gapH16,
-          // Groups List
-          _buildGroupsList(),
-        ],
+      child: RefreshIndicator(
+        // Use the controller for RefreshIndicator
+        onRefresh: () async {
+          _fetchApi();
+        },
+        child: SingleChildScrollView(
+          // Pass the controller to SingleChildScrollView
+          controller: _scrollController,
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: Container(
+            padding: isMobile
+                ? const EdgeInsets.all(12)
+                : AppTextStyle.getResponsivePaddingBody(context),
+            child: Column(
+              children: [
+                // Header Row
+                _buildHeaderRow(isMobile),
+                gapH16,
+                // Groups List
+                _buildGroupsList(),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

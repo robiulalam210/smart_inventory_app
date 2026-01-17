@@ -355,20 +355,17 @@ class PurchaseReturnTableCard extends StatelessWidget {
           children: [
             _buildActionButton(icon: Icons.visibility, color: Colors.green, tooltip: 'View', onPressed: () => _showViewDialog(context, purchaseReturn)),
             if ((purchaseReturn.status ?? '').toLowerCase() == 'pending') ...[
-              const SizedBox(width: 4),
               _buildActionButton(icon: Icons.edit, color: Colors.blue, tooltip: 'Edit', onPressed: () => _showEditDialog(context, purchaseReturn)),
-              const SizedBox(width: 4),
               _buildActionButton(icon: Icons.check, color: Colors.green, tooltip: 'Approve', onPressed: () => _confirmApprove(context, purchaseReturn)),
-              const SizedBox(width: 4),
               _buildActionButton(icon: Icons.close, color: Colors.red, tooltip: 'Reject', onPressed: () => _confirmReject(context, purchaseReturn)),
             ],
             if ((purchaseReturn.status ?? '').toLowerCase() == 'approved') ...[
-              const SizedBox(width: 4),
+              const SizedBox(width: 2),
               _buildActionButton(icon: Icons.done, color: Colors.green, tooltip: 'Complete', onPressed: () => _confirmComplete(context, purchaseReturn)),
             ],
             if ((purchaseReturn.status ?? '').toLowerCase() == 'pending' ||
                 (purchaseReturn.status ?? '').toLowerCase() == 'rejected') ...[
-              const SizedBox(width: 4),
+              const SizedBox(width: 2),
               _buildActionButton(icon: Icons.delete, color: Colors.red, tooltip: 'Delete', onPressed: () => _confirmDelete(context, purchaseReturn)),
             ],
           ],

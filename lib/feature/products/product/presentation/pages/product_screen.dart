@@ -120,10 +120,8 @@ class _ProductsScreenState extends State<ProductsScreen> {
             builder: (context, state) {
               return Column(
                 children: [
-                  if (isBigScreen)
-                    _buildDesktopHeader()
-                  else
-                    _buildMobileHeader(),
+                    _buildDesktopHeader(),
+
                   const SizedBox(height: 16),
                   SizedBox(
                     child: _buildProductList(state),
@@ -186,7 +184,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
               context.read<ProductsBloc>().filterTextController.clear();
               _fetchProductList();
             },
-            hintText: "Search products...",
+            hintText: "products...",
           ),
         ),
         gapW16,
@@ -198,63 +196,6 @@ class _ProductsScreenState extends State<ProductsScreen> {
     );
   }
 
-  Widget _buildMobileHeader() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        // Search Bar
-        Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withValues(alpha: 0.1),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: CustomSearchTextFormField(
-                    controller: context.read<ProductsBloc>().filterTextController,
-                    onChanged: (value) {
-                      _fetchProductList(filterText: value);
-                    },
-                    isRequiredLabel: false,
-                    onClear: () {
-                      context.read<ProductsBloc>().filterTextController.clear();
-                      _fetchProductList();
-                    },
-                    hintText: "Search products...",
-                  ),
-                ),
-              ),
-              IconButton(
-                icon: Icon(
-                  Iconsax.filter,
-                  color: AppColors.primaryColor(context),
-                ),
-                onPressed: () => _showMobileFilterSheet(context),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 12),
-
-        // Create Button
-        AppButton(
-          name: "Create Product",
-          onPressed: () => _showCreateProductDialog(context),
-          padding: const EdgeInsets.symmetric(vertical: 12),
-        ),
-      ],
-    );
-  }
 
   Widget _buildProductList(ProductsState state) {
     if (state is ProductsListLoading) {

@@ -152,6 +152,7 @@ class _CreatePurchaseReturnScreenState
   @override
   Widget build(BuildContext context) {
     return Container(
+      color: AppColors.bottomNavBg(context),
       padding: const EdgeInsets.all(16),
       child: BlocListener<PurchaseReturnBloc, PurchaseReturnState>(
         listener: (context, state) {
@@ -311,20 +312,21 @@ class _CreatePurchaseReturnScreenState
                       final total = (item.unitPrice ?? 0) * (item.quantity ?? 1);
 
                       return Card(
+                        color: AppColors.bottomNavBg(context),
                         margin: const EdgeInsets.symmetric(vertical: 4),
-                        elevation: 1,
+                        elevation: 0,
                         child: ListTile(
                           title: Text(
                             item.productName ?? 'Unknown Product',
                             style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
-                          subtitle: Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          subtitle: Wrap(
+                            // crossAxisAlignment: CrossAxisAlignment.center,
+                            // mainAxisAlignment: MainAxisAlignment.spaceBetween,
 
                             children: [
                               Row(
-                                spacing: 20,
+                                spacing: 5,
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text('Price: ${item.unitPrice?.toStringAsFixed(2) ?? "0.00"}'),
@@ -357,13 +359,15 @@ class _CreatePurchaseReturnScreenState
                                       _updateProductQuantity(index, (item.quantity ?? 1) + 1);
                                     },
                                   ),
+                                  Spacer(),
+                                  Text(
+                                    'Total: ${total.toStringAsFixed(2)}',
+                                    style: const TextStyle(fontWeight: FontWeight.bold),
+                                  ),
                                 ],
                               ),
 
-                              Text(
-                                'Total: ${total.toStringAsFixed(2)}',
-                                style: const TextStyle(fontWeight: FontWeight.bold),
-                              ),
+
 
                             ],
                           ),

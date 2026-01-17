@@ -70,7 +70,11 @@ class _SalesReturnScreenState extends State<MobileSalesReturnPage> {
   Widget build(BuildContext context) {
 
     return Scaffold(
-      floatingActionButton: FloatingActionButton(  onPressed: () {
+      floatingActionButton: FloatingActionButton( 
+        
+        backgroundColor: AppColors.primaryColor(context),
+        
+        onPressed: () {
         showDialog(
           context: context,
           builder: (context) {
@@ -92,7 +96,7 @@ class _SalesReturnScreenState extends State<MobileSalesReturnPage> {
             );
           },
         );
-      },child: Icon(Icons.add),),
+      },child: Icon(Icons.add,color: AppColors.whiteColor(context),),),
       appBar: AppBar(title: Text("Sales Return",style: AppTextStyle.titleMedium(context),),),
 
       body: SafeArea(
@@ -233,7 +237,7 @@ class _SalesReturnScreenState extends State<MobileSalesReturnPage> {
           },
           hintText: "by Receipt No, Customer",
         ),
-        const SizedBox(width: 6),
+        const SizedBox(width: 4),
 
         // Customer Dropdown
         BlocBuilder<CustomerBloc, CustomerState>(
@@ -262,7 +266,6 @@ class _SalesReturnScreenState extends State<MobileSalesReturnPage> {
             );
           },
         ),
-        const SizedBox(width: 6),
 
         // Date Range Picker
         SizedBox(

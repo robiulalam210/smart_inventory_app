@@ -200,7 +200,7 @@ class _ProductsFormState extends State<MobileProductCreate> {
                       Row(
                         children: [
                           Expanded(child: _buildCategoryDropdown()),
-                          const SizedBox(width: 10),
+                          const SizedBox(width: 5),
                           Expanded(child: _buildUnitDropdown()),
                         ],
                       ),
@@ -210,18 +210,19 @@ class _ProductsFormState extends State<MobileProductCreate> {
                         children: [
                           Expanded(child: _buildGroupsDropdown()),
                           const SizedBox(width: 5),
-                          Expanded(child: _buildBrandDropdown()),
-                          const SizedBox(width: 5),
                           Expanded(child: _buildSourceDropdown()),
                         ],
                       ),
 
                       // Third Row: Product Name and Opening Stock
                       Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.start,
                         children: [
                           Expanded(child: _buildProductNameField()),
-                          const SizedBox(width: 10),
-                          Expanded(child: _buildOpeningStockField()),
+                          const SizedBox(width: 5),
+                          Expanded(child: _buildBrandDropdown()),
+
                         ],
                       ),
                       const SizedBox(height: 8),
@@ -229,8 +230,11 @@ class _ProductsFormState extends State<MobileProductCreate> {
                       // Fourth Row: Purchase Price and Selling Price
                       Row(
                         children: [
+                          Expanded(child: _buildOpeningStockField()),
+                          const SizedBox(width: 5),
+
                           Expanded(child: _buildPurchasePriceField()),
-                          const SizedBox(width: 10),
+                          const SizedBox(width: 5),
                           Expanded(child: _buildSellingPriceField()),
                         ],
                       ),

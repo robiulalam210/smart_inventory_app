@@ -116,35 +116,17 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
     super.dispose();
   }
 
+
+
+
   void _updateChangeAmount() {
     final bloc = context.read<CreatePosSaleBloc>();
     final payableAmount = double.tryParse(bloc.payableAmount.text) ?? 0.0;
     final netTotal = calculateAllFinalTotal();
     final changeAmount = payableAmount - netTotal;
 
-    // For walk-in customers, change amount should be 0 (no advance)
-    final selectedCustomer = bloc.selectClintModel;
-    final isWalkInCustomer = selectedCustomer?.id == -1;
 
-    if (isWalkInCustomer) {
-      // Walk-in customer: Must pay exact amount, no change
-      if (payableAmount != netTotal) {
-        showCustomToast(
-          context: context,
-          title: 'Warning!',
-          description:
-          "Walk-in customer must pay exact amount. No change allowed.",
-          icon: Icons.warning,
-          primaryColor: Colors.orange,
-        );
-        // Auto-correct to exact amount
-        bloc.payableAmount.text = netTotal.toStringAsFixed(2);
-        setState(() {
-          changeAmountController.text = "0.00";
-        });
-        return;
-      }
-    }
+
 
     setState(() {
       changeAmountController.text = changeAmount.toStringAsFixed(2);
@@ -1322,6 +1304,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
               selectedOverallDiscountType = value;
               bloc.selectedOverallDiscountType = value;
             });
+            calculateDiscountTotal();
             _updateChangeAmount();
           },
         ),
@@ -1335,6 +1318,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
               bloc.selectedOverallVatType = value;
             });
             _updateChangeAmount();
+            calculateVatTotal();
           },
         ),
         _buildChargeField(
@@ -1346,6 +1330,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
               selectedOverallServiceChargeType = value;
               bloc.selectedOverallServiceChargeType = value;
             });
+            calculateServiceChargeTotal();
             _updateChangeAmount();
           },
         ),
@@ -1358,6 +1343,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
               selectedOverallDeliveryType = value;
               bloc.selectedOverallDeliveryType = value;
             });
+            calculateDeliveryTotal();
             _updateChangeAmount();
           },
         ),
@@ -1536,13 +1522,13 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                       _buildSummaryRow("Product Total", productTotal),
                       _buildSummaryRow(
                         "Specific Discount (-)",
-                        specificDiscount,
+                        calculateSpecificDiscountTotal(),
                       ),
                       _buildSummaryRow("Sub Total", subTotal),
-                      _buildSummaryRow("Discount (-)", discount),
-                      _buildSummaryRow("Vat (+)", vat),
-                      _buildSummaryRow("Service Charge (+)", serviceCharge),
-                      _buildSummaryRow("Delivery Charge (+)", deliveryCharge),
+                      _buildSummaryRow("Discount (-)", calculateDiscountTotal()),
+                      _buildSummaryRow("Vat (+)", calculateVatTotal()),
+                      _buildSummaryRow("Service Charge (+)", calculateServiceChargeTotal()),
+                      _buildSummaryRow("Delivery Charge (+)", calculateDeliveryTotal()),
                       _buildSummaryRow("Net Total", netTotal, isBold: true),
                     ],
                   ),
