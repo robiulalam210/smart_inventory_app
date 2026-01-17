@@ -189,7 +189,7 @@ class AppTextStyle {
 
   static TextStyle searchTextStyle(BuildContext context) =>
       Theme.of(context).textTheme.labelSmall!.copyWith(
-        color: AppColors.blackColor(context),
+        color: AppColors.text(context),
         fontFamily: fontFamily,
         fontWeight: FontWeight.w500,
       );

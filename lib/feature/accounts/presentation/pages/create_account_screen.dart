@@ -120,7 +120,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                     ),
                     const SizedBox(width: 10),
                     Expanded(
-                      child: AppTextField(
+                      child: CustomInputField(
                         isRequired: true,
                         textInputAction: TextInputAction.next,
                         controller: context
@@ -148,7 +148,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
-                      child: AppTextField(
+                      child: CustomInputField(
                         isRequired: true,
                         textInputAction: TextInputAction.done,
                         controller: context
@@ -188,7 +188,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                             return const SizedBox.shrink();
                           }
 
-                          return AppTextField(
+                          return CustomInputField(
                             isRequired: true,
                             textInputAction: TextInputAction.next,
                             controller: context
@@ -215,44 +215,6 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                       ),
                     ),
 
-                    // Expanded(
-                    //   child: ValueListenableBuilder<String>(
-                    //     valueListenable: selectedAccountType,
-                    //     builder: (context, selectedType, child) {
-                    //       final isBank = selectedType == "Bank";
-                    //       final isCash = selectedType == "Cash";
-                    //       final isMobile = selectedType == "Mobile banking";
-                    //       final showField = isBank || isMobile||isCash;
-                    //
-                    //       if (!showField) {
-                    //         return const SizedBox.shrink();
-                    //       }
-                    //
-                    //       return  AppTextField(
-                    //
-                    //         isRequired: true,
-                    //         textInputAction: TextInputAction.next,
-                    //         controller: context
-                    //             .read<AccountBloc>()
-                    //             .accountNumberController,
-                    //         hintText: isBank
-                    //             ? 'Bank Account Number'
-                    //             : 'Mobile Account Number',
-                    //
-                    //         keyboardType: TextInputType.text,
-                    //         validator: (value) {
-                    //           if (value == null || value.trim().isEmpty) {
-                    //             return 'Please enter account number';
-                    //           }
-                    //           if (value.trim().length < 5) {
-                    //             return 'Account number must be at least 5 characters';
-                    //           }
-                    //           return null;
-                    //         },
-                    //       );
-                    //     },
-                    //   ),
-                    // ),
                   ],
                 ),
 
@@ -271,7 +233,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                     return Row(
                       children: [
                         Expanded(
-                          child: AppTextField(
+                          child: CustomInputField(
                             isRequired: true,
                             textInputAction: TextInputAction.next,
                             controller: context
@@ -293,7 +255,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                         ),
                         const SizedBox(width: 10),
                         Expanded(
-                          child: AppTextField(
+                          child: CustomInputField(
                             isRequired: true,
                             textInputAction: TextInputAction.next,
                             controller: context

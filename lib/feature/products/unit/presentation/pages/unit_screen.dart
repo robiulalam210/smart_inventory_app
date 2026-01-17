@@ -142,40 +142,54 @@ class _UnitScreenState extends State<UnitScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                  SizedBox(
-                    width: 350,
-                    child:  CustomSearchTextFormField(
-                      controller: context.read<UnitBloc>().filterTextController,
-                      onChanged: (value) {
-                        _fetchApiData(filterText: value);
-                      },
-                      onClear: () {
-                        context.read<UnitBloc>().filterTextController.clear();
-                        _fetchApiData();
-                      },
-                      isRequiredLabel: false,
-                      hintText: "Name", // Pass dynamic hintText if needed
-                    ),
-                  ),
-
-                  gapW16,
-                  AppButton(
-                    name: "Create Unit ",
-                    onPressed: () {
-                      context.read<UnitBloc>().nameController.clear();
-                      context.read<UnitBloc>().shortNameController.clear();
-                      showDialog(
-                        context: context,
-                        builder: (context) {
-                          return Dialog(child: UnitCreate());
+                    SizedBox(
+                      width: 350,
+                      child: CustomSearchTextFormField(
+                        controller: context
+                            .read<UnitBloc>()
+                            .filterTextController,
+                        onChanged: (value) {
+                          _fetchApiData(filterText: value);
                         },
-                      );
+                        onClear: () {
+                          context.read<UnitBloc>().filterTextController.clear();
+                          _fetchApiData();
+                        },
+                        isRequiredLabel: false,
+                        hintText: "Name", // Pass dynamic hintText if needed
+                      ),
+                    ),
 
-                    },
-                  ),
-                ],),
+                    gapW16,
+                    AppButton(
+                      name: "Create Unit ",
+                      onPressed: () {
+                        context.read<UnitBloc>().nameController.clear();
+                        context.read<UnitBloc>().shortNameController.clear();
+                        showDialog(
+                          context: context,
+                          builder: (context) {
+                            return Dialog(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(AppSizes.radius),
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(AppSizes.radius),
+                                child: SizedBox(
+                                  width: Responsive.isMobile(context)
+                                      ? MediaQuery.of(context).size.width * 0.9
+                                      : MediaQuery.of(context).size.width * 0.5,
+                                  child: UnitCreate(),
+                                ),
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  ],
+                ),
                 gapH8,
-
 
                 SizedBox(
                   child: BlocBuilder<UnitBloc, UnitState>(
@@ -186,7 +200,7 @@ class _UnitScreenState extends State<UnitScreen> {
                         if (state.list.isEmpty) {
                           return Center(child: Lottie.asset(AppImages.noData));
                         } else {
-                          return UnitTableCard(units: state.list,);
+                          return UnitTableCard(units: state.list);
                         }
                       } else if (state is UnitListFailed) {
                         return Center(

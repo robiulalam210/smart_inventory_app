@@ -123,7 +123,6 @@ class _AccountScreenState extends State<AccountScreen> {
             builder: (context, state) {
               return Column(
                 children: [
-                  if (isBigScreen)
                     _buildDesktopHeader()
                ,
 
@@ -220,7 +219,7 @@ class _AccountScreenState extends State<AccountScreen> {
               return AppDropdown<String>(
                 hint: "Select Account Type",
                 isNeedAll: true,
-                isLabel: false,
+                isLabel: true,
                 isRequired: false,
                 value: value,
                 itemList: ['Cash', 'Bank', 'Mobile Banking'],

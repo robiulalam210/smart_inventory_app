@@ -33,6 +33,17 @@ class _BrandScreenState extends State<BrandScreen> {
     super.initState();
   }
 
+  final ScrollController _scrollController = ScrollController();
+
+
+
+  @override
+  void dispose() {
+    // Dispose the scroll controller
+    _scrollController.dispose();
+    super.dispose();
+  }
+
   void _fetchApi({String filterText = '', int pageNumber = 0}) {
     context.read<BrandBloc>().add(
       FetchBrandList(context, filterText: filterText, pageNumber: pageNumber),
@@ -85,7 +96,8 @@ class _BrandScreenState extends State<BrandScreen> {
         onRefresh: () async {
           _fetchApi();
         },
-        child: SingleChildScrollView(
+        child: SingleChildScrollView(          controller: _scrollController,
+
           physics: const AlwaysScrollableScrollPhysics(),
           child: Container(
             padding: isMobile
@@ -191,7 +203,7 @@ class _BrandScreenState extends State<BrandScreen> {
             onChanged: (value) {
               _fetchApi(filterText: value);
             },
-            hintText: "Search brand name",
+            hintText: "brand name",
             isRequiredLabel: false,
           ),
         ),
@@ -236,17 +248,32 @@ class _BrandScreenState extends State<BrandScreen> {
       },
     );
   }
-
   void _showCreateDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (context) {
         return Dialog(
-          child: SizedBox(
-            width: Responsive.isMobile(context)
-                ? MediaQuery.of(context).size.width * 0.9
-                : MediaQuery.of(context).size.width * 0.5,
-            child: const BrandCreate(),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: SizedBox(
+              width: Responsive.isMobile(context)
+                  ? MediaQuery.of(context).size.width * 0.9
+                  : MediaQuery.of(context).size.width * 0.5,
+              child: Scrollbar(
+                controller: ScrollController(), // Explicit ScrollController
+                child: SingleChildScrollView(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxHeight: MediaQuery.of(context).size.height * 0.8,
+                    ),
+                    child: const BrandCreate(),
+                  ),
+                ),
+              ),
+            ),
           ),
         );
       },

@@ -30,11 +30,24 @@ class _TransactionScreenState extends State<MobileTransactionScreen> {
     filterTextController.clear();
 
     // Initialize with default date range (last month)
-    DateTime now = DateTime.now();
-    selectedDateRange = DateRange(
-      DateTime(now.year, now.month - 1, 1),
-      DateTime(now.year, now.month, 0), // Last day of previous month
+    final DateTime now = DateTime.now();
+
+// First day of previous month
+    final DateTime startDate = DateTime(
+      now.year,
+      now.month - 1,
+      1,
     );
+
+// Last day of previous month
+    final DateTime endDate = DateTime(
+      now.year,
+      now.month,
+      now.day,
+    );
+
+    selectedDateRange = DateRange(startDate, endDate);
+
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _fetchTransactions();

@@ -1,6 +1,4 @@
 import '/core/core.dart';
-
-
 import '../bloc/categories/categories_bloc.dart';
 
 class CategoriesCreate extends StatefulWidget {
@@ -81,7 +79,11 @@ class _CategoriesCreateState extends State<CategoriesCreate> {
   Widget build(BuildContext context) {
     return BlocListener<CategoriesBloc, CategoriesState>(
       listener: (context, state) {
+        // Always guard against using a deactivated context
+        if (!mounted) return;
+
         if (state is CategoriesAddSuccess) {
+          // show toast while dialog is still mounted
           showCustomToast(
             context: context,
             title: 'Success!',
@@ -92,14 +94,23 @@ class _CategoriesCreateState extends State<CategoriesCreate> {
             icon: Icons.check_circle,
             primaryColor: Colors.green,
           );
+
+          // clear controller
           context.read<CategoriesBloc>().nameController.clear();
 
-          // Clear form and close on success
+          // Clear form if creating new
           if (widget.id == null) {
             _clearForm();
           }
-          Navigator.pop(context, true); // Return success result
+
+          // Defer popping the dialog to the next frame so any in-flight
+          // builders/overlays (e.g. dropdown overlays) can finish using this context.
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted) return;
+            Navigator.of(context).pop(true); // Return success result
+          });
         } else if (state is CategoriesAddFailed) {
+          if (!mounted) return;
           showCustomToast(
             context: context,
             title: state.title,
@@ -116,9 +127,8 @@ class _CategoriesCreateState extends State<CategoriesCreate> {
 
   Widget _buildDialogContent() {
     return Container(
-
       decoration: BoxDecoration(
-        borderRadius: BorderRadiusGeometry.circular(16),
+        borderRadius: BorderRadius.circular(16),
         color: AppColors.bottomNavBg(context),
       ),
       width: AppSizes.width(context) * 0.40,
@@ -145,21 +155,19 @@ class _CategoriesCreateState extends State<CategoriesCreate> {
                   onPressed: () => Navigator.pop(context),
                   icon: Icon(Icons.close, color: Colors.red, size: 20),
                   padding: EdgeInsets.zero,
-                  constraints: BoxConstraints(),
+                  constraints: const BoxConstraints(),
                 ),
               ],
             ),
 
-            SizedBox(height: 10),
-
+            const SizedBox(height: 10),
 
             // Name Input Field
-            AppTextField(
+            CustomInputField(
               isRequired: true,
               controller: context.read<CategoriesBloc>().nameController,
               hintText: 'Enter category name',
               labelText: 'Category Name',
-
               keyboardType: TextInputType.text,
               validator: (value) {
                 if (value == null || value.isEmpty) {
@@ -175,8 +183,8 @@ class _CategoriesCreateState extends State<CategoriesCreate> {
               },
             ),
 
-            SizedBox(height: 10),
-            if (widget.id !=null)  ...[
+            const SizedBox(height: 10),
+            if (widget.id != null) ...[
               LayoutBuilder(
                 builder: (context, constraints) {
                   final isSmallScreen = constraints.maxWidth < 600;
@@ -187,19 +195,19 @@ class _CategoriesCreateState extends State<CategoriesCreate> {
                         : constraints.maxWidth * 0.5,
                     child: AppDropdown(
                       label: "Status",
-                      hint: "Select Status"
-                        ,
+                      hint: "Select Status",
                       isLabel: false,
-                      value:
-                      context.read<CategoriesBloc>().selectedState.isEmpty
+                      value: context.read<CategoriesBloc>().selectedState.isEmpty
                           ? null
                           : context.read<CategoriesBloc>().selectedState,
-                      itemList: ["Active", "Inactive"],
+                      itemList: const ["Active", "Inactive"],
                       onChanged: (newVal) {
-                        setState(() {
-                          context.read<CategoriesBloc>().selectedState = newVal
-                              .toString();
-                        });
+                        // only mutate bloc-backed state (no need to call setState for the dialog)
+                        context.read<CategoriesBloc>().selectedState =
+                            newVal.toString();
+                        // If you need UI changes inside this dialog that depend on
+                        // selectedState, call setState here. Otherwise it's not necessary.
+                        setState(() {});
                       },
                     ),
                   );
@@ -212,25 +220,23 @@ class _CategoriesCreateState extends State<CategoriesCreate> {
             Row(
               children: [
                 Expanded(
-                  child:
-                  AppButton(
+                  child: AppButton(
                     isOutlined: true,
                     color: AppColors.primaryColor(context),
                     borderColor: AppColors.primaryColor(context),
                     textColor: AppColors.errorColor(context),
-                    name:  'Cancel',    onPressed: () => Navigator.pop(context),)
-
-
+                    name: 'Cancel',
+                    onPressed: () => Navigator.pop(context),
+                  ),
                 ),
-                SizedBox(width: 10),
+                const SizedBox(width: 10),
                 Expanded(
                   child: BlocBuilder<CategoriesBloc, CategoriesState>(
                     builder: (context, state) {
                       return AppButton(
                         name: widget.id == null ? 'Create' : 'Update',
-                        onPressed: (state is CategoriesAddLoading)
-                            ? null
-                            : _showConfirmationDialog,
+                        onPressed:
+                        (state is CategoriesAddLoading) ? null : _showConfirmationDialog,
                       );
                     },
                   ),

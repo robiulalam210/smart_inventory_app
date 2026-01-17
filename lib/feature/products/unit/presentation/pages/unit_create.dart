@@ -246,6 +246,7 @@ class _UnitCreateState extends State<UnitCreate> {
 
             // Buttons Row
             Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 AppButton(
                   isOutlined: true,
@@ -257,18 +258,16 @@ class _UnitCreateState extends State<UnitCreate> {
 
                 ,
                 SizedBox(width: 10),
-                Expanded(
-                  child: BlocBuilder<UnitBloc, UnitState>(
-                    builder: (context, state) {
-                      return AppButton(
-                        size: 120,
-                        name: widget.id == null ? 'Create' : 'Update',
-                        onPressed: (state is UnitAddLoading)
-                            ? null
-                            : _showConfirmationDialog,
-                      );
-                    },
-                  ),
+                BlocBuilder<UnitBloc, UnitState>(
+                  builder: (context, state) {
+                    return AppButton(
+                      size: 120,
+                      name: widget.id == null ? 'Create' : 'Update',
+                      onPressed: (state is UnitAddLoading)
+                          ? null
+                          : _showConfirmationDialog,
+                    );
+                  },
                 ),
               ],
             ),

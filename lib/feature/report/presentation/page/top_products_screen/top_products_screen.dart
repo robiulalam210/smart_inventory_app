@@ -251,7 +251,7 @@ class _TopProductsScreenState extends State<TopProductsScreen> {
                   style:  TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color:AppColors.blackColor(context),
+                    color:AppColors.text(context),
                   ),
                 ),
               ],
@@ -673,19 +673,54 @@ class TopProductsTableCard extends StatelessWidget {
   }
 
   DataCell _buildPerformanceCell(
-    TopProductModel product,
-    List<TopProductModel> allProducts,
-    double width,
-  ) {
+      TopProductModel product,
+      List<TopProductModel> allProducts,
+      double width,
+      ) {
     final totalRevenue = allProducts.fold(
       0.0,
-      (sum, p) => sum + p.totalSoldPrice,
+          (sum, p) => sum + p.totalSoldPrice,
     );
+
+    // Guard against division by zero
+    if (totalRevenue <= 0) {
+      return DataCell(
+        SizedBox(
+          width: width,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                height: 6,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(3),
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                '0%',
+                style: TextStyle(
+                  fontSize: 10,
+                  color: Colors.grey,
+                  fontWeight: FontWeight.w600,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     final percentage = (product.totalSoldPrice / totalRevenue * 100);
 
+    // Ensure percentage is not negative
+    final safePercentage = percentage.clamp(0.0, 100.0);
+
     Color getPerformanceColor() {
-      if (percentage > 50) return Colors.green;
-      if (percentage > 25) return Colors.orange;
+      if (safePercentage > 50) return Colors.green;
+      if (safePercentage > 25) return Colors.orange;
       return Colors.red;
     }
 
@@ -704,7 +739,7 @@ class TopProductsTableCard extends StatelessWidget {
               ),
               child: FractionallySizedBox(
                 alignment: Alignment.centerLeft,
-                widthFactor: percentage / 100,
+                widthFactor: safePercentage / 100,
                 child: Container(
                   decoration: BoxDecoration(
                     color: getPerformanceColor(),
@@ -715,7 +750,7 @@ class TopProductsTableCard extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              '${percentage.toStringAsFixed(1)}%',
+              '${safePercentage.toStringAsFixed(1)}%',
               style: TextStyle(
                 fontSize: 10,
                 color: getPerformanceColor(),
@@ -728,7 +763,6 @@ class TopProductsTableCard extends StatelessWidget {
       ),
     );
   }
-
   DataCell _buildActionCell(
     TopProductModel product,
     BuildContext context,

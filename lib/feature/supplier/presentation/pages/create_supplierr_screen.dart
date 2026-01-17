@@ -4,6 +4,7 @@ import '../bloc/supplier/supplier_list_bloc.dart';
 
 class CreateSupplierScreen extends StatefulWidget {
   const CreateSupplierScreen({super.key, this.submitText = '', this.id = ''});
+
   final String id;
   final String submitText;
 
@@ -21,7 +22,6 @@ class _CreateSupplierScreenState extends State<CreateSupplierScreen> {
         color: AppColors.bottomNavBg(context),
 
         borderRadius: BorderRadius.circular(AppSizes.bodyPadding),
-
       ),
       child: SafeArea(
         child: ResponsiveRow(
@@ -35,7 +35,6 @@ class _CreateSupplierScreenState extends State<CreateSupplierScreen> {
       ),
     );
   }
-
 
   Widget _buildContentArea(bool isBigScreen) {
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
@@ -57,9 +56,10 @@ class _CreateSupplierScreenState extends State<CreateSupplierScreen> {
         child: SingleChildScrollView(
           child: Form(
             key: formKey,
-            child: Container(           padding: AppTextStyle.getResponsivePaddingBody(context),
+            child: Container(
+              padding: AppTextStyle.getResponsivePaddingBody(context),
 
-            child: Column(
+              child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
@@ -87,13 +87,13 @@ class _CreateSupplierScreenState extends State<CreateSupplierScreen> {
 
                   SizedBox(height: AppSizes.height(context) * 0.01),
 
-
                   // Supplier Name
-                  AppTextField(
-
+                  CustomInputField(
                     isRequired: true,
                     textInputAction: TextInputAction.next,
-                    controller: context.read<SupplierListBloc>().customerNameController,
+                    controller: context
+                        .read<SupplierListBloc>()
+                        .customerNameController,
                     hintText: 'Supplier Name',
 
                     keyboardType: TextInputType.text,
@@ -110,15 +110,16 @@ class _CreateSupplierScreenState extends State<CreateSupplierScreen> {
                   SizedBox(height: AppSizes.height(context) * 0.01),
 
                   // Phone Number
-                  AppTextField(
-
+                  CustomInputField(
                     isRequired: true,
                     textInputAction: TextInputAction.next,
-                    controller: context.read<SupplierListBloc>().customerNumberController,
+                    controller: context
+                        .read<SupplierListBloc>()
+                        .customerNumberController,
                     hintText: 'Phone Number',
                     labelText: "Phone Number",
-                    // maxLength: 11,
 
+                    // maxLength: 11,
                     keyboardType: TextInputType.phone,
                     validator: (value) {
                       return value!.trim().isEmpty
@@ -135,11 +136,12 @@ class _CreateSupplierScreenState extends State<CreateSupplierScreen> {
                   SizedBox(height: AppSizes.height(context) * 0.01),
 
                   // Address
-                  AppTextField(
-
+                  CustomInputField(
                     isRequired: true,
                     textInputAction: TextInputAction.done,
-                    controller: context.read<SupplierListBloc>().addressController,
+                    controller: context
+                        .read<SupplierListBloc>()
+                        .addressController,
                     hintText: 'Address',
 
                     keyboardType: TextInputType.multiline,
@@ -154,53 +156,57 @@ class _CreateSupplierScreenState extends State<CreateSupplierScreen> {
                   widget.id.toString() == ""
                       ? Container()
                       : AppDropdown(
-                    label: "Status",
-                    hint:
-                    context.read<SupplierListBloc>().selectedState.isEmpty
-                        ? "Select Status"
-                        : context.read<SupplierListBloc>().selectedState,
-                    isLabel: false,
-                    value:
-                    context.read<SupplierListBloc>().selectedState.isEmpty
-                        ? null
-                        : context.read<SupplierListBloc>().selectedState,
-                    itemList: context.read<SupplierListBloc>().statesList,
-                    onChanged: (newVal) {
-                      context.read<SupplierListBloc>().selectedState =
-                          newVal.toString();
-                    },
-
-                  ),
+                          label: "Status",
+                          hint:
+                              context
+                                  .read<SupplierListBloc>()
+                                  .selectedState
+                                  .isEmpty
+                              ? "Select Status"
+                              : context.read<SupplierListBloc>().selectedState,
+                          isLabel: false,
+                          value:
+                              context
+                                  .read<SupplierListBloc>()
+                                  .selectedState
+                                  .isEmpty
+                              ? null
+                              : context.read<SupplierListBloc>().selectedState,
+                          itemList: context.read<SupplierListBloc>().statesList,
+                          onChanged: (newVal) {
+                            context.read<SupplierListBloc>().selectedState =
+                                newVal.toString();
+                          },
+                        ),
                   SizedBox(height: AppSizes.height(context) * 0.02),
 
                   // Submit Button
-
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       AppButton(
                         size: 120,
-                        name:  "Cancel",
+                        name: "Cancel",
                         isOutlined: true,
                         textColor: AppColors.errorColor(context),
                         borderColor: AppColors.primaryColor(context),
-                        onPressed: (){
+                        onPressed: () {
                           AppRoutes.pop(context);
                         },
                       ),
-                      SizedBox(width: 10,),
+                      SizedBox(width: 10),
                       AppButton(
-
                         size: 130,
-                        name: widget.submitText.isEmpty ? "Create Supplier" : widget.submitText,
+                        name: widget.submitText.isEmpty
+                            ? "Create Supplier"
+                            : widget.submitText,
                         onPressed: () {
                           if (formKey.currentState!.validate()) {
                             _createOrUpdateSupplier();
                           }
                         },
                       ),
-
                     ],
                   ),
 
@@ -230,15 +236,14 @@ class _CreateSupplierScreenState extends State<CreateSupplierScreen> {
       supplierBloc.add(AddSupplierList(body: body));
     } else {
       if (supplierBloc.selectedState.trim().isNotEmpty) {
-        body["is_active"] = supplierBloc.selectedState=="Active"?true:false;
+        body["is_active"] = supplierBloc.selectedState == "Active"
+            ? true
+            : false;
       }
       // Update existing supplier
       supplierBloc.add(UpdateSupplierList(body: body, branchId: widget.id));
     }
-
   }
-
-
 
   @override
   void dispose() {

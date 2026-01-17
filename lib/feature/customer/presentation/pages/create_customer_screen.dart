@@ -69,7 +69,7 @@ class _CreateCustomerScreenState extends State<CreateCustomerScreen> {
                 ),
                 // Row 1: Customer Name and Phone Number
                 _buildTwoColumnRow(
-                  firstChild: AppTextField(
+                  firstChild: CustomInputField(
                     isRequired: true,
                     textInputAction: TextInputAction.next,
                     controller: context.read<CustomerBloc>().customerNameController,
@@ -83,7 +83,7 @@ class _CreateCustomerScreenState extends State<CreateCustomerScreen> {
                     },
 
                   ),
-                  secondChild: AppTextField(
+                  secondChild: CustomInputField(
 
                     isRequired: true,
                     textInputAction: TextInputAction.next,
@@ -108,7 +108,7 @@ class _CreateCustomerScreenState extends State<CreateCustomerScreen> {
 
                 // Row 2: Email and Address
                 _buildTwoColumnRow(
-                  firstChild: AppTextField(
+                  firstChild: CustomInputField(
 
                     isRequired: false,
                     textInputAction: TextInputAction.next,
@@ -128,7 +128,7 @@ class _CreateCustomerScreenState extends State<CreateCustomerScreen> {
                       return;
                     },
                   ),
-                  secondChild: AppTextField(
+                  secondChild: CustomInputField(
 
                     isRequired: false,
                     textInputAction: TextInputAction.done,

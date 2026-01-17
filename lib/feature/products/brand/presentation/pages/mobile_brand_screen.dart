@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lottie/lottie.dart';
 import 'package:meherinMart/core/configs/app_colors.dart';
+import 'package:meherinMart/core/configs/configs.dart';
 import 'package:meherinMart/core/widgets/app_scaffold.dart';
 import '../../../../../core/configs/app_images.dart';
 import '../../../../../core/configs/app_routes.dart';
@@ -174,10 +175,10 @@ class _BrandScreenState extends State<MobileBrandScreen> {
       builder: (context) {
         return Dialog(
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(AppSizes.radius),
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(AppSizes.radius),
             child: SizedBox(
               width: Responsive.isMobile(context)
                   ? MediaQuery.of(context).size.width * 0.9

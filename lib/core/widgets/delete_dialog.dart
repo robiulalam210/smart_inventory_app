@@ -5,6 +5,7 @@ Future<bool> showDeleteConfirmationDialog(BuildContext context) async {
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
+        backgroundColor: AppColors.bottomNavBg(context),
         title: Text(
           'Delete Confirmation',
           style: AppTextStyle.cardTitle(context),

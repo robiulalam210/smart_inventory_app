@@ -254,7 +254,7 @@ class _ProfitLossScreenState extends State<ProfitLossScreen> {
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: isProfit ? color :AppColors.blackColor(context),
+                    color: isProfit ? color :AppColors.text(context),
                   ),
                 ),
               ],

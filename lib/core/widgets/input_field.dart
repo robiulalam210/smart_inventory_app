@@ -18,7 +18,7 @@ class CustomInputField extends StatefulWidget {
     this.icon,
     this.prefixImageIcon,
     this.fillColor,
-    this.maxLine = 5, // default maximum lines
+    this.maxLine = 3, // default maximum lines
     this.autoFocus,
     this.validator,
     this.radius = AppSizes.borderRadiusSize,
@@ -77,8 +77,8 @@ class CustomInputFieldState extends State<CustomInputField> {
       padding: const EdgeInsets.all(0),
       child: ConstrainedBox(
         constraints: BoxConstraints(
-          maxHeight: 55, // Adjust max height as needed
-          minHeight: 40, // Adjust max height as needed
+          maxHeight: 65, // Adjust max height as needed
+          minHeight: 45, // Adjust max height as needed
         ),
         child: SingleChildScrollView(
           scrollDirection: Axis.vertical,

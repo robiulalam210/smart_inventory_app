@@ -460,9 +460,10 @@ class BadStockTableCard extends StatelessWidget {
       itemBuilder: (context, index) {
         final badStock = badStocks[index];
         return Card(
+          color: AppColors.bottomNavBg(context),
           margin: const EdgeInsets.symmetric(vertical: 4),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          elevation: 1,
+          elevation: 0,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             child: Column(
@@ -487,15 +488,15 @@ class BadStockTableCard extends StatelessWidget {
                         children: [
                           Text(
                             badStock.productName ?? 'Unknown Product',
-                            style: const TextStyle(
-                              fontSize: 14,
+                            style:  TextStyle(
+                              fontSize: 14, color: AppColors.text(context),
                               fontWeight: FontWeight.w700,
                             ),
                           ),
                           const SizedBox(height: 4),
                           Text(
                             'Qty: ${badStock.quantity ?? 0}',
-                            style: const TextStyle(fontSize: 12, color: Colors.black54),
+                            style:  TextStyle(fontSize: 12,  color: AppColors.text(context),),
                           ),
                         ],
                       ),
@@ -513,7 +514,7 @@ class BadStockTableCard extends StatelessWidget {
                           badStock.referenceType != null
                               ? '${badStock.referenceType} #${badStock.referenceId}'
                               : 'No Ref',
-                          style: const TextStyle(fontSize: 11, color: Colors.black45),
+                          style:  TextStyle(fontSize: 11,  color: AppColors.bottomNavBg(context),),
                         ),
                       ],
                     ),
@@ -525,7 +526,7 @@ class BadStockTableCard extends StatelessWidget {
                     alignment: Alignment.centerLeft,
                     child: Text(
                       'Reason:',
-                      style: TextStyle(fontWeight: FontWeight.w700, color:AppColors.blackColor(context)),
+                      style: TextStyle(fontWeight: FontWeight.w700, color:AppColors.text(context)),
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -533,11 +534,10 @@ class BadStockTableCard extends StatelessWidget {
                     alignment: Alignment.centerLeft,
                     child: Text(
                       badStock.reason ?? 'No reason provided',
-                      style: const TextStyle(fontSize: 13),
+                      style: AppTextStyle.bodySmall(context)
                     ),
                   ),
                 ],
-                const SizedBox(height: 8),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
@@ -743,6 +743,7 @@ class BadStockTableCard extends StatelessWidget {
       builder: (context) {
         return Dialog(
           child: Container(
+            color: AppColors.bottomNavBg(context),
             width: AppSizes.width(context) * 0.40,
             padding: const EdgeInsets.all(20),
             child: SingleChildScrollView(
@@ -755,12 +756,12 @@ class BadStockTableCard extends StatelessWidget {
                     style: AppTextStyle.cardLevelHead(context),
                   ),
                   const SizedBox(height: 16),
-                  _buildDetailRow('Product:', badStock.productName ?? 'N/A'),
-                  _buildDetailRow('Quantity:', badStock.quantity?.toString() ?? '0'),
-                  _buildDetailRow('Reason:', badStock.reason ?? 'No reason provided'),
-                  _buildDetailRow('Date:', _formatDate(badStock.date)),
-                  _buildDetailRow('Reference Type:', badStock.referenceType ?? 'N/A'),
-                  _buildDetailRow('Reference ID:', badStock.referenceId?.toString() ?? 'N/A'),
+                  _buildDetailRow('Product:', badStock.productName ?? 'N/A',context),
+                  _buildDetailRow('Quantity:', badStock.quantity?.toString() ?? '0',context),
+                  _buildDetailRow('Reason:', badStock.reason ?? 'No reason provided',context),
+                  _buildDetailRow('Date:', _formatDate(badStock.date),context),
+                  _buildDetailRow('Reference Type:', badStock.referenceType ?? 'N/A',context),
+                  _buildDetailRow('Reference ID:', badStock.referenceId?.toString() ?? 'N/A',context),
                   const SizedBox(height: 20),
                   Align(
                     alignment: Alignment.centerRight,
@@ -778,7 +779,7 @@ class BadStockTableCard extends StatelessWidget {
     );
   }
 
-  Widget _buildDetailRow(String label, String value) {
+  Widget _buildDetailRow(String label, String value,BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
@@ -788,8 +789,9 @@ class BadStockTableCard extends StatelessWidget {
             width: 120,
             child: Text(
               label,
-              style: const TextStyle(
+              style:  TextStyle(
                 fontWeight: FontWeight.w600,
+                color: AppColors.text(context),
                 fontSize: 12,
               ),
             ),
@@ -798,7 +800,10 @@ class BadStockTableCard extends StatelessWidget {
           Expanded(
             child: Text(
               value,
-              style: const TextStyle(
+              style:  TextStyle(
+                color: AppColors.text(context),
+
+
                 fontSize: 12,
               ),
             ),

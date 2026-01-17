@@ -85,7 +85,7 @@
 //                         child: Text(
 //                           item.toString(),
 //                           style: const TextStyle(
-//                             color:AppColors.blackColor(context),
+//                             color:AppColors.text(context),
 //                             fontFamily: 'Quicksand',
 //                             fontWeight: FontWeight.w600,
 //                           ),
@@ -132,7 +132,7 @@
 //                       child: Text(
 //                         item.toString(),
 //                         style: const TextStyle(
-//                           color:AppColors.blackColor(context),
+//                           color:AppColors.text(context),
 //                           fontFamily: 'Quicksand',
 //                           fontWeight: FontWeight.w600,
 //                         ),
@@ -194,7 +194,7 @@
 //                           child: Text(
 //                             item.toString(),
 //                             style: const TextStyle(
-//                               color:AppColors.blackColor(context),
+//                               color:AppColors.text(context),
 //                               fontFamily: 'Quicksand',
 //                               fontWeight: FontWeight.w300,
 //                             ),

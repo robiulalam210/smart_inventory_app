@@ -174,10 +174,7 @@ class _ProductsFormState extends State<ProductsForm> {
             children: [
               Text(
                 _isEditMode ? "Update Product" : "Create New Product",
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
+                style:AppTextStyle.titleMedium(context)
               ),
               IconButton(
                 icon: const Icon(Icons.close),
@@ -409,7 +406,7 @@ class _ProductsFormState extends State<ProductsForm> {
 
         return AppDropdown(
           label: "Category",
-          hint: selectedCategory.isEmpty ? "Select Category" : selectedCategory,
+          hint: "Select Category" ,
           isLabel: false,
           isNeedAll: false,
           isRequired: true,
@@ -442,7 +439,7 @@ class _ProductsFormState extends State<ProductsForm> {
 
         return AppDropdown(
           label: "Unit ",
-          hint: selectedUnit.isEmpty ? "Select Unit" : selectedUnit,
+          hint: "Select Unit" ,
           isLabel: false,
           isNeedAll: false,
           isRequired: true,
@@ -474,7 +471,7 @@ class _ProductsFormState extends State<ProductsForm> {
 
         return AppDropdown(
           label: "Groups ",
-          hint: selectedGroup.isEmpty ? "Select Groups" : selectedGroup,
+          hint:  "Select Groups" ,
           isLabel: false,
           isNeedAll: false,
           isRequired: false,
@@ -505,7 +502,7 @@ class _ProductsFormState extends State<ProductsForm> {
 
         return AppDropdown(
           label: "Source ",
-          hint: selectedSource.isEmpty ? "Select Source" : selectedSource,
+          hint: "Select Source" ,
           isLabel: false,
           isNeedAll: false,
           isRequired: false,
@@ -536,7 +533,7 @@ class _ProductsFormState extends State<ProductsForm> {
 
         return AppDropdown(
           label: "Brand",
-          hint: selectedBrand.isEmpty ? "Select Brand" : selectedBrand,
+          hint:  "Select Brand" ,
           isLabel: false,
           isNeedAll: false,
           isSearch: true,
@@ -643,7 +640,7 @@ class _ProductsFormState extends State<ProductsForm> {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 0),
       decoration: BoxDecoration(
-        color: Colors.grey[50],
+        color: AppColors.bottomNavBg(context),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: Colors.grey[300]!),
       ),

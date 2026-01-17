@@ -181,7 +181,7 @@ class _ProductsScreenState extends State<MobileProductScreen> {
                       context.read<ProductsBloc>().filterTextController.clear();
                       _fetchProductList();
                     },
-                    hintText: "Search products...",
+                    hintText: "products...",
                   ),
                 ),
               ),

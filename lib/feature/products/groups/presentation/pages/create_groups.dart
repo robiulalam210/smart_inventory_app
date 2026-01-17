@@ -1,3 +1,4 @@
+import '../../../../../core/widgets/input_field.dart';
 import '/feature/products/groups/presentation/bloc/groups/groups_bloc.dart';
 import '../../../../../core/configs/configs.dart';
 import '../../../../../core/widgets/app_button.dart';
@@ -104,6 +105,8 @@ class _GroupsCreateState extends State<GroupsCreate> {
   Widget build(BuildContext context) {
     return BlocListener<GroupsBloc, GroupsState>(
       listener: (context, state) {
+        if (!mounted) return;
+
         if (state is GroupsAddSuccess) {
           showCustomToast(
             context: context,
@@ -119,8 +122,10 @@ class _GroupsCreateState extends State<GroupsCreate> {
           if (widget.id == null) {
             _clearForm();
           }
-          Navigator.pop(context, true);
-
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted) return;
+            Navigator.of(context).pop(true); // Return success result
+          });
         } else if (state is GroupsAddFailed) {
           showCustomToast(
             context: context,
@@ -175,7 +180,7 @@ class _GroupsCreateState extends State<GroupsCreate> {
             SizedBox(height: 10),
 
             // Name Input Field
-            AppTextField(
+            CustomInputField(
 
               isRequired: true,
               controller: nameController,
@@ -239,7 +244,7 @@ class _GroupsCreateState extends State<GroupsCreate> {
                     isOutlined: true,
                     color: AppColors.primaryColor(context),
                     borderColor: AppColors.primaryColor(context),
-                    textColor: AppColors.primaryColor(context),
+                    textColor: AppColors.errorColor(context),
                     onPressed: () => Navigator.pop(context),
                   ),
                 ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lottie/lottie.dart';
+import 'package:meherinMart/core/configs/app_sizes.dart';
 import '/feature/products/groups/presentation/pages/create_groups.dart';
 import '../../../../../core/configs/app_colors.dart';
 import '../../../../../core/configs/app_images.dart';
@@ -25,10 +26,20 @@ class GroupsScreen extends StatefulWidget {
 }
 
 class _GroupsScreenState extends State<GroupsScreen> {
+  // Add a ScrollController
+  final ScrollController _scrollController = ScrollController();
+
   @override
   void initState() {
     super.initState();
     _fetchApi();
+  }
+
+  @override
+  void dispose() {
+    // Dispose the scroll controller
+    _scrollController.dispose();
+    super.dispose();
   }
 
   void _fetchApi({String filterText = '', int pageNumber = 0}) {
@@ -88,20 +99,7 @@ class _GroupsScreenState extends State<GroupsScreen> {
       xl: 10,
       child: Container(
         color: AppColors.bottomNavBg(context),
-        child: RefreshIndicator(
-          onRefresh: () async {
-            _fetchApi();
-          },
-          child: SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            child: Container(
-              padding: isMobile
-                  ? const EdgeInsets.all(12)
-                  : AppTextStyle.getResponsivePaddingBody(context),
-              child: buildContent(isMobile),
-            ),
-          ),
-        ),
+        child: buildContent(isMobile),
       ),
     );
   }
@@ -163,14 +161,30 @@ class _GroupsScreenState extends State<GroupsScreen> {
           );
         }
       },
-      child: Column(
-        children: [
-          // Header Row
-          _buildHeaderRow(isMobile),
-          gapH16,
-          // Groups List
-          _buildGroupsList(),
-        ],
+      child: RefreshIndicator(
+        // Use the controller for RefreshIndicator
+        onRefresh: () async {
+          _fetchApi();
+        },
+        child: SingleChildScrollView(
+          // Pass the controller to SingleChildScrollView
+          controller: _scrollController,
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: Container(
+            padding: isMobile
+                ? const EdgeInsets.all(12)
+                : AppTextStyle.getResponsivePaddingBody(context),
+            child: Column(
+              children: [
+                // Header Row
+                _buildHeaderRow(isMobile),
+                gapH16,
+                // Groups List
+                _buildGroupsList(),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -268,11 +282,17 @@ class _GroupsScreenState extends State<GroupsScreen> {
       context: context,
       builder: (context) {
         return Dialog(
-          child: SizedBox(
-            width: Responsive.isMobile(context)
-                ? MediaQuery.of(context).size.width * 0.9
-                : MediaQuery.of(context).size.width * 0.5,
-            child: const GroupsCreate(),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppSizes.radius),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(AppSizes.radius),
+            child: SizedBox(
+              width: Responsive.isMobile(context)
+                  ? MediaQuery.of(context).size.width * 0.9
+                  : MediaQuery.of(context).size.width * 0.5,
+              child: const GroupsCreate(),
+            ),
           ),
         );
       },

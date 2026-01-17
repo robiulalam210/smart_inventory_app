@@ -1,5 +1,6 @@
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:meherinMart/core/widgets/app_scaffold.dart';
 
 import '../../../../../core/widgets/delete_dialog.dart';
 import '../../data/model/purchase_return_model.dart';
@@ -8,7 +9,6 @@ import '/feature/supplier/data/model/supplier_active_model.dart';
 import '/feature/supplier/presentation/bloc/supplier/supplier_list_bloc.dart';
 import '/feature/supplier/presentation/bloc/supplier_invoice/supplier_invoice_bloc.dart';
 import '../../../../../core/widgets/app_alert_dialog.dart';
-import '../../../../../core/widgets/app_button.dart';
 import '../../../../../core/widgets/app_dropdown.dart';
 import '../../../../../core/widgets/app_loader.dart';
 import '../../../../../core/widgets/coustom_search_text_field.dart';
@@ -21,7 +21,8 @@ class MobilePurchaseReturnScreen extends StatefulWidget {
   const MobilePurchaseReturnScreen({super.key});
 
   @override
-  State<MobilePurchaseReturnScreen> createState() => _PurchaseReturnScreenState();
+  State<MobilePurchaseReturnScreen> createState() =>
+      _PurchaseReturnScreenState();
 }
 
 class _PurchaseReturnScreenState extends State<MobilePurchaseReturnScreen> {
@@ -63,41 +64,50 @@ class _PurchaseReturnScreenState extends State<MobilePurchaseReturnScreen> {
     String? supplierId,
   }) {
     // Keep filterText null when empty to match existing backend expectations
-    context.read<PurchaseReturnBloc>().add(FetchPurchaseReturn(
-      context,
-      startDate: from,
-      endDate: to,
-      filterText: filterText.isNotEmpty ? filterText : null,
-      pageNumber: pageNumber,
-      // supplierId: supplierId // uncomment if your event supports this
-    ));
+    context.read<PurchaseReturnBloc>().add(
+      FetchPurchaseReturn(
+        context,
+        startDate: from,
+        endDate: to,
+        filterText: filterText.isNotEmpty ? filterText : null,
+        pageNumber: pageNumber,
+        // supplierId: supplierId // uncomment if your event supports this
+      ),
+    );
   }
-
-
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      floatingActionButton: FloatingActionButton(onPressed: (){      showDialog(
-        context: context,
-        builder: (context) {
-          return Dialog(
-            insetPadding: const EdgeInsets.all(20),
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                maxWidth: AppSizes.width(context) * 0.90,
-                maxHeight: AppSizes.height(context) * 0.85,
-              ),
-              child: const CreatePurchaseReturnScreen(),
-            ),
-          );
+    return AppScaffold(
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: AppColors.primaryColor(context),
+        onPressed: () {
+          showDialog(
+            context: context,
+            builder: (context) {
+              return Dialog(
+                insetPadding: const EdgeInsets.all(20),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxWidth: AppSizes.width(context) * 0.90,
+                    maxHeight: AppSizes.height(context) * 0.85,
+                  ),
+                  child: const CreatePurchaseReturnScreen(),
+                ),
+              );
+            },
+          ).then((_) {
+            _fetchPurchaseReturnList(from: startDate, to: endDate);
+          });
         },
-      ).then((_) {
-        _fetchPurchaseReturnList(from: startDate, to: endDate);
-      }
-
-      );}),
-      appBar: AppBar(title: Text("Purchase Return", style: AppTextStyle.titleMedium(context))),
+        child: Icon(Icons.add,color: AppColors.whiteColor(context),),
+      ),
+      appBar: AppBar(
+        title: Text(
+          "Purchase Return",
+          style: AppTextStyle.titleMedium(context),
+        ),
+      ),
       body: SafeArea(child: _buildContentArea()),
     );
   }
@@ -122,7 +132,9 @@ class _PurchaseReturnScreenState extends State<MobilePurchaseReturnScreen> {
               if (state is PurchaseReturnCreateLoading) {
                 appLoader(context, "Creating Purchase Return...");
               } else if (state is PurchaseReturnCreateSuccess) {
-                if (Navigator.of(context, rootNavigator: true).canPop()) Navigator.pop(context);
+                if (Navigator.of(context, rootNavigator: true).canPop()) {
+                  Navigator.pop(context);
+                }
                 _fetchPurchaseReturnList(
                   filterText: filterTextController.text,
                   from: selectedDateRange?.start ?? startDate,
@@ -133,15 +145,22 @@ class _PurchaseReturnScreenState extends State<MobilePurchaseReturnScreen> {
                   state.message,
                   title: "Success",
                   actions: [
-                    TextButton(onPressed: () {
-                      if (Navigator.of(context, rootNavigator: true).canPop()) Navigator.pop(context);
-                    }, child: const Text("OK")),
+                    TextButton(
+                      onPressed: () {
+                        if (Navigator.of(context, rootNavigator: true).canPop()) {
+                          Navigator.pop(context);
+                        }
+                      },
+                      child: const Text("OK"),
+                    ),
                   ],
                 );
               } else if (state is PurchaseReturnDeleteLoading) {
                 appLoader(context, "Deleting Purchase Return...");
               } else if (state is PurchaseReturnDeleteSuccess) {
-                if (Navigator.of(context, rootNavigator: true).canPop()) Navigator.pop(context);
+                if (Navigator.of(context, rootNavigator: true).canPop()) {
+                  Navigator.pop(context);
+                }
                 _fetchPurchaseReturnList(
                   filterText: filterTextController.text,
                   from: selectedDateRange?.start ?? startDate,
@@ -152,13 +171,20 @@ class _PurchaseReturnScreenState extends State<MobilePurchaseReturnScreen> {
                   state.message,
                   title: "Success",
                   actions: [
-                    TextButton(onPressed: () {
-                      if (Navigator.of(context, rootNavigator: true).canPop()) Navigator.pop(context);
-                    }, child: const Text("OK")),
+                    TextButton(
+                      onPressed: () {
+                        if (Navigator.of(context, rootNavigator: true).canPop()) {
+                          Navigator.pop(context);
+                        }
+                      },
+                      child: const Text("OK"),
+                    ),
                   ],
                 );
               } else if (state is PurchaseReturnError) {
-                if (Navigator.of(context, rootNavigator: true).canPop()) Navigator.pop(context);
+                if (Navigator.of(context, rootNavigator: true).canPop()) {
+                  Navigator.pop(context);
+                }
                 appAlertDialog(
                   context,
                   state.content,
@@ -166,7 +192,9 @@ class _PurchaseReturnScreenState extends State<MobilePurchaseReturnScreen> {
                   actions: [
                     TextButton(
                       onPressed: () {
-                        if (Navigator.of(context, rootNavigator: true).canPop()) Navigator.pop(context);
+                        if (Navigator.of(context, rootNavigator: true).canPop()) {
+                          Navigator.pop(context);
+                        }
                       },
                       child: const Text("Dismiss"),
                     ),
@@ -189,7 +217,6 @@ class _PurchaseReturnScreenState extends State<MobilePurchaseReturnScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Header with title and clear filters
-
                 _buildFilterRow(),
                 const SizedBox(height: 8),
                 SizedBox(child: _buildDataTable()),
@@ -205,12 +232,12 @@ class _PurchaseReturnScreenState extends State<MobilePurchaseReturnScreen> {
   Widget _buildFilterRow() {
     return Card(
       elevation: 0,
+      color: AppColors.bottomNavBg(context),
+
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: LayoutBuilder(
           builder: (context, constraints) {
-            final maxWidth = constraints.maxWidth;
-            final isMobile = maxWidth < 700; // adjust breakpoint as needed
 
             void refreshWithCurrentFilters() {
               _fetchPurchaseReturnList(
@@ -221,213 +248,111 @@ class _PurchaseReturnScreenState extends State<MobilePurchaseReturnScreen> {
               );
             }
 
-            if (isMobile) {
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  CustomSearchTextFormField(
-                    isRequiredLabel: false,
-                    controller: filterTextController,
-                    onChanged: (value) {
-                      if (value.length > 2 || value.isEmpty) {
-                        _fetchPurchaseReturnList(
-                          filterText: value,
-                          from: selectedDateRange?.start ?? startDate,
-                          to: selectedDateRange?.end ?? endDate,
-                        );
-                      }
-                    },
-                    onClear: () {
-                      filterTextController.clear();
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                CustomSearchTextFormField(
+                  isRequiredLabel: false,
+                  controller: filterTextController,
+                  onChanged: (value) {
+                    if (value.length > 2 || value.isEmpty) {
                       _fetchPurchaseReturnList(
-                        filterText: '',
+                        filterText: value,
                         from: selectedDateRange?.start ?? startDate,
                         to: selectedDateRange?.end ?? endDate,
                       );
-                    },
-                    hintText: "Search by Receipt No, Supplier, or Reason",
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: BlocBuilder<SupplierInvoiceBloc, SupplierInvoiceState>(
-                          builder: (context, state) {
-                            List<SupplierActiveModel> suppliers = [];
-                            if (state is SupplierActiveListSuccess) suppliers = state.list;
-                            if (state is SupplierInvoiceLoading) {
-                              return const Center(child: SizedBox(height: 40, child: CircularProgressIndicator()));
-                            }
-                            final allSuppliersList = [
-                              SupplierActiveModel(id: null, name: 'All Suppliers', phone: ''),
-                              ...suppliers
-                            ];
-                            return AppDropdown<SupplierActiveModel>(
-                              label: "Supplier",
-                              isSearch: true,
-                              hint: "Select Supplier",
-                              isNeedAll: false,
-                              isRequired: false,
-                              isLabel: true,
-                              value: _selectedSupplier,
-                              itemList: allSuppliersList,
-                              onChanged: (newVal) {
-                                setState(() {
-                                  _selectedSupplier = newVal?.id != null ? newVal : null;
-                                });
-                                _fetchPurchaseReturnList(
-                                  from: selectedDateRange?.start ?? startDate,
-                                  to: selectedDateRange?.end ?? endDate,
-                                  supplierId: _selectedSupplier?.id?.toString(),
-                                );
-                              },
-                            );
-                          },
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      IconButton(onPressed: refreshWithCurrentFilters, icon: const Icon(Icons.refresh), tooltip: "Refresh"),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: CustomDateRangeField(
-                          isLabel: true,
-                          selectedDateRange: selectedDateRange,
-                          onDateRangeSelected: (value) {
-                            setState(() => selectedDateRange = value);
-                            if (value != null) {
-                              _fetchPurchaseReturnList(from: value.start, to: value.end);
-                            } else {
-                              _fetchPurchaseReturnList(from: startDate, to: endDate);
-                            }
-                          },
-                        ),
-                      ),
-
-                    ],
-                  ),
-                ],
-              );
-            }
-
-            // Wide layout: use Wrap so controls flow instead of overflowing
-            return Wrap(
-              crossAxisAlignment: WrapCrossAlignment.center,
-              spacing: 12,
-              runSpacing: 12,
-              children: [
-                ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 420, minWidth: 200),
-                  child: SizedBox(
-                    width: 350,
-                    child: CustomSearchTextFormField(
-                      isRequiredLabel: false,
-                      controller: filterTextController,
-                      onChanged: (value) {
-                        if (value.length > 2 || value.isEmpty) {
-                          _fetchPurchaseReturnList(
-                            filterText: value,
-                            from: selectedDateRange?.start ?? startDate,
-                            to: selectedDateRange?.end ?? endDate,
-                          );
-                        }
-                      },
-                      onClear: () {
-                        filterTextController.clear();
-                        _fetchPurchaseReturnList();
-                      },
-                      hintText: "Search by Receipt No, Supplier, or Reason",
-                    ),
-                  ),
-                ),
-
-                ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 320, minWidth: 180),
-                  child: SizedBox(
-                    width: 260,
-                    child: BlocBuilder<SupplierInvoiceBloc, SupplierInvoiceState>(
-                      builder: (context, state) {
-                        List<SupplierActiveModel> suppliers = [];
-                        if (state is SupplierActiveListSuccess) suppliers = state.list;
-                        if (state is SupplierInvoiceLoading) return const Center(child: CircularProgressIndicator());
-                        final allSuppliersList = [
-                          SupplierActiveModel(id: null, name: 'All Suppliers', phone: ''),
-                          ...suppliers
-                        ];
-                        return AppDropdown<SupplierActiveModel>(
-                          label: "Supplier",
-                          isSearch: true,
-                          hint: "Select Supplier",
-                          isNeedAll: false,
-                          isRequired: false,
-                          isLabel: true,
-                          value: _selectedSupplier,
-                          itemList: allSuppliersList,
-                          onChanged: (newVal) {
-                            setState(() {
-                              _selectedSupplier = newVal?.id != null ? newVal : null;
-                            });
-                            _fetchPurchaseReturnList(
-                              from: selectedDateRange?.start ?? startDate,
-                              to: selectedDateRange?.end ?? endDate,
-                              supplierId: _selectedSupplier?.id?.toString(),
-                            );
-                          },
-                        );
-                      },
-                    ),
-                  ),
-                ),
-
-                ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 300, minWidth: 160),
-                  child: SizedBox(
-                    width: 260,
-                    child: CustomDateRangeField(
-                      isLabel: true,
-                      selectedDateRange: selectedDateRange,
-                      onDateRangeSelected: (value) {
-                        setState(() => selectedDateRange = value);
-                        if (value != null) {
-                          _fetchPurchaseReturnList(from: value.start, to: value.end);
-                        } else {
-                          _fetchPurchaseReturnList(from: startDate, to: endDate);
-                        }
-                      },
-                    ),
-                  ),
-                ),
-
-                AppButton(
-                  name: "Create Purchase Return",
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: (context) {
-                        return Dialog(
-                          insetPadding: const EdgeInsets.all(20),
-                          child: ConstrainedBox(
-                            constraints: BoxConstraints(
-                              maxWidth: AppSizes.width(context) * 0.70,
-                              maxHeight: AppSizes.height(context) * 0.85,
-                            ),
-                            child: const CreatePurchaseReturnScreen(),
-                          ),
-                        );
-                      },
-                    ).then((_) {
-                      _fetchPurchaseReturnList(from: startDate, to: endDate);
-                    });
+                    }
                   },
+                  onClear: () {
+                    filterTextController.clear();
+                    _fetchPurchaseReturnList(
+                      filterText: '',
+                      from: selectedDateRange?.start ?? startDate,
+                      to: selectedDateRange?.end ?? endDate,
+                    );
+                  },
+                  hintText: "Search by Receipt No, Supplier, or Reason",
                 ),
-
-                IconButton(
-                  onPressed: () => _fetchPurchaseReturnList(),
-                  icon: const Icon(Icons.refresh),
-                  tooltip: "Refresh",
-                  color: AppColors.primaryColor(context),
+                const SizedBox(height: 8),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child:
+                          BlocBuilder<
+                            SupplierInvoiceBloc,
+                            SupplierInvoiceState
+                          >(
+                            builder: (context, state) {
+                              List<SupplierActiveModel> suppliers = [];
+                              if (state is SupplierActiveListSuccess) {
+                                suppliers = state.list;
+                              }
+                              if (state is SupplierInvoiceLoading) {
+                                return const Center(
+                                  child: SizedBox(
+                                    height: 40,
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                );
+                              }
+                              final allSuppliersList = [
+                                SupplierActiveModel(
+                                  id: null,
+                                  name: 'All Suppliers',
+                                  phone: '',
+                                ),
+                                ...suppliers,
+                              ];
+                              return AppDropdown<SupplierActiveModel>(
+                                label: "Supplier",
+                                isSearch: true,
+                                hint: "Select Supplier",
+                                isNeedAll: false,
+                                isRequired: false,
+                                isLabel: true,
+                                value: _selectedSupplier,
+                                itemList: allSuppliersList,
+                                onChanged: (newVal) {
+                                  setState(() {
+                                    _selectedSupplier = newVal?.id != null
+                                        ? newVal
+                                        : null;
+                                  });
+                                  _fetchPurchaseReturnList(
+                                    from: selectedDateRange?.start ?? startDate,
+                                    to: selectedDateRange?.end ?? endDate,
+                                    supplierId: _selectedSupplier?.id
+                                        ?.toString(),
+                                  );
+                                },
+                              );
+                            },
+                          ),
+                    ),
+                    const SizedBox(width: 8),
+                    IconButton(
+                      onPressed: refreshWithCurrentFilters,
+                      icon: const Icon(Icons.refresh),
+                      tooltip: "Refresh",
+                    ),
+                  ],
+                ),
+                CustomDateRangeField(
+                  isLabel: true,
+                  selectedDateRange: selectedDateRange,
+                  onDateRangeSelected: (value) {
+                    setState(() => selectedDateRange = value);
+                    if (value != null) {
+                      _fetchPurchaseReturnList(
+                        from: value.start,
+                        to: value.end,
+                      );
+                    } else {
+                      _fetchPurchaseReturnList(from: startDate, to: endDate);
+                    }
+                  },
                 ),
               ],
             );
@@ -452,10 +377,14 @@ class _PurchaseReturnScreenState extends State<MobilePurchaseReturnScreen> {
             ),
           );
         } else if (state is PurchaseReturnSuccess) {
-          if (state.list.isEmpty) return _noDataWidget("No purchase returns found");
+          if (state.list.isEmpty) {
+            return _noDataWidget("No purchase returns found");
+          }
           return Column(
             children: [
-              SizedBox(child: PurchaseReturnTableCard(purchaseReturns: state.list)),
+              SizedBox(
+                child: PurchaseReturnTableCard(purchaseReturns: state.list),
+              ),
               const SizedBox(height: 16),
               PaginationBar(
                 count: state.count,
@@ -490,13 +419,28 @@ class _PurchaseReturnScreenState extends State<MobilePurchaseReturnScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Lottie.asset(AppImages.noData, width: 200, height: 200, repeat: false),
+          Lottie.asset(
+            AppImages.noData,
+            width: 200,
+            height: 200,
+            repeat: false,
+          ),
           const SizedBox(height: 16),
-          Text(message, style: const TextStyle(fontSize: 16, color: Colors.grey, fontWeight: FontWeight.w500)),
+          Text(
+            message,
+            style: const TextStyle(
+              fontSize: 16,
+              color: Colors.grey,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
           const SizedBox(height: 12),
           ElevatedButton(
             onPressed: () => _fetchPurchaseReturnList(),
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryColor(context), foregroundColor: Colors.white),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primaryColor(context),
+              foregroundColor: Colors.white,
+            ),
             child: const Text("Refresh"),
           ),
         ],
@@ -511,11 +455,22 @@ class _PurchaseReturnScreenState extends State<MobilePurchaseReturnScreen> {
         children: [
           const Icon(Icons.error_outline, size: 60, color: Colors.red),
           const SizedBox(height: 16),
-          Text("Error: $error", style: const TextStyle(fontSize: 16, color: Colors.red, fontWeight: FontWeight.w500), textAlign: TextAlign.center),
+          Text(
+            "Error: $error",
+            style: const TextStyle(
+              fontSize: 16,
+              color: Colors.red,
+              fontWeight: FontWeight.w500,
+            ),
+            textAlign: TextAlign.center,
+          ),
           const SizedBox(height: 12),
           ElevatedButton(
             onPressed: () => _fetchPurchaseReturnList(),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
             child: const Text("Retry"),
           ),
         ],
@@ -543,81 +498,10 @@ class PurchaseReturnTableCard extends StatelessWidget {
   Widget build(BuildContext context) {
     if (purchaseReturns.isEmpty) return _buildEmptyState();
 
-    final width = MediaQuery.of(context).size.width;
-    final isMobile = width < 600;
 
-    if (isMobile) return _buildMobileList(context);
+    return _buildMobileList(context);
 
-    final verticalScrollController = ScrollController();
-    final horizontalScrollController = ScrollController();
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final totalWidth = constraints.maxWidth;
-        const numColumns = 7;
-        const minColumnWidth = 120.0;
-
-        final dynamicColumnWidth = (totalWidth / numColumns).clamp(minColumnWidth, double.infinity);
-
-        return Container(
-          decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), color: Colors.white, boxShadow: [
-            BoxShadow(color: Colors.grey.withValues(alpha: 0.1), blurRadius: 8, offset: const Offset(0, 2))
-          ]),
-          child: Scrollbar(
-            controller: verticalScrollController,
-            thumbVisibility: true,
-            child: SingleChildScrollView(
-              controller: verticalScrollController,
-              scrollDirection: Axis.vertical,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: Scrollbar(
-                  controller: horizontalScrollController,
-                  thumbVisibility: true,
-                  child: SingleChildScrollView(
-                    controller: horizontalScrollController,
-                    scrollDirection: Axis.horizontal,
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 5),
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(minWidth: totalWidth),
-                        child: DataTable(
-                          dataRowMinHeight: 40,
-                          dataRowMaxHeight: 40,
-                          columnSpacing: 8,
-                          horizontalMargin: 12,
-                          dividerThickness: 0.5,
-                          headingRowHeight: 40,
-                          headingTextStyle: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w700, fontFamily: GoogleFonts.inter().fontFamily),
-                          headingRowColor: WidgetStateProperty.all(AppColors.primaryColor(context)),
-                          dataTextStyle: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, fontFamily: GoogleFonts.inter().fontFamily),
-                          columns: _buildColumns(dynamicColumnWidth),
-                          rows: purchaseReturns.asMap().entries.map((entry) {
-                            final purchaseReturn = entry.value;
-                            return DataRow(
-                              onSelectChanged: onPurchaseReturnTap != null ? (_) => onPurchaseReturnTap!() : null,
-                              cells: [
-                                _buildDataCell(purchaseReturn.invoiceNo ?? 'N/A', dynamicColumnWidth),
-                                _buildDataCell(purchaseReturn.supplier ?? 'N/A', dynamicColumnWidth),
-                                _buildDataCell(purchaseReturn.returnDate != null ? _formatDateSafe(purchaseReturn.returnDate!) : 'N/A', dynamicColumnWidth),
-                                _buildDataCell(purchaseReturn.returnAmount?.toString() ?? "0.00", dynamicColumnWidth),
-                                _buildReasonCell(purchaseReturn.reason, dynamicColumnWidth),
-                                _buildStatusCell(purchaseReturn.status, dynamicColumnWidth),
-                                _buildActionCell(purchaseReturn, context, dynamicColumnWidth),
-                              ],
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
   }
 
   // Mobile list view
@@ -631,9 +515,11 @@ class PurchaseReturnTableCard extends StatelessWidget {
         final pr = purchaseReturns[index];
         final statusColor = _getStatusColor(pr.status ?? '');
         return Card(
+
+          color: AppColors.bottomNavBg(context),
           margin: const EdgeInsets.symmetric(vertical: 4),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          elevation: 1,
+          elevation: 0,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             child: Column(
@@ -642,37 +528,103 @@ class PurchaseReturnTableCard extends StatelessWidget {
                   children: [
                     CircleAvatar(
                       radius: 18,
-                      backgroundColor: AppColors.primaryColor(context).withValues(alpha: 0.1),
-                      child: Text('${index + 1}', style: TextStyle(color: AppColors.primaryColor(context), fontWeight: FontWeight.w700)),
+                      backgroundColor: AppColors.primaryColor(
+                        context,
+                      ).withValues(alpha: 0.1),
+                      child: Text(
+                        '${index + 1}',
+                        style: TextStyle(
+                          color: AppColors.primaryColor(context),
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                        Text(pr.invoiceNo ?? 'N/A', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700)),
-                        const SizedBox(height: 4),
-                        Text(pr.supplier ?? 'N/A', style: const TextStyle(fontSize: 12, color: Colors.black54)),
-                      ]),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            pr.invoiceNo ?? 'N/A',
+                            style:  TextStyle(
+                              fontSize: 14,                color: AppColors.text(context),
+
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            pr.supplier ?? 'N/A',
+                            style:  TextStyle(
+                              fontSize: 12,
+                              color: AppColors.text(context),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                     const SizedBox(width: 8),
-                    Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-                      Text(pr.returnAmount != null ? pr.returnAmount!.toString() : '0.00', style: const TextStyle(color: Colors.red, fontWeight: FontWeight.w700)),
-                      const SizedBox(height: 6),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(color: statusColor.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(16)),
-                        child: Text((pr.status ?? 'N/A').toUpperCase(), style: TextStyle(color: statusColor, fontSize: 11, fontWeight: FontWeight.w700)),
-                      ),
-                    ]),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          pr.returnAmount != null
+                              ? pr.returnAmount!.toString()
+                              : '0.00',
+                          style: const TextStyle(
+                            color: Colors.red,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: statusColor.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Text(
+                            (pr.status ?? 'N/A').toUpperCase(),
+                            style: TextStyle(
+                              color: statusColor,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
                 const SizedBox(height: 8),
                 if ((pr.reason ?? '').isNotEmpty) ...[
-                  Align(alignment: Alignment.centerLeft, child: Text('Reason:', style: TextStyle(fontWeight: FontWeight.w700, color:AppColors.blackColor(context)))),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'Reason:',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.text(context),
+                      ),
+                    ),
+                  ),
                   const SizedBox(height: 4),
-                  Align(alignment: Alignment.centerLeft, child: Text(pr.reason ?? 'No reason provided', style: const TextStyle(fontSize: 13))),
-                  const SizedBox(height: 8),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      pr.reason ?? 'No reason provided',
+                      style:  TextStyle(fontSize: 13,                color: AppColors.text(context),
+                      ),
+                    ),
+                  ),
                 ],
-                Row(mainAxisAlignment: MainAxisAlignment.end, children: _mobileActionButtons(context, pr)),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: _mobileActionButtons(context, pr),
+                ),
               ],
             ),
           ),
@@ -681,83 +633,90 @@ class PurchaseReturnTableCard extends StatelessWidget {
     );
   }
 
-  List<Widget> _mobileActionButtons(BuildContext context, PurchaseReturnModel pr) {
+  List<Widget> _mobileActionButtons(
+    BuildContext context,
+    PurchaseReturnModel pr,
+  ) {
     final List<Widget> actions = [];
-    actions.add(_mobileIconButton(icon: Icons.visibility, color: Colors.green, tooltip: 'View', onPressed: () => _showViewDialog(context, pr)));
+    actions.add(
+      _mobileIconButton(
+        icon: Icons.visibility,
+        color: Colors.green,
+        tooltip: 'View',
+        onPressed: () => _showViewDialog(context, pr),
+      ),
+    );
     final status = pr.status?.toLowerCase() ?? 'pending';
     if (status == 'pending') {
       actions.add(const SizedBox(width: 8));
-      actions.add(_mobileIconButton(icon: Icons.edit, color: Colors.blue, tooltip: 'Edit', onPressed: () => _showEditDialog(context, pr)));
+      actions.add(
+        _mobileIconButton(
+          icon: Icons.edit,
+          color: Colors.blue,
+          tooltip: 'Edit',
+          onPressed: () => _showEditDialog(context, pr),
+        ),
+      );
       actions.add(const SizedBox(width: 8));
-      actions.add(_mobileIconButton(icon: Icons.check, color: Colors.green, tooltip: 'Approve', onPressed: () => _confirmApprove(context, pr)));
+      actions.add(
+        _mobileIconButton(
+          icon: Icons.check,
+          color: Colors.green,
+          tooltip: 'Approve',
+          onPressed: () => _confirmApprove(context, pr),
+        ),
+      );
       actions.add(const SizedBox(width: 8));
-      actions.add(_mobileIconButton(icon: Icons.close, color: Colors.red, tooltip: 'Reject', onPressed: () => _confirmReject(context, pr)));
+      actions.add(
+        _mobileIconButton(
+          icon: Icons.close,
+          color: Colors.red,
+          tooltip: 'Reject',
+          onPressed: () => _confirmReject(context, pr),
+        ),
+      );
     } else if (status == 'approved') {
       actions.add(const SizedBox(width: 8));
-      actions.add(_mobileIconButton(icon: Icons.done, color: Colors.green, tooltip: 'Complete', onPressed: () => _confirmComplete(context, pr)));
+      actions.add(
+        _mobileIconButton(
+          icon: Icons.done,
+          color: Colors.green,
+          tooltip: 'Complete',
+          onPressed: () => _confirmComplete(context, pr),
+        ),
+      );
     }
     if (status == 'pending' || status == 'rejected') {
       actions.add(const SizedBox(width: 8));
-      actions.add(_mobileIconButton(icon: Icons.delete, color: Colors.red, tooltip: 'Delete', onPressed: () => _confirmDelete(context, pr)));
+      actions.add(
+        _mobileIconButton(
+          icon: Icons.delete,
+          color: Colors.red,
+          tooltip: 'Delete',
+          onPressed: () => _confirmDelete(context, pr),
+        ),
+      );
     }
     return actions;
   }
 
-  Widget _mobileIconButton({required IconData icon, required Color color, required String tooltip, required VoidCallback onPressed}) {
-    return IconButton(onPressed: onPressed, icon: Icon(icon, size: 20, color: color), tooltip: tooltip, padding: EdgeInsets.zero, constraints: const BoxConstraints(minWidth: 36, minHeight: 36));
+  Widget _mobileIconButton({
+    required IconData icon,
+    required Color color,
+    required String tooltip,
+    required VoidCallback onPressed,
+  }) {
+    return IconButton(
+      onPressed: onPressed,
+      icon: Icon(icon, size: 20, color: color),
+      tooltip: tooltip,
+      padding: EdgeInsets.zero,
+      constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+    );
   }
 
-  List<DataColumn> _buildColumns(double columnWidth) {
-    return [
-      DataColumn(label: SizedBox(width: columnWidth, child: const Text('Return No', textAlign: TextAlign.center))),
-      DataColumn(label: SizedBox(width: columnWidth, child: const Text('Supplier', textAlign: TextAlign.center))),
-      DataColumn(label: SizedBox(width: columnWidth, child: const Text('Date', textAlign: TextAlign.center))),
-      DataColumn(label: SizedBox(width: columnWidth, child: const Text('Total Amount', textAlign: TextAlign.center))),
-      DataColumn(label: SizedBox(width: columnWidth, child: const Text('Reason', textAlign: TextAlign.center))),
-      DataColumn(label: SizedBox(width: columnWidth, child: const Text('Status', textAlign: TextAlign.center))),
-      DataColumn(label: SizedBox(width: columnWidth * 1.2, child: const Text('Actions', textAlign: TextAlign.center))),
-    ];
-  }
 
-  DataCell _buildDataCell(String text, double width) {
-    return DataCell(SizedBox(width: width, child: Text(text, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: Colors.black87), textAlign: TextAlign.center, overflow: TextOverflow.ellipsis)));
-  }
 
-  DataCell _buildReasonCell(String? reason, double width) {
-    return DataCell(Tooltip(message: reason ?? 'No reason provided', child: SizedBox(width: width, child: Text(reason ?? 'N/A', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: Colors.black87), textAlign: TextAlign.center, overflow: TextOverflow.ellipsis, maxLines: 2))));
-  }
-
-  DataCell _buildStatusCell(String? status, double width) {
-    final statusText = status ?? 'Pending';
-    final statusColor = _getStatusColor(statusText);
-    return DataCell(SizedBox(width: width, child: Center(child: Container(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), decoration: BoxDecoration(color: statusColor.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(4)), child: Text(statusText.toUpperCase(), style: TextStyle(color: statusColor, fontWeight: FontWeight.w600, fontSize: 10))))));
-  }
-
-  DataCell _buildActionCell(PurchaseReturnModel purchaseReturn, BuildContext context, double width) {
-    return DataCell(SizedBox(width: width, child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-      _buildActionButton(icon: Icons.visibility, color: Colors.green, tooltip: 'View', onPressed: () => _showViewDialog(context, purchaseReturn)),
-      if ((purchaseReturn.status ?? '').toLowerCase() == 'pending') ...[
-        const SizedBox(width: 4),
-        _buildActionButton(icon: Icons.edit, color: Colors.blue, tooltip: 'Edit', onPressed: () => _showEditDialog(context, purchaseReturn)),
-        const SizedBox(width: 4),
-        _buildActionButton(icon: Icons.check, color: Colors.green, tooltip: 'Approve', onPressed: () => _confirmApprove(context, purchaseReturn)),
-        const SizedBox(width: 4),
-        _buildActionButton(icon: Icons.close, color: Colors.red, tooltip: 'Reject', onPressed: () => _confirmReject(context, purchaseReturn)),
-      ],
-      if ((purchaseReturn.status ?? '').toLowerCase() == 'approved') ...[
-        const SizedBox(width: 4),
-        _buildActionButton(icon: Icons.done, color: Colors.green, tooltip: 'Complete', onPressed: () => _confirmComplete(context, purchaseReturn)),
-      ],
-      if ((purchaseReturn.status ?? '').toLowerCase() == 'pending' || (purchaseReturn.status ?? '').toLowerCase() == 'rejected') ...[
-        const SizedBox(width: 4),
-        _buildActionButton(icon: Icons.delete, color: Colors.red, tooltip: 'Delete', onPressed: () => _confirmDelete(context, purchaseReturn)),
-      ],
-    ])));
-  }
-
-  Widget _buildActionButton({required IconData icon, required Color color, required String tooltip, required VoidCallback onPressed}) {
-    return IconButton(onPressed: onPressed, icon: Icon(icon, size: 18, color: color), tooltip: tooltip, padding: EdgeInsets.zero, constraints: const BoxConstraints(minWidth: 30, minHeight: 30));
-  }
 
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {
@@ -783,37 +742,90 @@ class PurchaseReturnTableCard extends StatelessWidget {
     }
   }
 
-  Future<void> _confirmDelete(BuildContext context, PurchaseReturnModel pr) async {
+  Future<void> _confirmDelete(
+    BuildContext context,
+    PurchaseReturnModel pr,
+  ) async {
     final shouldDelete = await showDeleteConfirmationDialog(context);
     if (shouldDelete && context.mounted) {
-      context.read<PurchaseReturnBloc>().add(DeletePurchaseReturn(context,id: pr.id.toString()));
+      context.read<PurchaseReturnBloc>().add(
+        DeletePurchaseReturn(context, id: pr.id.toString()),
+      );
     }
   }
 
-  Future<void> _confirmApprove(BuildContext context, PurchaseReturnModel pr) async {
-    final confirmed = await _showConfirmationDialog(context, title: 'Approve Purchase Return', content: 'Are you sure you want to approve this purchase return?');
-    if (confirmed && context.mounted) context.read<PurchaseReturnBloc>().add(PurchaseReturnApprove(id: pr.id.toString()));
+  Future<void> _confirmApprove(
+    BuildContext context,
+    PurchaseReturnModel pr,
+  ) async {
+    final confirmed = await _showConfirmationDialog(
+      context,
+      title: 'Approve Purchase Return',
+      content: 'Are you sure you want to approve this purchase return?',
+    );
+    if (confirmed && context.mounted) {
+      context.read<PurchaseReturnBloc>().add(
+        PurchaseReturnApprove(id: pr.id.toString()),
+      );
+    }
   }
 
-  Future<void> _confirmReject(BuildContext context, PurchaseReturnModel pr) async {
-    final confirmed = await _showConfirmationDialog(context, title: 'Reject Purchase Return', content: 'Are you sure you want to reject this purchase return?');
-    if (confirmed && context.mounted) context.read<PurchaseReturnBloc>().add(PurchaseReturnReject(id: pr.id.toString()));
+  Future<void> _confirmReject(
+    BuildContext context,
+    PurchaseReturnModel pr,
+  ) async {
+    final confirmed = await _showConfirmationDialog(
+      context,
+      title: 'Reject Purchase Return',
+      content: 'Are you sure you want to reject this purchase return?',
+    );
+    if (confirmed && context.mounted) {
+      context.read<PurchaseReturnBloc>().add(
+        PurchaseReturnReject(id: pr.id.toString()),
+      );
+    }
   }
 
-  Future<void> _confirmComplete(BuildContext context, PurchaseReturnModel pr) async {
-    final confirmed = await _showConfirmationDialog(context, title: 'Complete Purchase Return', content: 'Are you sure you want to mark this purchase return as complete?');
-    if (confirmed && context.mounted) context.read<PurchaseReturnBloc>().add(PurchaseReturnComplete(id: pr.id.toString()));
+  Future<void> _confirmComplete(
+    BuildContext context,
+    PurchaseReturnModel pr,
+  ) async {
+    final confirmed = await _showConfirmationDialog(
+      context,
+      title: 'Complete Purchase Return',
+      content:
+          'Are you sure you want to mark this purchase return as complete?',
+    );
+    if (confirmed && context.mounted) {
+      context.read<PurchaseReturnBloc>().add(
+        PurchaseReturnComplete(id: pr.id.toString()),
+      );
+    }
   }
 
-  Future<bool> _showConfirmationDialog(BuildContext context, {required String title, required String content}) async {
+  Future<bool> _showConfirmationDialog(
+    BuildContext context, {
+    required String title,
+    required String content,
+  }) async {
     final res = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(title),
-        content: Text(content),
+        backgroundColor: AppColors.bottomNavBg(context),
+        title: Text(title,style: AppTextStyle.titleMedium(context),),
+        content: Text(content,style: AppTextStyle.body(context),),
         actions: [
-          TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Cancel')),
-          ElevatedButton(onPressed: () => Navigator.of(context).pop(true), style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryColor(context)), child: const Text('Confirm')),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primaryColor(context),
+            ),
+            child:  Text('Confirm',style: AppTextStyle.body(context),),
+          ),
         ],
       ),
     );
@@ -825,6 +837,7 @@ class PurchaseReturnTableCard extends StatelessWidget {
       context: context,
       builder: (context) {
         return Dialog(
+          backgroundColor: AppColors.bottomNavBg(context),
           child: Container(
             width: AppSizes.width(context) * 0.50,
             padding: const EdgeInsets.all(20),
@@ -833,34 +846,80 @@ class PurchaseReturnTableCard extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Purchase Return Details - ${pr.invoiceNo ?? "N/A"}', style: AppTextStyle.cardLevelHead(context)),
+                  Text(
+                    'Purchase Return Details - ${pr.invoiceNo ?? "N/A"}',
+                    style: AppTextStyle.cardLevelHead(context),
+                  ),
                   const SizedBox(height: 16),
                   _buildDetailRow('Return No:', pr.invoiceNo ?? 'N/A'),
                   _buildDetailRow('Supplier:', pr.supplier ?? 'N/A'),
-                  _buildDetailRow('Return Date:', pr.returnDate != null ? _formatDateSafe(pr.returnDate!) : 'N/A'),
-                  _buildDetailRow('Total Amount:', pr.returnAmount != null ? pr.returnAmount!.toString() : '0.00'),
-                  _buildDetailRow('Status:', pr.status?.toUpperCase() ?? 'PENDING'),
+                  _buildDetailRow(
+                    'Return Date:',
+                    pr.returnDate != null
+                        ? _formatDateSafe(pr.returnDate!)
+                        : 'N/A',
+                  ),
+                  _buildDetailRow(
+                    'Total Amount:',
+                    pr.returnAmount != null
+                        ? pr.returnAmount!.toString()
+                        : '0.00',
+                  ),
+                  _buildDetailRow(
+                    'Status:',
+                    pr.status?.toUpperCase() ?? 'PENDING',
+                  ),
                   _buildDetailRow('Reason:', pr.reason ?? 'No reason provided'),
                   if (pr.items?.isNotEmpty ?? false) ...[
                     const SizedBox(height: 16),
-                    const Text('Returned Items:', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
-                    const SizedBox(height: 8),
-                    ...pr.items!.map((item) => Container(
-                      margin: const EdgeInsets.only(bottom: 8),
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(color: Colors.grey.withValues(alpha: 0.05), borderRadius: BorderRadius.circular(4)),
-                      child: Row(
-                        children: [
-                          Expanded(child: Text(item.productName ?? 'Unknown Product', style: const TextStyle(fontWeight: FontWeight.w500))),
-                          Text('Qty: ${item.quantity ?? 0}'),
-                          const SizedBox(width: 16),
-                          Text('\$${item.total?.toString() ?? "0.00"}', style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.red)),
-                        ],
+                    const Text(
+                      'Returned Items:',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
                       ),
-                    )),
+                    ),
+                    const SizedBox(height: 8),
+                    ...pr.items!.map(
+                      (item) => Container(
+                        margin: const EdgeInsets.only(bottom: 8),
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.withValues(alpha: 0.05),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                item.productName ?? 'Unknown Product',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                            Text('Qty: ${item.quantity ?? 0}'),
+                            const SizedBox(width: 16),
+                            Text(
+                              '\$${item.total?.toString() ?? "0.00"}',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                                color: Colors.red,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   ],
                   const SizedBox(height: 20),
-                  Align(alignment: Alignment.centerRight, child: TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Close'))),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: const Text('Close'),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -878,17 +937,32 @@ class PurchaseReturnTableCard extends StatelessWidget {
           child: Container(
             width: AppSizes.width(context) * 0.60,
             padding: const EdgeInsets.all(20),
-            child: Column(mainAxisSize: MainAxisSize.min, children: [
-              Text('Edit Purchase Return - ${pr.invoiceNo}', style: AppTextStyle.cardLevelHead(context)),
-              const SizedBox(height: 20),
-              const Text('Edit functionality would be implemented here'),
-              const SizedBox(height: 20),
-              Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-                TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Cancel')),
-                const SizedBox(width: 8),
-                ElevatedButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Save Changes')),
-              ]),
-            ]),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Edit Purchase Return - ${pr.invoiceNo}',
+                  style: AppTextStyle.cardLevelHead(context),
+                ),
+                const SizedBox(height: 20),
+                const Text('Edit functionality would be implemented here'),
+                const SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: const Text('Cancel'),
+                    ),
+                    const SizedBox(width: 8),
+                    ElevatedButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: const Text('Save Changes'),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         );
       },
@@ -898,25 +972,62 @@ class PurchaseReturnTableCard extends StatelessWidget {
   Widget _buildDetailRow(String label, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        SizedBox(width: 120, child: Text(label, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12))),
-        const SizedBox(width: 8),
-        Expanded(child: Text(value, style: const TextStyle(fontSize: 12))),
-      ]),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 120,
+            child: Text(
+              label,
+              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(child: Text(value, style: const TextStyle(fontSize: 12))),
+        ],
+      ),
     );
   }
 
   Widget _buildEmptyState() {
     return Container(
-      decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), color: Colors.white, boxShadow: [BoxShadow(color: Colors.grey.withValues(alpha: 0.1), blurRadius: 8, offset: const Offset(0, 2))]),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withValues(alpha: 0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
       padding: const EdgeInsets.all(40),
-      child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-        Lottie.asset(AppImages.noData, width: 200, height: 200),
-        const SizedBox(height: 16),
-        Text('No Purchase Returns Found', style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.grey)),
-        const SizedBox(height: 8),
-        Text('Purchase returns will appear here when created', style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w400, color: Colors.grey), textAlign: TextAlign.center),
-      ]),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Lottie.asset(AppImages.noData, width: 200, height: 200),
+          const SizedBox(height: 16),
+          Text(
+            'No Purchase Returns Found',
+            style: GoogleFonts.inter(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Purchase returns will appear here when created',
+            style: GoogleFonts.inter(
+              fontSize: 12,
+              fontWeight: FontWeight.w400,
+              color: Colors.grey,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
     );
   }
 }

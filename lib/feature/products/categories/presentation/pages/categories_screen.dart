@@ -111,7 +111,9 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
             );
             }
             // Navigator.pop(context);
-            if (state is CategoriesAddSuccess) Navigator.pop(context);
+            if (state is CategoriesAddSuccess) {
+              Navigator.pop(context);
+            }
             _fetchApiData();
             context.read<CategoriesBloc>().clearData();
           } else if (state is CategoriesAddFailed ||
