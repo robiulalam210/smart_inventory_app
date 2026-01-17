@@ -264,6 +264,7 @@ class _CreateSalesReturnScreenState
           if (state is SalesReturnCreateLoading) {
             appLoader(context, "Creating Sales Return...");
           } else if (state is SalesReturnCreateSuccess) {
+            print("dsafg${state.message}");
             Navigator.pop(context); // Close loader
             Navigator.pop(context); // Close dialog
             widget.onSuccess?.call();
@@ -275,6 +276,8 @@ class _CreateSalesReturnScreenState
               primaryColor: Colors.green,
             );
           } else if (state is SalesReturnError) {
+
+            Navigator.pop(context); // Close loader
             Navigator.pop(context); // Close loader
             showCustomToast(
               context: context,

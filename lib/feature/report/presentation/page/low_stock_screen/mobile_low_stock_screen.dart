@@ -328,7 +328,7 @@ class _MobileLowStockScreenState extends State<MobileLowStockScreen> {
   Widget _buildTag(String text,BuildContext context) => Container(
     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
     decoration: BoxDecoration(color: Colors.grey[200], borderRadius: BorderRadius.circular(4)),
-    child: Text(text, style:  TextStyle(fontSize: 10, color: AppColors.blackColor(context))),
+    child: Text(text, style:  TextStyle(fontSize: 10, color: AppColors.text(context))),
   );
 
   Widget _buildStockDetailItem(String label, String value, Color color) {

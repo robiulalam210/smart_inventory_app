@@ -338,7 +338,7 @@ class _SaleReportScreenState extends State<SaleReportScreen> {
                 style:  TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color:AppColors.blackColor(context),
+                  color:AppColors.text(context),
                 ),
               ),
             ],

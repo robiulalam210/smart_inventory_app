@@ -721,7 +721,7 @@ mainAxisAlignment: MainAxisAlignment.start,                  children: [
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.bold,
-            color: isTotal ? AppColors.primaryColor(context) :AppColors.blackColor(context),
+            color: isTotal ? AppColors.primaryColor(context) :AppColors.text(context),
           ),
         ),
       ],

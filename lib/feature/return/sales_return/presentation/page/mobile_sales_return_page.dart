@@ -122,11 +122,13 @@ class _SalesReturnScreenState extends State<MobileSalesReturnPage> {
             listener: (context, state) {
               _handleStateChanges(state);
             },
-            child: Column(
-              children: [
-                _buildFilterRow(),
-                SizedBox(child: _buildDataTable()),
-              ],
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  _buildFilterRow(),
+                  SizedBox(child: _buildDataTable()),
+                ],
+              ),
             ),
           ),
         ),

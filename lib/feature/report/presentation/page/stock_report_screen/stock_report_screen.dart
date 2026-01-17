@@ -354,7 +354,7 @@ class _StockReportScreenState extends State<StockReportScreen> {
                   style:  TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
-                    color:AppColors.blackColor(context),
+                    color:AppColors.text(context),
                   ),
                 ),
               ],

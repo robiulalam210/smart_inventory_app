@@ -366,7 +366,9 @@ class SalesReturnBloc extends Bloc<SalesReturnEvent, SalesReturnState> {
 
   // Create Sales Return
   Future<void> _onCreateSalesReturn(
-      SalesReturnCreate event, Emitter<SalesReturnState> emit) async {
+      SalesReturnCreate event,
+      Emitter<SalesReturnState> emit,
+      ) async {
     emit(SalesReturnCreateLoading());
 
     try {
@@ -375,26 +377,55 @@ class SalesReturnBloc extends Bloc<SalesReturnEvent, SalesReturnState> {
         payload: event.body.toJson(),
       );
 
-      if (res['status'] == true) {
-        final salesReturnData = SalesReturnModel.fromJson(res['data']);
-        clearData();
-        emit(SalesReturnCreateSuccess(
-            message: res['message'] ?? "Sales return created successfully",
-            salesReturn: salesReturnData
-        ));
+      // 🔒 Top-level success check
+      if (res['status'] == true && res['data'] != null) {
+        final innerData = res['data'];
+
+        // 🔒 Inner success check
+        if (innerData['status'] == true && innerData['data'] != null) {
+          final salesReturnJson = innerData['data'];
+
+          final salesReturn =
+          SalesReturnModel.fromJson(salesReturnJson);
+
+          clearData();
+
+          emit(
+            SalesReturnCreateSuccess(
+              message: innerData['message']?.toString()
+                  ?? res['message']?.toString()
+                  ?? "Sales return created successfully",
+              salesReturn: salesReturn,
+            ),
+          );
+        } else {
+          emit(
+            SalesReturnError(
+              title: "Error",
+              content: innerData['message']?.toString()
+                  ?? "Failed to create sales return",
+            ),
+          );
+        }
       } else {
-        emit(SalesReturnError(
+        emit(
+          SalesReturnError(
             title: "Error",
-            content: res['message'] ?? "Failed to create sales return"
-        ));
+            content: res['message']?.toString()
+                ?? "Failed to create sales return",
+          ),
+        );
       }
     } catch (error) {
-      emit(SalesReturnError(
+      emit(
+        SalesReturnError(
           title: "Error",
-          content: "Failed to create sales return: ${error.toString()}"
-      ));
+          content: "Failed to create sales return: ${error.toString()}",
+        ),
+      );
     }
   }
+
 
   /// Fetch Sales Return List
   Future<void> _onFetchSalesReturnList(

@@ -201,7 +201,7 @@ class PurchaseReturnTableCard extends StatelessWidget {
                 if ((pr.reason ?? '').isNotEmpty) ...[
                   Align(
                     alignment: Alignment.centerLeft,
-                    child: Text('Reason:', style: TextStyle(fontWeight: FontWeight.w700, color:AppColors.blackColor(context))),
+                    child: Text('Reason:', style: TextStyle(fontWeight: FontWeight.w700, color:AppColors.text(context))),
                   ),
                   const SizedBox(height: 4),
                   Align(

@@ -534,7 +534,7 @@ class BadStockTableCard extends StatelessWidget {
                     alignment: Alignment.centerLeft,
                     child: Text(
                       badStock.reason ?? 'No reason provided',
-                      style: const TextStyle(fontSize: 13),
+                      style: AppTextStyle.bodySmall(context)
                     ),
                   ),
                 ],
@@ -743,6 +743,7 @@ class BadStockTableCard extends StatelessWidget {
       builder: (context) {
         return Dialog(
           child: Container(
+            color: AppColors.bottomNavBg(context),
             width: AppSizes.width(context) * 0.40,
             padding: const EdgeInsets.all(20),
             child: SingleChildScrollView(
@@ -755,12 +756,12 @@ class BadStockTableCard extends StatelessWidget {
                     style: AppTextStyle.cardLevelHead(context),
                   ),
                   const SizedBox(height: 16),
-                  _buildDetailRow('Product:', badStock.productName ?? 'N/A'),
-                  _buildDetailRow('Quantity:', badStock.quantity?.toString() ?? '0'),
-                  _buildDetailRow('Reason:', badStock.reason ?? 'No reason provided'),
-                  _buildDetailRow('Date:', _formatDate(badStock.date)),
-                  _buildDetailRow('Reference Type:', badStock.referenceType ?? 'N/A'),
-                  _buildDetailRow('Reference ID:', badStock.referenceId?.toString() ?? 'N/A'),
+                  _buildDetailRow('Product:', badStock.productName ?? 'N/A',context),
+                  _buildDetailRow('Quantity:', badStock.quantity?.toString() ?? '0',context),
+                  _buildDetailRow('Reason:', badStock.reason ?? 'No reason provided',context),
+                  _buildDetailRow('Date:', _formatDate(badStock.date),context),
+                  _buildDetailRow('Reference Type:', badStock.referenceType ?? 'N/A',context),
+                  _buildDetailRow('Reference ID:', badStock.referenceId?.toString() ?? 'N/A',context),
                   const SizedBox(height: 20),
                   Align(
                     alignment: Alignment.centerRight,
@@ -778,7 +779,7 @@ class BadStockTableCard extends StatelessWidget {
     );
   }
 
-  Widget _buildDetailRow(String label, String value) {
+  Widget _buildDetailRow(String label, String value,BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
@@ -788,8 +789,9 @@ class BadStockTableCard extends StatelessWidget {
             width: 120,
             child: Text(
               label,
-              style: const TextStyle(
+              style:  TextStyle(
                 fontWeight: FontWeight.w600,
+                color: AppColors.text(context),
                 fontSize: 12,
               ),
             ),
@@ -798,7 +800,10 @@ class BadStockTableCard extends StatelessWidget {
           Expanded(
             child: Text(
               value,
-              style: const TextStyle(
+              style:  TextStyle(
+                color: AppColors.text(context),
+
+
                 fontSize: 12,
               ),
             ),
