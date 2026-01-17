@@ -81,8 +81,15 @@ class _MobileSaleReportScreenState extends State<MobileSalesReportScreen> {
           ),
           IconButton(
             icon: Icon(Icons.refresh, color: AppColors.text(context)),
-            onPressed: () => _fetchSalesReport(),
-            tooltip: 'Refresh',
+            onPressed: () {
+              setState(() => selectedDateRange = null);
+              _isExpanded = false;
+
+              context.read<SalesReportBloc>().add(
+                ClearSalesReportFilters(),
+              );
+              _fetchSalesReport();
+            },            tooltip: 'Refresh',
           ),
         ],
       ),
@@ -131,6 +138,7 @@ class _MobileSaleReportScreenState extends State<MobileSalesReportScreen> {
       color: AppColors.bottomNavBg(context),
       child: ExpansionPanelList(
         elevation: 0,
+
         expandedHeaderPadding: EdgeInsets.zero,
         expansionCallback: (index, isExpanded) {
           setState(() {
@@ -139,6 +147,8 @@ class _MobileSaleReportScreenState extends State<MobileSalesReportScreen> {
         },
         children: [
           ExpansionPanel(
+
+            backgroundColor: AppColors.bottomNavBg(context),
             isExpanded: _isExpanded,
             headerBuilder: (context, isExpanded) {
               return ListTile(
@@ -244,27 +254,9 @@ class _MobileSaleReportScreenState extends State<MobileSalesReportScreen> {
                       }
                     },
                   ),
-                  const SizedBox(height: 6),
 
                   // Clear Filters Button
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: () {
-                        setState(() => selectedDateRange = null);
-                        context.read<SalesReportBloc>().add(
-                          ClearSalesReportFilters(),
-                        );
-                        _fetchSalesReport();
-                      },
-                      icon: const Icon(Icons.clear_all, size: 18),
-                      label: const Text('Clear All Filters'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.grey[200],
-                        foregroundColor: Colors.grey[800],
-                      ),
-                    ),
-                  ),
+
                 ],
               ),
             ),
@@ -461,16 +453,22 @@ class _MobileSaleReportScreenState extends State<MobileSalesReportScreen> {
                   ],
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  report.customerName,
-                  style:  AppTextStyle.body(context),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  _formatDate(report.saleDate),
-                  style:  AppTextStyle.body(context),
-                ),
-                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                  Text(
+                    report.customerName,
+                    style:  AppTextStyle.body(context),
+                  ),
+                  Text(
+                    _formatDate(report.saleDate),
+                    style:  AppTextStyle.body(context),
+                  ),
+
+                ],),
+
+
+                const SizedBox(height: 2),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [

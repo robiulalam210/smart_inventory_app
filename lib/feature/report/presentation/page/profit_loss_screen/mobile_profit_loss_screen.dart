@@ -1,30 +1,22 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
-import 'package:lottie/lottie.dart';
 import 'package:meherinMart/core/core.dart';
 import 'package:meherinMart/core/widgets/app_scaffold.dart';
 import 'package:printing/printing.dart';
 
-import '../../../../../core/configs/app_images.dart';
-import '/core/configs/app_colors.dart';
 import '/core/widgets/date_range.dart';
 import '/feature/report/presentation/bloc/profit_loss_bloc/profit_loss_bloc.dart';
 import '/feature/report/presentation/page/profit_loss_screen/pdf.dart';
-import '../../../../../responsive.dart';
 import 'profit_loss_screen.dart';
 
 class MobileProfitLossScreen extends StatefulWidget {
   const MobileProfitLossScreen({super.key});
 
   @override
-  State<MobileProfitLossScreen> createState() =>
-      _MobileProfitLossScreenState();
+  State<MobileProfitLossScreen> createState() => _MobileProfitLossScreenState();
 }
 
 class _MobileProfitLossScreenState extends State<MobileProfitLossScreen> {
   DateRange? selectedDateRange;
-  bool _isFilterExpanded = false;
 
   @override
   void initState() {
@@ -34,11 +26,7 @@ class _MobileProfitLossScreenState extends State<MobileProfitLossScreen> {
 
   void _fetchProfitLossReport({DateTime? from, DateTime? to}) {
     context.read<ProfitLossBloc>().add(
-      FetchProfitLossReport(
-        context: context,
-        from: from,
-        to: to,
-      ),
+      FetchProfitLossReport(context: context, from: from, to: to),
     );
   }
 
@@ -48,15 +36,23 @@ class _MobileProfitLossScreenState extends State<MobileProfitLossScreen> {
 
     return AppScaffold(
       appBar: AppBar(
-        title:  Text('Profit & Loss Report',style: AppTextStyle.titleMedium(context),),
+        title: Text(
+          'Profit & Loss Report',
+          style: AppTextStyle.titleMedium(context),
+        ),
         actions: [
           IconButton(
-            icon:  Icon(Icons.picture_as_pdf,color: AppColors.text(context),),
+            icon: Icon(Icons.picture_as_pdf, color: AppColors.text(context)),
             onPressed: _generatePdf,
           ),
           IconButton(
-            icon:  Icon(Icons.refresh,color:AppColors.text(context),),
-            onPressed: () => _fetchProfitLossReport(),
+            icon: Icon(Icons.refresh, color: AppColors.text(context)), onPressed: () {
+
+          _fetchProfitLossReport();
+          setState(() => selectedDateRange = null);
+
+
+          },
           ),
         ],
       ),
@@ -73,32 +69,18 @@ class _MobileProfitLossScreenState extends State<MobileProfitLossScreen> {
                 onDateRangeSelected: (value) {
                   setState(() => selectedDateRange = value);
                   if (value != null) {
-                    _fetchProfitLossReport(
-                      from: value.start,
-                      to: value.end,
-                    );
+                    _fetchProfitLossReport(from: value.start, to: value.end);
                   }
                 },
-              ),              const SizedBox(height: 8),
+              ),
+              const SizedBox(height: 8),
               _buildProfitLossCards(),
               _buildReportContent(),
             ],
           ),
         ),
       ),
-      floatingActionButton: isMobile
-          ? FloatingActionButton(
-        backgroundColor: AppColors.primaryColor(context),
-        onPressed: () =>
-            setState(() => _isFilterExpanded = !_isFilterExpanded),
-        child: Icon(
-          _isFilterExpanded
-              ? Icons.filter_alt_off
-              : Icons.filter_alt,
-          color: AppColors.white,
-        ),
-      )
-          : null,
+
     );
   }
 
@@ -175,12 +157,12 @@ class _MobileProfitLossScreenState extends State<MobileProfitLossScreen> {
   }
 
   Widget _profitLossCard(
-      String title,
-      double value,
-      IconData icon,
-      Color color, {
-        bool highlight = false,
-      }) {
+    String title,
+    double value,
+    IconData icon,
+    Color color, {
+    bool highlight = false,
+  }) {
     return Container(
       margin: const EdgeInsets.only(bottom: 6),
       padding: const EdgeInsets.all(12),
@@ -202,9 +184,7 @@ class _MobileProfitLossScreenState extends State<MobileProfitLossScreen> {
               Expanded(
                 child: Text(
                   title,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: AppTextStyle.body(context)
                 ),
               ),
             ],
@@ -246,12 +226,10 @@ class _MobileProfitLossScreenState extends State<MobileProfitLossScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const SizedBox(height: 8),
-            ProfitLossSummaryCard(summary: summary,),
+            ProfitLossSummaryCard(summary: summary),
             const SizedBox(height: 8),
             if (summary.expenseBreakdown.isNotEmpty)
-              ExpenseBreakdownList(
-                expenses: summary.expenseBreakdown,
-              ),
+              ExpenseBreakdownList(expenses: summary.expenseBreakdown),
           ],
         );
       },
@@ -259,9 +237,7 @@ class _MobileProfitLossScreenState extends State<MobileProfitLossScreen> {
   }
 
   Widget _buildEmpty() {
-    return Center(
-      child: Lottie.asset(AppImages.noData, width: 150),
-    );
+    return Center(child: Lottie.asset(AppImages.noData, width: 150));
   }
 
   Widget _buildError(String error) {
@@ -280,8 +256,7 @@ class _MobileProfitLossScreenState extends State<MobileProfitLossScreen> {
       context,
       MaterialPageRoute(
         builder: (_) => PdfPreview(
-          build: (_) =>
-              generateProfitLossReportPdf(state.response),
+          build: (_) => generateProfitLossReportPdf(state.response),
           canChangeOrientation: false,
           canChangePageFormat: false,
         ),

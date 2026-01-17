@@ -269,7 +269,8 @@ class _MobileLowStockScreenState extends State<MobileLowStockScreen> {
       itemBuilder: (context, index) {
         final product = products[index];
         return Card(
-          
+
+
           margin: const EdgeInsets.only(bottom: 8),
           color: product.totalStockQuantity == 0 ? Colors.red.withValues(alpha: 0.05) : Colors.orange.withValues(alpha: 0.05),
           child: Padding(
@@ -293,13 +294,13 @@ class _MobileLowStockScreenState extends State<MobileLowStockScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(product.productName, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold), maxLines: 2, overflow: TextOverflow.ellipsis),
+                          Text(product.productName, style:AppTextStyle.body(context), maxLines: 2, overflow: TextOverflow.ellipsis),
                           const SizedBox(height: 4),
                           Row(
                             children: [
-                              _buildTag(product.category),
+                              _buildTag(product.category,context),
                               const SizedBox(width: 4),
-                              _buildTag(product.brand),
+                              _buildTag(product.brand,context),
                             ],
                           ),
                         ],
@@ -311,7 +312,7 @@ class _MobileLowStockScreenState extends State<MobileLowStockScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    _buildStockDetailItem('Current Stock', product.totalStockQuantity.toString(), Colors.black),
+                    _buildStockDetailItem('Current Stock', product.totalStockQuantity.toString(), Colors.pink),
                     _buildStockDetailItem('Alert Level', product.alertQuantity.toString(), Colors.blue),
                     _buildStockDetailItem('Below By', product.belowAlertLevel.toString(), Colors.orange),
                   ],
@@ -324,10 +325,10 @@ class _MobileLowStockScreenState extends State<MobileLowStockScreen> {
     );
   }
 
-  Widget _buildTag(String text) => Container(
+  Widget _buildTag(String text,BuildContext context) => Container(
     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
     decoration: BoxDecoration(color: Colors.grey[200], borderRadius: BorderRadius.circular(4)),
-    child: Text(text, style: const TextStyle(fontSize: 10)),
+    child: Text(text, style:  TextStyle(fontSize: 10, color: AppColors.blackColor(context))),
   );
 
   Widget _buildStockDetailItem(String label, String value, Color color) {

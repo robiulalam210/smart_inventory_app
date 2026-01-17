@@ -120,7 +120,6 @@ class _MobileCustomerLedgerScreenState
         child: Icon(
           _isFilterExpanded ? Icons.filter_alt_off : Icons.filter_alt,
           color: AppColors.whiteColor(context),
-
         ),
       ),
     );
@@ -140,10 +139,14 @@ class _MobileCustomerLedgerScreenState
         children: [
           ExpansionPanel(
             headerBuilder: (context, isExpanded) {
-              return  ListTile(
-                leading: Icon(Icons.filter_alt,                              color: AppColors.text(context),
-                ),
-                title: Text('Filters',style: AppTextStyle.body(context),),
+              return ListTile(
+                leading: Icon(Icons.filter_alt, color: AppColors.text(context)),
+                title: Text('Filters', style: AppTextStyle.body(context)),
+                onTap: (){
+                  setState(() {
+                    _isFilterExpanded=!_isFilterExpanded;
+                  });
+                },
               );
             },
             body: Padding(
@@ -156,9 +159,7 @@ class _MobileCustomerLedgerScreenState
                       return AppDropdown<CustomerActiveModel>(
                         label: "Customer",
                         isSearch: true,
-                        hint:
-
-                            "Select Customer",
+                        hint: "Select Customer",
                         isNeedAll: false,
                         isRequired: true,
                         isLabel: true,
@@ -295,8 +296,8 @@ class _MobileCustomerLedgerScreenState
         // final salesCount = transactions.where((t) => t.type.toLowerCase() == 'sale').length;
         // final paymentsCount = transactions.where((t) => t.type.toLowerCase() == 'payment').length;
 
-        return Card(            color: AppColors.bottomNavBg(context),
-
+        return Card(
+          color: AppColors.bottomNavBg(context),
 
           child: Padding(
             padding: const EdgeInsets.all(16.0),
@@ -317,7 +318,7 @@ class _MobileCustomerLedgerScreenState
                     Expanded(
                       child: Text(
                         customer.name ?? "",
-                        style: AppTextStyle.body(context)
+                        style: AppTextStyle.body(context),
                       ),
                     ),
                   ],
@@ -339,13 +340,12 @@ class _MobileCustomerLedgerScreenState
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                             Text(
+                            Text(
                               'Current Balance',
                               style: TextStyle(
                                 fontSize: 12,
                                 color: AppColors.text(context),
-
-                        ),
+                              ),
                             ),
                             Text(
                               _formatCurrency(summary.closingBalance),
@@ -457,10 +457,7 @@ class _MobileCustomerLedgerScreenState
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  label,
-                  style:AppTextStyle.bodySmall(context)
-                ),
+                Text(label, style: AppTextStyle.bodySmall(context)),
                 Text(
                   value,
                   style: TextStyle(
@@ -542,8 +539,9 @@ class _MobileCustomerLedgerScreenState
                     Expanded(
                       child: Text(
                         transaction.voucherNo,
-                        style:  TextStyle(
-                          fontSize: 16,            color: AppColors.text(context),
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: AppColors.text(context),
 
                           fontWeight: FontWeight.bold,
                         ),
@@ -726,7 +724,7 @@ class _MobileCustomerLedgerScreenState
                       if (transaction.details.isNotEmpty)
                         Text(
                           transaction.details,
-                          style:  TextStyle(
+                          style: TextStyle(
                             fontSize: 11,
                             color: AppColors.text(context),
                           ),
@@ -738,7 +736,7 @@ class _MobileCustomerLedgerScreenState
                           padding: const EdgeInsets.only(top: 4.0),
                           child: Row(
                             children: [
-                               Icon(
+                              Icon(
                                 Icons.payment,
                                 size: 12,
                                 color: AppColors.text(context),
@@ -746,7 +744,7 @@ class _MobileCustomerLedgerScreenState
                               const SizedBox(width: 4),
                               Text(
                                 transaction.method,
-                                style:  TextStyle(
+                                style: TextStyle(
                                   fontSize: 11,
                                   color: AppColors.text(context),
                                 ),
@@ -868,7 +866,7 @@ class _MobileCustomerLedgerScreenState
       backgroundColor: Colors.transparent,
       builder: (context) {
         return Container(
-          decoration:  BoxDecoration(
+          decoration: BoxDecoration(
             color: AppColors.bottomNavBg(context),
 
             borderRadius: BorderRadius.only(
@@ -897,16 +895,16 @@ class _MobileCustomerLedgerScreenState
                 children: [
                   Text(
                     'Transaction Details',
-                    style:  TextStyle(
-                      fontSize: 16,                            color: AppColors.text(context),
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: AppColors.text(context),
 
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   IconButton(
                     onPressed: () => Navigator.pop(context),
-                    icon:  Icon(Icons.close,                            color: AppColors.text(context),
-                    ),
+                    icon: Icon(Icons.close, color: AppColors.text(context)),
                   ),
                 ],
               ),
@@ -914,21 +912,27 @@ class _MobileCustomerLedgerScreenState
               const SizedBox(height: 8),
 
               // Transaction Details
-              _buildDetailRow('Voucher No:', transaction.voucherNo,context),
-              _buildDetailRow('Date:', _formatDate(transaction.date),context),
-              _buildDetailRow('Type:', transaction.type.toUpperCase(),context),
-              _buildDetailRow('Particular:', transaction.particular,context),
-              _buildDetailRow('Details:', transaction.details,context),
-              _buildDetailRow('Payment Method:', transaction.method,context),
+              _buildDetailRow('Voucher No:', transaction.voucherNo, context),
+              _buildDetailRow('Date:', _formatDate(transaction.date), context),
+              _buildDetailRow('Type:', transaction.type.toUpperCase(), context),
+              _buildDetailRow('Particular:', transaction.particular, context),
+              _buildDetailRow('Details:', transaction.details, context),
+              _buildDetailRow('Payment Method:', transaction.method, context),
               _buildDetailRow(
                 'Debit Amount:',
-                _formatCurrency(transaction.debit),context
+                _formatCurrency(transaction.debit),
+                context,
               ),
               _buildDetailRow(
                 'Credit Amount:',
-                _formatCurrency(transaction.credit),context
+                _formatCurrency(transaction.credit),
+                context,
               ),
-              _buildDetailRow('Balance:', _formatCurrency(transaction.due),context),
+              _buildDetailRow(
+                'Balance:',
+                _formatCurrency(transaction.due),
+                context,
+              ),
 
               // Type Badge
               const SizedBox(height: 16),
@@ -971,7 +975,7 @@ class _MobileCustomerLedgerScreenState
     );
   }
 
-  Widget _buildDetailRow(String label, String value,BuildContext context) {
+  Widget _buildDetailRow(String label, String value, BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
@@ -980,7 +984,7 @@ class _MobileCustomerLedgerScreenState
             flex: 2,
             child: Text(
               label,
-              style:  TextStyle(
+              style: TextStyle(
                 fontSize: 14,
                 color: AppColors.text(context),
                 fontWeight: FontWeight.w500,
@@ -991,10 +995,12 @@ class _MobileCustomerLedgerScreenState
             flex: 3,
             child: Text(
               value,
-              style:  TextStyle(fontSize: 14,
-                  color: AppColors.text(context),
+              style: TextStyle(
+                fontSize: 14,
+                color: AppColors.text(context),
 
-                  fontWeight: FontWeight.w600),
+                fontWeight: FontWeight.w600,
+              ),
               textAlign: TextAlign.right,
             ),
           ),
