@@ -212,15 +212,8 @@ class _MobileLoginScrState extends State<MobileLoginScr>
                                 onFieldSubmitted: (_) => _submit(),
                                 keyboardType: TextInputType.text,
                               ),
-                              Align(
-                                alignment: Alignment.centerRight,
-                                child: TextButton(
-                                  onPressed: () {},
-                                  child:  Text("forgot_password".tr()),
-                                ),
-                              ),
 
-                              const SizedBox(height: 6),
+                              const SizedBox(height: 20),
 
                               BlocBuilder<AuthBloc, AuthState>(
                                 builder: (context, state) {
