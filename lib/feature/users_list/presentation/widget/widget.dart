@@ -136,50 +136,56 @@ class UserTableCard extends StatelessWidget {
             child: SingleChildScrollView(
               controller: horizontalController,
               scrollDirection: Axis.horizontal,
-              child: DataTable(
-                headingRowColor: WidgetStateProperty.all(
-                  AppColors.primaryColor(context),
-                ),
-                headingTextStyle: GoogleFonts.inter(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white,
-                ),
-                dataTextStyle: GoogleFonts.inter(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w500,
-                ),
-                columns: const [
-                  DataColumn(label: Text('No.')),
-                  DataColumn(label: Text('Full Name')),
-                  DataColumn(label: Text('Email')),
-                  DataColumn(label: Text('Role')),
-                  DataColumn(label: Text('Phone')),
-                  DataColumn(label: Text('Company')),
-                  DataColumn(label: Text('Status')),
-                  DataColumn(label: Text('Actions')),
-                ],
-                rows: users.asMap().entries.map((entry) {
-                  final user = entry.value;
-                  return DataRow(cells: [
-                    DataCell(Text('${entry.key + 1}')),
-                    DataCell(Text(
-                        '${user.firstName ?? ""} ${user.lastName ?? ""}'.trim())),
-                    DataCell(Text(user.email ?? 'N/A')),
-                    DataCell(Text(user.role ?? 'N/A')),
-                    DataCell(Text(user.phone ?? 'N/A')),
-                    DataCell(Text(user.company?.name ?? 'N/A')),
-                    DataCell(_statusChip(_getUserStatus(user))),
-                    DataCell(
-                      IconButton(
-                        icon: const Icon(Icons.visibility,
-                            size: 18, color: Colors.green),
-                        onPressed: () =>
-                            _showViewDialog(context, user),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: DataTable(
+                  headingRowColor: WidgetStateProperty.all(
+                    AppColors.primaryColor(context),
+                  ),
+                  headingTextStyle: GoogleFonts.inter(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
+                  dataTextStyle: GoogleFonts.inter(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  columns: const [
+                    DataColumn(label: Text('No.')),
+                    DataColumn(label: Text('Full Name')),
+                    DataColumn(label: Text('User Name')),
+                    DataColumn(label: Text('Email')),
+                    DataColumn(label: Text('Role')),
+                    DataColumn(label: Text('Phone')),
+                    DataColumn(label: Text('Company')),
+                    DataColumn(label: Text('Status')),
+                    DataColumn(label: Text('Actions')),
+                  ],
+                  rows: users.asMap().entries.map((entry) {
+                    final user = entry.value;
+                    return DataRow(cells: [
+                      DataCell(Text('${entry.key + 1}')),
+                      DataCell(Text(
+                          (user.fullName ?? "N/A").trim()))
+                      ,  DataCell(Text(
+                          '${user.username ?? ""} ')),
+                      DataCell(Text(user.email ?? 'N/A')),
+                      DataCell(Text(user.role ?? 'N/A')),
+                      DataCell(Text(user.phone ?? 'N/A')),
+                      DataCell(Text(user.company?.name ?? 'N/A')),
+                      DataCell(_statusChip(_getUserStatus(user))),
+                      DataCell(
+                        IconButton(
+                          icon: const Icon(Icons.visibility,
+                              size: 18, color: Colors.green),
+                          onPressed: () =>
+                              _showViewDialog(context, user),
+                        ),
                       ),
-                    ),
-                  ]);
-                }).toList(),
+                    ]);
+                  }).toList(),
+                ),
               ),
             ),
           ),

@@ -191,7 +191,7 @@ class _BrandScreenState extends State<BrandScreen> {
             onChanged: (value) {
               _fetchApi(filterText: value);
             },
-            hintText: "Search brand name",
+            hintText: "brand name",
             isRequiredLabel: false,
           ),
         ),
@@ -237,16 +237,30 @@ class _BrandScreenState extends State<BrandScreen> {
     );
   }
 
+// (only the modified method shown)
   void _showCreateDialog(BuildContext context) {
+    // Provide an explicit ScrollController to the dialog so any Scrollbar
+    // using the PrimaryScrollController has a ScrollPosition attached.
+    final dialogScrollController = ScrollController();
+
     showDialog(
       context: context,
       builder: (context) {
         return Dialog(
-          child: SizedBox(
-            width: Responsive.isMobile(context)
-                ? MediaQuery.of(context).size.width * 0.9
-                : MediaQuery.of(context).size.width * 0.5,
-            child: const BrandCreate(),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: PrimaryScrollController(
+              controller: dialogScrollController,
+              child: SizedBox(
+                width: Responsive.isMobile(context)
+                    ? MediaQuery.of(context).size.width * 0.9
+                    : MediaQuery.of(context).size.width * 0.5,
+                child: const BrandCreate(),
+              ),
+            ),
           ),
         );
       },

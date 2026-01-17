@@ -1362,10 +1362,7 @@ class _SalesScreenState extends State<MobileSalesScreen> {
     // Create a mock PosSaleModel for preview
     final bloc = context.read<CreatePosSaleBloc>();
     final netTotal = calculateAllFinalTotal();
-    final subTotal = products.fold(
-      0.0,
-          (p, e) => p + _toDouble(e["total"]),
-    );
+
     final overallDiscount =
         double.tryParse(bloc.discountOverAllController.text) ?? 0.0;
     final vat = double.tryParse(bloc.vatOverAllController.text) ?? 0.0;

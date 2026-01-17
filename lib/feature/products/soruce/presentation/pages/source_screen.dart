@@ -166,7 +166,19 @@ class _SourceScreenState extends State<SourceScreen> {
                         showDialog(
                           context: context,
                           builder: (context) {
-                            return Dialog(child: SourceCreate());
+                            return Dialog(
+
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(AppSizes.radius),
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(AppSizes.radius),                              child: SizedBox(
+
+                                  width: Responsive.isMobile(context)
+                                      ? MediaQuery.of(context).size.width * 0.9
+                                      : MediaQuery.of(context).size.width * 0.5,
+                                  child: SourceCreate()),
+                            ));
                           },
                         );
                       },

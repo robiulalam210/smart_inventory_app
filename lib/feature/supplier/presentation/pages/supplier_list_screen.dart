@@ -123,7 +123,7 @@ class _SupplierScreenState extends State<SupplierScreen> {
               _fetchApi(); // Reload supplier list
 
               context.read<DashboardBloc>().add(
-                ChangeDashboardScreen(index: 10),
+                ChangeDashboardScreen(index: 11),
               );
             } else if (state is SupplierAddFailed) {
               Navigator.pop(context); // Close loader dialog
@@ -185,7 +185,7 @@ class _SupplierScreenState extends State<SupplierScreen> {
                         onChanged: (value) {
                           _fetchApi(filterText: value);
                         },
-                        hintText: "Search by Name",
+                        hintText: "by Name",
                       ),
                     ),
                     const SizedBox(width: 16),

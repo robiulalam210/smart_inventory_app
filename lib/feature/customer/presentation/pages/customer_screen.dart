@@ -123,7 +123,6 @@ class _CustomerScreenState extends State<CustomerScreen> {
             builder: (context, state) {
               return Column(
                 children: [
-                  if (isBigScreen)
                     _buildDesktopHeader(),
 
                   SizedBox(
@@ -198,8 +197,8 @@ class _CustomerScreenState extends State<CustomerScreen> {
 
   Widget _buildDesktopHeader() {
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.start,
       children: [
         // 🔍 Search Field
         Expanded(
@@ -223,9 +222,9 @@ class _CustomerScreenState extends State<CustomerScreen> {
             valueListenable: selectedStatusNotifier,
             builder: (context, value, child) {
               return AppDropdown<String>(
-                isLabel: false,
+                isLabel: true,
                 hint: "Select Status",
-                label: "",
+                label: "Status",
                 isNeedAll: true,
                 isRequired: false,
                 value: value,

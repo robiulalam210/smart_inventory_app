@@ -41,7 +41,7 @@ class _SourceCreateState extends State<SourceCreate> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title:  Text('Confirm',style: AppTextStyle.titleMedium(context),),
+          title: Text('Confirm', style: AppTextStyle.titleMedium(context)),
           content: Text(
             widget.id == null
                 ? 'Are you sure you want to create this source?'
@@ -73,8 +73,7 @@ class _SourceCreateState extends State<SourceCreate> {
       final Map<String, dynamic> body = {"name": nameController.text.trim()};
       if (widget.id != null &&
           context.read<SourceBloc>().selectedState.trim().isNotEmpty) {
-        body["is_active"] =
-        context.read<SourceBloc>().selectedState == "Active"
+        body["is_active"] = context.read<SourceBloc>().selectedState == "Active"
             ? true
             : false;
       }
@@ -184,7 +183,7 @@ class _SourceCreateState extends State<SourceCreate> {
             SizedBox(height: 10),
 
             // Name Input Field
-            AppTextField(
+            CustomInputField(
               isRequired: true,
               controller: nameController,
               hintText: 'Enter source name',
@@ -206,7 +205,7 @@ class _SourceCreateState extends State<SourceCreate> {
             ),
 
             SizedBox(height: 10),
-            if (widget.id !=null) ...[
+            if (widget.id != null) ...[
               LayoutBuilder(
                 builder: (context, constraints) {
                   final isSmallScreen = constraints.maxWidth < 600;
@@ -217,11 +216,9 @@ class _SourceCreateState extends State<SourceCreate> {
                         : constraints.maxWidth * 0.5,
                     child: AppDropdown(
                       label: "Status",
-                      hint:  "Select Status"
-                          ,
+                      hint: "Select Status",
                       isLabel: false,
-                      value:
-                      context.read<SourceBloc>().selectedState.isEmpty
+                      value: context.read<SourceBloc>().selectedState.isEmpty
                           ? null
                           : context.read<SourceBloc>().selectedState,
                       itemList: ["Active", "Inactive"],
@@ -240,6 +237,7 @@ class _SourceCreateState extends State<SourceCreate> {
 
             // Buttons Row
             Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 AppButton(
                   isOutlined: true,
@@ -247,21 +245,20 @@ class _SourceCreateState extends State<SourceCreate> {
                   color: AppColors.primaryColor(context),
                   borderColor: AppColors.primaryColor(context),
                   textColor: AppColors.errorColor(context),
-                  name:  'Cancel',    onPressed: () => Navigator.pop(context),)
-
-                ,
+                  name: 'Cancel',
+                  onPressed: () => Navigator.pop(context),
+                ),
                 SizedBox(width: 10),
-                Expanded(
-                  child: BlocBuilder<SourceBloc, SourceState>(
-                    builder: (context, state) {
-                      return AppButton(
-                        name: widget.id == null ? 'Create' : 'Update',
-                        onPressed: (state is SourceAddLoading)
-                            ? null
-                            : _showConfirmationDialog,
-                      );
-                    },
-                  ),
+                BlocBuilder<SourceBloc, SourceState>(
+                  builder: (context, state) {
+                    return AppButton(
+                      size: 120,
+                      name: widget.id == null ? 'Create' : 'Update',
+                      onPressed: (state is SourceAddLoading)
+                          ? null
+                          : _showConfirmationDialog,
+                    );
+                  },
                 ),
               ],
             ),
@@ -270,5 +267,4 @@ class _SourceCreateState extends State<SourceCreate> {
       ),
     );
   }
-
 }

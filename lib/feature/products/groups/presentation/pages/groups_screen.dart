@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lottie/lottie.dart';
+import 'package:meherinMart/core/configs/app_sizes.dart';
 import '/feature/products/groups/presentation/pages/create_groups.dart';
 import '../../../../../core/configs/app_colors.dart';
 import '../../../../../core/configs/app_images.dart';
@@ -268,11 +269,17 @@ class _GroupsScreenState extends State<GroupsScreen> {
       context: context,
       builder: (context) {
         return Dialog(
-          child: SizedBox(
-            width: Responsive.isMobile(context)
-                ? MediaQuery.of(context).size.width * 0.9
-                : MediaQuery.of(context).size.width * 0.5,
-            child: const GroupsCreate(),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppSizes.radius),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(AppSizes.radius),
+            child: SizedBox(
+              width: Responsive.isMobile(context)
+                  ? MediaQuery.of(context).size.width * 0.9
+                  : MediaQuery.of(context).size.width * 0.5,
+              child: const GroupsCreate(),
+            ),
           ),
         );
       },

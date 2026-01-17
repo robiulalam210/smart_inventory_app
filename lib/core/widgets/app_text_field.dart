@@ -93,7 +93,7 @@ class AppTextField extends StatelessWidget {
                   fontSize: 14,
                   color: AppColors.grey,
                 ),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                 filled: true,
                 fillColor: fillColor ??
                     AppColors.primaryColor(context).withValues(alpha: 0.05), // theme background

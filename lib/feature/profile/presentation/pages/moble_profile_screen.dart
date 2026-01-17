@@ -758,9 +758,7 @@ class _MobileProfileScreenState extends State<MobileProfileScreen> {
                         const CircularProgressIndicator(),
                         const SizedBox(height: 12),
                         Text(
-                          '${'uploading'.tr()} ${_uploadProgress > 0
-                                  ? '${(_uploadProgress * 100).toStringAsFixed(0)}%'
-                                  : ''}',
+                          '${'uploading'.tr()} ${_uploadProgress > 0 ? '${(_uploadProgress * 100).toStringAsFixed(0)}%' : ''}',
                           style: const TextStyle(color: Colors.white),
                         ),
                       ],
@@ -915,12 +913,6 @@ class _MobileProfileScreenState extends State<MobileProfileScreen> {
       ],
     );
   }
-
-
-
-
-
-
 
   void _showSecurityDialog() {
     showDialog(
