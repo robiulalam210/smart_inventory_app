@@ -640,7 +640,7 @@ class ProfitLossSummaryCard extends StatelessWidget {
               style: TextStyle(
                 fontWeight: isNet ? FontWeight.bold : FontWeight.w600,
                 fontSize: isNet ? 14 : 14,
-                color: isNet ? getAmountColor() : Colors.black87,
+                color: isNet ? getAmountColor() :AppColors.text(context),
               ),
             ),
           ),

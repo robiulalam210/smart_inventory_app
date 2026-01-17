@@ -74,7 +74,16 @@ class _MobilePurchaseReportScreenState
           ),
           IconButton(
             icon: Icon(Icons.refresh, color: AppColors.text(context)),
-            onPressed: () => _fetchPurchaseReport(),
+            onPressed: () {
+              setState(() {
+                selectedDateRange = null;
+                _isFilterExpanded = false;
+              });
+              context.read<PurchaseReportBloc>().add(
+                ClearPurchaseReportFilters(),
+              );
+              _fetchPurchaseReport();
+            },
             tooltip: 'Refresh',
           ),
         ],
@@ -124,19 +133,37 @@ class _MobilePurchaseReportScreenState
       color: AppColors.bottomNavBg(context),
       child: ExpansionPanelList(
         elevation: 0,
+        expandIconColor: Colors.transparent, // hide default arrow
         expandedHeaderPadding: EdgeInsets.zero,
         expansionCallback: (int index, bool isExpanded) {
-          setState(() => _isFilterExpanded = !isExpanded);
+          setState(() {
+            _isFilterExpanded = !isExpanded;
+          });
         },
+
         children: [
           ExpansionPanel(
+            canTapOnHeader: true,
+            isExpanded: _isFilterExpanded,
+            backgroundColor: AppColors.bottomNavBg(context),
             headerBuilder: (context, isExpanded) {
               return ListTile(
-                leading: Icon(Icons.filter_alt),
-                title: Text('Filters', style: AppTextStyle.bodyLarge(context)),
-                onTap: () {
+                leading: Icon(
+                  Icons.filter_alt,
+                  color: AppColors.text(context),
+                ),
+                title: Text(
+                  'Filters',
+                  style: AppTextStyle.bodyLarge(context),
+                ),
+                trailing: AnimatedRotation(
+                  turns: isExpanded ? 0.5 : 0, // rotate arrow
+                  duration: const Duration(milliseconds: 200),
+                  child: const Icon(Icons.arrow_downward_rounded),
+                ),
+                onTap: (){
                   setState(() {
-                    _isFilterExpanded = !_isFilterExpanded;
+                    _isFilterExpanded = !isExpanded;
                   });
                 },
               );
@@ -183,128 +210,15 @@ class _MobilePurchaseReportScreenState
                       }
                     },
                   ),
-                  const SizedBox(height: 12),
-
-                  // Clear Filters Button
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: () {
-                        setState(() {
-                          selectedDateRange = null;
-                          _isFilterExpanded = false;
-                        });
-                        context.read<PurchaseReportBloc>().add(
-                          ClearPurchaseReportFilters(),
-                        );
-                        _fetchPurchaseReport();
-                      },
-                      icon: const Icon(Icons.clear_all, size: 18),
-                      label: const Text('Clear All Filters'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.grey[200],
-                        foregroundColor: Colors.grey[800],
-                      ),
-                    ),
-                  ),
                 ],
               ),
             ),
-            isExpanded: _isFilterExpanded,
           ),
         ],
       ),
     );
   }
 
-  Widget _buildDesktopFilterRow() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Filters',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 12),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Supplier Dropdown
-                Expanded(
-                  flex: 2,
-                  child: BlocBuilder<SupplierInvoiceBloc, SupplierInvoiceState>(
-                    builder: (context, state) {
-                      return AppDropdown<SupplierActiveModel>(
-                        label: "Supplier",
-                        isSearch: true,
-                        hint: "Select Supplier",
-                        isNeedAll: true,
-                        isRequired: false,
-                        isLabel: true,
-                        value: context
-                            .read<PurchaseReportBloc>()
-                            .selectedSupplier,
-                        itemList: context
-                            .read<SupplierInvoiceBloc>()
-                            .supplierActiveList,
-                        onChanged: (newVal) {
-                          _fetchPurchaseReport(
-                            from: selectedDateRange?.start,
-                            to: selectedDateRange?.end,
-                            supplier: newVal?.id.toString() ?? '',
-                          );
-                        },
-                      );
-                    },
-                  ),
-                ),
-                const SizedBox(width: 12),
-
-                // Date Range Picker
-                Expanded(
-                  flex: 2,
-                  child: CustomDateRangeField(
-                    isLabel: true,
-                    selectedDateRange: selectedDateRange,
-                    onDateRangeSelected: (value) {
-                      setState(() => selectedDateRange = value);
-                      if (value != null) {
-                        _fetchPurchaseReport(from: value.start, to: value.end);
-                      }
-                    },
-                  ),
-                ),
-                const SizedBox(width: 12),
-
-                // Clear Button
-                SizedBox(
-                  width: 100,
-                  child: ElevatedButton.icon(
-                    onPressed: () {
-                      setState(() => selectedDateRange = null);
-                      context.read<PurchaseReportBloc>().add(
-                        ClearPurchaseReportFilters(),
-                      );
-                      _fetchPurchaseReport();
-                    },
-                    icon: const Icon(Icons.clear_all, size: 18),
-                    label: const Text('Clear'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.grey[200],
-                      foregroundColor: Colors.grey[800],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
   Widget _buildSummaryCards() {
     return BlocBuilder<PurchaseReportBloc, PurchaseReportState>(
@@ -463,7 +377,8 @@ class _MobilePurchaseReportScreenState
                   children: [
                     Text(
                       report.invoiceNo,
-                      style: const TextStyle(
+                      style:  TextStyle(
+                        color: AppColors.text(context),
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
                       ),
@@ -476,7 +391,7 @@ class _MobilePurchaseReportScreenState
                       decoration: BoxDecoration(
                         color: _getStatusColor(
                           report.paymentStatus,
-                        ).withOpacity(0.1),
+                        ).withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
@@ -490,7 +405,7 @@ class _MobilePurchaseReportScreenState
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 4),
                 Text(
                   report.supplier,
                   style: const TextStyle(color: Colors.grey),
@@ -500,7 +415,7 @@ class _MobilePurchaseReportScreenState
                   _formatDate(report.purchaseDate),
                   style: const TextStyle(fontSize: 12, color: Colors.grey),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 6),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -596,7 +511,7 @@ class _MobilePurchaseReportScreenState
       backgroundColor: Colors.transparent,
       builder: (context) {
         return Container(
-          decoration:  BoxDecoration(
+          decoration: BoxDecoration(
             color: AppColors.bottomNavBg(context),
 
             borderRadius: BorderRadius.only(
@@ -639,24 +554,32 @@ class _MobilePurchaseReportScreenState
               ),
               const Divider(),
               const SizedBox(height: 4),
-              _buildMobileDetailItem('Invoice No:', report.invoiceNo,context),
-              _buildMobileDetailItem('Date:', _formatDate(report.purchaseDate),context),
-              _buildMobileDetailItem('Supplier:', report.supplier,context),
+              _buildMobileDetailItem('Invoice No:', report.invoiceNo, context),
+              _buildMobileDetailItem(
+                'Date:',
+                _formatDate(report.purchaseDate),
+                context,
+              ),
+              _buildMobileDetailItem('Supplier:', report.supplier, context),
               _buildMobileDetailItem(
                 'Net Total:',
-                '\$${report.netTotal.toStringAsFixed(2)}',context
+                '\$${report.netTotal.toStringAsFixed(2)}',
+                context,
               ),
               _buildMobileDetailItem(
                 'Paid Amount:',
-                '\$${report.paidTotal.toStringAsFixed(2)}',context
+                '\$${report.paidTotal.toStringAsFixed(2)}',
+                context,
               ),
               _buildMobileDetailItem(
                 'Due Amount:',
-                '\$${report.dueTotal.toStringAsFixed(2)}',context
+                '\$${report.dueTotal.toStringAsFixed(2)}',
+                context,
               ),
               _buildMobileDetailItem(
                 'Status:',
-                report.paymentStatus.toUpperCase(),context
+                report.paymentStatus.toUpperCase(),
+                context,
               ),
               const SizedBox(height: 24),
             ],
@@ -666,7 +589,11 @@ class _MobilePurchaseReportScreenState
     );
   }
 
-  Widget _buildMobileDetailItem(String label, String value,BuildContext context) {
+  Widget _buildMobileDetailItem(
+    String label,
+    String value,
+    BuildContext context,
+  ) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
@@ -675,7 +602,7 @@ class _MobilePurchaseReportScreenState
             flex: 2,
             child: Text(
               label,
-              style:  TextStyle(
+              style: TextStyle(
                 fontSize: 14,
                 color: AppColors.text(context),
                 fontWeight: FontWeight.w500,
@@ -686,11 +613,13 @@ class _MobilePurchaseReportScreenState
             flex: 3,
             child: Text(
               value,
-              style:  TextStyle(fontSize: 14,
+              style: TextStyle(
+                fontSize: 14,
 
-                  color: AppColors.text(context),
+                color: AppColors.text(context),
 
-                  fontWeight: FontWeight.w600),
+                fontWeight: FontWeight.w600,
+              ),
               textAlign: TextAlign.right,
             ),
           ),
@@ -838,4 +767,3 @@ class _MobilePurchaseReportScreenState
     return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
   }
 }
-

@@ -82,7 +82,12 @@ class _MobileStockReportScreenState extends State<MobileStockReportScreen> {
           ),
           IconButton(
             icon: Icon(Icons.refresh, color: AppColors.text(context)),
-            onPressed: () => _fetchStockReport(),
+            onPressed: () {
+              setState(() {
+                selectedDateRange=null;
+                _fetchStockReport();
+              });
+            },
             tooltip: 'Refresh',
           ),
         ],
@@ -118,68 +123,6 @@ class _MobileStockReportScreenState extends State<MobileStockReportScreen> {
     );
   }
 
-  Widget _buildMobileFilterSection() {
-    return Card(
-      child: ExpansionPanelList(
-        elevation: 0,
-        expandedHeaderPadding: EdgeInsets.zero,
-        expansionCallback: (int index, bool isExpanded) {
-          setState(() => _isFilterExpanded = !isExpanded);
-        },
-        children: [
-          ExpansionPanel(
-            headerBuilder: (context, isExpanded) {
-              return const ListTile(
-                leading: Icon(Icons.calendar_today),
-                title: Text('Date Range Filter'),
-              );
-            },
-            body: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                children: [
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          onPressed: () {
-                            setState(() {
-                              selectedDateRange = null;
-                              _isFilterExpanded = false;
-                            });
-                            context.read<StockReportBloc>().add(
-                              ClearStockReportFilters(),
-                            );
-                            _fetchStockReport();
-                          },
-                          icon: const Icon(Icons.clear_all, size: 18),
-                          label: const Text('Clear Filter'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.grey[200],
-                            foregroundColor: Colors.grey[800],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          onPressed: _generatePdf,
-                          icon: const Icon(Icons.picture_as_pdf, size: 18),
-                          label: const Text('PDF Report'),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            isExpanded: _isFilterExpanded,
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildSummaryCards() {
     return BlocBuilder<StockReportBloc, StockReportState>(

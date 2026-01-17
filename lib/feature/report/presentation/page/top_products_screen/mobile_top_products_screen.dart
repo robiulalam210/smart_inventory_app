@@ -52,7 +52,13 @@ class _MobileTopProductsScreenState extends State<MobileTopProductsScreen> {
           ),
           IconButton(
             icon: Icon(Icons.refresh, color: AppColors.text(context)),
-            onPressed: () => _fetchTopProductsReport(),
+            onPressed: () {
+              _fetchTopProductsReport();
+              setState(() {
+
+                selectedDateRange=null;
+              });
+            },
             tooltip: 'Refresh',
           ),
         ],
@@ -270,7 +276,7 @@ class _MobileTopProductsScreenState extends State<MobileTopProductsScreen> {
                     title,
                     style: TextStyle(
                       fontSize: isMobile ? 10 : 12,
-                      color: Colors.grey,
+                      color: AppColors.text(context),
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -279,7 +285,7 @@ class _MobileTopProductsScreenState extends State<MobileTopProductsScreen> {
                     style: TextStyle(
                       fontSize: isMobile ? 14 : 18,
                       fontWeight: FontWeight.bold,
-                      color: AppColors.blackColor(context),
+                      color: AppColors.text(context),
                     ),
                   ),
                 ],
@@ -364,6 +370,11 @@ class _MobileTopProductsScreenState extends State<MobileTopProductsScreen> {
                       ),
                     ),
                   ),
+                  InkWell(
+                    onTap: () => _showMobileProductDetails(context, product),
+                    child: const Icon(Icons.remove_red_eye, size: 16),
+
+                  ),
                 ],
               ),
               const SizedBox(height: 4),
@@ -423,21 +434,7 @@ class _MobileTopProductsScreenState extends State<MobileTopProductsScreen> {
                 ),
               ),
 
-              // View Details Button
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton.icon(
-                  onPressed: () => _showMobileProductDetails(context, product),
-                  icon: const Icon(Icons.remove_red_eye, size: 16),
-                  label: const Text('View Details'),
-                  style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                  ),
-                ),
-              ),
+
             ],
           ),
         );
