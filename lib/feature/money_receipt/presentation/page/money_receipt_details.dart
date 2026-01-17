@@ -43,17 +43,17 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
         children: [
           // Header Card
           _buildMobileHeaderCard(context),
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
 
           // Payment Info Card
           _buildMobilePaymentInfoCard(context ,),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
 
           // Summary Card
           _buildMobileSummaryCard(context ,),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
 
           // Affected Invoices Card
           _buildMobileAffectedInvoicesCard(context ,),
@@ -146,7 +146,7 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
     final amount = double.tryParse(receipt.amount ?? '0') ?? 0;
 
     return Card(
-      elevation: 1,
+      elevation: 0,
       color: AppColors.bottomNavBg(context),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -293,7 +293,8 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
     final amount = double.tryParse(receipt.amount ?? '0') ?? 0;
 
     return Card(
-      elevation: 1,
+      elevation: 0,
+      color: AppColors.bottomNavBg(context),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -381,7 +382,7 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
     final after = summary?.afterPayment;
 
     return Card(
-      elevation: 1,
+      elevation: 0,
       color: AppColors.bottomNavBg(context),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -416,7 +417,8 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey.shade300),
+        border: Border.all(color:       AppColors.greyColor(context).withValues(alpha: 0.5),width: 0.5
+      ),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
@@ -478,7 +480,9 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
     final affectedInvoices = receipt.paymentSummary?.affectedInvoices ?? [];
 
     return Card(
-      elevation: 3,
+      elevation: 0,
+      color: AppColors.bottomNavBg(context),
+
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -1301,8 +1305,9 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
         builder: (context) => Scaffold(
           backgroundColor: Colors.white,
           appBar: AppBar(
-            title: const Text('Money Receipt Preview'),
-            backgroundColor: AppColors.primaryColor(context),
+            backgroundColor: AppColors.bottomNavBg(context),
+
+            title:  Text('Money Receipt Preview',style: AppTextStyle.titleMedium(context),),
             foregroundColor: Colors.white,
           ),
           body: PdfPreview(
@@ -1313,12 +1318,20 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
             canChangePageFormat: false,
             dynamicLayout: true,
             build: (format) => generateMoneyReceiptPdf(receipt, context.read<ProfileBloc>().permissionModel?.data?.companyInfo),
-            pdfPreviewPageDecoration: BoxDecoration(color: AppColors.white),
+
+            pdfPreviewPageDecoration: BoxDecoration(color: AppColors.greyColor(context)),
             actionBarTheme: PdfActionBarTheme(
-              backgroundColor: AppColors.primaryColor(context),
-              iconColor: Colors.white,
-              textStyle: const TextStyle(color: Colors.white),
+              backgroundColor: AppColors.bottomNavBg(context),
+              iconColor: AppColors.text(context),
+              textStyle: AppTextStyle.body(context),
             ),
+            actions: [
+              IconButton(
+                onPressed: () => AppRoutes.pop(context),
+                icon: const Icon(Icons.cancel, color: Colors.red),
+              ),
+            ],
+
             onPrinted: (context) {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Money receipt printed successfully')),

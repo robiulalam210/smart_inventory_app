@@ -47,11 +47,6 @@ class _PosSaleScreenState extends State<MobilePosSaleScreen> {
       context.read<ProductsBloc>().add(FetchProductsStockList(context));
 
       // Debug: Print the dates being used
-      print('INIT STATE - Now: $now');
-      print('INIT STATE - Now year: ${now.year}');
-      print('INIT STATE - Selected range: $selectedDateRange');
-      print('INIT STATE - Start year: ${selectedDateRange?.start?.year}');
-      print('INIT STATE - End year: ${selectedDateRange?.end?.year}');
 
       _fetchApi();
     });
@@ -125,17 +120,12 @@ class _PosSaleScreenState extends State<MobilePosSaleScreen> {
         final temp = from;
         from = to;
         to = temp;
-        print('Swapped dates: from was after to');
       }
 
-      print('=== FILTERING WITH INCLUSIVE DATES ===');
-      print('From (start of day): ${formatDateStart(from)}');
-      print('To (end of day+1): ${formatDateEnd(to)}');
 
       filter += "&start_date=${formatDateStart(from)}&end_date=${formatDateEnd(to)}";
     }
 
-    print('API URL: /api/sales/$filter');
 
     context.read<PosSaleBloc>().add(
       FetchPosSaleList(context, dropdownFilter: filter),
@@ -143,15 +133,8 @@ class _PosSaleScreenState extends State<MobilePosSaleScreen> {
   }
   void _fetchProductList({required int pageNumber, required int pageSize}) {
     // Debug: Print what's being sent
-    print('=== DEBUG: Fetching Product List ===');
-    print('Current date: ${DateTime.now()}');
-    print('Selected date range: $selectedDateRange');
 
     if (selectedDateRange != null) {
-      print('Start date: ${selectedDateRange!.start}');
-      print('Start year: ${selectedDateRange!.start?.year}');
-      print('End date: ${selectedDateRange!.end}');
-      print('End year: ${selectedDateRange!.end?.year}');
     }
 
     _fetchApi(
@@ -176,7 +159,6 @@ class _PosSaleScreenState extends State<MobilePosSaleScreen> {
     context.read<PosSaleBloc>().selectCustomerModel = null;
     context.read<PosSaleBloc>().selectUserModel = null;
 
-    print('Cleared filters, default date range set');
     _fetchApi();
   }
 
@@ -465,9 +447,6 @@ class _PosSaleScreenState extends State<MobilePosSaleScreen> {
                             onPressed: () {
                               Navigator.pop(context);
                               // Debug before fetching
-                              print('=== APPLYING FILTERS ===');
-                              print('From: ${selectedDateRange?.start}');
-                              print('To: ${selectedDateRange?.end}');
 
                               _fetchApi(
                                 filterText: filterTextController.text,

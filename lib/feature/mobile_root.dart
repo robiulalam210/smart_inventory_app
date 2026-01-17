@@ -1,7 +1,6 @@
 import 'package:meherinMart/feature/profile/presentation/pages/moble_profile_screen.dart';
 import 'package:meherinMart/feature/purchase/presentation/page/mobile_purchase_screen.dart';
 import 'package:meherinMart/feature/report/presentation/page/mobile_all_report_tab_screen.dart';
-import 'package:meherinMart/feature/sales/presentation/pages/create_pos_sale/mobile_create_sales_pos.dart';
 
 import '../core/widgets/app_scaffold.dart';
 import 'common/presentation/cubit/theme_cubit.dart';

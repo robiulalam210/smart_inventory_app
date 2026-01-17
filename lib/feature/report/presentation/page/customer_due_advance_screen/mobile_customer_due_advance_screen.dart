@@ -267,7 +267,7 @@ class _MobileCustomerDueAdvanceScreenState
         // Calculate additional metrics
         final customersWithDue = customers.where((c) => c.presentDue > 0).length;
         final customersWithAdvance = customers.where((c) => c.presentAdvance > 0).length;
-        final settledCustomers = customers.where((c) => c.presentDue == 0 && c.presentAdvance == 0).length;
+        final _ = customers.where((c) => c.presentDue == 0 && c.presentAdvance == 0).length;
 
         return Column(
           children: [
@@ -461,7 +461,7 @@ class _MobileCustomerDueAdvanceScreenState
                       width: 40,
                       height: 40,
                       decoration: BoxDecoration(
-                        color: customer.balanceStatusColor.withOpacity(0.1),
+                        color: customer.balanceStatusColor.withValues(alpha: 0.1),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
@@ -862,14 +862,6 @@ class _MobileCustomerDueAdvanceScreenState
     );
   }
 
-  void _viewCustomerLedger(BuildContext context, CustomerDueAdvance customer) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Opening ledger for ${customer.customerName}'),
-        duration: const Duration(seconds: 2),
-      ),
-    );
-  }
 
   void _generatePdf() {
     final state = context.read<CustomerDueAdvanceBloc>().state;

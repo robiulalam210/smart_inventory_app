@@ -32,7 +32,6 @@ class _MobileProfitLossScreenState extends State<MobileProfitLossScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isMobile = Responsive.isMobile(context);
 
     return AppScaffold(
       appBar: AppBar(
