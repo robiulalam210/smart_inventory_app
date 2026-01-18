@@ -97,7 +97,7 @@ class ExpenseHeadBloc extends Bloc<ExpenseHeadEvent, ExpenseHeadState> {
       if (response.success == false) {
         emit(ExpenseHeadAddFailed(title: '', content: response.message ?? ""));
         return;
-      }
+      }name.clear();
 
       emit(ExpenseHeadAddSuccess());
     } catch (error) {

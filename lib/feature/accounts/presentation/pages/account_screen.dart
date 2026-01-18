@@ -206,7 +206,7 @@ class _AccountScreenState extends State<AccountScreen> {
               filterTextController.clear();
               _fetchApi();
             },
-            hintText: "Search Account Name or Number",
+            hintText: "Account Name or Number",
           ),
         ),
         const SizedBox(width: 10),

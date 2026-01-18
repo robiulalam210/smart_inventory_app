@@ -162,11 +162,10 @@ class _TransactionScreenState extends State<TransactionScreen> {
           padding: AppTextStyle.getResponsivePaddingBody(context),
           child: Column(
             children: [
-              if (isBigScreen)
+
                 _buildDesktopHeader()
-              else
-                _buildMobileHeader(),
-              const SizedBox(height: 16),
+
+              ,
               SizedBox(
                 child: _buildTransactionList(),
               ),
@@ -181,7 +180,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
     return Column(
       children: [
         Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             // 🔍 Search Field
@@ -194,7 +193,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                   filterTextController.clear();
                   _fetchTransactions();
                 },
-                hintText: "Search Transaction No, Description, or Account",
+                hintText: "Transaction No, Description, or Account",
               ),
             ),
             const SizedBox(width: 10),
@@ -207,7 +206,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                   return AppDropdown<String>(
                     hint: "Transaction Type",
                     isNeedAll: true,
-                    isLabel: false,
+                    isLabel: true,
                     isRequired: false,
                     value: value,
                     itemList: ['Credit', 'Debit'],
@@ -234,7 +233,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                   return AppDropdown<String>(
                     hint: "Status",
                     isNeedAll: true,
-                    isLabel: false,
+                    isLabel: true,
                     isRequired: false,
                     value: value,
                     itemList: ['Completed', 'Pending', 'Failed'],
@@ -256,8 +255,10 @@ class _TransactionScreenState extends State<TransactionScreen> {
             // 📅 Date Range Button
             AppButton(
               name: "Date Range",
+              isOutlined: true,
+
               onPressed: () => _selectDateRange(context),
-              textColor: AppColors.primaryColor(context),
+              textColor: AppColors.text(context),
             ),
 
             gapW16,
@@ -319,118 +320,6 @@ class _TransactionScreenState extends State<TransactionScreen> {
     );
   }
 
-  Widget _buildMobileHeader() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        // Search Bar
-        Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withValues(alpha: 0.1),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: CustomSearchTextFormField(
-                    isRequiredLabel: false,
-                    controller: filterTextController,
-                    onChanged: (value) => _fetchTransactions(filterText: value),
-                    onClear: () {
-                      filterTextController.clear();
-                      _fetchTransactions();
-                    },
-                    hintText: "Search transactions...",
-                  ),
-                ),
-              ),
-              IconButton(
-                icon: Icon(
-                  Iconsax.filter,
-                  color: AppColors.primaryColor(context),
-                ),
-                onPressed: () => _showMobileFilterSheet(context),
-              ),
-              IconButton(
-                onPressed: () => _fetchTransactions(),
-                icon: const Icon(Icons.refresh),
-                tooltip: "Refresh",
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 12),
-
-        // Filter Chips
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            if (selectedTransactionTypeNotifier.value != null)
-              Chip(
-                label: Text(selectedTransactionTypeNotifier.value!),
-                onDeleted: () {
-                  selectedTransactionTypeNotifier.value = null;
-                  _fetchTransactions();
-                },
-              ),
-            if (selectedStatusNotifier.value != null)
-              Chip(
-                label: Text(selectedStatusNotifier.value!),
-                onDeleted: () {
-                  selectedStatusNotifier.value = null;
-                  _fetchTransactions();
-                },
-              ),
-            if (startDate != null || endDate != null)
-              Chip(
-                label: Text(
-                  '${startDate != null ? _formatDate(startDate!) : "Any"} - ${endDate != null ? _formatDate(endDate!) : "Any"}',
-                ),
-                onDeleted: _clearDateRange,
-              ),
-          ],
-        ),
-        const SizedBox(height: 12),
-
-        // Action Buttons
-        Row(
-          children: [
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: () => _showMobileFilterSheet(context),
-                icon: const Icon(Iconsax.filter, size: 16),
-                label: const Text('More Filters'),
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: () => _selectDateRange(context),
-                icon: const Icon(Iconsax.calendar, size: 16),
-                label: const Text('Date Range'),
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
 
   Widget _buildTransactionList() {
     return BlocBuilder<TransactionBloc, TransactionState>(
@@ -502,154 +391,6 @@ class _TransactionScreenState extends State<TransactionScreen> {
     );
   }
 
-  void _showMobileFilterSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return Container(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        "Filter Transactions",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-
-                  // Transaction Type Filter
-                  const Text(
-                    "Transaction Type",
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    children: ["All", "Credit", "Debit"].map((type) {
-                      final bool isSelected =
-                          selectedTransactionTypeNotifier.value == type ||
-                              (type == "All" && selectedTransactionTypeNotifier.value == null);
-                      return FilterChip(
-                        label: Text(type),
-                        selected: isSelected,
-                        onSelected: (selected) {
-                          setState(() {
-                            selectedTransactionTypeNotifier.value = selected ? type : null;
-                          });
-                        },
-                        selectedColor: AppColors.primaryColor(context).withValues(alpha: 0.2),
-                        checkmarkColor: AppColors.primaryColor(context),
-                      );
-                    }).toList(),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Status Filter
-                  const Text(
-                    "Status",
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    children: ["All", "Completed", "Pending", "Failed"].map((status) {
-                      final bool isSelected =
-                          selectedStatusNotifier.value == status ||
-                              (status == "All" && selectedStatusNotifier.value == null);
-                      return FilterChip(
-                        label: Text(status),
-                        selected: isSelected,
-                        onSelected: (selected) {
-                          setState(() {
-                            selectedStatusNotifier.value = selected ? status : null;
-                          });
-                        },
-                        selectedColor: AppColors.primaryColor(context).withValues(alpha: 0.2),
-                        checkmarkColor: AppColors.primaryColor(context),
-                      );
-                    }).toList(),
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Action Buttons
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton(
-                          onPressed: () {
-                            setState(() {
-                              filterTextController.clear();
-                              selectedTransactionTypeNotifier.value = null;
-                              selectedStatusNotifier.value = null;
-                              selectedAccountNotifier.value = null;
-                              startDate = null;
-                              endDate = null;
-                            });
-                            Navigator.pop(context);
-                            _fetchTransactions();
-                          },
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          child: const Text("Clear All"),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: () {
-                            Navigator.pop(context);
-                            _fetchTransactions();
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primaryColor(context),
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          child: const Text("Apply Filters"),
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: MediaQuery.of(context).viewInsets.bottom),
-                ],
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
 
   String _formatDate(DateTime date) {
     return '${date.day}/${date.month}/${date.year}';

@@ -18,16 +18,26 @@ Widget dashboardCardItem({
     return Container(
       height: 120,
       width: boxWidth,
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        border: Border(
-          right: BorderSide(color: color, width: 10.0),
-          bottom: BorderSide(color: color, width: 1.5),
-          top: BorderSide(color: color, width: 1.5),
-          left: BorderSide(color: color, width: 1.5),
+        borderRadius: BorderRadius.circular(14),
+        gradient: LinearGradient(
+          colors: [
+            color.withValues(alpha: 0.18),
+            color.withValues(alpha: 0.06),
+          ],
         ),
+        border: Border.all(color: color.withValues(alpha: 0.25)),
       ),
+      // decoration: BoxDecoration(
+      //   borderRadius: BorderRadius.circular(12),
+      //   border: Border(
+      //     right: BorderSide(color: color, width: 10.0),
+      //     bottom: BorderSide(color: color, width: 1.5),
+      //     top: BorderSide(color: color, width: 1.5),
+      //     left: BorderSide(color: color, width: 1.5),
+      //   ),
+      // ),
       child: FittedBox(
         fit: BoxFit.scaleDown,
         child: Row(

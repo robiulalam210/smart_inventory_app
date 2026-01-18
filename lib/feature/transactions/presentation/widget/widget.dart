@@ -101,14 +101,25 @@ class TransactionCard extends StatelessWidget {
                                 ? (_) => onTransactionTap!()
                                 : null,
                             cells: [
-                              _buildDataCell(transaction.transactionNo?? "N/A", minColumnWidth),
+                              _buildDataCell(transaction.transactionNo ?? "N/A", minColumnWidth),
                               _buildDataCell(transaction.accountName ?? "N/A", minColumnWidth * 1.2),
-                              _buildTypeCell(transaction.transactionType, minColumnWidth),
-                              _buildAmountCell(double.tryParse(transaction.amount??"0"), transaction.transactionType, minColumnWidth),
+                              _buildTypeCell(transaction.transactionType ?? "N/A", minColumnWidth),
+                              _buildAmountCell(
+                                double.tryParse(transaction.amount ?? "0"),
+                                transaction.transactionType,
+                                minColumnWidth,
+                              ),
                               _buildDataCell(transaction.description ?? "-", minColumnWidth * 1.3),
                               _buildDateCell(transaction.transactionDate, minColumnWidth),
                               _buildStatusCell(transaction.status, minColumnWidth),
+
+                              // ✅ 8th CELL (Inventory Expense)
+                              _buildDataCell(
+                                transaction.expenseHead ?? "Inventory Expense",
+                                minColumnWidth,
+                              ),
                             ],
+
                           );
                         }).toList(),
                       ),

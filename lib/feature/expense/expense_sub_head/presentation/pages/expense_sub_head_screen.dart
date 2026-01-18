@@ -124,7 +124,6 @@ class _ExpenseHeadScreenState extends State<ExpenseSubHeadScreen> {
               child: Column(
                 children: [
 
-                  if (Responsive.isDesktop(context))
                   // Desktop layout
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -155,7 +154,7 @@ class _ExpenseHeadScreenState extends State<ExpenseSubHeadScreen> {
                         gapW16,
                         AppButton(
                           name: "Create Sub Expense Head",
-                          size: 100,
+                          size: 200,
                           onPressed: () {
                             context.read<ExpenseSubHeadBloc>().clearData();
                             showDialog(
@@ -172,64 +171,8 @@ class _ExpenseHeadScreenState extends State<ExpenseSubHeadScreen> {
                           },
                         ),
                       ],
-                    )
-                  else
-                  // Mobile/Tablet layout
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        // Search Field
-                        CustomSearchTextFormField(
-                          isRequiredLabel: false,
-                          controller: context
-                              .read<ExpenseSubHeadBloc>()
-                              .filterTextController,
-                          onChanged: (value) {
-                            _fetchApiData(
-                              filterText: value,
-                            );
-                          },
-                          onClear: () {
-                            context
-                                .read<ExpenseSubHeadBloc>()
-                                .filterTextController
-                                .clear();
-                            _fetchApiData();
-                          },
-                          hintText: "expense sub heads...",
-                        ),
-                        const SizedBox(height: 12),
-
-                        // Create Button
-                        AppButton(
-                          name: "Create",
-                          size: 100,
-                          width: 100,
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          onPressed: () {
-                            context.read<ExpenseSubHeadBloc>().clearData();
-                            showDialog(
-                              context: context,
-                              builder: (context) {
-                                return Dialog(
-                                  // insetPadding: const EdgeInsets.all(16),
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.rectangle,
-                                      color: AppColors.whiteColor(context),
-                                      borderRadius: BorderRadius.circular(AppSizes.borderRadiusSize),
-                                    ),
-                                    width: double.infinity,
-                                    height: AppSizes.height(context) * 0.3,
-                                    child: const ExpenseSubCreateScreen(),
-                                  ),
-                                );
-                              },
-                            );
-                          },
-                        ),
-                      ],
                     ),
+gapH8,
                   SizedBox(
                     child: BlocBuilder<ExpenseSubHeadBloc, ExpenseSubHeadState>(
                       builder: (context, state) {

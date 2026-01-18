@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/configs/configs.dart';
+import '../../../../core/utilities/amount_counter.dart';
 import '../../../../core/widgets/app_scaffold.dart';
 import '../../../../core/shared/widgets/sideMenu/mobile_tab_sidebar.dart';
 
@@ -160,47 +161,89 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
         borderRadius: BorderRadius.circular(14),
         gradient: LinearGradient(
           colors: [
-            color.withValues(alpha: 0.18),
-            color.withValues(alpha: 0.06),
+            color.withValues(alpha: 0.22),
+            color.withValues(alpha: 0.07),
           ],
         ),
         border: Border.all(color: color.withValues(alpha: 0.25)),
       ),
-      padding: const EdgeInsets.all(12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, color: color, size: 22),
-          const Spacer(),
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 12,
-              color: AppColors.text(context).withValues(alpha: 0.7),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Icon(icon, color: color, size: 35),
+            const SizedBox(width: 8),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                if (isCurrency)
+                  AnimatedAmountCounter(
+                    amount:double.tryParse(value.toString()) ?? 0.0,
+                    prefix: '৳ ',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  )
+                else
+                  AnimatedCounter(
+                    amount:
+                    int.tryParse(value.toString()) ?? 0,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+              ],
             ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            isCurrency ? "৳ ${value.toStringAsFixed(2)}" : value.toString(),
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: AppColors.text(context),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
+      // child: Column(
+      //   crossAxisAlignment: CrossAxisAlignment.start,
+      //   children: [
+      //     Icon(icon, color: color, size: 22),
+      //     const Spacer(),
+      //     Text(
+      //       title,
+      //       style: TextStyle(
+      //         fontSize: 12,
+      //         color: AppColors.text(context).withValues(alpha: 0.7),
+      //       ),
+      //     ),
+      //     const SizedBox(height: 4),
+      //     Text(
+      //       isCurrency ? "৳ ${value.toStringAsFixed(2)}" : value.toString(),
+      //       style: TextStyle(
+      //         fontSize: 16,
+      //         fontWeight: FontWeight.bold,
+      //         color: AppColors.text(context),
+      //       ),
+      //     ),
+      //   ],
+      // ),
     );
   }
 
   Widget _buildDashboardCards(DashboardData data) {
-    final isMobile = Responsive.isMobile(context);
 
     return GridView.count(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      crossAxisCount: isMobile ? 2 : 5,
-      childAspectRatio: isMobile ? 1.4 : 1.3,
+      crossAxisCount:  5,
+      childAspectRatio: 1.1,
       crossAxisSpacing: 8,
       mainAxisSpacing: 8,
       children: [

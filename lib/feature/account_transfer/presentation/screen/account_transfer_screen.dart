@@ -95,9 +95,9 @@ class _AccountTransferScreenState extends State<AccountTransferScreen> {
       initialDateRange: startDate != null && endDate != null
           ? DateTimeRange(start: startDate!, end: endDate!)
           : DateTimeRange(
-        start: DateTime.now().subtract(const Duration(days: 30)),
-        end: DateTime.now(),
-      ),
+              start: DateTime.now().subtract(const Duration(days: 30)),
+              end: DateTime.now(),
+            ),
     );
 
     if (picked != null) {
@@ -170,7 +170,6 @@ class _AccountTransferScreenState extends State<AccountTransferScreen> {
               if (state is ExecuteTransferLoading) {
                 appLoader(context, "Executing transfer, please wait...");
               } else if (state is ExecuteTransferSuccess) {
-
                 Navigator.pop(context);
                 showCustomToast(
                   context: context,
@@ -181,7 +180,8 @@ class _AccountTransferScreenState extends State<AccountTransferScreen> {
                 );
                 _fetchApi();
               } else if (state is ExecuteTransferFailed) {
-                Navigator.pop(context);                _fetchApi();
+                Navigator.pop(context);
+                _fetchApi();
 
                 appAlertDialog(
                   context,
@@ -253,9 +253,9 @@ class _AccountTransferScreenState extends State<AccountTransferScreen> {
             child: Column(
               children: [
                 _buildFilterRow(),
-                const SizedBox(height: 16),
+                const SizedBox(height: 4),
                 _buildDateFilterRow(),
-                const SizedBox(height: 16),
+                const SizedBox(height: 4),
                 SizedBox(
                   child: BlocBuilder<AccountTransferBloc, AccountTransferState>(
                     builder: (context, state) {
@@ -447,9 +447,7 @@ class _AccountTransferScreenState extends State<AccountTransferScreen> {
                 ),
               );
             },
-            style: TextButton.styleFrom(
-              backgroundColor: Colors.orange.shade50,
-            ),
+            style: TextButton.styleFrom(backgroundColor: Colors.orange.shade50),
             child: Text(
               'Reverse',
               style: GoogleFonts.inter(
@@ -459,9 +457,7 @@ class _AccountTransferScreenState extends State<AccountTransferScreen> {
             ),
           ),
         ],
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
   }
@@ -582,9 +578,7 @@ class _AccountTransferScreenState extends State<AccountTransferScreen> {
                 ),
               );
             },
-            style: TextButton.styleFrom(
-              backgroundColor: Colors.red.shade50,
-            ),
+            style: TextButton.styleFrom(backgroundColor: Colors.red.shade50),
             child: Text(
               'Cancel Transfer',
               style: GoogleFonts.inter(
@@ -594,9 +588,7 @@ class _AccountTransferScreenState extends State<AccountTransferScreen> {
             ),
           ),
         ],
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
   }
@@ -631,7 +623,7 @@ class _AccountTransferScreenState extends State<AccountTransferScreen> {
               filterTextController.clear();
               _fetchApi();
             },
-            hintText: "Search Transfer No or Description",
+            hintText: "Transfer No or Description",
           ),
         ),
         const SizedBox(width: 10),

@@ -127,8 +127,6 @@ class _ExpenseCreateScreenState extends State<ExpenseCreateScreen> {
           "Cash": "cash",
           "Bank": "bank",
           "Mobile banking": "mobile",
-          "Card": "card",
-          "Other": "other",
         };
         return mapping[frontendValue] ?? "cash"; // Added default value
       }
@@ -238,6 +236,7 @@ class _ExpenseCreateScreenState extends State<ExpenseCreateScreen> {
                     if (state is ExpenseAddLoading) {
                       appLoader(context, "Processing expense, please wait...");
                     } else if (state is ExpenseAddSuccess) {
+                      Navigator.pop(context); // Close loader dialog
                       Navigator.pop(context); // Close loader dialog
                       // Navigator.of(context).pop(true); // Return success
                     } else if (state is ExpenseAddFailed) {
@@ -469,74 +468,70 @@ class _ExpenseCreateScreenState extends State<ExpenseCreateScreen> {
                       // Payment Method (only for create)
                       Wrap(
                         children: [
-                          Expanded(
-                            child: CustomInputField(
-                              isRequiredLable: true,
-                              isRequired: true,
-                              controller: expenseBloc.amountTextController,
-                              hintText: 'Amount',
-                              fillColor: const Color.fromARGB(
-                                255,
-                                255,
-                                255,
-                                255,
-                              ),
-                              keyboardType: TextInputType.number,
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Please enter amount';
-                                }
-                                if (double.tryParse(value) == null) {
-                                  return 'Please enter a valid number';
-                                }
-                                return null;
-                              },
-                              onChanged: (value) {
-                                return null;
-                              },
+                          CustomInputField(
+                            isRequiredLable: true,
+                            isRequired: true,
+                            controller: expenseBloc.amountTextController,
+                            hintText: 'Amount',
+                            fillColor: const Color.fromARGB(
+                              255,
+                              255,
+                              255,
+                              255,
                             ),
+                            keyboardType: TextInputType.number,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter amount';
+                              }
+                              if (double.tryParse(value) == null) {
+                                return 'Please enter a valid number';
+                              }
+                              return null;
+                            },
+                            onChanged: (value) {
+                              return null;
+                            },
                           ),
                           gapW16,
-                          Expanded(
-                            child: CustomInputField(
-                              isRequiredLable: true,
-                              isRequired: true,
-                              controller: expenseBloc.dateExpenseTextController,
-                              hintText: 'Expense Date',
-                              fillColor: const Color.fromARGB(
-                                255,
-                                255,
-                                255,
-                                255,
-                              ),
-                              readOnly: true,
-                              keyboardType: TextInputType.text,
-                              validator: (value) {
-                                return value == null || value.isEmpty
-                                    ? 'Please enter Expense Date'
-                                    : null;
-                              },
-                              onTap: () async {
-                                FocusScope.of(
-                                  context,
-                                ).requestFocus(FocusNode());
-                                DateTime? pickedDate = await showDatePicker(
-                                  context: context,
-                                  initialDate: DateTime.now(),
-                                  firstDate: DateTime(1900),
-                                  lastDate: DateTime.now(),
-                                );
-                                if (pickedDate != null) {
-                                  expenseBloc.dateExpenseTextController.text =
-                                      pickedDate.toLocal().toString().split(
-                                        ' ',
-                                      )[0];
-                                }
-                              },
-                              onChanged: (value) {
-                                return null;
-                              },
+                          CustomInputField(
+                            isRequiredLable: true,
+                            isRequired: true,
+                            controller: expenseBloc.dateExpenseTextController,
+                            hintText: 'Expense Date',
+                            fillColor: const Color.fromARGB(
+                              255,
+                              255,
+                              255,
+                              255,
                             ),
+                            readOnly: true,
+                            keyboardType: TextInputType.text,
+                            validator: (value) {
+                              return value == null || value.isEmpty
+                                  ? 'Please enter Expense Date'
+                                  : null;
+                            },
+                            onTap: () async {
+                              FocusScope.of(
+                                context,
+                              ).requestFocus(FocusNode());
+                              DateTime? pickedDate = await showDatePicker(
+                                context: context,
+                                initialDate: DateTime.now(),
+                                firstDate: DateTime(1900),
+                                lastDate: DateTime.now(),
+                              );
+                              if (pickedDate != null) {
+                                expenseBloc.dateExpenseTextController.text =
+                                    pickedDate.toLocal().toString().split(
+                                      ' ',
+                                    )[0];
+                              }
+                            },
+                            onChanged: (value) {
+                              return null;
+                            },
                           ),
                         ],
                       ),
