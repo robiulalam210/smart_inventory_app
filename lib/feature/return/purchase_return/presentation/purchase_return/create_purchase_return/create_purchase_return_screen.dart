@@ -15,7 +15,6 @@ import '../../../../../../core/widgets/input_field.dart';
 import '../../../../../../core/widgets/show_custom_toast.dart';
 import '../../../../../accounts/data/model/account_active_model.dart';
 import '../../../../../accounts/presentation/bloc/account/account_bloc.dart';
-import '../../../../../expense/presentation/bloc/expense_list/expense_bloc.dart';
 import '../../bloc/purchase_return/purchase_return_bloc.dart';
 
 class CreatePurchaseReturnScreen extends StatefulWidget {
@@ -29,20 +28,24 @@ class CreatePurchaseReturnScreen extends StatefulWidget {
 class _CreatePurchaseReturnScreenState
     extends State<CreatePurchaseReturnScreen> {
   List<Item> products = [];
-  final TextEditingController _returnChargeController = TextEditingController(text: "0");
-  final TextEditingController _returnAmountController = TextEditingController(text: "0.00");
+  final TextEditingController _returnChargeController =
+  TextEditingController(text: "0");
+  final TextEditingController _returnAmountController =
+  TextEditingController(text: "0.00");
   String _selectedReturnChargeType = "fixed";
+  String? _selectedPaymentMethod; // Added missing variable
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   SupplierActiveModel? _selectedSupplier;
   PurchaseInvoiceModel? _selectedInvoice;
-  String? _selectedPaymentMethod;
   AccountActiveModel? _selectedAccount;
+
+  // Added missing ValueNotifier
+  final ValueNotifier<String?> selectedPaymentMethodNotifier =
+  ValueNotifier<String?>(null);
 
   @override
   void initState() {
     super.initState();
-    context.read<AccountBloc>().add(FetchAccountList(context));
-    context.read<SupplierInvoiceBloc>().add(FetchSupplierActiveList(context));
     context.read<AccountBloc>().add(FetchAccountActiveList(context));
 
     // Set initial return date
@@ -58,6 +61,7 @@ class _CreatePurchaseReturnScreenState
     _returnChargeController.removeListener(_updateReturnAmount);
     _returnChargeController.dispose();
     _returnAmountController.dispose();
+    selectedPaymentMethodNotifier.dispose(); // Dispose the ValueNotifier
     super.dispose();
   }
 
@@ -83,9 +87,12 @@ class _CreatePurchaseReturnScreenState
           products.add(Item(
             productId: item.id,
             productName: item.productName,
-            unitPrice: double.tryParse(item.price?.replaceAll(',', '') ?? '0') ?? 0.0,
+            unitPrice:
+            double.tryParse(item.price?.replaceAll(',', '') ?? '0') ?? 0.0,
             quantity: item.qty ?? 1,
-            discount: double.tryParse(item.discount?.replaceAll(',', '') ?? '0') ?? 0.0,
+            discount:
+            double.tryParse(item.discount?.replaceAll(',', '') ?? '0') ??
+                0.0,
             discountType: item.discountType ?? 'fixed',
           ));
         }
@@ -209,88 +216,85 @@ class _CreatePurchaseReturnScreenState
                     ),
                   ],
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 10),
+          BlocBuilder<SupplierInvoiceBloc,
+              SupplierInvoiceState>(
+            builder: (context, state) {
+              List<SupplierActiveModel> suppliers = [];
+
+              if (state is SupplierActiveListSuccess) {
+                suppliers = state.list;
+              }
+
+              return AppDropdown<SupplierActiveModel>(
+                label: "Supplier ",
+                hint: "Select Supplier",
+                isRequired: true,
+                value: _selectedSupplier,
+                itemList: suppliers,
+                onChanged: (newVal) {
+                  if (newVal != null) {
+                    setState(() {
+                      _selectedSupplier = newVal;
+                      _selectedInvoice = null;
+                      products.clear();
+                    });
+
+                    // Fetch invoices for selected supplier
+                    context.read<PurchaseReturnBloc>().add(
+                      FetchPurchaseInvoiceList(
+                        context,
+                        supplierId: newVal.id.toString(),
+                      ),
+                    );
+                  }
+                },
+                validator: (value) => value == null
+                    ? 'Please select a supplier'
+                    : null,
+              );
+            },
+          ),
+                const SizedBox(height: 8),
 
                 // Supplier and Invoice Selection
-                Row(
-                  children: [
-                    Expanded(
-                      child: BlocBuilder<SupplierInvoiceBloc, SupplierInvoiceState>(
-                        builder: (context, state) {
-                          List<SupplierActiveModel> suppliers = [];
+                BlocBuilder<PurchaseReturnBloc,
+                    PurchaseReturnState>(
+                  builder: (context, state) {
+                    final bloc = context.read<PurchaseReturnBloc>();
 
-                          if (state is SupplierActiveListSuccess) {
-                            suppliers = state.list;
-                          } else if (state is SupplierInvoiceLoading) {
-                          }
+                    // Check if invoice list is empty
+                    final hasInvoices = bloc.invoiceList.isNotEmpty;
 
-                          return AppDropdown<SupplierActiveModel>(
-                            label: "Supplier ",
-                            hint: "Select Supplier",
-                            isRequired: true,
-                            value: _selectedSupplier,
-                            itemList: suppliers,
-                            onChanged: (newVal) {
-                              if (newVal != null) {
-                                setState(() {
-                                  _selectedSupplier = newVal;
-                                  _selectedInvoice = null;
-                                  products.clear();
-                                });
-
-                                // Fetch invoices for selected supplier
-                                context.read<PurchaseReturnBloc>().add(
-                                  FetchPurchaseInvoiceList(
-                                 context,
-                                    supplierId: newVal.id.toString(),
-                                  ),
-                                );
-                              }
-                            },
-                            validator: (value) => value == null ? 'Please select a supplier' : null,
-                          );
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-
-                    Expanded(
-                      child: BlocBuilder<PurchaseReturnBloc, PurchaseReturnState>(
-                        builder: (context, state) {
-                          final bloc = context.read<PurchaseReturnBloc>();
-
-                          if (state is PurchaseInvoiceListLoading) {
-                          }
-
-                          // Check if invoice list is empty
-                          final hasInvoices = bloc.invoiceList.isNotEmpty;
-
-                          return AppDropdown<PurchaseInvoiceModel>(
-                            label: "Invoice Number ",
-                            hint: hasInvoices ? "Select Invoice Number" : "No invoices available",
-                            isRequired: true,
-                            value: _selectedInvoice,
-                            itemList: bloc.invoiceList,
-                            onChanged: (newVal) {
-                              if (newVal != null) {
-                                setState(() {
-                                  _selectedInvoice = newVal;
-                                });
-                                onProductChanged(newVal);
-                              }
-                            } ,
-                            validator: (value) {
-                              if (value == null) return 'Please select an invoice';
-                              if (!hasInvoices) return 'No invoices available for this supplier';
-                              return null;
-                            },
-                          );
-                        },
-                      ),
-                    ),
-                  ],
+                    return AppDropdown<PurchaseInvoiceModel>(
+                      label: "Invoice Number ",
+                      hint: hasInvoices
+                          ? "Select Invoice Number"
+                          : "No invoices available",
+                      isRequired: true,
+                      value: _selectedInvoice,
+                      itemList: bloc.invoiceList,
+                      onChanged: (newVal) {
+                        if (newVal != null) {
+                          setState(() {
+                            _selectedInvoice = newVal;
+                          });
+                          onProductChanged(newVal);
+                        }
+                      },
+                      validator: (value) {
+                        if (value == null) {
+                          return 'Please select an invoice';
+                        }
+                        if (!hasInvoices) {
+                          return 'No invoices available for this supplier';
+                        }
+                        return null;
+                      },
+                    );
+                  },
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 8),
 
                 // Products List
                 if (products.isNotEmpty) ...[
@@ -320,17 +324,17 @@ class _CreatePurchaseReturnScreenState
                             item.productName ?? 'Unknown Product',
                             style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
-                          subtitle: Wrap(
-                            // crossAxisAlignment: CrossAxisAlignment.center,
-                            // mainAxisAlignment: MainAxisAlignment.spaceBetween,
-
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Row(
-                                spacing: 5,
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text('Price: ${item.unitPrice?.toStringAsFixed(2) ?? "0.00"}'),
-                                  Text('Discount: ${item.discount?.toStringAsFixed(2) ?? "0.00"}'),
+                                  Text(
+                                      'Price: ${item.unitPrice?.toStringAsFixed(2) ?? "0.00"}'),
+                                  Text(
+                                      'Discount: ${item.discount?.toStringAsFixed(2) ?? "0.00"}'),
                                 ],
                               ),
                               const SizedBox(height: 4),
@@ -339,41 +343,44 @@ class _CreatePurchaseReturnScreenState
                                   IconButton(
                                     icon: const Icon(Icons.remove, size: 20),
                                     onPressed: () {
-                                      _updateProductQuantity(index, (item.quantity ?? 1) - 1);
+                                      _updateProductQuantity(
+                                          index, (item.quantity ?? 1) - 1);
                                     },
                                   ),
                                   Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 12, vertical: 4),
                                     decoration: BoxDecoration(
                                       border: Border.all(color: Colors.grey),
                                       borderRadius: BorderRadius.circular(4),
                                     ),
                                     child: Text(
                                       '${item.quantity}',
-                                      style: const TextStyle(fontWeight: FontWeight.bold),
+                                      style:
+                                      const TextStyle(fontWeight: FontWeight.bold),
                                     ),
                                   ),
                                   IconButton(
                                     icon: const Icon(Icons.add, size: 20),
                                     onPressed: () {
-                                      _updateProductQuantity(index, (item.quantity ?? 1) + 1);
+                                      _updateProductQuantity(
+                                          index, (item.quantity ?? 1) + 1);
                                     },
                                   ),
-                                  Spacer(),
+                                  const Spacer(),
                                   Text(
                                     'Total: ${total.toStringAsFixed(2)}',
-                                    style: const TextStyle(fontWeight: FontWeight.bold),
+                                    style:
+                                    const TextStyle(fontWeight: FontWeight.bold),
                                   ),
                                 ],
                               ),
-
-
-
                             ],
                           ),
                           trailing: products.length > 1
                               ? IconButton(
-                            icon:  Icon(HugeIcons.strokeRoundedDelete02, color: Colors.red),
+                            icon: Icon(HugeIcons.strokeRoundedDelete02,
+                                color: Colors.red),
                             onPressed: () => _removeProduct(index),
                           )
                               : null,
@@ -384,13 +391,7 @@ class _CreatePurchaseReturnScreenState
                   const SizedBox(height: 8),
                 ],
                 // Payment Method and Account
-                Row(
-                  children: [
-                    Expanded(child: _buildPaymentMethodDropdown()),
-                    const SizedBox(width: 12),
-                    Expanded(child: _buildAccountDropdown()),
-                  ],
-                ),
+                _buildMobilePaymentSection(),
                 // Return Charge Type and Charge
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -419,9 +420,12 @@ class _CreatePurchaseReturnScreenState
                         isRequired: true,
                         controller: _returnChargeController,
                         labelText: 'Return Charge',
-                        hintText: _selectedReturnChargeType == 'fixed' ? 'Enter amount' : 'Enter percentage',
+                        hintText: _selectedReturnChargeType == 'fixed'
+                            ? 'Enter amount'
+                            : 'Enter percentage',
                         fillColor: Colors.white,
-                        keyboardType: TextInputType.numberWithOptions(decimal: true),
+                        keyboardType:
+                        TextInputType.numberWithOptions(decimal: true),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Please enter Return Charge';
@@ -430,7 +434,8 @@ class _CreatePurchaseReturnScreenState
                             return 'Please enter a valid number';
                           }
                           final doubleVal = double.parse(value);
-                          if (_selectedReturnChargeType == 'percentage' && (doubleVal < 0 || doubleVal > 100)) {
+                          if (_selectedReturnChargeType == 'percentage' &&
+                              (doubleVal < 0 || doubleVal > 100)) {
                             return 'Percentage must be between 0 and 100';
                           }
                           return null;
@@ -459,7 +464,8 @@ class _CreatePurchaseReturnScreenState
                     Expanded(
                       child: CustomInputField(
                         isRequired: true,
-                        controller: context.read<PurchaseReturnBloc>().returnDateTextController,
+                        controller:
+                        context.read<PurchaseReturnBloc>().returnDateTextController,
                         labelText: 'Return Date',
                         hintText: 'Select date',
                         fillColor: Colors.white,
@@ -478,9 +484,13 @@ class _CreatePurchaseReturnScreenState
                             lastDate: DateTime.now(),
                           );
                           if (pickedDate != null && context.mounted) {
-                            context.read<PurchaseReturnBloc>().returnDateTextController.text = _formatDate(pickedDate);
+                            context
+                                .read<PurchaseReturnBloc>()
+                                .returnDateTextController
+                                .text = _formatDate(pickedDate);
                           }
-                        }, keyboardType: TextInputType.text,
+                        },
+                        keyboardType: TextInputType.text,
                       ),
                     ),
                   ],
@@ -489,7 +499,8 @@ class _CreatePurchaseReturnScreenState
 
                 // Remark
                 CustomInputField(
-                  isRequired: false, keyboardType: TextInputType.text,
+                  isRequired: false,
+                  keyboardType: TextInputType.text,
                   controller: context.read<PurchaseReturnBloc>().remarkController,
                   labelText: 'Remark',
                   hintText: 'Enter remark (optional)',
@@ -514,9 +525,9 @@ class _CreatePurchaseReturnScreenState
 
                         return AppButton(
                           size: 150,
-                          onPressed: isLoading ? null : () => _submitForm(),
-                         isLoading: isLoading,
-                          name:'Purchase Return',
+                          onPressed: isLoading ? null : _submitForm,
+                          isLoading: isLoading,
+                          name: 'Purchase Return',
                         );
                       },
                     ),
@@ -529,50 +540,132 @@ class _CreatePurchaseReturnScreenState
       ),
     );
   }
-  Widget _buildPaymentMethodDropdown() {
-    return BlocBuilder<ExpenseBloc, ExpenseState>(
-      builder: (context, state) {
-        return AppDropdown<String>(
-          label: "Payment Method",
-          hint: _selectedPaymentMethod ?? "Select Payment Method",
-          isRequired: true,
-          value: _selectedPaymentMethod,
-          itemList: ['cash', 'bank', 'mobile'],
-          onChanged: (newVal) {
-            setState(() {
-              _selectedPaymentMethod = newVal;
-            });
+
+  Widget _buildMobilePaymentSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ValueListenableBuilder<String?>(
+          valueListenable: selectedPaymentMethodNotifier,
+          builder: (context, selectedPaymentMethod, child) {
+            return AppDropdown<String>(
+              label: "Payment Method",
+              hint: "Select Payment Method",
+              isLabel: false,
+              isRequired: true,
+              isNeedAll: false,
+              value: selectedPaymentMethod,
+              itemList: const ["Bank", "Cash", "Mobile banking"],
+              onChanged: (newVal) {
+                setState(() {
+                  selectedPaymentMethodNotifier.value = newVal;
+                  _selectedPaymentMethod = newVal; // Update local variable
+                  _selectedAccount = null; // Clear selected account when payment method changes
+                });
+              },
+              validator: (value) {
+                if (value == null) {
+                  return 'Please select a payment method';
+                }
+                return null;
+              },
+            );
           },
-          validator: (value) => value == null ? 'Please select Payment Method' : null,
-        );
-      },
+        ),
+        const SizedBox(height: 12),
+        _buildAccountDropdown(),
+      ],
     );
   }
 
   Widget _buildAccountDropdown() {
     return BlocBuilder<AccountBloc, AccountState>(
       builder: (context, state) {
-        return AppDropdown<AccountActiveModel>(
-          label: "Account ",
-          hint: _selectedAccount?.name ?? "Select Account",
-          isRequired: true,
-          value: _selectedAccount,
-          itemList: context.read<AccountBloc>().activeAccount,
-          onChanged: (newVal) {
-            setState(() {
-              _selectedAccount = newVal;
+        if (state is AccountActiveListLoading) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (state is AccountActiveListSuccess) {
+          final accounts = state.list;
+
+          // Filter accounts based on selected payment method
+          final List<AccountActiveModel> filteredList;
+          if (selectedPaymentMethodNotifier.value != null) {
+            filteredList = accounts.where((item) {
+              final itemType = item.acType?.toLowerCase().trim() ?? '';
+              final paymentMethod = selectedPaymentMethodNotifier.value
+                  ?.toLowerCase()
+                  .trim() ??
+                  '';
+
+              final paymentMethodMap = {
+                'bank': 'bank',
+                'cash': 'cash',
+                'mobile banking': 'mobile banking',
+                'mobile': 'mobile banking',
+              };
+
+              final mappedPaymentMethod =
+                  paymentMethodMap[paymentMethod] ?? paymentMethod;
+
+              return itemType == mappedPaymentMethod;
+            }).toList();
+          } else {
+            filteredList = accounts;
+          }
+
+          // Auto-select first account if none is selected and list is available
+          if (_selectedAccount == null && filteredList.isNotEmpty) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              setState(() {
+                _selectedAccount = filteredList.first;
+              });
             });
-          },
-          validator: (value) => value == null ? 'Please select Account' : null,
-        );
+          }
+
+          return AppDropdown<AccountActiveModel>(
+            label: "Account",
+            hint: filteredList.isEmpty
+                ? "No accounts available"
+                : (_selectedAccount == null
+                ? "Select Account"
+                : "${_selectedAccount!.name}${_selectedAccount!.acNumber != null ? ' - ${_selectedAccount!.acNumber}' : ''}"),
+            isLabel: false,
+            isRequired: true,
+            isNeedAll: false,
+            value: _selectedAccount,
+            itemList: filteredList,
+            onChanged: (newVal) {
+              setState(() {
+                _selectedAccount = newVal;
+              });
+            },
+            validator: (value) {
+              if (selectedPaymentMethodNotifier.value != null &&
+                  filteredList.isEmpty) {
+                return 'No "${selectedPaymentMethodNotifier.value}" accounts available';
+              }
+              if (value == null) {
+                return 'Please select an account';
+              }
+              return null;
+            },
+          );
+        } else if (state is AccountActiveListFailed) {
+          return Text('Error: ${state.content}');
+        } else {
+          return const Text('No accounts available');
+        }
       },
     );
   }
+
   void _resetForm() {
     setState(() {
       products.clear();
       _selectedSupplier = null;
       _selectedInvoice = null;
+      _selectedPaymentMethod = null;
+      selectedPaymentMethodNotifier.value = null;
+      _selectedAccount = null;
       _returnChargeController.text = "0";
       _returnAmountController.text = "0.00";
       _selectedReturnChargeType = "fixed";
@@ -581,7 +674,7 @@ class _CreatePurchaseReturnScreenState
 
     final bloc = context.read<PurchaseReturnBloc>();
     bloc.returnDateTextController.text = _formatDate(DateTime.now());
-    bloc.remarkController.text = "Purchase return processed.";
+    bloc.remarkController.clear();
   }
 
   void _submitForm() {
@@ -629,6 +722,28 @@ class _CreatePurchaseReturnScreenState
       return;
     }
 
+    if (_selectedPaymentMethod == null) {
+      showCustomToast(
+        context: context,
+        title: 'Warning!',
+        description: "Please select a payment method",
+        icon: Icons.warning,
+        primaryColor: Colors.orange,
+      );
+      return;
+    }
+
+    if (_selectedAccount == null) {
+      showCustomToast(
+        context: context,
+        title: 'Warning!',
+        description: "Please select an account",
+        icon: Icons.warning,
+        primaryColor: Colors.orange,
+      );
+      return;
+    }
+
     // Prepare products data
     var returnProducts = products.map((product) => {
       "product_id": product.productId,
@@ -639,7 +754,10 @@ class _CreatePurchaseReturnScreenState
     }).toList();
 
     // Prepare the request body
-    final returnDate = _parseDate(context.read<PurchaseReturnBloc>().returnDateTextController.text);
+    final returnDate = _parseDate(context
+        .read<PurchaseReturnBloc>()
+        .returnDateTextController
+        .text);
 
     Map<String, dynamic> body = {
       "supplier_id": _selectedSupplier!.id.toString(),
@@ -657,7 +775,7 @@ class _CreatePurchaseReturnScreenState
     // Dispatch create event
     context.read<PurchaseReturnBloc>().add(
       CreatePurchaseReturn(
-         context,
+        context,
         body: body,
       ),
     );

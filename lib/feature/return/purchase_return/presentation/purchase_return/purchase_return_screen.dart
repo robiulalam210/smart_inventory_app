@@ -296,24 +296,26 @@ class _PurchaseReturnScreenState extends State<PurchaseReturnScreen> {
           // Create Button
           AppButton(
             name: "Create Purchase Return",
-            // icon: Icons.add,
             onPressed: () {
-              showDialog(
+              showModalBottomSheet(
                 context: context,
+                isScrollControlled: true, // Important for full height
+                backgroundColor: Colors.transparent,
                 builder: (context) {
-                  return Dialog(
-                    insetPadding: const EdgeInsets.all(20),
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(
-                        maxWidth: AppSizes.width(context) * 0.70,
-                        maxHeight: AppSizes.height(context) * 0.85,
+                  return Container(
+                    height: MediaQuery.of(context).size.height * 0.85,
+                    decoration: BoxDecoration(
+                      color: AppColors.bottomNavBg(context),
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(20),
+                        topRight: Radius.circular(20),
                       ),
-                      child: const CreatePurchaseReturnScreen(),
                     ),
+                    child: CreatePurchaseReturnScreen(),
                   );
                 },
               ).then((_) {
-                // Refresh list after dialog closes
+                // Refresh list after bottom sheet closes
                 _fetchPurchaseReturnList(from: startDate, to: endDate);
               });
             },

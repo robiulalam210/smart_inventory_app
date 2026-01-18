@@ -1,3 +1,4 @@
+import 'package:date_format/date_format.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/configs/configs.dart';
 import '../../data/model/user_model.dart';
@@ -75,21 +76,27 @@ class UserTableCard extends StatelessWidget {
     );
   }
 
-  Widget _mobileHeader(UsersListModel user,BuildContext context) {
+  Widget _mobileHeader(UsersListModel user, BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
+        // Name
         Expanded(
           child: Text(
-            (user.fullName ?? 'N/A'),
-            style:  TextStyle(
+            user.fullName?.trim().isNotEmpty == true
+                ? user.fullName!
+                : (user.username ?? 'Unknown'),
+            style: TextStyle(
               fontWeight: FontWeight.w600,
               color: AppColors.text(context),
               fontSize: 14,
             ),
             overflow: TextOverflow.ellipsis,
+            maxLines: 1,
           ),
         ),
+
+        // Status Chip
         _statusChip(_getUserStatus(user)),
       ],
     );

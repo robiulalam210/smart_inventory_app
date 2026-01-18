@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import '../configs/configs.dart';
 
-const double _kMenuCapHeight = 240;
-const double _kMenuVerticalMargin = 6;
-
 class AppDropdown<T> extends FormField<T> {
   AppDropdown({
     super.key,
@@ -23,11 +20,6 @@ class AppDropdown<T> extends FormField<T> {
     autovalidateMode: AutovalidateMode.onUserInteraction,
     builder: (FormFieldState<T> state) {
       final context = state.context;
-
-      final GlobalKey fieldKey = GlobalKey();
-      OverlayEntry? overlayEntry;
-      bool isOpen = false;
-
       final TextEditingController controller =
       TextEditingController(text: state.value?.toString() ?? '');
 
@@ -36,118 +28,41 @@ class AppDropdown<T> extends FormField<T> {
       if (isNeedAll && allItem != null) {
         items.insert(0, allItem as T);
       }
-      List<T> filteredItems = [...items];
 
-      Rect? _getFieldRect() {
-        final box =
-        fieldKey.currentContext?.findRenderObject() as RenderBox?;
-        if (box == null || !box.hasSize) return null;
-        final pos = box.localToGlobal(Offset.zero);
-        return Rect.fromLTWH(
-          pos.dx,
-          pos.dy,
-          box.size.width,
-          box.size.height,
-        );
-      }
+      // Show dropdown as a bottom sheet
+      void _showDropdown() {
+        // Unfocus any active focus to prevent keyboard issues
+        FocusScope.of(context).unfocus();
 
-      void _removeOverlay() {
-        overlayEntry?.remove();
-        overlayEntry = null;
-        isOpen = false;
-      }
-
-      OverlayEntry _createOverlay() {
-        return OverlayEntry(
-          builder: (context) {
-            final media = MediaQuery.of(context);
-            final fieldRect = _getFieldRect();
-            if (fieldRect == null) return const SizedBox.shrink();
-
-            final keyboard = media.viewInsets.bottom;
-            final screenHeight = media.size.height;
-
-            final spaceBelow = screenHeight -
-                keyboard -
-                fieldRect.bottom -
-                _kMenuVerticalMargin;
-            final spaceAbove =
-                fieldRect.top - media.padding.top - _kMenuVerticalMargin;
-
-            final bool showAbove =
-                spaceAbove > spaceBelow && spaceAbove > 100;
-
-            final double maxHeight = (showAbove
-                ? spaceAbove
-                : spaceBelow)
-                .clamp(80.0, _kMenuCapHeight);
-
-            final double top = showAbove
-                ? fieldRect.top - maxHeight - _kMenuVerticalMargin
-                : fieldRect.bottom + _kMenuVerticalMargin;
-
-            return GestureDetector(
-              behavior: HitTestBehavior.translucent,
-              onTap: _removeOverlay,
-              child: Stack(
-                children: [
-                  Positioned(
-                    left: fieldRect.left,
-                    top: top,
-                    width: fieldRect.width,
-                    child: Material(
-                      elevation: 6,
-                      borderRadius: BorderRadius.circular(8),
-                      clipBehavior: Clip.antiAlias,
-                      child: ConstrainedBox(
-                        constraints:
-                        BoxConstraints(maxHeight: maxHeight),
-                        child: ListView.separated(
-                          padding: EdgeInsets.zero,
-                          itemCount: filteredItems.length,
-                          separatorBuilder: (_, __) =>
-                          const Divider(height: 1),
-                          itemBuilder: (_, index) {
-                            final item = filteredItems[index];
-                            return InkWell(
-                              onTap: () {
-                                controller.text = item.toString();
-                                state.didChange(item);
-                                onChanged(item);
-                                _removeOverlay();
-                              },
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: 12, horizontal: 12),
-                                child: Text(
-                                  item.toString(),
-                                  style:
-                                  AppTextStyle.body(context),
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+        showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+          useSafeArea: true,
+          builder: (sheetContext) {
+            return _DropdownBottomSheet<T>(
+              items: items,
+              selectedValue: state.value,
+              controller: controller,
+              hint: hint,
+              isSearch: isSearch,
+              onChanged: (value) {
+                if (value != null) {
+                  controller.text = value.toString();
+                  state.didChange(value);
+                  onChanged(value);
+                }
+                Navigator.pop(sheetContext);
+              },
             );
           },
         );
       }
 
-      void _showOverlay() {
-        if (filteredItems.isEmpty) return;
-        if (overlayEntry == null) {
-          overlayEntry = _createOverlay();
-          Overlay.of(context, rootOverlay: true)
-              .insert(overlayEntry!);
-          isOpen = true;
-        } else {
-          overlayEntry!.markNeedsBuild();
-        }
+      void _handleClear() {
+        controller.clear();
+        state.didChange(null);
+        onChanged(null);
       }
 
       return Column(
@@ -159,12 +74,10 @@ class AppDropdown<T> extends FormField<T> {
               children: [
                 Text(
                   label,
-                  style: AppTextStyle
-                      .labelDropdownTextStyle(context),
+                  style: AppTextStyle.labelDropdownTextStyle(context),
                 ),
                 if (isRequired)
-                  const Text('*',
-                      style: TextStyle(color: Colors.red)),
+                  const Text('*', style: TextStyle(color: Colors.red)),
               ],
             ),
             const SizedBox(height: 4),
@@ -172,80 +85,58 @@ class AppDropdown<T> extends FormField<T> {
 
           /// ---------- FIELD ----------
           SizedBox(
-            key: fieldKey,
-            height: 55, // 🔒 FIXED HEIGHT
-            child: TextField(
-              controller: controller,
-              readOnly: !isSearch,
-              maxLines: 1,
-              textAlignVertical: TextAlignVertical.center,
-              onTap: () {
-                filteredItems = [...items];
-                _showOverlay();
-              },
-              onChanged: (value) {
-                if (!isSearch) return;
-                filteredItems = items
-                    .where((e) => e
-                    .toString()
-                    .toLowerCase()
-                    .contains(value.toLowerCase()))
-                    .toList();
-                _showOverlay();
-              },
-              decoration: InputDecoration(
-                hintText: hint,
-                hintStyle: TextStyle(
-                  color: AppColors.greyColor(context),
-                  fontSize: 14,
-                  fontWeight: FontWeight.w300,
-                ),
-                isDense: true,
-                contentPadding: const EdgeInsets.only(
-                    right: 8,left: 0, bottom: 0,top: 0),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius:
-                  BorderRadius.circular(AppSizes.radius),
-                  borderSide: BorderSide(
+            height: 55,
+            child: InkWell(
+              onTap: _showDropdown,
+              borderRadius: BorderRadius.circular(AppSizes.radius),
+              child: Container(
+                decoration: BoxDecoration(
+                  border: Border.all(
                     color: state.hasError
                         ? Colors.red
                         : AppColors.greyColor(context),
+                    width: 1,
                   ),
+                  borderRadius: BorderRadius.circular(AppSizes.radius),
                 ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius:
-                  BorderRadius.circular(AppSizes.radius),
-                  borderSide: BorderSide(
-                    color: state.hasError
-                        ? Colors.red
-                        : AppColors.primaryColor(context),
-                  ),
-                ),
-
-                /// ---------- CLEAR + DROPDOWN ----------
-                suffixIcon: Row(
-                  mainAxisSize: MainAxisSize.min,
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: Row(
                   children: [
-                    if (controller.text.isNotEmpty)
-                      InkWell(
-                        onTap: () {
-                          controller.clear();
-                          state.didChange(null);
-                          onChanged(null);
-                          _removeOverlay();
-                        },
-                        child: const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 4),
-                          child: Icon(Icons.close, size: 18),
+                    Expanded(
+                      child: Text(
+                        controller.text.isEmpty ? hint : controller.text,
+                        style: TextStyle(
+                          color: controller.text.isEmpty
+                              ? AppColors.greyColor(context)
+                              : AppColors.text(context),
+                          fontSize: 14,
                         ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
                       ),
-                    InkWell(
-                      onTap: () =>
-                      isOpen ? _removeOverlay() : _showOverlay(),
-                      child: const Padding(
-                        padding: EdgeInsets.only(right: 4),
-                        child: Icon(Icons.keyboard_arrow_down),
-                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (controller.text.isNotEmpty)
+                          InkWell(
+                            onTap: _handleClear,
+                            borderRadius: BorderRadius.circular(12),
+                            child: Padding(
+                              padding: const EdgeInsets.all(4),
+                              child: Icon(
+                                Icons.close,
+                                size: 18,
+                                color: AppColors.greyColor(context),
+                              ),
+                            ),
+                          ),
+                        Icon(
+                          Icons.keyboard_arrow_down,
+                          color: AppColors.greyColor(context),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -256,12 +147,10 @@ class AppDropdown<T> extends FormField<T> {
           /// ---------- ERROR ----------
           if (state.hasError)
             Padding(
-              padding:
-              const EdgeInsets.only(top: 4, left: 6),
+              padding: const EdgeInsets.only(top: 4, left: 6),
               child: Text(
                 state.errorText!,
-                style:
-                AppTextStyle.errorTextStyle(context),
+                style: AppTextStyle.errorTextStyle(context),
               ),
             ),
         ],
@@ -278,4 +167,201 @@ class AppDropdown<T> extends FormField<T> {
   final T? allItem;
   final List<T> itemList;
   final void Function(T?) onChanged;
+}
+
+class _DropdownBottomSheet<T> extends StatefulWidget {
+  final List<T> items;
+  final T? selectedValue;
+  final TextEditingController controller;
+  final String hint;
+  final bool isSearch;
+  final ValueChanged<T?> onChanged;
+
+  const _DropdownBottomSheet({
+    required this.items,
+    required this.selectedValue,
+    required this.controller,
+    required this.hint,
+    required this.isSearch,
+    required this.onChanged,
+  });
+
+  @override
+  State<_DropdownBottomSheet<T>> createState() => _DropdownBottomSheetState<T>();
+}
+
+class _DropdownBottomSheetState<T> extends State<_DropdownBottomSheet<T>> {
+  late List<T> filteredItems;
+  late TextEditingController searchController;
+
+  @override
+  void initState() {
+    super.initState();
+    filteredItems = widget.items;
+    searchController = TextEditingController();
+
+    // If search is enabled, initialize with current value
+    if (widget.isSearch && widget.controller.text.isNotEmpty) {
+      searchController.text = widget.controller.text;
+      _filterItems(widget.controller.text);
+    }
+  }
+
+  @override
+  void dispose() {
+    searchController.dispose();
+    super.dispose();
+  }
+
+  void _filterItems(String query) {
+    setState(() {
+      if (query.isEmpty) {
+        filteredItems = widget.items;
+      } else {
+        filteredItems = widget.items
+            .where((item) => item.toString().toLowerCase().contains(query.toLowerCase()))
+            .toList();
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return DraggableScrollableSheet(
+      initialChildSize: 0.6,
+      minChildSize: 0.4,
+      maxChildSize: 0.9,
+      builder: (context, scrollController) {
+        return Container(
+          decoration:  BoxDecoration(
+            color:AppColors.bottomNavBg(context),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: Column(
+            children: [
+              // Header
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(color: Colors.grey.shade300),
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Select',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primaryColor(context),
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.close, color: AppColors.grey),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Search field (if enabled)
+              if (widget.isSearch)
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: TextField(
+                    controller: searchController,
+                    autofocus: true,
+                    decoration: InputDecoration(
+                      hintText: 'Search ${widget.hint}',
+                      prefixIcon: const Icon(Icons.search),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        vertical: 12,
+                        horizontal: 16,
+                      ),
+                    ),
+                    onChanged: _filterItems,
+                  ),
+                ),
+
+              // Items list
+              Expanded(
+                child: filteredItems.isEmpty
+                    ? Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.search_off,
+                          size: 64,
+                          color: AppColors.greyColor(context),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'No items found',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: AppColors.greyColor(context),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+                    : ListView.builder(
+                  controller: scrollController,
+                  padding: const EdgeInsets.all(8),
+                  itemCount: filteredItems.length,
+                  itemBuilder: (context, index) {
+                    final item = filteredItems[index];
+                    final isSelected = item == widget.selectedValue;
+
+                    return Card(
+                      margin: const EdgeInsets.symmetric(
+                        vertical: 4,
+                        horizontal: 8,
+                      ),
+                      elevation: 0,
+                      color: isSelected
+                          ? AppColors.primaryColor(context).withValues(alpha: 0.1)
+                          : AppColors.bottomNavBg(context),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        side: BorderSide(
+                          color: Colors.grey.shade200,
+                          width: 1,
+                        ),
+                      ),
+                      child: ListTile(
+                        leading: isSelected
+                            ? Icon(
+                          Icons.check_circle,
+                          color: AppColors.primaryColor(context),
+                        )
+                            : null,
+                        title: Text(
+                          item.toString(),
+                          style: TextStyle(
+                            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                            color: AppColors.text(context),
+                          ),
+                        ),
+                        onTap: () => widget.onChanged(item),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 }

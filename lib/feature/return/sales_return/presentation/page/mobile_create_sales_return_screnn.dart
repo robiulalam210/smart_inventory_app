@@ -44,10 +44,10 @@ class _CreateSalesReturnScreenState
 
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
-  String? _selectedPaymentMethod;
   String? _returnChargeType = 'fixed';
   AccountActiveModel? _selectedAccount;
   SalesInvoiceModel? _selectedInvoice;
+  ValueNotifier<String?> selectedPaymentMethodNotifier = ValueNotifier<String?>("Cash");
 
   @override
   void initState() {
@@ -80,6 +80,7 @@ class _CreateSalesReturnScreenState
     returnChargeAmountController.dispose();
     subtotalController.dispose();
     totalAmountController.dispose();
+    selectedPaymentMethodNotifier.dispose();
     super.dispose();
   }
 
@@ -155,14 +156,14 @@ class _CreateSalesReturnScreenState
               productId: productId ?? 0,
               productName: item.productName ?? 'Unknown Product',
               unitPrice:
-                  double.tryParse(item.unitPrice?.toString() ?? "0") ?? 0.0,
+              double.tryParse(item.unitPrice?.toString() ?? "0") ?? 0.0,
               totalPrice:
-                  double.tryParse(item.subtotal?.toString() ?? "0") ?? 0.0,
+              double.tryParse(item.subtotal?.toString() ?? "0") ?? 0.0,
               quantity: item.quantity ?? 1,
               damageQuantity: 0,
               // Initialize damage quantity as 0
               discount:
-                  double.tryParse(item.discount?.toString() ?? "0") ?? 0.0,
+              double.tryParse(item.discount?.toString() ?? "0") ?? 0.0,
               discountType: item.discountType ?? "fixed",
               originalQuantity: item.quantity ?? 1,
             ),
@@ -176,10 +177,10 @@ class _CreateSalesReturnScreenState
   }
 
   void _updateProductQuantity(
-    int index,
-    int newQuantity, {
-    bool isDamage = false,
-  }) {
+      int index,
+      int newQuantity, {
+        bool isDamage = false,
+      }) {
     if (newQuantity < 0) return;
 
     setState(() {
@@ -195,7 +196,7 @@ class _CreateSalesReturnScreenState
             context: context,
             title: 'Alert!',
             description:
-                'Damage quantity cannot exceed returned quantity ($maxDamage)',
+            'Damage quantity cannot exceed returned quantity ($maxDamage)',
             icon: Icons.error,
             primaryColor: Colors.redAccent,
           );
@@ -264,7 +265,6 @@ class _CreateSalesReturnScreenState
           if (state is SalesReturnCreateLoading) {
             appLoader(context, "Creating Sales Return...");
           } else if (state is SalesReturnCreateSuccess) {
-            print("dsafg${state.message}");
             Navigator.pop(context); // Close loader
             Navigator.pop(context); // Close dialog
             widget.onSuccess?.call();
@@ -276,8 +276,6 @@ class _CreateSalesReturnScreenState
               primaryColor: Colors.green,
             );
           } else if (state is SalesReturnError) {
-
-            Navigator.pop(context); // Close loader
             Navigator.pop(context); // Close loader
             showCustomToast(
               context: context,
@@ -316,18 +314,13 @@ class _CreateSalesReturnScreenState
                 const SizedBox(height: 16),
 
                 // Invoice Selection
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-
-                  mainAxisAlignment: MainAxisAlignment.start,
+                Wrap(
                   children: [
-                    Expanded(child: _buildReceiptNumberDropdown()),
+                    SizedBox(child: _buildReceiptNumberDropdown()),
                     const SizedBox(width: 12),
-                    Expanded(child: _buildCustomerNameField()),
-
+                    SizedBox(child: _buildCustomerNameField()),
                   ],
                 ),
-
 
                 // Return Date
                 const SizedBox(height: 8),
@@ -336,14 +329,7 @@ class _CreateSalesReturnScreenState
                 _buildReturnChargeSection(),
                 const SizedBox(height: 8),
 
-                // Payment Method and Account
-                Row(
-                  children: [
-                    Expanded(child: _buildPaymentMethodDropdown()),
-                    const SizedBox(width: 12),
-                    Expanded(child: _buildAccountDropdown()),
-                  ],
-                ),
+                _buildMobilePaymentSection(),
                 const SizedBox(height: 8),
 
                 // Products Section
@@ -395,6 +381,7 @@ class _CreateSalesReturnScreenState
           isSearch: true,
           hint: _selectedInvoice?.invoiceNo ?? "Select Receipt Number",
           isRequired: true,
+
           value: _selectedInvoice,
           itemList: bloc.invoiceList,
           onChanged: (newVal) {
@@ -403,7 +390,7 @@ class _CreateSalesReturnScreenState
             }
           },
           validator: (value) =>
-              value == null ? 'Please select Receipt Number' : null,
+          value == null ? 'Please select Receipt Number' : null,
         );
       },
     );
@@ -502,8 +489,6 @@ class _CreateSalesReturnScreenState
                   },
                 ),
               ),
-
-
             ],
           ),
 
@@ -522,49 +507,119 @@ class _CreateSalesReturnScreenState
               ),
             ),
           ],)
-
         ],
       ),
     );
   }
 
-  Widget _buildPaymentMethodDropdown() {
-    return BlocBuilder<ExpenseBloc, ExpenseState>(
-      builder: (context, state) {
-        return AppDropdown<String>(
-          label: "Payment Method ",
-          hint: _selectedPaymentMethod ?? "Select Payment Method",
-          isRequired: true,
-          value: _selectedPaymentMethod,
-          itemList: ['cash', 'bank', 'mobile'],
-          onChanged: (newVal) {
-            setState(() {
-              _selectedPaymentMethod = newVal;
-            });
+  Widget _buildMobilePaymentSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ValueListenableBuilder<String?>(
+          valueListenable: selectedPaymentMethodNotifier,
+          builder: (context, selectedPaymentMethod, child) {
+            return AppDropdown<String>(
+              label: "Payment Method",
+              hint: selectedPaymentMethod ?? "Select Payment Method",
+              isLabel: false,
+              isRequired: true,
+              isNeedAll: false,
+              value: selectedPaymentMethod,
+              itemList: ["Bank", "Cash", "Mobile banking"],
+              onChanged: (newVal) {
+                setState(() {
+                  selectedPaymentMethodNotifier.value = newVal;
+                  _selectedAccount = null; // Clear selected account when payment method changes
+                });
+              },
+              validator: (value) {
+                if (value == null) {
+                  return 'Please select a payment method';
+                }
+                return null;
+              },
+            );
           },
-          validator: (value) =>
-              value == null ? 'Please select Payment Method' : null,
-        );
-      },
+        ),
+        const SizedBox(height: 12),
+        _buildAccountDropdown(),
+      ],
     );
   }
 
   Widget _buildAccountDropdown() {
     return BlocBuilder<AccountBloc, AccountState>(
       builder: (context, state) {
-        return AppDropdown<AccountActiveModel>(
-          label: "Account",
-          hint: _selectedAccount?.name ?? "Select Account",
-          isRequired: true,
-          value: _selectedAccount,
-          itemList: context.read<AccountBloc>().activeAccount,
-          onChanged: (newVal) {
-            setState(() {
-              _selectedAccount = newVal;
+        if (state is AccountActiveListLoading) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (state is AccountActiveListSuccess) {
+          final accounts = state.list;
+
+          // Filter accounts based on selected payment method
+          final List<AccountActiveModel> filteredList;
+          if (selectedPaymentMethodNotifier.value != null ) {
+            filteredList = accounts.where((item) {
+              final itemType = item.acType?.toLowerCase().trim() ?? '';
+              final paymentMethod = selectedPaymentMethodNotifier.value.toString().toLowerCase().trim();
+
+              final paymentMethodMap = {
+                'bank': 'bank',
+                'cash': 'cash',
+                'mobile banking': 'mobile banking',
+                'mobile': 'mobile banking',
+              };
+
+              final mappedPaymentMethod =
+                  paymentMethodMap[paymentMethod] ?? paymentMethod;
+
+              return itemType == mappedPaymentMethod;
+            }).toList();
+          } else {
+            filteredList = accounts;
+          }
+
+          // Auto-select first account if none is selected and list is available
+          if (_selectedAccount == null && filteredList.isNotEmpty) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              setState(() {
+                _selectedAccount = filteredList.first;
+              });
             });
-          },
-          validator: (value) => value == null ? 'Please select Account' : null,
-        );
+          }
+
+          return AppDropdown<AccountActiveModel>(
+            label: "Account",
+            hint: filteredList.isEmpty
+                ? "No accounts available"
+                : (_selectedAccount == null
+                ? "Select Account"
+                : "${_selectedAccount!.name}${_selectedAccount!.acNumber != null ? ' - ${_selectedAccount!.acNumber}' : ''}"),
+            isLabel: false,
+            isRequired: true,
+            isNeedAll: false,
+            value: _selectedAccount,
+            itemList: filteredList,
+            onChanged: (newVal) {
+              setState(() {
+                _selectedAccount = newVal;
+              });
+            },
+            validator: (value) {
+              if (selectedPaymentMethodNotifier.value != null && filteredList.isEmpty) {
+                return 'No "$selectedPaymentMethodNotifier.value" accounts available';
+              }
+              if (value == null) {
+                return 'Please select an account';
+              }
+              return null;
+            },
+          );
+        } else if (state is AccountActiveListFailed) {
+          return Text('Error: ${state.content}');
+        } else {
+          return const Text('No accounts available');
+        }
       },
     );
   }
@@ -701,7 +756,7 @@ class _CreateSalesReturnScreenState
           const SizedBox(height: 4),
           Container(
             decoration: BoxDecoration(
-              border: Border.all(color: color.withValues(alpha: 0.3)),
+              border: Border.all(color: color.withAlpha(128)),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Row(
@@ -751,7 +806,7 @@ class _CreateSalesReturnScreenState
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.bold,
-            color: isTotal ? AppColors.primaryColor(context) :AppColors.text(context),
+            color: isTotal ? AppColors.primaryColor(context) : AppColors.text(context),
           ),
         ),
       ],
@@ -762,7 +817,7 @@ class _CreateSalesReturnScreenState
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color:AppColors.bottomNavBg(context),
+        color: AppColors.bottomNavBg(context),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: Colors.blue.shade200),
       ),
@@ -784,7 +839,7 @@ class _CreateSalesReturnScreenState
             context: context,
             label: 'Subtotal:',
             value: double.tryParse(subtotalController.text) ?? 0.0,
-            color:  AppColors.text(context),
+            color: AppColors.text(context),
           ),
 
           // Return Charge
@@ -837,7 +892,7 @@ class _CreateSalesReturnScreenState
               if (showType && _returnChargeType == 'percentage')
                 Text(
                   ' (${returnChargeController.text}%)',
-                  style: TextStyle(fontSize: 12, color:  AppColors.text(context),),
+                  style: TextStyle(fontSize: 12, color: AppColors.text(context),),
                 ),
             ],
           ),
@@ -956,7 +1011,7 @@ class _CreateSalesReturnScreenState
     }
 
     // Validate payment method
-    if (_selectedPaymentMethod == null || _selectedPaymentMethod!.isEmpty) {
+    if (selectedPaymentMethodNotifier.value == null || selectedPaymentMethodNotifier.value!.isEmpty) {
       showCustomToast(
         context: context,
         title: 'Error!',
@@ -987,7 +1042,7 @@ class _CreateSalesReturnScreenState
       "customer_name": customerNameController.text,
       "return_date": DateFormat('yyyy-MM-dd').format(returnDate),
       "account_id": _selectedAccount!.id,
-      "payment_method": _selectedPaymentMethod,
+      "payment_method": selectedPaymentMethodNotifier.value,
       "reason": remarkController.text,
       "return_charge": double.tryParse(returnChargeController.text) ?? 0.0,
       "return_charge_type": _returnChargeType ?? 'fixed',
@@ -1000,8 +1055,6 @@ class _CreateSalesReturnScreenState
       body["receipt_no"] = _selectedInvoice!.invoiceNo;
     }
 
-    // Log for debugging
-
     // Dispatch the event
     context.read<SalesReturnBloc>().add(
       SalesReturnCreate(
@@ -1009,8 +1062,8 @@ class _CreateSalesReturnScreenState
         body: SalesReturnCreateModel(
           customerName: customerNameController.text,
           returnDate: returnDate,
-          accountId: _selectedAccount!.id,
-          paymentMethod: _selectedPaymentMethod,
+          accountId: _selectedAccount?.id,
+          paymentMethod: selectedPaymentMethodNotifier.value,
           reason: remarkController.text,
           returnCharge: double.tryParse(returnChargeController.text) ?? 0.0,
           returnChargeType: _returnChargeType,
@@ -1019,14 +1072,14 @@ class _CreateSalesReturnScreenState
           items: products
               .map(
                 (item) => SalesReturnItemCreate(
-                  productId: item.productId!,
-                  quantity: item.quantity!,
-                  damageQuantity: item.damageQuantity!,
-                  unitPrice: item.unitPrice!,
-                  discount: item.discount ?? 0,
-                  discountType: item.discountType,
-                ),
-              )
+              productId: item.productId!,
+              quantity: item.quantity!,
+              damageQuantity: item.damageQuantity!,
+              unitPrice: item.unitPrice!,
+              discount: item.discount ?? 0,
+              discountType: item.discountType,
+            ),
+          )
               .toList(),
         ),
       ),
