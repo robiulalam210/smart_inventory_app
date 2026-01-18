@@ -1569,16 +1569,216 @@ class _SalesScreenState extends State<MobileSalesScreen> {
     );
   }
 
+  // Widget _buildProductCard(ProductModelStockModel p) {
+  //   final bloc = context.read<CreatePosSaleBloc>();
+  //
+  //   final existingIndex = bloc.products.indexWhere(
+  //         (row) => row["product_id"] == p.id,
+  //   );
+  //   return InkWell(
+  //     // ➕ ADD PRODUCT / INCREASE QTY
+  //     onTap: () {
+  //       if (existingIndex != -1) {
+  //         final qtyController = controllers[existingIndex]?["quantity"];
+  //         final currentQty = int.tryParse(qtyController?.text ?? "1") ?? 1;
+  //
+  //         qtyController?.text = (currentQty + 1).toString();
+  //         bloc.products[existingIndex]["quantity"] = currentQty + 1;
+  //         updateTotal(existingIndex);
+  //
+  //         Navigator.pop(context);
+  //         setState(() {});
+  //         return;
+  //       }
+  //
+  //       final emptyIndex = bloc.products.indexWhere(
+  //             (row) => row["product_id"] == null,
+  //       );
+  //
+  //       final targetIndex =
+  //       emptyIndex != -1 ? emptyIndex : bloc.products.length;
+  //
+  //       if (emptyIndex == -1) {
+  //         bloc.addProduct();
+  //       }
+  //
+  //       onProductChanged(targetIndex, p);
+  //
+  //       controllers.putIfAbsent(
+  //         targetIndex,
+  //             () => {
+  //           "price": TextEditingController(),
+  //           "discount": TextEditingController(),
+  //           "quantity": TextEditingController(text: "1"),
+  //           "ticket_total": TextEditingController(),
+  //           "total": TextEditingController(),
+  //         },
+  //       );
+  //
+  //       bloc.products[targetIndex]["quantity"] = 1;
+  //       updateTotal(targetIndex);
+  //
+  //       setState(() {});
+  //     },
+  //
+  //     // ➖ REMOVE / DECREASE QTY
+  //     onLongPress: () {
+  //       final bloc = context.read<CreatePosSaleBloc>();
+  //
+  //       final existingIndex = bloc.products.indexWhere(
+  //             (row) => row["product_id"] == p.id,
+  //       );
+  //
+  //       if (existingIndex == -1) return;
+  //
+  //       final qtyController = controllers[existingIndex]?["quantity"];
+  //       final currentQty = int.tryParse(qtyController?.text ?? "1") ?? 1;
+  //
+  //       if (currentQty > 1) {
+  //         // decrease qty
+  //         qtyController?.text = (currentQty - 1).toString();
+  //         bloc.products[existingIndex]["quantity"] = currentQty - 1;
+  //         updateTotal(existingIndex);
+  //       } else {
+  //         // qty == 1 → remove row
+  //         bloc.removeProduct(existingIndex);
+  //         controllers.remove(existingIndex);
+  //       }
+  //
+  //       setState(() {});
+  //     },
+  //
+  //     child: Container(
+  //       decoration: BoxDecoration(
+  //         color: Colors.white,
+  //         borderRadius: BorderRadius.circular(10),
+  //         border: Border.all(
+  //           color: existingIndex != -1 ? Colors.green : Colors.grey.shade200,
+  //           width: existingIndex != -1 ? 2 : 1,
+  //         ),
+  //         boxShadow: [
+  //           BoxShadow(
+  //             color: Colors.black.withOpacity(0.02),
+  //             blurRadius: 6,
+  //             offset: const Offset(0, 2),
+  //           ),
+  //         ],
+  //       ),
+  //       child: Column(
+  //         crossAxisAlignment: CrossAxisAlignment.start,
+  //         children: [
+  //           /// IMAGE
+  //           AspectRatio(
+  //             aspectRatio: 3,
+  //             child: p.image != null
+  //                 ? ClipRRect(
+  //               borderRadius: const BorderRadius.vertical(
+  //                 top: Radius.circular(10),
+  //               ),
+  //               child: Image.network(
+  //                 p.image!,
+  //                 fit: BoxFit.cover,
+  //                 width: double.infinity,
+  //               ),
+  //             )
+  //                 : Container(
+  //               decoration: const BoxDecoration(
+  //                 borderRadius: BorderRadius.vertical(
+  //                   top: Radius.circular(10),
+  //                 ),
+  //                 color: Color(0xfff5f5f5),
+  //               ),
+  //               child: const Center(
+  //                 child: Icon(
+  //                   Icons.image_not_supported,
+  //                   size: 36,
+  //                   color: Colors.black26,
+  //                 ),
+  //               ),
+  //             ),
+  //           ),
+  //
+  //           Padding(
+  //             padding: const EdgeInsets.all(8),
+  //             child: Column(
+  //               crossAxisAlignment: CrossAxisAlignment.start,
+  //               children: [
+  //                 Text(
+  //                   '৳ ${_toDouble(p.sellingPrice).toStringAsFixed(2)}',
+  //                   style: const TextStyle(
+  //                     fontSize: 14,
+  //                     fontWeight: FontWeight.bold,
+  //                   ),
+  //                 ),
+  //                 const SizedBox(height: 6),
+  //                 Text(
+  //                   p.toString(),
+  //                   maxLines: 2,
+  //                   overflow: TextOverflow.ellipsis,
+  //                   style: const TextStyle(
+  //                     fontSize: 12,
+  //                     fontWeight: FontWeight.w500,
+  //                   ),
+  //                 ),
+  //                 const SizedBox(height: 6),
+  //                 Text(
+  //                   '${p.brandInfo?.name ?? ''} • ${p.categoryInfo?.name ?? ''}',
+  //                   maxLines: 1,
+  //                   overflow: TextOverflow.ellipsis,
+  //                   style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
+  //                 ),
+  //                 const SizedBox(height: 6),
+  //                 Row(
+  //                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //                   children: [
+  //                     Container(
+  //                       padding: const EdgeInsets.symmetric(
+  //                         horizontal: 6,
+  //                         vertical: 4,
+  //                       ),
+  //                       decoration: BoxDecoration(
+  //                         color: p.stockQty == 0 ? Colors.grey : Colors.redAccent,
+  //                         borderRadius: BorderRadius.circular(20),
+  //                       ),
+  //                       child: Text(
+  //                         'Stock ${p.stockQty ?? 0}',
+  //                         style: const TextStyle(
+  //                           color: Colors.white,
+  //                           fontSize: 11,
+  //                         ),
+  //                       ),
+  //                     ),
+  //                      Icon(
+  //                       Icons.add_circle_outline,
+  //                       color: AppColors.primaryColor(context),
+  //                     ),
+  //                   ],
+  //                 ),
+  //               ],
+  //             ),
+  //           ),
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
   Widget _buildProductCard(ProductModelStockModel p) {
     final bloc = context.read<CreatePosSaleBloc>();
 
+    // Check if this product is already in the sale
     final existingIndex = bloc.products.indexWhere(
           (row) => row["product_id"] == p.id,
     );
+
+    final isAdded = existingIndex != -1;
+    final addedQuantity = isAdded
+        ? (_toInt(bloc.products[existingIndex]["quantity"]) ?? 0)
+        : 0;
+
     return InkWell(
-      // ➕ ADD PRODUCT / INCREASE QTY
       onTap: () {
-        if (existingIndex != -1) {
+        if (isAdded) {
+          // Already added, increase quantity
           final qtyController = controllers[existingIndex]?["quantity"];
           final currentQty = int.tryParse(qtyController?.text ?? "1") ?? 1;
 
@@ -1586,17 +1786,18 @@ class _SalesScreenState extends State<MobileSalesScreen> {
           bloc.products[existingIndex]["quantity"] = currentQty + 1;
           updateTotal(existingIndex);
 
+          // Close bottom sheet and update UI
           Navigator.pop(context);
           setState(() {});
           return;
         }
 
+        // Find empty slot or create new one
         final emptyIndex = bloc.products.indexWhere(
               (row) => row["product_id"] == null,
         );
 
-        final targetIndex =
-        emptyIndex != -1 ? emptyIndex : bloc.products.length;
+        final targetIndex = emptyIndex != -1 ? emptyIndex : bloc.products.length;
 
         if (emptyIndex == -1) {
           bloc.addProduct();
@@ -1618,29 +1819,24 @@ class _SalesScreenState extends State<MobileSalesScreen> {
         bloc.products[targetIndex]["quantity"] = 1;
         updateTotal(targetIndex);
 
+        // Close bottom sheet and update UI
+        Navigator.pop(context);
         setState(() {});
       },
 
-      // ➖ REMOVE / DECREASE QTY
       onLongPress: () {
-        final bloc = context.read<CreatePosSaleBloc>();
-
-        final existingIndex = bloc.products.indexWhere(
-              (row) => row["product_id"] == p.id,
-        );
-
-        if (existingIndex == -1) return;
+        if (!isAdded) return;
 
         final qtyController = controllers[existingIndex]?["quantity"];
         final currentQty = int.tryParse(qtyController?.text ?? "1") ?? 1;
 
         if (currentQty > 1) {
-          // decrease qty
+          // Decrease quantity
           qtyController?.text = (currentQty - 1).toString();
           bloc.products[existingIndex]["quantity"] = currentQty - 1;
           updateTotal(existingIndex);
         } else {
-          // qty == 1 → remove row
+          // Remove item
           bloc.removeProduct(existingIndex);
           controllers.remove(existingIndex);
         }
@@ -1653,13 +1849,13 @@ class _SalesScreenState extends State<MobileSalesScreen> {
           color: Colors.white,
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
-            color: existingIndex != -1 ? Colors.green : Colors.grey.shade200,
-            width: existingIndex != -1 ? 2 : 1,
+            color: isAdded ? AppColors.primaryColor(context) : Colors.grey.shade200,
+            width: isAdded ? 2 : 1,
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.02),
-              blurRadius: 6,
+              color: Colors.black.withOpacity(isAdded ? 0.1 : 0.02),
+              blurRadius: isAdded ? 8 : 6,
               offset: const Offset(0, 2),
             ),
           ],
@@ -1667,34 +1863,87 @@ class _SalesScreenState extends State<MobileSalesScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            /// IMAGE
+            // IMAGE
             AspectRatio(
               aspectRatio: 3,
-              child: p.image != null
-                  ? ClipRRect(
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(10),
-                ),
-                child: Image.network(
-                  p.image!,
-                  fit: BoxFit.cover,
-                  width: double.infinity,
-                ),
-              )
-                  : Container(
-                decoration: const BoxDecoration(
-                  borderRadius: BorderRadius.vertical(
-                    top: Radius.circular(10),
-                  ),
-                  color: Color(0xfff5f5f5),
-                ),
-                child: const Center(
-                  child: Icon(
-                    Icons.image_not_supported,
-                    size: 36,
-                    color: Colors.black26,
-                  ),
-                ),
+              child: Stack(
+                children: [
+                  if (p.image != null)
+                    ClipRRect(
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(10),
+                      ),
+                      child: Image.network(
+                        p.image!,
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            decoration: const BoxDecoration(
+                              borderRadius: BorderRadius.vertical(
+                                top: Radius.circular(10),
+                              ),
+                              color: Color(0xfff5f5f5),
+                            ),
+                            child: const Center(
+                              child: Icon(
+                                Icons.image_not_supported,
+                                size: 36,
+                                color: Colors.black26,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    )
+                  else
+                    Container(
+                      decoration: const BoxDecoration(
+                        borderRadius: BorderRadius.vertical(
+                          top: Radius.circular(10),
+                        ),
+                        color: Color(0xfff5f5f5),
+                      ),
+                      child: const Center(
+                        child: Icon(
+                          Icons.image_not_supported,
+                          size: 36,
+                          color: Colors.black26,
+                        ),
+                      ),
+                    ),
+
+                  // Added badge overlay
+                  if (isAdded)
+                    Positioned(
+                      top: 6,
+                      right: 6,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryColor(context),
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.2),
+                              blurRadius: 4,
+                            ),
+                          ],
+                        ),
+                        child: Text(
+                          '×$addedQuantity',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
               ),
             ),
 
@@ -1703,54 +1952,97 @@ class _SalesScreenState extends State<MobileSalesScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    '৳ ${_toDouble(p.sellingPrice).toStringAsFixed(2)}',
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  // PRICE
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        '৳ ${_toDouble(p.sellingPrice).toStringAsFixed(2)}',
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      if (isAdded)
+                        Icon(
+                          Icons.check_circle,
+                          color: AppColors.primaryColor(context),
+                          size: 16,
+                        ),
+                    ],
                   ),
                   const SizedBox(height: 6),
+
+                  // PRODUCT NAME
                   Text(
-                    p.toString(),
+                    p.name ?? 'Product',
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
-                      fontWeight: FontWeight.w500,
+                      fontWeight: isAdded ? FontWeight.bold : FontWeight.w500,
+                      color: isAdded ? AppColors.primaryColor(context) : Colors.black,
                     ),
                   ),
                   const SizedBox(height: 6),
+
+                  // CATEGORY & BRAND
                   Text(
                     '${p.brandInfo?.name ?? ''} • ${p.categoryInfo?.name ?? ''}',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: Colors.grey.shade600,
+                    ),
                   ),
                   const SizedBox(height: 6),
+
+                  // STOCK & ACTION
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
+                      // STOCK BADGE
                       Container(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
+                          horizontal: 8,
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: p.stockQty == 0 ? Colors.grey : Colors.redAccent,
-                          borderRadius: BorderRadius.circular(20),
+                          color: p.stockQty == 0
+                              ? Colors.grey
+                              : (p.stockQty != null && p.stockQty! < 10
+                              ? Colors.orange
+                              : Colors.green),
+                          borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
-                          'Stock ${p.stockQty ?? 0}',
+                          'Stock: ${p.stockQty ?? 0}',
                           style: const TextStyle(
                             color: Colors.white,
-                            fontSize: 11,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                       ),
-                       Icon(
-                        Icons.add_circle_outline,
-                        color: AppColors.primaryColor(context),
+
+                      // ADD/INCREASE BUTTON
+                      Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          color: isAdded
+                              ? AppColors.primaryColor(context).withOpacity(0.1)
+                              : AppColors.primaryColor(context),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          isAdded ? Icons.add_circle : Icons.add_circle_outline,
+                          color: isAdded
+                              ? AppColors.primaryColor(context)
+                              : Colors.white,
+                          size: 20,
+                        ),
                       ),
                     ],
                   ),
@@ -1762,7 +2054,6 @@ class _SalesScreenState extends State<MobileSalesScreen> {
       ),
     );
   }
-
   // Date selector
   void _selectDate() async {
     DateTime? pickedDate = await showDatePicker(
