@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import '../configs/configs.dart';
 
+const double _kMenuCapHeight = 240;
+const double _kMenuVerticalMargin = 6;
+
 class AppDropdown<T> extends FormField<T> {
   AppDropdown({
     super.key,
@@ -13,226 +16,263 @@ class AppDropdown<T> extends FormField<T> {
     this.isSearch = false,
     this.isNeedAll = false,
     this.allItem,
-    this.isLabel = false,
+    this.isLabel = true,
     super.validator,
   }) : super(
-         initialValue: value,
-         autovalidateMode: AutovalidateMode.onUserInteraction,
-         builder: (FormFieldState<T> state) {
-           final context = state.context;
-           final bool showLabel = !(isLabel ?? false);
-           final bool isMobile = Responsive.isMobile(context);
+    initialValue: value,
+    autovalidateMode: AutovalidateMode.onUserInteraction,
+    builder: (FormFieldState<T> state) {
+      final context = state.context;
 
-           final LayerLink layerLink = LayerLink();
-           OverlayEntry? overlayEntry;
-           bool isOpen = false;
+      final GlobalKey fieldKey = GlobalKey();
+      OverlayEntry? overlayEntry;
+      bool isOpen = false;
 
-           final TextEditingController controller = TextEditingController(
-             text: state.value?.toString() ?? "",
-           );
+      final TextEditingController controller =
+      TextEditingController(text: state.value?.toString() ?? '');
 
-           // ---------- ITEMS ----------
-           final List<T> items = [...itemList];
-           if (isNeedAll && allItem != null) {
-             items.insert(0, allItem as T);
-           }
+      /// ---------- ITEMS ----------
+      final List<T> items = [...itemList];
+      if (isNeedAll && allItem != null) {
+        items.insert(0, allItem as T);
+      }
+      List<T> filteredItems = [...items];
 
-           // ---------- SEARCH STATE (PERSISTENT) ----------
-           List<T> filteredItems = [...items];
+      Rect? _getFieldRect() {
+        final box =
+        fieldKey.currentContext?.findRenderObject() as RenderBox?;
+        if (box == null || !box.hasSize) return null;
+        final pos = box.localToGlobal(Offset.zero);
+        return Rect.fromLTWH(
+          pos.dx,
+          pos.dy,
+          box.size.width,
+          box.size.height,
+        );
+      }
 
-           void closeOverlay() {
-             overlayEntry?.remove();
-             overlayEntry = null;
-             isOpen = false;
-           }
+      void _removeOverlay() {
+        overlayEntry?.remove();
+        overlayEntry = null;
+        isOpen = false;
+      }
 
-           void openOverlay() {
-             if (isOpen) return;
-             isOpen = true;
+      OverlayEntry _createOverlay() {
+        return OverlayEntry(
+          builder: (context) {
+            final media = MediaQuery.of(context);
+            final fieldRect = _getFieldRect();
+            if (fieldRect == null) return const SizedBox.shrink();
 
-             final RenderBox renderBox =
-                 context.findRenderObject() as RenderBox;
-             final size = renderBox.size;
+            final keyboard = media.viewInsets.bottom;
+            final screenHeight = media.size.height;
 
-             overlayEntry = OverlayEntry(
-               builder: (_) => GestureDetector(
-                 behavior: HitTestBehavior.translucent,
-                 onTap: closeOverlay,
-                 child: Stack(
-                   children: [
-                     Positioned(
-                       width: size.width,
-                       child: CompositedTransformFollower(
-                         link: layerLink,
-                         offset: Offset(0, size.height + 4),
-                         child: Material(
-                           elevation: 4,
-                           borderRadius: BorderRadius.circular(8),
-                           color: AppColors.bottomNavBg(context),
-                           child: StatefulBuilder(
-                             builder: (context, setOverlayState) {
-                               return ConstrainedBox(
-                                 constraints: const BoxConstraints(
-                                   maxHeight: 220,
-                                 ),
-                                 child: ListView.separated(
-                                   padding: EdgeInsets.zero,
-                                   itemCount: filteredItems.length,
-                                   separatorBuilder: (_, __) =>
-                                       const Divider(height: 1),
-                                   itemBuilder: (_, index) {
-                                     final item = filteredItems[index];
-                                     return InkWell(
-                                       onTap: () {
-                                         controller.text = item.toString();
-                                         state.didChange(item);
-                                         onChanged(item);
-                                         closeOverlay();
-                                       },
-                                       child: Padding(
-                                         padding: const EdgeInsets.symmetric(
-                                           vertical: 6,
-                                           horizontal: 12,
-                                         ),
-                                         child: Text(
-                                           item.toString(),
-                                           style: AppTextStyle.body(context),
-                                         ),
-                                       ),
-                                     );
-                                   },
-                                 ),
-                               );
-                             },
-                           ),
-                         ),
-                       ),
-                     ),
-                   ],
-                 ),
-               ),
-             );
+            final spaceBelow = screenHeight -
+                keyboard -
+                fieldRect.bottom -
+                _kMenuVerticalMargin;
+            final spaceAbove =
+                fieldRect.top - media.padding.top - _kMenuVerticalMargin;
 
-             Overlay.of(context).insert(overlayEntry!);
-           }
+            final bool showAbove =
+                spaceAbove > spaceBelow && spaceAbove > 100;
 
-           return SizedBox(
-             height: showLabel ? (isMobile ? 83 : 68) : (isMobile ? 60 : 50),
-             child: Column(
-               crossAxisAlignment: CrossAxisAlignment.start,
-               children: [
-                 // ---------- LABEL ----------
-                 if (showLabel)
-                   Row(
-                     children: [
-                       Text(
-                         label,
-                         style: TextStyle(
-                           fontSize: 12,
-                           fontWeight: FontWeight.w500,
-                           color: AppColors.text(context),
-                         ),
-                       ),
-                       if (isRequired)
-                         const Text("*", style: TextStyle(color: Colors.red)),
-                     ],
-                   ),
-                 if (showLabel) const SizedBox(height: 4),
+            final double maxHeight = (showAbove
+                ? spaceAbove
+                : spaceBelow)
+                .clamp(80.0, _kMenuCapHeight);
 
-                 // ---------- INPUT ----------
-                 CompositedTransformTarget(
-                   link: layerLink,
+            final double top = showAbove
+                ? fieldRect.top - maxHeight - _kMenuVerticalMargin
+                : fieldRect.bottom + _kMenuVerticalMargin;
 
-                   child: SizedBox(
-                     height: isMobile ? 35 : 30, // ✅ proper height
-                     child: TextField(
-                       maxLines: 1,
-                       controller: controller,
-                       readOnly: !isSearch,
-                       onTap: () {
-                         filteredItems = [...items];
-                         openOverlay();
-                       },
-                       onChanged: (value) {
-                         if (!isSearch) return;
+            return GestureDetector(
+              behavior: HitTestBehavior.translucent,
+              onTap: _removeOverlay,
+              child: Stack(
+                children: [
+                  Positioned(
+                    left: fieldRect.left,
+                    top: top,
+                    width: fieldRect.width,
+                    child: Material(
+                      elevation: 6,
+                      borderRadius: BorderRadius.circular(8),
+                      clipBehavior: Clip.antiAlias,
+                      child: ConstrainedBox(
+                        constraints:
+                        BoxConstraints(maxHeight: maxHeight),
+                        child: ListView.separated(
+                          padding: EdgeInsets.zero,
+                          itemCount: filteredItems.length,
+                          separatorBuilder: (_, __) =>
+                          const Divider(height: 1),
+                          itemBuilder: (_, index) {
+                            final item = filteredItems[index];
+                            return InkWell(
+                              onTap: () {
+                                controller.text = item.toString();
+                                state.didChange(item);
+                                onChanged(item);
+                                _removeOverlay();
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 12, horizontal: 12),
+                                child: Text(
+                                  item.toString(),
+                                  style:
+                                  AppTextStyle.body(context),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      }
 
-                         filteredItems = items
-                             .where(
-                               (e) => e.toString().toLowerCase().contains(
-                                 value.toLowerCase(),
-                               ),
-                             )
-                             .toList();
+      void _showOverlay() {
+        if (filteredItems.isEmpty) return;
+        if (overlayEntry == null) {
+          overlayEntry = _createOverlay();
+          Overlay.of(context, rootOverlay: true)
+              .insert(overlayEntry!);
+          isOpen = true;
+        } else {
+          overlayEntry!.markNeedsBuild();
+        }
+      }
 
-                         if (!isOpen) {
-                           openOverlay();
-                         } else {
-                           overlayEntry?.markNeedsBuild();
-                         }
-                       },
-                       decoration: InputDecoration(
-                         hintText: hint,
-                         hintStyle: AppTextStyle.body(context),
-                         counterStyle: AppTextStyle.body(context),
-                         helperStyle: AppTextStyle.body(context),
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          /// ---------- LABEL ----------
+          if (isLabel) ...[
+            Row(
+              children: [
+                Text(
+                  label,
+                  style: AppTextStyle
+                      .labelDropdownTextStyle(context),
+                ),
+                if (isRequired)
+                  const Text('*',
+                      style: TextStyle(color: Colors.red)),
+              ],
+            ),
+            const SizedBox(height: 4),
+          ],
 
-                         isDense: true,
-                         contentPadding: EdgeInsets.zero,
+          /// ---------- FIELD ----------
+          SizedBox(
+            key: fieldKey,
+            height: 55, // 🔒 FIXED HEIGHT
+            child: TextField(
+              controller: controller,
+              readOnly: !isSearch,
+              maxLines: 1,
+              textAlignVertical: TextAlignVertical.center,
+              onTap: () {
+                filteredItems = [...items];
+                _showOverlay();
+              },
+              onChanged: (value) {
+                if (!isSearch) return;
+                filteredItems = items
+                    .where((e) => e
+                    .toString()
+                    .toLowerCase()
+                    .contains(value.toLowerCase()))
+                    .toList();
+                _showOverlay();
+              },
+              decoration: InputDecoration(
+                hintText: hint,
+                hintStyle: TextStyle(
+                  color: AppColors.greyColor(context),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w300,
+                ),
+                isDense: true,
+                contentPadding: const EdgeInsets.only(
+                    right: 8,left: 0, bottom: 0,top: 0),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius:
+                  BorderRadius.circular(AppSizes.radius),
+                  borderSide: BorderSide(
+                    color: state.hasError
+                        ? Colors.red
+                        : AppColors.greyColor(context),
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius:
+                  BorderRadius.circular(AppSizes.radius),
+                  borderSide: BorderSide(
+                    color: state.hasError
+                        ? Colors.red
+                        : AppColors.primaryColor(context),
+                  ),
+                ),
 
-                         border: OutlineInputBorder(
-                           borderRadius: BorderRadius.circular(6),
-                         ),
-                         enabledBorder: OutlineInputBorder(
-                           borderRadius: BorderRadius.circular(6),
-                           borderSide: BorderSide(
-                             color: state.hasError ? Colors.red : Colors.grey,
-                           ),
-                         ),
-                         focusedBorder: OutlineInputBorder(
-                           borderRadius: BorderRadius.circular(6),
-                           borderSide: BorderSide(
-                             color: state.hasError ? Colors.red : Colors.blue,
-                           ),
-                         ),
-                         suffixIcon: InkWell(
-                           onTap: () {
-                             filteredItems = [...items];
-                             openOverlay();
-                           },
-                           child: Icon(
-                             isOpen
-                                 ? Icons.arrow_drop_up
-                                 : Icons.arrow_drop_down,
-                             size: 20,
-                           ),
-                         ),
-                       ),
-                     ),
-                   ),
-                 ),
+                /// ---------- CLEAR + DROPDOWN ----------
+                suffixIcon: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (controller.text.isNotEmpty)
+                      InkWell(
+                        onTap: () {
+                          controller.clear();
+                          state.didChange(null);
+                          onChanged(null);
+                          _removeOverlay();
+                        },
+                        child: const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 4),
+                          child: Icon(Icons.close, size: 18),
+                        ),
+                      ),
+                    InkWell(
+                      onTap: () =>
+                      isOpen ? _removeOverlay() : _showOverlay(),
+                      child: const Padding(
+                        padding: EdgeInsets.only(right: 4),
+                        child: Icon(Icons.keyboard_arrow_down),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
 
-                 // ---------- ERROR ----------
-                 if (state.hasError)
-                   Padding(
-                     padding: const EdgeInsets.only(top: 2, left: 4),
-                     child: Text(
-                       state.errorText!,
-                       style: const TextStyle(
-                         fontSize: 10.5,
-                         color: Colors.red,
-                       ),
-                     ),
-                   ),
-               ],
-             ),
-           );
-         },
-       );
+          /// ---------- ERROR ----------
+          if (state.hasError)
+            Padding(
+              padding:
+              const EdgeInsets.only(top: 4, left: 6),
+              child: Text(
+                state.errorText!,
+                style:
+                AppTextStyle.errorTextStyle(context),
+              ),
+            ),
+        ],
+      );
+    },
+  );
 
   final String label;
   final String hint;
   final bool isRequired;
-  final bool? isLabel;
+  final bool isLabel;
   final bool isSearch;
   final bool isNeedAll;
   final T? allItem;

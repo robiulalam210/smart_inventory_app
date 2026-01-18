@@ -6,7 +6,7 @@ Widget buildDoctorAvatar({
   required bool isMan,
   required bool isDoctor,
   required BuildContext context,
-  double size = 110, // default same as your container
+  double size = 100, // default same as your container
   double borderRadius = 20,
 }) {
   final String fullImageUrl;

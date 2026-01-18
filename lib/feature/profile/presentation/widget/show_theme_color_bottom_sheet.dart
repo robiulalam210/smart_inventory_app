@@ -1,8 +1,10 @@
+import 'package:date_format/date_format.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 import '../../../../core/configs/configs.dart';
 import '../../../../core/database/auth_db.dart';
 import '../../../common/presentation/cubit/theme_cubit.dart';
+
 final List<Map<String, dynamic>> colors = const [
   {'color': Color(0xff60DAFF), 'name': 'Default'},
   {'color': Color(0xff69B128), 'name': 'Default 2'},
@@ -30,21 +32,21 @@ final List<Map<String, dynamic>> colors = const [
 ];
 
 void showThemeColorBottomSheet(
-    BuildContext context,
-    ThemeCubit themeCubit,
-    Color currentColor,
-    ) {
+  BuildContext context,
+  ThemeCubit themeCubit,
+  Color currentColor,
+) {
   final isDark = Theme.of(context).brightness == Brightness.dark;
 
   showModalBottomSheet(
     context: context,
-    backgroundColor: isDark ? const Color(0xFF23272B) : Colors.white,
+    backgroundColor: AppColors.bottomNavBg(context),
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
     ),
     builder: (_) {
-      return Padding(
-        padding: const EdgeInsets.all(16),
+      return SingleChildScrollView(
+        padding: const EdgeInsets.all(14),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -58,13 +60,29 @@ void showThemeColorBottomSheet(
               ),
             ),
             const SizedBox(height: 16),
-            Text(
-              'choose_theme_color'.tr(),
-              style:  TextStyle(
-                fontSize: 18,
-                color: AppColors.text(context),
-                fontWeight: FontWeight.w600,
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                gapW8,
+                Text(
+                  'choose_theme_color'.tr(),
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: AppColors.text(context),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+
+                IconButton(
+                  onPressed: () {
+                    AppRoutes.pop(context);
+                  },
+                  icon: Icon(
+                    HugeIcons.strokeRoundedCancelSquare,
+                    color: AppColors.errorColor(context),
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 20),
             Wrap(
@@ -76,7 +94,8 @@ void showThemeColorBottomSheet(
                   onTap: () async {
                     themeCubit.setPrimaryColor(c['color']);
                     await AuthLocalDB.savePrimaryColor(
-                        c['color'].value.toString());
+                      c['color'].value.toString(),
+                    );
                     if (!context.mounted) return;
                     Navigator.pop(context);
                   },
@@ -90,9 +109,7 @@ void showThemeColorBottomSheet(
                           color: c['color'],
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color: selected
-                                ? c['color']
-                                : Colors.grey.shade300,
+                            color: selected ? c['color'] : Colors.grey.shade300,
                             width: selected ? 3 : 1,
                           ),
                         ),

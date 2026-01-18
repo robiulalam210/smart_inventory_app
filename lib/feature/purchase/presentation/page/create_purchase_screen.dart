@@ -480,7 +480,7 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                           lg: 3,
                           xl: 3,
                           child: CustomInputField(
-                            radius: 10,
+
                             isRequired: true,
                             readOnly: true,
                             controller: context
@@ -488,7 +488,7 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                                 .dateEditingController,
                             hintText: 'Purchase Date',
                             keyboardType: TextInputType.datetime,
-                            bottom: 15.0,
+
                             fillColor: AppColors.whiteColor(context),
                             validator: (value) {
                               return value!.isEmpty

@@ -72,47 +72,45 @@ class _ProductsScreenState extends State<MobileProductScreen> {
 
       floatingActionButton: FloatingActionButton(
         backgroundColor: AppColors.primaryColor(context),
-        onPressed: () => _showCreateProductDialog(context),
+        onPressed: () => _showCreateProductBottomSheet(context),
         child: Icon(Icons.add),
       ),
-      body: SafeArea(child: _buildContentArea()),
+      body: SafeArea(child:  ResponsiveCol(
+        xs: 12,
+        sm: 12,
+        md: 12,
+        lg: 10,
+        xl: 10,
+        child: RefreshIndicator(
+          color: AppColors.primaryColor(context),
+          onRefresh: () async {
+            _fetchProductList();
+          },
+          child: Container(
+            padding: AppTextStyle.getResponsivePaddingBody(context),
+            child: BlocConsumer<ProductsBloc, ProductsState>(
+              listener: (context, state) {
+                _handleBlocState(state);
+              },
+              builder: (context, state) {
+                return SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      _buildMobileHeader(),
+                      const SizedBox(height: 8),
+                      SizedBox(child: _buildProductList(state)),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      )),
     );
   }
 
-  Widget _buildContentArea() {
-    return ResponsiveCol(
-      xs: 12,
-      sm: 12,
-      md: 12,
-      lg: 10,
-      xl: 10,
-      child: RefreshIndicator(
-        color: AppColors.primaryColor(context),
-        onRefresh: () async {
-          _fetchProductList();
-        },
-        child: Container(
-          padding: AppTextStyle.getResponsivePaddingBody(context),
-          child: BlocConsumer<ProductsBloc, ProductsState>(
-            listener: (context, state) {
-              _handleBlocState(state);
-            },
-            builder: (context, state) {
-              return SingleChildScrollView(
-                child: Column(
-                  children: [
-                    _buildMobileHeader(),
-                    const SizedBox(height: 8),
-                    SizedBox(child: _buildProductList(state)),
-                  ],
-                ),
-              );
-            },
-          ),
-        ),
-      ),
-    );
-  }
+
 
   void _handleBlocState(ProductsState state) {
     if (state is ProductsDeleteLoading) {
@@ -211,7 +209,7 @@ class _ProductsScreenState extends State<MobileProductScreen> {
             SizedBox(
               child: ProductDataTableWidget(
                 products: state.list,
-                onEdit: (v) => _showEditDialog(context, v, false),
+                onEdit: (v) => _showEditBottomSheet(context, v,),
                 onDelete: (v) async {
                   final shouldDelete = await showDeleteConfirmationDialog(
                     context,
@@ -272,20 +270,31 @@ class _ProductsScreenState extends State<MobileProductScreen> {
     }
   }
 
-  void _showCreateProductDialog(BuildContext context) {
-    showDialog(
+  void _showCreateProductBottomSheet(BuildContext context) {
+    showModalBottomSheet(
       context: context,
+      isScrollControlled: true, // ✅ full control with keyboard
+      backgroundColor: Colors.transparent, // for rounded corners
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(20),
+        ),
+      ),
       builder: (context) {
-        return Dialog(
-          insetPadding: const EdgeInsets.all(20),
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              // maxWidth: Responsive.isMobile(context)
-              //     ? AppSizes.width(context)
-              //     : AppSizes.width(context) * 0.6,
-              maxHeight: Responsive.isMobile(context)
-                  ? AppSizes.height(context) * 0.7
-                  : AppSizes.height(context) * 0.8,
+        final height = AppSizes.height(context) * 0.9;
+
+        return Padding(
+          // ✅ prevents keyboard overlap
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          child: Container(
+            height: height,
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(
+                top: Radius.circular(20),
+              ),
             ),
             child: const MobileProductCreate(),
           ),
@@ -294,27 +303,29 @@ class _ProductsScreenState extends State<MobileProductScreen> {
     );
   }
 
-  void _showEditDialog(
-    BuildContext context,
-    ProductModel product,
-    bool isMobile,
-  ) {
-    showDialog(
+  void _showEditBottomSheet(
+      BuildContext context,
+      ProductModel product,
+      ) {
+    showModalBottomSheet(
       context: context,
+      isScrollControlled: true, // ✅ allows keyboard and full scroll
+      backgroundColor: Colors.transparent, // for rounded corners
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
       builder: (context) {
-        return Dialog(
-          insetPadding: const EdgeInsets.all(10),
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              // minWidth: isMobile
-              //     ? double.infinity
-              //     : AppSizes.width(context) * 0.7,
-              // maxWidth: isMobile
-              //     ? double.infinity
-              //     : AppSizes.width(context) * 0.7,
-              maxHeight: isMobile
-                  ? AppSizes.height(context) * 0.7
-                  : AppSizes.height(context) * 0.8,
+        final height =  AppSizes.height(context) * 0.9;
+
+        return Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          child: Container(
+            height: height,
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
             ),
             child: MobileProductCreate(
               productId: product.id.toString(),

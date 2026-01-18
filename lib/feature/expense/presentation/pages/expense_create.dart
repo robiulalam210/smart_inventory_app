@@ -544,7 +544,7 @@ class _ExpenseCreateScreenState extends State<ExpenseCreateScreen> {
                       CustomInputField(
                         isRequiredLable: true,
                         isRequired: false,
-                        maxLine: 5,
+
                         controller: expenseBloc.noteTextController,
                         hintText: 'Note',
                         fillColor: const Color.fromARGB(255, 255, 255, 255),

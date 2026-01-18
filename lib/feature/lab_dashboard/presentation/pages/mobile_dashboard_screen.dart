@@ -101,11 +101,11 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
   Widget _buildFilterSegmentedControl() {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 12),
-      padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        color: AppColors.bottomNavBg(context),
-        borderRadius: BorderRadius.circular(30),
-      ),
+      padding: const EdgeInsets.only(top: 4,bottom: 4),
+      // decoration: BoxDecoration(
+      //   color: AppColors.bottomNavBg(context),
+      //   borderRadius: BorderRadius.circular(30),
+      // ),
       child: CupertinoSegmentedControl<String>(
         children: {
           'current_day': _segText("Today", 'current_day'),
@@ -133,11 +133,11 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
     final bool isSelected = selectedPurchaseOverviewType == value;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Text(
         text,
         style: TextStyle(
-          fontSize: 12,
+          fontSize: 14,
           fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
           color: isSelected
               ? AppColors.text(context)// ✅ selected text color
@@ -167,73 +167,42 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
         ),
         border: Border.all(color: color.withValues(alpha: 0.25)),
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
       child: FittedBox(
         fit: BoxFit.scaleDown,
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            Icon(icon, color: color, size: 35),
-            const SizedBox(width: 8),
+            Icon(icon, color: color, size: 30),
+            const SizedBox(width: 6),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                  ),
+                  style: AppTextStyle.bodyLarge(context)
                 ),
                 const SizedBox(height: 4),
                 if (isCurrency)
                   AnimatedAmountCounter(
                     amount:double.tryParse(value.toString()) ?? 0.0,
                     prefix: '৳ ',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                    ),
+                    style: AppTextStyle.body(context)
                   )
                 else
                   AnimatedCounter(
                     amount:
                     int.tryParse(value.toString()) ?? 0,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                    ),
+                      style: AppTextStyle.body(context)
                   ),
               ],
             ),
           ],
         ),
       ),
-      // child: Column(
-      //   crossAxisAlignment: CrossAxisAlignment.start,
-      //   children: [
-      //     Icon(icon, color: color, size: 22),
-      //     const Spacer(),
-      //     Text(
-      //       title,
-      //       style: TextStyle(
-      //         fontSize: 12,
-      //         color: AppColors.text(context).withValues(alpha: 0.7),
-      //       ),
-      //     ),
-      //     const SizedBox(height: 4),
-      //     Text(
-      //       isCurrency ? "৳ ${value.toStringAsFixed(2)}" : value.toString(),
-      //       style: TextStyle(
-      //         fontSize: 16,
-      //         fontWeight: FontWeight.bold,
-      //         color: AppColors.text(context),
-      //       ),
-      //     ),
-      //   ],
-      // ),
+
     );
   }
 
@@ -244,8 +213,8 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
       physics: const NeverScrollableScrollPhysics(),
       crossAxisCount:  5,
       childAspectRatio: 1.1,
-      crossAxisSpacing: 8,
-      mainAxisSpacing: 8,
+      crossAxisSpacing: 4,
+      mainAxisSpacing: 4,
       children: [
         dashboardCardItem(
           title: "Total Sales",
@@ -277,14 +246,14 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
               : Colors.red,
           isCurrency: true,
         ),
-        // dashboardCardItem(
-        //   title: "Stock Alerts",
-        //   value: ((data.stockAlerts?.lowStock ?? 0) +
-        //       (data.stockAlerts?.outOfStock ?? 0))
-        //       .toDouble(),
-        //   icon: Icons.warning,
-        //   color: Colors.orange,
-        // ),
+        dashboardCardItem(
+          title: "Stock Alerts",
+          value: ((data.stockAlerts?.lowStock ?? 0) +
+              (data.stockAlerts?.outOfStock ?? 0))
+              .toDouble(),
+          icon: Icons.warning,
+          color: Colors.orange,
+        ),
       ],
     );
   }
