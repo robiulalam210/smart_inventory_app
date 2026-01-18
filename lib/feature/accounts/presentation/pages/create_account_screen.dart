@@ -99,6 +99,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                             label: "Account Type",
                             hint: "Select Account type",
 
+                            isLabel: true,
                             isRequired: true,
                             isNeedAll: false,
                             value: selectedType.isEmpty ? null : selectedType,

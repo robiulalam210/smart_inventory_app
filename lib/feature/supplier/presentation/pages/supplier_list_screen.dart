@@ -193,7 +193,8 @@ class _SupplierScreenState extends State<SupplierScreen> {
                       flex: 2,
                       child: AppDropdown(
                         hint: "Select Status",
-                        isLabel: true,
+                        isLabel: false,
+
                         isNeedAll: true,
                         value: dataBloc.selectedState.isEmpty
                             ? null
@@ -236,7 +237,7 @@ class _SupplierScreenState extends State<SupplierScreen> {
                     ),
                   ],
                 ),
-
+gapH16,
               SizedBox(
                 child: BlocBuilder<SupplierListBloc, SupplierListState>(
                   builder: (context, state) {

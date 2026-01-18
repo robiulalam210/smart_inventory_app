@@ -200,7 +200,7 @@ class _ProductsFormState extends State<ProductsForm> {
                           Expanded(child: _buildUnitDropdown()),
                         ],
                       ),
-
+gapH8,
                       // Second Row: Groups, Brand, Source
                       Row(
                         children: [

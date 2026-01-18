@@ -29,7 +29,9 @@ class _SaleReportScreenState extends State<SaleReportScreen> {
     filterTextController.clear();
 
     // Load dropdown data
-    context.read<UserBloc>().add(FetchUserList(context, dropdownFilter: "?status=1"));
+    context.read<UserBloc>().add(
+      FetchUserList(context, dropdownFilter: "?status=1"),
+    );
     context.read<CustomerBloc>().add(FetchCustomerActiveList(context));
 
     // Fetch initial sales report
@@ -42,13 +44,15 @@ class _SaleReportScreenState extends State<SaleReportScreen> {
     DateTime? from,
     DateTime? to,
   }) {
-    context.read<SalesReportBloc>().add(FetchSalesReport(
-      context: context,
-      customer: customer,
-      seller: seller,
-      from: from,
-      to: to,
-    ));
+    context.read<SalesReportBloc>().add(
+      FetchSalesReport(
+        context: context,
+        customer: customer,
+        seller: seller,
+        from: from,
+        to: to,
+      ),
+    );
   }
 
   @override
@@ -59,7 +63,8 @@ class _SaleReportScreenState extends State<SaleReportScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isBigScreen = Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
+    final isBigScreen =
+        Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
 
     return Container(
       color: AppColors.bottomNavBg(context),
@@ -95,6 +100,8 @@ class _SaleReportScreenState extends State<SaleReportScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildFilterRow(),
+              const SizedBox(height: 8),
+
               _buildSummaryCards(),
               const SizedBox(height: 8),
               SizedBox(child: _buildDataTable()),
@@ -119,7 +126,7 @@ class _SaleReportScreenState extends State<SaleReportScreen> {
               return AppDropdown<CustomerActiveModel>(
                 label: "Customer",
                 isSearch: true,
-                isLabel: true,
+                isLabel: false,
                 hint: "Select Customer",
                 isNeedAll: true,
                 isRequired: false,
@@ -130,7 +137,13 @@ class _SaleReportScreenState extends State<SaleReportScreen> {
                     from: selectedDateRange?.start,
                     to: selectedDateRange?.end,
                     customer: newVal?.id.toString() ?? '',
-                    seller: context.read<SalesReportBloc>().selectedSeller?.id.toString() ?? '',
+                    seller:
+                        context
+                            .read<SalesReportBloc>()
+                            .selectedSeller
+                            ?.id
+                            .toString() ??
+                        '',
                   );
                 },
               );
@@ -141,13 +154,13 @@ class _SaleReportScreenState extends State<SaleReportScreen> {
 
         // 🧑‍💼 Seller Dropdown
         SizedBox(
-         width: 200,
+          width: 200,
           child: BlocBuilder<UserBloc, UserState>(
             builder: (context, state) {
               return AppDropdown<UsersListModel>(
                 label: "Seller",
                 hint: "Select Seller",
-                isLabel: true,
+                isLabel: false,
                 isRequired: false,
                 isNeedAll: true,
                 value: context.read<SalesReportBloc>().selectedSeller,
@@ -156,7 +169,13 @@ class _SaleReportScreenState extends State<SaleReportScreen> {
                   _fetchSalesReport(
                     from: selectedDateRange?.start,
                     to: selectedDateRange?.end,
-                    customer: context.read<SalesReportBloc>().selectedCustomer?.id.toString() ?? '',
+                    customer:
+                        context
+                            .read<SalesReportBloc>()
+                            .selectedCustomer
+                            ?.id
+                            .toString() ??
+                        '',
                     seller: newVal?.id.toString() ?? '',
                   );
                 },
@@ -178,8 +197,20 @@ class _SaleReportScreenState extends State<SaleReportScreen> {
                 _fetchSalesReport(
                   from: value.start,
                   to: value.end,
-                  customer: context.read<SalesReportBloc>().selectedCustomer?.id.toString() ?? '',
-                  seller: context.read<SalesReportBloc>().selectedSeller?.id.toString() ?? '',
+                  customer:
+                      context
+                          .read<SalesReportBloc>()
+                          .selectedCustomer
+                          ?.id
+                          .toString() ??
+                      '',
+                  seller:
+                      context
+                          .read<SalesReportBloc>()
+                          .selectedSeller
+                          ?.id
+                          .toString() ??
+                      '',
                 );
               }
             },
@@ -187,16 +218,86 @@ class _SaleReportScreenState extends State<SaleReportScreen> {
         ),
         const SizedBox(width: 6),
 
-        AppButton(name: "Clear",
-    onPressed: () {
-    setState(() => selectedDateRange = null);
-    context.read<SalesReportBloc>().add(ClearSalesReportFilters());
-    _fetchSalesReport();
-    },
-
+        AppButton(
+          name: "Clear",
+          onPressed: () {
+            setState(() => selectedDateRange = null);
+            context.read<SalesReportBloc>().add(ClearSalesReportFilters());
+            _fetchSalesReport();
+          },
         ),
-        // Clear Filters Button
+gapW8,
+        BlocBuilder<SalesReportBloc, SalesReportState>(
+          builder: (context, state) {
+            if (state is! SalesReportSuccess) return const SizedBox();
 
+
+            return   AppButton(
+              size: 100,
+              isOutlined: true,
+              textColor: AppColors.errorColor(context),
+              name: "Pdf",
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => Scaffold(
+                      backgroundColor: Colors.red,
+                      body: PdfPreview.builder(
+                        useActions: true,
+                        allowSharing: false,
+                        canDebug: false,
+                        canChangeOrientation: false,
+                        canChangePageFormat: false,
+                        dynamicLayout: true,
+                        build: (format) =>
+                            generateSalesReportPdf(state.response),
+                        pdfPreviewPageDecoration: BoxDecoration(
+                          color: AppColors.white,
+                        ),
+                        actionBarTheme: PdfActionBarTheme(
+                          backgroundColor: AppColors.primaryColor(context),
+                          iconColor: Colors.white,
+                          textStyle: const TextStyle(color: Colors.white),
+                        ),
+                        actions: [
+                          IconButton(
+                            onPressed: () => AppRoutes.pop(context),
+                            icon: const Icon(
+                              Icons.cancel,
+                              color: Colors.red,
+                            ),
+                          ),
+                        ],
+                        pagesBuilder: (context, pages) {
+                          debugPrint('Rendering ${pages.length} pages');
+                          return PageView.builder(
+                            itemCount: pages.length,
+                            scrollDirection: Axis.vertical,
+                            itemBuilder: (context, index) {
+                              final page = pages[index];
+                              return Container(
+                                color: Colors.grey,
+                                alignment: Alignment.center,
+                                padding: const EdgeInsets.all(8.0),
+                                child: Image(
+                                  image: page.image,
+                                  fit: BoxFit.contain,
+                                ),
+                              );
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                );
+              },
+            );
+          },
+        ),
+
+        // Clear Filters Button
       ],
     );
   }
@@ -243,80 +344,29 @@ class _SaleReportScreenState extends State<SaleReportScreen> {
               Colors.purple,
             ),
 
-            AppButton(
-                size: 100,
-                name: "Pdf", onPressed: (){
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => Scaffold(
-                    backgroundColor: Colors.red,
-                    body: PdfPreview.builder(
-                      useActions: true,
-                      allowSharing: false,
-                      canDebug: false,
-                      canChangeOrientation: false,
-                      canChangePageFormat: false,
-                      dynamicLayout: true,
-                      build: (format) => generateSalesReportPdf(
-                        state.response,
 
-                      ),
-                      pdfPreviewPageDecoration:
-                      BoxDecoration(color: AppColors.white),
-                      actionBarTheme: PdfActionBarTheme(
-                        backgroundColor: AppColors.primaryColor(context),
-                        iconColor: Colors.white,
-                        textStyle: const TextStyle(color: Colors.white),
-                      ),
-                      actions: [
-                        IconButton(
-                          onPressed: () => AppRoutes.pop(context),
-                          icon: const Icon(Icons.cancel, color: Colors.red),
-                        ),
-                      ],
-                      pagesBuilder: (context, pages) {
-                        debugPrint('Rendering ${pages.length} pages');
-                        return PageView.builder(
-                          itemCount: pages.length,
-                          scrollDirection: Axis.vertical,
-                          itemBuilder: (context, index) {
-                            final page = pages[index];
-                            return Container(
-                              color: Colors.grey,
-                              alignment: Alignment.center,
-                              padding: const EdgeInsets.all(8.0),
-                              child: Image(image: page.image, fit: BoxFit.contain),
-                            );
-                          },
-                        );
-                      },
-                    ),
-                  ),
-                ),
-              );
-
-            })
           ],
         );
       },
     );
   }
 
-  Widget _buildSummaryCard(String title, String value, IconData icon, Color color) {
+  Widget _buildSummaryCard(
+    String title,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
     return Container(
       width: 170,
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: Colors.white,
+        border: Border.all(
+          color: AppColors.greyColor(context).withValues(alpha: 0.5),width: 0.5
+        ),
+        color: AppColors.bottomNavBg(context),
         borderRadius: BorderRadius.circular(8),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.2),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
+    
       ),
       child: Row(
         children: [
@@ -335,10 +385,10 @@ class _SaleReportScreenState extends State<SaleReportScreen> {
               ),
               Text(
                 value,
-                style:  TextStyle(
+                style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color:AppColors.text(context),
+                  color: AppColors.text(context),
                 ),
               ),
             ],
@@ -459,11 +509,14 @@ class SalesReportTableCard extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final totalWidth = constraints.maxWidth;
-        const numColumns = 7; // Invoice No, Date, Customer, Sales Price, Profit, Status, Actions
+        const numColumns =
+            7; // Invoice No, Date, Customer, Sales Price, Profit, Status, Actions
         const minColumnWidth = 120.0;
 
-        final dynamicColumnWidth =
-        (totalWidth / numColumns).clamp(minColumnWidth, double.infinity);
+        final dynamicColumnWidth = (totalWidth / numColumns).clamp(
+          minColumnWidth,
+          double.infinity,
+        );
 
         return Container(
           decoration: BoxDecoration(
@@ -524,12 +577,31 @@ class SalesReportTableCard extends StatelessWidget {
                                   ? (_) => onReportTap!()
                                   : null,
                               cells: [
-                                _buildDataCell(report.invoiceNo, dynamicColumnWidth),
-                                _buildDateCell(report.saleDate, dynamicColumnWidth),
-                                _buildDataCell(report.customerName, dynamicColumnWidth),
-                                _buildAmountCell(report.salesPrice, dynamicColumnWidth, isSales: true),
-                                _buildProfitCell(report.profit, dynamicColumnWidth),
-                                _buildStatusCell(report.paymentStatus, dynamicColumnWidth),
+                                _buildDataCell(
+                                  report.invoiceNo,
+                                  dynamicColumnWidth,
+                                ),
+                                _buildDateCell(
+                                  report.saleDate,
+                                  dynamicColumnWidth,
+                                ),
+                                _buildDataCell(
+                                  report.customerName,
+                                  dynamicColumnWidth,
+                                ),
+                                _buildAmountCell(
+                                  report.salesPrice,
+                                  dynamicColumnWidth,
+                                  isSales: true,
+                                ),
+                                _buildProfitCell(
+                                  report.profit,
+                                  dynamicColumnWidth,
+                                ),
+                                _buildStatusCell(
+                                  report.paymentStatus,
+                                  dynamicColumnWidth,
+                                ),
                               ],
                             );
                           }).toList(),
@@ -584,7 +656,6 @@ class SalesReportTableCard extends StatelessWidget {
           child: const Text('Status', textAlign: TextAlign.center),
         ),
       ),
-
     ];
   }
 
@@ -623,7 +694,11 @@ class SalesReportTableCard extends StatelessWidget {
     );
   }
 
-  DataCell _buildAmountCell(double amount, double width, {bool isSales = false}) {
+  DataCell _buildAmountCell(
+    double amount,
+    double width, {
+    bool isSales = false,
+  }) {
     return DataCell(
       SizedBox(
         width: width,
@@ -631,7 +706,9 @@ class SalesReportTableCard extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: isSales ? Colors.blue.withValues(alpha: 0.1) : Colors.green.withValues(alpha: 0.1),
+              color: isSales
+                  ? Colors.blue.withValues(alpha: 0.1)
+                  : Colors.green.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
@@ -659,7 +736,9 @@ class SalesReportTableCard extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: isPositive ? Colors.green.withValues(alpha: 0.1) : Colors.red.withValues(alpha: 0.1),
+              color: isPositive
+                  ? Colors.green.withValues(alpha: 0.1)
+                  : Colors.red.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
@@ -705,8 +784,6 @@ class SalesReportTableCard extends StatelessWidget {
     );
   }
 
-
-
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {
       case 'paid':
@@ -727,7 +804,4 @@ class SalesReportTableCard extends StatelessWidget {
   String _formatDate(DateTime date) {
     return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
   }
-
-
-
 }

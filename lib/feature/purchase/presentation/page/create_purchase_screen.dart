@@ -577,12 +577,11 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
 
                     return AppDropdown(
                       label: "Category",
-                      hint: selectedCategory.isEmpty
-                          ? "Select Category"
-                          : selectedCategory,
+                      hint:  "Select Category"
+                          ,
                       isRequired: false,
                       isNeedAll: true,
-                      isLabel: true,
+                      isLabel: false,
                       isSearch: true,
                       value: selectedCategory.isEmpty ? null : selectedCategory,
                       itemList: categoryList.map((e) => e.name ?? "").toList(),
@@ -652,7 +651,7 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
 
                     return AppDropdown<ProductModelStockModel>(
                       isRequired: false,
-                      isLabel: true,
+                      isLabel: false,
                       isSearch: true,
                       label: "Product",
                       hint: selectedCategoryId.isEmpty
@@ -1018,7 +1017,7 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
 
   Widget _buildChargesSection() {
     return ResponsiveRow(
-      spacing: 20,
+      spacing: 6,
       runSpacing: 10,
       children: [
         _buildChargeField(
@@ -1078,8 +1077,8 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
         children: [
           Text(label, style: AppTextStyle.cardLevelText(context)),
           Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            mainAxisAlignment: MainAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Expanded(
                 child: CupertinoSegmentedControl<String>(
@@ -1277,14 +1276,8 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                 child: AppDropdown<String>(
                   label: "Payment Method",
                   hint:
-                  context
-                      .read<CreatePurchaseBloc>()
-                      .selectedPaymentMethod
-                      .isEmpty
-                      ? "Select Payment Method"
-                      : context
-                      .read<CreatePurchaseBloc>()
-                      .selectedPaymentMethod,
+                   "Select Payment Method"
+                      ,
                   isLabel: false,
                   isRequired: true,
                   isNeedAll: false,

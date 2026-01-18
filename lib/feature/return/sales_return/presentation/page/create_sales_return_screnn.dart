@@ -373,6 +373,7 @@ mainAxisAlignment: MainAxisAlignment.start,                  children: [
         return AppDropdown<SalesInvoiceModel>(
           label: "Receipt Number",
           isSearch: true,
+          isLabel: true,
           hint: _selectedInvoice?.invoiceNo ?? "Select Receipt Number",
           isRequired: true,
           value: _selectedInvoice,
@@ -468,6 +469,7 @@ mainAxisAlignment: MainAxisAlignment.start,                  children: [
                 flex: 2,
                 child: AppDropdown<String>(
                   label: "Type",
+                  isLabel: true,
                   hint: _returnChargeType ?? "Select",
                   value: _returnChargeType,
                   itemList: ['fixed', 'percentage'],

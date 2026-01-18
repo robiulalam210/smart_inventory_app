@@ -380,6 +380,8 @@ class _MoneyReceiptListScreenState extends State<MobileMoneyReceiptForm> {
             return AppDropdown(
               label: "Customer",
               isSearch: true,
+
+              isLabel: false,
               hint: moneyReceiptBloc.selectCustomerModel?.name?.toString() ?? "Select Customer",
               isNeedAll: false,
               isRequired: true,

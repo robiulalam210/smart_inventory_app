@@ -219,24 +219,21 @@ class _ProfitLossScreenState extends State<ProfitLossScreen> {
 
   Widget _buildProfitLossCard(String title, String value, IconData icon, Color color, {bool isProfit = false}) {
     return Container(
-      width: 200,
+      width: 150,
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: Colors.white,
         borderRadius: BorderRadius.circular(8),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.2),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-        border: isProfit ? Border.all(color: color.withValues(alpha: 0.3), width: 2) : null,
+
+
+        color: AppColors.bottomNavBg(context),
+        border: isProfit ? Border.all(color: color.withValues(alpha: 0.3), width: 1) :  Border.all(
+            color: AppColors.greyColor(context).withValues(alpha: 0.5),width: 0.5
+        ),
       ),
       child: Row(
         children: [
           Icon(icon, color: color, size: 32),
-          const SizedBox(width: 12),
+          const SizedBox(width: 6),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -252,7 +249,7 @@ class _ProfitLossScreenState extends State<ProfitLossScreen> {
                 Text(
                   value,
                   style: TextStyle(
-                    fontSize: 18,
+                    fontSize: 16,
                     fontWeight: FontWeight.bold,
                     color: isProfit ? color :AppColors.text(context),
                   ),

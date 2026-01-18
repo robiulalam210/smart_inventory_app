@@ -13,7 +13,7 @@ class AppDropdown<T> extends FormField<T> {
     this.isSearch = false,
     this.isNeedAll = false,
     this.allItem,
-    this.isLabel = true,
+    this.isLabel = false,
     super.validator,
   }) : super(
     initialValue: value,
@@ -85,7 +85,7 @@ class AppDropdown<T> extends FormField<T> {
 
           /// ---------- FIELD ----------
           SizedBox(
-            height: 55,
+            height: 35,
             child: InkWell(
               onTap: _showDropdown,
               borderRadius: BorderRadius.circular(AppSizes.radius),
@@ -280,7 +280,7 @@ class _DropdownBottomSheetState<T> extends State<_DropdownBottomSheet<T>> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       contentPadding: const EdgeInsets.symmetric(
-                        vertical: 12,
+                        vertical: 6,
                         horizontal: 16,
                       ),
                     ),
@@ -293,7 +293,7 @@ class _DropdownBottomSheetState<T> extends State<_DropdownBottomSheet<T>> {
                 child: filteredItems.isEmpty
                     ? Center(
                   child: Padding(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(12),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -339,6 +339,7 @@ class _DropdownBottomSheetState<T> extends State<_DropdownBottomSheet<T>> {
                         ),
                       ),
                       child: ListTile(
+                        contentPadding: EdgeInsets.zero,
                         leading: isSelected
                             ? Icon(
                           Icons.check_circle,

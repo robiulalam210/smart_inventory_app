@@ -401,6 +401,7 @@ class _CreatePurchaseReturnScreenState
                         label: "Return Charge Type",
                         hint: "Select Type",
                         isRequired: true,
+                        isLabel: true,
                         value: _selectedReturnChargeType,
                         itemList: const ["fixed", "percentage"],
                         onChanged: (newVal) {

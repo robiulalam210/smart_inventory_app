@@ -204,7 +204,7 @@ class _SalesReturnScreenState extends State<SalesReturnScreen> {
                 hint: _selectedCustomer?.name ?? "Select Customer",
                 isNeedAll: true,
                 isRequired: false,
-                isLabel: true,
+                isLabel: false,
                 value: _selectedCustomer,
                 itemList: context.read<CustomerBloc>().activeCustomer,
                 onChanged: (newVal) {

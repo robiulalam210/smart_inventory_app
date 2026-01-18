@@ -68,8 +68,7 @@ class _TopProductsScreenState extends State<TopProductsScreen> {
           padding: AppTextStyle.getResponsivePaddingBody(context),
           child: Column(
             children: [
-              _buildFilterRow(),
-              const SizedBox(height: 6),
+
               _buildSummaryCards(),
               const SizedBox(height: 6),
               SizedBox(child: _buildTopProductsTable()),
@@ -80,18 +79,7 @@ class _TopProductsScreenState extends State<TopProductsScreen> {
     );
   }
 
-  Widget _buildFilterRow() {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        // 📅 Date Range Picker
 
-
-        // Clear Filters Button
-      ],
-    );
-  }
 
   Widget _buildSummaryCards() {
     return BlocBuilder<TopProductsBloc, TopProductsState>(
@@ -128,8 +116,22 @@ class _TopProductsScreenState extends State<TopProductsScreen> {
               Icons.analytics,
               Colors.orange,
             ),
+
+            SizedBox(
+              width: 245,
+              child: CustomDateRangeField(
+                isLabel: false,
+                selectedDateRange: selectedDateRange,
+                onDateRangeSelected: (value) {
+                  setState(() => selectedDateRange = value);
+                  if (value != null) {
+                    _fetchTopProductsReport(from: value.start, to: value.end);
+                  }
+                },
+              ),
+            ),
             AppButton(
-                size: 100,
+                size: 80,
                 name: "Pdf", onPressed: (){
               Navigator.push(
                 context,
@@ -182,20 +184,6 @@ class _TopProductsScreenState extends State<TopProductsScreen> {
               );
 
             }),
-            SizedBox(
-              width: 260,
-              child: CustomDateRangeField(
-                isLabel: false,
-                selectedDateRange: selectedDateRange,
-                onDateRangeSelected: (value) {
-                  setState(() => selectedDateRange = value);
-                  if (value != null) {
-                    _fetchTopProductsReport(from: value.start, to: value.end);
-                  }
-                },
-              ),
-            ),
-            const SizedBox(width: 6),
             AppButton(
               name: "Clear",size: 80,
               onPressed: () {
@@ -217,23 +205,20 @@ class _TopProductsScreenState extends State<TopProductsScreen> {
     Color color,
   ) {
     return Container(
-      width: 170,
+      width: 160,
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: Colors.white,
+        border: Border.all(
+            color: AppColors.greyColor(context).withValues(alpha: 0.5),width: 0.5
+        ),
+        color: AppColors.bottomNavBg(context),
         borderRadius: BorderRadius.circular(8),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.2),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
+
       ),
       child: Row(
         children: [
-          Icon(icon, color: color, size: 30),
-          const SizedBox(width: 8),
+          Icon(icon, color: color, size: 25),
+          const SizedBox(width: 6),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -249,7 +234,7 @@ class _TopProductsScreenState extends State<TopProductsScreen> {
                 Text(
                   value,
                   style:  TextStyle(
-                    fontSize: 18,
+                    fontSize: 14,
                     fontWeight: FontWeight.bold,
                     color:AppColors.text(context),
                   ),
