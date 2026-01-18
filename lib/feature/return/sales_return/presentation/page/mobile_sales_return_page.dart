@@ -1,4 +1,5 @@
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
+import 'package:meherinMart/core/widgets/app_scaffold.dart';
 import 'package:meherinMart/feature/return/sales_return/presentation/page/mobile_create_sales_return_screnn.dart';
 import '/core/configs/configs.dart';
 import '/feature/customer/data/model/customer_active_model.dart';
@@ -11,7 +12,6 @@ import '../../../../../core/widgets/date_range.dart';
 import '../../../../customer/presentation/bloc/customer/customer_bloc.dart';
 import '../../../../products/product/presentation/widget/pagination.dart';
 import '../sales_return_bloc/sales_return_bloc.dart';
-
 
 class MobileSalesReturnPage extends StatefulWidget {
   const MobileSalesReturnPage({super.key});
@@ -57,54 +57,85 @@ class _SalesReturnScreenState extends State<MobileSalesReturnPage> {
     DateTime? to,
     int pageNumber = 0,
   }) {
-    context.read<SalesReturnBloc>().add(FetchSalesReturn(
-      context: context,
-      startDate: from,
-      endDate: to,
-      filterText: filterText,
-      pageNumber: pageNumber,
-    ));
+    context.read<SalesReturnBloc>().add(
+      FetchSalesReturn(
+        context: context,
+        startDate: from,
+        endDate: to,
+        filterText: filterText,
+        pageNumber: pageNumber,
+      ),
+    );
   }
 
-  @override
-  Widget build(BuildContext context) {
-
-    return Scaffold(
-      floatingActionButton: FloatingActionButton( 
-        
-        backgroundColor: AppColors.primaryColor(context),
-        
-        onPressed: () {
-        showDialog(
-          context: context,
-          builder: (context) {
-            return Dialog(
-              insetPadding: const EdgeInsets.all(20),
-              child: SizedBox(
-                // width: AppSizes.width(context) * 0.70,
-                child: MobileCreateSalesReturnScrenn(
-                  onSuccess: () {
-                    if (Navigator.canPop(context)) Navigator.pop(context);
-                    _fetchSalesReturnList(
-                      filterText: filterTextController.text,
-                      from: selectedDateRange?.start ?? startDate,
-                      to: selectedDateRange?.end ?? endDate,
-                    );
-                  },
+  void _showCreateSalesReturnSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      isDismissible: true,
+      // Keep this true
+      enableDrag: true,
+      // Keep this true
+      useSafeArea: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return DraggableScrollableSheet(
+          initialChildSize: 0.9,
+          minChildSize: 0.5,
+          maxChildSize: 0.95,
+          expand: false,
+          builder: (context, scrollController) {
+            return Container(
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+              ),
+              child: SingleChildScrollView(
+                controller: scrollController,
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    bottom: MediaQuery.of(context).viewInsets.bottom,
+                  ),
+                  child: MobileCreateSalesReturnScrenn(
+                    onSuccess: () {
+                      Navigator.pop(context);
+                      _fetchSalesReturnList(
+                        filterText: filterTextController.text,
+                        from: selectedDateRange?.start ?? startDate,
+                        to: selectedDateRange?.end ?? endDate,
+                      );
+                    },
+                  ),
                 ),
               ),
             );
           },
         );
-      },child: Icon(Icons.add,color: AppColors.whiteColor(context),),),
-      appBar: AppBar(title: Text("Sales Return",style: AppTextStyle.titleMedium(context),),),
-
-      body: SafeArea(
-        child:   _buildContentArea(),
-      ),
+      },
     );
   }
 
+  @override
+  Widget build(BuildContext context) {
+    return AppScaffold(
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: AppColors.primaryColor(context),
+
+        onPressed: () {
+          _showCreateSalesReturnSheet(context);
+        },
+        child: Icon(Icons.add, color: AppColors.whiteColor(context)),
+      ),
+      appBar: AppBar(
+        title: Text("Sales Return", style: AppTextStyle.titleMedium(context)),
+      ),
+
+      body: SafeArea(child: _buildContentArea()),
+    );
+  }
 
   Widget _buildContentArea() {
     return ResponsiveCol(
@@ -162,17 +193,13 @@ class _SalesReturnScreenState extends State<MobileSalesReturnPage> {
 
       if (state is SalesReturnCreateSuccess) {
         message = state.message;
-      }
-      else if (state is SalesReturnApproveSuccess) {
+      } else if (state is SalesReturnApproveSuccess) {
         message = state.message;
-      }
-      else if (state is SalesReturnRejectSuccess) {
+      } else if (state is SalesReturnRejectSuccess) {
         message = state.message;
-      }
-      else if (state is SalesReturnCompleteSuccess) {
+      } else if (state is SalesReturnCompleteSuccess) {
         message = state.message;
-      }
-      else if (state is SalesReturnDeleteSuccess) {
+      } else if (state is SalesReturnDeleteSuccess) {
         message = state.message;
       }
 
@@ -264,7 +291,6 @@ class _SalesReturnScreenState extends State<MobileSalesReturnPage> {
                   to: selectedDateRange?.end ?? endDate,
                 );
               },
-
             );
           },
         ),
@@ -289,7 +315,6 @@ class _SalesReturnScreenState extends State<MobileSalesReturnPage> {
         ),
 
         // Create Sales Return Button
-
 
         // Refresh Button
         IconButton(
@@ -330,9 +355,7 @@ class _SalesReturnScreenState extends State<MobileSalesReturnPage> {
           }
           return Column(
             children: [
-              SizedBox(
-                child: SalesReturnTableCard(salesReturns: state.list),
-              ),
+              SizedBox(child: SalesReturnTableCard(salesReturns: state.list)),
               const SizedBox(height: 16),
               PaginationBar(
                 count: state.count,
@@ -375,10 +398,7 @@ class _SalesReturnScreenState extends State<MobileSalesReturnPage> {
       children: [
         Lottie.asset(AppImages.noData, width: 200, height: 200),
         const SizedBox(height: 16),
-        Text(
-          message,
-          style: const TextStyle(fontSize: 16, color: Colors.grey),
-        ),
+        Text(message, style: const TextStyle(fontSize: 16, color: Colors.grey)),
         const SizedBox(height: 12),
         ElevatedButton(
           onPressed: () => _fetchSalesReturnList(
