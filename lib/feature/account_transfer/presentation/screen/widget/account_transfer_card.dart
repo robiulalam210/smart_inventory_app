@@ -311,6 +311,7 @@ class MobileAccountTransferCard extends StatelessWidget {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      backgroundColor: AppColors.bottomNavBg(context),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -328,6 +329,7 @@ class MobileAccountTransferCard extends StatelessWidget {
                     'Transfer Details',
                     style: GoogleFonts.inter(
                       fontWeight: FontWeight.w600,
+                      color: AppColors.text(context),
                       fontSize: 18,
                     ),
                   ),
@@ -339,33 +341,33 @@ class MobileAccountTransferCard extends StatelessWidget {
               ),
               const SizedBox(height: 16),
 
-              _buildDetailRowModal('Transfer No:', transfer.transferNo ?? 'N/A'),
-              _buildDetailRowModal('Date:', _formatDateTime(transfer.transferDate)),
-              _buildDetailRowModal('From Account:', transfer.fromAccount?.name ?? 'N/A'),
-              _buildDetailRowModal('To Account:', transfer.toAccount?.name ?? 'N/A'),
-              _buildDetailRowModal('Amount:', '\$${transfer.amount ?? "0.00"}'),
-              _buildDetailRowModal('Status:', transfer.status?.toUpperCase() ?? 'UNKNOWN',
+              _buildDetailRowModal(context,'Transfer No:', transfer.transferNo ?? 'N/A'),
+              _buildDetailRowModal(context,'Date:', _formatDateTime(transfer.transferDate)),
+              _buildDetailRowModal(context,'From Account:', transfer.fromAccount?.name ?? 'N/A'),
+              _buildDetailRowModal(context,'To Account:', transfer.toAccount?.name ?? 'N/A'),
+              _buildDetailRowModal(context,'Amount:', '\$${transfer.amount ?? "0.00"}'),
+              _buildDetailRowModal(context,'Status:', transfer.status?.toUpperCase() ?? 'UNKNOWN',
                 color: _getStatusColor(transfer.status),
               ),
-              _buildDetailRowModal('Type:', transfer.transferType?.replaceAll('_', ' ').toUpperCase() ?? 'UNKNOWN',
+              _buildDetailRowModal(context,'Type:', transfer.transferType?.replaceAll('_', ' ').toUpperCase() ?? 'UNKNOWN',
                 color: _getTypeColor(transfer.transferType),
               ),
-              _buildDetailRowModal('Reversal:', (transfer.isReversal ?? false) ? 'Yes' : 'No'),
+              _buildDetailRowModal(context,'Reversal:', (transfer.isReversal ?? false) ? 'Yes' : 'No'),
 
               if (transfer.description != null && transfer.description!.isNotEmpty)
-                _buildDetailRowModal('Description:', transfer.description!),
+                _buildDetailRowModal(context,'Description:', transfer.description!),
 
               if (transfer.referenceNo != null && transfer.referenceNo!.isNotEmpty)
-                _buildDetailRowModal('Reference No:', transfer.referenceNo!),
+                _buildDetailRowModal(context,'Reference No:', transfer.referenceNo!),
 
               if (transfer.remarks != null && transfer.remarks!.isNotEmpty)
-                _buildDetailRowModal('Remarks:', transfer.remarks!),
+                _buildDetailRowModal(context,'Remarks:', transfer.remarks!),
 
               if (transfer.createdByName != null && transfer.createdByName!.isNotEmpty)
-                _buildDetailRowModal('Created By:', transfer.createdByName!),
+                _buildDetailRowModal(context,'Created By:', transfer.createdByName!),
 
               if (transfer.approvedByName != null && transfer.approvedByName!.isNotEmpty)
-                _buildDetailRowModal('Approved By:', transfer.approvedByName!),
+                _buildDetailRowModal(context,'Approved By:', transfer.approvedByName!),
 
               const SizedBox(height: 20),
             ],
@@ -375,7 +377,7 @@ class MobileAccountTransferCard extends StatelessWidget {
     );
   }
 
-  Widget _buildDetailRowModal(String label, String value, {Color? color}) {
+  Widget _buildDetailRowModal(BuildContext context,String label, String value, {Color? color}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
@@ -388,7 +390,7 @@ class MobileAccountTransferCard extends StatelessWidget {
               style: GoogleFonts.inter(
                 fontWeight: FontWeight.w500,
                 fontSize: 14,
-                color: Colors.grey.shade700,
+                color: AppColors.text(context),
               ),
             ),
           ),
@@ -399,7 +401,8 @@ class MobileAccountTransferCard extends StatelessWidget {
               style: GoogleFonts.inter(
                 fontWeight: FontWeight.w400,
                 fontSize: 14,
-                color: color ?? Colors.black87,
+                color: color ??               AppColors.text(context)
+                ,
               ),
             ),
           ),
