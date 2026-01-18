@@ -167,7 +167,7 @@ class _SupplierLedgerScreenState extends State<SupplierLedgerScreen> {
                   label: "Supplier",
                   hint: "Loading suppliers...",
                   isRequired: false,
-                  isLabel: true,
+                  isLabel: false,
                   itemList: [],
                   onChanged: (v){},
                 );
@@ -177,7 +177,7 @@ class _SupplierLedgerScreenState extends State<SupplierLedgerScreen> {
                 return AppDropdown<SupplierActiveModel>(
                   label: "Supplier",
                   hint: "Failed to load suppliers",
-                  isRequired: false,   isLabel: true,
+                  isRequired: false,   isLabel: false,
                   itemList: [],
                   onChanged: (v){},
                 );
@@ -194,7 +194,7 @@ class _SupplierLedgerScreenState extends State<SupplierLedgerScreen> {
                 return AppDropdown<SupplierActiveModel>(
                   label: "Supplier",
                   hint: "Select Supplier",
-                  isRequired: false,   isLabel: true,
+                  isRequired: false,   isLabel: false,
                   value: _selectedSupplier,
                   itemList: options,
                   onChanged: (newVal) {

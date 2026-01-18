@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:lottie/lottie.dart';
+import 'package:meherinMart/core/configs/gaps.dart';
 import 'package:printing/printing.dart';
 import '/core/configs/app_colors.dart';
 import '/core/configs/app_images.dart';
@@ -128,6 +129,7 @@ class _CustomerDueAdvanceScreenState extends State<CustomerDueAdvanceScreen> {
               _buildHeader(),
               const SizedBox(height: 6),
               _buildFilterRow(),
+              gapH8,
               _buildSummaryCards(),              const SizedBox(height: 6),
 
               SizedBox(child: _buildCustomerTable()),
@@ -211,7 +213,7 @@ class _CustomerDueAdvanceScreenState extends State<CustomerDueAdvanceScreen> {
               }
 
               return AppDropdown<CustomerActiveModel>(
-                label: "Customer", isLabel: true,
+                label: "Customer", isLabel: false,
                 hint: "Select Customer",
                 isNeedAll: true,
                 isRequired: false,
@@ -233,7 +235,7 @@ class _CustomerDueAdvanceScreenState extends State<CustomerDueAdvanceScreen> {
             hint: "Select Status",
             isNeedAll: false,
             isRequired: false,
-            isLabel: true,
+            isLabel: false,
             value: _selectedStatus,
             itemList: statusOptions,
             onChanged: _onStatusChanged,
@@ -378,18 +380,15 @@ AppButton(name: "Clear", onPressed: (){
 
   Widget _buildSummaryCard(String title, String value, IconData icon, Color color, {String? subtitle}) {
     return Container(
-      width: 210,
+      width: 190,
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: Colors.white,
+        border: Border.all(
+            color: AppColors.greyColor(context).withValues(alpha: 0.5),width: 0.5
+        ),
+        color: AppColors.bottomNavBg(context),
         borderRadius: BorderRadius.circular(8),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.1),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
+
       ),
       child: Row(
         children: [

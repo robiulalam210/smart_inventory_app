@@ -188,9 +188,9 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
           child: Column(
             children: [
               _buildHeader(),
-              const SizedBox(height: 6),
+              const SizedBox(height: 8),
               _buildFilterRow(),
-              const SizedBox(height: 0),
+              const SizedBox(height: 8),
               _buildSummaryCards(),
               const SizedBox(height: 4),
               SizedBox(child: _buildExpenseTable()),
@@ -234,7 +234,7 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
           children: [
             // Date Range Picker
             SizedBox(
-              width: 260,
+              width: 250,
               child: CustomDateRangeField(
                 isLabel: false,
                 selectedDateRange: selectedDateRange,
@@ -251,7 +251,7 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
                 hint: "Select Payment Method",
                 isNeedAll: true,
                 isRequired: false,
-                isLabel: true,
+                isLabel: false,
                 value: _selectedPaymentMethod,
                 itemList: paymentMethods,
                 onChanged: _onPaymentMethodChanged,
@@ -282,7 +282,7 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
                       isNeedAll: true,
                       isRequired: false,
                       value: null,
-                      isLabel: true,
+                      isLabel: false,
                       itemList: [],
                       onChanged: (v) {},
                     );
@@ -293,7 +293,7 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
                     hint: "Select Expense Head",
                     isNeedAll: true,
                     isRequired: false,
-                    isLabel: true,
+                    isLabel: false,
                     value: _selectedExpenseHead,
                     itemList: context.read<ExpenseHeadBloc>().list,
                     onChanged: _onExpenseHeadChanged,
@@ -475,18 +475,15 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
     Color color,
   ) {
     return Container(
-      width: 250,
-      padding: const EdgeInsets.all(12),
+      width: 220,
+      padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: Colors.white,
+        border: Border.all(
+            color: AppColors.greyColor(context).withValues(alpha: 0.5),width: 0.5
+        ),
+        color: AppColors.bottomNavBg(context),
         borderRadius: BorderRadius.circular(8),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.2),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
+
       ),
       child: Row(
         children: [
@@ -514,7 +511,7 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
                 Text(
                   value,
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: 12,
                     fontWeight: FontWeight.bold,
                     color: color,
                   ),
@@ -631,7 +628,8 @@ class ExpenseReportDataTable extends StatelessWidget {
     );
 
     return Card(
-      elevation: 2,
+      elevation: 0,
+      color: AppColors.bottomNavBg(context),
       child: Padding(
         padding: const EdgeInsets.all(0),
         child: Column(

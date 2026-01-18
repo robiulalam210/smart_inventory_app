@@ -193,8 +193,8 @@ class _AccountScreenState extends State<AccountScreen> {
 
   Widget _buildDesktopHeader() {
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.start,
       children: [
         // 🔍 Search Field
         Expanded(
@@ -219,7 +219,7 @@ class _AccountScreenState extends State<AccountScreen> {
               return AppDropdown<String>(
                 hint: "Select Account Type",
                 isNeedAll: true,
-                isLabel: true,
+                isLabel: false,
                 isRequired: false,
                 value: value,
                 itemList: ['Cash', 'Bank', 'Mobile Banking'],

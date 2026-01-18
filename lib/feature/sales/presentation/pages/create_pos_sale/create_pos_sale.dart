@@ -616,7 +616,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                           : selectedCategory,
                       isRequired: false,
                       isNeedAll: true,
-                      isLabel: true,
+                      isLabel: false,
                       isSearch: true,
                       value: selectedCategory.isEmpty ? null : selectedCategory,
                       itemList: categoryList.map((e) => e.name ?? "").toList(),
@@ -686,7 +686,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
 
                     return AppDropdown<ProductModelStockModel>(
                       isRequired: false,
-                      isLabel: true,
+                      isLabel: false,
                       isSearch: true,
                       label: "Product",
                       hint: selectedCategoryId.isEmpty

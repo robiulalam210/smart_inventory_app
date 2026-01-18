@@ -118,10 +118,10 @@ class _CustomerLedgerScreenState extends State<CustomerLedgerScreen> {
               return AppDropdown<CustomerActiveModel>(
                 label: "Customer",
                 isSearch: true,
-                hint: context.read<CustomerLedgerBloc>().selectedCustomer?.name ?? "Select Customer",
+                hint:  "Select Customer",
                 isNeedAll: false,
                 isRequired: true,
-                isLabel: true,
+                isLabel: false,
                 value: context.read<CustomerLedgerBloc>().selectedCustomer,
                 itemList: context.read<CustomerBloc>().activeCustomer,
                 onChanged: (newVal) {

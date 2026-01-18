@@ -245,20 +245,17 @@ class _LowStockScreenState extends State<LowStockScreen> {
 
   Widget _buildAlertCard(String title, String value, IconData icon, Color color, String subtitle) {
     return Container(
-      width: 240,
-      padding: const EdgeInsets.all(16),
+      width: 200,
+      padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: Colors.white,
+        border: Border.all(
+            color:color.withValues(alpha: 0.5),width: 0.5
+        ),
+        color: AppColors.bottomNavBg(context),
         borderRadius: BorderRadius.circular(8),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.1),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-        border: Border.all(color: color.withValues(alpha: 0.3)),
+
       ),
+
       child: Row(
         children: [
           Container(
@@ -502,16 +499,14 @@ class LowStockTableCard extends StatelessWidget {
         (totalWidth / numColumns).clamp(minColumnWidth, double.infinity);
 
         return Container(
+          padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withValues(alpha: 0.1),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
+            border: Border.all(
+                color: AppColors.greyColor(context).withValues(alpha: 0.5),width: 0.5
+            ),
+            color: AppColors.bottomNavBg(context),
+            borderRadius: BorderRadius.circular(8),
+
           ),
           child: Scrollbar(
             controller: verticalScrollController,

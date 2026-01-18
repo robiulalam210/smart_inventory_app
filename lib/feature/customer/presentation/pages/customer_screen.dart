@@ -222,7 +222,7 @@ class _CustomerScreenState extends State<CustomerScreen> {
             valueListenable: selectedStatusNotifier,
             builder: (context, value, child) {
               return AppDropdown<String>(
-                isLabel: true,
+                isLabel: false,
                 hint: "Select Status",
                 label: "Status",
                 isNeedAll: true,

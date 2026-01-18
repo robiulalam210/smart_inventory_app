@@ -35,12 +35,14 @@ class _PurchaseReportScreenState extends State<PurchaseReportScreen> {
     DateTime? from,
     DateTime? to,
   }) {
-    context.read<PurchaseReportBloc>().add(FetchPurchaseReport(
-      context: context,
-      supplier: supplier,
-      from: from,
-      to: to,
-    ));
+    context.read<PurchaseReportBloc>().add(
+      FetchPurchaseReport(
+        context: context,
+        supplier: supplier,
+        from: from,
+        to: to,
+      ),
+    );
   }
 
   @override
@@ -51,7 +53,8 @@ class _PurchaseReportScreenState extends State<PurchaseReportScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isBigScreen = Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
+    final isBigScreen =
+        Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
 
     return Container(
       color: AppColors.bottomNavBg(context),
@@ -85,7 +88,6 @@ class _PurchaseReportScreenState extends State<PurchaseReportScreen> {
           padding: AppTextStyle.getResponsivePaddingBody(context),
           child: Column(
             children: [
-              _buildFilterRow(),
               _buildSummaryCards(),
               const SizedBox(height: 8),
               SizedBox(child: _buildDataTable()),
@@ -96,65 +98,6 @@ class _PurchaseReportScreenState extends State<PurchaseReportScreen> {
     );
   }
 
-  Widget _buildFilterRow() {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        // 👤 Supplier Dropdown
-        SizedBox(
-
-       width: 220,
-          child: BlocBuilder<SupplierInvoiceBloc, SupplierInvoiceState>(
-            builder: (context, state) {
-              return AppDropdown<SupplierActiveModel>(
-                label: "Supplier",
-                isSearch: true,
-                hint: "Select Supplier",
-                isNeedAll: true,
-                isRequired: false,
-                isLabel: true,
-                value: context.read<PurchaseReportBloc>().selectedSupplier,
-                itemList: context.read<SupplierInvoiceBloc>().supplierActiveList,
-                onChanged: (newVal) {
-                  _fetchPurchaseReport(
-                    from: selectedDateRange?.start,
-                    to: selectedDateRange?.end,
-                    supplier: newVal?.id.toString() ?? '',
-                  );
-                },
-              );
-            },
-          ),
-        ),
-        const SizedBox(width: 6),
-
-        // 📅 Date Range Picker
-        SizedBox(
-          width: 260,
-          child: CustomDateRangeField(
-            isLabel: false,
-            selectedDateRange: selectedDateRange,
-            onDateRangeSelected: (value) {
-              setState(() => selectedDateRange = value);
-              if (value != null) {
-                _fetchPurchaseReport(from: value.start, to: value.end);
-              }
-            },
-          ),
-        ),
-        const SizedBox(width: 6),
-
-        AppButton(name: "Clear", onPressed: (){
-          setState(() => selectedDateRange = null);
-          context.read<PurchaseReportBloc>().add(ClearPurchaseReportFilters());
-          _fetchPurchaseReport();
-        }),
-        // Clear Filters Button
-
-      ],
-    );
-  }
 
   Widget _buildSummaryCards() {
     return BlocBuilder<PurchaseReportBloc, PurchaseReportState>(
@@ -167,6 +110,54 @@ class _PurchaseReportScreenState extends State<PurchaseReportScreen> {
           spacing: 8,
           runSpacing: 8,
           children: [
+            // 👤 Supplier Dropdown
+            SizedBox(
+              width: 180,
+              child: BlocBuilder<SupplierInvoiceBloc, SupplierInvoiceState>(
+                builder: (context, state) {
+                  return AppDropdown<SupplierActiveModel>(
+                    label: "Supplier",
+                    isSearch: true,
+                    hint: "Select Supplier",
+                    isNeedAll: true,
+                    isRequired: false,
+                    isLabel: false,
+                    value: context.read<PurchaseReportBloc>().selectedSupplier,
+                    itemList: context
+                        .read<SupplierInvoiceBloc>()
+                        .supplierActiveList,
+                    onChanged: (newVal) {
+                      setState(() {
+
+                      });
+                      context.read<PurchaseReportBloc>().selectedSupplier=newVal;
+                      _fetchPurchaseReport(
+                        from: selectedDateRange?.start,
+                        to: selectedDateRange?.end,
+                        supplier: newVal?.id.toString() ?? '',
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+
+            // 📅 Date Range Picker
+            SizedBox(
+              width: 250,
+              child: CustomDateRangeField(
+                isLabel: false,
+                selectedDateRange: selectedDateRange,
+                onDateRangeSelected: (value) {
+                  setState(() => selectedDateRange = value);
+                  if (value != null) {
+                    _fetchPurchaseReport(from: value.start, to: value.end);
+                  }
+                },
+              ),
+            ),
+
+
             _buildSummaryCard(
               "Total Purchases",
               "\$${summary.totalPurchases.toStringAsFixed(2)}",
@@ -192,79 +183,95 @@ class _PurchaseReportScreenState extends State<PurchaseReportScreen> {
               Colors.purple,
             ),
             AppButton(
-                size: 100,
-                name: "Pdf", onPressed: (){
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => Scaffold(
-                    backgroundColor: Colors.red,
-                    body: PdfPreview.builder(
-                      useActions: true,
-                      allowSharing: false,
-                      canDebug: false,
-                      canChangeOrientation: false,
-                      canChangePageFormat: false,
-                      dynamicLayout: true,
-                      build: (format) => generatePurchaseReportPdf(
-                        state.response,
-
-                      ),
-                      pdfPreviewPageDecoration:
-                      BoxDecoration(color: AppColors.white),
-                      actionBarTheme: PdfActionBarTheme(
-                        backgroundColor: AppColors.primaryColor(context),
-                        iconColor: Colors.white,
-                        textStyle: const TextStyle(color: Colors.white),
-                      ),
-                      actions: [
-                        IconButton(
-                          onPressed: () => AppRoutes.pop(context),
-                          icon: const Icon(Icons.cancel, color: Colors.red),
+              name: "Clear",
+              size: 100,
+              onPressed: () {
+                setState(() => selectedDateRange = null);
+                context.read<PurchaseReportBloc>().add(
+                  ClearPurchaseReportFilters(),
+                );
+                _fetchPurchaseReport();
+              },
+            ),
+            AppButton(
+              size: 100,
+              name: "Pdf",
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => Scaffold(
+                      backgroundColor: Colors.red,
+                      body: PdfPreview.builder(
+                        useActions: true,
+                        allowSharing: false,
+                        canDebug: false,
+                        canChangeOrientation: false,
+                        canChangePageFormat: false,
+                        dynamicLayout: true,
+                        build: (format) =>
+                            generatePurchaseReportPdf(state.response),
+                        pdfPreviewPageDecoration: BoxDecoration(
+                          color: AppColors.white,
                         ),
-                      ],
-                      pagesBuilder: (context, pages) {
-                        debugPrint('Rendering ${pages.length} pages');
-                        return PageView.builder(
-                          itemCount: pages.length,
-                          scrollDirection: Axis.vertical,
-                          itemBuilder: (context, index) {
-                            final page = pages[index];
-                            return Container(
-                              color: Colors.grey,
-                              alignment: Alignment.center,
-                              padding: const EdgeInsets.all(8.0),
-                              child: Image(image: page.image, fit: BoxFit.contain),
-                            );
-                          },
-                        );
-                      },
+                        actionBarTheme: PdfActionBarTheme(
+                          backgroundColor: AppColors.primaryColor(context),
+                          iconColor: Colors.white,
+                          textStyle: const TextStyle(color: Colors.white),
+                        ),
+                        actions: [
+                          IconButton(
+                            onPressed: () => AppRoutes.pop(context),
+                            icon: const Icon(Icons.cancel, color: Colors.red),
+                          ),
+                        ],
+                        pagesBuilder: (context, pages) {
+                          debugPrint('Rendering ${pages.length} pages');
+                          return PageView.builder(
+                            itemCount: pages.length,
+                            scrollDirection: Axis.vertical,
+                            itemBuilder: (context, index) {
+                              final page = pages[index];
+                              return Container(
+                                color: Colors.grey,
+                                alignment: Alignment.center,
+                                padding: const EdgeInsets.all(8.0),
+                                child: Image(
+                                  image: page.image,
+                                  fit: BoxFit.contain,
+                                ),
+                              );
+                            },
+                          );
+                        },
+                      ),
                     ),
                   ),
-                ),
-              );
-
-            })
+                );
+              },
+            ),
           ],
         );
       },
     );
   }
 
-  Widget _buildSummaryCard(String title, String value, IconData icon, Color color) {
+  Widget _buildSummaryCard(
+    String title,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
     return Container(
-      width: 180,
+      width: 155,
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: Colors.white,
+        border: Border.all(
+            color: AppColors.greyColor(context).withValues(alpha: 0.5),width: 0.5
+        ),
+        color: AppColors.bottomNavBg(context),
         borderRadius: BorderRadius.circular(8),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.2),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
+
       ),
       child: Row(
         children: [
@@ -283,10 +290,10 @@ class _PurchaseReportScreenState extends State<PurchaseReportScreen> {
               ),
               Text(
                 value,
-                style:  TextStyle(
-                  fontSize: 18,
+                style: TextStyle(
+                  fontSize: 14,
                   fontWeight: FontWeight.bold,
-                  color:AppColors.text(context),
+                  color: AppColors.text(context),
                 ),
               ),
             ],
@@ -407,11 +414,14 @@ class PurchaseReportTableCard extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final totalWidth = constraints.maxWidth;
-        const numColumns = 8; // Invoice No, Date, Supplier, Net Total, Paid, Due, Status, Actions
+        const numColumns =
+            8; // Invoice No, Date, Supplier, Net Total, Paid, Due, Status, Actions
         const minColumnWidth = 120.0;
 
-        final dynamicColumnWidth =
-        (totalWidth / numColumns).clamp(minColumnWidth, double.infinity);
+        final dynamicColumnWidth = (totalWidth / numColumns).clamp(
+          minColumnWidth,
+          double.infinity,
+        );
 
         return Container(
           decoration: BoxDecoration(
@@ -472,14 +482,42 @@ class PurchaseReportTableCard extends StatelessWidget {
                                   ? (_) => onReportTap!()
                                   : null,
                               cells: [
-                                _buildDataCell(report.invoiceNo, dynamicColumnWidth),
-                                _buildDateCell(report.purchaseDate, dynamicColumnWidth),
-                                _buildDataCell(report.supplier, dynamicColumnWidth),
-                                _buildAmountCell(report.netTotal, dynamicColumnWidth, isTotal: true),
-                                _buildAmountCell(report.paidTotal, dynamicColumnWidth, isPaid: true),
-                                _buildAmountCell(report.dueTotal, dynamicColumnWidth, isDue: true),
-                                _buildStatusCell(report.paymentStatus, dynamicColumnWidth),
-                                _buildActionCell(report, context, dynamicColumnWidth),
+                                _buildDataCell(
+                                  report.invoiceNo,
+                                  dynamicColumnWidth,
+                                ),
+                                _buildDateCell(
+                                  report.purchaseDate,
+                                  dynamicColumnWidth,
+                                ),
+                                _buildDataCell(
+                                  report.supplier,
+                                  dynamicColumnWidth,
+                                ),
+                                _buildAmountCell(
+                                  report.netTotal,
+                                  dynamicColumnWidth,
+                                  isTotal: true,
+                                ),
+                                _buildAmountCell(
+                                  report.paidTotal,
+                                  dynamicColumnWidth,
+                                  isPaid: true,
+                                ),
+                                _buildAmountCell(
+                                  report.dueTotal,
+                                  dynamicColumnWidth,
+                                  isDue: true,
+                                ),
+                                _buildStatusCell(
+                                  report.paymentStatus,
+                                  dynamicColumnWidth,
+                                ),
+                                _buildActionCell(
+                                  report,
+                                  context,
+                                  dynamicColumnWidth,
+                                ),
                               ],
                             );
                           }).toList(),
@@ -584,7 +622,13 @@ class PurchaseReportTableCard extends StatelessWidget {
     );
   }
 
-  DataCell _buildAmountCell(double amount, double width, {bool isTotal = false, bool isPaid = false, bool isDue = false}) {
+  DataCell _buildAmountCell(
+    double amount,
+    double width, {
+    bool isTotal = false,
+    bool isPaid = false,
+    bool isDue = false,
+  }) {
     Color getAmountColor() {
       if (isPaid) return Colors.green;
       if (isDue) return Colors.orange;
@@ -645,7 +689,11 @@ class PurchaseReportTableCard extends StatelessWidget {
     );
   }
 
-  DataCell _buildActionCell(PurchaseReportModel report, BuildContext context, double width) {
+  DataCell _buildActionCell(
+    PurchaseReportModel report,
+    BuildContext context,
+    double width,
+  ) {
     return DataCell(
       SizedBox(
         width: width,
@@ -729,9 +777,18 @@ class PurchaseReportTableCard extends StatelessWidget {
                 _buildDetailRow('Invoice No:', report.invoiceNo),
                 _buildDetailRow('Date:', _formatDate(report.purchaseDate)),
                 _buildDetailRow('Supplier:', report.supplier),
-                _buildDetailRow('Net Total:', '\$${report.netTotal.toStringAsFixed(2)}'),
-                _buildDetailRow('Paid Amount:', '\$${report.paidTotal.toStringAsFixed(2)}'),
-                _buildDetailRow('Due Amount:', '\$${report.dueTotal.toStringAsFixed(2)}'),
+                _buildDetailRow(
+                  'Net Total:',
+                  '\$${report.netTotal.toStringAsFixed(2)}',
+                ),
+                _buildDetailRow(
+                  'Paid Amount:',
+                  '\$${report.paidTotal.toStringAsFixed(2)}',
+                ),
+                _buildDetailRow(
+                  'Due Amount:',
+                  '\$${report.dueTotal.toStringAsFixed(2)}',
+                ),
                 _buildDetailRow('Status:', report.paymentStatus.toUpperCase()),
 
                 const SizedBox(height: 20),
@@ -770,21 +827,11 @@ class PurchaseReportTableCard extends StatelessWidget {
             width: 120,
             child: Text(
               label,
-              style: const TextStyle(
-                fontWeight: FontWeight.w600,
-                fontSize: 12,
-              ),
+              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
             ),
           ),
           const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              value,
-              style: const TextStyle(
-                fontSize: 12,
-              ),
-            ),
-          ),
+          Expanded(child: Text(value, style: const TextStyle(fontSize: 12))),
         ],
       ),
     );

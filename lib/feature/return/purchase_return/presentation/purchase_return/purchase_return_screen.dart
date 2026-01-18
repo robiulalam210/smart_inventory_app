@@ -251,7 +251,7 @@ class _PurchaseReturnScreenState extends State<PurchaseReturnScreen> {
                   hint: "Select Supplier",
                   isNeedAll: false, // We handle "All" manually
                   isRequired: false,
-                  isLabel: true,
+                  isLabel: false,
                   value: _selectedSupplier,
                   itemList: allSuppliersList,
                   onChanged: (newVal) {

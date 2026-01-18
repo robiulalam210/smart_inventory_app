@@ -284,6 +284,8 @@ class _ExpenseCreateScreenState extends State<ExpenseCreateScreen> {
                       SizedBox(height: AppSizes.height(context) * 0.01),
 
                       Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
                         children: [
                           // Expense Head Dropdown
                           Expanded(
@@ -357,9 +359,10 @@ class _ExpenseCreateScreenState extends State<ExpenseCreateScreen> {
                           ),
                         ],
                       ),
-
+gapH8,
                       // Amount Field
-                      Wrap(
+                      Wrap(  spacing: 8,
+                        runSpacing: 8,
                         children: [
                           Expanded(
                             child: widget.id == null
@@ -390,7 +393,7 @@ class _ExpenseCreateScreenState extends State<ExpenseCreateScreen> {
                                   )
                                 : Container(),
                           ),
-                          gapW16,
+                          gapW16,gapH8,
                           Expanded(
                             child: widget.id == null
                                 ? BlocBuilder<AccountBloc, AccountState>(
@@ -467,6 +470,8 @@ class _ExpenseCreateScreenState extends State<ExpenseCreateScreen> {
 
                       // Payment Method (only for create)
                       Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
                         children: [
                           CustomInputField(
                             isRequiredLable: true,
