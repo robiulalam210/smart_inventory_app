@@ -4,26 +4,42 @@ part of 'products_bloc.dart';
 sealed class ProductsEvent {}
 
 class FetchProductsList extends ProductsEvent {
-  BuildContext context;
-
-  final String filterApiURL;
+  final BuildContext context;
   final String filterText;
-  final String state;
   final String category;
+  final String state;
+  final String brand;
+  final String unit;
+  final String group;
+  final String source;
+  final String minPrice;
+  final String maxPrice;
+  final String minStock;
+  final String maxStock;
+  final String productName;
+  final String sku;
   final int pageNumber;
   final int pageSize;
 
-  FetchProductsList(
-    this.context, {
-    this.filterText = '',
-    this.state = '',
-    this.category = '',
-    this.filterApiURL = '',
-    this.pageNumber = 0,
-    this.pageSize = 10,
-  });
+   FetchProductsList(
+      this.context, {
+        this.filterText = '',
+        this.category = '',
+        this.state = '',
+        this.brand = '',
+        this.unit = '',
+        this.group = '',
+        this.source = '',
+        this.minPrice = '',
+        this.maxPrice = '',
+        this.minStock = '',
+        this.maxStock = '',
+        this.productName = '',
+        this.sku = '',
+        this.pageNumber = 1,
+        this.pageSize = 10,
+      });
 }
-
 
 class FetchProductsStockList extends ProductsEvent {
   BuildContext context;
