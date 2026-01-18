@@ -1,6 +1,5 @@
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
 
-
 import '../../../../core/configs/configs.dart';
 import '../../../../core/shared/widgets/sideMenu/sidebar.dart';
 import '../../../../core/widgets/app_alert_dialog.dart';
@@ -58,8 +57,8 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
   @override
   void dispose() {
     _searchController.dispose();
-    dataBloc.filterTextController.dispose();
-      super.dispose();
+    // dataBloc.filterTextController.dispose();
+    super.dispose();
   }
 
   void _onExpenseHeadChanged(ExpenseHeadModel? value) {
@@ -110,7 +109,7 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
       _selectedExpenseSubHead = null;
     });
     dataBloc.filterTextController.clear();
-      _searchController.clear();
+    _searchController.clear();
     _fetchApi();
   }
 
@@ -163,12 +162,9 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
           builder: (context, state) {
             return Column(
               children: [
-                if (isBigScreen)
-                  _buildDesktopHeader(context),
+                _buildDesktopHeader(context),
 
-                SizedBox(
-                  child: _buildExpenseList(state),
-                ),
+                SizedBox(child: _buildExpenseList(state)),
               ],
             );
           },
@@ -234,9 +230,9 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
                 },
                 onClear: () {
                   dataBloc.filterTextController.clear();
-                                  _fetchApi();
+                  _fetchApi();
                 },
-                hintText: "Search by description, amount, etc.",
+                hintText: "by description, etc.",
               ),
             ),
             const SizedBox(width: 16),
@@ -252,7 +248,6 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
                     itemList: context.read<ExpenseHeadBloc>().list,
                     onChanged: _onExpenseHeadChanged,
                     validator: (value) => null,
-
                   );
                 },
               ),
@@ -278,10 +273,7 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
               onPressed: _clearFilters,
               child: Text(
                 'Clear All',
-                style: TextStyle(
-                  color: Colors.red,
-                  fontSize: 14,
-                ),
+                style: TextStyle(color: Colors.red, fontSize: 14),
               ),
             ),
             const SizedBox(width: 16),
@@ -305,12 +297,15 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
                     isNeedAll: true,
                     isRequired: false,
                     value: _selectedExpenseSubHead,
-                    itemList: context.read<ExpenseSubHeadBloc>().list
-                        .where((subHead) => subHead.id == _selectedExpenseHead?.id)
+                    itemList: context
+                        .read<ExpenseSubHeadBloc>()
+                        .list
+                        .where(
+                          (subHead) => subHead.id == _selectedExpenseHead?.id,
+                        )
                         .toList(),
                     onChanged: _onExpenseSubHeadChanged,
                     validator: (value) => null,
-
                   ),
                 ),
               ],
@@ -320,7 +315,6 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
       ],
     );
   }
-
 
   Widget _buildExpenseList(ExpenseState state) {
     if (state is ExpenseListLoading) {
@@ -370,10 +364,7 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
             style: TextStyle(fontSize: 16, color: Colors.grey),
           ),
           const SizedBox(height: 16),
-          AppButton(
-            name: "Refresh",
-            onPressed: () => _fetchApi(),
-          ),
+          AppButton(name: "Refresh", onPressed: () => _fetchApi()),
         ],
       ),
     );
@@ -398,10 +389,7 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 16),
-          AppButton(
-            name: "Retry",
-            onPressed: () => _fetchApi(),
-          ),
+          AppButton(name: "Retry", onPressed: () => _fetchApi()),
         ],
       ),
     );
@@ -427,6 +415,4 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
       },
     );
   }
-
-
 }

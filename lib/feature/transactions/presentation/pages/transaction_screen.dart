@@ -194,7 +194,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                   filterTextController.clear();
                   _fetchTransactions();
                 },
-                hintText: "Search Transaction No, Description, or Account",
+                hintText: "Transaction No, Description, or Account",
               ),
             ),
             const SizedBox(width: 10),
@@ -349,7 +349,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                       filterTextController.clear();
                       _fetchTransactions();
                     },
-                    hintText: "Search transactions...",
+                    hintText: "transactions...",
                   ),
                 ),
               ),

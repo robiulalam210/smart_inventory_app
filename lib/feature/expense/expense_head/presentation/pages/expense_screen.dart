@@ -58,7 +58,12 @@ class _ExpenseHeadScreenState extends State<ExpenseHeadScreen> {
           runSpacing: 0,
           children: [
             if (isBigScreen) _buildSidebar(),
-            _buildContentArea(isBigScreen),
+            Column(
+              children: [
+                _buildDesktopHeader(context),
+                _buildContentArea(isBigScreen),
+              ],
+            ),
           ],
         ),
       ),
@@ -99,12 +104,7 @@ class _ExpenseHeadScreenState extends State<ExpenseHeadScreen> {
                 _handleBlocState(state);
               },
               builder: (context, state) {
-                return Column(
-                  children: [
-                    _buildDesktopHeader(context),
-                    _buildExpenseHeadList(state),
-                  ],
-                );
+                return   _buildExpenseHeadList(state);
               },
             ),
           ),
@@ -117,6 +117,7 @@ class _ExpenseHeadScreenState extends State<ExpenseHeadScreen> {
     if (state is ExpenseHeadAddLoading) {
       appLoader(context, "Creating Expense Head, please wait...");
     } else if (state is ExpenseHeadAddSuccess) {
+      Navigator.pop(context); // Close loader dialog
       Navigator.pop(context); // Close loader dialog
       _fetchApiData(); // Reload expense head list
     } else if (state is ExpenseHeadAddFailed) {
@@ -155,7 +156,7 @@ class _ExpenseHeadScreenState extends State<ExpenseHeadScreen> {
               _searchController.clear();
               _fetchApiData();
             },
-            hintText: "Search expense head...",
+            hintText: "expense head...",
           ),
         ),
         gapW16,
@@ -169,20 +170,19 @@ class _ExpenseHeadScreenState extends State<ExpenseHeadScreen> {
 
 
   Widget _buildExpenseHeadList(ExpenseHeadState state) {
+    print(state);
     if (state is ExpenseHeadListLoading) {
-      return const Expanded(child: Center(child: CircularProgressIndicator()));
+      return const SizedBox(child: Center(child: CircularProgressIndicator()));
     } else if (state is ExpenseHeadListSuccess) {
       if (state.list.isEmpty) {
-        return Expanded(child: Center(child: Lottie.asset(AppImages.noData)));
+        return SizedBox(child: Center(child: Lottie.asset(AppImages.noData)));
       }
-      return Expanded(
-        child: ExpenseHeadTableCard(
-          expenseHeads: state.list,
-          onExpenseHeadTap: () {},
-        ),
+      return ExpenseHeadTableCard(
+        expenseHeads: state.list,
+        onExpenseHeadTap: () {},
       );
     } else if (state is ExpenseHeadListFailed) {
-      return Expanded(
+      return SizedBox(
         child: Center(
           child: Text(
             'Failed to load: ${state.content}',
@@ -191,11 +191,12 @@ class _ExpenseHeadScreenState extends State<ExpenseHeadScreen> {
         ),
       );
     } else {
-      return Expanded(child: Center(child: Lottie.asset(AppImages.noData)));
+      return SizedBox(child: Center(child: Lottie.asset(AppImages.noData)));
     }
   }
 
   void _showCreateDialog(BuildContext context) {
+    context.read<ExpenseHeadBloc>().name.clear();
     showDialog(
       context: context,
       builder: (context) {
