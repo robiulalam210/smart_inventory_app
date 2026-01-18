@@ -542,14 +542,12 @@ class _SalesScreenState extends State<MobileSalesScreen> {
           children: [
             Expanded(
               child: CustomInputField(
-                radius: 10,
                 isRequired: true,
                 readOnly: true,
                 controller: bloc.dateEditingController,
                 hintText: 'Sale Date',
                 keyboardType: TextInputType.datetime,
                 autofillHints: AutofillHints.name,
-                bottom: 15.0,
                 fillColor: AppColors.whiteColor(context),
                 validator: (value) =>
                 value!.isEmpty ? 'Please enter date' : null,

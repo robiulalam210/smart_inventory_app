@@ -696,13 +696,11 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
           ),
           const SizedBox(height: 12),
           CustomInputField(
-            radius: 10,
             isRequired: true,
             readOnly: true,
             controller: bloc.dateEditingController,
             hintText: 'Purchase Date',
             keyboardType: TextInputType.datetime,
-            bottom: 15.0,
             fillColor: AppColors.whiteColor(context),
             validator: (value) {
               return value!.isEmpty ? 'Please enter date' : null;

@@ -197,11 +197,11 @@ class _ProductsFormState extends State<MobileProductCreate> {
                   child: Column(
                     children: [
                       // First Row: Category and Unit
-                      Row(
+                      Wrap(
                         children: [
-                          Expanded(child: _buildCategoryDropdown()),
+                          SizedBox(child: _buildCategoryDropdown()),
                           const SizedBox(width: 5),
-                          Expanded(child: _buildUnitDropdown()),
+                          SizedBox(child: _buildUnitDropdown()),
                         ],
                       ),
 
@@ -215,17 +215,18 @@ class _ProductsFormState extends State<MobileProductCreate> {
                       ),
 
                       // Third Row: Product Name and Opening Stock
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Expanded(child: _buildProductNameField()),
-                          const SizedBox(width: 5),
-                          Expanded(child: _buildBrandDropdown()),
 
+                      _buildProductNameField(),
+
+                      // Seventh Row: Alert Quantity and Description
+                      Row(
+                        children: [
+                          Expanded(child: _buildAlertQuantityField()),
+                          const SizedBox(width: 5),
+
+                          Expanded(child: _buildBrandDropdown()),
                         ],
                       ),
-                      const SizedBox(height: 8),
 
                       // Fourth Row: Purchase Price and Selling Price
                       Row(
@@ -238,7 +239,6 @@ class _ProductsFormState extends State<MobileProductCreate> {
                           Expanded(child: _buildSellingPriceField()),
                         ],
                       ),
-                      const SizedBox(height: 8),
 
                       // Fifth Row: Discount Toggle
                       Row(
@@ -271,17 +271,8 @@ class _ProductsFormState extends State<MobileProductCreate> {
                       ),
 
                       // Sixth Row: Discount Value and Type
-                      const SizedBox(height: 8),
-
-                      // Seventh Row: Alert Quantity and Description
-                      Row(
-                        children: [
-                          Expanded(child: _buildAlertQuantityField()),
-                          const SizedBox(width: 10),
-
-                          Expanded(child: _buildDescriptionField()),
-                        ],
-                      ),
+                      const SizedBox(height: 10),
+                      _buildDescriptionField(),
 
                       const SizedBox(height: 10),
                       if (widget.productId != null) ...[
@@ -324,7 +315,6 @@ class _ProductsFormState extends State<MobileProductCreate> {
                         SizedBox(height: AppSizes.height(context) * 0.01),
                       ],
 
-                      const SizedBox(height: 20),
 
                       // Buttons Row
                       Row(
@@ -344,11 +334,14 @@ class _ProductsFormState extends State<MobileProductCreate> {
                           SizedBox(
                             width: 150,
                             child: AppButton(
+                              isOutlined: true,
                               name: "Cancel",
                               color: Colors.grey,
+                              textColor: AppColors.errorColor(context),
                               onPressed: () => Navigator.pop(context),
                             ),
                           ),
+                          const SizedBox(width: 10),
                         ],
                       ),
                     ],
@@ -414,7 +407,7 @@ class _ProductsFormState extends State<MobileProductCreate> {
 
         return AppDropdown(
           label: "Category",
-          hint: selectedCategory.isEmpty ? "Select Category" : selectedCategory,
+          hint: "Select Category" ,
           isLabel: false,
           isNeedAll: false,
           isRequired: true,
@@ -447,7 +440,7 @@ class _ProductsFormState extends State<MobileProductCreate> {
 
         return AppDropdown(
           label: "Unit ",
-          hint: selectedUnit.isEmpty ? "Select Unit" : selectedUnit,
+          hint: "Select Unit" ,
           isLabel: false,
           isNeedAll: false,
           isRequired: true,
@@ -479,7 +472,7 @@ class _ProductsFormState extends State<MobileProductCreate> {
 
         return AppDropdown(
           label: "Groups ",
-          hint: selectedGroup.isEmpty ? "Select Groups" : selectedGroup,
+          hint: "Select Groups",
           isLabel: false,
           isNeedAll: false,
           isRequired: false,
@@ -510,7 +503,7 @@ class _ProductsFormState extends State<MobileProductCreate> {
 
         return AppDropdown(
           label: "Source ",
-          hint: selectedSource.isEmpty ? "Select Source" : selectedSource,
+          hint:  "Select Source" ,
           isLabel: false,
           isNeedAll: false,
           isRequired: false,
@@ -541,7 +534,7 @@ class _ProductsFormState extends State<MobileProductCreate> {
 
         return AppDropdown(
           label: "Brand",
-          hint: selectedBrand.isEmpty ? "Select Brand" : selectedBrand,
+          hint: "Select Brand" ,
           isLabel: false,
           isNeedAll: false,
           isSearch: true,

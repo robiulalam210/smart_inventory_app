@@ -559,14 +559,12 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                 lg: 2,
                 xl: 2,
                 child: CustomInputField(
-                  radius: 8,
                   isRequired: true,
                   readOnly: true,
                   controller: bloc.dateEditingController,
                   hintText: 'Sale Date',
                   keyboardType: TextInputType.datetime,
                   autofillHints: AutofillHints.name,
-                  bottom: 15.0,
                   fillColor: AppColors.whiteColor(context),
                   validator: (value) =>
                       value!.isEmpty ? 'Please enter date' : null,

@@ -399,7 +399,7 @@ class _MobileProfileScreenState extends State<MobileProfileScreen> {
                 _loadProfileData();
               },
               child: SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
+                padding: AppTextStyle.getResponsivePaddingBody(context),
                 child: BlocConsumer<ProfileBloc, ProfileState>(
                   listener: (context, state) {
                     _handleStateChanges(context, state);
@@ -460,13 +460,15 @@ class _MobileProfileScreenState extends State<MobileProfileScreen> {
                                   ),
                                 ),
                               ),
-                              const SizedBox(height: 15),
+                              const SizedBox(height: 4),
                               Text(
-                                my.data?.user?.username ?? '',
+                                my.data?.user?.username?.toString() ?? '',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
                                   color: primary,
                                   fontWeight: FontWeight.bold,
-                                  fontSize: 22,
+                                  fontSize: 20,
                                 ),
                               ),
                               const SizedBox(height: 2),
@@ -487,7 +489,7 @@ class _MobileProfileScreenState extends State<MobileProfileScreen> {
                                   fontSize: 13,
                                 ),
                               ),
-                              const SizedBox(height: 14),
+                              const SizedBox(height: 8),
                               SizedBox(
                                 width: double.infinity,
                                 child: ElevatedButton(
@@ -543,7 +545,7 @@ class _MobileProfileScreenState extends State<MobileProfileScreen> {
                               ),
                             ],
                           ),
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 10),
 
                           // Theme mode and color, language, menu items...
                           Theme(
