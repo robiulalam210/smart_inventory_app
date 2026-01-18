@@ -586,6 +586,7 @@ class _SalesScreenState extends State<MobileSalesScreen> {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
             ),
+            color: AppColors.bottomNavBg(context),
             elevation: 0,
             child: Padding(
               padding: const EdgeInsets.all(10),
@@ -645,9 +646,9 @@ class _SalesScreenState extends State<MobileSalesScreen> {
                       children: [
                         Text(
                           'Stock: ${product["stock_qty"] ?? selectedItem?.stockQty ?? 0}',
-                          style: const TextStyle(
+                          style:  TextStyle(
                             fontSize: 12,
-                            color: Colors.grey,
+                            color:AppColors.text(context),
                           ),
                         ),
                         const SizedBox(width: 8),
@@ -665,7 +666,7 @@ class _SalesScreenState extends State<MobileSalesScreen> {
                               product["discount_type"] == 'percent'
                                   ? '${product["discount"] ?? 0}% off'
                                   : 'Tk ${product["discount"] ?? 0}',
-                              style: const TextStyle(fontSize: 12),
+                              style:  TextStyle(fontSize: 12,color: AppColors.text(context)   ),
                             ),
                           ),
                       ],
@@ -1228,7 +1229,7 @@ class _SalesScreenState extends State<MobileSalesScreen> {
                 ))
           ])
         ],
-
+        const SizedBox(height: 10),
         // Payable amount section (common for both)
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,

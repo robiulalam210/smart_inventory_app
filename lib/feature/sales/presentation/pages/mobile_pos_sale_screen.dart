@@ -341,6 +341,7 @@ class _PosSaleScreenState extends State<MobilePosSaleScreen> {
           builder: (context, setState) {
             return SafeArea(
               child: Container(
+                color: AppColors.bottomNavBg(context),
                 padding: const EdgeInsets.all(20),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -382,7 +383,7 @@ class _PosSaleScreenState extends State<MobilePosSaleScreen> {
                         );
                       },
                     ),
-
+                    const SizedBox(height: 10),
                     // Seller Filter
                     BlocBuilder<UserBloc, UserState>(
                       builder: (context, state) {
@@ -403,7 +404,7 @@ class _PosSaleScreenState extends State<MobilePosSaleScreen> {
                         );
                       },
                     ),
-
+                    const SizedBox(height: 10),
                     // Date Range
                     CustomDateRangeField(
                       isLabel: false,

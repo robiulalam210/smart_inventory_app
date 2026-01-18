@@ -865,6 +865,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                   );
                 },
               ),
+              gapH8,
               BlocBuilder<UserBloc, UserState>(
                 builder: (context, state) {
                   return AppDropdown(
@@ -995,6 +996,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                       );
                     },
                   ),
+                  gapH8,
 
                   // Product
                   BlocBuilder<ProductsBloc, ProductsState>(
@@ -1400,7 +1402,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
               ),
               const SizedBox(width: 4),
               SizedBox(
-                width: 110,
+                width: 140,
                 child: CustomInputFieldPayRoll(
                   isRequiredLevle: false,
                   controller: controller,
@@ -1500,8 +1502,8 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
             ),
 
           ResponsiveRow(
-            spacing: 20,
-            runSpacing: 10,
+            spacing: 8,
+            runSpacing: 8,
             children: [
               ResponsiveCol(
                 xs: 12,
@@ -1573,9 +1575,10 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
         ),
         if (_isChecked) ...[
           const SizedBox(height: 10),
-          Row(
+          Wrap(
+            spacing: 10,
             children: [
-              Expanded(
+              SizedBox(
                 child: AppDropdown<String>(
                   label: "Payment Method",
                   hint: bloc.selectedPaymentMethod.isEmpty
@@ -1597,8 +1600,8 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
 
                 ),
               ),
-              const SizedBox(width: 5),
-              Expanded(
+              gapH8,
+              SizedBox(
                 child: BlocBuilder<AccountBloc, AccountState>(
                   builder: (context, state) {
                     if (state is AccountActiveListLoading) {
@@ -1642,11 +1645,13 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
               ),
             ],
           ),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          gapH16,
+          Wrap(
+          spacing: 10,
+            runSpacing: 10,
             children: [
-              Expanded(
-                flex: 2,
+              SizedBox(
+
                 child: AppTextField(
                   controller: changeAmountController,
                   hintText: isWalkInCustomer
@@ -1659,8 +1664,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                 ),
               ),
               const SizedBox(width: 5),
-              Expanded(
-                flex: 2,
+              SizedBox(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [

@@ -556,7 +556,7 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
           padding: const EdgeInsets.all(6),
           margin: const EdgeInsets.all(0),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color:AppColors.bottomNavBg(context),
             borderRadius: BorderRadius.circular(8),
           ),
           child: ResponsiveRow(

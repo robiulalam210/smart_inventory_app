@@ -360,6 +360,7 @@ class _PurchaseScreenState extends State<MobilePurchaseScreen> {
         return StatefulBuilder(
           builder: (context, setState) {
             return Container(
+              color: AppColors.bottomNavBg(context),
               padding: const EdgeInsets.all(20),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -400,7 +401,7 @@ class _PurchaseScreenState extends State<MobilePurchaseScreen> {
                       );
                     },
                   ),
-
+gapH16,
                   // Payment Status Filter
                   Wrap(
                     spacing: 8,
