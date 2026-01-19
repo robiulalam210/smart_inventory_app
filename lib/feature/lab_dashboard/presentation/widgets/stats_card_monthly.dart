@@ -49,18 +49,22 @@ class StatsCardMonthly extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Container(
-                        width: isMobile ? 24 : 30,
-                        height: isMobile ? 24 : 30,
+                        width: 35, // same for mobile & desktop
+                        height: 35,
                         decoration: BoxDecoration(
                           color: color.withAlpha(128),
                           shape: BoxShape.circle,
                         ),
+                        alignment: Alignment.center, // centers the icon
                         child: Image.asset(
                           icon,
                           color: Colors.white,
-                          width: isMobile ? 24 : 30,
+                          width: 20, // icon width
+                          height: 20, // ensure square icon
+                          fit: BoxFit.contain,
                         ),
                       ),
+
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(

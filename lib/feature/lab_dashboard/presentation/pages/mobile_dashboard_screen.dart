@@ -383,7 +383,7 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
                 count: (data.todayMetrics?.purchases?.total ?? 0)
                     .toStringAsFixed(2),
                 color: Colors.green,
-                icon: "assets/images/gross.png",
+                icon: "assets/images/amount.png",
               ),
             ),
           ],
@@ -429,7 +429,7 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
                 count:
                 data.todayMetrics?.sales?.totalQuantity?.toString() ?? "0",
                 color: Colors.pink,
-                icon: "assets/images/sold.png",
+                icon: "assets/images/sales.png",
               ),
             ),
             SizedBox(width: isMobile ? 8 : 12),
@@ -439,7 +439,7 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
                 count: (data.todayMetrics?.sales?.total ?? 0)
                     .toStringAsFixed(2),
                 color: Colors.purple,
-                icon: "assets/images/gross.png",
+                icon: "assets/images/amount.png",
               ),
             ),
           ],
@@ -453,7 +453,7 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
                 count: (data.todayMetrics?.sales?.totalDue ?? 0)
                     .toStringAsFixed(2),
                 color: Colors.redAccent,
-                icon: "assets/images/cancel.png",
+                icon: "assets/images/due.png",
               ),
             ),
             SizedBox(width: isMobile ? 8 : 12),
@@ -465,7 +465,7 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
                 color: (data.profitLoss?.netProfit ?? 0) >= 0
                     ? Colors.green
                     : Colors.red,
-                icon: "assets/images/expenses.png",
+                icon: "assets/images/profits.png",
               ),
             ),
           ],
