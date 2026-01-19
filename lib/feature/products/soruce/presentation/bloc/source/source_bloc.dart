@@ -64,12 +64,11 @@ class SourceBloc extends Bloc<SourceEvent, SourceState> {
 
       // Apply filtering and pagination
       final filteredData = _filterSource(list, event.filterText);
-      final paginatedData = _paginateSource(filteredData, event.pageNumber);
 
       final totalPages = (filteredData.length / _itemsPerPage).ceil();
 
       emit(SourceListSuccess(
-        list: paginatedData,
+        list: filteredData,
         totalPages: totalPages,
         currentPage: event.pageNumber,
       ));
@@ -86,12 +85,6 @@ class SourceBloc extends Bloc<SourceEvent, SourceState> {
     }).toList();
   }
 
-  List<SourceModel> _paginateSource(List<SourceModel> list, int pageNumber) {
-    final start = pageNumber * _itemsPerPage;
-    final end = start + _itemsPerPage;
-    if (start >= list.length) return [];
-    return list.sublist(start, end > list.length ? list.length : end);
-  }
 
 
   Future<void> _onCreateSourceList(

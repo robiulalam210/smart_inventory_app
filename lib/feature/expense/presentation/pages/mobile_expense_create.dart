@@ -285,6 +285,8 @@ class _ExpenseCreateScreenState extends State<MobileExpenseCreate> {
                       SizedBox(height: AppSizes.height(context) * 0.03),
 
                       Wrap(
+                        runSpacing: 5,
+                        spacing: 10,
                         children: [
                           // Expense Head Dropdown
                           SizedBox(
@@ -319,7 +321,7 @@ class _ExpenseCreateScreenState extends State<MobileExpenseCreate> {
                                   },
                                 ),
                           ),
-                          gapW16,
+                          gapW8,
                           // Expense SubHead Dropdown
                           SizedBox(
                             child:
@@ -358,9 +360,11 @@ class _ExpenseCreateScreenState extends State<MobileExpenseCreate> {
                           ),
                         ],
                       ),
-
+                      gapH8,
                       // Amount Field
                       Wrap(
+                        runSpacing: 5,
+                        spacing: 10,
                         children: [
                           SizedBox(
                             child: widget.id == null
@@ -465,7 +469,7 @@ class _ExpenseCreateScreenState extends State<MobileExpenseCreate> {
                           ),
                         ],
                       ),
-
+                      gapH8,
                       // Payment Method (only for create)
                       Wrap(
                         children: [

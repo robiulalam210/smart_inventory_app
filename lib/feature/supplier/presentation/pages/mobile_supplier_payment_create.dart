@@ -130,7 +130,7 @@ class _MobileSupplierPaymentCreateState extends State<MobileSupplierPaymentCreat
             secondChild: _buildCollectedByDropdown(),
           ),
 
-
+gapH8,
           // Payment To & Conditional Invoice
           _buildTwoColumnRow(
             firstChild: _buildPaymentToDropdown(),
@@ -227,6 +227,7 @@ class _MobileSupplierPaymentCreateState extends State<MobileSupplierPaymentCreat
         return Column(
           children: [
             firstChild,
+            gapH8,
             secondChild,
           ],
         );

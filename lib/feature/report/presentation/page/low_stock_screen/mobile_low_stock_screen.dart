@@ -196,7 +196,7 @@ class _MobileLowStockScreenState extends State<MobileLowStockScreen> {
               crossAxisCount: 2,
               crossAxisSpacing: 8,
               mainAxisSpacing: 8,
-              childAspectRatio: 1.9,
+              childAspectRatio: 1.7,
               children: [
                 _buildMobileAlertCard('Total Items', summary.totalLowStockItems.toString(), Icons.inventory_2, AppColors.primaryColor(context)),
                 _buildMobileAlertCard('Critical', criticalItems.toString(), Icons.dangerous, Colors.red),
