@@ -352,7 +352,7 @@ class _MobileSupplierDueAdvanceScreenState
                       width: 40,
                       height: 40,
                       decoration: BoxDecoration(
-                        color: supplier.balanceStatusColor.withOpacity(0.1),
+                        color: supplier.balanceStatusColor.withValues(alpha: 0.1),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
@@ -434,7 +434,7 @@ class _MobileSupplierDueAdvanceScreenState
                         child: Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: Colors.red.withOpacity(0.1),
+                            color: Colors.red.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Column(
@@ -464,7 +464,7 @@ class _MobileSupplierDueAdvanceScreenState
                         child: Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: Colors.green.withOpacity(0.1),
+                            color: Colors.green.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Column(
@@ -726,7 +726,7 @@ class _MobileSupplierDueAdvanceScreenState
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: supplier.balanceStatusColor.withOpacity(0.1),
+                  color: supplier.balanceStatusColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(color: supplier.balanceStatusColor),
                 ),

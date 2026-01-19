@@ -1,8 +1,4 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:lottie/lottie.dart';
 import 'package:meherinMart/core/widgets/app_scaffold.dart';
-import 'package:iconsax/iconsax.dart';
 
 import '../../../../../core/configs/configs.dart';
 import '../../../../../core/widgets/app_alert_dialog.dart';
@@ -237,7 +233,7 @@ class _ProductsScreenState extends State<MobileProductScreen> {
                 margin: const EdgeInsets.only(top: 8),
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: AppColors.primaryColor(context).withOpacity(0.1),
+                  color: AppColors.primaryColor(context).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(

@@ -465,7 +465,7 @@ class SalesDetailsScreen extends StatelessWidget {
   }
 
   Widget _mobileSummaryRow(
-    context,
+    dynamic context,
     String label,
     double value, {
     bool isNegative = false,

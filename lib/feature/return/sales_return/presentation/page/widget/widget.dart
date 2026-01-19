@@ -2,8 +2,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:meherinMart/core/core.dart';
 import '/feature/return/sales_return/data/model/sales_return_model.dart';
 
-import '../../../../../../core/configs/configs.dart';
-import '../../../../../../core/widgets/delete_dialog.dart';
 import '../../sales_return_bloc/sales_return_bloc.dart';
 
 class SalesReturnTableCard extends StatelessWidget {

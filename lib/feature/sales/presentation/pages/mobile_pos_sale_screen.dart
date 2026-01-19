@@ -12,7 +12,6 @@ import 'package:meherinMart/feature/users_list/data/model/user_model.dart';
 import 'package:meherinMart/feature/users_list/presentation/bloc/users/user_bloc.dart';
 import 'package:meherinMart/feature/sales/presentation/bloc/possale/possale_bloc.dart';
 import 'package:meherinMart/feature/sales/presentation/widgets/widget.dart';
-import 'package:lottie/lottie.dart';
 
 class MobilePosSaleScreen extends StatefulWidget {
   const MobilePosSaleScreen({super.key, this.posSale});

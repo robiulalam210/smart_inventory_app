@@ -939,7 +939,7 @@ class _MobileCustomerLedgerScreenState
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: transaction.typeColor.withOpacity(0.1),
+                  color: transaction.typeColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(color: transaction.typeColor),
                 ),

@@ -16,147 +16,148 @@ class AppDropdown<T> extends FormField<T> {
     this.isLabel = false,
     super.validator,
   }) : super(
-    initialValue: value,
-    autovalidateMode: AutovalidateMode.onUserInteraction,
-    builder: (FormFieldState<T> state) {
-      final context = state.context;
-      final TextEditingController controller =
-      TextEditingController(text: state.value?.toString() ?? '');
+         initialValue: value,
+         autovalidateMode: AutovalidateMode.onUserInteraction,
+         builder: (FormFieldState<T> state) {
+           final context = state.context;
+           final TextEditingController controller = TextEditingController(
+             text: state.value?.toString() ?? '',
+           );
 
-      /// ---------- ITEMS ----------
-      final List<T> items = [...itemList];
-      if (isNeedAll && allItem != null) {
-        items.insert(0, allItem as T);
-      }
+           /// ---------- ITEMS ----------
+           final List<T> items = [...itemList];
+           if (isNeedAll && allItem != null) {
+             items.insert(0, allItem as T);
+           }
 
-      // Show dropdown as a bottom sheet
-      void _showDropdown() {
-        // Unfocus any active focus to prevent keyboard issues
-        FocusScope.of(context).unfocus();
+           // Show dropdown as a bottom sheet
+           void _showDropdown() {
+             // Unfocus any active focus to prevent keyboard issues
+             FocusScope.of(context).unfocus();
 
-        showModalBottomSheet(
-          context: context,
-          isScrollControlled: true,
-          backgroundColor: Colors.transparent,
-          useSafeArea: true,
-          builder: (sheetContext) {
-            return _DropdownBottomSheet<T>(
-              items: items,
-              selectedValue: state.value,
-              controller: controller,
-              hint: hint,
-              isSearch: isSearch,
-              onChanged: (value) {
-                if (value != null) {
-                  controller.text = value.toString();
-                  state.didChange(value);
-                  onChanged(value);
-                }
-                Navigator.pop(sheetContext);
-              },
-            );
-          },
-        );
-      }
+             showModalBottomSheet(
+               context: context,
+               isScrollControlled: true,
+               backgroundColor: Colors.transparent,
+               useSafeArea: true,
+               builder: (sheetContext) {
+                 return _DropdownBottomSheet<T>(
+                   items: items,
+                   selectedValue: state.value,
+                   controller: controller,
+                   hint: hint,
+                   isSearch: isSearch,
+                   onChanged: (value) {
+                     if (value != null) {
+                       // controller.text = value.toString();
+                       state.didChange(value);
+                       onChanged(value);
+                     }
+                     Navigator.pop(sheetContext);
+                   },
+                 );
+               },
+             );
+           }
 
-      void _handleClear() {
-        controller.clear();
-        state.didChange(null);
-        onChanged(null);
-      }
+           void handleClear() {
+             controller.clear();
+             state.didChange(null);
+             onChanged(null);
+           }
 
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          /// ---------- LABEL ----------
-          if (isLabel) ...[
-            Row(
-              children: [
-                Text(
-                  label,
-                  style: AppTextStyle.labelDropdownTextStyle(context),
-                ),
-                if (isRequired)
-                  const Text('*', style: TextStyle(color: Colors.red)),
-              ],
-            ),
-            const SizedBox(height: 4),
-          ],
+           return Column(
+             crossAxisAlignment: CrossAxisAlignment.start,
+             children: [
+               /// ---------- LABEL ----------
+               if (isLabel) ...[
+                 Row(
+                   children: [
+                     Text(
+                       label,
+                       style: AppTextStyle.labelDropdownTextStyle(context),
+                     ),
+                     if (isRequired)
+                       const Text('*', style: TextStyle(color: Colors.red)),
+                   ],
+                 ),
+                 const SizedBox(height: 4),
+               ],
 
-          /// ---------- FIELD ----------
-          SizedBox(
-            height: 35,
-            child: InkWell(
-              onTap: _showDropdown,
-              borderRadius: BorderRadius.circular(AppSizes.radius),
-              child: Container(
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: state.hasError
-                        ? Colors.red
-                        : AppColors.greyColor(context),
-                    width: 1,
-                  ),
-                  borderRadius: BorderRadius.circular(AppSizes.radius),
-                ),
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        controller.text.isEmpty ? hint : controller.text,
-                        style: TextStyle(
-                          color: controller.text.isEmpty
-                              ? AppColors.greyColor(context)
-                              : AppColors.text(context),
-                          fontSize: 14,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 1,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (controller.text.isNotEmpty)
-                          InkWell(
-                            onTap: _handleClear,
-                            borderRadius: BorderRadius.circular(12),
-                            child: Padding(
-                              padding: const EdgeInsets.all(4),
-                              child: Icon(
-                                Icons.close,
-                                size: 18,
-                                color: AppColors.greyColor(context),
-                              ),
-                            ),
-                          ),
-                        Icon(
-                          Icons.keyboard_arrow_down,
-                          color: AppColors.greyColor(context),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
+               /// ---------- FIELD ----------
+               SizedBox(
+                 height: 35,
+                 child: InkWell(
+                   onTap: _showDropdown,
+                   borderRadius: BorderRadius.circular(AppSizes.radius),
+                   child: Container(
+                     decoration: BoxDecoration(
+                       border: Border.all(
+                         color: state.hasError
+                             ? Colors.red
+                             : AppColors.greyColor(context),
+                         width: 1,
+                       ),
+                       borderRadius: BorderRadius.circular(AppSizes.radius),
+                     ),
+                     padding: const EdgeInsets.symmetric(horizontal: 12),
+                     child: Row(
+                       children: [
+                         Expanded(
+                           child: Text(
+                             controller.text.isEmpty ? hint : controller.text,
+                             style: TextStyle(
+                               color: controller.text.isEmpty
+                                   ? AppColors.greyColor(context)
+                                   : AppColors.text(context),
+                               fontSize: 14,
+                             ),
+                             overflow: TextOverflow.ellipsis,
+                             maxLines: 1,
+                           ),
+                         ),
+                         const SizedBox(width: 8),
+                         Row(
+                           mainAxisSize: MainAxisSize.min,
+                           children: [
+                             if (controller.text.isNotEmpty)
+                               InkWell(
+                                 onTap: handleClear,
+                                 borderRadius: BorderRadius.circular(12),
+                                 child: Padding(
+                                   padding: const EdgeInsets.all(4),
+                                   child: Icon(
+                                     Icons.close,
+                                     size: 18,
+                                     color: AppColors.greyColor(context),
+                                   ),
+                                 ),
+                               ),
+                             Icon(
+                               Icons.keyboard_arrow_down,
+                               color: AppColors.greyColor(context),
+                             ),
+                           ],
+                         ),
+                       ],
+                     ),
+                   ),
+                 ),
+               ),
 
-          /// ---------- ERROR ----------
-          if (state.hasError)
-            Padding(
-              padding: const EdgeInsets.only(top: 4, left: 6),
-              child: Text(
-                state.errorText!,
-                style: AppTextStyle.errorTextStyle(context),
-              ),
-            ),
-        ],
-      );
-    },
-  );
+               /// ---------- ERROR ----------
+               if (state.hasError)
+                 Padding(
+                   padding: const EdgeInsets.only(top: 4, left: 6),
+                   child: Text(
+                     state.errorText!,
+                     style: AppTextStyle.errorTextStyle(context),
+                   ),
+                 ),
+             ],
+           );
+         },
+       );
 
   final String label;
   final String hint;
@@ -187,7 +188,8 @@ class _DropdownBottomSheet<T> extends StatefulWidget {
   });
 
   @override
-  State<_DropdownBottomSheet<T>> createState() => _DropdownBottomSheetState<T>();
+  State<_DropdownBottomSheet<T>> createState() =>
+      _DropdownBottomSheetState<T>();
 }
 
 class _DropdownBottomSheetState<T> extends State<_DropdownBottomSheet<T>> {
@@ -202,7 +204,7 @@ class _DropdownBottomSheetState<T> extends State<_DropdownBottomSheet<T>> {
 
     // If search is enabled, initialize with current value
     if (widget.isSearch && widget.controller.text.isNotEmpty) {
-      searchController.text = widget.controller.text;
+      // searchController.text = widget.controller.text;
       _filterItems(widget.controller.text);
     }
   }
@@ -219,7 +221,10 @@ class _DropdownBottomSheetState<T> extends State<_DropdownBottomSheet<T>> {
         filteredItems = widget.items;
       } else {
         filteredItems = widget.items
-            .where((item) => item.toString().toLowerCase().contains(query.toLowerCase()))
+            .where(
+              (item) =>
+                  item.toString().toLowerCase().contains(query.toLowerCase()),
+            )
             .toList();
       }
     });
@@ -233,8 +238,8 @@ class _DropdownBottomSheetState<T> extends State<_DropdownBottomSheet<T>> {
       maxChildSize: 0.9,
       builder: (context, scrollController) {
         return Container(
-          decoration:  BoxDecoration(
-            color:AppColors.bottomNavBg(context),
+          decoration: BoxDecoration(
+            color: AppColors.bottomNavBg(context),
             borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
           ),
           child: Column(
@@ -292,72 +297,86 @@ class _DropdownBottomSheetState<T> extends State<_DropdownBottomSheet<T>> {
               Expanded(
                 child: filteredItems.isEmpty
                     ? Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.search_off,
-                          size: 64,
-                          color: AppColors.greyColor(context),
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'No items found',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: AppColors.greyColor(context),
+                        child: Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.search_off,
+                                size: 64,
+                                color: AppColors.greyColor(context),
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                'No items found',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: AppColors.greyColor(context),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                      ],
-                    ),
-                  ),
-                )
+                      )
                     : ListView.builder(
-                  controller: scrollController,
-                  padding: const EdgeInsets.all(8),
-                  itemCount: filteredItems.length,
-                  itemBuilder: (context, index) {
-                    final item = filteredItems[index];
-                    final isSelected = item == widget.selectedValue;
+                        controller: scrollController,
+                        padding: const EdgeInsets.all(8),
+                        itemCount: filteredItems.length,
+                        itemBuilder: (context, index) {
+                          final item = filteredItems[index];
+                          final isSelected = item == widget.selectedValue;
 
-                    return Card(
-                      margin: const EdgeInsets.symmetric(
-                        vertical: 4,
-                        horizontal: 8,
+                          return Container(
+                            margin: const EdgeInsets.symmetric(
+                              vertical: 4,
+                              horizontal: 08,
+                            ),
+
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? AppColors.primaryColor(
+                                      context,
+                                    ).withValues(alpha: 0.1)
+                                  : AppColors.bottomNavBg(context),
+                              borderRadius: BorderRadius.circular(
+                                AppSizes.radius,
+                              ),
+                              border: Border.all(
+                                color: AppColors.greyColor(
+                                  context,
+                                ).withValues(alpha: 0.5),
+                                width: 0.5,
+                              ),
+                            ),
+
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 12,
+                            ),
+                            child: InkWell(
+                              onTap: () => widget.onChanged(item),
+                              child: Row(
+                                children: [
+                                  isSelected
+                                      ? Icon(
+                                          Icons.check_circle,
+                                          color: AppColors.primaryColor(
+                                            context,
+                                          ),
+                                        )
+                                      : SizedBox.shrink(),
+                                  SizedBox(width: 10),
+                                  Text(
+                                    item.toString(),
+                                    style: AppTextStyle.bodyLarge(context),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
                       ),
-                      elevation: 0,
-                      color: isSelected
-                          ? AppColors.primaryColor(context).withValues(alpha: 0.1)
-                          : AppColors.bottomNavBg(context),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        side: BorderSide(
-                          color: Colors.grey.shade200,
-                          width: 1,
-                        ),
-                      ),
-                      child: ListTile(
-                        contentPadding: EdgeInsets.zero,
-                        leading: isSelected
-                            ? Icon(
-                          Icons.check_circle,
-                          color: AppColors.primaryColor(context),
-                        )
-                            : null,
-                        title: Text(
-                          item.toString(),
-                          style: TextStyle(
-                            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                            color: AppColors.text(context),
-                          ),
-                        ),
-                        onTap: () => widget.onChanged(item),
-                      ),
-                    );
-                  },
-                ),
               ),
             ],
           ),

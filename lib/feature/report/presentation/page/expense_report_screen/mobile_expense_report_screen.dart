@@ -356,7 +356,7 @@ class _MobileExpenseReportScreenState extends State<MobileExpenseReportScreen> {
                     borderRadius: BorderRadius.circular(8),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.grey.withOpacity(0.1),
+                        color: Colors.grey.withValues(alpha: 0.1),
                         blurRadius: 4,
                         offset: const Offset(0, 2),
                       ),
@@ -422,7 +422,7 @@ width: 0.5
             Container(
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
+                color: color.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(icon, color: color, size: 20),
@@ -612,7 +612,7 @@ elevation: 0,
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
-                            color: _getPaymentMethodColor(expense.paymentMethod).withOpacity(0.1),
+                            color: _getPaymentMethodColor(expense.paymentMethod).withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
@@ -813,7 +813,7 @@ elevation: 0,
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: _getPaymentMethodColor(expense.paymentMethod).withOpacity(0.1),
+                  color: _getPaymentMethodColor(expense.paymentMethod).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(color: _getPaymentMethodColor(expense.paymentMethod)),
                 ),

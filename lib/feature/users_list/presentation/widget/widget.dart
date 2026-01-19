@@ -1,4 +1,3 @@
-import 'package:date_format/date_format.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/configs/configs.dart';
 import '../../data/model/user_model.dart';

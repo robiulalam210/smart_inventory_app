@@ -255,6 +255,7 @@ class _MobileAccountTransferScreenState extends State<MobileAccountTransferScree
         if (state is ExecuteTransferLoading) {
           appLoader(context, "Executing transfer, please wait...");
         } else if (state is ExecuteTransferSuccess) {
+          _fetchApi();
           Navigator.pop(context);
           showCustomToast(
             context: context,
@@ -266,6 +267,7 @@ class _MobileAccountTransferScreenState extends State<MobileAccountTransferScree
           _fetchApi();
         } else if (state is ExecuteTransferFailed) {
           Navigator.pop(context);
+          _fetchApi();
           appAlertDialog(
             context,
             state.content,
@@ -281,6 +283,7 @@ class _MobileAccountTransferScreenState extends State<MobileAccountTransferScree
           appLoader(context, "Reversing transfer, please wait...");
         } else if (state is ReverseTransferSuccess) {
           Navigator.pop(context);
+          _fetchApi();
           showCustomToast(
             context: context,
             title: 'Success!',
@@ -291,6 +294,7 @@ class _MobileAccountTransferScreenState extends State<MobileAccountTransferScree
           _fetchApi();
         } else if (state is ReverseTransferFailed) {
           Navigator.pop(context);
+          _fetchApi();
           appAlertDialog(
             context,
             state.content,
@@ -316,6 +320,7 @@ class _MobileAccountTransferScreenState extends State<MobileAccountTransferScree
           _fetchApi();
         } else if (state is CancelTransferFailed) {
           Navigator.pop(context);
+          _fetchApi();
           appAlertDialog(
             context,
             state.content,

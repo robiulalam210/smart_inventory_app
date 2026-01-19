@@ -2,11 +2,6 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/painting.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:lottie/lottie.dart';
 import 'package:meherinMart/feature/auth/presentation/pages/login_scr.dart';
 import 'package:path/path.dart' as p;
 
@@ -112,8 +107,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final themeState = context.watch<ThemeCubit>().state;
 
     final primary = themeState.primaryColor;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final iconBg = primary.withOpacity(0.11);
+    final iconBg = primary.withValues(alpha: 0.11);
     return ResponsiveCol(
       xs: 12,
       lg: 10,
@@ -323,7 +317,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               if (_isUploading)
                 Positioned.fill(
                   child: Container(
-                    color: Colors.black.withOpacity(0.45),
+                    color: Colors.black.withValues(alpha: 0.45),
                     child: Center(
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
@@ -443,8 +437,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final themeState = context.watch<ThemeCubit>().state;
 
     final primary = themeState.primaryColor;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final iconBg = primary.withOpacity(0.11);
+
     return SingleChildScrollView(
       key: const ValueKey('profileForm'),
       child: Card(
@@ -613,7 +606,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         width: 40,
                         height: 40,
                         decoration: BoxDecoration(
-                          color: primary.withOpacity(0.11),
+                          color: primary.withValues(alpha: 0.11),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Icon(Icons.palette, color: primary),
@@ -1338,7 +1331,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             width: 42,
             height: 42,
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary.withOpacity(0.11),
+              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.11),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(Icons.translate, color: Theme.of(context).colorScheme.primary, size: 18),

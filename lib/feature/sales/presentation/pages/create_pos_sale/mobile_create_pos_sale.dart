@@ -1441,7 +1441,6 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
 
   Widget _buildSummarySection(CreatePosSaleBloc bloc, bool isWalkInCustomer) {
     final productTotal = calculateTotalTicketForAllProducts();
-    final specificDiscount = calculateSpecificDiscountTotal();
     final subTotal = calculateTotalForAllProducts();
     final netTotal = calculateAllFinalTotal();
 

@@ -1365,8 +1365,7 @@ class _SalesScreenState extends State<MobileSalesScreen> {
     final overallDiscount =
         double.tryParse(bloc.discountOverAllController.text) ?? 0.0;
     final vat = double.tryParse(bloc.vatOverAllController.text) ?? 0.0;
-    final serviceCharge =
-        double.tryParse(bloc.serviceChargeOverAllController.text) ?? 0.0;
+
 
     // Create a preview sale model
     final previewSale = PosSaleModel(
@@ -1773,7 +1772,7 @@ class _SalesScreenState extends State<MobileSalesScreen> {
 
     final isAdded = existingIndex != -1;
     final addedQuantity = isAdded
-        ? (_toInt(bloc.products[existingIndex]["quantity"]) ?? 0)
+        ? (_toInt(bloc.products[existingIndex]["quantity"]))
         : 0;
 
     return InkWell(
@@ -2425,7 +2424,7 @@ Future<Uint8List> generateSalesPreviewPdf(
   }
 
   // Helper for info rows
-  pw.Widget _buildInfoRow(String label, String value) {
+  pw.Widget buildInfoRow(String label, String value) {
     return pw.Container(
       margin: const pw.EdgeInsets.symmetric(vertical: 2),
       child: pw.Row(
@@ -2450,7 +2449,7 @@ Future<Uint8List> generateSalesPreviewPdf(
   }
 
   // Helper for status color
-  PdfColor _getStatusColor(String status) {
+  PdfColor getStatusColor(String status) {
     switch (status.toLowerCase()) {
       case 'paid':
         return PdfColors.green;
@@ -2552,9 +2551,9 @@ Future<Uint8List> generateSalesPreviewPdf(
                     ),
                   ),
                   pw.SizedBox(height: 4),
-                  _buildInfoRow('Invoice No:', sale.invoiceNo ?? 'N/A'),
-                  _buildInfoRow('Date:', sale.formattedSaleDate),
-                  _buildInfoRow('Time:', sale.formattedTime),
+                  buildInfoRow('Invoice No:', sale.invoiceNo ?? 'N/A'),
+                  buildInfoRow('Date:', sale.formattedSaleDate),
+                  buildInfoRow('Time:', sale.formattedTime),
                 ],
               ),
               pw.Container(
@@ -2563,7 +2562,7 @@ Future<Uint8List> generateSalesPreviewPdf(
                   vertical: 8,
                 ),
                 decoration: pw.BoxDecoration(
-                  color: _getStatusColor(sale.paymentStatus),
+                  color: getStatusColor(sale.paymentStatus),
                   borderRadius: pw.BorderRadius.circular(20),
                 ),
                 child: pw.Text(
@@ -2602,8 +2601,8 @@ Future<Uint8List> generateSalesPreviewPdf(
                       ),
                     ),
                     pw.SizedBox(height: 8),
-                    _buildInfoRow('Customer:', sale.customerName ?? 'Walk-in Customer'),
-                    _buildInfoRow('Sales Person:', sale.saleByName ?? 'N/A'),
+                    buildInfoRow('Customer:', sale.customerName ?? 'Walk-in Customer'),
+                    buildInfoRow('Sales Person:', sale.saleByName ?? 'N/A'),
                   ],
                 ),
               ),
@@ -2620,9 +2619,9 @@ Future<Uint8List> generateSalesPreviewPdf(
                       ),
                     ),
                     pw.SizedBox(height: 8),
-                    _buildInfoRow('Payment Method:', sale.paymentMethod ?? 'Cash'),
+                    buildInfoRow('Payment Method:', sale.paymentMethod ?? 'Cash'),
                     if (sale.accountName != null && sale.accountName!.isNotEmpty)
-                      _buildInfoRow('Account:', sale.accountName!),
+                      buildInfoRow('Account:', sale.accountName!),
                   ],
                 ),
               ),

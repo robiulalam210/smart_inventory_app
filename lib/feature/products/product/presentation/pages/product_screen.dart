@@ -1,6 +1,4 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:lottie/lottie.dart';
+
 import '../../../../../core/configs/configs.dart';
 import '../../../../../core/shared/widgets/sideMenu/sidebar.dart';
 import '../../../../../core/widgets/app_alert_dialog.dart';
@@ -179,7 +177,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
                 boxShadow: [
                   if (_showFilterDrawer)
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
+                      color: Colors.black.withValues(alpha: 0.1),
                       blurRadius: 10,
                       offset: const Offset(-3, 0),
                     ),
@@ -260,11 +258,8 @@ class _ProductsScreenState extends State<ProductsScreen> {
                 size: 24,
               ),
               onPressed: () {
-                print("Filter button pressed!");
-                print("Current _showFilterDrawer value: $_showFilterDrawer");
                 setState(() {
                   _showFilterDrawer = !_showFilterDrawer;
-                  print("New _showFilterDrawer value: $_showFilterDrawer");
                 });
               },
               tooltip: 'Toggle Filters',
@@ -285,7 +280,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
       margin: const EdgeInsets.only(top: 8, bottom: 8),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: AppColors.primaryColor(context).withOpacity(0.1),
+        color: AppColors.primaryColor(context).withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -383,7 +378,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
       label: Text(label, style: const TextStyle(fontSize: 12)),
       deleteIcon: const Icon(Icons.close, size: 14),
       onDeleted: onDeleted,
-      backgroundColor: AppColors.primaryColor(context).withOpacity(0.1),
+      backgroundColor: AppColors.primaryColor(context).withValues(alpha: 0.1),
     );
   }
 
@@ -676,7 +671,6 @@ class _ProductsScreenState extends State<ProductsScreen> {
         String hintText = '',
         TextInputType keyboardType = TextInputType.text,
       }) {
-    print("Building text field for $label with value: $value");
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -720,7 +714,6 @@ class _ProductsScreenState extends State<ProductsScreen> {
                   : null,
             ),
             onChanged: (newValue) {
-              print("$label changed from '$value' to '$newValue'");
               onChanged(newValue);
             },
           ),

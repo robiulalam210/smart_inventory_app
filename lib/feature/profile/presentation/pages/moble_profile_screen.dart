@@ -752,7 +752,7 @@ class _MobileProfileScreenState extends State<MobileProfileScreen> {
             if (_isUploading)
               Positioned.fill(
                 child: Container(
-                  color: Colors.black.withOpacity(0.4),
+                  color: Colors.black.withValues(alpha: 0.4),
                   child: Center(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
@@ -1202,7 +1202,7 @@ class _MobileProfileScreenState extends State<MobileProfileScreen> {
             width: 42,
             height: 42,
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary.withOpacity(0.11),
+              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.11),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(
