@@ -4,6 +4,7 @@ import '../../../../core/core.dart';
 import '../../../../core/database/login_local_storage.dart';
 import '../../../../root.dart';
 import '../../../feature.dart';
+import '../../../profile/presentation/bloc/profile_bloc/profile_bloc.dart';
 
 class LogInScreen extends StatefulWidget {
   const LogInScreen({super.key});
@@ -228,6 +229,8 @@ class _LogInScreenState extends State<LogInScreen> {
                   icon: Icons.check_circle,
                   primaryColor: Colors.green,
                 );
+                context.read<ProfileBloc>().add(FetchProfilePermission(context: context));
+
                 AppRoutes.pushReplacement(context, RootScreen());
               } else if (state is AuthError) {
                 _dismissLoaderIfOpen();

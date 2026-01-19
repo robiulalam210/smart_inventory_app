@@ -322,9 +322,9 @@ class User {
   final String? role;
   final int? company;
   final CompanyInfo? companyInfo;
-  final dynamic phone;
+  final String? phone;
   final dynamic profilePicture;
-  final dynamic dateOfBirth;
+  final DateTime? dateOfBirth;
   final bool? isVerified;
   final DateTime? lastLogin;
   final DateTime? dateJoined;
@@ -363,7 +363,7 @@ class User {
     companyInfo: json["company_info"] == null ? null : CompanyInfo.fromJson(json["company_info"]),
     phone: json["phone"],
     profilePicture: json["profile_picture"],
-    dateOfBirth: json["date_of_birth"],
+    dateOfBirth: json["date_of_birth"] == null ? null : DateTime.parse(json["date_of_birth"]),
     isVerified: json["is_verified"],
     lastLogin: json["last_login"] == null ? null : DateTime.parse(json["last_login"]),
     dateJoined: json["date_joined"] == null ? null : DateTime.parse(json["date_joined"]),
@@ -383,7 +383,7 @@ class User {
     "company_info": companyInfo?.toJson(),
     "phone": phone,
     "profile_picture": profilePicture,
-    "date_of_birth": dateOfBirth,
+    "date_of_birth": "${dateOfBirth!.year.toString().padLeft(4, '0')}-${dateOfBirth!.month.toString().padLeft(2, '0')}-${dateOfBirth!.day.toString().padLeft(2, '0')}",
     "is_verified": isVerified,
     "last_login": lastLogin?.toIso8601String(),
     "date_joined": dateJoined?.toIso8601String(),

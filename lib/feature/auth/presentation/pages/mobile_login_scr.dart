@@ -7,6 +7,7 @@ import '../../../../core/core.dart';
 import '../../../../core/database/login_local_storage.dart';
 import '../../../feature.dart';
 import '../../../mobile_root.dart';
+import '../../../profile/presentation/bloc/profile_bloc/profile_bloc.dart';
 
 class MobileLoginScr extends StatefulWidget {
   const MobileLoginScr({super.key});
@@ -104,7 +105,7 @@ class _MobileLoginScrState extends State<MobileLoginScr>
               description: "Login Successful",
               type: ToastificationType.success,
             );
-
+            context.read<ProfileBloc>().add(FetchProfilePermission(context: context));
             AppRoutes.pushReplacement(context, const MobileRootScreen());
           }
 

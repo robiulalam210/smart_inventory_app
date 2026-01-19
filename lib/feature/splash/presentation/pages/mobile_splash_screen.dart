@@ -7,6 +7,7 @@ import '../../../../core/widgets/app_show_info.dart';
 import '../../../auth/presentation/pages/mobile_login_scr.dart';
 import '../../../../core/configs/configs.dart';
 import '../../../mobile_root.dart';
+import '../../../profile/presentation/bloc/profile_bloc/profile_bloc.dart';
 import '../bloc/splash/splash_bloc.dart';
 
 class MobileSplashScreen extends StatefulWidget {
@@ -124,6 +125,7 @@ class _MobileSplashScreenState extends State<MobileSplashScreen>
           else if (state is SplashNavigateToLogin) {
             AppRoutes.pushAndRemoveUntil(context, const MobileLoginScr());
           } else if (state is SplashNavigateToHome) {
+            context.read<ProfileBloc>().add(FetchProfilePermission(context: context));
             AppRoutes.pushAndRemoveUntil(context, const MobileRootScreen());
           }
         },
