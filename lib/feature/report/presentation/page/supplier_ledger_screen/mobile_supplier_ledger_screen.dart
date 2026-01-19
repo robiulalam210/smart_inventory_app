@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:lottie/lottie.dart';
 import 'package:meherinMart/core/configs/app_text.dart';
 import 'package:meherinMart/core/widgets/app_scaffold.dart';
 import 'package:printing/printing.dart';
+import '../../../../../core/widgets/app_button.dart';
 import '/core/configs/app_colors.dart';
 import '/core/configs/app_images.dart';
 import '/core/widgets/app_dropdown.dart';
@@ -61,12 +63,12 @@ class _MobileSupplierLedgerScreenState
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.picture_as_pdf, color: AppColors.text(context)),
+            icon: Icon(HugeIcons.strokeRoundedPdf02, color: AppColors.text(context)),
             onPressed: _generatePdf,
             tooltip: 'Generate PDF',
           ),
           IconButton(
-            icon: Icon(Icons.refresh, color: AppColors.text(context)),
+            icon: Icon(HugeIcons.strokeRoundedReload, color: AppColors.text(context)),
             onPressed: () => _fetchApi(),
             tooltip: 'Refresh',
           ),
@@ -100,7 +102,7 @@ class _MobileSupplierLedgerScreenState
         },
         tooltip: 'Toggle Filters',
         child: Icon(
-          _isFilterExpanded ? Icons.filter_alt_off : Icons.filter_alt,
+          _isFilterExpanded ? HugeIcons.strokeRoundedFilterRemove:HugeIcons.strokeRoundedFilter,
           color: AppColors.whiteColor(context),
         ),
       ),
@@ -111,26 +113,37 @@ class _MobileSupplierLedgerScreenState
     return Card(
       elevation: 0,
       color: AppColors.bottomNavBg(context),
-      child: ExpansionPanelList(
-        elevation: 0,
-        expandedHeaderPadding: EdgeInsets.zero,
-        expansionCallback: (int index, bool isExpanded) {
-          setState(() => _isFilterExpanded = !isExpanded);
-        },
+      child: Column(
         children: [
-          ExpansionPanel(
-            headerBuilder: (context, isExpanded) {
-              return ListTile(
-                leading: Icon(Icons.filter_alt, color: AppColors.text(context)),
-                title: Text('Filters', style: AppTextStyle.body(context)),
-                onTap: () {
-                  _isFilterExpanded = !_isFilterExpanded;
-                  setState(() {});
-                },
-              );
-            },
-            body: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 0.0),
+          // --- Header with toggle ---
+          InkWell(
+            onTap: () => setState(() => _isFilterExpanded = !_isFilterExpanded),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Row(
+                children: [
+                  Icon(HugeIcons.strokeRoundedFilter, color: AppColors.text(context)),
+                  const SizedBox(width: 8),
+                  Text('Filters', style: AppTextStyle.body(context)),
+                  const Spacer(),
+                  // Custom arrow
+                  Icon(
+                    _isFilterExpanded
+                        ? Icons.keyboard_arrow_up
+                        : Icons.keyboard_arrow_down,
+                    color: AppColors.text(context),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // --- Expandable body ---
+          AnimatedCrossFade(
+            duration: const Duration(milliseconds: 200),
+            firstChild: const SizedBox.shrink(),
+            secondChild: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Column(
                 children: [
                   // Date Range Picker
@@ -148,7 +161,7 @@ class _MobileSupplierLedgerScreenState
                       }
                     },
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 8),
 
                   // Supplier Dropdown
                   BlocBuilder<SupplierInvoiceBloc, SupplierInvoiceState>(
@@ -158,7 +171,7 @@ class _MobileSupplierLedgerScreenState
                           label: "Supplier",
                           hint: "Loading suppliers...",
                           isLabel: true,
-                          itemList: [],
+                          itemList: const [],
                           onChanged: (v) {},
                         );
                       }
@@ -168,14 +181,13 @@ class _MobileSupplierLedgerScreenState
                           label: "Supplier",
                           hint: "Failed to load suppliers",
                           isLabel: true,
-                          itemList: [],
+                          itemList: const [],
                           onChanged: (v) {},
                         );
                       }
 
-                      final supplierList = context
-                          .read<SupplierInvoiceBloc>()
-                          .supplierActiveList;
+                      final supplierList =
+                          context.read<SupplierInvoiceBloc>().supplierActiveList;
 
                       return AppDropdown<SupplierActiveModel>(
                         label: "Supplier",
@@ -184,9 +196,7 @@ class _MobileSupplierLedgerScreenState
                         value: _selectedSupplier,
                         itemList: supplierList,
                         onChanged: (newVal) {
-                          setState(() {
-                            _selectedSupplier = newVal;
-                          });
+                          setState(() => _selectedSupplier = newVal);
                           _fetchApi(
                             supplier: newVal?.id?.toString(),
                             from: selectedDateRange?.start,
@@ -199,12 +209,15 @@ class _MobileSupplierLedgerScreenState
                 ],
               ),
             ),
-            isExpanded: _isFilterExpanded,
+            crossFadeState: _isFilterExpanded
+                ? CrossFadeState.showSecond
+                : CrossFadeState.showFirst,
           ),
         ],
       ),
     );
   }
+
 
   Widget _buildSupplierSummary() {
     return BlocBuilder<SupplierLedgerBloc, SupplierLedgerState>(
@@ -732,22 +745,22 @@ class _MobileSupplierLedgerScreenState
                     ],
                   ),
 
-                // View Details Button
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton.icon(
-                    onPressed: () =>
-                        _showTransactionDetails(context, transaction),
-                    icon: const Icon(Icons.remove_red_eye, size: 14),
-                    label: const Text('View Details'),
-                    style: TextButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 4,
-                      ),
-                    ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                  AppButton(
+                    size: 90,
+                    isOutlined: true,
+                    name: "Details",
+
+
+                    onPressed: () => _showTransactionDetails(context, transaction),
+
                   ),
-                ),
+
+                ],)
+                // View Details Button
+
               ],
             ),
           ),
@@ -829,139 +842,141 @@ class _MobileSupplierLedgerScreenState
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) {
-        return Container(
-          decoration: BoxDecoration(
-            color: AppColors.bottomNavBg(context),
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(20),
-              topRight: Radius.circular(20),
+        return SafeArea(
+          child: Container(
+            decoration: BoxDecoration(
+              color: AppColors.bottomNavBg(context),
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
+              ),
             ),
-          ),
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Transaction Details',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: AppColors.text(context),
+
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(Icons.close),
+                    ),
+                  ],
+                ),
+                const Divider(),
+                const SizedBox(height: 8),
+
+                // Transaction Details
+                _buildMobileDetailRow('Voucher No:', transaction.voucherNo,context),
+                _buildMobileDetailRow('Date:', _formatDate(transaction.date),context),
+                _buildMobileDetailRow('Type:', transaction.type.toUpperCase(),context),
+                _buildMobileDetailRow('Particular:', transaction.particular,context),
+                _buildMobileDetailRow('Details:', transaction.details,context),
+                _buildMobileDetailRow('Payment Method:', transaction.method,context),
+                _buildMobileDetailRow(
+                  'Debit Amount:',
+                  _formatCurrency(transaction.debit),context
+                ),
+                _buildMobileDetailRow(
+                  'Credit Amount:',
+                  _formatCurrency(transaction.credit),context
+                ),
+                _buildMobileDetailRow(
+                  'Balance:',
+                  _formatCurrency(transaction.due),context
+                ),
+
+                // Type Badge
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(2),
+                    color: transaction.typeColor.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: transaction.typeColor),
                   ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Transaction Details',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: AppColors.text(context),
-
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.close),
-                  ),
-                ],
-              ),
-              const Divider(),
-              const SizedBox(height: 8),
-
-              // Transaction Details
-              _buildMobileDetailRow('Voucher No:', transaction.voucherNo,context),
-              _buildMobileDetailRow('Date:', _formatDate(transaction.date),context),
-              _buildMobileDetailRow('Type:', transaction.type.toUpperCase(),context),
-              _buildMobileDetailRow('Particular:', transaction.particular,context),
-              _buildMobileDetailRow('Details:', transaction.details,context),
-              _buildMobileDetailRow('Payment Method:', transaction.method,context),
-              _buildMobileDetailRow(
-                'Debit Amount:',
-                _formatCurrency(transaction.debit),context
-              ),
-              _buildMobileDetailRow(
-                'Credit Amount:',
-                _formatCurrency(transaction.credit),context
-              ),
-              _buildMobileDetailRow(
-                'Balance:',
-                _formatCurrency(transaction.due),context
-              ),
-
-              // Type Badge
-              const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: transaction.typeColor.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: transaction.typeColor),
-                ),
-                child: Row(
-                  children: [
-                    Icon(transaction.typeIcon, color: transaction.typeColor),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        'Transaction Type: ${transaction.type}',
-                        style: TextStyle(
-                          color: transaction.typeColor,
-                          fontWeight: FontWeight.bold,
+                  child: Row(
+                    children: [
+                      Icon(transaction.typeIcon, color: transaction.typeColor),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          'Transaction Type: ${transaction.type}',
+                          style: TextStyle(
+                            color: transaction.typeColor,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
 
-              // Balance Status
-              const SizedBox(height: 12),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: balanceColor.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: balanceColor),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      transaction.due > 0
-                          ? Icons.arrow_circle_up
-                          : Icons.arrow_circle_down,
-                      color: balanceColor,
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
+                // Balance Status
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: balanceColor.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: balanceColor),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
                         transaction.due > 0
-                            ? 'Supplier OWES you'
-                            : 'You OWE supplier',
-                        style: TextStyle(
-                          color: balanceColor,
-                          fontWeight: FontWeight.bold,
+                            ? Icons.arrow_circle_up
+                            : Icons.arrow_circle_down,
+                        color: balanceColor,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          transaction.due > 0
+                              ? 'Supplier OWES you'
+                              : 'You OWE supplier',
+                          style: TextStyle(
+                            color: balanceColor,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
 
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('Close'),
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('Close'),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },

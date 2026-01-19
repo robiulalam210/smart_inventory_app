@@ -42,12 +42,12 @@ class _MobileTopProductsScreenState extends State<MobileTopProductsScreen> {
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.picture_as_pdf, color: AppColors.text(context)),
+            icon: Icon(HugeIcons.strokeRoundedPdf02, color: AppColors.text(context)),
             onPressed: _generatePdf,
             tooltip: 'Generate PDF',
           ),
           IconButton(
-            icon: Icon(Icons.refresh, color: AppColors.text(context)),
+            icon: Icon(HugeIcons.strokeRoundedReload, color: AppColors.text(context)),
             onPressed: () {
               _fetchTopProductsReport();
               setState(() {
@@ -401,156 +401,158 @@ class _MobileTopProductsScreenState extends State<MobileTopProductsScreen> {
         final totalRevenue = product.totalSoldPrice;
         final avgSale = totalRevenue / product.totalSoldQuantity;
 
-        return Container(
-          decoration:  BoxDecoration(
-            color: AppColors.bottomNavBg(context),
+        return SafeArea(
+          child: Container(
+            decoration:  BoxDecoration(
+              color: AppColors.bottomNavBg(context),
 
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(20),
-              topRight: Radius.circular(20),
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
+              ),
             ),
-          ),
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Text(
-                      product.productName,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(2),
                     ),
                   ),
-                  IconButton(
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        product.productName,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(Icons.close),
+                    ),
+                  ],
+                ),
+                const Divider(),
+                const SizedBox(height: 4),
+
+                // Product Details
+                _buildMobileDetailRow(
+                  'Selling Price:',
+                  '\$${product.sellingPrice.toStringAsFixed(2)}',context
+                ),
+                _buildMobileDetailRow(
+                  'Quantity Sold:',
+                  product.totalSoldQuantity.toString(),context
+                ),
+                _buildMobileDetailRow(
+                  'Total Revenue:',
+                  '\$${totalRevenue.toStringAsFixed(2)}',context
+                ),
+                _buildMobileDetailRow(
+                  'Average per Sale:',
+                  '\$${avgSale.toStringAsFixed(2)}',context
+                ),
+
+                // Performance Metrics
+                const SizedBox(height: 12),
+                 Text(
+                  'Performance Metrics',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold,
+                    color: AppColors.text(context),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Column(
+                          children: [
+                            Icon(Icons.trending_up, color: Colors.blue),
+                            const SizedBox(height: 8),
+                             Text(
+                              'Top Seller',
+                              style: TextStyle(fontSize: 12,                             color: AppColors.text(context),
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            // Text(
+                            //   '#${product.indexOf(product) + 1}',
+                            //   style: const TextStyle(
+                            //     fontSize: 16,
+                            //     fontWeight: FontWeight.bold,
+                            //     color: Colors.blue,
+                            //   ),
+                            // ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.green.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Column(
+                          children: [
+                            Icon(Icons.attach_money, color: Colors.green),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Revenue Rank',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: AppColors.text(context),
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            // Text(
+                            //   '#${_getRevenueRank(product, products)}',
+                            //   style: const TextStyle(
+                            //     fontSize: 16,
+                            //     fontWeight: FontWeight.bold,
+                            //     color: Colors.green,
+                            //   ),
+                            // ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
                     onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.close),
+                    child: const Text('Close'),
                   ),
-                ],
-              ),
-              const Divider(),
-              const SizedBox(height: 4),
-
-              // Product Details
-              _buildMobileDetailRow(
-                'Selling Price:',
-                '\$${product.sellingPrice.toStringAsFixed(2)}',context
-              ),
-              _buildMobileDetailRow(
-                'Quantity Sold:',
-                product.totalSoldQuantity.toString(),context
-              ),
-              _buildMobileDetailRow(
-                'Total Revenue:',
-                '\$${totalRevenue.toStringAsFixed(2)}',context
-              ),
-              _buildMobileDetailRow(
-                'Average per Sale:',
-                '\$${avgSale.toStringAsFixed(2)}',context
-              ),
-
-              // Performance Metrics
-              const SizedBox(height: 12),
-               Text(
-                'Performance Metrics',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold,
-                  color: AppColors.text(context),
                 ),
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.blue.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Column(
-                        children: [
-                          Icon(Icons.trending_up, color: Colors.blue),
-                          const SizedBox(height: 8),
-                           Text(
-                            'Top Seller',
-                            style: TextStyle(fontSize: 12,                             color: AppColors.text(context),
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          // Text(
-                          //   '#${product.indexOf(product) + 1}',
-                          //   style: const TextStyle(
-                          //     fontSize: 16,
-                          //     fontWeight: FontWeight.bold,
-                          //     color: Colors.blue,
-                          //   ),
-                          // ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.green.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Column(
-                        children: [
-                          Icon(Icons.attach_money, color: Colors.green),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Revenue Rank',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: AppColors.text(context),
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          // Text(
-                          //   '#${_getRevenueRank(product, products)}',
-                          //   style: const TextStyle(
-                          //     fontSize: 16,
-                          //     fontWeight: FontWeight.bold,
-                          //     color: Colors.green,
-                          //   ),
-                          // ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('Close'),
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },

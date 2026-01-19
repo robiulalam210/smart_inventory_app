@@ -253,103 +253,112 @@ class _CreateSalesReturnScreenState
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.bottomNavBg(context),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      padding: AppTextStyle.getResponsivePaddingBody(context),
-      child: BlocListener<SalesReturnBloc, SalesReturnState>(
-        listener: (context, state) {
-          if (state is SalesReturnCreateLoading) {
-            appLoader(context, "Creating Sales Return...");
-          } else if (state is SalesReturnCreateSuccess) {
-            Navigator.pop(context); // Close loader
-            Navigator.pop(context); // Close dialog
-            widget.onSuccess?.call();
-            showCustomToast(
-              context: context,
-              title: 'Success!',
-              description: state.message,
-              icon: Icons.check_circle,
-              primaryColor: Colors.green,
-            );
-          } else if (state is SalesReturnError) {
-            Navigator.pop(context); // Close loader
-            showCustomToast(
-              context: context,
-              title: 'Error!',
-              description: state.content,
-              icon: Icons.error,
-              primaryColor: Colors.redAccent,
-            );
-          }
-        },
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          child: Form(
-            key: formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Header
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return SafeArea(
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppColors.bottomNavBg(context),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        padding: AppTextStyle.getResponsivePaddingBody(context),
+        child: BlocListener<SalesReturnBloc, SalesReturnState>(
+          listener: (context, state) {
+            if (state is SalesReturnCreateLoading) {
+              appLoader(context, "Creating Sales Return...");
+            } else if (state is SalesReturnCreateSuccess) {
+              Navigator.pop(context); // Close loader
+              Navigator.pop(context); // Close dialog
+              widget.onSuccess?.call();
+              showCustomToast(
+                context: context,
+                title: 'Success!',
+                description: state.message,
+                icon: Icons.check_circle,
+                primaryColor: Colors.green,
+              );
+            } else if (state is SalesReturnError) {
+              Navigator.pop(context); // Close loader
+              showCustomToast(
+                context: context,
+                title: 'Error!',
+                description: state.content,
+                icon: Icons.error,
+                primaryColor: Colors.redAccent,
+              );
+            }
+          },
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.9,
+            ),
+            child: SingleChildScrollView(    padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: Form(
+                key: formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      "Create Sales Return",
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.primaryColor(context),
-                      ),
+                    // Header
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Create Sales Return",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.primaryColor(context),
+                          ),
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.close, color: AppColors.grey),
+                          onPressed: () => Navigator.of(context).pop(),
+                        ),
+                      ],
                     ),
-                    IconButton(
-                      icon: Icon(Icons.close, color: AppColors.grey),
-                      onPressed: () => Navigator.of(context).pop(),
+                    const SizedBox(height: 16),
+            
+                    // Invoice Selection
+                    Wrap(
+                      children: [
+                        SizedBox(child: _buildReceiptNumberDropdown()),
+                        const SizedBox(width: 12),
+                        SizedBox(child: _buildCustomerNameField()),
+                      ],
                     ),
+            
+                    // Return Date
+                    const SizedBox(height: 8),
+            
+                    // Return Charge Section
+                    _buildReturnChargeSection(),
+                    const SizedBox(height: 8),
+            
+                    _buildMobilePaymentSection(),
+                    const SizedBox(height: 8),
+            
+                    // Products Section
+                    if (products.isNotEmpty) ...[
+                      _buildProductsList(),
+                      const SizedBox(height: 8),
+                    ],
+            
+                    // Summary Section
+                    if (products.isNotEmpty) ...[
+                      _buildSummarySection(),
+                      const SizedBox(height: 8),
+                    ],
+            
+                    // Remark Field
+                    _buildRemarkField(),
+                    const SizedBox(height: 8),
+            
+                    // Submit Button
+                    _buildActionButtons(),
+                    const SizedBox(height: 100),
                   ],
                 ),
-                const SizedBox(height: 16),
-
-                // Invoice Selection
-                Wrap(
-                  children: [
-                    SizedBox(child: _buildReceiptNumberDropdown()),
-                    const SizedBox(width: 12),
-                    SizedBox(child: _buildCustomerNameField()),
-                  ],
-                ),
-
-                // Return Date
-                const SizedBox(height: 8),
-
-                // Return Charge Section
-                _buildReturnChargeSection(),
-                const SizedBox(height: 8),
-
-                _buildMobilePaymentSection(),
-                const SizedBox(height: 8),
-
-                // Products Section
-                if (products.isNotEmpty) ...[
-                  _buildProductsList(),
-                  const SizedBox(height: 8),
-                ],
-
-                // Summary Section
-                if (products.isNotEmpty) ...[
-                  _buildSummarySection(),
-                  const SizedBox(height: 8),
-                ],
-
-                // Remark Field
-                _buildRemarkField(),
-                const SizedBox(height: 8),
-
-                // Submit Button
-                _buildActionButtons(),
-              ],
+              ),
             ),
           ),
         ),
@@ -477,6 +486,7 @@ class _CreateSalesReturnScreenState
                 flex: 2,
                 child: AppDropdown<String>(
                   label: "Type",
+                  isLabel: true,
                   hint: _returnChargeType ?? "Select",
                   value: _returnChargeType,
                   itemList: ['fixed', 'percentage'],
@@ -652,11 +662,12 @@ class _CreateSalesReturnScreenState
     final originalMaxQuantity = item.originalQuantity ?? item.quantity ?? 1;
 
     return Card(
-      elevation: 1,
+      elevation: 0,
+      color: AppColors.bottomNavBg(context),
       margin: EdgeInsets.zero,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
-        side: BorderSide(color: Colors.grey.shade200),
+        side: BorderSide(color: AppColors.greyColor(context).withValues(alpha: 0.5),width: 0.5),
       ),
       child: Container(
         padding: const EdgeInsets.all(12),
@@ -682,7 +693,7 @@ class _CreateSalesReturnScreenState
                 if (products.length > 1)
                   IconButton(
                     onPressed: () => _removeProduct(index),
-                    icon: Icon(Icons.delete, size: 20, color: Colors.red),
+                    icon: Icon(HugeIcons.strokeRoundedDelete01, size: 20, color: Colors.red),
                     padding: EdgeInsets.zero,
                     constraints: BoxConstraints(),
                   ),
@@ -763,7 +774,7 @@ class _CreateSalesReturnScreenState
                 IconButton(
                   icon: Icon(Icons.remove, size: 18, color: color),
                   onPressed: quantity > 0 ? onDecrement : null,
-                  padding: const EdgeInsets.all(4),
+                  padding:  EdgeInsets.zero,
                   constraints: const BoxConstraints(),
                 ),
                 Expanded(
@@ -780,7 +791,7 @@ class _CreateSalesReturnScreenState
                 IconButton(
                   icon: Icon(Icons.add, size: 18, color: color),
                   onPressed: quantity < maxQuantity ? onIncrement : null,
-                  padding: const EdgeInsets.all(4),
+                  padding:  EdgeInsets.zero,
                   constraints: const BoxConstraints(),
                 ),
               ],

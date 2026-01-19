@@ -1,10 +1,13 @@
 import 'dart:async';
+import 'package:date_format/date_format.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:lottie/lottie.dart';
 import 'package:meherinMart/core/configs/app_text.dart';
+import 'package:meherinMart/core/core.dart';
 import 'package:meherinMart/core/widgets/app_scaffold.dart';
 import 'package:printing/printing.dart';
 import '/core/configs/app_colors.dart';
@@ -23,7 +26,8 @@ class MobileExpenseReportScreen extends StatefulWidget {
   const MobileExpenseReportScreen({super.key});
 
   @override
-  State<MobileExpenseReportScreen> createState() => _MobileExpenseReportScreenState();
+  State<MobileExpenseReportScreen> createState() =>
+      _MobileExpenseReportScreenState();
 }
 
 class _MobileExpenseReportScreenState extends State<MobileExpenseReportScreen> {
@@ -67,12 +71,7 @@ class _MobileExpenseReportScreenState extends State<MobileExpenseReportScreen> {
   }) {
     _filterDebounceTimer?.cancel();
     _filterDebounceTimer = Timer(const Duration(milliseconds: 500), () {
-      _fetchApi(
-        from: from,
-        to: to,
-        head: head,
-        paymentMethod: paymentMethod,
-      );
+      _fetchApi(from: from, to: to, head: head, paymentMethod: paymentMethod);
     });
   }
 
@@ -130,17 +129,15 @@ class _MobileExpenseReportScreenState extends State<MobileExpenseReportScreen> {
   Widget build(BuildContext context) {
     return AppScaffold(
       appBar: AppBar(
-        title:  Text('Expense Report',style: AppTextStyle.titleMedium(context),),
+        title: Text('Expense Report', style: AppTextStyle.titleMedium(context)),
         actions: [
           IconButton(
-            icon:  Icon(Icons.picture_as_pdf,                                  color: AppColors.text(context),
-            ),
+            icon: Icon(HugeIcons.strokeRoundedPdf02, color: AppColors.text(context)),
             onPressed: _generatePdf,
             tooltip: 'Generate PDF',
           ),
           IconButton(
-            icon:  Icon(Icons.refresh      ,                            color: AppColors.text(context),
-          ),
+            icon: Icon(HugeIcons.strokeRoundedReload, color: AppColors.text(context)),
             onPressed: () => _fetchApi(),
             tooltip: 'Refresh',
           ),
@@ -167,11 +164,15 @@ class _MobileExpenseReportScreenState extends State<MobileExpenseReportScreen> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
+        backgroundColor: AppColors.primaryColor(context),
         onPressed: () {
           setState(() => _isFilterExpanded = !_isFilterExpanded);
         },
-        child: Icon(_isFilterExpanded ? Icons.filter_alt_off : Icons.filter_alt),
         tooltip: 'Toggle Filters',
+        child: Icon(
+          _isFilterExpanded ? HugeIcons.strokeRoundedFilterRemove:HugeIcons.strokeRoundedFilter,
+          color: AppColors.whiteColor(context),
+        ),
       ),
     );
   }
@@ -180,32 +181,39 @@ class _MobileExpenseReportScreenState extends State<MobileExpenseReportScreen> {
     return Card(
       elevation: 0,
       color: AppColors.bottomNavBg(context),
-      child: ExpansionPanelList(
-        elevation: 0,
-        expandedHeaderPadding: EdgeInsets.zero,
-        expansionCallback: (int index, bool isExpanded) {
-          setState(() => _isFilterExpanded = !isExpanded);
-        },
+      child: Column(
         children: [
-          ExpansionPanel(
-            headerBuilder: (context, isExpanded) {
-              return  ListTile(
-                leading: Icon(Icons.filter_alt,                color: AppColors.text(context),
-                    ),
-                title: Text('Filters',style: AppTextStyle.titleMedium(context),),
+          // --- Header with custom arrow ---
+          InkWell(
+            onTap: () => setState(() => _isFilterExpanded = !_isFilterExpanded),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Row(
+                children: [
+                  Icon(HugeIcons.strokeRoundedFilter, color: AppColors.text(context)),
+                  const SizedBox(width: 8),
+                  Text('Filters', style: AppTextStyle.titleMedium(context)),
+                  const Spacer(),
+                  // Custom arrow icon
+                  Icon(
+                    _isFilterExpanded
+                        ? Icons.keyboard_arrow_up
+                        : Icons.keyboard_arrow_down,
+                    color: AppColors.text(context),
+                  ),
+                ],
+              ),
+            ),
+          ),
 
-                onTap: (){
-                  setState(() {
-                    _isFilterExpanded=!_isFilterExpanded;
-                  });
-                },
-              );
-            },
-            body: Padding(
+          // --- Expandable body ---
+          AnimatedCrossFade(
+            duration: const Duration(milliseconds: 200),
+            firstChild: const SizedBox.shrink(),
+            secondChild: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 children: [
-                  // Date Range Picker
                   CustomDateRangeField(
                     isLabel: true,
                     selectedDateRange: selectedDateRange,
@@ -213,7 +221,6 @@ class _MobileExpenseReportScreenState extends State<MobileExpenseReportScreen> {
                   ),
                   const SizedBox(height: 12),
 
-                  // Expense Head Dropdown
                   BlocBuilder<ExpenseHeadBloc, ExpenseHeadState>(
                     builder: (context, state) {
                       if (state is ExpenseHeadListLoading) {
@@ -223,7 +230,7 @@ class _MobileExpenseReportScreenState extends State<MobileExpenseReportScreen> {
                           isNeedAll: true,
                           isLabel: true,
                           value: null,
-                          itemList: [],
+                          itemList: const [],
                           onChanged: (v) {},
                         );
                       }
@@ -235,7 +242,7 @@ class _MobileExpenseReportScreenState extends State<MobileExpenseReportScreen> {
                           isNeedAll: true,
                           isLabel: true,
                           value: null,
-                          itemList: [],
+                          itemList: const [],
                           onChanged: (v) {},
                         );
                       }
@@ -252,7 +259,6 @@ class _MobileExpenseReportScreenState extends State<MobileExpenseReportScreen> {
                     },
                   ),
 
-                  // Payment Method Dropdown
                   AppDropdown<String>(
                     label: "Payment Method",
                     hint: "Select Payment Method",
@@ -262,12 +268,12 @@ class _MobileExpenseReportScreenState extends State<MobileExpenseReportScreen> {
                     itemList: paymentMethods,
                     onChanged: _onPaymentMethodChanged,
                   ),
-
-
                 ],
               ),
             ),
-            isExpanded: _isFilterExpanded,
+            crossFadeState: _isFilterExpanded
+                ? CrossFadeState.showSecond
+                : CrossFadeState.showFirst,
           ),
         ],
       ),
@@ -280,7 +286,7 @@ class _MobileExpenseReportScreenState extends State<MobileExpenseReportScreen> {
         if (state is! ExpenseReportSuccess) {
           return Card(
             elevation: 0,
-            color:AppColors.bottomNavBg(context),
+            color: AppColors.bottomNavBg(context),
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
@@ -302,10 +308,7 @@ class _MobileExpenseReportScreenState extends State<MobileExpenseReportScreen> {
                   const SizedBox(height: 8),
                   const Text(
                     "Apply filters to view expense statistics",
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey,
-                    ),
+                    style: TextStyle(fontSize: 14, color: Colors.grey),
                     textAlign: TextAlign.center,
                   ),
                 ],
@@ -315,7 +318,9 @@ class _MobileExpenseReportScreenState extends State<MobileExpenseReportScreen> {
         }
 
         final summary = state.response.summary;
-        final avgExpense = summary.totalCount > 0 ? (summary.totalAmount / summary.totalCount) : 0.0;
+        final avgExpense = summary.totalCount > 0
+            ? (summary.totalAmount / summary.totalCount)
+            : 0.0;
 
         return Column(
           children: [
@@ -399,23 +404,22 @@ class _MobileExpenseReportScreenState extends State<MobileExpenseReportScreen> {
   }
 
   Widget _buildMobileSummaryCard(
-      String title,
-      String value,
-      IconData icon,
-      Color color,
-      ) {
+    String title,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
     return Expanded(
       child: Container(
         margin: const EdgeInsets.only(bottom: 8),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color:AppColors.bottomNavBg(context),
+          color: AppColors.bottomNavBg(context),
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color:AppColors.greyColor(context).withValues(alpha: 0.5),
-width: 0.5
-          )
-
+            color: AppColors.greyColor(context).withValues(alpha: 0.5),
+            width: 0.5,
+          ),
         ),
         child: Row(
           children: [
@@ -485,7 +489,10 @@ width: 0.5
   }
 
   Widget _buildMobileExpenseList(List<ExpenseReport> expenses) {
-    final totalAmount = expenses.fold(0.0, (sum, expense) => sum + expense.amount);
+    final totalAmount = expenses.fold(
+      0.0,
+      (sum, expense) => sum + expense.amount,
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -493,7 +500,7 @@ width: 0.5
         // Total Summary
         Card(
           elevation: 0,
-          color:AppColors.bottomNavBg(context),
+          color: AppColors.bottomNavBg(context),
 
           child: Padding(
             padding: const EdgeInsets.all(12.0),
@@ -505,10 +512,7 @@ width: 0.5
                   children: [
                     const Text(
                       'Total Expenses',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey,
-                      ),
+                      style: TextStyle(fontSize: 12, color: Colors.grey),
                     ),
                     Text(
                       expenses.length.toString(),
@@ -524,10 +528,7 @@ width: 0.5
                   children: [
                     const Text(
                       'Total Amount',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey,
-                      ),
+                      style: TextStyle(fontSize: 12, color: Colors.grey),
                     ),
                     Text(
                       _formatCurrency(totalAmount),
@@ -553,8 +554,8 @@ width: 0.5
           itemBuilder: (context, index) {
             final expense = expenses[index];
             return Card(
-              color:AppColors.bottomNavBg(context),
-elevation: 0,
+              color: AppColors.bottomNavBg(context),
+              elevation: 0,
               margin: const EdgeInsets.only(bottom: 8),
               child: Padding(
                 padding: const EdgeInsets.all(12.0),
@@ -568,9 +569,9 @@ elevation: 0,
                         Expanded(
                           child: Text(
                             expense.head,
-                            style:  TextStyle(
+                            style: TextStyle(
                               fontSize: 16,
-                              color:AppColors.text(context),
+                              color: AppColors.text(context),
 
                               fontWeight: FontWeight.bold,
                             ),
@@ -598,7 +599,10 @@ elevation: 0,
                     Row(
                       children: [
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.grey[200],
                             borderRadius: BorderRadius.circular(4),
@@ -610,16 +614,23 @@ elevation: 0,
                         ),
                         const SizedBox(width: 8),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
                           decoration: BoxDecoration(
-                            color: _getPaymentMethodColor(expense.paymentMethod).withValues(alpha: 0.1),
+                            color: _getPaymentMethodColor(
+                              expense.paymentMethod,
+                            ).withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
                             expense.paymentMethod,
                             style: TextStyle(
                               fontSize: 10,
-                              color: _getPaymentMethodColor(expense.paymentMethod),
+                              color: _getPaymentMethodColor(
+                                expense.paymentMethod,
+                              ),
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -629,7 +640,8 @@ elevation: 0,
 
                     // Subhead and Note
                     if (expense.subhead != null || expense.note != null)
-                      Column(
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           if (expense.subhead != null)
@@ -657,17 +669,21 @@ elevation: 0,
                       ),
 
                     // View Details Button
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: TextButton.icon(
-                        onPressed: () => _showExpenseDetails(context, expense),
-                        icon: const Icon(Icons.remove_red_eye, size: 14),
-                        label: const Text('View Details'),
-                        style: TextButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        AppButton(
+                          size: 90,
+                          isOutlined: true,
+                          name: "Details",
+
+
+                          onPressed: () => _showExpenseDetails(context, expense),
+
                         ),
-                      ),
-                    ),
+                      ],
+                    )
+
                   ],
                 ),
               ),
@@ -757,8 +773,8 @@ elevation: 0,
       backgroundColor: Colors.transparent,
       builder: (context) {
         return Container(
-          decoration:  BoxDecoration(
-            color:AppColors.bottomNavBg(context),
+          decoration: BoxDecoration(
+            color: AppColors.bottomNavBg(context),
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(20),
               topRight: Radius.circular(20),
@@ -785,8 +801,9 @@ elevation: 0,
                 children: [
                   Text(
                     'Expense Details',
-                    style:  TextStyle(
-                      fontSize: 16,                              color:AppColors.text(context),
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: AppColors.text(context),
 
                       fontWeight: FontWeight.bold,
                     ),
@@ -806,16 +823,21 @@ elevation: 0,
               _buildMobileDetailRow('Date:', _formatDate(expense.expenseDate)),
               _buildMobileDetailRow('Amount:', _formatCurrency(expense.amount)),
               _buildMobileDetailRow('Payment Method:', expense.paymentMethod),
-              if (expense.note != null) _buildMobileDetailRow('Note:', expense.note!),
+              if (expense.note != null)
+                _buildMobileDetailRow('Note:', expense.note!),
 
               // Payment Method Badge
               const SizedBox(height: 16),
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: _getPaymentMethodColor(expense.paymentMethod).withValues(alpha: 0.1),
+                  color: _getPaymentMethodColor(
+                    expense.paymentMethod,
+                  ).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: _getPaymentMethodColor(expense.paymentMethod)),
+                  border: Border.all(
+                    color: _getPaymentMethodColor(expense.paymentMethod),
+                  ),
                 ),
                 child: Row(
                   children: [
@@ -861,9 +883,9 @@ elevation: 0,
             flex: 2,
             child: Text(
               label,
-              style:  TextStyle(
+              style: TextStyle(
                 fontSize: 14,
-                color:AppColors.text(context),
+                color: AppColors.text(context),
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -872,8 +894,9 @@ elevation: 0,
             flex: 3,
             child: Text(
               value,
-              style:  TextStyle(
-                fontSize: 14,                              color:AppColors.text(context),
+              style: TextStyle(
+                fontSize: 14,
+                color: AppColors.text(context),
 
                 fontWeight: FontWeight.w600,
               ),
@@ -949,5 +972,4 @@ elevation: 0,
   String _formatDate(DateTime date) {
     return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
   }
-
 }

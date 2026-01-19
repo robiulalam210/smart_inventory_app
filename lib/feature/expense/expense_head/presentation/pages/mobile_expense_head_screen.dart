@@ -70,12 +70,14 @@ class _ExpenseHeadScreenState extends State<MobileExpenseHeadScreen> {
                 _handleBlocState(state);
               },
               builder: (context, state) {
-                return Column(
-                  children: [
-                    _buildMobileHeader(context),
-                    const SizedBox(height: 8),
-                    _buildExpenseHeadList(state),
-                  ],
+                return SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      _buildMobileHeader(context),
+                      const SizedBox(height: 8),
+                      _buildExpenseHeadList(state),
+                    ],
+                  ),
                 );
               },
             ),

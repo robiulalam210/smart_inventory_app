@@ -241,7 +241,7 @@ class _SourceCreateState extends State<SourceCreate> {
               children: [
                 AppButton(
                   isOutlined: true,
-                  size: 120,
+                  size: 100,
                   color: AppColors.primaryColor(context),
                   borderColor: AppColors.primaryColor(context),
                   textColor: AppColors.errorColor(context),
@@ -252,7 +252,7 @@ class _SourceCreateState extends State<SourceCreate> {
                 BlocBuilder<SourceBloc, SourceState>(
                   builder: (context, state) {
                     return AppButton(
-                      size: 120,
+                      size: 100,
                       name: widget.id == null ? 'Create' : 'Update',
                       onPressed: (state is SourceAddLoading)
                           ? null

@@ -72,12 +72,12 @@ class _MobileStockReportScreenState extends State<MobileStockReportScreen> {
         title: Text('Stock Report', style: AppTextStyle.titleMedium(context)),
         actions: [
           IconButton(
-            icon: Icon(Icons.picture_as_pdf, color: AppColors.text(context)),
+            icon: Icon(HugeIcons.strokeRoundedPdf02, color: AppColors.text(context)),
             onPressed: _generatePdf,
             tooltip: 'Generate PDF',
           ),
           IconButton(
-            icon: Icon(Icons.refresh, color: AppColors.text(context)),
+            icon: Icon(HugeIcons.strokeRoundedReload, color: AppColors.text(context)),
             onPressed: () {
               setState(() {
                 selectedDateRange=null;

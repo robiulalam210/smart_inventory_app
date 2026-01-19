@@ -2,6 +2,7 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:date_format/date_format.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -104,8 +105,8 @@ class _SalesScreenState extends State<MobileSalesScreen> {
       name: 'Walk-in-customer',
       id: -1,
     );
-    _isChecked = false;
-    bloc.isChecked = false;
+    _isChecked = true;
+    bloc.isChecked = true;
 
     // Ensure there's at least one product row (empty) so UI has an 'add' row
     if (bloc.products.isEmpty) {
@@ -466,95 +467,85 @@ class _SalesScreenState extends State<MobileSalesScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: BlocBuilder<CustomerBloc, CustomerState>(
-                builder: (context, state) {
-                  return AppDropdown(
-                    label: "Customer",
-                    hint: bloc.selectClintModel?.name ?? "Select Customer",
-                    isSearch: true,
-                    isNeedAll: false,
-                    isRequired: true,
-                    value: bloc.selectClintModel,
-                    itemList: [
-                      CustomerActiveModel(name: 'Walk-in-customer', id: -1),
-                    ] +
-                        context.read<CustomerBloc>().activeCustomer,
-                    onChanged: (newVal) {
-                      bloc.selectClintModel = newVal;
-                      bloc.customType = (newVal?.id == -1)
-                          ? "Walking Customer"
-                          : "Saved Customer";
+        BlocBuilder<CustomerBloc, CustomerState>(
+          builder: (context, state) {
+            return AppDropdown(
+              label: "Customer",
+              hint:  "Select Customer",
+              isSearch: true,
+              isNeedAll: false,
+              isLabel: true,
+              isRequired: true,
+              value: bloc.selectClintModel,
+              itemList: [
+                CustomerActiveModel(name: 'Walk-in-customer', id: -1),
+              ] +
+                  context.read<CustomerBloc>().activeCustomer,
+              onChanged: (newVal) {
+                bloc.selectClintModel = newVal;
+                bloc.customType = (newVal?.id == -1)
+                    ? "Walking Customer"
+                    : "Saved Customer";
 
-                      // Apply customer type rules
-                      if (newVal?.id == -1) {
-                        // Walk-in customer: set _isChecked to false
-                        _isChecked = false;
-                        bloc.isChecked = false;
-                        // Auto-set payable amount to net total for walk-in customer
-                        Future.delayed(const Duration(milliseconds: 100), () {
-                          final netTotal = calculateAllFinalTotal();
-                          bloc.payableAmount.text = netTotal.toStringAsFixed(2);
-                          _updateChangeAmount();
-                        });
-                      } else {
-                        // Saved customer: set _isChecked to true
-                        _isChecked = true;
-                        bloc.isChecked = true;
-                      }
-                      setState(() {});
-                    },
-                    validator: (value) =>
-                    value == null ? 'Please select Customer' : null,
+                // Apply customer type rules
+                if (newVal?.id == -1) {
+                  // Walk-in customer: set _isChecked to false
+                  _isChecked = true;
+                  bloc.isChecked = true;
+                  // Auto-set payable amount to net total for walk-in customer
+                  Future.delayed(const Duration(milliseconds: 100), () {
+                    final netTotal = calculateAllFinalTotal();
+                    bloc.payableAmount.text = netTotal.toStringAsFixed(2);
+                    _updateChangeAmount();
+                  });
+                } else {
+                  // Saved customer: set _isChecked to true
+                  _isChecked = true;
+                  bloc.isChecked = true;
+                }
+                setState(() {});
+              },
+              validator: (value) =>
+              value == null ? 'Please select Customer' : null,
 
-                  );
-                },
-              ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: BlocBuilder<UserBloc, UserState>(
-                builder: (context, state) {
-                  return AppDropdown(
-                    label: "Sales By",
-                    hint: bloc.selectSalesModel?.username ?? "Select Sales",
-                    isSearch: true,
-                    isNeedAll: false,
-                    isRequired: true,
-                    value: bloc.selectSalesModel,
-                    itemList: context.read<UserBloc>().list,
-                    onChanged: (newVal) {
-                      bloc.selectSalesModel = newVal;
-                      setState(() {});
-                    },
-                    validator: (value) =>
-                    value == null ? 'Please select Sales' : null,
-
-                  );
-                },
-              ),
-            ),
-          ],
+            );
+          },
         ),
-        Row(
-          children: [
-            Expanded(
-              child: CustomInputField(
-                isRequired: true,
-                readOnly: true,
-                controller: bloc.dateEditingController,
-                hintText: 'Sale Date',
-                keyboardType: TextInputType.datetime,
-                autofillHints: AutofillHints.name,
-                fillColor: AppColors.whiteColor(context),
-                validator: (value) =>
-                value!.isEmpty ? 'Please enter date' : null,
-                onTap: _selectDate,
-              ),
-            ),
-          ],
+
+        gapH8,
+        BlocBuilder<UserBloc, UserState>(
+          builder: (context, state) {
+            return AppDropdown(
+              label: "Sales By",
+              hint:  "Select Sales",
+              isSearch: true,
+              isLabel: true,
+              isNeedAll: false,
+              isRequired: true,
+              value: bloc.selectSalesModel,
+              itemList: context.read<UserBloc>().list,
+              onChanged: (newVal) {
+                bloc.selectSalesModel = newVal;
+                setState(() {});
+              },
+              validator: (value) =>
+              value == null ? 'Please select Sales' : null,
+
+            );
+          },
+        ),
+       gapH8,
+        CustomInputField(
+          isRequired: true,
+          readOnly: true,
+          controller: bloc.dateEditingController,
+          hintText: 'Sale Date',
+          keyboardType: TextInputType.datetime,
+          autofillHints: AutofillHints.name,
+          fillColor: AppColors.whiteColor(context),
+          validator: (value) =>
+          value!.isEmpty ? 'Please enter date' : null,
+          onTap: _selectDate,
         ),
       ],
     );
@@ -581,13 +572,17 @@ class _SalesScreenState extends State<MobileSalesScreen> {
           final productId = product["product_id"];
           final isProductSelected = productId != null;
 
-          return Card(
+          return Container(
             margin: const EdgeInsets.only(bottom: 5),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
+
+            decoration: BoxDecoration(
+                color: AppColors.bottomNavBg(context),
+
+                borderRadius: BorderRadius.circular(AppSizes.radius),
+              border: Border.all(
+                color: AppColors.greyColor(context).withValues(alpha: 0.5,),width: 0.5
+              )
             ),
-            color: AppColors.bottomNavBg(context),
-            elevation: 0,
             child: Padding(
               padding: const EdgeInsets.all(10),
               child: Column(
@@ -699,7 +694,7 @@ class _SalesScreenState extends State<MobileSalesScreen> {
                               },
                             ),
                             SizedBox(
-                              width: 40,
+                              width: 80,
                               child: TextFormField(
                                 controller: controllers[index]?["quantity"],
                                 readOnly: discountApplied,

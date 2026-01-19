@@ -117,64 +117,66 @@ class _ExpenseHeadScreenState extends State<MobileExpenseSubHeadScreen> {
                     );
                   }
                 },
-                child: Column(
-                  children: [
-
-
-                    // Mobile/Tablet layout
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        // Search Field
-                        CustomSearchTextFormField(
-                          isRequiredLabel: false,
-                          controller: context
-                              .read<ExpenseSubHeadBloc>()
-                              .filterTextController,
-                          onChanged: (value) {
-                            _fetchApiData(
-                              filterText: value,
-                            );
-                          },
-                          onClear: () {
-                            context
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                  
+                  
+                      // Mobile/Tablet layout
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          // Search Field
+                          CustomSearchTextFormField(
+                            isRequiredLabel: false,
+                            controller: context
                                 .read<ExpenseSubHeadBloc>()
-                                .filterTextController
-                                .clear();
-                            FocusScope.of(context).unfocus();
-                            _fetchApiData();
-                          },
-                          hintText: "expense sub heads...",
-                        ),
-
-                      ],
-                    ),
-                    SizedBox(
-                      child: BlocBuilder<ExpenseSubHeadBloc, ExpenseSubHeadState>(
-                        builder: (context, state) {
-                          if (state is ExpenseSubHeadListLoading) {
-                            return const Center(
-                              child: CircularProgressIndicator(),
-                            );
-                          } else if (state is ExpenseSubHeadListSuccess) {
-                            if (state.list.isEmpty) {
+                                .filterTextController,
+                            onChanged: (value) {
+                              _fetchApiData(
+                                filterText: value,
+                              );
+                            },
+                            onClear: () {
+                              context
+                                  .read<ExpenseSubHeadBloc>()
+                                  .filterTextController
+                                  .clear();
+                              FocusScope.of(context).unfocus();
+                              _fetchApiData();
+                            },
+                            hintText: "expense sub heads...",
+                          ),
+                  
+                        ],
+                      ),
+                      SizedBox(
+                        child: BlocBuilder<ExpenseSubHeadBloc, ExpenseSubHeadState>(
+                          builder: (context, state) {
+                            if (state is ExpenseSubHeadListLoading) {
+                              return const Center(
+                                child: CircularProgressIndicator(),
+                              );
+                            } else if (state is ExpenseSubHeadListSuccess) {
+                              if (state.list.isEmpty) {
+                                return Center(
+                                  child: Lottie.asset(AppImages.noData),
+                                );
+                              } else {
+                                return ExpenseSubHeadTableCard(expenseSubHeads: state.list,);
+                              }
+                            } else if (state is ExpenseSubHeadListFailed) {
                               return Center(
-                                child: Lottie.asset(AppImages.noData),
+                                child: Text('Failed to load  : ${state.content}'),
                               );
                             } else {
-                              return ExpenseSubHeadTableCard(expenseSubHeads: state.list,);
+                              return Center(child: Lottie.asset(AppImages.noData));
                             }
-                          } else if (state is ExpenseSubHeadListFailed) {
-                            return Center(
-                              child: Text('Failed to load  : ${state.content}'),
-                            );
-                          } else {
-                            return Center(child: Lottie.asset(AppImages.noData));
-                          }
-                        },
+                          },
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),

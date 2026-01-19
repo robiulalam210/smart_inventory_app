@@ -73,12 +73,12 @@ class _MobileSaleReportScreenState extends State<MobileSalesReportScreen> {
         title: const Text('Sales Report'),
         actions: [
           IconButton(
-            icon: Icon(Icons.picture_as_pdf, color: AppColors.text(context)),
+            icon: Icon(HugeIcons.strokeRoundedPdf02, color: AppColors.text(context)),
             onPressed: _generatePdf,
             tooltip: 'Generate PDF',
           ),
           IconButton(
-            icon: Icon(Icons.refresh, color: AppColors.text(context)),
+            icon: Icon(HugeIcons.strokeRoundedReload, color: AppColors.text(context)),
             onPressed: () {
               setState(() => selectedDateRange = null);
               _isExpanded = false;
@@ -122,7 +122,7 @@ class _MobileSaleReportScreenState extends State<MobileSalesReportScreen> {
               },
               tooltip: 'Toggle Filters',
               child: Icon(
-                _isExpanded ? Icons.filter_alt_off : Icons.filter_alt,
+                _isExpanded ? HugeIcons.strokeRoundedFilterRemove:HugeIcons.strokeRoundedFilter,
                 color: AppColors.whiteColor(context),
               ),
             )
@@ -134,34 +134,39 @@ class _MobileSaleReportScreenState extends State<MobileSalesReportScreen> {
     return Card(
       elevation: 0,
       color: AppColors.bottomNavBg(context),
-      child: ExpansionPanelList(
-        elevation: 0,
-
-        expandedHeaderPadding: EdgeInsets.zero,
-        expansionCallback: (index, isExpanded) {
-          setState(() {
-            _isExpanded = !_isExpanded;
-          });
-        },
+      child: Column(
         children: [
-          ExpansionPanel(
+          // Header: fully clickable
+          InkWell(
+            onTap: () => setState(() => _isExpanded = !_isExpanded),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Row(
+                children: [
+                  Icon(HugeIcons.strokeRoundedFilter, color: AppColors.text(context)),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Filters',
+                    style: AppTextStyle.bodyLarge(context),
+                  ),
+                  const Spacer(),
+                  Icon(
+                    _isExpanded
+                        ? Icons.keyboard_arrow_up
+                        : Icons.keyboard_arrow_down,
+                    color: AppColors.text(context),
+                  ),
+                ],
+              ),
+            ),
+          ),
 
-            backgroundColor: AppColors.bottomNavBg(context),
-            isExpanded: _isExpanded,
-            headerBuilder: (context, isExpanded) {
-              return ListTile(
-                leading: Icon(Icons.filter_alt, color: AppColors.text(context)),
-                title: Text('Filters',style: AppTextStyle.bodyLarge(context),),
-
-                onTap: () {
-                  setState(() {
-                    _isExpanded = !_isExpanded;
-                  });
-                },
-              );
-            },
-            body: Padding(
-              padding: const EdgeInsets.all(0.0),
+          // Expandable body
+          AnimatedCrossFade(
+            duration: const Duration(milliseconds: 200),
+            firstChild: const SizedBox.shrink(),
+            secondChild: Padding(
+              padding: const EdgeInsets.all(16.0),
               child: Column(
                 children: [
                   // Customer Dropdown
@@ -181,18 +186,18 @@ class _MobileSaleReportScreenState extends State<MobileSalesReportScreen> {
                             from: selectedDateRange?.start,
                             to: selectedDateRange?.end,
                             customer: newVal?.id.toString() ?? '',
-                            seller:
-                                context
-                                    .read<SalesReportBloc>()
-                                    .selectedSeller
-                                    ?.id
-                                    .toString() ??
+                            seller: context
+                                .read<SalesReportBloc>()
+                                .selectedSeller
+                                ?.id
+                                .toString() ??
                                 '',
                           );
                         },
                       );
                     },
                   ),
+                  const SizedBox(height: 12),
 
                   // Seller Dropdown
                   BlocBuilder<UserBloc, UserState>(
@@ -209,12 +214,11 @@ class _MobileSaleReportScreenState extends State<MobileSalesReportScreen> {
                           _fetchSalesReport(
                             from: selectedDateRange?.start,
                             to: selectedDateRange?.end,
-                            customer:
-                                context
-                                    .read<SalesReportBloc>()
-                                    .selectedCustomer
-                                    ?.id
-                                    .toString() ??
+                            customer: context
+                                .read<SalesReportBloc>()
+                                .selectedCustomer
+                                ?.id
+                                .toString() ??
                                 '',
                             seller: newVal?.id.toString() ?? '',
                           );
@@ -222,11 +226,11 @@ class _MobileSaleReportScreenState extends State<MobileSalesReportScreen> {
                       );
                     },
                   ),
+                  const SizedBox(height: 12),
 
                   // Date Range Picker
                   CustomDateRangeField(
                     isLabel: true,
-                    // label: 'Date Range',
                     selectedDateRange: selectedDateRange,
                     onDateRangeSelected: (value) {
                       setState(() => selectedDateRange = value);
@@ -234,30 +238,30 @@ class _MobileSaleReportScreenState extends State<MobileSalesReportScreen> {
                         _fetchSalesReport(
                           from: value.start,
                           to: value.end,
-                          customer:
-                              context
-                                  .read<SalesReportBloc>()
-                                  .selectedCustomer
-                                  ?.id
-                                  .toString() ??
+                          customer: context
+                              .read<SalesReportBloc>()
+                              .selectedCustomer
+                              ?.id
+                              .toString() ??
                               '',
-                          seller:
-                              context
-                                  .read<SalesReportBloc>()
-                                  .selectedSeller
-                                  ?.id
-                                  .toString() ??
+                          seller: context
+                              .read<SalesReportBloc>()
+                              .selectedSeller
+                              ?.id
+                              .toString() ??
                               '',
                         );
                       }
                     },
                   ),
 
-                  // Clear Filters Button
-
+                  // TODO: Add Clear Filters / Action Buttons here
                 ],
               ),
             ),
+            crossFadeState: _isExpanded
+                ? CrossFadeState.showSecond
+                : CrossFadeState.showFirst,
           ),
         ],
       ),

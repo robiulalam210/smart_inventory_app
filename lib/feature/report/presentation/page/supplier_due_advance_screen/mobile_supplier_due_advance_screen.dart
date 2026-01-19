@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:lottie/lottie.dart';
 import 'package:meherinMart/core/widgets/app_scaffold.dart';
 import 'package:printing/printing.dart';
+import '../../../../../core/widgets/app_button.dart';
 import '/core/configs/app_colors.dart';
 import '/core/configs/app_images.dart';
 import '/core/configs/app_text.dart';
@@ -76,12 +78,12 @@ class _MobileSupplierDueAdvanceScreenState
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.picture_as_pdf, color: AppColors.text(context)),
+            icon: Icon(HugeIcons.strokeRoundedPdf02, color: AppColors.text(context)),
             onPressed: _generatePdf,
             tooltip: 'Generate PDF',
           ),
           IconButton(
-            icon: Icon(Icons.refresh, color: AppColors.text(context)),
+            icon: Icon(HugeIcons.strokeRoundedReload, color: AppColors.text(context)),
             onPressed: () => _fetchSupplierDueAdvanceReport(),
             tooltip: 'Refresh',
           ),
@@ -525,51 +527,49 @@ class _MobileSupplierDueAdvanceScreenState
                 const SizedBox(height: 5),
 
                 // Status Badge
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: supplier.balanceStatusColor.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        supplier.balanceStatusIcon,
-                        size: 14,
-                        color: supplier.balanceStatusColor,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        supplier.balanceStatus.toUpperCase(),
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: supplier.balanceStatusColor,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 6),
+
 
                 // Action Buttons
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    SizedBox(
-                      child: OutlinedButton.icon(
-                        onPressed: () =>
-                            _showSupplierDetails(context, supplier),
-                        icon: const Icon(Icons.remove_red_eye, size: 16),
-                        label: const Text(''),
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 0),
-                        ),
+
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: supplier.balanceStatusColor.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            supplier.balanceStatusIcon,
+                            size: 14,
+                            color: supplier.balanceStatusColor,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            supplier.balanceStatus.toUpperCase(),
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: supplier.balanceStatusColor,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
+                    AppButton(
+                      size: 90,
+                      isOutlined: true,
+                      name: "Details",
+                      onPressed: () => _showSupplierDetails(context, supplier),
+                    ),
+
 
                   ],
                 ),
@@ -663,96 +663,98 @@ class _MobileSupplierDueAdvanceScreenState
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) {
-        return Container(
-          decoration:  BoxDecoration(
-            color: AppColors.bottomNavBg(context),
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(20),
-              topRight: Radius.circular(20),
+        return SafeArea(
+          child: Container(
+            decoration:  BoxDecoration(
+              color: AppColors.bottomNavBg(context),
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
+              ),
             ),
-          ),
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    supplier.supplierName,
-                    style:  TextStyle(
-                      fontSize: 18,
-                      color: AppColors.primaryColor(context),
-                      fontWeight: FontWeight.bold,
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(2),
                     ),
                   ),
-                  IconButton(
-                    onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.close),
-                  ),
-                ],
-              ),
-              const Divider(),
-              const SizedBox(height: 4),
-
-              // Supplier Details
-              _buildMobileDetailRow('Phone:', supplier.phone),
-              _buildMobileDetailRow('Email:', supplier.email),
-              _buildMobileDetailRow(
-                'Due Amount:',
-                '\$${supplier.presentDue.toStringAsFixed(2)}',
-              ),
-              _buildMobileDetailRow(
-                'Advance Amount:',
-                '\$${supplier.presentAdvance.toStringAsFixed(2)}',
-              ),
-              _buildMobileDetailRow('Net Balance:', netBalanceText),
-              _buildMobileDetailRow('Status:', supplier.balanceStatus),
-
-              // Status Card
-              const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: supplier.balanceStatusColor.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: supplier.balanceStatusColor),
                 ),
-                child: Row(
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Icon(
-                      supplier.balanceStatusIcon,
-                      color: supplier.balanceStatusColor,
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        'Balance Status: ${supplier.balanceStatus}',
-                        style: TextStyle(
-                          color: supplier.balanceStatusColor,
-                          fontWeight: FontWeight.bold,
-                        ),
+                    Text(
+                      supplier.supplierName,
+                      style:  TextStyle(
+                        fontSize: 18,
+                        color: AppColors.primaryColor(context),
+                        fontWeight: FontWeight.bold,
                       ),
+                    ),
+                    IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(Icons.close),
                     ),
                   ],
                 ),
-              ),
+                const Divider(),
+                const SizedBox(height: 4),
 
-              const SizedBox(height: 24),
+                // Supplier Details
+                _buildMobileDetailRow('Phone:', supplier.phone),
+                _buildMobileDetailRow('Email:', supplier.email),
+                _buildMobileDetailRow(
+                  'Due Amount:',
+                  '\$${supplier.presentDue.toStringAsFixed(2)}',
+                ),
+                _buildMobileDetailRow(
+                  'Advance Amount:',
+                  '\$${supplier.presentAdvance.toStringAsFixed(2)}',
+                ),
+                _buildMobileDetailRow('Net Balance:', netBalanceText),
+                _buildMobileDetailRow('Status:', supplier.balanceStatus),
 
-            ],
+                // Status Card
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: supplier.balanceStatusColor.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: supplier.balanceStatusColor),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        supplier.balanceStatusIcon,
+                        color: supplier.balanceStatusColor,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          'Balance Status: ${supplier.balanceStatus}',
+                          style: TextStyle(
+                            color: supplier.balanceStatusColor,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 24),
+
+              ],
+            ),
           ),
         );
       },
