@@ -624,8 +624,8 @@ class _SalesScreenState extends State<MobileSalesScreen> {
                           padding: const EdgeInsets.all(6),
                           decoration: BoxDecoration(
                             color: product == products.last
-                                ? Colors.green.withOpacity(0.08)
-                                : Colors.red.withOpacity(0.08),
+                                ? Colors.green.withValues(alpha: 0.08)
+                                : Colors.red.withValues(alpha: 0.08),
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Icon(
@@ -659,7 +659,7 @@ class _SalesScreenState extends State<MobileSalesScreen> {
                               vertical: 2,
                             ),
                             decoration: BoxDecoration(
-                              color: Colors.green.withOpacity(0.08),
+                              color: Colors.green.withValues(alpha: 0.08),
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
@@ -1854,7 +1854,7 @@ class _SalesScreenState extends State<MobileSalesScreen> {
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(isAdded ? 0.1 : 0.02),
+              color: Colors.black.withValues(alpha:  isAdded ? 0.1 : 0.02),
               blurRadius: isAdded ? 8 : 6,
               offset: const Offset(0, 2),
             ),
@@ -1928,7 +1928,7 @@ class _SalesScreenState extends State<MobileSalesScreen> {
                           borderRadius: BorderRadius.circular(12),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.2),
+                              color: Colors.black.withValues(alpha: 0.2),
                               blurRadius: 4,
                             ),
                           ],
@@ -2032,7 +2032,7 @@ class _SalesScreenState extends State<MobileSalesScreen> {
                         height: 36,
                         decoration: BoxDecoration(
                           color: isAdded
-                              ? AppColors.primaryColor(context).withOpacity(0.1)
+                              ? AppColors.primaryColor(context).withValues(alpha: 0.1)
                               : AppColors.primaryColor(context),
                           shape: BoxShape.circle,
                         ),

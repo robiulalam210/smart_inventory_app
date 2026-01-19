@@ -378,7 +378,7 @@ class _MobileProfileScreenState extends State<MobileProfileScreen> {
 
     final primary = themeState.primaryColor;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final iconBg = primary.withOpacity(0.11);
+    final iconBg = primary.withValues(alpha: 0.11);
 
     return AppScaffold(
       appBar: AppBar(

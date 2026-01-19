@@ -709,13 +709,15 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
 
     final serviceChargeValue =
         double.tryParse(bloc.serviceChargeOverAllController.text) ?? 0;
-    if (serviceChargeValue < 0)
+    if (serviceChargeValue < 0) {
       validationErrors.add('Service charge cannot be negative');
+    }
 
     final deliveryChargeValue =
         double.tryParse(bloc.deliveryChargeOverAllController.text) ?? 0;
-    if (deliveryChargeValue < 0)
+    if (deliveryChargeValue < 0) {
       validationErrors.add('Delivery charge cannot be negative');
+    }
 
     if (validationErrors.isNotEmpty) {
       showCustomToast(
