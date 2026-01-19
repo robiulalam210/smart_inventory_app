@@ -1,4 +1,3 @@
-import 'package:date_format/date_format.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 import '../../../../core/configs/configs.dart';

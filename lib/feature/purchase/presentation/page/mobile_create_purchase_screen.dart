@@ -837,7 +837,7 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
             padding: const EdgeInsets.all(6),
             margin: const EdgeInsets.all(0),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.bottomNavBg(context),
               borderRadius: BorderRadius.circular(8),
             ),
             child: ResponsiveRow(
@@ -963,7 +963,7 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
                         "Price",
                         style: AppTextStyle.cardLevelText(context),
                       ),
-                      fillColor: AppColors.whiteColor(context),
+                      fillColor: AppColors.bottomNavBg(context),
                       filled: true,
                       hintStyle: AppTextStyle.cardLevelText(context),
                       isCollapsed: true,
@@ -1073,7 +1073,7 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
                       decimal: true,
                     ),
                     decoration: InputDecoration(
-                      fillColor: AppColors.whiteColor(context),
+                      fillColor: AppColors.bottomNavBg(context),
                       filled: true,
                       hintStyle: AppTextStyle.cardLevelText(context),
                       isCollapsed: true,
@@ -1186,7 +1186,7 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
                         "Ticket Total",
                         style: AppTextStyle.cardLevelText(context),
                       ),
-                      fillColor: AppColors.whiteColor(context),
+                      fillColor: AppColors.bottomNavBg(context),
                       filled: true,
                       hintStyle: AppTextStyle.cardLevelText(context),
                       isCollapsed: true,
@@ -1240,7 +1240,7 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
                         "Total Amount",
                         style: AppTextStyle.cardLevelText(context),
                       ),
-                      fillColor: AppColors.whiteColor(context),
+                      fillColor: AppColors.bottomNavBg(context),
                       filled: true,
                       hintStyle: AppTextStyle.cardLevelText(context),
                       isCollapsed: true,
@@ -1314,7 +1314,7 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
 
   Widget _buildChargesSection() {
     return ResponsiveRow(
-      spacing: 20,
+      spacing: 10,
       runSpacing: 10,
       children: [
         _buildChargeField(
@@ -1373,8 +1373,9 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(label, style: AppTextStyle.cardLevelText(context)),
+          gapH8,
           Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               Expanded(
@@ -1459,7 +1460,7 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(8),
-                color: Colors.white,
+                color: AppColors.bottomNavBg(context),
               ),
               child: Column(
                 children: [
@@ -1564,16 +1565,18 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
-        color: Colors.white,
+        color:AppColors.bottomNavBg(context)
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text("Payment Information", style: AppTextStyle.cardTitle(context)),
           const SizedBox(height: 10),
-          Row(
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
             children: [
-              Expanded(
+              SizedBox(
                 child: AppDropdown<String>(
                   label: "Payment Method",
                   hint:
@@ -1612,7 +1615,7 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
                 ),
               ),
               const SizedBox(width: 10),
-              Expanded(
+              SizedBox(
                 child: BlocBuilder<AccountBloc, AccountState>(
                   builder: (context, state) {
                     if (state is AccountActiveListLoading) {
@@ -1692,9 +1695,9 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
             ],
           ),
           const SizedBox(height: 10),
-          Row(
+          Wrap(
             children: [
-              Expanded(
+              SizedBox(
                 child: CustomInputField(
                   controller: paidAmountController,
                   hintText: 'Paid Amount',
@@ -1722,12 +1725,14 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
               ),
               const SizedBox(width: 10),
               AppButton(
+                size: 100,
                 name: 'Full Payment',
                 onPressed: _payFullAmount,
                 color: AppColors.primaryColor(context),
               ),
               const SizedBox(width: 10),
               AppButton(
+                size: 100,
                 name: 'Clear',
                 onPressed: _clearPayment,
                 color: Colors.grey,
@@ -1746,7 +1751,7 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
-        color: Colors.grey[100],
+        color:AppColors.bottomNavBg(context)
       ),
       child: Column(
         children: [
@@ -1763,7 +1768,7 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
           _buildPaymentRow(
             "Change Amount:",
             changeAmount.toStringAsFixed(2),
-            color: changeAmount > 0 ? Colors.green : Colors.black,
+            color: changeAmount > 0 ? Colors.green : AppColors.text(context),
           ),
         ],
       ),

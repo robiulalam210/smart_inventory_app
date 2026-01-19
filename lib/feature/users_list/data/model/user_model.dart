@@ -37,7 +37,11 @@ class UsersListModel {
 
   @override
   String toString() {
-    return fullName ?? username ?? "";
+    final name = (fullName != null && fullName!.trim().isNotEmpty)
+        ? fullName!
+        : (username ?? '');
+
+    return name;
   }
 
   @override

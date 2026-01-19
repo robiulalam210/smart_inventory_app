@@ -4,6 +4,7 @@ import '/core/core.dart';
 import '/feature/accounts/presentation/bloc/account/account_bloc.dart';
 import '../../../accounts/data/model/account_active_model.dart';
 import '../bloc/account_transfer/account_transfer_bloc.dart';
+import 'mobile_account_transfer_screen.dart';
 
 class MobileAccountTransferForm extends StatefulWidget {
   const MobileAccountTransferForm({super.key});
@@ -87,14 +88,19 @@ class _MobileAccountTransferFormState extends State<MobileAccountTransferForm> {
                   state is ExecuteTransferLoading) {
                 appLoader(context, "Processing transfer...");
               } else if (state is AccountTransferAddSuccess) {
-                Navigator.pop(context);
+
                 _fetchApi();
-                _showSuccessDialog(
-                  "Transfer Created",
-                  "Transfer request created successfully. Use execute option to complete it.",
-                );
+                // _showSuccessDialog(
+                //   "Transfer Created",
+                //   "Transfer request created successfully. Use execute option to complete it.",
+                // );
+                Navigator.pop(context);
+
+                AppRoutes.pushReplacement(context, MobileAccountTransferScreen());
               } else if (state is QuickTransferSuccess) {
                 Navigator.pop(context);
+
+                AppRoutes.pushReplacement(context, MobileAccountTransferScreen());
                 _showSuccessDialog(
                   "Transfer Completed",
                   "Transfer completed successfully.",

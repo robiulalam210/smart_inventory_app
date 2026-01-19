@@ -10,7 +10,7 @@ class AccountTransferModel {
   final String? amount;
   final String? description;
   final String? transferType;
-  final String? status;
+  final dynamic? status;
   final DateTime? transferDate;
   final DateTime? createdAt;
   final String? createdByName;

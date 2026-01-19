@@ -1,8 +1,5 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:lottie/lottie.dart';
 import 'package:meherinMart/core/widgets/app_scaffold.dart';
 import 'package:printing/printing.dart';
 import '/core/core.dart';
@@ -631,7 +628,7 @@ class _MobileStockReportScreenState extends State<MobileStockReportScreen> {
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
                       color: (isOutOfStock ? Colors.red : Colors.orange)
-                          .withOpacity(0.1),
+                          .withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
                         color: isOutOfStock ? Colors.red : Colors.orange,

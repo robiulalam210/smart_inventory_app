@@ -387,6 +387,7 @@ class _AccountScreenState extends State<MobileAccountScreen> {
           builder: (context, setState) {
             return SafeArea(
               child: Container(
+                color: AppColors.bottomNavBg(context),
                 padding: const EdgeInsets.all(20),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,

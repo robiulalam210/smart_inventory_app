@@ -221,6 +221,7 @@ class AccountTransferBloc extends Bloc<AccountTransferEvent, AccountTransferStat
     }
   }
 
+
   Future<void> _onCreateAccountTransfer(
       CreateAccountTransfer event,
       Emitter<AccountTransferState> emit,
@@ -228,33 +229,75 @@ class AccountTransferBloc extends Bloc<AccountTransferEvent, AccountTransferStat
     emit(AccountTransferAddLoading());
 
     try {
-      final res = await postResponse(
+      final Map<String, dynamic> res = await postResponse(
         url: '${AppUrls.baseUrl}/transfers/',
         payload: event.body,
       );
-      final jsonString = jsonEncode(res);
 
-      ApiResponse response = appParseJson(
-        jsonString,
-            (data) => AccountTransferModel.fromJson(data),
-      );
+      debugPrint("✅ response: $res");
+      debugPrint("✅ status: ${res['status']}");
+      debugPrint("✅ message: ${res['message']}");
 
-      if (response.success == false) {
+      if (res['status'] != true) {
         emit(AccountTransferAddFailed(
           title: 'Error',
-          content: response.message ?? "",
+          content: res['message'] ?? 'Failed',
         ));
         return;
       }
+
+      // Optional: parse model
+      final transfer = AccountTransferModel.fromJson(res['data']);
+
       resetForm();
       emit(AccountTransferAddSuccess());
-    } catch (error) {
+
+    } catch (e, st) {
+      debugPrint("❌ Exception: $e");
+      debugPrintStack(stackTrace: st);
+
       emit(AccountTransferAddFailed(
-        title: "Error",
-        content: error.toString(),
+        title: 'Error',
+        content: e.toString(),
       ));
     }
   }
+
+
+  // Future<void> _onCreateAccountTransfer(
+  //     CreateAccountTransfer event,
+  //     Emitter<AccountTransferState> emit,
+  //     ) async {
+  //   emit(AccountTransferAddLoading());
+  //
+  //   try {
+  //     final res = await postResponse(
+  //       url: '${AppUrls.baseUrl}/transfers/',
+  //       payload: event.body,
+  //     );
+  //     final jsonString = jsonEncode(res);
+  //
+  //     ApiResponse response = appParseJson(
+  //       jsonString,
+  //           (data) => AccountTransferModel.fromJson(data),
+  //     );
+  //
+  //     if (response.success == false) {
+  //       emit(AccountTransferAddFailed(
+  //         title: 'Error',
+  //         content: response.message ?? "",
+  //       ));
+  //       return;
+  //     }
+  //     resetForm();
+  //     emit(AccountTransferAddSuccess());
+  //   } catch (error) {
+  //     emit(AccountTransferAddFailed(
+  //       title: "Error",
+  //       content: error.toString(),
+  //     ));
+  //   }
+  // }
 
 
   Future<void> _onExecuteTransfer(

@@ -293,7 +293,7 @@ class _MobileSupplierLedgerScreenState
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: Colors.blue.withOpacity(0.1),
+                        color: Colors.blue.withValues(alpha: 0.1),
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(Icons.business, color: Colors.blue),
@@ -899,7 +899,7 @@ class _MobileSupplierLedgerScreenState
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: transaction.typeColor.withOpacity(0.1),
+                  color: transaction.typeColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(color: transaction.typeColor),
                 ),
@@ -925,7 +925,7 @@ class _MobileSupplierLedgerScreenState
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: balanceColor.withOpacity(0.1),
+                  color: balanceColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(color: balanceColor),
                 ),

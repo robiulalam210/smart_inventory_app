@@ -264,7 +264,7 @@ class PurchaseDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTableHeaderCell(context, String text) {
+  Widget _buildTableHeaderCell(BuildContext context, String text) {
     return Padding(
       padding: const EdgeInsets.all(12),
       child: Text(

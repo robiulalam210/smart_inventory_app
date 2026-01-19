@@ -12,7 +12,6 @@ import 'package:meherinMart/feature/users_list/data/model/user_model.dart';
 import 'package:meherinMart/feature/users_list/presentation/bloc/users/user_bloc.dart';
 import 'package:meherinMart/feature/sales/presentation/bloc/possale/possale_bloc.dart';
 import 'package:meherinMart/feature/sales/presentation/widgets/widget.dart';
-import 'package:lottie/lottie.dart';
 
 class MobilePosSaleScreen extends StatefulWidget {
   const MobilePosSaleScreen({super.key, this.posSale});
@@ -341,6 +340,7 @@ class _PosSaleScreenState extends State<MobilePosSaleScreen> {
           builder: (context, setState) {
             return SafeArea(
               child: Container(
+                color: AppColors.bottomNavBg(context),
                 padding: const EdgeInsets.all(20),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -382,7 +382,7 @@ class _PosSaleScreenState extends State<MobilePosSaleScreen> {
                         );
                       },
                     ),
-
+                    const SizedBox(height: 10),
                     // Seller Filter
                     BlocBuilder<UserBloc, UserState>(
                       builder: (context, state) {
@@ -403,7 +403,7 @@ class _PosSaleScreenState extends State<MobilePosSaleScreen> {
                         );
                       },
                     ),
-
+                    const SizedBox(height: 10),
                     // Date Range
                     CustomDateRangeField(
                       isLabel: false,

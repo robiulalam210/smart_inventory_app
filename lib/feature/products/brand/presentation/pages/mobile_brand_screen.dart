@@ -1,17 +1,9 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:lottie/lottie.dart';
-import 'package:meherinMart/core/configs/app_colors.dart';
 import 'package:meherinMart/core/configs/configs.dart';
 import 'package:meherinMart/core/widgets/app_scaffold.dart';
-import '../../../../../core/configs/app_images.dart';
-import '../../../../../core/configs/app_routes.dart';
-import '../../../../../core/configs/app_text.dart';
 import '../../../../../core/widgets/app_alert_dialog.dart';
 import '../../../../../core/widgets/app_loader.dart';
 import '../../../../../core/widgets/coustom_search_text_field.dart';
 import '../../../../../core/widgets/show_custom_toast.dart';
-import '../../../../../responsive.dart';
 import '../bloc/brand/brand_bloc.dart';
 import '../widget/widget.dart';
 import 'create_brand/create_brand_setup.dart';

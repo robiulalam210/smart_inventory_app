@@ -909,7 +909,7 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTabletInvoiceRow(context ,AffectedInvoice invoice) {
+  Widget _buildTabletInvoiceRow(BuildContext context ,AffectedInvoice invoice) {
     final amount = double.tryParse(invoice.amountApplied?.toString() ?? '0') ?? 0;
 
     return Container(
@@ -1104,7 +1104,7 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildPaymentRow(context ,String label, String value, {bool isAmount = false}) {
+  Widget _buildPaymentRow(BuildContext context ,String label, String value, {bool isAmount = false}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [

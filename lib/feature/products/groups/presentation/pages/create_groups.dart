@@ -3,7 +3,6 @@ import '/feature/products/groups/presentation/bloc/groups/groups_bloc.dart';
 import '../../../../../core/configs/configs.dart';
 import '../../../../../core/widgets/app_button.dart';
 import '../../../../../core/widgets/app_dropdown.dart';
-import '../../../../../core/widgets/app_text_field.dart';
 import '../../../../../core/widgets/show_custom_toast.dart';
 
 class GroupsCreate extends StatefulWidget {
