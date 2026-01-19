@@ -247,7 +247,6 @@ class AccountTransferBloc extends Bloc<AccountTransferEvent, AccountTransferStat
       }
 
       // Optional: parse model
-      final transfer = AccountTransferModel.fromJson(res['data']);
 
       resetForm();
       emit(AccountTransferAddSuccess());

@@ -86,7 +86,7 @@ class _SupplierScreenState extends State<MobileSupplierListScreen> {
             return Dialog(
               insetPadding: const EdgeInsets.all(20),
               child: SizedBox(
-                // width: AppSizes.width(context) * 0.5,
+
                 height: AppSizes.height(context) * 0.5,
                 child: const MobileCreateSupplierScreen(),
               ),

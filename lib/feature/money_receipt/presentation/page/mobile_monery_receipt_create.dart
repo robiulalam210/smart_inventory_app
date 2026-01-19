@@ -291,9 +291,9 @@ class _MoneyReceiptListScreenState extends State<MobileMoneyReceiptForm> {
     // Validate form
     if (!formKey2.currentState!.validate()) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Please fix the errors in step 2')),
-        );
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   SnackBar(content: Text('Please fix the errors in step 2')),
+        // );
       });
       return false;
     }
@@ -328,9 +328,9 @@ class _MoneyReceiptListScreenState extends State<MobileMoneyReceiptForm> {
     // Validate form
     if (!formKey3.currentState!.validate()) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Please fix the errors in step 3')),
-        );
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   SnackBar(content: Text('Please fix the errors in step 3')),
+        // );
       });
       return false;
     }

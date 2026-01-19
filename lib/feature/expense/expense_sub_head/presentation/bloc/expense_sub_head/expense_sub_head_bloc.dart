@@ -59,13 +59,12 @@ class ExpenseSubHeadBloc extends Bloc<ExpenseSubHeadEvent, ExpenseSubHeadState> 
       // Apply filtering and pagination
       final filteredWarehouses =
       _filterExpenseHead(list, event.filterText);
-      final paginatedWarehouses =
-      _paginatePage(filteredWarehouses, event.pageNumber);
+
 
       final totalPages = (filteredWarehouses.length / _itemsPerPage).ceil();
 
       emit(ExpenseSubHeadListSuccess(
-        list: paginatedWarehouses,
+        list: filteredWarehouses,
         totalPages: totalPages,
         currentPage: event.pageNumber,
       ));
@@ -85,14 +84,7 @@ class ExpenseSubHeadBloc extends Bloc<ExpenseSubHeadEvent, ExpenseSubHeadState> 
     }).toList();
   }
 
-  List<ExpenseSubHeadModel> _paginatePage(
-      List<ExpenseSubHeadModel> list, int pageNumber) {
-    final start = pageNumber * _itemsPerPage;
-    final end = start + _itemsPerPage;
-    if (start >= list.length) return [];
-    return list.sublist(
-        start, end > list.length ? list.length : end);
-  }
+
 
   Future<void> _onCreateExpenseHead(
       AddSubExpenseHead event, Emitter<ExpenseSubHeadState> emit) async {

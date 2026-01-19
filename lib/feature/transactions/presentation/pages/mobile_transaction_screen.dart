@@ -141,49 +141,42 @@ class _TransactionScreenState extends State<MobileTransactionScreen> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         // Search Bar
-        Container(
-          decoration: BoxDecoration(
-            color: Colors.transparent,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withValues(alpha: 0.1),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
+        Row(
+          children: [
+            Expanded(
+              child: CustomSearchTextFormField(
+                isRequiredLabel: false,
+                controller: filterTextController,
+                onChanged: (value) => _fetchTransactions(filterText: value),
+                onClear: () {
+                  filterTextController.clear();
+                  _fetchTransactions();
+                },
+                hintText: "transactions...",
               ),
-            ],
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: CustomSearchTextFormField(
-                    isRequiredLabel: false,
-                    controller: filterTextController,
-                    onChanged: (value) => _fetchTransactions(filterText: value),
-                    onClear: () {
-                      filterTextController.clear();
-                      _fetchTransactions();
-                    },
-                    hintText: "transactions...",
-                  ),
-                ),
+            ),
+            IconButton(
+              icon: Icon(
+                Iconsax.filter,
+                color: AppColors.primaryColor(context),
               ),
-              IconButton(
-                icon: Icon(
-                  Iconsax.filter,
-                  color: AppColors.primaryColor(context),
-                ),
-                onPressed: () => _showMobileFilterSheet(context),
-              ),
-              IconButton(
-                onPressed: () => _fetchTransactions(),
-                icon: const Icon(Icons.refresh),
-                tooltip: "Refresh",
-              ),
-            ],
-          ),
+              onPressed: () => _showMobileFilterSheet(context),
+            ),
+            IconButton(
+              onPressed: () {
+                setState(() {
+                  filterTextController.clear();
+                  selectedTransactionTypeNotifier.value = null;
+                  selectedStatusNotifier.value = null;
+                  selectedAccountNotifier.value = null;
+                  selectedDateRange = null;
+                });
+                _fetchTransactions();
+              },
+              icon: const Icon(Icons.refresh),
+              tooltip: "Refresh",
+            ),
+          ],
         ),
 
         // Filter Chips

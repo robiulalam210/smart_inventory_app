@@ -16,10 +16,12 @@ class MobileSupplierPaymentCreate extends StatefulWidget {
   const MobileSupplierPaymentCreate({super.key});
 
   @override
-  State<MobileSupplierPaymentCreate> createState() => _MobileSupplierPaymentCreateState();
+  State<MobileSupplierPaymentCreate> createState() =>
+      _MobileSupplierPaymentCreateState();
 }
 
-class _MobileSupplierPaymentCreateState extends State<MobileSupplierPaymentCreate> {
+class _MobileSupplierPaymentCreateState
+    extends State<MobileSupplierPaymentCreate> {
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
   @override
@@ -27,22 +29,21 @@ class _MobileSupplierPaymentCreateState extends State<MobileSupplierPaymentCreat
     super.initState();
 
     // Fetch necessary lists
-    context.read<UserBloc>().add(FetchUserList(context, dropdownFilter: "?status=1"));
+    context.read<UserBloc>().add(
+      FetchUserList(context, dropdownFilter: "?status=1"),
+    );
     context.read<SupplierListBloc>().add(FetchSupplierList(context));
     context.read<AccountBloc>().add(FetchAccountActiveList(context));
 
     // Set default date
-    context.read<SupplierPaymentBloc>().dateController.text =
-        appWidgets.convertDateTimeDDMMYYYY(DateTime.now());
+    context.read<SupplierPaymentBloc>().dateController.text = appWidgets
+        .convertDateTimeDDMMYYYY(DateTime.now());
   }
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: _buildForm(),
-      ),
+      child: Padding(padding: const EdgeInsets.all(8.0), child: _buildForm()),
     );
   }
 
@@ -78,14 +79,12 @@ class _MobileSupplierPaymentCreateState extends State<MobileSupplierPaymentCreat
               const SizedBox(height: 6),
               Column(
                 children: [
-
                   _buildSupplierInfoSection(),
                   // const SizedBox(height: 6),
                   _buildPaymentInfoSection(),
                   const SizedBox(height: 8),
                   _buildActionButtons(),
                   const SizedBox(height: 20),
-
                 ],
               ),
             ],
@@ -130,13 +129,12 @@ class _MobileSupplierPaymentCreateState extends State<MobileSupplierPaymentCreat
             secondChild: _buildCollectedByDropdown(),
           ),
 
-
+          gapH8,
           // Payment To & Conditional Invoice
           _buildTwoColumnRow(
             firstChild: _buildPaymentToDropdown(),
             secondChild: _buildInvoiceDropdownIfNeeded(),
           ),
-
 
           // Date field
           CustomInputField(
@@ -147,7 +145,8 @@ class _MobileSupplierPaymentCreateState extends State<MobileSupplierPaymentCreat
             fillColor: Colors.white,
             readOnly: true,
             onTap: _pickDate,
-            validator: (value) => value!.isEmpty ? 'Please enter Date' : null, keyboardType: TextInputType.number,
+            validator: (value) => value!.isEmpty ? 'Please enter Date' : null,
+            keyboardType: TextInputType.number,
           ),
         ],
       ),
@@ -173,7 +172,6 @@ class _MobileSupplierPaymentCreateState extends State<MobileSupplierPaymentCreat
             secondChild: _buildAccountDropdown(),
           ),
 
-
           // Amount & Remark
           _buildTwoColumnRow(
             firstChild: CustomInputField(
@@ -182,9 +180,11 @@ class _MobileSupplierPaymentCreateState extends State<MobileSupplierPaymentCreat
               controller: context.read<SupplierPaymentBloc>().amountController,
               hintText: 'Amount',
               keyboardType: TextInputType.number,
-              validator: (value) => value!.isEmpty ? 'Please enter amount' : null,
+              validator: (value) =>
+                  value!.isEmpty ? 'Please enter amount' : null,
             ),
-            secondChild: CustomInputField( keyboardType: TextInputType.text,
+            secondChild: CustomInputField(
+              keyboardType: TextInputType.text,
               isRequiredLable: true,
               isRequired: false,
               controller: context.read<SupplierPaymentBloc>().remarkController,
@@ -210,26 +210,18 @@ class _MobileSupplierPaymentCreateState extends State<MobileSupplierPaymentCreat
           onPressed: () => Navigator.of(context).pop(),
         ),
         gapW16,
-        AppButton(
-          size: 160,
-          name: "Create Payment",
-          onPressed: _submitPayment,
-        ),
+        AppButton(size: 160, name: "Create Payment", onPressed: _submitPayment),
       ],
-      
     );
   }
 
-  Widget _buildTwoColumnRow({required Widget firstChild, required Widget secondChild}) {
+  Widget _buildTwoColumnRow({
+    required Widget firstChild,
+    required Widget secondChild,
+  }) {
     return LayoutBuilder(
       builder: (context, constraints) {
-
-        return Column(
-          children: [
-            firstChild,
-            secondChild,
-          ],
-        );
+        return Column(children: [firstChild, gapH8, secondChild]);
       },
     );
   }
@@ -241,26 +233,31 @@ class _MobileSupplierPaymentCreateState extends State<MobileSupplierPaymentCreat
       builder: (context, state) {
         return AppDropdown(
           label: "Supplier",
-          hint: context.read<SupplierPaymentBloc>().selectCustomerModel?.name ?? "Select Supplier",
+          hint:
+              context.read<SupplierPaymentBloc>().selectCustomerModel?.name ??
+              "Select Supplier",
           isRequired: true,
           value: context.read<SupplierPaymentBloc>().selectCustomerModel,
           itemList: context.read<SupplierListBloc>().supplierListModel,
           onChanged: (newVal) {
             context.read<SupplierPaymentBloc>().selectCustomerModel = newVal;
             context.read<SupplierInvoiceBloc>().supplierInvoiceListModel = "";
-            context.read<SupplierInvoiceBloc>().add(FetchSupplierInvoiceList(
-              context,
-              dropdownFilter: "${newVal?.id}",
-            ));
+            context.read<SupplierInvoiceBloc>().add(
+              FetchSupplierInvoiceList(
+                context,
+                dropdownFilter: "${newVal?.id}",
+              ),
+            );
             // Set default amount if due > 0
-            context.read<SupplierPaymentBloc>().amountController.text =
-            double.tryParse(newVal?.totalDue.toString() ?? "0")! > 0
+            context
+                .read<SupplierPaymentBloc>()
+                .amountController
+                .text = double.tryParse(newVal?.totalDue.toString() ?? "0")! > 0
                 ? newVal!.totalDue.toString()
                 : "0";
             setState(() {});
           },
           validator: (value) => value == null ? 'Please select Supplier' : null,
-
         );
       },
     );
@@ -274,13 +271,15 @@ class _MobileSupplierPaymentCreateState extends State<MobileSupplierPaymentCreat
           isRequired: true,
           value: context.read<SupplierPaymentBloc>().selectUserModel,
           itemList: context.read<UserBloc>().list,
-          hint: context.read<SupplierPaymentBloc>().selectUserModel?.username ?? "Select Collected By",
+          hint:
+              context.read<SupplierPaymentBloc>().selectUserModel?.username ??
+              "Select Collected By",
           onChanged: (newVal) {
             context.read<SupplierPaymentBloc>().selectUserModel = newVal;
             setState(() {});
           },
-          validator: (value) => value == null ? 'Please select Collected By' : null,
-
+          validator: (value) =>
+              value == null ? 'Please select Collected By' : null,
         );
       },
     );
@@ -292,7 +291,8 @@ class _MobileSupplierPaymentCreateState extends State<MobileSupplierPaymentCreat
       isRequired: true,
       value: context.read<SupplierPaymentBloc>().selectedPaymentToState,
       itemList: context.read<SupplierPaymentBloc>().paymentTo,
-      hint: context.read<SupplierPaymentBloc>().selectedPaymentToState.isNotEmpty
+      hint:
+          context.read<SupplierPaymentBloc>().selectedPaymentToState.isNotEmpty
           ? context.read<SupplierPaymentBloc>().selectedPaymentToState
           : "Select Payment To",
       onChanged: (newVal) {
@@ -300,12 +300,12 @@ class _MobileSupplierPaymentCreateState extends State<MobileSupplierPaymentCreat
         setState(() {});
       },
       validator: (value) => value == null ? 'Please select Payment To' : null,
-
     );
   }
 
   Widget _buildInvoiceDropdownIfNeeded() {
-    if (context.read<SupplierPaymentBloc>().selectedPaymentToState != "Specific") {
+    if (context.read<SupplierPaymentBloc>().selectedPaymentToState !=
+        "Specific") {
       return const SizedBox();
     }
 
@@ -316,17 +316,25 @@ class _MobileSupplierPaymentCreateState extends State<MobileSupplierPaymentCreat
           isRequired: true,
           value: context.read<SupplierInvoiceBloc>().supplierInvoiceListModel,
           itemList: context.read<SupplierInvoiceBloc>().supplierListModel,
-          hint: context.read<SupplierInvoiceBloc>().supplierInvoiceListModel.isEmpty
+          hint:
+              context
+                  .read<SupplierInvoiceBloc>()
+                  .supplierInvoiceListModel
+                  .isEmpty
               ? "Select Invoice"
               : context.read<SupplierInvoiceBloc>().supplierInvoiceListModel,
           onChanged: (newVal) {
-            context.read<SupplierInvoiceBloc>().supplierInvoiceListModel = newVal.toString();
-            context.read<SupplierPaymentBloc>().amountController.text =
-                newVal.toString().split("(").last.split(")").first;
+            context.read<SupplierInvoiceBloc>().supplierInvoiceListModel =
+                newVal.toString();
+            context.read<SupplierPaymentBloc>().amountController.text = newVal
+                .toString()
+                .split("(")
+                .last
+                .split(")")
+                .first;
             setState(() {});
           },
           validator: (value) => value == null ? 'Please select Invoice' : null,
-
         );
       },
     );
@@ -344,25 +352,30 @@ class _MobileSupplierPaymentCreateState extends State<MobileSupplierPaymentCreat
           ? "Select Payment Method"
           : context.read<SupplierPaymentBloc>().selectedPaymentMethod,
       onChanged: (newVal) {
-        context.read<SupplierPaymentBloc>().selectedPaymentMethod = newVal.toString();
+        context.read<SupplierPaymentBloc>().selectedPaymentMethod = newVal
+            .toString();
         context.read<SupplierPaymentBloc>().selectedAccount = "";
         context.read<SupplierPaymentBloc>().selectedAccountId = "";
         setState(() {});
       },
-      validator: (value) => value == null ? 'Please select a payment method' : null,
-
+      validator: (value) =>
+          value == null ? 'Please select a payment method' : null,
     );
   }
 
   Widget _buildAccountDropdown() {
     return BlocBuilder<AccountBloc, AccountState>(
       builder: (context, state) {
-        final filteredList = context.read<SupplierPaymentBloc>().selectedPaymentMethod.isNotEmpty
+        final filteredList =
+            context.read<SupplierPaymentBloc>().selectedPaymentMethod.isNotEmpty
             ? context.read<AccountBloc>().activeAccount.where((item) {
-          final itemAcType = item.acType?.toLowerCase() ?? '';
-          final selectedMethod = context.read<SupplierPaymentBloc>().selectedPaymentMethod.toLowerCase();
-          return itemAcType == selectedMethod;
-        }).toList()
+                final itemAcType = item.acType?.toLowerCase() ?? '';
+                final selectedMethod = context
+                    .read<SupplierPaymentBloc>()
+                    .selectedPaymentMethod
+                    .toLowerCase();
+                return itemAcType == selectedMethod;
+              }).toList()
             : context.read<AccountBloc>().activeAccount;
 
         return AppDropdown(
@@ -372,20 +385,26 @@ class _MobileSupplierPaymentCreateState extends State<MobileSupplierPaymentCreat
               ? null
               : context.read<SupplierPaymentBloc>().selectedAccount,
           itemList: filteredList,
-          hint: filteredList.isEmpty ? "No accounts available" : "Select Account",
+          hint: filteredList.isEmpty
+              ? "No accounts available"
+              : "Select Account",
           onChanged: (newVal) {
             if (newVal != null) {
-              context.read<SupplierPaymentBloc>().selectedAccount = newVal.toString();
+              context.read<SupplierPaymentBloc>().selectedAccount = newVal
+                  .toString();
               try {
-                var matchingAccount = filteredList.firstWhere((acc) => acc.toString() == newVal.toString());
-                context.read<SupplierPaymentBloc>().selectedAccountId = matchingAccount.id.toString();
+                var matchingAccount = filteredList.firstWhere(
+                  (acc) => acc.toString() == newVal.toString(),
+                );
+                context.read<SupplierPaymentBloc>().selectedAccountId =
+                    matchingAccount.id.toString();
               } catch (e) {
                 context.read<SupplierPaymentBloc>().selectedAccountId = "";
               }
             }
           },
-          validator: (value) => value == null ? 'Please select an account' : null,
-
+          validator: (value) =>
+              value == null ? 'Please select an account' : null,
         );
       },
     );
@@ -400,8 +419,8 @@ class _MobileSupplierPaymentCreateState extends State<MobileSupplierPaymentCreat
       lastDate: DateTime.now(),
     );
     if (pickedDate != null) {
-      context.read<SupplierPaymentBloc>().dateController.text =
-          appWidgets.convertDateTimeDDMMYYYY(pickedDate);
+      context.read<SupplierPaymentBloc>().dateController.text = appWidgets
+          .convertDateTimeDDMMYYYY(pickedDate);
       setState(() {});
     }
   }
@@ -417,16 +436,25 @@ class _MobileSupplierPaymentCreateState extends State<MobileSupplierPaymentCreat
       "amount": double.tryParse(supplierBloc.amountController.text.trim()),
       "supplier_id": supplierBloc.selectCustomerModel?.id.toString(),
       "payment_date": appWidgets.convertDateTime(
-        DateFormat("dd-MM-yyyy").parse(supplierBloc.dateController.text.trim(), true),
+        DateFormat(
+          "dd-MM-yyyy",
+        ).parse(supplierBloc.dateController.text.trim(), true),
         "yyyy-MM-dd",
       ),
-      "payment_method": supplierBloc.selectedPaymentMethod.toString().toLowerCase(),
+      "payment_method": supplierBloc.selectedPaymentMethod
+          .toString()
+          .toLowerCase(),
       "seller_id": supplierBloc.selectUserModel?.id.toString(),
-      "specific_invoice": supplierBloc.selectedPaymentToState == "Over All" ? false : true,
+      "specific_invoice": supplierBloc.selectedPaymentToState == "Over All"
+          ? false
+          : true,
     };
 
     if (supplierBloc.selectedPaymentToState == "Specific") {
-      body["invoice_no"] = invoiceBloc.supplierInvoiceListModel.toString().split("(").first;
+      body["invoice_no"] = invoiceBloc.supplierInvoiceListModel
+          .toString()
+          .split("(")
+          .first;
     }
     if (supplierBloc.remarkController.text.isNotEmpty) {
       body["description"] = supplierBloc.remarkController.text;

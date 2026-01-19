@@ -30,6 +30,7 @@ class CategoriesListMobile extends StatelessWidget {
           ? _buildEmptyState(context)
           : ListView.builder(
               shrinkWrap: true,
+              physics: NeverScrollableScrollPhysics(),
               padding: const EdgeInsets.only(
                 top: 8,
                 bottom: 20,

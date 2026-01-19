@@ -65,16 +65,13 @@ class GroupsBloc extends Bloc<GroupsEvent, GroupsState> {
 
       // Apply filtering and pagination
       final filteredWarehouses = _filterData(list, event.filterText);
-      final paginatedWarehouses = __paginatePage(
-        filteredWarehouses,
-        event.pageNumber,
-      );
+
 
       final totalPages = (filteredWarehouses.length / _itemsPerPage).ceil();
 
       emit(
         GroupsListSuccess(
-          list: paginatedWarehouses,
+          list: filteredWarehouses,
           totalPages: totalPages,
           currentPage: event.pageNumber,
         ),
@@ -96,18 +93,7 @@ class GroupsBloc extends Bloc<GroupsEvent, GroupsState> {
     }).toList();
   }
 
-  List<GroupsModel> __paginatePage(
-    List<GroupsModel> warehouses,
-    int pageNumber,
-  ) {
-    final start = pageNumber * _itemsPerPage;
-    final end = start + _itemsPerPage;
-    if (start >= warehouses.length) return [];
-    return warehouses.sublist(
-      start,
-      end > warehouses.length ? warehouses.length : end,
-    );
-  }
+
 
   Future<void> _onCreateWarehouseList(
     AddGroups event,

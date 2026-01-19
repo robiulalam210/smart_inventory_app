@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import '../configs/configs.dart';
 
 class AppDropdown<T> extends FormField<T> {
@@ -31,7 +30,7 @@ class AppDropdown<T> extends FormField<T> {
            }
 
            // Show dropdown as a bottom sheet
-           void _showDropdown() {
+           void showDropdown() {
              // Unfocus any active focus to prevent keyboard issues
              FocusScope.of(context).unfocus();
 
@@ -88,7 +87,7 @@ class AppDropdown<T> extends FormField<T> {
                SizedBox(
                  height: 35,
                  child: InkWell(
-                   onTap: _showDropdown,
+                   onTap: showDropdown,
                    borderRadius: BorderRadius.circular(AppSizes.radius),
                    child: Container(
                      decoration: BoxDecoration(

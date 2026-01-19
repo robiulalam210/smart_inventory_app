@@ -29,12 +29,23 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
         if (event.pageNumber > 1) 'page': event.pageNumber.toString(),
         if (event.pageSize != 10) 'page_size': event.pageSize.toString(),
         if (event.filterText.isNotEmpty) 'search': event.filterText,
-        if (event.accountId != null) 'account_id': event.accountId!,
-        if (event.transactionType != null) 'transaction_type': event.transactionType!,
-        if (event.status != null) 'status': event.status!,
+        if (event.accountId != null && event.accountId!.isNotEmpty)
+          'account_id': event.accountId!,
+        if (event.transactionType != null &&
+            event.transactionType!.isNotEmpty &&
+            event.transactionType! != 'null' &&
+            event.transactionType! != 'All')
+          'transaction_type': event.transactionType!,
+
+        if (event.status != null &&
+            event.status!.isNotEmpty &&
+            event.status! != 'null' &&
+            event.status! != 'All')
+          'status': event.status!,
         if (event.startDate != null) 'start_date': _formatDate(event.startDate!),
         if (event.endDate != null) 'end_date': _formatDate(event.endDate!),
       };
+
 
       final Uri uri = Uri.parse(AppUrls.transactions).replace(
         queryParameters: queryParams,

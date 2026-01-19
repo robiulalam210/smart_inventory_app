@@ -61,13 +61,12 @@ class BrandBloc extends Bloc<BrandEvent, BrandState> {
 
       // Apply filtering and pagination
       final filteredData = _filterBrand(brandModel, event.filterText);
-      final paginatedPage = _paginatePage(filteredData, event.pageNumber);
 
       final totalPages = (filteredData.length / _itemsPerPage).ceil();
 
       emit(
         BrandListSuccess(
-          list: paginatedPage,
+          list: filteredData,
           totalPages: totalPages,
           currentPage: event.pageNumber,
         ),
@@ -86,12 +85,7 @@ class BrandBloc extends Bloc<BrandEvent, BrandState> {
     }).toList();
   }
 
-  List<BrandModel> _paginatePage(List<BrandModel> list, int pageNumber) {
-    final start = pageNumber * _itemsPerPage;
-    final end = start + _itemsPerPage;
-    if (start >= list.length) return [];
-    return list.sublist(start, end > list.length ? list.length : end);
-  }
+
 
   Future<void> _onCreateBrandList(
     AddBrand event,

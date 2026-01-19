@@ -86,13 +86,20 @@ class _PurchaseReturnScreenState extends State<MobilePurchaseReturnScreen> {
             context: context,
             builder: (context) {
               return Dialog(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                 
+                ),
                 insetPadding: const EdgeInsets.all(20),
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    maxWidth: AppSizes.width(context) * 0.90,
-                    maxHeight: AppSizes.height(context) * 0.85,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxWidth: AppSizes.width(context) * 0.90,
+                      maxHeight: AppSizes.height(context) * 0.85,
+                    ),
+                    child: const CreatePurchaseReturnScreen(),
                   ),
-                  child: const CreatePurchaseReturnScreen(),
                 ),
               );
             },
@@ -271,7 +278,7 @@ class _PurchaseReturnScreenState extends State<MobilePurchaseReturnScreen> {
                       to: selectedDateRange?.end ?? endDate,
                     );
                   },
-                  hintText: "Search by Receipt No, Supplier, or Reason",
+                  hintText: "by Receipt No, Supplier, or Reason",
                 ),
                 const SizedBox(height: 8),
                 Row(

@@ -35,7 +35,7 @@ class ExpenseSubHeadTableCard extends StatelessWidget {
   Widget _buildMobileCardView(BuildContext context, bool isMobile) {
     return ListView.builder(
       shrinkWrap: true,
-      physics: const ClampingScrollPhysics(),
+      physics: const NeverScrollableScrollPhysics(),
       itemCount: expenseSubHeads.length,
       itemBuilder: (context, index) {
         final expenseSubHead = expenseSubHeads[index];

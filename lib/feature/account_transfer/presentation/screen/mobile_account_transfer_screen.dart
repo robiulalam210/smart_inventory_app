@@ -125,15 +125,16 @@ class _MobileAccountTransferScreenState extends State<MobileAccountTransferScree
         backgroundColor: AppColors.bottomNavBg(context),
         title:  Text("Account Transfers",style: AppTextStyle.titleMedium(context),),
         actions: [
-          IconButton(
-            onPressed: () => _fetchApi(),
-            icon: const Icon(Icons.refresh),
-            tooltip: "Refresh",
-          ),
+
           IconButton(
             onPressed: () => _showMobileFilterSheet(context),
             icon: const Icon(Icons.filter_alt),
             tooltip: "Filters",
+          ),
+          IconButton(
+            onPressed: () => _fetchApi(),
+            icon: const Icon(Icons.refresh),
+            tooltip: "Refresh",
           ),
         ],
       ),
@@ -175,37 +176,15 @@ class _MobileAccountTransferScreenState extends State<MobileAccountTransferScree
   }
 
   Widget _buildMobileHeader() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 0),
-              child: CustomSearchTextFormField(
-                isRequiredLabel: false,
-                controller: filterTextController,
-                onChanged: (value) => _fetchApi(filterText: value),
-                onClear: () {
-                  filterTextController.clear();
-                  _fetchApi();
-                },
-                hintText: "transfers...",
-              ),
-            ),
-          ),
-        ],
-      ),
+    return CustomSearchTextFormField(
+      isRequiredLabel: false,
+      controller: filterTextController,
+      onChanged: (value) => _fetchApi(filterText: value),
+      onClear: () {
+        filterTextController.clear();
+        _fetchApi();
+      },
+      hintText: "transfers...",
     );
   }
 
@@ -335,7 +314,8 @@ class _MobileAccountTransferScreenState extends State<MobileAccountTransferScree
         }
       },
       child: BlocBuilder<AccountTransferBloc, AccountTransferState>(
-        builder: (context, state) {
+        buildWhen: (previous, current) =>
+        current is AccountTransferListSuccess,        builder: (context, state) {
           if (state is AccountTransferListLoading) {
             return const Center(child: CircularProgressIndicator());
           } else if (state is AccountTransferListSuccess) {
