@@ -1556,6 +1556,17 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
       bool isWalkInCustomer,
       double netTotal,
       ) {
+    void recalculateAndAutoFill() {
+      final bloc = context.read<CreatePosSaleBloc>();
+      final selectedCustomer = bloc.selectClintModel;
+
+      if (selectedCustomer?.id == -1) {
+        // Only auto-fill for walk-in customer
+        final netTotal = calculateAllFinalTotal();
+        bloc.payableAmount.text = netTotal.toStringAsFixed(2);
+        _updateChangeAmount();
+      }
+    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1646,10 +1657,10 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
               ),
             ],
           ),
-          gapH16,
+          gapH8,
           Wrap(
-          spacing: 10,
-            runSpacing: 10,
+          spacing: 6,
+            runSpacing: 6,
             children: [
               SizedBox(
 
@@ -1664,7 +1675,6 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                   readOnly: true,
                 ),
               ),
-              const SizedBox(width: 5),
               SizedBox(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -1691,6 +1701,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
 
                         // Walk-in customer validation
                         if (isWalkInCustomer && numericValue != netTotal) {
+
                           return 'Must pay exact: ${netTotal.toStringAsFixed(2)}';
                         }
 
@@ -1698,6 +1709,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                       },
                       onChanged: (value) {
                         _updateChangeAmount();
+                        recalculateAndAutoFill();
                         setState(() {});
                       },
                     ),

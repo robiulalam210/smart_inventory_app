@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:lottie/lottie.dart';
 import 'package:meherinMart/core/configs/app_text.dart';
 import 'package:meherinMart/core/widgets/app_scaffold.dart';
@@ -43,12 +44,12 @@ class _MobileLowStockScreenState extends State<MobileLowStockScreen> {
         title:  Text('Low Stock Alert',style: AppTextStyle.titleMedium(context),),
         actions: [
           IconButton(
-            icon:  Icon(Icons.picture_as_pdf,color: AppColors.text(context),),
+            icon:  Icon(HugeIcons.strokeRoundedPdf02,color: AppColors.text(context),),
             onPressed: _generatePdf,
             tooltip: 'Generate PDF',
           ),
           IconButton(
-            icon:  Icon(Icons.refresh,color:  AppColors.text(context),),
+            icon:  Icon(HugeIcons.strokeRoundedReload,color:  AppColors.text(context),),
             onPressed: () => _fetchLowStockReport(),
             tooltip: 'Refresh',
           ),

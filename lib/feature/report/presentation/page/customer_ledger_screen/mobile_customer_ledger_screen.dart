@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:lottie/lottie.dart';
 import 'package:meherinMart/core/configs/app_text.dart';
 import 'package:printing/printing.dart';
+import '../../../../../core/widgets/app_button.dart';
 import '/core/configs/app_colors.dart';
 import '/core/configs/app_images.dart';
 import '/core/widgets/app_dropdown.dart';
@@ -65,14 +67,14 @@ class _MobileCustomerLedgerScreenState
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.picture_as_pdf),
+            icon: Icon(HugeIcons.strokeRoundedPdf02),
             color: AppColors.text(context),
 
             onPressed: _generatePdf,
             tooltip: 'Generate PDF',
           ),
           IconButton(
-            icon: Icon(Icons.refresh, color: AppColors.text(context)),
+            icon: Icon(HugeIcons.strokeRoundedReload, color: AppColors.text(context)),
             onPressed: () {
               final customer = context
                   .read<CustomerLedgerBloc>()
@@ -129,28 +131,39 @@ class _MobileCustomerLedgerScreenState
     return Card(
       elevation: 0,
       color: AppColors.bottomNavBg(context),
-
-      child: ExpansionPanelList(
-        elevation: 0,
-        expandedHeaderPadding: EdgeInsets.zero,
-        expansionCallback: (int index, bool isExpanded) {
-          setState(() => _isFilterExpanded = !isExpanded);
-        },
+      child: Column(
         children: [
-          ExpansionPanel(
-            headerBuilder: (context, isExpanded) {
-              return ListTile(
-                leading: Icon(Icons.filter_alt, color: AppColors.text(context)),
-                title: Text('Filters', style: AppTextStyle.body(context)),
-                onTap: (){
-                  setState(() {
-                    _isFilterExpanded=!_isFilterExpanded;
-                  });
-                },
-              );
-            },
-            body: Padding(
-              padding: const EdgeInsets.all(0.0),
+          // Header: fully clickable
+          InkWell(
+            onTap: () => setState(() => _isFilterExpanded = !_isFilterExpanded),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Row(
+                children: [
+                  Icon(HugeIcons.strokeRoundedFilter, color: AppColors.text(context)),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Filters',
+                    style: AppTextStyle.bodyLarge(context),
+                  ),
+                  const Spacer(),
+                  Icon(
+                    _isFilterExpanded
+                        ? Icons.keyboard_arrow_up
+                        : Icons.keyboard_arrow_down,
+                    color: AppColors.text(context),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // Expandable body
+          AnimatedCrossFade(
+            duration: const Duration(milliseconds: 200),
+            firstChild: const SizedBox.shrink(),
+            secondChild: Padding(
+              padding: const EdgeInsets.all(16.0),
               child: Column(
                 children: [
                   // Customer Dropdown
@@ -170,9 +183,8 @@ class _MobileCustomerLedgerScreenState
                         onChanged: (newVal) {
                           if (newVal != null) {
                             context
-                                    .read<CustomerLedgerBloc>()
-                                    .selectedCustomer =
-                                newVal;
+                                .read<CustomerLedgerBloc>()
+                                .selectedCustomer = newVal;
                             _fetchCustomerLedger(
                               customer: newVal.id.toString(),
                               from: selectedDateRange?.start,
@@ -180,11 +192,8 @@ class _MobileCustomerLedgerScreenState
                             );
                           }
                         },
-                        validator: (value) {
-                          return value == null
-                              ? 'Please select Customer'
-                              : null;
-                        },
+                        validator: (value) =>
+                        value == null ? 'Please select Customer' : null,
                       );
                     },
                   ),
@@ -196,9 +205,8 @@ class _MobileCustomerLedgerScreenState
                     selectedDateRange: selectedDateRange,
                     onDateRangeSelected: (value) {
                       setState(() => selectedDateRange = value);
-                      final customer = context
-                          .read<CustomerLedgerBloc>()
-                          .selectedCustomer;
+                      final customer =
+                          context.read<CustomerLedgerBloc>().selectedCustomer;
                       if (value != null && customer != null) {
                         _fetchCustomerLedger(
                           customer: customer.id.toString(),
@@ -209,16 +217,21 @@ class _MobileCustomerLedgerScreenState
                     },
                   ),
 
-                  // Action Buttons
+                  // TODO: Add Action Buttons here
                 ],
               ),
             ),
-            isExpanded: _isFilterExpanded,
+            crossFadeState: _isFilterExpanded
+                ? CrossFadeState.showSecond
+                : CrossFadeState.showFirst,
           ),
         ],
       ),
     );
   }
+
+
+
 
   Widget _buildCustomerSummary() {
     return BlocBuilder<CustomerLedgerBloc, CustomerLedgerState>(
@@ -756,22 +769,22 @@ class _MobileCustomerLedgerScreenState
                   ),
 
                 // View Details Button
-                const SizedBox(height: 4),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton.icon(
-                    onPressed: () =>
-                        _showTransactionDetails(context, transaction),
-                    icon: const Icon(Icons.remove_red_eye, size: 14),
-                    label: const Text('View Details'),
-                    style: TextButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 4,
-                      ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    AppButton(
+                      size: 90,
+                      isOutlined: true,
+                      name: "Details",
+
+
+                      onPressed: () => _showTransactionDetails(context, transaction),
+
                     ),
-                  ),
-                ),
+
+                  ],)      ,
+
+
               ],
             ),
           ),

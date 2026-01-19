@@ -4,6 +4,7 @@ import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
 import 'package:meherinMart/core/configs/app_text.dart';
+import 'package:meherinMart/core/core.dart';
 import 'package:meherinMart/core/widgets/app_scaffold.dart';
 import 'package:printing/printing.dart';
 import '../../../../../core/configs/app_sizes.dart';
@@ -100,16 +101,30 @@ class _MobileCustomerDueAdvanceScreenState
   Widget build(BuildContext context) {
     return AppScaffold(
       appBar: AppBar(
-        title:  Text('Customer Due & Advance',style: AppTextStyle.titleMedium(context),),
+        title: Text(
+          'Customer Due & Advance',
+          style: AppTextStyle.titleMedium(context),
+        ),
         actions: [
           IconButton(
-            icon:  Icon(Icons.picture_as_pdf,color: AppColors.text(context),),
+            icon: Icon(HugeIcons.strokeRoundedPdf02, color: AppColors.text(context)),
             onPressed: _generatePdf,
             tooltip: 'Generate PDF',
           ),
           IconButton(
-            icon:  Icon(Icons.refresh,color: AppColors.text(context),),
-            onPressed: () => _fetchApi(),
+            icon: Icon(HugeIcons.strokeRoundedReload, color: AppColors.text(context)),
+            onPressed: () {
+              setState(() {
+                selectedDateRange = null;
+                _selectedCustomer = null;
+                _selectedStatus = null;
+                _isFilterExpanded = false;
+              });
+              context.read<CustomerDueAdvanceBloc>().add(
+                ClearCustomerDueAdvanceFilters(),
+              );
+              _fetchApi();
+            },
             tooltip: 'Refresh',
           ),
         ],
@@ -140,28 +155,46 @@ class _MobileCustomerDueAdvanceScreenState
           setState(() => _isFilterExpanded = !_isFilterExpanded);
         },
         tooltip: 'Toggle Filters',
-        child: Icon(_isFilterExpanded ? Icons.filter_alt_off : Icons.filter_alt,color: AppColors.whiteColor(context)),
+        child: Icon(
+          _isFilterExpanded ? HugeIcons.strokeRoundedFilterRemove:HugeIcons.strokeRoundedFilter,
+          color: AppColors.whiteColor(context),
+        ),
       ),
     );
   }
 
   Widget _buildMobileFilterSection() {
     return Card(
-      child: ExpansionPanelList(
-        elevation: 0,
-        expandedHeaderPadding: EdgeInsets.zero,
-        expansionCallback: (int index, bool isExpanded) {
-          setState(() => _isFilterExpanded = !isExpanded);
-        },
+      elevation: 0,
+      color: AppColors.bottomNavBg(context),
+      child: Column(
         children: [
-          ExpansionPanel(
-            headerBuilder: (context, isExpanded) {
-              return const ListTile(
-                leading: Icon(Icons.filter_alt),
-                title: Text('Filters'),
-              );
-            },
-            body: Padding(
+          // --- Header with clickable icon ---
+          InkWell(
+            onTap: () => setState(() => _isFilterExpanded = !_isFilterExpanded),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Row(
+                children: [
+                  const Icon(HugeIcons.strokeRoundedFilter),
+                  const SizedBox(width: 8),
+                  const Text('Filters', style: TextStyle(fontWeight: FontWeight.bold)),
+                  const Spacer(),
+                  Icon(
+                    _isFilterExpanded
+                        ? Icons.keyboard_arrow_up
+                        : Icons.keyboard_arrow_down,
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // --- Expandable body ---
+          AnimatedCrossFade(
+            duration: const Duration(milliseconds: 200),
+            firstChild: const SizedBox.shrink(),
+            secondChild: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 children: [
@@ -209,47 +242,14 @@ class _MobileCustomerDueAdvanceScreenState
                     itemList: statusOptions,
                     onChanged: _onStatusChanged,
                   ),
-                  const SizedBox(height: 12),
 
-                  // Action Buttons
-                  Row(
-                    children: [
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          onPressed: () {
-                            setState(() {
-                              selectedDateRange = null;
-                              _selectedCustomer = null;
-                              _selectedStatus = null;
-                              _isFilterExpanded = false;
-                            });
-                            context.read<CustomerDueAdvanceBloc>().add(
-                              ClearCustomerDueAdvanceFilters(),
-                            );
-                            _fetchApi();
-                          },
-                          icon: const Icon(Icons.clear_all, size: 18),
-                          label: const Text('Clear Filters'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.grey[200],
-                            foregroundColor: Colors.grey[800],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          onPressed: _generatePdf,
-                          icon: const Icon(Icons.picture_as_pdf, size: 18),
-                          label: const Text('PDF Report'),
-                        ),
-                      ),
-                    ],
-                  ),
+                  // TODO: Add action buttons here
                 ],
               ),
             ),
-            isExpanded: _isFilterExpanded,
+            crossFadeState: _isFilterExpanded
+                ? CrossFadeState.showSecond
+                : CrossFadeState.showFirst,
           ),
         ],
       ),
@@ -265,9 +265,15 @@ class _MobileCustomerDueAdvanceScreenState
         final customers = state.response.report;
 
         // Calculate additional metrics
-        final customersWithDue = customers.where((c) => c.presentDue > 0).length;
-        final customersWithAdvance = customers.where((c) => c.presentAdvance > 0).length;
-        final _ = customers.where((c) => c.presentDue == 0 && c.presentAdvance == 0).length;
+        final customersWithDue = customers
+            .where((c) => c.presentDue > 0)
+            .length;
+        final customersWithAdvance = customers
+            .where((c) => c.presentAdvance > 0)
+            .length;
+        final _ = customers
+            .where((c) => c.presentDue == 0 && c.presentAdvance == 0)
+            .length;
 
         return Column(
           children: [
@@ -284,7 +290,9 @@ class _MobileCustomerDueAdvanceScreenState
                 _buildMobileSummaryCard(
                   "Net Balance",
                   _formatCurrencySigned(summary.netBalance),
-                  summary.netBalance >= 0 ? Icons.arrow_upward : Icons.arrow_downward,
+                  summary.netBalance >= 0
+                      ? Icons.arrow_upward
+                      : Icons.arrow_downward,
                   summary.overallStatusColor,
                 ),
               ],
@@ -342,22 +350,22 @@ class _MobileCustomerDueAdvanceScreenState
   }
 
   Widget _buildMobileSummaryCard(
-      String title,
-      String value,
-      IconData icon,
-      Color color,
-      ) {
+    String title,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
     return Expanded(
       child: Container(
         margin: const EdgeInsets.only(bottom: 8),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-         color:    AppColors.bottomNavBg(context),
+          color: AppColors.bottomNavBg(context),
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: AppColors.greyColor(context).withValues(alpha: 0.5),width: 0.5
-          )
-
+            color: AppColors.greyColor(context).withValues(alpha: 0.5),
+            width: 0.5,
+          ),
         ),
         child: Row(
           children: [
@@ -376,9 +384,9 @@ class _MobileCustomerDueAdvanceScreenState
                 children: [
                   Text(
                     title,
-                    style:  TextStyle(
+                    style: TextStyle(
                       fontSize: 10,
-                      color:AppColors.text(context),
+                      color: AppColors.text(context),
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -461,7 +469,9 @@ class _MobileCustomerDueAdvanceScreenState
                       width: 40,
                       height: 40,
                       decoration: BoxDecoration(
-                        color: customer.balanceStatusColor.withValues(alpha: 0.1),
+                        color: customer.balanceStatusColor.withValues(
+                          alpha: 0.1,
+                        ),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
@@ -485,7 +495,10 @@ class _MobileCustomerDueAdvanceScreenState
                             children: [
                               if (customer.phone.isNotEmpty)
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                    vertical: 2,
+                                  ),
                                   decoration: BoxDecoration(
                                     color: Colors.grey[200],
                                     borderRadius: BorderRadius.circular(4),
@@ -495,11 +508,15 @@ class _MobileCustomerDueAdvanceScreenState
                                     style: const TextStyle(fontSize: 10),
                                   ),
                                 ),
-                              if (customer.phone.isNotEmpty && customer.email.isNotEmpty)
+                              if (customer.phone.isNotEmpty &&
+                                  customer.email.isNotEmpty)
                                 const SizedBox(width: 4),
                               if (customer.email.isNotEmpty)
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                    vertical: 2,
+                                  ),
                                   decoration: BoxDecoration(
                                     color: Colors.grey[200],
                                     borderRadius: BorderRadius.circular(4),
@@ -617,42 +634,48 @@ class _MobileCustomerDueAdvanceScreenState
                 const SizedBox(height: 6),
 
                 // Status Badge
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: customer.balanceStatusColor.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(customer.balanceStatusIcon, size: 14, color: customer.balanceStatusColor),
-                      const SizedBox(width: 4),
-                      Text(
-                        customer.balanceStatus.toUpperCase(),
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: customer.balanceStatusColor,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 12),
 
                 // Action Buttons
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    OutlinedButton.icon(
-                      onPressed: () => _showCustomerDetails(context, customer),
-                      icon: const Icon(Icons.remove_red_eye, size: 16),
-                      label: const Text('Details'),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 8,horizontal: 10),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: customer.balanceStatusColor.withValues(
+                          alpha: 0.1,
+                        ),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            customer.balanceStatusIcon,
+                            size: 14,
+                            color: customer.balanceStatusColor,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            customer.balanceStatus.toUpperCase(),
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: customer.balanceStatusColor,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-
+                    AppButton(
+                      size: 90,
+                      isOutlined: true,
+                      name: "Details",
+                      onPressed: () => _showCustomerDetails(context, customer),
+                    ),
                   ],
                 ),
               ],
@@ -745,90 +768,108 @@ class _MobileCustomerDueAdvanceScreenState
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) {
-        return Container(
-          decoration:  BoxDecoration(
-            color: AppColors.bottomNavBg(context),
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(20),
-              topRight: Radius.circular(20),
+        return SafeArea(
+          child: Container(
+            decoration: BoxDecoration(
+              color: AppColors.bottomNavBg(context),
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
+              ),
             ),
-          ),
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(2),
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(2),
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    customer.customerName,
-                                      style: AppTextStyle.bodyLarge(context),
-
-        ),
-                  IconButton(
-                    onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.close),
-                  ),
-                ],
-              ),
-              const Divider(),
-              const SizedBox(height: 4),
-
-              // Customer Details
-              _buildMobileDetailRow('Phone:', customer.phone,context),
-              _buildMobileDetailRow('Email:', customer.email,context),
-              _buildMobileDetailRow('Due Amount:', '\$${customer.presentDue.toStringAsFixed(2)}',context),
-              _buildMobileDetailRow('Advance Amount:', '\$${customer.presentAdvance.toStringAsFixed(2)}',context),
-              _buildMobileDetailRow('Net Balance:', netBalanceText,context),
-              _buildMobileDetailRow('Status:', customer.balanceStatus,context),
-
-              // Status Card
-              const SizedBox(height: 6),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: customer.balanceStatusColor.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: customer.balanceStatusColor),
-                ),
-                child: Row(
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Icon(customer.balanceStatusIcon, color: customer.balanceStatusColor),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        'Balance Status: ${customer.balanceStatus}',
-                        style: TextStyle(
-                          color: customer.balanceStatusColor,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                    Text(
+                      customer.customerName,
+                      style: AppTextStyle.bodyLarge(context),
+                    ),
+                    IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(Icons.close),
                     ),
                   ],
                 ),
-              ),
+                const Divider(),
+                const SizedBox(height: 4),
 
+                // Customer Details
+                _buildMobileDetailRow('Phone:', customer.phone, context),
+                _buildMobileDetailRow('Email:', customer.email, context),
+                _buildMobileDetailRow(
+                  'Due Amount:',
+                  '\$${customer.presentDue.toStringAsFixed(2)}',
+                  context,
+                ),
+                _buildMobileDetailRow(
+                  'Advance Amount:',
+                  '\$${customer.presentAdvance.toStringAsFixed(2)}',
+                  context,
+                ),
+                _buildMobileDetailRow('Net Balance:', netBalanceText, context),
+                _buildMobileDetailRow(
+                  'Status:',
+                  customer.balanceStatus,
+                  context,
+                ),
 
-            ],
+                // Status Card
+                const SizedBox(height: 6),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: customer.balanceStatusColor.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: customer.balanceStatusColor),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        customer.balanceStatusIcon,
+                        color: customer.balanceStatusColor,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          'Balance Status: ${customer.balanceStatus}',
+                          style: TextStyle(
+                            color: customer.balanceStatusColor,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         );
       },
     );
   }
 
-  Widget _buildMobileDetailRow(String label, String value,BuildContext context) {
+  Widget _buildMobileDetailRow(
+    String label,
+    String value,
+    BuildContext context,
+  ) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
@@ -837,7 +878,7 @@ class _MobileCustomerDueAdvanceScreenState
             flex: 2,
             child: Text(
               label,
-              style:  TextStyle(
+              style: TextStyle(
                 fontSize: 14,
                 color: AppColors.text(context),
                 fontWeight: FontWeight.w500,
@@ -848,11 +889,10 @@ class _MobileCustomerDueAdvanceScreenState
             flex: 3,
             child: Text(
               value,
-              style:  TextStyle(
+              style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
                 color: AppColors.text(context),
-
               ),
               textAlign: TextAlign.right,
             ),
@@ -861,7 +901,6 @@ class _MobileCustomerDueAdvanceScreenState
       ),
     );
   }
-
 
   void _generatePdf() {
     final state = context.read<CustomerDueAdvanceBloc>().state;
@@ -880,7 +919,8 @@ class _MobileCustomerDueAdvanceScreenState
               ],
             ),
             body: PdfPreview(
-              build: (format) => generateCustomerDueAdvanceReportPdf(state.response),
+              build: (format) =>
+                  generateCustomerDueAdvanceReportPdf(state.response),
               canChangeOrientation: false,
               canChangePageFormat: false,
               canDebug: false,

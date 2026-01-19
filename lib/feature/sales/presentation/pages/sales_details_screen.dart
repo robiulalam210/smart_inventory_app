@@ -35,10 +35,12 @@ class SalesDetailsScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: Responsive(
-        mobile: _buildMobileView(context),
-        tablet: _buildMobileView(context),
-        desktop: _buildDesktopView(context),
+      body: SafeArea(
+        child: Responsive(
+          mobile: _buildMobileView(context),
+          tablet: _buildMobileView(context),
+          desktop: _buildDesktopView(context),
+        ),
       ),
     );
   }

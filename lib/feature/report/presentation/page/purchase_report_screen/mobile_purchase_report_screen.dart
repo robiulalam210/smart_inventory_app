@@ -66,12 +66,12 @@ class _MobilePurchaseReportScreenState
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.picture_as_pdf, color: AppColors.text(context)),
+            icon: Icon(HugeIcons.strokeRoundedPdf02, color: AppColors.text(context)),
             onPressed: _generatePdf,
             tooltip: 'Generate PDF',
           ),
           IconButton(
-            icon: Icon(Icons.refresh, color: AppColors.text(context)),
+            icon: Icon(HugeIcons.strokeRoundedReload, color: AppColors.text(context)),
             onPressed: () {
               setState(() {
                 selectedDateRange = null;
@@ -117,7 +117,7 @@ class _MobilePurchaseReportScreenState
               },
               tooltip: 'Toggle Filters',
               child: Icon(
-                _isFilterExpanded ? Icons.filter_alt_off : Icons.filter_alt,
+                _isFilterExpanded ? HugeIcons.strokeRoundedFilterRemove:HugeIcons.strokeRoundedFilter,
                 color: AppColors.whiteColor(context),
               ),
             )
@@ -129,50 +129,47 @@ class _MobilePurchaseReportScreenState
     return Card(
       elevation: 0,
       color: AppColors.bottomNavBg(context),
-      child: ExpansionPanelList(
-        elevation: 0,
-        expandIconColor: Colors.transparent, // hide default arrow
-        expandedHeaderPadding: EdgeInsets.zero,
-        expansionCallback: (int index, bool isExpanded) {
-          setState(() {
-            _isFilterExpanded = !isExpanded;
-          });
-        },
-
+      child: Column(
         children: [
-          ExpansionPanel(
-            canTapOnHeader: true,
-            isExpanded: _isFilterExpanded,
-            backgroundColor: AppColors.bottomNavBg(context),
-            headerBuilder: (context, isExpanded) {
-              return ListTile(
-                leading: Icon(
-                  Icons.filter_alt,
-                  color: AppColors.text(context),
-                ),
-                title: Text(
-                  'Filters',
-                  style: AppTextStyle.bodyLarge(context),
-                ),
-                trailing: AnimatedRotation(
-                  turns: isExpanded ? 0.5 : 0, // rotate arrow
-                  duration: const Duration(milliseconds: 200),
-                  child: const Icon(Icons.arrow_downward_rounded),
-                ),
-                onTap: (){
-                  setState(() {
-                    _isFilterExpanded = !isExpanded;
-                  });
-                },
-              );
-            },
-            body: Padding(
-              padding: const EdgeInsets.all(1.0),
+          // Header: fully clickable
+          InkWell(
+            onTap: () => setState(() => _isFilterExpanded = !_isFilterExpanded),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Row(
+                children: [
+                  Icon(HugeIcons.strokeRoundedFilter, color: AppColors.text(context)),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Filters',
+                    style: AppTextStyle.bodyLarge(context),
+                  ),
+                  const Spacer(),
+                  Icon(
+                    _isFilterExpanded
+                        ? Icons.keyboard_arrow_up
+                        : Icons.keyboard_arrow_down,
+                    color: AppColors.text(context),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // Expandable body
+          AnimatedCrossFade(
+            duration: const Duration(milliseconds: 200),
+            firstChild: const SizedBox.shrink(),
+            secondChild: Padding(
+              padding: const EdgeInsets.all(16.0),
               child: Column(
                 children: [
                   // Supplier Dropdown
                   BlocBuilder<SupplierInvoiceBloc, SupplierInvoiceState>(
                     builder: (context, state) {
+                      final supplierList = context
+                          .read<SupplierInvoiceBloc>()
+                          .supplierActiveList;
                       return AppDropdown<SupplierActiveModel>(
                         label: "Supplier",
                         isSearch: true,
@@ -183,9 +180,7 @@ class _MobilePurchaseReportScreenState
                         value: context
                             .read<PurchaseReportBloc>()
                             .selectedSupplier,
-                        itemList: context
-                            .read<SupplierInvoiceBloc>()
-                            .supplierActiveList,
+                        itemList: supplierList,
                         onChanged: (newVal) {
                           _fetchPurchaseReport(
                             from: selectedDateRange?.start,
@@ -196,6 +191,7 @@ class _MobilePurchaseReportScreenState
                       );
                     },
                   ),
+                  const SizedBox(height: 12),
 
                   // Date Range Picker
                   CustomDateRangeField(
@@ -204,13 +200,19 @@ class _MobilePurchaseReportScreenState
                     onDateRangeSelected: (value) {
                       setState(() => selectedDateRange = value);
                       if (value != null) {
-                        _fetchPurchaseReport(from: value.start, to: value.end);
+                        _fetchPurchaseReport(
+                          from: value.start,
+                          to: value.end,
+                        );
                       }
                     },
                   ),
                 ],
               ),
             ),
+            crossFadeState: _isFilterExpanded
+                ? CrossFadeState.showSecond
+                : CrossFadeState.showFirst,
           ),
         ],
       ),

@@ -41,11 +41,11 @@ class _MobileProfitLossScreenState extends State<MobileProfitLossScreen> {
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.picture_as_pdf, color: AppColors.text(context)),
+            icon: Icon(HugeIcons.strokeRoundedPdf02, color: AppColors.text(context)),
             onPressed: _generatePdf,
           ),
           IconButton(
-            icon: Icon(Icons.refresh, color: AppColors.text(context)), onPressed: () {
+            icon: Icon(HugeIcons.strokeRoundedReload, color: AppColors.text(context)), onPressed: () {
 
           _fetchProfitLossReport();
           setState(() => selectedDateRange = null);
