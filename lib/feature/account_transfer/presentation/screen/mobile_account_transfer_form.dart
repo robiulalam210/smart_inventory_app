@@ -70,7 +70,8 @@ class _MobileAccountTransferFormState extends State<MobileAccountTransferForm> {
         centerTitle: true,
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon:  Icon(     HugeIcons.strokeRoundedReload,
+              color: AppColors.primaryColor(context),),
             onPressed: () {
               transferBloc.add(ResetForm());
               setState(() {});

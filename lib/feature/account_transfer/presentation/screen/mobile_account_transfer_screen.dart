@@ -20,15 +20,21 @@ class MobileAccountTransferScreen extends StatefulWidget {
   const MobileAccountTransferScreen({super.key});
 
   @override
-  State<MobileAccountTransferScreen> createState() => _MobileAccountTransferScreenState();
+  State<MobileAccountTransferScreen> createState() =>
+      _MobileAccountTransferScreenState();
 }
 
-class _MobileAccountTransferScreenState extends State<MobileAccountTransferScreen> {
+class _MobileAccountTransferScreenState
+    extends State<MobileAccountTransferScreen> {
   final TextEditingController filterTextController = TextEditingController();
   final ValueNotifier<String?> selectedStatusNotifier = ValueNotifier(null);
-  final ValueNotifier<String?> selectedTransferTypeNotifier = ValueNotifier(null);
+  final ValueNotifier<String?> selectedTransferTypeNotifier = ValueNotifier(
+    null,
+  );
   final ValueNotifier<bool?> isReversalNotifier = ValueNotifier(null);
-  final ValueNotifier<String?> selectedFromAccountNotifier = ValueNotifier(null);
+  final ValueNotifier<String?> selectedFromAccountNotifier = ValueNotifier(
+    null,
+  );
   final ValueNotifier<String?> selectedToAccountNotifier = ValueNotifier(null);
 
   DateRange? selectedDateRange;
@@ -77,8 +83,10 @@ class _MobileAccountTransferScreenState extends State<MobileAccountTransferScree
         status: status,
         transferType: transferType,
         isReversal: isReversal,
-        startDate: selectedDateRange?.start, // Use DateRange values
-        endDate: selectedDateRange?.end,     // Use DateRange values
+        startDate: selectedDateRange?.start,
+        // Use DateRange values
+        endDate: selectedDateRange?.end,
+        // Use DateRange values
         pageNumber: pageNumber,
         pageSize: pageSize,
       ),
@@ -123,17 +131,25 @@ class _MobileAccountTransferScreenState extends State<MobileAccountTransferScree
     return AppScaffold(
       appBar: AppBar(
         backgroundColor: AppColors.bottomNavBg(context),
-        title:  Text("Account Transfers",style: AppTextStyle.titleMedium(context),),
+        title: Text(
+          "Account Transfers",
+          style: AppTextStyle.titleMedium(context),
+        ),
         actions: [
-
           IconButton(
             onPressed: () => _showMobileFilterSheet(context),
-            icon: const Icon(Icons.filter_alt),
+            icon: Icon(
+              HugeIcons.strokeRoundedFilter,
+              color: AppColors.primaryColor(context),
+            ),
             tooltip: "Filters",
           ),
           IconButton(
             onPressed: () => _fetchApi(),
-            icon: const Icon(Icons.refresh),
+            icon: Icon(
+              HugeIcons.strokeRoundedReload,
+              color: AppColors.primaryColor(context),
+            ),
             tooltip: "Refresh",
           ),
         ],
@@ -141,7 +157,6 @@ class _MobileAccountTransferScreenState extends State<MobileAccountTransferScree
       body: _buildContentArea(),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -267,7 +282,7 @@ class _MobileAccountTransferScreenState extends State<MobileAccountTransferScree
             context: context,
             title: 'Success!',
             description: 'Transfer reversed successfully',
-            icon: Icons.refresh,
+            icon: HugeIcons.strokeRoundedReload,
             primaryColor: Colors.orange,
           );
           _fetchApi();
@@ -314,8 +329,8 @@ class _MobileAccountTransferScreenState extends State<MobileAccountTransferScree
         }
       },
       child: BlocBuilder<AccountTransferBloc, AccountTransferState>(
-        buildWhen: (previous, current) =>
-        current is AccountTransferListSuccess,        builder: (context, state) {
+        buildWhen: (previous, current) => current is AccountTransferListSuccess,
+        builder: (context, state) {
           if (state is AccountTransferListLoading) {
             return const Center(child: CircularProgressIndicator());
           } else if (state is AccountTransferListSuccess) {
@@ -337,7 +352,9 @@ class _MobileAccountTransferScreenState extends State<MobileAccountTransferScree
                     AppButton(
                       name: "Clear Filters",
                       onPressed: _clearAllFilters,
-                      color: AppColors.primaryColor(context).withValues(alpha: 0.8),
+                      color: AppColors.primaryColor(
+                        context,
+                      ).withValues(alpha: 0.8),
                     ),
                   ],
                 ),
@@ -374,10 +391,8 @@ class _MobileAccountTransferScreenState extends State<MobileAccountTransferScree
                       pageNumber: page,
                       pageSize: state.pageSize,
                     ),
-                    onPageSizeChanged: (newSize) => _fetchTransferList(
-                      pageNumber: 1,
-                      pageSize: newSize,
-                    ),
+                    onPageSizeChanged: (newSize) =>
+                        _fetchTransferList(pageNumber: 1, pageSize: newSize),
                   ),
                 ],
               );
@@ -400,10 +415,7 @@ class _MobileAccountTransferScreenState extends State<MobileAccountTransferScree
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 16),
-                  AppButton(
-                    name: "Retry",
-                    onPressed: () => _fetchApi(),
-                  ),
+                  AppButton(name: "Retry", onPressed: () => _fetchApi()),
                 ],
               ),
             );
@@ -435,7 +447,7 @@ class _MobileAccountTransferScreenState extends State<MobileAccountTransferScree
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                         Text(
+                        Text(
                           "Filter Transfers",
                           style: TextStyle(
                             fontSize: 18,
@@ -454,7 +466,7 @@ class _MobileAccountTransferScreenState extends State<MobileAccountTransferScree
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                         Text(
+                        Text(
                           "Date Range",
                           style: TextStyle(
                             fontWeight: FontWeight.w600,
@@ -477,7 +489,7 @@ class _MobileAccountTransferScreenState extends State<MobileAccountTransferScree
                     const SizedBox(height: 16),
 
                     // Status Filter
-                     Text(
+                    Text(
                       "Status",
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
@@ -488,27 +500,39 @@ class _MobileAccountTransferScreenState extends State<MobileAccountTransferScree
                     const SizedBox(height: 8),
                     Wrap(
                       spacing: 8,
-                      children: ["All", "pending", "completed", "failed", "cancelled"].map((status) {
-                        final bool isSelected =
-                            selectedStatusNotifier.value == status ||
-                                (status == "All" && selectedStatusNotifier.value == null);
-                        return FilterChip(
-                          label: Text(status.toUpperCase()),
-                          selected: isSelected,
-                          onSelected: (selected) {
-                            setState(() {
-                              selectedStatusNotifier.value = selected ? (status == "All" ? null : status) : null;
-                            });
-                          },
-                          selectedColor: AppColors.primaryColor(context).withValues(alpha: 0.2),
-                          checkmarkColor: AppColors.primaryColor(context),
-                        );
-                      }).toList(),
+                      children:
+                          [
+                            "All",
+                            "pending",
+                            "completed",
+                            "failed",
+                            "cancelled",
+                          ].map((status) {
+                            final bool isSelected =
+                                selectedStatusNotifier.value == status ||
+                                (status == "All" &&
+                                    selectedStatusNotifier.value == null);
+                            return FilterChip(
+                              label: Text(status.toUpperCase()),
+                              selected: isSelected,
+                              onSelected: (selected) {
+                                setState(() {
+                                  selectedStatusNotifier.value = selected
+                                      ? (status == "All" ? null : status)
+                                      : null;
+                                });
+                              },
+                              selectedColor: AppColors.primaryColor(
+                                context,
+                              ).withValues(alpha: 0.2),
+                              checkmarkColor: AppColors.primaryColor(context),
+                            );
+                          }).toList(),
                     ),
                     const SizedBox(height: 16),
 
                     // Transfer Type Filter
-                     Text(
+                    Text(
                       "Transfer Type",
                       style: TextStyle(
                         color: AppColors.text(context),
@@ -519,22 +543,29 @@ class _MobileAccountTransferScreenState extends State<MobileAccountTransferScree
                     const SizedBox(height: 8),
                     Wrap(
                       spacing: 8,
-                      children: ["All", "internal", "external", "adjustment"].map((type) {
-                        final bool isSelected =
-                            selectedTransferTypeNotifier.value == type ||
-                                (type == "All" && selectedTransferTypeNotifier.value == null);
-                        return FilterChip(
-                          label: Text(type.toUpperCase()),
-                          selected: isSelected,
-                          onSelected: (selected) {
-                            setState(() {
-                              selectedTransferTypeNotifier.value = selected ? (type == "All" ? null : type) : null;
-                            });
-                          },
-                          selectedColor: AppColors.primaryColor(context).withValues(alpha: 0.2),
-                          checkmarkColor: AppColors.primaryColor(context),
-                        );
-                      }).toList(),
+                      children: ["All", "internal", "external", "adjustment"]
+                          .map((type) {
+                            final bool isSelected =
+                                selectedTransferTypeNotifier.value == type ||
+                                (type == "All" &&
+                                    selectedTransferTypeNotifier.value == null);
+                            return FilterChip(
+                              label: Text(type.toUpperCase()),
+                              selected: isSelected,
+                              onSelected: (selected) {
+                                setState(() {
+                                  selectedTransferTypeNotifier.value = selected
+                                      ? (type == "All" ? null : type)
+                                      : null;
+                                });
+                              },
+                              selectedColor: AppColors.primaryColor(
+                                context,
+                              ).withValues(alpha: 0.2),
+                              checkmarkColor: AppColors.primaryColor(context),
+                            );
+                          })
+                          .toList(),
                     ),
                     const SizedBox(height: 16),
 
@@ -542,7 +573,7 @@ class _MobileAccountTransferScreenState extends State<MobileAccountTransferScree
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                         Text(
+                        Text(
                           "Reversal Only",
                           style: TextStyle(
                             color: AppColors.text(context),
@@ -588,8 +619,8 @@ class _MobileAccountTransferScreenState extends State<MobileAccountTransferScree
                               Navigator.pop(context);
                               _fetchApi(
                                 status: selectedStatusNotifier.value,
-                                transferType: selectedTransferTypeNotifier.value,
-                                
+                                transferType:
+                                    selectedTransferTypeNotifier.value,
                               );
                             },
                             style: ElevatedButton.styleFrom(
@@ -599,7 +630,10 @@ class _MobileAccountTransferScreenState extends State<MobileAccountTransferScree
                                 borderRadius: BorderRadius.circular(10),
                               ),
                             ),
-                            child:  Text("Apply Filters",style: AppTextStyle.body(context),),
+                            child: Text(
+                              "Apply Filters",
+                              style: AppTextStyle.body(context),
+                            ),
                           ),
                         ),
                       ],
@@ -738,9 +772,7 @@ class _MobileAccountTransferScreenState extends State<MobileAccountTransferScree
                 ),
               );
             },
-            style: TextButton.styleFrom(
-              backgroundColor: Colors.orange.shade50,
-            ),
+            style: TextButton.styleFrom(backgroundColor: Colors.orange.shade50),
             child: Text(
               'Reverse',
               style: GoogleFonts.inter(
@@ -750,9 +782,7 @@ class _MobileAccountTransferScreenState extends State<MobileAccountTransferScree
             ),
           ),
         ],
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
   }
@@ -873,9 +903,7 @@ class _MobileAccountTransferScreenState extends State<MobileAccountTransferScree
                 ),
               );
             },
-            style: TextButton.styleFrom(
-              backgroundColor: Colors.red.shade50,
-            ),
+            style: TextButton.styleFrom(backgroundColor: Colors.red.shade50),
             child: Text(
               'Cancel Transfer',
               style: GoogleFonts.inter(
@@ -885,9 +913,7 @@ class _MobileAccountTransferScreenState extends State<MobileAccountTransferScree
             ),
           ),
         ],
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
   }

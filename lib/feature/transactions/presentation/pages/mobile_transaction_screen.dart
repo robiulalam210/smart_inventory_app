@@ -17,7 +17,9 @@ class MobileTransactionScreen extends StatefulWidget {
 
 class _TransactionScreenState extends State<MobileTransactionScreen> {
   final TextEditingController filterTextController = TextEditingController();
-  final ValueNotifier<String?> selectedTransactionTypeNotifier = ValueNotifier(null);
+  final ValueNotifier<String?> selectedTransactionTypeNotifier = ValueNotifier(
+    null,
+  );
   final ValueNotifier<String?> selectedStatusNotifier = ValueNotifier(null);
   final ValueNotifier<String?> selectedAccountNotifier = ValueNotifier(null);
 
@@ -32,22 +34,13 @@ class _TransactionScreenState extends State<MobileTransactionScreen> {
     // Initialize with default date range (last month)
     final DateTime now = DateTime.now();
 
-// First day of previous month
-    final DateTime startDate = DateTime(
-      now.year,
-      now.month - 1,
-      1,
-    );
+    // First day of previous month
+    final DateTime startDate = DateTime(now.year, now.month - 1, 1);
 
-// Last day of previous month
-    final DateTime endDate = DateTime(
-      now.year,
-      now.month,
-      now.day,
-    );
+    // Last day of previous month
+    final DateTime endDate = DateTime(now.year, now.month, now.day);
 
     selectedDateRange = DateRange(startDate, endDate);
-
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _fetchTransactions();
@@ -100,7 +93,6 @@ class _TransactionScreenState extends State<MobileTransactionScreen> {
     );
   }
 
-
   void _clearDateRange() {
     setState(() {
       selectedDateRange = null;
@@ -111,7 +103,9 @@ class _TransactionScreenState extends State<MobileTransactionScreen> {
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
-      appBar: AppBar(title:  Text("Transaction",style: AppTextStyle.titleMedium(context),)),
+      appBar: AppBar(
+        title: Text("Transaction", style: AppTextStyle.titleMedium(context)),
+      ),
       body: SafeArea(
         child: RefreshIndicator(
           color: AppColors.primaryColor(context),
@@ -124,9 +118,7 @@ class _TransactionScreenState extends State<MobileTransactionScreen> {
               children: [
                 _buildMobileHeader(),
                 const SizedBox(height: 8),
-                SizedBox(
-                  child: _buildTransactionList(),
-                ),
+                SizedBox(child: _buildTransactionList()),
               ],
             ),
           ),
@@ -134,7 +126,6 @@ class _TransactionScreenState extends State<MobileTransactionScreen> {
       ),
     );
   }
-
 
   Widget _buildMobileHeader() {
     return Column(
@@ -157,7 +148,7 @@ class _TransactionScreenState extends State<MobileTransactionScreen> {
             ),
             IconButton(
               icon: Icon(
-                Iconsax.filter,
+                HugeIcons.strokeRoundedFilter,
                 color: AppColors.primaryColor(context),
               ),
               onPressed: () => _showMobileFilterSheet(context),
@@ -173,7 +164,10 @@ class _TransactionScreenState extends State<MobileTransactionScreen> {
                 });
                 _fetchTransactions();
               },
-              icon: const Icon(Icons.refresh),
+              icon: Icon(
+                HugeIcons.strokeRoundedReload,
+                color: AppColors.primaryColor(context),
+              ),
               tooltip: "Refresh",
             ),
           ],
@@ -225,12 +219,7 @@ class _TransactionScreenState extends State<MobileTransactionScreen> {
           } else {
             return Column(
               children: [
-                SizedBox(
-                  child: TransactionCard(
-                    transactions: state.list,
-
-                  ),
-                ),
+                SizedBox(child: TransactionCard(transactions: state.list)),
                 const SizedBox(height: 16),
                 PaginationBar(
                   count: state.count,
@@ -243,10 +232,8 @@ class _TransactionScreenState extends State<MobileTransactionScreen> {
                     pageNumber: page,
                     pageSize: state.pageSize,
                   ),
-                  onPageSizeChanged: (newSize) => _fetchTransactionList(
-                    pageNumber: 1,
-                    pageSize: newSize,
-                  ),
+                  onPageSizeChanged: (newSize) =>
+                      _fetchTransactionList(pageNumber: 1, pageSize: newSize),
                 ),
               ],
             );
@@ -270,10 +257,7 @@ class _TransactionScreenState extends State<MobileTransactionScreen> {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 16),
-                AppButton(
-                  name: "Retry",
-                  onPressed: () => _fetchTransactions(),
-                ),
+                AppButton(name: "Retry", onPressed: () => _fetchTransactions()),
               ],
             ),
           );
@@ -305,7 +289,7 @@ class _TransactionScreenState extends State<MobileTransactionScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                         Text(
+                        Text(
                           "Filter Transactions",
                           style: TextStyle(
                             fontSize: 18,
@@ -320,12 +304,12 @@ class _TransactionScreenState extends State<MobileTransactionScreen> {
                       ],
                     ),
                     const SizedBox(height: 20),
-              
+
                     // Date Range Picker - Using CustomDateRangeField
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                         Text(
+                        Text(
                           "Date Range",
                           style: TextStyle(
                             fontWeight: FontWeight.w600,
@@ -346,9 +330,9 @@ class _TransactionScreenState extends State<MobileTransactionScreen> {
                       ],
                     ),
                     const SizedBox(height: 8),
-              
+
                     // Transaction Type Filter
-                     Text(
+                    Text(
                       "Transaction Type",
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
@@ -362,24 +346,29 @@ class _TransactionScreenState extends State<MobileTransactionScreen> {
                       children: ["All", "Credit", "Debit"].map((type) {
                         final bool isSelected =
                             selectedTransactionTypeNotifier.value == type ||
-                                (type == "All" && selectedTransactionTypeNotifier.value == null);
+                            (type == "All" &&
+                                selectedTransactionTypeNotifier.value == null);
                         return FilterChip(
                           label: Text(type),
                           selected: isSelected,
                           onSelected: (selected) {
                             setState(() {
-                              selectedTransactionTypeNotifier.value = selected ? type : null;
+                              selectedTransactionTypeNotifier.value = selected
+                                  ? type
+                                  : null;
                             });
                           },
-                          selectedColor: AppColors.primaryColor(context).withValues(alpha: 0.2),
+                          selectedColor: AppColors.primaryColor(
+                            context,
+                          ).withValues(alpha: 0.2),
                           checkmarkColor: AppColors.primaryColor(context),
                         );
                       }).toList(),
                     ),
                     const SizedBox(height: 8),
-              
+
                     // Status Filter
-                     Text(
+                    Text(
                       "Status",
                       style: TextStyle(
                         color: AppColors.text(context),
@@ -390,25 +379,32 @@ class _TransactionScreenState extends State<MobileTransactionScreen> {
                     const SizedBox(height: 8),
                     Wrap(
                       spacing: 8,
-                      children: ["All", "Completed", "Pending", "Failed"].map((status) {
+                      children: ["All", "Completed", "Pending", "Failed"].map((
+                        status,
+                      ) {
                         final bool isSelected =
                             selectedStatusNotifier.value == status ||
-                                (status == "All" && selectedStatusNotifier.value == null);
+                            (status == "All" &&
+                                selectedStatusNotifier.value == null);
                         return FilterChip(
                           label: Text(status),
                           selected: isSelected,
                           onSelected: (selected) {
                             setState(() {
-                              selectedStatusNotifier.value = selected ? status : null;
+                              selectedStatusNotifier.value = selected
+                                  ? status
+                                  : null;
                             });
                           },
-                          selectedColor: AppColors.primaryColor(context).withValues(alpha: 0.2),
+                          selectedColor: AppColors.primaryColor(
+                            context,
+                          ).withValues(alpha: 0.2),
                           checkmarkColor: AppColors.primaryColor(context),
                         );
                       }).toList(),
                     ),
                     const SizedBox(height: 24),
-              
+
                     // Action Buttons
                     Row(
                       children: [
@@ -435,14 +431,14 @@ class _TransactionScreenState extends State<MobileTransactionScreen> {
                             onPressed: () {
                               Navigator.pop(context);
                               _fetchTransactions(
-                                transactionType: selectedTransactionTypeNotifier.value.toString(),
+                                transactionType: selectedTransactionTypeNotifier
+                                    .value
+                                    .toString(),
                                 status: selectedStatusNotifier.value.toString(),
-
-
                               );
                             },
-              
-                           name: "Apply Filters",
+
+                            name: "Apply Filters",
                           ),
                         ),
                       ],
