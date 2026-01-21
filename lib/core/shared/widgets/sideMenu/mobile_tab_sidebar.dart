@@ -1,3 +1,4 @@
+import 'package:meherinMart/core/shared/widgets/sideMenu/sidebar.dart';
 import 'package:meherinMart/feature/auth/presentation/pages/mobile_login_scr.dart';
 import 'package:meherinMart/feature/expense/expense_head/presentation/pages/mobile_expense_head_screen.dart';
 import 'package:meherinMart/feature/expense/expense_sub_head/presentation/pages/mobile_expense_sub_head_screen.dart';
@@ -7,6 +8,7 @@ import 'package:meherinMart/feature/products/categories/presentation/pages/mobil
 import 'package:meherinMart/feature/products/groups/presentation/pages/mobile_groups_screen.dart';
 import 'package:meherinMart/feature/products/soruce/presentation/pages/mobile_source_screen.dart';
 import 'package:meherinMart/feature/products/unit/presentation/pages/mobile_unit_screen.dart';
+import 'package:meherinMart/feature/profile/presentation/bloc/profile_bloc/profile_bloc.dart';
 import 'package:meherinMart/feature/sales/presentation/pages/mobile_pos_sale_screen.dart';
 
 import '../../../../feature/account_transfer/presentation/screen/mobile_account_transfer_form.dart';
@@ -17,6 +19,7 @@ import '../../../../feature/lab_dashboard/presentation/bloc/dashboard/dashboard_
 import '../../../../feature/money_receipt/presentation/page/mobile_monery_receipt_create.dart';
 import '../../../../feature/money_receipt/presentation/page/mobile_money_receipt_list.dart';
 import '../../../../feature/products/product/presentation/pages/mobile_product_screen.dart';
+import '../../../../feature/profile/data/model/profile_perrmission_model.dart';
 import '../../../../feature/profile/presentation/pages/moble_profile_screen.dart';
 import '../../../../feature/purchase/presentation/page/mobile_create_purchase_screen.dart';
 import '../../../../feature/purchase/presentation/page/mobile_purchase_screen.dart';
@@ -47,106 +50,215 @@ class MobileTabSidebar extends StatelessWidget {
   const MobileTabSidebar({super.key});
 
   // Same menu structure as Sidebar for consistency
-  final List<MenuSection> menuSections = const [
-    MenuSection(
-      title: "My Dashboard",
-      items: [MenuItem(title: "My Dashboard", index: 0)],
-    ),
-    MenuSection(
-      title: "Sales",
-      items: [
-        MenuItem(title: "Sale", index: 1),
-        MenuItem(title: "Pos Sale", index: 2),
-        MenuItem(title: "Sale List", index: 3),
-      ],
-    ),
-    MenuSection(
-      title: "Money Receipt",
-      items: [
-        MenuItem(title: "Create Money Receipt", index: 4),
-        MenuItem(title: "Money Receipt", index: 5),
-      ],
-    ),
-    MenuSection(
-      title: "Purchase",
-      items: [
-        MenuItem(title: "Create Purchase", index: 6),
-        MenuItem(title: "Purchase List", index: 7),
-      ],
-    ),
-    MenuSection(
-      title: "Products",
-      items: [MenuItem(title: "Product", index: 8)],
-    ),
-    MenuSection(
-      title: "Accounts",
-      items: [MenuItem(title: "Accounts", index: 9)],
-    ),
-    MenuSection(
-      title: "Customers",
-      items: [MenuItem(title: "Customer", index: 10)],
-    ),
-    MenuSection(
-      title: "Supplier",
-      items: [
-        MenuItem(title: "Supplier List", index: 11),
-        MenuItem(title: "Supplier Payment", index: 12),
-      ],
-    ),
-    MenuSection(
-      title: "Expense",
-      items: [
-        MenuItem(title: "Expense List", index: 13),
-        MenuItem(title: "Expense Head", index: 14),
-        MenuItem(title: "Expense Sub Head", index: 15),
-      ],
-    ),
-    MenuSection(
-      title: "Return",
-      items: [
-        MenuItem(title: "Sales Return", index: 16),
-        MenuItem(title: "Bad Stock List", index: 17),
-        MenuItem(title: "Purchase Return", index: 18),
-      ],
-    ),
-    MenuSection(
-      title: "Reports",
-      items: [
-        MenuItem(title: "Sales Report", index: 19),
-        MenuItem(title: "Purchase Report", index: 20),
-        MenuItem(title: "Profit/Loss Report", index: 21),
-        MenuItem(title: "Top Sale Product Report", index: 22),
-        MenuItem(title: "Low Stock Product Report", index: 23),
-        MenuItem(title: "Stock Product Report", index: 24),
-        MenuItem(title: "Customer Ledger", index: 25),
-        MenuItem(title: "Customer Due/Advance Report", index: 26),
-        MenuItem(title: "Supplier Ledger", index: 27),
-        MenuItem(title: "Supplier Due/Advance Report", index: 28),
-        MenuItem(title: "Expense Report", index: 29),
-        MenuItem(title: "Bad Stock Report", index: 30),
-      ],
-    ),
-    MenuSection(
-      title: "Administration",
-      items: [
-        MenuItem(title: "Staff", index: 31),
-        MenuItem(title: "Source", index: 32),
-        MenuItem(title: "Unit", index: 33),
-        MenuItem(title: "Brand", index: 34),
-        MenuItem(title: "Category", index: 35),
-        MenuItem(title: "Group", index: 36),
-        MenuItem(title: "Profile", index: 37),
-      ],
-    ),
-    MenuSection(
-      title: "Transfer Balance",
-      items: [
-        MenuItem(title: "Account Transfer From", index: 38),
-        MenuItem(title: "Account Transfer List", index: 39),
-        MenuItem(title: "Translation", index: 40),
-      ],
-    ),
-  ];
+  List<MenuSection> getMenuSections(Permissions? permissions) {
+    final sections = <MenuSection>[];
+
+    // Dashboard Section
+    if (permissions?.dashboard?.view == true) {
+      sections.add(
+        MenuSection(
+          title: "My Dashboard",
+          items: [MenuItem(title: "My Dashboard", index: 0)],
+        ),
+      );
+    }
+
+    // Sales Section
+    if (permissions?.sales?.view == true) {
+      sections.add(
+        MenuSection(
+          title: "Sales",
+          items: [
+            if (permissions?.sales?.create == true)
+              MenuItem(title: "Sale", index: 1),
+            if (permissions?.sales?.create == true)
+              MenuItem(title: "Pos Sale", index: 2),
+            if (permissions?.sales?.view == true)
+              MenuItem(title: "Sale List", index: 3),
+          ],
+        ),
+      );
+    }
+
+    // Money Receipt Section
+    if (permissions?.moneyReceipt?.view == true) {
+      sections.add(
+        MenuSection(
+          title: "Money Receipt",
+          items: [
+            if (permissions?.moneyReceipt?.create == true)
+              MenuItem(title: "Create Money Receipt", index: 4),
+            if (permissions?.moneyReceipt?.view == true)
+              MenuItem(title: "Money Receipt", index: 5),
+          ],
+        ),
+      );
+    }
+
+    // Purchase Section
+    if (permissions?.purchases?.view == true) {
+      sections.add(
+        MenuSection(
+          title: "Purchase",
+          items: [
+            if (permissions?.purchases?.create == true)
+              MenuItem(title: "Create Purchase", index: 6),
+            if (permissions?.purchases?.view == true)
+              MenuItem(title: "Purchase List", index: 7),
+          ],
+        ),
+      );
+    }
+
+    // Products Section
+    if (permissions?.products?.view == true) {
+      sections.add(
+        MenuSection(
+          title: "Products",
+          items: [MenuItem(title: "Product", index: 8)],
+        ),
+      );
+    }
+
+    // Accounts Section
+    if (permissions?.accounts?.view == true) {
+      sections.add(
+        MenuSection(
+          title: "Accounts",
+          items: [MenuItem(title: "Accounts", index: 9)],
+        ),
+      );
+    }
+
+    // Customers Section
+    if (permissions?.customers?.view == true) {
+      sections.add(
+        MenuSection(
+          title: "Customers",
+          items: [MenuItem(title: "Customer", index: 10)],
+        ),
+      );
+    }
+
+    // Supplier Section
+    if (permissions?.suppliers?.view == true) {
+      sections.add(
+        MenuSection(
+          title: "Supplier",
+          items: [
+            if (permissions?.suppliers?.view == true)
+              MenuItem(title: "Supplier List", index: 11),
+            if (permissions?.suppliers?.view == true)
+              MenuItem(title: "Supplier Payment", index: 12),
+          ],
+        ),
+      );
+    }
+
+    // Expense Section
+    if (permissions?.expense?.view == true) {
+      sections.add(
+        MenuSection(
+          title: "Expense",
+          items: [
+            if (permissions?.expense?.view == true)
+              MenuItem(title: "Expense List", index: 13),
+            if (permissions?.expense?.view == true)
+              MenuItem(title: "Expense Head", index: 14),
+            if (permissions?.expense?.view == true)
+              MenuItem(title: "Expense Sub Head", index: 15),
+          ],
+        ),
+      );
+    }
+
+    // Return Section
+    if (permissions?.permissionsReturn?.view == true) {
+      sections.add(
+        MenuSection(
+          title: "Return",
+          items: [
+            if (permissions?.permissionsReturn?.view == true)
+              MenuItem(title: "Sales Return", index: 16),
+            if (permissions?.permissionsReturn?.view == true)
+              MenuItem(title: "Bad Stock List", index: 17),
+            if (permissions?.permissionsReturn?.view == true)
+              MenuItem(title: "Purchase Return", index: 18),
+          ],
+        ),
+      );
+    }
+
+    // Reports Section
+    if (permissions?.reports?.view == true) {
+      sections.add(
+        MenuSection(
+          title: "Reports",
+          items: [
+            if (permissions?.reports?.view == true)
+              MenuItem(title: "Sales Report", index: 19),
+            if (permissions?.reports?.view == true)
+              MenuItem(title: "Purchase Report", index: 20),
+            if (permissions?.reports?.view == true)
+              MenuItem(title: "Profit/Loss Report", index: 21),
+            if (permissions?.reports?.view == true)
+              MenuItem(title: "Top Sale Product Report", index: 22),
+            if (permissions?.reports?.view == true)
+              MenuItem(title: "Low Stock Product Report", index: 23),
+            if (permissions?.reports?.view == true)
+              MenuItem(title: "Stock Product Report", index: 24),
+            if (permissions?.reports?.view == true)
+              MenuItem(title: "Customer Ledger", index: 25),
+            if (permissions?.reports?.view == true)
+              MenuItem(title: "Customer Due/Advance Report", index: 26),
+            if (permissions?.reports?.view == true)
+              MenuItem(title: "Supplier Ledger", index: 27),
+            if (permissions?.reports?.view == true)
+              MenuItem(title: "Supplier Due/Advance Report", index: 28),
+            if (permissions?.reports?.view == true)
+              MenuItem(title: "Expense Report", index: 29),
+            if (permissions?.reports?.view == true)
+              MenuItem(title: "Bad Stock Report", index: 30),
+          ],
+        ),
+      );
+    }
+
+    // Administration Section
+    if (permissions?.administration?.view == true) {
+      sections.add(
+        MenuSection(
+          title: "Administration",
+          items: [
+            if (permissions?.users?.view == true)
+              MenuItem(title: "Staff", index: 31),
+            MenuItem(title: "Source", index: 32),
+            MenuItem(title: "Unit", index: 33),
+            MenuItem(title: "Brand", index: 34),
+            MenuItem(title: "Category", index: 35),
+            MenuItem(title: "Group", index: 36),
+            MenuItem(title: "Profile", index: 37),
+          ],
+        ),
+      );
+    }
+
+    // Transfer Balance Section (assuming it's under accounts)
+    if (permissions?.accounts?.view == true) {
+      sections.add(
+        MenuSection(
+          title: "Transfer Balance",
+          items: [
+            MenuItem(title: "Account Transfer From", index: 38),
+            MenuItem(title: "Account Transfer List", index: 39),
+            MenuItem(title: "Translation", index: 40),
+          ],
+        ),
+      );
+    }
+
+    return sections;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -161,6 +273,43 @@ class MobileTabSidebar extends StatelessWidget {
               currentIndex = state.index;
             }
 
+            final permission = context.read<ProfileBloc>().permissionModel?.data?.permissions;
+
+            // Get dynamic menu sections based on permissions
+            final menuSections = getMenuSections(permission);
+
+            // Show empty state if no permissions
+            if (menuSections.isEmpty) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.lock_outline,
+                      size: 64,
+                      color: Colors.grey[400],
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      "No Menu Access",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      "Contact administrator for access",
+                      style: TextStyle(
+                        color: Colors.grey[500],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }
+
             return Column(
               children: [
 
@@ -170,10 +319,6 @@ class MobileTabSidebar extends StatelessWidget {
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: AppColors.bottomNavBg(context),
-                    // color: Theme.of(context)
-                    //     .colorScheme
-                    //     .inversePrimary
-                    //     .withValues(alpha: 0.1),
                     borderRadius: const BorderRadius.only(
                       bottomLeft: Radius.circular(8),
                       bottomRight: Radius.circular(8),
@@ -210,6 +355,10 @@ class MobileTabSidebar extends StatelessWidget {
                     children: [
                       // Build all menu sections dynamically
                       ...menuSections.map((section) {
+                        if (section.items.isEmpty) {
+                          return const SizedBox.shrink();
+                        }
+
                         if (section.items.length == 1) {
                           // Single item (no expansion)
                           final item = section.items.first;
@@ -218,7 +367,7 @@ class MobileTabSidebar extends StatelessWidget {
                             title: section.title,
                             isSelected: currentIndex == item.index,
                             onPressed: () {
-                              _handleMenuSelection(item.index, context);
+                              _handleMenuSelection(item.index, context, permission);
                             },
                           );
                         } else {
@@ -239,10 +388,9 @@ class MobileTabSidebar extends StatelessWidget {
                               return MenuTile(
                                 isSubmenu: true,
                                 title: item.title,
-
                                 isSelected: currentIndex == item.index,
                                 onPressed: () {
-                                  _handleMenuSelection(item.index, context);
+                                  _handleMenuSelection(item.index, context, permission);
                                 },
                               );
                             }).toList(),
@@ -283,138 +431,359 @@ class MobileTabSidebar extends StatelessWidget {
     );
   }
 
-  void _handleMenuSelection(int index, BuildContext context) {
+  void _handleMenuSelection(int index, BuildContext context, Permissions? permissions) {
+    // Check permissions before navigation
     switch (index) {
-      case 0: // POS Sale
+      case 0: // Dashboard
+        if (permissions?.dashboard?.view != true) {
+          _showPermissionDeniedDialog(context);
+          return;
+        }
         AppRoutes.pop(context);
         break;
-      case 1: // Sale
+
+      case 1: // Sale (Create)
+        if (permissions?.sales?.create != true) {
+          _showPermissionDeniedDialog(context);
+          return;
+        }
         AppRoutes.push(context, MobileCreatePosSale());
         break;
-      case 2: // Sale
+
+      case 2: // Pos Sale
+        if (permissions?.sales?.create != true) {
+          _showPermissionDeniedDialog(context);
+          return;
+        }
         AppRoutes.push(context, MobileSalesScreen());
         break;
+
       case 3: // Sale List
+        if (permissions?.sales?.view != true) {
+          _showPermissionDeniedDialog(context);
+          return;
+        }
         AppRoutes.push(context, MobilePosSaleScreen());
         break;
 
-      case 4: // Sale List
+      case 4: // Create Money Receipt
+        if (permissions?.moneyReceipt?.create != true) {
+          _showPermissionDeniedDialog(context);
+          return;
+        }
         AppRoutes.push(context, MobileMoneyReceiptForm());
         break;
-      case 5: // Sale List
+
+      case 5: // Money Receipt List
+        if (permissions?.moneyReceipt?.view != true) {
+          _showPermissionDeniedDialog(context);
+          return;
+        }
         AppRoutes.push(context, MobileMoneyReceiptList());
         break;
-      case 6: // Sale List
+
+      case 6: // Create Purchase
+        if (permissions?.purchases?.create != true) {
+          _showPermissionDeniedDialog(context);
+          return;
+        }
         AppRoutes.push(context, MobileCreatePurchaseScreen());
         break;
-      case 7: // Sale List
+
+      case 7: // Purchase List
+        if (permissions?.purchases?.view != true) {
+          _showPermissionDeniedDialog(context);
+          return;
+        }
         AppRoutes.push(context, MobilePurchaseScreen());
         break;
-      case 8: // Sale List
+
+      case 8: // Product
+        if (permissions?.products?.view != true) {
+          _showPermissionDeniedDialog(context);
+          return;
+        }
         AppRoutes.push(context, MobileProductScreen());
         break;
-      case 9: // Sale List
+
+      case 9: // Accounts
+        if (permissions?.accounts?.view != true) {
+          _showPermissionDeniedDialog(context);
+          return;
+        }
         AppRoutes.push(context, MobileAccountScreen());
         break;
-      case 10: // Sale List
+
+      case 10: // Customer
+        if (permissions?.customers?.view != true) {
+          _showPermissionDeniedDialog(context);
+          return;
+        }
         AppRoutes.push(context, MobileCustomerScreen());
         break;
-      case 11: // Sale List
+
+      case 11: // Supplier List
+        if (permissions?.suppliers?.view != true) {
+          _showPermissionDeniedDialog(context);
+          return;
+        }
         AppRoutes.push(context, MobileSupplierListScreen());
         break;
-      case 12: // Sale List
+
+      case 12: // Supplier Payment
+        if (permissions?.suppliers?.view != true) {
+          _showPermissionDeniedDialog(context);
+          return;
+        }
         AppRoutes.push(context, MobileSupplierPaymentListScreen());
         break;
-      case 13: // Sale List
+
+      case 13: // Expense List
+        if (permissions?.expense?.view != true) {
+          _showPermissionDeniedDialog(context);
+          return;
+        }
         AppRoutes.push(context, MobileExpenseListScreen());
         break;
-      case 14: // Sale List
+
+      case 14: // Expense Head
+        if (permissions?.expense?.view != true) {
+          _showPermissionDeniedDialog(context);
+          return;
+        }
         AppRoutes.push(context, MobileExpenseHeadScreen());
         break;
-      case 15: // Sale List
+
+      case 15: // Expense Sub Head
+        if (permissions?.expense?.view != true) {
+          _showPermissionDeniedDialog(context);
+          return;
+        }
         AppRoutes.push(context, MobileExpenseSubHeadScreen());
         break;
 
-      case 16: // Sale List
+      case 16: // Sales Return
+        if (permissions?.permissionsReturn?.view != true) {
+          _showPermissionDeniedDialog(context);
+          return;
+        }
         AppRoutes.push(context, MobileSalesReturnPage());
         break;
-      case 17: // Sale List
+
+      case 17: // Bad Stock List
+        if (permissions?.permissionsReturn?.view != true) {
+          _showPermissionDeniedDialog(context);
+          return;
+        }
         AppRoutes.push(context, MobileBadStockScreen());
         break;
-      case 18: // Sale List
+
+      case 18: // Purchase Return
+        if (permissions?.permissionsReturn?.view != true) {
+          _showPermissionDeniedDialog(context);
+          return;
+        }
         AppRoutes.push(context, MobilePurchaseReturnScreen());
         break;
-      case 19: // Sale List
-      AppRoutes.push(context, MobileSalesReportScreen());
-        break;
-      case 20: // Sale List
-      AppRoutes.push(context, MobilePurchaseReportScreen());
-        break;
-      case 21: // Sale List
-      AppRoutes.push(context, MobileProfitLossScreen());
-        break;
-      case 22: // Sale List
-      AppRoutes.push(context, MobileTopProductsScreen());
-        break;
-      case 23: // Sale List
-      AppRoutes.push(context, MobileLowStockScreen());
-        break;
-      case 24: // Sale List
-      AppRoutes.push(context, MobileStockReportScreen());
-        break;
-      case 25: // Sale List
-      AppRoutes.push(context, MobileCustomerLedgerScreen());
-        break;
-      case 26: // Sale List
-      AppRoutes.push(context, MobileCustomerDueAdvanceScreen());
-        break;
-      case 27: // Sale List
-      AppRoutes.push(context, MobileSupplierLedgerScreen());
-        break;
-      case 28: // Sale List
-      AppRoutes.push(context, MobileSupplierDueAdvanceScreen());
-        break;
-      case 29: // Sale List
-        AppRoutes.push(context, MobileExpenseReportScreen());
 
+      case 19: // Sales Report
+        if (permissions?.reports?.view != true) {
+          _showPermissionDeniedDialog(context);
+          return;
+        }
+        AppRoutes.push(context, MobileSalesReportScreen());
         break;
-      case 30: // Sale List
-      // AppRoutes.push(context, MobilePurchaseReturnScreen());
+
+      case 20: // Purchase Report
+        if (permissions?.reports?.view != true) {
+          _showPermissionDeniedDialog(context);
+          return;
+        }
+        AppRoutes.push(context, MobilePurchaseReportScreen());
         break;
-      case 31: // Sale List
+
+      case 21: // Profit/Loss Report
+        if (permissions?.reports?.view != true) {
+          _showPermissionDeniedDialog(context);
+          return;
+        }
+        AppRoutes.push(context, MobileProfitLossScreen());
+        break;
+
+      case 22: // Top Sale Product Report
+        if (permissions?.reports?.view != true) {
+          _showPermissionDeniedDialog(context);
+          return;
+        }
+        AppRoutes.push(context, MobileTopProductsScreen());
+        break;
+
+      case 23: // Low Stock Product Report
+        if (permissions?.reports?.view != true) {
+          _showPermissionDeniedDialog(context);
+          return;
+        }
+        AppRoutes.push(context, MobileLowStockScreen());
+        break;
+
+      case 24: // Stock Product Report
+        if (permissions?.reports?.view != true) {
+          _showPermissionDeniedDialog(context);
+          return;
+        }
+        AppRoutes.push(context, MobileStockReportScreen());
+        break;
+
+      case 25: // Customer Ledger
+        if (permissions?.reports?.view != true) {
+          _showPermissionDeniedDialog(context);
+          return;
+        }
+        AppRoutes.push(context, MobileCustomerLedgerScreen());
+        break;
+
+      case 26: // Customer Due/Advance Report
+        if (permissions?.reports?.view != true) {
+          _showPermissionDeniedDialog(context);
+          return;
+        }
+        AppRoutes.push(context, MobileCustomerDueAdvanceScreen());
+        break;
+
+      case 27: // Supplier Ledger
+        if (permissions?.reports?.view != true) {
+          _showPermissionDeniedDialog(context);
+          return;
+        }
+        AppRoutes.push(context, MobileSupplierLedgerScreen());
+        break;
+
+      case 28: // Supplier Due/Advance Report
+        if (permissions?.reports?.view != true) {
+          _showPermissionDeniedDialog(context);
+          return;
+        }
+        AppRoutes.push(context, MobileSupplierDueAdvanceScreen());
+        break;
+
+      case 29: // Expense Report
+        if (permissions?.reports?.view != true) {
+          _showPermissionDeniedDialog(context);
+          return;
+        }
+        AppRoutes.push(context, MobileExpenseReportScreen());
+        break;
+
+      case 30: // Bad Stock Report
+        if (permissions?.reports?.view != true) {
+          _showPermissionDeniedDialog(context);
+          return;
+        }
+        AppRoutes.push(context, MobileBadStockScreen());
+        break;
+
+      case 31: // Staff
+        if (permissions?.users?.view != true) {
+          _showPermissionDeniedDialog(context);
+          return;
+        }
         AppRoutes.push(context, MoblieUsersScreen());
         break;
-      case 32: // Sale List
+
+      case 32: // Source
+        if (permissions?.administration?.view != true) {
+          _showPermissionDeniedDialog(context);
+          return;
+        }
         AppRoutes.push(context, MobileSourceScreen());
         break;
-      case 33: // Sale List
+
+      case 33: // Unit
+        if (permissions?.administration?.view != true) {
+          _showPermissionDeniedDialog(context);
+          return;
+        }
         AppRoutes.push(context, MobileUnitScreen());
         break;
-      case 34: // Sale List
+
+      case 34: // Brand
+        if (permissions?.administration?.view != true) {
+          _showPermissionDeniedDialog(context);
+          return;
+        }
         AppRoutes.push(context, MobileBrandScreen());
         break;
-      case 35: // Sale List
+
+      case 35: // Category
+        if (permissions?.administration?.view != true) {
+          _showPermissionDeniedDialog(context);
+          return;
+        }
         AppRoutes.push(context, MobileCategoriesScreen());
         break;
-      case 36: // Sale List
+
+      case 36: // Group
+        if (permissions?.administration?.view != true) {
+          _showPermissionDeniedDialog(context);
+          return;
+        }
         AppRoutes.push(context, MobileGroupsScreen());
         break;
-      case 37: // Sale List
+
+      case 37: // Profile
+        if (permissions?.administration?.view != true) {
+          _showPermissionDeniedDialog(context);
+          return;
+        }
         AppRoutes.push(context, MobileProfileScreen());
         break;
-      case 38: // Sale List
+
+      case 38: // Account Transfer From
+        if (permissions?.accounts?.view != true) {
+          _showPermissionDeniedDialog(context);
+          return;
+        }
         AppRoutes.push(context, MobileAccountTransferForm());
         break;
-      case 39: // Sale List
+
+      case 39: // Account Transfer List
+        if (permissions?.accounts?.view != true) {
+          _showPermissionDeniedDialog(context);
+          return;
+        }
         AppRoutes.push(context, MobileAccountTransferScreen());
         break;
-      case 40 :// Sale List
+
+      case 40: // Translation
+        if (permissions?.accounts?.view != true) {
+          _showPermissionDeniedDialog(context);
+          return;
+        }
         AppRoutes.push(context, MobileTransactionScreen());
         break;
+
       default:
       // Fallback: do nothing or show a snack bar
         break;
     }
+  }
+
+  void _showPermissionDeniedDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Access Denied"),
+          content: const Text("You don't have permission to access this feature."),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("OK"),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void _handleLogout(BuildContext context) {
@@ -446,19 +815,27 @@ class MobileTabSidebar extends StatelessWidget {
       },
     );
   }
-}
-
-// Make sure these classes are available (same as in Sidebar)
+}// Helper classes for menu structure
 class MenuSection {
   final String title;
   final List<MenuItem> items;
+  final bool Function(Permissions? permissions)? requiredPermission;
 
-  const MenuSection({required this.title, required this.items});
+  MenuSection({
+    required this.title,
+    required this.items,
+    this.requiredPermission,
+  });
 }
 
 class MenuItem {
   final String title;
   final int index;
+  final bool Function(Permissions? permissions)? requiredPermission;
 
-  const MenuItem({required this.title, required this.index});
+  MenuItem({
+    required this.title,
+    required this.index,
+    this.requiredPermission,
+  });
 }

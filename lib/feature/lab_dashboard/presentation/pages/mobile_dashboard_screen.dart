@@ -33,12 +33,8 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<PrintLayoutBloc>().add(FetchPrintLayout());
-      context
-          .read<ProfileBloc>()
-          .add(FetchProfilePermission(context: context));
-      context
-          .read<DashboardBloc>()
-          .add(FetchDashboardData(context: context));
+      context.read<ProfileBloc>().add(FetchProfilePermission(context: context));
+      context.read<DashboardBloc>().add(FetchDashboardData(context: context));
     });
   }
 
@@ -50,6 +46,8 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
 
   // ================= HEADER =================
   Widget _buildHeader() {
+    final companyInfo = context.read<ProfileBloc>().permissionModel?.data?.companyInfo;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -78,6 +76,10 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
                 ),
               ),
               const SizedBox(height: 4),
+              Text("Welcome ${companyInfo?.name??""}",style: AppTextStyle.body(context).copyWith(
+                color: AppColors.whiteColor(context)
+              ),),
+              const SizedBox(height: 4),
               Text(
                 DateFormat('EEEE, dd MMM yyyy').format(DateTime.now()),
                 style: const TextStyle(color: Colors.white70),
@@ -87,11 +89,8 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
           CircleAvatar(
             radius: 22,
             backgroundColor: Colors.white,
-            child: Icon(
-              Icons.insights,
-              color: AppColors.primaryColor(context),
-            ),
-          )
+            child: Icon(Icons.insights, color: AppColors.primaryColor(context)),
+          ),
         ],
       ),
     );
@@ -101,7 +100,7 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
   Widget _buildFilterSegmentedControl() {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 12),
-      padding: const EdgeInsets.only(top: 4,bottom: 4),
+      padding: const EdgeInsets.only(top: 4, bottom: 4),
       // decoration: BoxDecoration(
       //   color: AppColors.bottomNavBg(context),
       //   borderRadius: BorderRadius.circular(30),
@@ -140,13 +139,12 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
           fontSize: 14,
           fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
           color: isSelected
-              ? AppColors.text(context)// ✅ selected text color
+              ? AppColors.text(context) // ✅ selected text color
               : AppColors.primaryColor(context), // ❌ unselected
         ),
       ),
     );
   }
-
 
   // ================= SUMMARY CARD =================
   Widget dashboardCardItem({
@@ -180,38 +178,32 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
-                  title,
-                  style: AppTextStyle.bodyLarge(context)
-                ),
+                Text(title, style: AppTextStyle.bodyLarge(context)),
                 const SizedBox(height: 4),
                 if (isCurrency)
                   AnimatedAmountCounter(
-                    amount:double.tryParse(value.toString()) ?? 0.0,
+                    amount: double.tryParse(value.toString()) ?? 0.0,
                     prefix: '৳ ',
-                    style: AppTextStyle.body(context)
+                    style: AppTextStyle.body(context),
                   )
                 else
                   AnimatedCounter(
-                    amount:
-                    int.tryParse(value.toString()) ?? 0,
-                      style: AppTextStyle.body(context)
+                    amount: int.tryParse(value.toString()) ?? 0,
+                    style: AppTextStyle.body(context),
                   ),
               ],
             ),
           ],
         ),
       ),
-
     );
   }
 
   Widget _buildDashboardCards(DashboardData data) {
-
     return GridView.count(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      crossAxisCount:  5,
+      crossAxisCount: 5,
       childAspectRatio: 1.1,
       crossAxisSpacing: 4,
       mainAxisSpacing: 4,
@@ -248,9 +240,10 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
         ),
         dashboardCardItem(
           title: "Stock Alerts",
-          value: ((data.stockAlerts?.lowStock ?? 0) +
-              (data.stockAlerts?.outOfStock ?? 0))
-              .toDouble(),
+          value:
+              ((data.stockAlerts?.lowStock ?? 0) +
+                      (data.stockAlerts?.outOfStock ?? 0))
+                  .toDouble(),
           icon: Icons.warning,
           color: Colors.orange,
         ),
@@ -270,18 +263,20 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
-          )
+          ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: AppColors.text(context),
-              )),
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: AppColors.text(context),
+            ),
+          ),
           const SizedBox(height: 12),
           child,
         ],
@@ -321,9 +316,9 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
         builder: (context, state) {
           return RefreshIndicator(
             onRefresh: () async {
-              context
-                  .read<DashboardBloc>()
-                  .add(FetchDashboardData(context: context));
+              context.read<DashboardBloc>().add(
+                FetchDashboardData(context: context),
+              );
             },
             child: SingleChildScrollView(
               controller: scrollController,
@@ -359,6 +354,7 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
       ),
     );
   }
+
   Widget _buildPurchaseOverview(DashboardData data) {
     final isMobile = Responsive.isMobile(context);
 
@@ -369,8 +365,8 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
             Expanded(
               child: StatsCardMonthly(
                 title: "Purchase Quantity",
-                count: data.todayMetrics?.purchases?.totalQuantity
-                    ?.toString() ??
+                count:
+                    data.todayMetrics?.purchases?.totalQuantity?.toString() ??
                     "0",
                 color: Colors.blue,
                 icon: "assets/images/buy.png",
@@ -427,7 +423,7 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
               child: StatsCardMonthly(
                 title: "Sold Quantity",
                 count:
-                data.todayMetrics?.sales?.totalQuantity?.toString() ?? "0",
+                    data.todayMetrics?.sales?.totalQuantity?.toString() ?? "0",
                 color: Colors.pink,
                 icon: "assets/images/sales.png",
               ),
@@ -436,8 +432,9 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
             Expanded(
               child: StatsCardMonthly(
                 title: "Total Amount",
-                count: (data.todayMetrics?.sales?.total ?? 0)
-                    .toStringAsFixed(2),
+                count: (data.todayMetrics?.sales?.total ?? 0).toStringAsFixed(
+                  2,
+                ),
                 color: Colors.purple,
                 icon: "assets/images/amount.png",
               ),
@@ -460,8 +457,7 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
             Expanded(
               child: StatsCardMonthly(
                 title: "Profit / Loss",
-                count: (data.profitLoss?.netProfit ?? 0)
-                    .toStringAsFixed(2),
+                count: (data.profitLoss?.netProfit ?? 0).toStringAsFixed(2),
                 color: (data.profitLoss?.netProfit ?? 0) >= 0
                     ? Colors.green
                     : Colors.red,
@@ -473,5 +469,4 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
       ],
     );
   }
-
 }

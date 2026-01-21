@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'core/core.dart';
 import 'core/shared/widgets/sideMenu/tab_sidebar.dart';
 import 'feature/feature.dart';
+import 'feature/profile/presentation/bloc/profile_bloc/profile_bloc.dart';
 import 'feature/splash/presentation/bloc/connectivity_bloc/connectivity_state.dart';
 
 final GlobalKey<ScaffoldState> _drawerKey = GlobalKey();
@@ -18,6 +19,8 @@ class _RootScreenState extends State<RootScreen> {
   void initState() {
     super.initState();
     // initialize blocs and services
+    context.read<ProfileBloc>().add(FetchProfilePermission(context: context));
+
     context.read<DashboardBloc>().add(ChangeDashboardScreen(index: 0));
     context.read<PrintLayoutBloc>().add(FetchPrintLayout());
     AutoTimerService().startTimer();
@@ -36,7 +39,7 @@ class _RootScreenState extends State<RootScreen> {
         key: _drawerKey,
 
         // Mobile/tablet drawer
-        drawer: isSmallScreen ? const Drawer(child: TabSidebar()) : null,
+        drawer: isSmallScreen ?  Drawer(child: TabSidebar()) : null,
         drawerEnableOpenDragGesture: isSmallScreen,
 
         // AppBar only for smaller screens

@@ -1,5 +1,6 @@
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../profile/presentation/bloc/profile_bloc/profile_bloc.dart';
 import '/root.dart';
 import '../../../../core/configs/configs.dart';
 import '../../../auth/presentation/pages/login_scr.dart';
@@ -55,6 +56,8 @@ class _SplashScreenState extends State<SplashScreen>
           if (state is SplashNavigateToLogin) {
             AppRoutes.pushAndRemoveUntil(context, const LogInScreen());
           } else if (state is SplashNavigateToHome) {
+            context.read<ProfileBloc>().add(FetchProfilePermission(context: context));
+
             AppRoutes.pushAndRemoveUntil(context, const RootScreen());
           }
         },
