@@ -170,7 +170,6 @@ class _ExpenseHeadScreenState extends State<ExpenseHeadScreen> {
 
 
   Widget _buildExpenseHeadList(ExpenseHeadState state) {
-    print(state);
     if (state is ExpenseHeadListLoading) {
       return const SizedBox(child: Center(child: CircularProgressIndicator()));
     } else if (state is ExpenseHeadListSuccess) {
