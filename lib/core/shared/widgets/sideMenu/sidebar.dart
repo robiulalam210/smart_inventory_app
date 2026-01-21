@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../feature/lab_dashboard/presentation/bloc/dashboard/dashboard_bloc.dart';
 import '../../../../feature/profile/data/model/profile_perrmission_model.dart';
 import '../../../../feature/profile/presentation/bloc/profile_bloc/profile_bloc.dart';
@@ -273,7 +271,7 @@ class _SidebarState extends State<Sidebar> {
                                   }).toList(),
                                 );
                               }
-                            }).toList(),
+                            }),
                           ],
                         ),
                       ),
