@@ -1,3 +1,6 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
 import 'package:meherinMart/feature/profile/data/model/profile_perrmission_model.dart';
 import 'package:meherinMart/feature/profile/presentation/pages/moble_profile_screen.dart';
 import 'package:meherinMart/feature/purchase/presentation/page/mobile_purchase_screen.dart';
@@ -12,6 +15,7 @@ import 'profile/presentation/bloc/profile_bloc/profile_bloc.dart';
 
 class MobileRootScreen extends StatefulWidget {
   final int initialPageIndex;
+
   const MobileRootScreen({super.key, this.initialPageIndex = 2});
 
   @override
@@ -28,18 +32,13 @@ class _MobileRootScreenState extends State<MobileRootScreen> {
   void initState() {
     super.initState();
 
-    // Only dispatch fetch when the bloc hasn't already loaded or is not currently loading.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final profileBloc = context.read<ProfileBloc>();
-      final current = profileBloc.state;
-      if (current is! ProfilePermissionSuccess && current is! ProfilePermissionLoading) {
-        // Pass context only if your event requires it. Prefer not to pass BuildContext through events.
-        profileBloc.add(FetchProfilePermission(context: context));
-      }
-    });
-
-    // set a safe default; we'll clamp this after navigation is built
+    // Use provided initial index as a starting value. We'll rebuild navigation
+    // immediately with null (safe default) so there is always at least the
+    // Profile screen available and the index will be clamped accordingly.
     pageIndex.value = widget.initialPageIndex;
+
+    // Build a safe default navigation (no permissions yet)
+    _buildNavigation(null);
   }
 
   @override
@@ -57,64 +56,116 @@ class _MobileRootScreenState extends State<MobileRootScreen> {
     int? newDashboardIndex;
 
     // Sales
-    if ((permissions?.sales?.view ?? false) || (permissions?.sales?.create ?? false)) {
+    if ((permissions?.sales?.view ?? false) ||
+        (permissions?.sales?.create ?? false)) {
       newScreens.add(MobilePosSaleScreen());
-      newNavItems.add(_NavItem(
-        icon: HugeIcons.strokeRoundedSaleTag02,
-        index: currentIndex,
-        label: 'Sales',
-      ));
+      newNavItems.add(
+        _NavItem(
+          icon: HugeIcons.strokeRoundedSaleTag02,
+          index: currentIndex,
+          label: 'Sales',
+        ),
+      );
       currentIndex++;
     } else {
-      // If you want the nav item visible but show a "no permission" screen on tap,
-      // keep this. Alternatively, omit the nav item so it doesn't appear.
-      newScreens.add(Scaffold(
-        body: Center(child: Text("No Permission Sale")),
-      ));
-      newNavItems.add(_NavItem(
-        icon: HugeIcons.strokeRoundedSaleTag02,
-        index: currentIndex,
-        label: 'Sales',
-      ));
+      newScreens.add(
+        Scaffold(body: Center(child: Text("No Permission Sale"))),
+      );
+      newNavItems.add(
+        _NavItem(
+          icon: HugeIcons.strokeRoundedSaleTag02,
+          index: currentIndex,
+          label: 'Sales',
+        ),
+      );
       currentIndex++;
     }
 
     // Purchase
-    if ((permissions?.purchases?.view ?? false) || (permissions?.purchases?.create ?? false)) {
+    if ((permissions?.purchases?.view ?? false) ||
+        (permissions?.purchases?.create ?? false)) {
       newScreens.add(MobilePurchaseScreen());
-      newNavItems.add(_NavItem(
-        icon: HugeIcons.strokeRoundedInvoice04,
-        index: currentIndex,
-        label: 'Purchase',
-      ));
+      newNavItems.add(
+        _NavItem(
+          icon: HugeIcons.strokeRoundedInvoice04,
+          index: currentIndex,
+          label: 'Purchase',
+        ),
+      );
+      currentIndex++;
+    } else {
+      newScreens.add(
+        Scaffold(body: Center(child: Text("No Permission Purchase"))),
+      );
+      // Use invoice icon for purchase even when permission missing
+      newNavItems.add(
+        _NavItem(
+          icon: HugeIcons.strokeRoundedInvoice04,
+          index: currentIndex,
+          label: 'Purchase',
+        ),
+      );
       currentIndex++;
     }
 
-    // Dashboard (center FAB) - add screen but no nav item
+    // Dashboard (center FAB) - add screen; when permitted we set dashboardIndex
     if (permissions?.dashboard?.view == true) {
       newScreens.add(DashBoardScreen());
       newDashboardIndex = currentIndex;
+      // Note: intentionally NOT adding a nav item here because dashboard is
+      // exposed via the center FAB when available.
+      currentIndex++;
+    } else {
+      newScreens.add(
+        Scaffold(body: Center(child: Text("No Permission Dashboard"))),
+      );
+      // When dashboard isn't available as center FAB, offer a normal nav item
+      // so the user can see the placeholder/notice.
+      newNavItems.add(
+        _NavItem(
+          icon: HugeIcons.strokeRoundedHome04,
+          index: currentIndex,
+          label: 'Dashboard',
+        ),
+      );
       currentIndex++;
     }
 
     // Reports
     if (permissions?.reports?.view == true) {
       newScreens.add(MobileReportsTabScreen());
-      newNavItems.add(_NavItem(
-        icon: HugeIcons.strokeRoundedChartBarLine,
-        index: currentIndex,
-        label: 'Reports',
-      ));
+      newNavItems.add(
+        _NavItem(
+          icon: HugeIcons.strokeRoundedChartBarLine,
+          index: currentIndex,
+          label: 'Reports',
+        ),
+      );
+      currentIndex++;
+    } else {
+      newScreens.add(
+        Scaffold(body: Center(child: Text("No Permission Reports"))),
+      );
+      // Use reports icon even when permission missing
+      newNavItems.add(
+        _NavItem(
+          icon: HugeIcons.strokeRoundedChartBarLine,
+          index: currentIndex,
+          label: 'Reports',
+        ),
+      );
       currentIndex++;
     }
 
     // Profile (always add as last)
     newScreens.add(MobileProfileScreen());
-    newNavItems.add(_NavItem(
-      icon: HugeIcons.strokeRoundedUser,
-      index: currentIndex,
-      label: 'Profile',
-    ));
+    newNavItems.add(
+      _NavItem(
+        icon: HugeIcons.strokeRoundedUser,
+        index: currentIndex,
+        label: 'Profile',
+      ),
+    );
 
     // Assign to state
     screens = newScreens;
@@ -125,6 +176,10 @@ class _MobileRootScreenState extends State<MobileRootScreen> {
     if (pageIndex.value >= screens.length) {
       // set to last screen (profile) which we just added
       pageIndex.value = screens.isNotEmpty ? screens.length - 1 : 0;
+    }
+    // If pageIndex is negative (shouldn't happen), clamp to 0
+    if (pageIndex.value < 0) {
+      pageIndex.value = 0;
     }
   }
 
@@ -155,16 +210,9 @@ class _MobileRootScreenState extends State<MobileRootScreen> {
           },
           child: BlocBuilder<ProfileBloc, ProfileState>(
             builder: (context, state) {
-              final isLoading = state is ProfilePermissionLoading;
-
-              // If we have no screens and we are loading for the first time,
-              // show the full screen loading indicator to avoid blank.
-              if (screens.isEmpty && isLoading) {
-                return _buildLoadingState();
-              }
-
-              // If screens are empty and not loading, show NoScreens / error UI.
-              if (screens.isEmpty && !isLoading) {
+              // If for some reason screens are empty (shouldn't be because we
+              // build a default in initState), show NoScreens / error UI.
+              if (screens.isEmpty) {
                 return _buildNoScreensState();
               }
 
@@ -178,7 +226,7 @@ class _MobileRootScreenState extends State<MobileRootScreen> {
                     body: ValueListenableBuilder<int>(
                       valueListenable: pageIndex,
                       builder: (context, currentIndex, child) {
-                        if (currentIndex < screens.length) {
+                        if (currentIndex < screens.length && currentIndex >= 0) {
                           return screens[currentIndex];
                         }
                         return screens.isNotEmpty ? screens[0] : Container();
@@ -284,32 +332,12 @@ class _MobileRootScreenState extends State<MobileRootScreen> {
                       ),
                     ),
                   ),
-
-                  // Loading overlay (non-blocking visual) when fetching permissions again
-                  if (isLoading)
-                    Positioned.fill(
-                      child: Container(
-                        color: Colors.black.withOpacity(0.25),
-                        child: const Center(
-                          child: CircularProgressIndicator(),
-                        ),
-                      ),
-                    ),
                 ],
               );
             },
           ),
         );
       },
-    );
-  }
-
-  Widget _buildLoadingState() {
-    return const Center(
-      child: Padding(
-        padding: EdgeInsets.all(50),
-        child: CircularProgressIndicator(),
-      ),
     );
   }
 
@@ -374,7 +402,11 @@ class _MobileRootScreenState extends State<MobileRootScreen> {
             Icon(
               icon,
               size: AppSizes.preferredBottom,
-              color: selected ? primary : isDark ? Colors.grey[500] : Colors.black38,
+              color: selected
+                  ? primary
+                  : isDark
+                  ? Colors.grey[500]
+                  : Colors.black38,
             ),
           ],
         ),
@@ -388,9 +420,5 @@ class _NavItem {
   final int index;
   final String label;
 
-  _NavItem({
-    required this.icon,
-    required this.index,
-    required this.label,
-  });
+  _NavItem({required this.icon, required this.index, required this.label});
 }

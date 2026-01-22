@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../../../../../core/widgets/app_scaffold.dart';
+import '../../../../profile/presentation/bloc/profile_bloc/profile_bloc.dart';
 import '../mobile_pos_sale_screen.dart';
 import '/core/core.dart';
 import '/feature/products/product/data/model/product_stock_model.dart';
@@ -592,8 +593,12 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
       );
       return;
     }
+    final user = context.read<ProfileBloc>().permissionModel?.data?.user;
 
-    if (bloc.selectSalesModel == null) {
+    final isAdmin =
+        user?.role == "Super Admin" || user?.role == "Admin";
+
+    if (isAdmin && bloc.selectSalesModel == null) {
       showCustomToast(
         context: context,
         title: 'Validation Error',
@@ -603,6 +608,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
       );
       return;
     }
+
 
     if (bloc.dateEditingController.text.isEmpty) {
       showCustomToast(
@@ -822,6 +828,8 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
   }
 
   Widget _buildMobileTopFormSection(CreatePosSaleBloc bloc) {
+    final user = context.read<ProfileBloc>().permissionModel?.data?.user;
+
     return Form(
       key: _formKeyStep1,
       child: Column(
@@ -868,6 +876,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                 },
               ),
               gapH8,
+              if(user?.role=="Super Admin"||user?.role==" Admin")
               BlocBuilder<UserBloc, UserState>(
                 builder: (context, state) {
                   return AppDropdown(
@@ -1809,6 +1818,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
     final isWalkInCustomer = selectedCustomer?.id == -1;
     final netTotal = calculateAllFinalTotal();
     final paidAmount = double.tryParse(bloc.payableAmount.text.trim()) ?? 0;
+    final user = context.read<ProfileBloc>().permissionModel?.data?.user;
 
     Map<String, dynamic> body = {
       "type": "normal_sale",
@@ -1818,7 +1828,11 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
         ).parse(bloc.dateEditingController.text.trim(), true),
         "yyyy-MM-dd",
       ),
-      "sale_by": bloc.selectSalesModel?.id.toString() ?? '',
+      "sale_by": (user?.role == "Super Admin" || user?.role == "Admin")
+          ? bloc.selectSalesModel?.id?.toString() ?? ''
+          : user?.id?.toString() ?? '',
+
+      // "sale_by": bloc.selectSalesModel?.id.toString() ?? '',
       "overall_vat_type": selectedOverallVatType.toLowerCase(),
       "vat": bloc.vatOverAllController.text.isEmpty
           ? 0

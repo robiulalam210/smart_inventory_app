@@ -462,6 +462,8 @@ class _SalesScreenState extends State<MobileSalesScreen> {
   // ---------------- UI builders ----------------
 
   Widget _buildTopFormSection(CreatePosSaleBloc bloc) {
+    final user = context.read<ProfileBloc>().permissionModel?.data?.user;
+
     // compact single column arrangement for mobile
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -512,7 +514,9 @@ class _SalesScreenState extends State<MobileSalesScreen> {
         ),
 
         gapH8,
-        BlocBuilder<UserBloc, UserState>(
+        if(user?.role=="Super Admin"||user?.role==" Admin")
+
+          BlocBuilder<UserBloc, UserState>(
           builder: (context, state) {
             return AppDropdown(
               label: "Sales By",
@@ -2218,6 +2222,7 @@ class _SalesScreenState extends State<MobileSalesScreen> {
     final isWalkInCustomer = selectedCustomer?.id == -1;
     final netTotal = calculateAllFinalTotal();
     final paidAmount = double.tryParse(bloc.payableAmount.text.trim()) ?? 0;
+    final user = context.read<ProfileBloc>().permissionModel?.data?.user;
 
     Map<String, dynamic> body = {
       "type": "normal_sale",
@@ -2226,7 +2231,9 @@ class _SalesScreenState extends State<MobileSalesScreen> {
             .parse(bloc.dateEditingController.text.trim(), true),
         "yyyy-MM-dd",
       ),
-      "sale_by": bloc.selectSalesModel?.id.toString() ?? '',
+      "sale_by": (user?.role == "Super Admin" || user?.role == "Admin")
+          ? bloc.selectSalesModel?.id?.toString() ?? ''
+          : user?.id?.toString() ?? '',
       "overall_vat_type": selectedOverallVatType.toLowerCase(),
       "vat": bloc.vatOverAllController.text.isEmpty
           ? 0
