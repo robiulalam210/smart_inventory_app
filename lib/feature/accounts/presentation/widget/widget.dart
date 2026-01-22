@@ -136,7 +136,7 @@ class AccountCard extends StatelessWidget {
 
           // Account Details
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding:  EdgeInsets.symmetric(horizontal: 16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -149,7 +149,7 @@ class AccountCard extends StatelessWidget {
                   value: account.name ?? 'N/A',
                   isImportant: true,
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 4),
 
                 // Account Number
                 if (account.acNumber?.isNotEmpty == true)
@@ -161,7 +161,7 @@ class AccountCard extends StatelessWidget {
                         label: 'Account No',
                         value: account.acNumber ?? 'N/A',
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 4),
                     ],
                   ),
 

@@ -48,6 +48,7 @@ Future<Uint8List> generateSalesPdf(
       pageTheme: pw.PageTheme(
         pageFormat: PdfPageFormat.a4,
         margin: const pw.EdgeInsets.all(25),
+
         buildBackground: (context) => pw.Container(
           color: PdfColors.white, // Solid color background
         ),

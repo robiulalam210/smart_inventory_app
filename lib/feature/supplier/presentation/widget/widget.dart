@@ -63,7 +63,7 @@ class SupplierDataTableWidget extends StatelessWidget {
         children: [
           // Header with SL and Status
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
               color: AppColors.primaryColor(context).withValues(alpha: 0.05),
               borderRadius: const BorderRadius.only(
@@ -123,7 +123,7 @@ class SupplierDataTableWidget extends StatelessWidget {
                   value: supplier.name ?? '-',
                   isImportant: true,
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 2),
 
                 // Phone Row
                 _buildDetailRow(
@@ -137,7 +137,7 @@ class SupplierDataTableWidget extends StatelessWidget {
                   }
                       : null,
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 2),
 
                 // Address Row
                 if (supplier.address?.isNotEmpty == true)
@@ -220,7 +220,7 @@ class SupplierDataTableWidget extends StatelessWidget {
                         crossAxisCount: 2,
                         crossAxisSpacing: 8,
                         mainAxisSpacing: 8,
-                        childAspectRatio: 2.5,
+                        childAspectRatio: 2.7,
                         children: [
                           _buildFinancialCard(
                             context: context,

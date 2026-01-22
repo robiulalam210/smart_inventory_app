@@ -104,7 +104,7 @@ class _SupplierPaymentScreenState extends State<MobileSupplierPaymentListScreen>
             );
           },
         );
-      },child: Icon(Icons.add),),
+      },child: Icon(Icons.add,color: AppColors.whiteColor(context),),),
       appBar: AppBar(title: Text("Supplier Payment ",style: AppTextStyle.titleMedium(context),),),
       body: SafeArea(
         child: _buildContentArea()

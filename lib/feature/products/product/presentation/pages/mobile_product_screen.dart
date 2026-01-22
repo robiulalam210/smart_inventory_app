@@ -105,9 +105,10 @@ class _ProductsScreenState extends State<MobileProductScreen> {
         title: Text("Product", style: AppTextStyle.titleMedium(context)),
       ),
       floatingActionButton: FloatingActionButton(
+
         backgroundColor: AppColors.primaryColor(context),
         onPressed: () => _showCreateProductBottomSheet(context),
-        child: const Icon(Icons.add),
+        child:  Icon(Icons.add,color: AppColors.whiteColor(context),),
       ),
       body: SafeArea(
         child: ResponsiveCol(

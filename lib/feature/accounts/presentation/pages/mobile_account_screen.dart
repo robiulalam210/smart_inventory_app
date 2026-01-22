@@ -78,23 +78,12 @@ class _AccountScreenState extends State<MobileAccountScreen> {
       floatingActionButton: FloatingActionButton(
         backgroundColor: AppColors.primaryColor(context),
         onPressed: () => _showCreateAccountDialog(context),
-        child: Icon(Icons.add),
+        child: Icon(Icons.add,color: AppColors.whiteColor(context),),
       ),
       appBar: AppBar(
         title: Text("Account", style: AppTextStyle.titleMedium(context)),
       ),
-      body: SafeArea(child: _buildContentArea()),
-    );
-  }
-
-  Widget _buildContentArea() {
-    return ResponsiveCol(
-      xs: 12,
-      sm: 12,
-      md: 12,
-      lg: 10,
-      xl: 10,
-      child: RefreshIndicator(
+      body: SafeArea(child: RefreshIndicator(
         color: AppColors.primaryColor(context),
         onRefresh: () async {
           _fetchApi();
@@ -111,7 +100,6 @@ class _AccountScreenState extends State<MobileAccountScreen> {
                 child: Column(
                   children: [
                     _buildMobileHeader(),
-                    const SizedBox(height: 8),
                     SizedBox(child: _buildAccountList(state)),
                   ],
                 ),
@@ -119,9 +107,11 @@ class _AccountScreenState extends State<MobileAccountScreen> {
             },
           ),
         ),
-      ),
+      ),),
     );
   }
+
+
 
   void _handleBlocState(AccountState state) {
     if (state is AccountAddLoading) {
