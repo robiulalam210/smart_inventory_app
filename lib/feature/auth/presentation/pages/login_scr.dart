@@ -222,9 +222,9 @@ class _LogInScreenState extends State<LogInScreen> {
                 showCustomToast(
                   context: context,
                   title: 'Success!',
-                  description: state is AuthAuthenticated
-                      ? 'Login Online successfully.'
-                      : 'Login Offline successfully.',
+                  description:
+                  'Login successfully.'
+                  ,
                   type: ToastificationType.success,
                   icon: Icons.check_circle,
                   primaryColor: Colors.green,

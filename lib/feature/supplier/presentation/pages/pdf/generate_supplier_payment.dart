@@ -244,9 +244,9 @@ pw.Widget _buildPaymentDetails(SupplierPaymentModel payment, double amount) {
           child: pw.Column(
             children: [
               pw.Text(
-                '${amount.toStringAsFixed(2)}',
+                amount.toStringAsFixed(2),
                 style: pw.TextStyle(
-                  fontSize: 28,
+                  fontSize: 24,
                   fontWeight: pw.FontWeight.bold,
                   color: PdfColors.blue800,
                 ),
