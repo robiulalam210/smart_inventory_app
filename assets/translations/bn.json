@@ -24,15 +24,6 @@
   "module_permissions_desc": "সিস্টেম মডিউলের জন্য আপনার অনুমতি",
 
   "security": "নিরাপত্তা",
-  "change_password": "পাসওয়ার্ড পরিবর্তন",
-  "current_password": "বর্তমান পাসওয়ার্ড",
-  "please_enter_current_password": "বর্তমান পাসওয়ার্ড লিখুন",
-  "new_password": "নতুন পাসওয়ার্ড",
-  "please_enter_new_password": "নতুন পাসওয়ার্ড লিখুন",
-  "confirm_new_password": "নতুন পাসওয়ার্ড নিশ্চিত করুন",
-  "please_confirm_new_password": "পাসওয়ার্ড নিশ্চিত করুন",
-  "password_min_length_6": "পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে",
-  "passwords_do_not_match": "পাসওয়ার্ড মিলছে না",
 
   "theme_mode": "থিম মোড",
   "theme_color": "থিম রঙ",
@@ -84,5 +75,24 @@
 
   "language": "ভাষা",
   "login_failed": "লগইন ব্যর্থ",
-  "ok": "ঠিক আছে"
+  "ok": "ঠিক আছে",
+
+  "change_password": "পাসওয়ার্ড পরিবর্তন করুন",
+  "update_your_password": "আপনার পাসওয়ার্ড আপডেট করুন",
+  "choose_a_strong_password_to_keep_your_account_secure": "আপনার অ্যাকাউন্ট নিরাপদ রাখতে একটি শক্তিশালী পাসওয়ার্ড চয়ন করুন",
+  "current_password": "বর্তমান পাসওয়ার্ড",
+  "new_password": "নতুন পাসওয়ার্ড",
+  "confirm_new_password": "নতুন পাসওয়ার্ড নিশ্চিত করুন",
+  "enter_current_password": "বর্তমান পাসওয়ার্ড লিখুন",
+  "enter_new_password": "নতুন পাসওয়ার্ড লিখুন",
+  "re_enter_new_password": "নতুন পাসওয়ার্ড পুনরায় লিখুন",
+  "password_requirements": "পাসওয়ার্ড প্রয়োজনীয়তা",
+  "at_least_6_characters": "কমপক্ষে ৬টি অক্ষর",
+  "contains_letters_and_numbers": "অক্ষর এবং সংখ্যা ধারণ করে",
+  "not_your_email_or_name": "আপনার ইমেল বা নাম নয়",
+  "password_min_length_6": "পাসওয়ার্ড কমপক্ষে ৬ অক্ষর হতে হবে",
+  "please_enter_current_password": "দয়া করে বর্তমান পাসওয়ার্ড লিখুন",
+  "please_enter_new_password": "দয়া করে নতুন পাসওয়ার্ড লিখুন",
+  "please_confirm_new_password": "দয়া করে নতুন পাসওয়ার্ড নিশ্চিত করুন",
+  "passwords_do_not_match": "পাসওয়ার্ড মেলে না"
 }

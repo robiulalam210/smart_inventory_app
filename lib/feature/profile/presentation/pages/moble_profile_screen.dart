@@ -20,6 +20,7 @@ import '../widget/company_info.dart';
 import '../widget/show_theme_color_bottom_sheet.dart';
 import '../widget/user_profile.dart';
 import 'buildPermissionModules.dart';
+import 'mobile_change_password.dart';
 
 class MobileProfileScreen extends StatefulWidget {
   const MobileProfileScreen({super.key});
@@ -30,18 +31,11 @@ class MobileProfileScreen extends StatefulWidget {
 
 class _MobileProfileScreenState extends State<MobileProfileScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _passwordFormKey = GlobalKey<FormState>();
 
   final TextEditingController _firstNameController = TextEditingController();
   final TextEditingController _lastNameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
-
-  final TextEditingController _currentPasswordController =
-      TextEditingController();
-  final TextEditingController _newPasswordController = TextEditingController();
-  final TextEditingController _confirmPasswordController =
-      TextEditingController();
 
   bool _isUploading = false;
   double _uploadProgress = 0.0;
@@ -65,9 +59,7 @@ class _MobileProfileScreenState extends State<MobileProfileScreen> {
     _lastNameController.dispose();
     _emailController.dispose();
     _phoneController.dispose();
-    _currentPasswordController.dispose();
-    _newPasswordController.dispose();
-    _confirmPasswordController.dispose();
+
     super.dispose();
   }
 
@@ -540,7 +532,12 @@ class _MobileProfileScreenState extends State<MobileProfileScreen> {
                                   icon: Icons.lock,
                                   label: "security".tr(),
                                   color: primary,
-                                  onTap: () => _showSecurityDialog(),
+                                  onTap: () {
+                                    AppRoutes.push(
+                                      context,
+                                      ChangePasswordScreen(),
+                                    );
+                                  },
                                 ),
                               ),
                             ],
@@ -916,105 +913,6 @@ class _MobileProfileScreenState extends State<MobileProfileScreen> {
     );
   }
 
-  void _showSecurityDialog() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          backgroundColor: AppColors.bottomNavBg(context),
-          title: Text('change_password'.tr()),
-          content: SingleChildScrollView(
-            child: Form(
-              key: _passwordFormKey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextFormField(
-                    controller: _currentPasswordController,
-                    decoration: InputDecoration(
-                      labelText: 'current_password'.tr(),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      prefixIcon: const Icon(Icons.lock),
-                    ),
-                    obscureText: true,
-                    validator: (value) => (value == null || value.isEmpty)
-                        ? 'please_enter_current_password'.tr()
-                        : null,
-                  ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _newPasswordController,
-                    decoration: InputDecoration(
-                      labelText: 'new_password'.tr(),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      prefixIcon: const Icon(Icons.lock_outline),
-                    ),
-                    obscureText: true,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'please_enter_new_password'.tr();
-                      }
-                      if (value.length < 6) return 'password_min_length_6'.tr();
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _confirmPasswordController,
-                    decoration: InputDecoration(
-                      labelText: 'confirm_new_password'.tr(),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      prefixIcon: const Icon(Icons.lock_reset),
-                    ),
-                    obscureText: true,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'please_confirm_new_password'.tr();
-                      }
-                      if (value != _newPasswordController.text) {
-                        return 'passwords_do_not_match'.tr();
-                      }
-                      return null;
-                    },
-                  ),
-                ],
-              ),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text('cancel'.tr()),
-            ),
-            BlocBuilder<ProfileBloc, ProfileState>(
-              builder: (context, state) {
-                return ElevatedButton(
-                  onPressed: state is PasswordChanging
-                      ? null
-                      : () {
-                          if (_passwordFormKey.currentState!.validate()) {
-                            _changePassword();
-                            Navigator.pop(context);
-                          }
-                        },
-                  child: state is PasswordChanging
-                      ? const CircularProgressIndicator()
-                      : Text('change_password'.tr()),
-                );
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   // ---------------- Profile update handlers ----------------
 
   void _handleStateChanges(BuildContext context, ProfileState state) {
@@ -1045,7 +943,6 @@ class _MobileProfileScreenState extends State<MobileProfileScreen> {
         icon: Icons.check_circle,
         primaryColor: Colors.green,
       );
-      _clearPasswordFields();
     } else if (state is PasswordChangeFailed) {
       _loadProfileData();
       showCustomToast(
@@ -1132,24 +1029,6 @@ class _MobileProfileScreenState extends State<MobileProfileScreen> {
     }
   }
 
-  void _changePassword() {
-    if (_passwordFormKey.currentState!.validate()) {
-      context.read<ProfileBloc>().add(
-        ChangePassword(
-          currentPassword: _currentPasswordController.text,
-          newPassword: _newPasswordController.text,
-          context: context,
-        ),
-      );
-    }
-  }
-
-  void _clearPasswordFields() {
-    _currentPasswordController.clear();
-    _newPasswordController.clear();
-    _confirmPasswordController.clear();
-  }
-
   Widget _menuItem(
     IconData icon,
     String label,
@@ -1202,7 +1081,9 @@ class _MobileProfileScreenState extends State<MobileProfileScreen> {
             width: 42,
             height: 42,
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.11),
+              color: Theme.of(
+                context,
+              ).colorScheme.primary.withValues(alpha: 0.11),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(
