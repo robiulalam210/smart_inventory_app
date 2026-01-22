@@ -302,6 +302,8 @@ class _SalesScreenState extends State<MobileSalesScreen> {
 
     final url = Uri.parse('$apiBaseUrl/?sku=${Uri.encodeQueryComponent(sku)}');
 
+    print("url ${url}");
+    print("_authToken ${_authToken}");
     try {
       final response = await http.get(
         url,
