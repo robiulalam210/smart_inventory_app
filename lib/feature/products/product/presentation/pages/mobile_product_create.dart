@@ -198,19 +198,23 @@ class _ProductsFormState extends State<MobileProductCreate> {
                     children: [
                       // First Row: Category and Unit
                       Wrap(
+                        runSpacing: 8,
+                        spacing: 0,
                         children: [
                           SizedBox(child: _buildCategoryDropdown()),
                           const SizedBox(width: 5),
                           SizedBox(child: _buildUnitDropdown()),
                         ],
                       ),
-
+gapH8,
                       // Second Row: Groups, Brand, Source
-                      Row(
+                      Wrap(
+                        runSpacing: 8,
+                        spacing: 0,
                         children: [
-                          Expanded(child: _buildGroupsDropdown()),
+                          SizedBox(child: _buildGroupsDropdown()),
                           const SizedBox(width: 5),
-                          Expanded(child: _buildSourceDropdown()),
+                          SizedBox(child: _buildSourceDropdown()),
                         ],
                       ),
 
@@ -242,6 +246,7 @@ class _ProductsFormState extends State<MobileProductCreate> {
 
                       // Fifth Row: Discount Toggle
                       Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Expanded(child: _buildDiscountAppliedToggle()),
                           const SizedBox(width: 8),
@@ -251,7 +256,7 @@ class _ProductsFormState extends State<MobileProductCreate> {
                                 return Visibility(
                                   visible: productsBloc.isDiscountApplied,
                                   child: Row(
-                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     mainAxisAlignment: MainAxisAlignment.end,
                                     children: [
                                       Expanded(
@@ -640,14 +645,16 @@ class _ProductsFormState extends State<MobileProductCreate> {
 
   Widget _buildDiscountAppliedToggle() {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 0),
+      height: 43,
+      padding: const EdgeInsets.symmetric(vertical: 2,horizontal: 4),
       decoration: BoxDecoration(
         color: AppColors.bottomNavBg(context),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: Colors.grey[300]!),
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text(
             'Apply Discount',
@@ -816,7 +823,7 @@ class _ProductsFormState extends State<MobileProductCreate> {
       body["opening_stock"] = productsBloc.productOpeningStockController.text;
     }
     if (productsBloc.productAlertQuantityController.text.isNotEmpty &&
-        productsBloc.productAlertQuantityController.text != "5") {
+        productsBloc.productAlertQuantityController.text != "2") {
       body["alert_quantity"] = productsBloc.productAlertQuantityController.text;
     }
 
@@ -834,11 +841,11 @@ class _ProductsFormState extends State<MobileProductCreate> {
         body["discount_value"] =
             productsBloc.productDiscountValueController.text;
         body["discount_type"] = productsBloc.selectedDiscountType;
-        body["discount_applied_on"] = "true";
+        body["discount_applied_on"] = true;
       }
     } else {
       // Ensure discount is not applied
-      body["discount_applied_on"] = "false";
+      body["discount_applied_on"] = false; // Boolean, not string
     }
 
     if (_isEditMode) {

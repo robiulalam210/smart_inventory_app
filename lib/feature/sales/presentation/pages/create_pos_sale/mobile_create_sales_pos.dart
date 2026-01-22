@@ -463,7 +463,7 @@ class _SalesScreenState extends State<MobileSalesScreen> {
 
   Widget _buildTopFormSection(CreatePosSaleBloc bloc) {
     final user = context.read<ProfileBloc>().permissionModel?.data?.user;
-
+    final isAdmin = user?.role == "SUPER_ADMIN" || user?.role == "ADMIN";
     // compact single column arrangement for mobile
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -514,7 +514,7 @@ class _SalesScreenState extends State<MobileSalesScreen> {
         ),
 
         gapH8,
-        if(user?.role=="Super Admin"||user?.role==" Admin")
+        if(isAdmin)
 
           BlocBuilder<UserBloc, UserState>(
           builder: (context, state) {
@@ -2223,6 +2223,7 @@ class _SalesScreenState extends State<MobileSalesScreen> {
     final netTotal = calculateAllFinalTotal();
     final paidAmount = double.tryParse(bloc.payableAmount.text.trim()) ?? 0;
     final user = context.read<ProfileBloc>().permissionModel?.data?.user;
+    final isAdmin = user?.role == "SUPER_ADMIN" || user?.role == "ADMIN";
 
     Map<String, dynamic> body = {
       "type": "normal_sale",
@@ -2231,7 +2232,7 @@ class _SalesScreenState extends State<MobileSalesScreen> {
             .parse(bloc.dateEditingController.text.trim(), true),
         "yyyy-MM-dd",
       ),
-      "sale_by": (user?.role == "Super Admin" || user?.role == "Admin")
+      "sale_by": (isAdmin)
           ? bloc.selectSalesModel?.id?.toString() ?? ''
           : user?.id?.toString() ?? '',
       "overall_vat_type": selectedOverallVatType.toLowerCase(),

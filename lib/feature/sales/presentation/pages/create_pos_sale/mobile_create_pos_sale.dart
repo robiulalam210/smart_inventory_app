@@ -1,4 +1,3 @@
-
 import 'dart:developer';
 
 import 'package:flutter/cupertino.dart';
@@ -103,7 +102,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
 
     // Find matched user
     final matchedUser = userList.firstWhere(
-          (user) => user.id == loginUserId,
+      (user) => user.id == loginUserId,
       orElse: () => userList.first,
     );
 
@@ -117,17 +116,11 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
     super.dispose();
   }
 
-
-
-
   void _updateChangeAmount() {
     final bloc = context.read<CreatePosSaleBloc>();
     final payableAmount = double.tryParse(bloc.payableAmount.text) ?? 0.0;
     final netTotal = calculateAllFinalTotal();
     final changeAmount = payableAmount - netTotal;
-
-
-
 
     setState(() {
       changeAmountController.text = changeAmount.toStringAsFixed(2);
@@ -160,7 +153,16 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
   double calculateTotalForAllProducts() {
     double totalSum = 0;
     for (var product in products) {
-      totalSum += (product["total"] ?? 0).toDouble();
+      final totalValue = product["total"] ?? 0;
+
+      // Convert to double safely
+      if (totalValue is int) {
+        totalSum += totalValue.toDouble();
+      } else if (totalValue is String) {
+        totalSum += double.tryParse(totalValue) ?? 0;
+      } else if (totalValue is double) {
+        totalSum += totalValue;
+      }
     }
     return totalSum;
   }
@@ -168,7 +170,16 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
   double calculateTotalTicketForAllProducts() {
     double totalSum = 0;
     for (var product in products) {
-      totalSum += (product["ticket_total"] ?? 0).toDouble();
+      final ticketTotalValue = product["ticket_total"] ?? 0;
+
+      // Convert to double safely
+      if (ticketTotalValue is int) {
+        totalSum += ticketTotalValue.toDouble();
+      } else if (ticketTotalValue is String) {
+        totalSum += double.tryParse(ticketTotalValue) ?? 0;
+      } else if (ticketTotalValue is double) {
+        totalSum += ticketTotalValue;
+      }
     }
     return totalSum;
   }
@@ -181,19 +192,34 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
       double productDiscount = 0;
       double ticketTotal = 0;
 
-      final discountValue = product["discount"] ?? 0;
+      final discountValue = product["discount_value"] ?? 0;
       final ticketTotalValue = product["ticket_total"] ?? 0;
 
-      // Convert both to double safely
-      productDiscount = discountValue is String
-          ? double.tryParse(discountValue) ?? 0
-          : (discountValue is num ? discountValue.toDouble() : 0);
+      // Convert both to double safely - handle int, string, and double
+      if (discountValue is int) {
+        productDiscount = discountValue.toDouble();
+      } else if (discountValue is String) {
+        productDiscount = double.tryParse(discountValue) ?? 0;
+      } else if (discountValue is double) {
+        productDiscount = discountValue;
+      } else {
+        productDiscount = 0;
+      }
 
-      ticketTotal = ticketTotalValue is String
-          ? double.tryParse(ticketTotalValue) ?? 0
-          : (ticketTotalValue is num ? ticketTotalValue.toDouble() : 0);
+      if (ticketTotalValue is int) {
+        ticketTotal = ticketTotalValue.toDouble();
+      } else if (ticketTotalValue is String) {
+        ticketTotal = double.tryParse(ticketTotalValue) ?? 0;
+      } else if (ticketTotalValue is double) {
+        ticketTotal = ticketTotalValue;
+      } else {
+        ticketTotal = 0;
+      }
 
-      if (product["discount_type"] == 'percent') {
+      final discountType = product["discount_type"]?.toString() ?? "fixed";
+
+      if (discountType.toLowerCase() == 'percentage' ||
+          discountType.toLowerCase() == 'percent') {
         productDiscount = ticketTotal * (productDiscount / 100);
       }
 
@@ -260,32 +286,89 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
 
     final priceText = controllers[index]?["price"]?.text ?? "0";
     final quantityText = controllers[index]?["quantity"]?.text ?? "0";
-    final discountText = controllers[index]?["discount"]?.text ?? "0";
-    final discountType = products[index]["discount_type"] as String? ?? "fixed";
 
     final price = double.tryParse(priceText) ?? 0;
     final quantity = int.tryParse(quantityText) ?? 0;
-    final discountValue = double.tryParse(discountText) ?? 0;
 
-    // Calculate ticket total (price * quantity)
-    double ticketTotal = price * quantity;
+    final productData = products[index];
+    final product = productData["product"] as ProductModelStockModel?;
+
+    // 🔴 Stock validation
+    if (product != null) {
+      final stockQty = product.stockQty ?? 0;
+      final openingStock = product.openingStock ?? 0;
+      final availableStock = stockQty > 0 ? stockQty : openingStock;
+
+      if (quantity > availableStock) {
+        // Reset to maximum available stock
+        final maxQuantity = availableStock;
+        controllers[index]!["quantity"]!.text = maxQuantity.toString();
+        products[index]["quantity"] = maxQuantity.toString();
+
+        showCustomToast(
+          context: context,
+          title: 'Stock Adjusted!',
+          description: "Quantity reduced to available stock: $maxQuantity",
+          icon: Icons.info,
+          primaryColor: Colors.blue,
+        );
+
+        // Continue with adjusted quantity
+        return updateTotal(index);
+      }
+    }
+
+    /// 🔹 Get proper final price PER UNIT
+    double finalPricePerUnit = price; // Default to selling price
+
+    // Check if product has auto-discount
+    if (product != null) {
+      final bool hasAutoDiscount = product.discountApplied == true;
+
+      if (hasAutoDiscount && product.finalPrice != null) {
+        // Use backend-calculated final_price per unit
+        finalPricePerUnit = product.finalPrice!;
+      } else if (product.sellingPrice != null) {
+        // Fallback to selling price per unit
+        finalPricePerUnit = product.sellingPrice!;
+      }
+    }
+
+    /// 🔹 Ticket total (without discount) = Original Price * Quantity
+    final double ticketTotal = price * quantity;
     controllers[index]?["ticket_total"]?.text = ticketTotal.toStringAsFixed(2);
     products[index]["ticket_total"] = ticketTotal;
 
-    // Calculate discount amount
-    double discountAmount = 0;
-    if (discountType == 'fixed') {
-      discountAmount = discountValue;
-    } else if (discountType == 'percent') {
-      discountAmount = ticketTotal * (discountValue / 100);
+    /// 🔹 Final total (with auto-discount if applied) = Final Price Per Unit * Quantity
+    final double total = finalPricePerUnit * quantity;
+
+    controllers[index]?["total"]?.text = total.toStringAsFixed(2);
+    products[index]["total"] = total;
+
+    /// 🔹 Store auto-discount info for display
+    if (product != null && product.discountApplied == true) {
+      products[index]["discountApplied"] = true;
+      products[index]["discount_type"] = product.discountType ?? "fixed";
+
+      // Ensure discount_value is stored as double
+      products[index]["discount_value"] = product.discountValue ?? 0.0;
+
+      // Store final price per unit
+      products[index]["final_price"] = finalPricePerUnit;
+
+      // Auto-fill discount display (read-only)
+      if (product.discountValue != null) {
+        controllers[index]?["discount"]?.text = product.discountValue!
+            .toStringAsFixed(2);
+      } else {
+        controllers[index]?["discount"]?.text = "0";
+      }
+    } else {
+      products[index]["discountApplied"] = false;
+      products[index]["discount_type"] = "fixed";
+      products[index]["discount_value"] = 0.0;
+      products[index]["final_price"] = price;
     }
-
-    // Calculate final total (ticket total - discount)
-    double finalTotal = ticketTotal - discountAmount;
-    finalTotal = finalTotal < 0 ? 0.0 : finalTotal;
-
-    controllers[index]?["total"]?.text = finalTotal.toStringAsFixed(2);
-    products[index]["total"] = finalTotal;
 
     setState(() {});
   }
@@ -323,9 +406,9 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
     // Calculate final total
     double finalTotal =
         totalAfterDiscount +
-            overallVat +
-            overallServiceCharge +
-            overallDeliveryCharge;
+        overallVat +
+        overallServiceCharge +
+        overallDeliveryCharge;
 
     return finalTotal;
   }
@@ -333,7 +416,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
   void onProductChanged(int index, ProductModelStockModel? newVal) {
     if (newVal == null) return;
 
-    // 🔴 Check if product already exists (except current index)
+    // 🔴 Prevent duplicate product
     final alreadyAdded = products.asMap().entries.any((entry) {
       return entry.key != index && entry.value["product_id"] == newVal.id;
     });
@@ -349,9 +432,12 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
       return;
     }
 
-    final totalStock = newVal.stockQty ?? 0;
+    // 🔴 Stock check
+    final stockQty = newVal.stockQty ?? 0;
+    final openingStock = newVal.openingStock ?? 0;
+    final availableStock = stockQty > 0 ? stockQty : openingStock;
 
-    if (totalStock <= 0) {
+    if (availableStock <= 0) {
       showCustomToast(
         context: context,
         title: 'Alert!',
@@ -362,22 +448,50 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
       return;
     }
 
-    // ✅ Set product data
-    products[index]["product"] = newVal;
-    products[index]["product_id"] = newVal.id;
-    products[index]["price"] = newVal.sellingPrice;
-    products[index]["discount"] = newVal.discountValue;
-    products[index]["discount_type"] = newVal.discountType ?? "fixed";
-    products[index]["discountApplied"] = newVal.discountApplied;
+    setState(() {
+      // ✅ Basic product data
+      products[index]["product"] = newVal;
+      products[index]["product_id"] = newVal.id;
 
-    controllers[index]!["price"]!.text = newVal.sellingPrice.toString();
+      // ✅ Set price to selling price - ensure it's not null
+      final sellingPrice = newVal.sellingPrice ?? 0.0;
+      controllers[index]!["price"]!.text = sellingPrice.toStringAsFixed(2);
 
-    // ✅ Discount handling
-    controllers[index]!["discount"]!.text = newVal.discountApplied == true
-        ? newVal.discountValue.toString()
-        : "0";
+      // ✅ Auto-discount handling
+      final bool hasAutoDiscount = newVal.discountApplied == true;
+      products[index]["discountApplied"] = hasAutoDiscount;
 
-    updateTotal(index);
+      double finalPricePerUnit = sellingPrice;
+      if (hasAutoDiscount && newVal.finalPrice != null) {
+        finalPricePerUnit = newVal.finalPrice!;
+        products[index]["discount_type"] = newVal.discountType ?? "fixed";
+        products[index]["discount_value"] = newVal.discountValue ?? 0.0;
+      } else {
+        products[index]["discount_type"] = "fixed";
+        products[index]["discount_value"] = 0.0;
+      }
+
+      products[index]["final_price"] = finalPricePerUnit;
+
+      // ✅ Set initial quantity to 1, but check if stock is available
+      int initialQuantity = 1;
+      if (availableStock < 1) {
+        initialQuantity = 0;
+        showCustomToast(
+          context: context,
+          title: 'Stock Warning!',
+          description: "Product has very low stock: $availableStock",
+          icon: Icons.warning,
+          primaryColor: Colors.orange,
+        );
+      }
+
+      controllers[index]!["quantity"]!.text = initialQuantity.toString();
+      products[index]["quantity"] = initialQuantity.toString();
+
+      // ✅ Calculate initial total
+      updateTotal(index);
+    });
   }
 
   int currentStep = 0;
@@ -594,9 +708,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
       return;
     }
     final user = context.read<ProfileBloc>().permissionModel?.data?.user;
-
-    final isAdmin =
-        user?.role == "Super Admin" || user?.role == "Admin";
+    final isAdmin = user?.role == "SUPER_ADMIN" || user?.role == "ADMIN";
 
     if (isAdmin && bloc.selectSalesModel == null) {
       showCustomToast(
@@ -608,7 +720,6 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
       );
       return;
     }
-
 
     if (bloc.dateEditingController.text.isEmpty) {
       showCustomToast(
@@ -674,7 +785,8 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
           showCustomToast(
             context: context,
             title: 'Stock Error',
-            description: 'Insufficient stock for ${product.name}. Available: $stockQty',
+            description:
+                'Insufficient stock for ${product.name}. Available: $stockQty',
             icon: Icons.error,
             primaryColor: Colors.red,
           );
@@ -768,7 +880,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
           context: context,
           title: 'Validation Error',
           description:
-          "Walk-in customer must pay EXACT amount: ${netTotal.toStringAsFixed(2)}",
+              "Walk-in customer must pay EXACT amount: ${netTotal.toStringAsFixed(2)}",
           icon: Icons.error,
           primaryColor: Colors.red,
         );
@@ -829,7 +941,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
 
   Widget _buildMobileTopFormSection(CreatePosSaleBloc bloc) {
     final user = context.read<ProfileBloc>().permissionModel?.data?.user;
-
+    final isAdmin = user?.role == "SUPER_ADMIN" || user?.role == "ADMIN";
     return Form(
       key: _formKeyStep1,
       child: Column(
@@ -848,9 +960,9 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                     isRequired: true,
                     value: bloc.selectClintModel,
                     itemList:
-                    [
-                      CustomerActiveModel(name: 'Walk-in-customer', id: -1),
-                    ] +
+                        [
+                          CustomerActiveModel(name: 'Walk-in-customer', id: -1),
+                        ] +
                         context.read<CustomerBloc>().activeCustomer,
                     onChanged: (newVal) {
                       bloc.selectClintModel = newVal;
@@ -870,33 +982,31 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                       setState(() {});
                     },
                     validator: (value) =>
-                    value == null ? 'Please select Customer' : null,
-
+                        value == null ? 'Please select Customer' : null,
                   );
                 },
               ),
               gapH8,
-              if(user?.role=="Super Admin"||user?.role==" Admin")
-              BlocBuilder<UserBloc, UserState>(
-                builder: (context, state) {
-                  return AppDropdown(
-                    label: "Sales By",
-                    hint: "Select Sales",
-                    isSearch: true,
-                    isNeedAll: false,
-                    isRequired: true,
-                    value: bloc.selectSalesModel,
-                    itemList: context.read<UserBloc>().list,
-                    onChanged: (newVal) {
-                      bloc.selectSalesModel = newVal;
-                      setState(() {});
-                    },
-                    validator: (value) =>
-                    value == null ? 'Please select Sales' : null,
-
-                  );
-                },
-              ),
+              if (isAdmin)
+                BlocBuilder<UserBloc, UserState>(
+                  builder: (context, state) {
+                    return AppDropdown(
+                      label: "Sales By",
+                      hint: "Select Sales",
+                      isSearch: true,
+                      isNeedAll: false,
+                      isRequired: true,
+                      value: bloc.selectSalesModel,
+                      itemList: context.read<UserBloc>().list,
+                      onChanged: (newVal) {
+                        bloc.selectSalesModel = newVal;
+                        setState(() {});
+                      },
+                      validator: (value) =>
+                          value == null ? 'Please select Sales' : null,
+                    );
+                  },
+                ),
               CustomInputField(
                 isRequired: true,
                 readOnly: true,
@@ -906,10 +1016,10 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                 autofillHints: AutofillHints.name,
                 fillColor: AppColors.whiteColor(context),
                 validator: (value) =>
-                value!.isEmpty ? 'Please enter date' : null,
+                    value!.isEmpty ? 'Please enter date' : null,
                 onTap: _selectDate,
               ),
-              SizedBox(height: 20,)
+              SizedBox(height: 20),
             ],
           ),
         ],
@@ -917,369 +1027,767 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
     );
   }
 
+  // Widget _buildMobileProductListSection(CreatePosSaleBloc bloc) {
+  //   return Form(
+  //     key: _formKeyStep2,
+  //     child: Column(
+  //       mainAxisSize: MainAxisSize.min,
+  //       crossAxisAlignment: CrossAxisAlignment.start,
+  //       children: [
+  //         ...products.asMap().entries.map((entry) {
+  //           print(entry);
+  //           final index = entry.key;
+  //           final product = entry.value;
+  //           final discountApplied = product["discountApplied"] == true;
+  //
+  //           return Container(
+  //             margin: const EdgeInsets.only(bottom: 6),
+  //             padding: const EdgeInsets.all(6.0),
+  //             decoration: BoxDecoration(
+  //               color: AppColors.bottomNavBg(context),
+  //               border: Border.all(color: Colors.grey[300]!),
+  //               borderRadius: BorderRadius.circular(8),
+  //             ),
+  //             child: Column(
+  //               mainAxisSize: MainAxisSize.min,
+  //               crossAxisAlignment: CrossAxisAlignment.start,
+  //               children: [
+  //                 // Product header
+  //                 Row(
+  //                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //                   children: [
+  //                     Text(
+  //                       "Product ${index + 1}",
+  //                       style: AppTextStyle.cardTitle(context),
+  //                     ),
+  //                     if (index > 0)
+  //                       IconButton(
+  //                         icon: const Icon(
+  //                           Icons.delete,
+  //                           color: Colors.red,
+  //                           size: 20,
+  //                         ),
+  //                         onPressed: () => removeProduct(index),
+  //                         padding: EdgeInsets.zero,
+  //                       )
+  //                     else
+  //                       IconButton(
+  //                         icon: const Icon(Icons.add_circle, color: Colors.green),
+  //                         onPressed: addProduct,
+  //                       ),
+  //                   ],
+  //                 ),
+  //                 const SizedBox(height: 6),
+  //
+  //                 // Category
+  //                 BlocBuilder<CategoriesBloc, CategoriesState>(
+  //                   builder: (context, state) {
+  //                     final selectedCategory = categoriesBloc.selectedState;
+  //                     final categoryList = categoriesBloc.list;
+  //
+  //                     return AppDropdown(
+  //                       label: "Category",
+  //                       hint: selectedCategory.isEmpty
+  //                           ? "Select Category"
+  //                           : selectedCategory,
+  //                       isRequired: false,
+  //                       isNeedAll: true,
+  //                       isLabel: true,
+  //                       isSearch: true,
+  //                       value: selectedCategory.isEmpty ? null : selectedCategory,
+  //                       itemList: categoryList.map((e) => e.name ?? "").toList(),
+  //                       onChanged: (newVal) {
+  //                         setState(() {
+  //                           categoriesBloc.selectedState = newVal.toString();
+  //                           final matchingCategory = categoryList.firstWhere(
+  //                                 (category) =>
+  //                             category.name.toString() == newVal.toString(),
+  //                             orElse: () => CategoryModel(),
+  //                           );
+  //                           categoriesBloc.selectedStateId =
+  //                               matchingCategory.id?.toString() ?? "";
+  //                           product["product"] = null;
+  //                           product["product_id"] = null;
+  //                           controllers[index]!["price"]!.text = "0";
+  //                           controllers[index]!["quantity"]!.text = "1";
+  //                           controllers[index]!["discount"]!.text = "0";
+  //                           updateTotal(index);
+  //                         });
+  //                       },
+  //
+  //                     );
+  //                   },
+  //                 ),
+  //                 gapH8,
+  //
+  //                 // Product
+  //                 BlocBuilder<ProductsBloc, ProductsState>(
+  //                   builder: (context, state) {
+  //                     final selectedCategoryId = categoriesBloc.selectedStateId;
+  //                     final selectedProductIds = products
+  //                         .where((p) => p["product_id"] != null)
+  //                         .map<int>((p) => p["product_id"])
+  //                         .toList();
+  //
+  //                     final filteredProducts = context
+  //                         .read<ProductsBloc>()
+  //                         .productList
+  //                         .where((item) {
+  //                       final categoryMatch = selectedCategoryId.isEmpty
+  //                           ? true
+  //                           : item.category?.toString() == selectedCategoryId;
+  //                       final notDuplicate =
+  //                           !selectedProductIds.contains(item.id) ||
+  //                               item.id == product["product_id"];
+  //                       return categoryMatch && notDuplicate;
+  //                     })
+  //                         .toList();
+  //
+  //                     return AppDropdown<ProductModelStockModel>(
+  //                       isRequired: true,
+  //                       isLabel: true,
+  //                       isSearch: true,
+  //                       label: "Product",
+  //                       hint: selectedCategoryId.isEmpty
+  //                           ? "Select Category First"
+  //                           : "Select Product",
+  //                       value: product["product"],
+  //                       itemList: filteredProducts,
+  //                       onChanged: (newVal) => onProductChanged(index, newVal),
+  //                       validator: (value) =>
+  //                       value == null ? 'Please select Product' : null,
+  //
+  //                     );
+  //                   },
+  //                 ),
+  //
+  //                 // Price & Quantity Row
+  //                 Row(
+  //                   children: [
+  //                     Expanded(
+  //                       child: Column(
+  //                         crossAxisAlignment: CrossAxisAlignment.start,
+  //                         children: [
+  //                           Text("Price", style: AppTextStyle.bodySmall(context)),
+  //                           const SizedBox(height: 4),
+  //                           TextFormField(
+  //                             style: AppTextStyle.cardLevelText(context),
+  //                             controller: controllers[index]?["price"],
+  //                             keyboardType: TextInputType.number,
+  //                             readOnly: true,
+  //                             decoration: InputDecoration(
+  //                               filled: true,
+  //                               fillColor: AppColors.bottomNavBg(context),
+  //                               contentPadding: const EdgeInsets.all(10),
+  //                               border: OutlineInputBorder(
+  //                                 borderRadius: BorderRadius.circular(5),
+  //                                 borderSide: BorderSide(
+  //                                   color: AppColors.primaryColor(
+  //                                     context,
+  //                                   ).withValues(alpha: 0.3),
+  //                                 ),
+  //                               ),
+  //                               enabledBorder: OutlineInputBorder(
+  //                                 borderRadius: BorderRadius.circular(5),
+  //                                 borderSide: BorderSide(
+  //                                   color: AppColors.primaryColor(
+  //                                     context,
+  //                                   ).withValues(alpha: 0.3),
+  //                                 ),
+  //                               ),
+  //                             ),
+  //                           ),
+  //                         ],
+  //                       ),
+  //                     ),
+  //                     const SizedBox(width: 8),
+  //                     Expanded(
+  //                       child: Column(
+  //                         crossAxisAlignment: CrossAxisAlignment.start,
+  //                         children: [
+  //                           Text(
+  //                             "Quantity",
+  //                             style: AppTextStyle.bodySmall(context),
+  //                           ),
+  //                           const SizedBox(height: 4),
+  //                           Container(
+  //                             decoration: BoxDecoration(
+  //                               border: Border.all(
+  //                                 color: AppColors.primaryColor(
+  //                                   context,
+  //                                 ).withValues(alpha: 0.3),
+  //                               ),
+  //                               borderRadius: BorderRadius.circular(5),
+  //                             ),
+  //                             child: Row(
+  //                               children: [
+  //                                 IconButton(
+  //                                   icon: const Icon(Icons.remove, size: 18),
+  //                                   onPressed: () {
+  //                                     int? currentQuantity = int.tryParse(
+  //                                       controllers[index]?["quantity"]?.text ??
+  //                                           "0",
+  //                                     );
+  //                                     if (currentQuantity != null &&
+  //                                         currentQuantity > 1) {
+  //                                       controllers[index]!["quantity"]!.text =
+  //                                           (currentQuantity - 1).toString();
+  //                                       products[index]["quantity"] =
+  //                                           controllers[index]!["quantity"]!.text;
+  //                                       updateTotal(index);
+  //                                     }
+  //                                   },
+  //                                   padding: EdgeInsets.zero,
+  //                                   constraints: const BoxConstraints(
+  //                                     minWidth: 36,
+  //                                   ),
+  //                                 ),
+  //                                 Expanded(
+  //                                   child: Text(
+  //                                     controllers[index]!["quantity"]!.text,
+  //                                     textAlign: TextAlign.center,
+  //                                     style: AppTextStyle.cardTitle(context),
+  //                                   ),
+  //                                 ),
+  //                                 IconButton(
+  //                                   padding: EdgeInsets.zero,
+  //                                   icon: const Icon(Icons.add, size: 18),
+  //                                   onPressed: () {
+  //                                     int currentQuantity =
+  //                                         int.tryParse(
+  //                                           controllers[index]!["quantity"]!.text,
+  //                                         ) ??
+  //                                             0;
+  //                                     controllers[index]!["quantity"]!.text =
+  //                                         (currentQuantity + 1).toString();
+  //                                     products[index]["quantity"] =
+  //                                         controllers[index]!["quantity"]!.text;
+  //                                     updateTotal(index);
+  //                                   },
+  //                                   constraints: const BoxConstraints(
+  //                                     minWidth: 36,
+  //                                   ),
+  //                                 ),
+  //                               ],
+  //                             ),
+  //                           ),
+  //                         ],
+  //                       ),
+  //                     ),
+  //                   ],
+  //                 ),
+  //
+  //                 // Discount Section
+  //                 Column(
+  //                   crossAxisAlignment: CrossAxisAlignment.start,
+  //                   children: [
+  //                     Text("Discount", style: AppTextStyle.bodySmall(context)),
+  //                     const SizedBox(height: 4),
+  //                     Row(
+  //                       crossAxisAlignment: CrossAxisAlignment.start,
+  //                       children: [
+  //                         Expanded(
+  //                           child: AbsorbPointer(
+  //                             absorbing: discountApplied,
+  //                             child: CupertinoSegmentedControl<String>(
+  //                               padding: EdgeInsets.zero,
+  //                               children: {
+  //                                 'fixed': Padding(
+  //                                   padding: const EdgeInsets.symmetric(
+  //                                     horizontal: 4,
+  //                                     vertical: 8,
+  //                                   ),
+  //                                   child: Text(
+  //                                     'TK',
+  //                                     style: TextStyle(
+  //                                       fontSize: 12,
+  //                                       fontFamily: GoogleFonts.playfairDisplay()
+  //                                           .fontFamily,
+  //                                       color: product["discount_type"] == 'fixed'
+  //                                           ? Colors.white
+  //                                           : Colors.black,
+  //                                     ),
+  //                                   ),
+  //                                 ),
+  //                                 'percent': Padding(
+  //                                   padding: const EdgeInsets.symmetric(
+  //                                     horizontal: 4,
+  //                                     vertical: 8,
+  //                                   ),
+  //                                   child: Text(
+  //                                     '%',
+  //                                     style: TextStyle(
+  //                                       fontSize: 12,
+  //                                       fontFamily: GoogleFonts.playfairDisplay()
+  //                                           .fontFamily,
+  //                                       color:
+  //                                       product["discount_type"] == 'percent'
+  //                                           ? Colors.white
+  //                                           : Colors.black,
+  //                                     ),
+  //                                   ),
+  //                                 ),
+  //                               },
+  //                               onValueChanged: discountApplied
+  //                                   ? (_) {}
+  //                                   : (value) {
+  //                                 setState(() {
+  //                                   product["discount_type"] = value;
+  //                                   updateTotal(index);
+  //                                 });
+  //                               },
+  //                               groupValue: product["discount_type"],
+  //                               unselectedColor: Colors.grey[300],
+  //                               selectedColor: AppColors.primaryColor(context),
+  //                               borderColor: AppColors.primaryColor(context),
+  //                             ),
+  //                           ),
+  //                         ),
+  //                         const SizedBox(width: 8),
+  //                         Expanded(
+  //                           child: TextFormField(
+  //                             controller: controllers[index]?["discount"],
+  //                             style: AppTextStyle.cardLevelText(context),
+  //                             keyboardType: const TextInputType.numberWithOptions(
+  //                               decimal: true,
+  //                             ),
+  //                             readOnly: discountApplied,
+  //                             decoration: InputDecoration(
+  //                               filled: true,
+  //                               fillColor: AppColors.bottomNavBg(context),
+  //                               contentPadding: const EdgeInsets.all(10),
+  //                               border: OutlineInputBorder(
+  //                                 borderRadius: BorderRadius.circular(5),
+  //                                 borderSide: BorderSide(
+  //                                   color: AppColors.primaryColor(
+  //                                     context,
+  //                                   ).withValues(alpha: 0.3),
+  //                                 ),
+  //                               ),
+  //                               enabledBorder: OutlineInputBorder(
+  //                                 borderRadius: BorderRadius.circular(5),
+  //                                 borderSide: BorderSide(
+  //                                   color: AppColors.primaryColor(
+  //                                     context,
+  //                                   ).withValues(alpha: 0.3),
+  //                                 ),
+  //                               ),
+  //                             ),
+  //                             onChanged: discountApplied
+  //                                 ? null
+  //                                 : (value) {
+  //                               products[index]["discount"] =
+  //                                   double.tryParse(value) ?? 0.0;
+  //                               updateTotal(index);
+  //                             },
+  //                           ),
+  //                         ),
+  //                       ],
+  //                     ),
+  //                   ],
+  //                 ),
+  //               ],
+  //             ),
+  //           );
+  //         }),
+  //       ],
+  //     ),
+  //   );
+  // }
+
   Widget _buildMobileProductListSection(CreatePosSaleBloc bloc) {
     return Form(
       key: _formKeyStep2,
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ...products.asMap().entries.map((entry) {
-            final index = entry.key;
-            final product = entry.value;
-            final discountApplied = product["discountApplied"] == true;
+        children: products.asMap().entries.map((entry) {
+          final index = entry.key;
+          final product = entry.value;
+          final bool discountApplied = product["discountApplied"] == true;
 
-            return Container(
-              margin: const EdgeInsets.only(bottom: 6),
-              padding: const EdgeInsets.all(6.0),
-              decoration: BoxDecoration(
-                color: AppColors.bottomNavBg(context),
-                border: Border.all(color: Colors.grey[300]!),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Product header
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "Product ${index + 1}",
-                        style: AppTextStyle.cardTitle(context),
+          // 🔥 SAFELY extract and convert values to double
+          final type = product["discount_type"]?.toString() ?? "fixed";
+          final value = product["discount_value"] ?? 0;
+          final total = product["ticket_total"] ?? 0.0;
+// Inside your product container (Auto Discount Section)
+          final double finalPricePerUnit = product["final_price"] is String
+              ? double.tryParse(product["final_price"]) ?? 0.0
+              : product["final_price"] ?? 0.0;
+
+          final int quantity = int.tryParse(
+              controllers[index]!["quantity"]!.text) ??
+              1;
+
+          final double totalFinalPrice = finalPricePerUnit * quantity;
+          // Convert to double safely
+          final double doubleValue = value is int
+              ? value.toDouble()
+              : value is String
+              ? double.tryParse(value) ?? 0.0
+              : value is double
+              ? value
+              : 0.0;
+
+          final double doubleTotal = total is int
+              ? total.toDouble()
+              : total is String
+              ? double.tryParse(total) ?? 0.0
+              : total is double
+              ? total
+              : 0.0;
+
+          // Discount calculation
+          final double discountAmount =
+              type.toLowerCase() == "percentage" ||
+                  type.toLowerCase() == "percent"
+              ? doubleTotal * (doubleValue / 100)
+              : doubleValue;
+
+          return Container(
+            margin: const EdgeInsets.only(bottom: 4),
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: AppColors.bottomNavBg(context),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.grey.shade300),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                /// HEADER
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Product ${index + 1}",
+                      style: AppTextStyle.cardTitle(context),
+                    ),
+                    IconButton(
+                      icon: Icon(
+                        index == 0 ? HugeIcons.strokeRoundedAddCircle : HugeIcons.strokeRoundedDelete02,
+                        color: index == 0 ? AppColors.primaryColor(context) : AppColors.errorColor(context),
                       ),
-                      if (index > 0)
-                        IconButton(
-                          icon: const Icon(
-                            Icons.delete,
-                            color: Colors.red,
-                            size: 20,
-                          ),
-                          onPressed: () => removeProduct(index),
-                          padding: EdgeInsets.zero,
-                        )
-                      else
-                        IconButton(
-                          icon: const Icon(Icons.add_circle, color: Colors.green),
-                          onPressed: addProduct,
-                        ),
-                    ],
-                  ),
-                  const SizedBox(height: 6),
+                      onPressed: index == 0
+                          ? addProduct
+                          : () => removeProduct(index),
+                    ),
+                  ],
+                ),
 
-                  // Category
-                  BlocBuilder<CategoriesBloc, CategoriesState>(
-                    builder: (context, state) {
-                      final selectedCategory = categoriesBloc.selectedState;
-                      final categoryList = categoriesBloc.list;
+                const SizedBox(height: 6),
+                BlocBuilder<CategoriesBloc, CategoriesState>(
+                  builder: (context, state) {
+                    final selectedCategory = categoriesBloc.selectedState;
+                    final categoryList = categoriesBloc.list;
 
-                      return AppDropdown(
-                        label: "Category",
-                        hint: selectedCategory.isEmpty
-                            ? "Select Category"
-                            : selectedCategory,
-                        isRequired: false,
-                        isNeedAll: true,
-                        isLabel: true,
-                        isSearch: true,
-                        value: selectedCategory.isEmpty ? null : selectedCategory,
-                        itemList: categoryList.map((e) => e.name ?? "").toList(),
-                        onChanged: (newVal) {
-                          setState(() {
-                            categoriesBloc.selectedState = newVal.toString();
-                            final matchingCategory = categoryList.firstWhere(
-                                  (category) =>
-                              category.name.toString() == newVal.toString(),
-                              orElse: () => CategoryModel(),
-                            );
-                            categoriesBloc.selectedStateId =
-                                matchingCategory.id?.toString() ?? "";
-                            product["product"] = null;
-                            product["product_id"] = null;
-                            controllers[index]!["price"]!.text = "0";
-                            controllers[index]!["quantity"]!.text = "1";
-                            controllers[index]!["discount"]!.text = "0";
-                            updateTotal(index);
-                          });
-                        },
+                    return AppDropdown(
+                      label: "Category",
+                      hint: selectedCategory.isEmpty
+                          ? "Select Category"
+                          : selectedCategory,
+                      isRequired: false,
+                      isNeedAll: true,
+                      isLabel: true,
+                      isSearch: true,
+                      value: selectedCategory.isEmpty ? null : selectedCategory,
+                      itemList: categoryList.map((e) => e.name ?? "").toList(),
+                      onChanged: (newVal) {
+                        setState(() {
+                          categoriesBloc.selectedState = newVal.toString();
+                          final matchingCategory = categoryList.firstWhere(
+                            (category) =>
+                                category.name.toString() == newVal.toString(),
+                            orElse: () => CategoryModel(),
+                          );
+                          categoriesBloc.selectedStateId =
+                              matchingCategory.id?.toString() ?? "";
+                          product["product"] = null;
+                          product["product_id"] = null;
+                          controllers[index]!["price"]!.text = "0";
+                          controllers[index]!["quantity"]!.text = "1";
+                          controllers[index]!["discount"]!.text = "0";
+                          updateTotal(index);
+                        });
+                      },
+                    );
+                  },
+                ),
+                gapH8,
 
-                      );
-                    },
-                  ),
-                  gapH8,
+                // Product
+                BlocBuilder<ProductsBloc, ProductsState>(
+                  builder: (context, state) {
+                    final selectedCategoryId = categoriesBloc.selectedStateId;
+                    final selectedProductIds = products
+                        .where((p) => p["product_id"] != null)
+                        .map<int>((p) => p["product_id"])
+                        .toList();
 
-                  // Product
-                  BlocBuilder<ProductsBloc, ProductsState>(
-                    builder: (context, state) {
-                      final selectedCategoryId = categoriesBloc.selectedStateId;
-                      final selectedProductIds = products
-                          .where((p) => p["product_id"] != null)
-                          .map<int>((p) => p["product_id"])
-                          .toList();
+                    final filteredProducts = context
+                        .read<ProductsBloc>()
+                        .productList
+                        .where((item) {
+                          final categoryMatch = selectedCategoryId.isEmpty
+                              ? true
+                              : item.category?.toString() == selectedCategoryId;
+                          final notDuplicate =
+                              !selectedProductIds.contains(item.id) ||
+                              item.id == product["product_id"];
+                          return categoryMatch && notDuplicate;
+                        })
+                        .toList();
 
-                      final filteredProducts = context
-                          .read<ProductsBloc>()
-                          .productList
-                          .where((item) {
-                        final categoryMatch = selectedCategoryId.isEmpty
-                            ? true
-                            : item.category?.toString() == selectedCategoryId;
-                        final notDuplicate =
-                            !selectedProductIds.contains(item.id) ||
-                                item.id == product["product_id"];
-                        return categoryMatch && notDuplicate;
-                      })
-                          .toList();
+                    return AppDropdown<ProductModelStockModel>(
+                      isRequired: true,
+                      isLabel: true,
+                      isSearch: true,
+                      label: "Product",
+                      hint: selectedCategoryId.isEmpty
+                          ? "Select Category First"
+                          : "Select Product",
+                      value: product["product"],
+                      itemList: filteredProducts,
+                      onChanged: (newVal) => onProductChanged(index, newVal),
+                      validator: (value) =>
+                          value == null ? 'Please select Product' : null,
+                    );
+                  },
+                ),
 
-                      return AppDropdown<ProductModelStockModel>(
-                        isRequired: true,
-                        isLabel: true,
-                        isSearch: true,
-                        label: "Product",
-                        hint: selectedCategoryId.isEmpty
-                            ? "Select Category First"
-                            : "Select Product",
-                        value: product["product"],
-                        itemList: filteredProducts,
-                        onChanged: (newVal) => onProductChanged(index, newVal),
-                        validator: (value) =>
-                        value == null ? 'Please select Product' : null,
+                const SizedBox(height: 4),
 
-                      );
-                    },
-                  ),
+                /// PRICE + QTY
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextFormField(
 
-                  // Price & Quantity Row
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text("Price", style: AppTextStyle.bodySmall(context)),
-                            const SizedBox(height: 4),
-                            TextFormField(
-                              style: AppTextStyle.cardLevelText(context),
-                              controller: controllers[index]?["price"],
-                              keyboardType: TextInputType.number,
-                              readOnly: true,
-                              decoration: InputDecoration(
-                                filled: true,
-                                fillColor: AppColors.bottomNavBg(context),
-                                contentPadding: const EdgeInsets.all(10),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(5),
-                                  borderSide: BorderSide(
-                                    color: AppColors.primaryColor(
-                                      context,
-                                    ).withValues(alpha: 0.3),
-                                  ),
-                                ),
-                                enabledBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(5),
-                                  borderSide: BorderSide(
-                                    color: AppColors.primaryColor(
-                                      context,
-                                    ).withValues(alpha: 0.3),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
+                        controller: controllers[index]!["price"],
+                        readOnly: true,
+                        decoration:  InputDecoration(
+                          contentPadding: EdgeInsets.zero,
+
+
+                            labelText: "Original Price"),
                       ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Container(
+                        height: 35,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey.shade400),
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                        child: Row(
                           children: [
-                            Text(
-                              "Quantity",
-                              style: AppTextStyle.bodySmall(context),
-                            ),
-                            const SizedBox(height: 4),
-                            Container(
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                  color: AppColors.primaryColor(
-                                    context,
-                                  ).withValues(alpha: 0.3),
-                                ),
-                                borderRadius: BorderRadius.circular(5),
-                              ),
-                              child: Row(
-                                children: [
-                                  IconButton(
-                                    icon: const Icon(Icons.remove, size: 18),
-                                    onPressed: () {
-                                      int? currentQuantity = int.tryParse(
-                                        controllers[index]?["quantity"]?.text ??
-                                            "0",
-                                      );
-                                      if (currentQuantity != null &&
-                                          currentQuantity > 1) {
-                                        controllers[index]!["quantity"]!.text =
-                                            (currentQuantity - 1).toString();
-                                        products[index]["quantity"] =
-                                            controllers[index]!["quantity"]!.text;
-                                        updateTotal(index);
-                                      }
-                                    },
-                                    padding: EdgeInsets.zero,
-                                    constraints: const BoxConstraints(
-                                      minWidth: 36,
-                                    ),
-                                  ),
-                                  Expanded(
-                                    child: Text(
+                            IconButton(
+                              icon: const Icon(Icons.remove, size: 18),
+                              onPressed: () {
+                                int q =
+                                    int.tryParse(
                                       controllers[index]!["quantity"]!.text,
-                                      textAlign: TextAlign.center,
-                                      style: AppTextStyle.cardTitle(context),
-                                    ),
-                                  ),
-                                  IconButton(
-                                    padding: EdgeInsets.zero,
-                                    icon: const Icon(Icons.add, size: 18),
-                                    onPressed: () {
-                                      int currentQuantity =
-                                          int.tryParse(
-                                            controllers[index]!["quantity"]!.text,
-                                          ) ??
-                                              0;
-                                      controllers[index]!["quantity"]!.text =
-                                          (currentQuantity + 1).toString();
-                                      products[index]["quantity"] =
-                                          controllers[index]!["quantity"]!.text;
-                                      updateTotal(index);
-                                    },
-                                    constraints: const BoxConstraints(
-                                      minWidth: 36,
-                                    ),
-                                  ),
-                                ],
+                                    ) ??
+                                    1;
+                                if (q > 1) {
+                                  controllers[index]!["quantity"]!.text =
+                                      (q - 1).toString();
+                                  products[index]["quantity"] = (q - 1)
+                                      .toString();
+                                  updateTotal(index);
+                                }
+                              },
+                            ),
+                            Expanded(
+                              child: Text(
+                                controllers[index]!["quantity"]!.text,
+                                textAlign: TextAlign.center,
+                                style: AppTextStyle.cardTitle(context),
                               ),
                             ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
+                            IconButton(
+                              icon: const Icon(Icons.add, size: 18),
+                              onPressed: () {
+                                final productData = products[index];
+                                final product =
+                                    productData["product"]
+                                        as ProductModelStockModel?;
 
-                  // Discount Section
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text("Discount", style: AppTextStyle.bodySmall(context)),
-                      const SizedBox(height: 4),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: AbsorbPointer(
-                              absorbing: discountApplied,
-                              child: CupertinoSegmentedControl<String>(
-                                padding: EdgeInsets.zero,
-                                children: {
-                                  'fixed': Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 4,
-                                      vertical: 8,
-                                    ),
-                                    child: Text(
-                                      'TK',
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        fontFamily: GoogleFonts.playfairDisplay()
-                                            .fontFamily,
-                                        color: product["discount_type"] == 'fixed'
-                                            ? Colors.white
-                                            : Colors.black,
-                                      ),
-                                    ),
-                                  ),
-                                  'percent': Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 4,
-                                      vertical: 8,
-                                    ),
-                                    child: Text(
-                                      '%',
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        fontFamily: GoogleFonts.playfairDisplay()
-                                            .fontFamily,
-                                        color:
-                                        product["discount_type"] == 'percent'
-                                            ? Colors.white
-                                            : Colors.black,
-                                      ),
-                                    ),
-                                  ),
-                                },
-                                onValueChanged: discountApplied
-                                    ? (_) {}
-                                    : (value) {
-                                  setState(() {
-                                    product["discount_type"] = value;
-                                    updateTotal(index);
-                                  });
-                                },
-                                groupValue: product["discount_type"],
-                                unselectedColor: Colors.grey[300],
-                                selectedColor: AppColors.primaryColor(context),
-                                borderColor: AppColors.primaryColor(context),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: TextFormField(
-                              controller: controllers[index]?["discount"],
-                              style: AppTextStyle.cardLevelText(context),
-                              keyboardType: const TextInputType.numberWithOptions(
-                                decimal: true,
-                              ),
-                              readOnly: discountApplied,
-                              decoration: InputDecoration(
-                                filled: true,
-                                fillColor: AppColors.bottomNavBg(context),
-                                contentPadding: const EdgeInsets.all(10),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(5),
-                                  borderSide: BorderSide(
-                                    color: AppColors.primaryColor(
-                                      context,
-                                    ).withValues(alpha: 0.3),
-                                  ),
-                                ),
-                                enabledBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(5),
-                                  borderSide: BorderSide(
-                                    color: AppColors.primaryColor(
-                                      context,
-                                    ).withValues(alpha: 0.3),
-                                  ),
-                                ),
-                              ),
-                              onChanged: discountApplied
-                                  ? null
-                                  : (value) {
-                                products[index]["discount"] =
-                                    double.tryParse(value) ?? 0.0;
+                                if (product == null) {
+                                  showCustomToast(
+                                    context: context,
+                                    title: 'Error!',
+                                    description:
+                                        "Please select a product first",
+                                    icon: Icons.error,
+                                    primaryColor: Colors.redAccent,
+                                  );
+                                  return;
+                                }
+
+                                final currentQuantity =
+                                    int.tryParse(
+                                      controllers[index]!["quantity"]!.text,
+                                    ) ??
+                                    1;
+                                final stockQty = product.stockQty ?? 0;
+                                final openingStock = product.openingStock ?? 0;
+                                final availableStock = stockQty > 0
+                                    ? stockQty
+                                    : openingStock;
+
+                                if (availableStock <= 0) {
+                                  showCustomToast(
+                                    context: context,
+                                    title: 'Stock Error!',
+                                    description: "Product stock not available",
+                                    icon: Icons.error,
+                                    primaryColor: Colors.redAccent,
+                                  );
+                                  return;
+                                }
+
+                                if (currentQuantity >= availableStock) {
+                                  showCustomToast(
+                                    context: context,
+                                    title: 'Stock Limit!',
+                                    description:
+                                        "Cannot exceed available stock: $availableStock",
+                                    icon: Icons.warning,
+                                    primaryColor: Colors.orange,
+                                  );
+                                  return;
+                                }
+
+                                controllers[index]!["quantity"]!.text =
+                                    (currentQuantity + 1).toString();
+                                products[index]["quantity"] =
+                                    (currentQuantity + 1).toString();
                                 updateTotal(index);
                               },
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ],
+                    ),
+                  ],
+                ),
+
+                /// 🔥 AUTO DISCOUNT VIEW (ONLY IF EXISTS)
+                if (discountApplied) ...[
+                  const SizedBox(height: 4),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.green.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(color: Colors.green.withValues(alpha: 0.3)),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.discount,
+                              size: 16,
+                              color: Colors.green.shade700,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              "Auto Discount Applied",
+                              style: TextStyle(
+                                color: Colors.green.shade700,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              type.toLowerCase() == "percentage" ||
+                                      type.toLowerCase() == "percent"
+                                  ? "Discount (${doubleValue.toStringAsFixed(2)}%)"
+                                  : "Discount (৳${doubleValue.toStringAsFixed(2)})",
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                            Text(
+                              "-৳ ${discountAmount.toStringAsFixed(2)}",
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.red,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 2),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "Final Price Per Unit:",
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                            Text(
+                              "৳${product["final_price"]?.toStringAsFixed(2) ?? "0.00"}",
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.green.shade700,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+
+                      ],
+                    ),
+                  ),
+                ] else ...[
+                  const SizedBox(height: 4),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.green.withOpacity(0.08),
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(color: Colors.green.withOpacity(0.3)),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 2),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "Final Price :",
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                            Text(
+                              "৳${totalFinalPrice.toStringAsFixed(2)}",
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.green.shade700,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ],
-              ),
-            );
-          }),
-        ],
+              ],
+            ),
+          );
+        }).toList(),
       ),
     );
   }
@@ -1291,9 +1799,12 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text("Additional Charges", style:    AppTextStyle.cardLevelHead(
-            context,
-          ).copyWith(color: AppColors.text(context)),),
+          Text(
+            "Additional Charges",
+            style: AppTextStyle.cardLevelHead(
+              context,
+            ).copyWith(color: AppColors.text(context)),
+          ),
           const SizedBox(height: 12),
           _buildChargesSection(bloc),
         ],
@@ -1310,7 +1821,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
           "Overall Discount",
           selectedOverallDiscountType,
           bloc.discountOverAllController,
-              (value) {
+          (value) {
             setState(() {
               selectedOverallDiscountType = value;
               bloc.selectedOverallDiscountType = value;
@@ -1323,7 +1834,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
           "Overall Vat",
           selectedOverallVatType,
           bloc.vatOverAllController,
-              (value) {
+          (value) {
             setState(() {
               selectedOverallVatType = value;
               bloc.selectedOverallVatType = value;
@@ -1336,7 +1847,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
           "Service Charge",
           selectedOverallServiceChargeType,
           bloc.serviceChargeOverAllController,
-              (value) {
+          (value) {
             setState(() {
               selectedOverallServiceChargeType = value;
               bloc.selectedOverallServiceChargeType = value;
@@ -1349,7 +1860,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
           "Delivery Charge",
           selectedOverallDeliveryType,
           bloc.deliveryChargeOverAllController,
-              (value) {
+          (value) {
             setState(() {
               selectedOverallDeliveryType = value;
               bloc.selectedOverallDeliveryType = value;
@@ -1363,11 +1874,11 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
   }
 
   Widget _buildChargeField(
-      String label,
-      String selectedType,
-      TextEditingController controller,
-      Function(String) onTypeChanged,
-      ) {
+    String label,
+    String selectedType,
+    TextEditingController controller,
+    Function(String) onTypeChanged,
+  ) {
     return ResponsiveCol(
       xs: 12,
       sm: 2,
@@ -1535,10 +2046,19 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                         calculateSpecificDiscountTotal(),
                       ),
                       _buildSummaryRow("Sub Total", subTotal),
-                      _buildSummaryRow("Discount (-)", calculateDiscountTotal()),
+                      _buildSummaryRow(
+                        "Discount (-)",
+                        calculateDiscountTotal(),
+                      ),
                       _buildSummaryRow("Vat (+)", calculateVatTotal()),
-                      _buildSummaryRow("Service Charge (+)", calculateServiceChargeTotal()),
-                      _buildSummaryRow("Delivery Charge (+)", calculateDeliveryTotal()),
+                      _buildSummaryRow(
+                        "Service Charge (+)",
+                        calculateServiceChargeTotal(),
+                      ),
+                      _buildSummaryRow(
+                        "Delivery Charge (+)",
+                        calculateDeliveryTotal(),
+                      ),
                       _buildSummaryRow("Net Total", netTotal, isBold: true),
                     ],
                   ),
@@ -1561,10 +2081,10 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
   }
 
   Widget _buildPaymentSection(
-      CreatePosSaleBloc bloc,
-      bool isWalkInCustomer,
-      double netTotal,
-      ) {
+    CreatePosSaleBloc bloc,
+    bool isWalkInCustomer,
+    double netTotal,
+  ) {
     void recalculateAndAutoFill() {
       final bloc = context.read<CreatePosSaleBloc>();
       final selectedCustomer = bloc.selectClintModel;
@@ -1576,6 +2096,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
         _updateChangeAmount();
       }
     }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1583,7 +2104,9 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
         CheckboxListTile(
           title: Text(
             "With Money Receipt",
-            style: AppTextStyle.headerTitle(context).copyWith(color: AppColors.text(context)),
+            style: AppTextStyle.headerTitle(
+              context,
+            ).copyWith(color: AppColors.text(context)),
           ),
           value: _isChecked,
           onChanged: (bool? newValue) {
@@ -1617,8 +2140,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                     setState(() {});
                   },
                   validator: (value) =>
-                  value == null ? 'Please select a payment method' : null,
-
+                      value == null ? 'Please select a payment method' : null,
                 ),
               ),
               gapH8,
@@ -1630,14 +2152,14 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                     } else if (state is AccountActiveListSuccess) {
                       final filteredList = bloc.selectedPaymentMethod.isNotEmpty
                           ? state.list.where((item) {
-                        return item.acType?.toLowerCase() ==
-                            bloc.selectedPaymentMethod.toLowerCase();
-                      }).toList()
+                              return item.acType?.toLowerCase() ==
+                                  bloc.selectedPaymentMethod.toLowerCase();
+                            }).toList()
                           : state.list;
 
                       final selectedAccount =
                           bloc.accountModel ??
-                              (filteredList.isNotEmpty ? filteredList.first : null);
+                          (filteredList.isNotEmpty ? filteredList.first : null);
                       bloc.accountModel = selectedAccount;
 
                       return AppDropdown<AccountActiveModel>(
@@ -1655,8 +2177,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                           setState(() {});
                         },
                         validator: (value) =>
-                        value == null ? 'Please select an account' : null,
-
+                            value == null ? 'Please select an account' : null,
                       );
                     } else {
                       return Container();
@@ -1668,11 +2189,10 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
           ),
           gapH8,
           Wrap(
-          spacing: 6,
+            spacing: 6,
             runSpacing: 6,
             children: [
               SizedBox(
-
                 child: AppTextField(
                   controller: changeAmountController,
                   hintText: isWalkInCustomer
@@ -1710,7 +2230,6 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
 
                         // Walk-in customer validation
                         if (isWalkInCustomer && numericValue != netTotal) {
-
                           return 'Must pay exact: ${netTotal.toStringAsFixed(2)}';
                         }
 
@@ -1763,8 +2282,8 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
               label,
               style: isBold
                   ? AppTextStyle.cardLevelHead(
-                context,
-              ).copyWith(fontWeight: FontWeight.bold)
+                      context,
+                    ).copyWith(fontWeight: FontWeight.bold)
                   : AppTextStyle.cardLevelHead(context),
             ),
           ),
@@ -1772,9 +2291,9 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
             value.toStringAsFixed(2),
             style: isBold
                 ? AppTextStyle.cardLevelText(context).copyWith(
-              fontWeight: FontWeight.bold,
-              color: AppColors.primaryColor(context),
-            )
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.primaryColor(context),
+                  )
                 : AppTextStyle.cardLevelText(context),
           ),
         ],
@@ -1805,13 +2324,13 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
     var transferProducts = products
         .map(
           (product) => {
-        "product_id": int.tryParse(product["product_id"].toString()),
-        "quantity": int.tryParse(product["quantity"].toString()),
-        "unit_price": double.tryParse(product["price"].toString()),
-        "discount": double.tryParse(product["discount"].toString()),
-        "discount_type": product["discount_type"].toString(),
-      },
-    )
+            "product_id": int.tryParse(product["product_id"].toString()),
+            "quantity": int.tryParse(product["quantity"].toString()),
+            "unit_price": double.tryParse(product["price"].toString()),
+            "discount": double.tryParse(product["discount"].toString()),
+            "discount_type": product["discount_type"].toString(),
+          },
+        )
         .toList();
 
     final selectedCustomer = bloc.selectClintModel;
@@ -1819,7 +2338,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
     final netTotal = calculateAllFinalTotal();
     final paidAmount = double.tryParse(bloc.payableAmount.text.trim()) ?? 0;
     final user = context.read<ProfileBloc>().permissionModel?.data?.user;
-
+    final isAdmin = user?.role == "SUPER_ADMIN" || user?.role == "ADMIN";
     Map<String, dynamic> body = {
       "type": "normal_sale",
       "sale_date": appWidgets.convertDateTime(
@@ -1828,7 +2347,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
         ).parse(bloc.dateEditingController.text.trim(), true),
         "yyyy-MM-dd",
       ),
-      "sale_by": (user?.role == "Super Admin" || user?.role == "Admin")
+      "sale_by": (isAdmin)
           ? bloc.selectSalesModel?.id?.toString() ?? ''
           : user?.id?.toString() ?? '',
 

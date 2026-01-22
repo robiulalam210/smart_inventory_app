@@ -19,8 +19,8 @@ class ProductModelStockModel {
   final dynamic brand;
   final dynamic group;
   final dynamic source;
-  final dynamic purchasePrice;
-  final dynamic sellingPrice;
+  final double? purchasePrice;
+  final double? sellingPrice;
   final int? openingStock;
   final int? stockQty;
   final int? alertQuantity;
@@ -40,7 +40,7 @@ class ProductModelStockModel {
   // --- Discount Fields ---
   final bool? discountApplied;
   final String? discountType;
-  final dynamic discountValue;
+  final double? discountValue;
   final double? finalPrice;
 
   ProductModelStockModel({
@@ -79,69 +79,89 @@ class ProductModelStockModel {
 
   @override
   String toString() {
-    // TODO: implement toString
     return "$name(${unitInfo?.name})";
   }
-  factory ProductModelStockModel.fromJson(Map<String, dynamic> json) =>
-      ProductModelStockModel(
-        id: json["id"],
-        company: json["company"],
-        createdBy: json["created_by"],
-        name: json["name"],
-        sku: json["sku"],
-        category: json["category"],
-        unit: json["unit"],
-        brand: json["brand"],
-        group: json["group"],
-        source: json["source"],
-        purchasePrice: json["purchase_price"],
-        sellingPrice: json["selling_price"],
-        openingStock: json["opening_stock"],
-        stockQty: json["stock_qty"],
-        alertQuantity: json["alert_quantity"],
-        description: json["description"],
-        image: json["image"],
-        isActive: json["is_active"],
-        createdAt: json["created_at"] == null
-            ? null
-            : DateTime.parse(json["created_at"]),
-        updatedAt: json["updated_at"] == null
-            ? null
-            : DateTime.parse(json["updated_at"]),
-        categoryInfo: json["category_info"] == null
-            ? null
-            : Info.fromJson(json["category_info"]),
-        unitInfo: json["unit_info"] == null
-            ? null
-            : UnitInfo.fromJson(json["unit_info"]),
-        brandInfo:
 
-        json["brand_info"] == null
-            ? null
-            : Info.fromJson(json["brand_info"]),
+  // Helper method to parse dynamic to double
+  static double? _parseDouble(dynamic value) {
+    if (value == null) return null;
+    if (value is double) return value;
+    if (value is int) return value.toDouble();
+    if (value is String) {
+      // Handle string with quotes or without
+      final cleaned = value.replaceAll('"', '').trim();
+      return double.tryParse(cleaned);
+    }
+    return null;
+  }
 
-        groupInfo:
-        json["group_info"] == null
-            ? null
-            : Info.fromJson(json["group_info"]),
+  // Helper method to parse dynamic to bool
+  static bool? _parseBool(dynamic value) {
+    if (value == null) return null;
+    if (value is bool) return value;
+    if (value is String) {
+      final str = value.toLowerCase();
+      return str == 'true' || str == '1' || str == 'yes';
+    }
+    if (value is int) return value == 1;
+    return null;
+  }
 
-        sourceInfo:
-        json["source_info"] == null
-            ? null
-            : Info.fromJson(json["source_info"]),
+  factory ProductModelStockModel.fromJson(Map<String, dynamic> json) {
+    return ProductModelStockModel(
+      id: json["id"],
+      company: json["company"],
+      createdBy: json["created_by"],
+      name: json["name"],
+      sku: json["sku"],
+      category: json["category"],
+      unit: json["unit"],
+      brand: json["brand"],
+      group: json["group"],
+      source: json["source"],
+      purchasePrice: _parseDouble(json["purchase_price"]),
+      sellingPrice: _parseDouble(json["selling_price"]),
+      openingStock: json["opening_stock"],
+      stockQty: json["stock_qty"],
+      alertQuantity: json["alert_quantity"],
+      description: json["description"],
+      image: json["image"],
+      isActive: json["is_active"],
+      createdAt: json["created_at"] == null
+          ? null
+          : DateTime.parse(json["created_at"]),
+      updatedAt: json["updated_at"] == null
+          ? null
+          : DateTime.parse(json["updated_at"]),
+      categoryInfo: json["category_info"] == null
+          ? null
+          : Info.fromJson(json["category_info"]),
+      unitInfo: json["unit_info"] == null
+          ? null
+          : UnitInfo.fromJson(json["unit_info"]),
+      brandInfo: json["brand_info"] == null
+          ? null
+          : Info.fromJson(json["brand_info"]),
+      groupInfo: json["group_info"] == null
+          ? null
+          : Info.fromJson(json["group_info"]),
+      sourceInfo: json["source_info"] == null
+          ? null
+          : Info.fromJson(json["source_info"]),
+      createdByInfo: json["created_by_info"] == null
+          ? null
+          : CreatedByInfo.fromJson(json["created_by_info"]),
+      stockStatus: json["stock_status"],
 
-
-        createdByInfo: json["created_by_info"] == null
-            ? null
-            : CreatedByInfo.fromJson(json["created_by_info"]),
-        stockStatus: json["stock_status"],
-
-        // --- Discount ---
-        discountApplied: json["discount_applied"],
-        discountType: json["discount_type"],
-        discountValue: json["discount_value"],
-        finalPrice: json["final_price"]?.toDouble(),
-      );
+      // --- Discount --- with proper parsing
+      discountApplied: _parseBool(json["discount_applied"]) ??
+          _parseBool(json["discount_applied_on"]) ??
+          false,
+      discountType: json["discount_type"]?.toString(),
+      discountValue: _parseDouble(json["discount_value"]),
+      finalPrice: _parseDouble(json["final_price"]),
+    );
+  }
 
   Map<String, dynamic> toJson() => {
     "id": id,
@@ -166,9 +186,9 @@ class ProductModelStockModel {
     "updated_at": updatedAt?.toIso8601String(),
     "category_info": categoryInfo?.toJson(),
     "unit_info": unitInfo?.toJson(),
-    "brand_info": brandInfo,
-    "group_info": groupInfo,
-    "source_info": sourceInfo,
+    "brand_info": brandInfo?.toJson(),
+    "group_info": groupInfo?.toJson(),
+    "source_info": sourceInfo?.toJson(),
     "created_by_info": createdByInfo?.toJson(),
     "stock_status": stockStatus,
 
@@ -199,6 +219,7 @@ class Info {
     "name": name,
   };
 }
+
 class UnitInfo {
   final int? id;
   final String? name;
@@ -226,19 +247,23 @@ class UnitInfo {
 class CreatedByInfo {
   final int? id;
   final String? username;
+  final String? email;
 
   CreatedByInfo({
     this.id,
     this.username,
+    this.email,
   });
 
   factory CreatedByInfo.fromJson(Map<String, dynamic> json) => CreatedByInfo(
     id: json["id"],
     username: json["username"],
+    email: json["email"],
   );
 
   Map<String, dynamic> toJson() => {
     "id": id,
     "username": username,
+    "email": email,
   };
 }
