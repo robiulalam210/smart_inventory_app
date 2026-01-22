@@ -24,15 +24,6 @@
   "module_permissions_desc": "Your access permissions for system modules",
 
   "security": "Security",
-  "change_password": "Change Password",
-  "current_password": "Current Password",
-  "please_enter_current_password": "Please enter current password",
-  "new_password": "New Password",
-  "please_enter_new_password": "Please enter new password",
-  "confirm_new_password": "Confirm New Password",
-  "please_confirm_new_password": "Please confirm new password",
-  "password_min_length_6": "Password must be at least 6 characters",
-  "passwords_do_not_match": "Passwords do not match",
 
   "theme_mode": "Theme Mode",
   "theme_color": "Theme Color",
@@ -84,5 +75,27 @@
 
   "language": "Language",
   "login_failed": "Login Failed",
-  "ok": "OK"
+  "ok": "OK",
+
+
+
+
+  "change_password": "Change Password",
+  "update_your_password": "Update your password",
+  "choose_a_strong_password_to_keep_your_account_secure": "Choose a strong password to keep your account secure",
+  "current_password": "Current Password",
+  "new_password": "New Password",
+  "confirm_new_password": "Confirm New Password",
+  "enter_current_password": "Enter current password",
+  "enter_new_password": "Enter new password",
+  "re_enter_new_password": "Re-enter new password",
+  "password_requirements": "Password Requirements",
+  "at_least_6_characters": "At least 6 characters",
+  "contains_letters_and_numbers": "Contains letters and numbers",
+  "not_your_email_or_name": "Not your email or name",
+  "password_min_length_6": "Password must be at least 6 characters",
+  "please_enter_current_password": "Please enter current password",
+  "please_enter_new_password": "Please enter new password",
+  "please_confirm_new_password": "Please confirm new password",
+  "passwords_do_not_match": "Passwords do not match"
 }
