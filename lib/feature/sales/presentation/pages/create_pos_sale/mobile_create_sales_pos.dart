@@ -91,7 +91,7 @@ class _SalesScreenState extends State<MobileSalesScreen> {
         ? bloc.selectedOverallDiscountType
         : selectedOverallDiscountType;
     selectedOverallServiceChargeType =
-    bloc.selectedOverallServiceChargeType.isNotEmpty
+        bloc.selectedOverallServiceChargeType.isNotEmpty
         ? bloc.selectedOverallServiceChargeType
         : selectedOverallServiceChargeType;
     selectedOverallDeliveryType = bloc.selectedOverallDeliveryType.isNotEmpty
@@ -115,7 +115,9 @@ class _SalesScreenState extends State<MobileSalesScreen> {
     // Load auth token used for HTTP calls (barcode)
     LocalDB.getLoginInfo().then((login) {
       // adjust key names based on your LocalDB structure
-      _authToken = (login is Map) ? (login?['accessToken'] ?? login?['token'] ?? '') : '';
+      _authToken = (login is Map)
+          ? (login?['accessToken'] ?? login?['token'] ?? '')
+          : '';
     });
 
     // Defer setDefaultSalesUser and focus to after first frame to avoid setState during build
@@ -139,7 +141,7 @@ class _SalesScreenState extends State<MobileSalesScreen> {
     if (userList.isEmpty) return;
 
     final matchedUser = userList.firstWhere(
-          (user) => user.id == loginUserId,
+      (user) => user.id == loginUserId,
       orElse: () => userList.first,
     );
 
@@ -153,7 +155,7 @@ class _SalesScreenState extends State<MobileSalesScreen> {
     for (int i = 0; i < bloc.products.length; i++) {
       controllers.putIfAbsent(
         i,
-            () => {
+        () => {
           "price": TextEditingController(
             text: _toDouble(bloc.products[i]["price"]).toStringAsFixed(2),
           ),
@@ -206,7 +208,7 @@ class _SalesScreenState extends State<MobileSalesScreen> {
           context: context,
           title: 'Warning!',
           description:
-          "Walk-in customer must pay exact amount. Auto-correcting payable amount.",
+              "Walk-in customer must pay exact amount. Auto-correcting payable amount.",
           icon: Icons.warning,
           primaryColor: Colors.orange,
         );
@@ -229,7 +231,7 @@ class _SalesScreenState extends State<MobileSalesScreen> {
     final productList = products;
     double subTotal = productList.fold(
       0.0,
-          (p, e) => p + _toDouble(e["total"]),
+      (p, e) => p + _toDouble(e["total"]),
     );
     double overallDiscount =
         double.tryParse(bloc.discountOverAllController.text) ?? 0.0;
@@ -321,7 +323,7 @@ class _SalesScreenState extends State<MobileSalesScreen> {
 
           // Update local scanned list (optional)
           final index = _scannedProducts.indexWhere(
-                (p) => p['sku'] == product['sku'],
+            (p) => p['sku'] == product['sku'],
           );
           if (index >= 0) {
             setState(() {
@@ -399,9 +401,11 @@ class _SalesScreenState extends State<MobileSalesScreen> {
     if (bloc.products.isEmpty) bloc.addProduct();
 
     final emptyIndex = bloc.products.indexWhere(
-          (row) => row["product_id"] == null,
+      (row) => row["product_id"] == null,
     );
-    final targetIndex = emptyIndex >= 0 ? emptyIndex : (bloc.products.length - 1);
+    final targetIndex = emptyIndex >= 0
+        ? emptyIndex
+        : (bloc.products.length - 1);
 
     // If target already has a product, append new row
     final int useIndex;
@@ -416,12 +420,25 @@ class _SalesScreenState extends State<MobileSalesScreen> {
     final pid = productJson['id'] ?? productJson['product_id'] ?? 0;
     final name = productJson['name'] ?? '';
     final sellingPrice = _toDouble(
-      productJson['selling_price'] ?? productJson['price'] ?? productJson['sellingPrice'] ?? 0,
+      productJson['selling_price'] ??
+          productJson['price'] ??
+          productJson['sellingPrice'] ??
+          0,
     );
-    final discountValue = _toDouble(productJson['discount'] ?? productJson['discount_value'] ?? 0);
-    final discountType = (productJson['discount_type'] ?? productJson['discountType'] ?? 'fixed').toString();
-    final discountApplied = (productJson['discount_applied'] ?? productJson['discountApplied'] ?? false) == true;
-    final stockQty = _toInt(productJson['stock_qty'] ?? productJson['stockQty'] ?? 0);
+    final discountValue = _toDouble(
+      productJson['discount'] ?? productJson['discount_value'] ?? 0,
+    );
+    final discountType =
+        (productJson['discount_type'] ?? productJson['discountType'] ?? 'fixed')
+            .toString();
+    final discountApplied =
+        (productJson['discount_applied'] ??
+            productJson['discountApplied'] ??
+            false) ==
+        true;
+    final stockQty = _toInt(
+      productJson['stock_qty'] ?? productJson['stockQty'] ?? 0,
+    );
     final image = productJson['image']?.toString();
 
     final model = ProductModelStockModel(
@@ -439,9 +456,11 @@ class _SalesScreenState extends State<MobileSalesScreen> {
 
     controllers.putIfAbsent(
       useIndex,
-          () => {
+      () => {
         "price": TextEditingController(text: sellingPrice.toStringAsFixed(2)),
-        "discount": TextEditingController(text: discountApplied ? discountValue.toString() : "0"),
+        "discount": TextEditingController(
+          text: discountApplied ? discountValue.toString() : "0",
+        ),
         "quantity": TextEditingController(text: "1"),
         "ticket_total": TextEditingController(),
         "total": TextEditingController(),
@@ -450,7 +469,9 @@ class _SalesScreenState extends State<MobileSalesScreen> {
 
     controllers[useIndex]!["quantity"]!.text = "1";
     controllers[useIndex]!["price"]!.text = sellingPrice.toStringAsFixed(2);
-    controllers[useIndex]!["discount"]!.text = discountApplied ? discountValue.toString() : "0";
+    controllers[useIndex]!["discount"]!.text = discountApplied
+        ? discountValue.toString()
+        : "0";
 
     updateTotal(useIndex);
 
@@ -476,19 +497,20 @@ class _SalesScreenState extends State<MobileSalesScreen> {
               isLabel: true,
               isRequired: true,
               value: bloc.selectClintModel,
-              itemList: [
-                CustomerActiveModel(name: 'Walk-in-customer', id: -1),
-              ] +
+              itemList:
+                  [CustomerActiveModel(name: 'Walk-in-customer', id: -1)] +
                   context.read<CustomerBloc>().activeCustomer,
               onChanged: (newVal) {
                 bloc.selectClintModel = newVal;
-                bloc.customType = (newVal?.id == -1) ? "Walking Customer" : "Saved Customer";
+                bloc.customType = (newVal?.id == -1)
+                    ? "Walking Customer"
+                    : "Saved Customer";
 
                 // Apply customer type rules
                 if (newVal?.id == -1) {
                   // Walk-in customer: auto-set payable to net total and disable money receipt in _validateAndSubmitForm
-                  _isChecked = false;
-                  bloc.isChecked = false;
+                  _isChecked = true;
+                  bloc.isChecked = true;
                   Future.delayed(const Duration(milliseconds: 100), () {
                     final netTotal = calculateAllFinalTotal();
                     bloc.payableAmount.text = netTotal.toStringAsFixed(2);
@@ -501,7 +523,8 @@ class _SalesScreenState extends State<MobileSalesScreen> {
                 }
                 setState(() {});
               },
-              validator: (value) => value == null ? 'Please select Customer' : null,
+              validator: (value) =>
+                  value == null ? 'Please select Customer' : null,
             );
           },
         ),
@@ -523,7 +546,8 @@ class _SalesScreenState extends State<MobileSalesScreen> {
                   bloc.selectSalesModel = newVal;
                   setState(() {});
                 },
-                validator: (value) => value == null ? 'Please select Sales' : null,
+                validator: (value) =>
+                    value == null ? 'Please select Sales' : null,
               );
             },
           ),
@@ -568,15 +592,15 @@ class _SalesScreenState extends State<MobileSalesScreen> {
           return Container(
             margin: const EdgeInsets.only(bottom: 5),
             decoration: BoxDecoration(
-                color: AppColors.bottomNavBg(context),
-                borderRadius: BorderRadius.circular(AppSizes.radius),
-                border: Border.all(
-                  color: AppColors.greyColor(context).withValues(alpha: 0.5,),
-                  width: 0.5,
-                )
+              color: AppColors.bottomNavBg(context),
+              borderRadius: BorderRadius.circular(AppSizes.radius),
+              border: Border.all(
+                color: AppColors.greyColor(context).withValues(alpha: 0.5),
+                width: 0.5,
+              ),
             ),
             child: Padding(
-              padding: const EdgeInsets.all(10),
+              padding: const EdgeInsets.all(8),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -589,9 +613,9 @@ class _SalesScreenState extends State<MobileSalesScreen> {
                           style: isProductSelected
                               ? AppTextStyle.titleSmall(context)
                               : AppTextStyle.titleSmall(context).copyWith(
-                            color: Colors.grey,
-                            fontStyle: FontStyle.italic,
-                          ),
+                                  color: Colors.grey,
+                                  fontStyle: FontStyle.italic,
+                                ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -601,7 +625,9 @@ class _SalesScreenState extends State<MobileSalesScreen> {
                           if (product == products.last) {
                             context.read<CreatePosSaleBloc>().addProduct();
                           } else {
-                            context.read<CreatePosSaleBloc>().removeProduct(index);
+                            context.read<CreatePosSaleBloc>().removeProduct(
+                              index,
+                            );
                           }
                           setState(() {});
                         },
@@ -614,9 +640,13 @@ class _SalesScreenState extends State<MobileSalesScreen> {
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Icon(
-                            product == products.last ? Icons.add : Icons.delete,
+                            product == products.last
+                                ? HugeIcons.strokeRoundedAddCircle
+                                : HugeIcons.strokeRoundedDelete01,
                             size: 18,
-                            color: product == products.last ? Colors.green : Colors.red,
+                            color: product == products.last
+                                ? Colors.green
+                                : Colors.red,
                           ),
                         ),
                       ),
@@ -629,9 +659,9 @@ class _SalesScreenState extends State<MobileSalesScreen> {
                       children: [
                         Text(
                           'Stock: ${product["stock_qty"] ?? selectedItem?.stockQty ?? 0}',
-                          style:  TextStyle(
+                          style: TextStyle(
                             fontSize: 12,
-                            color:AppColors.text(context),
+                            color: AppColors.text(context),
                           ),
                         ),
                         const SizedBox(width: 8),
@@ -643,19 +673,21 @@ class _SalesScreenState extends State<MobileSalesScreen> {
                             ),
                             decoration: BoxDecoration(
                               color: Colors.green.withValues(alpha: 0.08),
+                              // Fixed: withOpacity instead of withValues
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
                               product["discount_type"] == 'percent'
                                   ? '${product["discount"] ?? 0}% off'
                                   : 'Tk ${product["discount"] ?? 0}',
-                              style:  TextStyle(fontSize: 12,color: AppColors.text(context)),
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: AppColors.text(context),
+                              ),
                             ),
                           ),
                       ],
                     ),
-
-                    const SizedBox(height: 5),
 
                     /// 🔹 Qty + Price + Total
                     Row(
@@ -665,13 +697,20 @@ class _SalesScreenState extends State<MobileSalesScreen> {
                         Row(
                           children: [
                             IconButton(
-                              icon: const Icon(Icons.remove, size: 18),
+                              icon: Icon(
+                                HugeIcons.strokeRoundedRemoveCircle,
+                                size: 18,
+                              ),
                               onPressed: () {
-                                int q = int.tryParse(
-                                  controllers[index]?["quantity"]?.text ?? "0",
-                                ) ?? 0;
+                                int q =
+                                    int.tryParse(
+                                      controllers[index]?["quantity"]?.text ??
+                                          "0",
+                                    ) ??
+                                    0;
                                 if (q > 1) {
-                                  controllers[index]!["quantity"]!.text = "${q - 1}";
+                                  controllers[index]!["quantity"]!.text =
+                                      "${q - 1}";
                                   products[index]["quantity"] = q - 1;
                                   updateTotal(index);
                                 }
@@ -691,25 +730,50 @@ class _SalesScreenState extends State<MobileSalesScreen> {
                                     horizontal: 4,
                                   ),
                                 ),
-                                onChanged: discountApplied ? null : (v) {
-                                  final q = int.tryParse(v) ?? 0;
-                                  controllers[index]!["quantity"]!.text = "$q";
-                                  products[index]["quantity"] = q;
-                                  updateTotal(index);
-                                },
+                                onChanged: discountApplied
+                                    ? null
+                                    : (v) {
+                                        final q = int.tryParse(v) ?? 0;
+                                        controllers[index]!["quantity"]!.text =
+                                            "$q";
+                                        products[index]["quantity"] = q;
+                                        updateTotal(index);
+                                      },
                               ),
                             ),
+
                             IconButton(
-                              icon: const Icon(Icons.add, size: 18),
+                              icon: const Icon(
+                                HugeIcons.strokeRoundedAddCircle,
+                                size: 18,
+                              ),
                               onPressed: () {
-                                int q = int.tryParse(
-                                  controllers[index]?["quantity"]?.text ?? "0",
-                                ) ?? 0;
-                                controllers[index]!["quantity"]!.text = "${q + 1}";
-                                products[index]["quantity"] = q + 1;
-                                updateTotal(index);
+                                final int q =
+                                    int.tryParse(controllers[index]?["quantity"]?.text ?? "0") ?? 0;
+
+                                final int stock =
+                                    product["stock_qty"] ?? selectedItem?.stockQty ?? 0;
+
+                                // ❗ prevent exceeding stock
+                                if (q < stock) {
+                                  controllers[index]!["quantity"]!.text = "${q + 1}";
+                                  products[index]["quantity"] = q + 1;
+                                  updateTotal(index);
+                                } else {
+
+                                  showCustomToast(
+                                    context: context,
+                                    title: 'Alert!',
+                                    description:"Stock limit reached",
+                                    icon: Icons.warning,
+                                    primaryColor: Colors.orange,
+                                  );
+
+                                }
                               },
                             ),
+
+
                           ],
                         ),
 
@@ -746,7 +810,7 @@ class _SalesScreenState extends State<MobileSalesScreen> {
                     ),
                   ] else ...[
                     // Show message when no product selected
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 5),
                     Text(
                       'Tap the product browser button below to add products or scan barcode/QR.',
                       style: TextStyle(
@@ -771,7 +835,8 @@ class _SalesScreenState extends State<MobileSalesScreen> {
     final priceText = controllers[index]?["price"]?.text ?? "0";
     final quantityText = controllers[index]?["quantity"]?.text ?? "0";
     final discountText = controllers[index]?["discount"]?.text ?? "0";
-    final discountType = products[index]["discount_type"]?.toString() ?? "fixed";
+    final discountType =
+        products[index]["discount_type"]?.toString() ?? "fixed";
 
     final price = double.tryParse(priceText) ?? 0.0;
     final quantity = int.tryParse(quantityText) ?? 0;
@@ -784,7 +849,10 @@ class _SalesScreenState extends State<MobileSalesScreen> {
     double discountAmount = discountType == 'percent'
         ? ticketTotal * (discountValue / 100.0)
         : discountValue;
-    double finalTotal = (ticketTotal - discountAmount).clamp(0.0, double.infinity);
+    double finalTotal = (ticketTotal - discountAmount).clamp(
+      0.0,
+      double.infinity,
+    );
     controllers[index]!["total"]?.text = finalTotal.toStringAsFixed(2);
     products[index]["total"] = finalTotal;
 
@@ -798,7 +866,7 @@ class _SalesScreenState extends State<MobileSalesScreen> {
     if (newVal == null) return;
 
     final alreadyAdded = products.asMap().entries.any(
-          (entry) => entry.key != index && entry.value["product_id"] == newVal.id,
+      (entry) => entry.key != index && entry.value["product_id"] == newVal.id,
     );
 
     if (alreadyAdded) {
@@ -834,7 +902,7 @@ class _SalesScreenState extends State<MobileSalesScreen> {
     // ensure controllers exist
     controllers.putIfAbsent(
       index,
-          () => {
+      () => {
         "price": TextEditingController(),
         "discount": TextEditingController(),
         "quantity": TextEditingController(text: "1"),
@@ -843,11 +911,16 @@ class _SalesScreenState extends State<MobileSalesScreen> {
       },
     );
 
-    controllers[index]!["price"]!.text = _toDouble(newVal.sellingPrice).toStringAsFixed(2);
+    controllers[index]!["price"]!.text = _toDouble(
+      newVal.sellingPrice,
+    ).toStringAsFixed(2);
     controllers[index]!["discount"]!.text = (newVal.discountApplied == true
         ? _toDouble(newVal.discountValue).toString()
         : "0");
-    controllers[index]!["quantity"]!.text = controllers[index]!["quantity"]!.text.isEmpty ? "1" : controllers[index]!["quantity"]!.text;
+    controllers[index]!["quantity"]!.text =
+        controllers[index]!["quantity"]!.text.isEmpty
+        ? "1"
+        : controllers[index]!["quantity"]!.text;
 
     updateTotal(index);
   }
@@ -855,11 +928,11 @@ class _SalesScreenState extends State<MobileSalesScreen> {
   // Charges section (kept, compact)
   Widget _buildChargesSection(CreatePosSaleBloc bloc) {
     Widget chargeField(
-        String label,
-        String selectedType,
-        TextEditingController controller,
-        Function(String) onTypeChanged,
-        ) {
+      String label,
+      String selectedType,
+      TextEditingController controller,
+      Function(String) onTypeChanged,
+    ) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -878,7 +951,9 @@ class _SalesScreenState extends State<MobileSalesScreen> {
                         'TK',
                         style: TextStyle(
                           fontFamily: GoogleFonts.playfairDisplay().fontFamily,
-                          color: selectedType == 'fixed' ? Colors.white : Colors.black,
+                          color: selectedType == 'fixed'
+                              ? Colors.white
+                              : Colors.black,
                         ),
                       ),
                     ),
@@ -887,7 +962,9 @@ class _SalesScreenState extends State<MobileSalesScreen> {
                         '%',
                         style: TextStyle(
                           fontFamily: GoogleFonts.playfairDisplay().fontFamily,
-                          color: selectedType == 'percent' ? Colors.white : Colors.black,
+                          color: selectedType == 'percent'
+                              ? Colors.white
+                              : Colors.black,
                         ),
                       ),
                     ),
@@ -925,35 +1002,45 @@ class _SalesScreenState extends State<MobileSalesScreen> {
 
     return Column(
       children: [
-        Row(children: [
-          Expanded(
-            child: chargeField(
-              "Discount",
-              selectedOverallDiscountType,
-              context.read<CreatePosSaleBloc>().discountOverAllController,
-                  (value) {
-                setState(() {
-                  selectedOverallDiscountType = value;
-                  context.read<CreatePosSaleBloc>().selectedOverallDiscountType = value;
-                });
-              },
+        Row(
+          children: [
+            Expanded(
+              child: chargeField(
+                "Discount",
+                selectedOverallDiscountType,
+                context.read<CreatePosSaleBloc>().discountOverAllController,
+                (value) {
+                  setState(() {
+                    selectedOverallDiscountType = value;
+                    context
+                            .read<CreatePosSaleBloc>()
+                            .selectedOverallDiscountType =
+                        value;
+                  });
+                },
+              ),
             ),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: chargeField(
-              "Delivery",
-              selectedOverallDeliveryType,
-              context.read<CreatePosSaleBloc>().deliveryChargeOverAllController,
-                  (value) {
-                setState(() {
-                  selectedOverallDeliveryType = value;
-                  context.read<CreatePosSaleBloc>().selectedOverallDeliveryType = value;
-                });
-              },
+            const SizedBox(width: 8),
+            Expanded(
+              child: chargeField(
+                "Delivery",
+                selectedOverallDeliveryType,
+                context
+                    .read<CreatePosSaleBloc>()
+                    .deliveryChargeOverAllController,
+                (value) {
+                  setState(() {
+                    selectedOverallDeliveryType = value;
+                    context
+                            .read<CreatePosSaleBloc>()
+                            .selectedOverallDeliveryType =
+                        value;
+                  });
+                },
+              ),
             ),
-          )
-        ]),
+          ],
+        ),
         const SizedBox(height: 8),
         Row(
           children: [
@@ -962,10 +1049,11 @@ class _SalesScreenState extends State<MobileSalesScreen> {
                 "Vat",
                 selectedOverallVatType,
                 context.read<CreatePosSaleBloc>().vatOverAllController,
-                    (value) {
+                (value) {
                   setState(() {
                     selectedOverallVatType = value;
-                    context.read<CreatePosSaleBloc>().selectedOverallVatType = value;
+                    context.read<CreatePosSaleBloc>().selectedOverallVatType =
+                        value;
                   });
                 },
               ),
@@ -975,11 +1063,16 @@ class _SalesScreenState extends State<MobileSalesScreen> {
               child: chargeField(
                 "Service",
                 selectedOverallServiceChargeType,
-                context.read<CreatePosSaleBloc>().serviceChargeOverAllController,
-                    (value) {
+                context
+                    .read<CreatePosSaleBloc>()
+                    .serviceChargeOverAllController,
+                (value) {
                   setState(() {
                     selectedOverallServiceChargeType = value;
-                    context.read<CreatePosSaleBloc>().selectedOverallServiceChargeType = value;
+                    context
+                            .read<CreatePosSaleBloc>()
+                            .selectedOverallServiceChargeType =
+                        value;
                   });
                 },
               ),
@@ -1061,21 +1154,41 @@ class _SalesScreenState extends State<MobileSalesScreen> {
             children: [
               _buildSummaryRow(
                 "Product Total",
-                products.fold(
-                  0.0,
-                      (p, e) => p + _toDouble(e["ticket_total"]),
-                ),
+                products.fold(0.0, (p, e) => p + _toDouble(e["ticket_total"])),
               ),
-              _buildSummaryRow("Specific Discount (-)", products.fold(0.0, (p, e) {
-                final disc = _toDouble(e["discount"]);
-                final ticket = _toDouble(e["ticket_total"]);
-                return p + ((e["discount_type"] == 'percent') ? (ticket * (disc / 100.0)) : disc);
-              })),
-              _buildSummaryRow("Sub Total", products.fold(0.0, (p, e) => p + _toDouble(e["total"]))),
-              _buildSummaryRow("Discount (-)", double.tryParse(bloc.discountOverAllController.text) ?? 0.0),
-              _buildSummaryRow("Vat (+)", double.tryParse(bloc.vatOverAllController.text) ?? 0.0),
-              _buildSummaryRow("Service Charge (+)", double.tryParse(bloc.serviceChargeOverAllController.text) ?? 0.0),
-              _buildSummaryRow("Delivery Charge (+)", double.tryParse(bloc.deliveryChargeOverAllController.text) ?? 0.0),
+              _buildSummaryRow(
+                "Specific Discount (-)",
+                products.fold(0.0, (p, e) {
+                  final disc = _toDouble(e["discount"]);
+                  final ticket = _toDouble(e["ticket_total"]);
+                  return p +
+                      ((e["discount_type"] == 'percent')
+                          ? (ticket * (disc / 100.0))
+                          : disc);
+                }),
+              ),
+              _buildSummaryRow(
+                "Sub Total",
+                products.fold(0.0, (p, e) => p + _toDouble(e["total"])),
+              ),
+              _buildSummaryRow(
+                "Discount (-)",
+                double.tryParse(bloc.discountOverAllController.text) ?? 0.0,
+              ),
+              _buildSummaryRow(
+                "Vat (+)",
+                double.tryParse(bloc.vatOverAllController.text) ?? 0.0,
+              ),
+              _buildSummaryRow(
+                "Service Charge (+)",
+                double.tryParse(bloc.serviceChargeOverAllController.text) ??
+                    0.0,
+              ),
+              _buildSummaryRow(
+                "Delivery Charge (+)",
+                double.tryParse(bloc.deliveryChargeOverAllController.text) ??
+                    0.0,
+              ),
               const Divider(),
               _buildSummaryRow("Net Total", netTotal, isBold: true),
             ],
@@ -1086,143 +1199,177 @@ class _SalesScreenState extends State<MobileSalesScreen> {
         CheckboxListTile(
           title: Text(
             "With Money Receipt",
-            style: AppTextStyle.headerTitle(context).copyWith(
-              color: AppColors.text(context),
-            ),
+            style: AppTextStyle.headerTitle(
+              context,
+            ).copyWith(color: AppColors.text(context)),
           ),
           value: _isChecked,
-          onChanged: isWalkInCustomer
-              ? null // Disabled for walk-in customers
-              : (bool? newValue) {
+          onChanged: (bool? newValue) {
             setState(() {
-              _isChecked = newValue ?? false;
+              _isChecked = newValue ?? true;
               context.read<CreatePosSaleBloc>().isChecked = _isChecked;
             });
           },
           controlAffinity: ListTileControlAffinity.leading,
-          secondary: isWalkInCustomer ? Icon(Icons.info, color: Colors.orange[700], size: 20) : null,
+          secondary: isWalkInCustomer
+              ? Icon(Icons.info, color: Colors.orange[700], size: 20)
+              : null,
         ),
 
         // Show payment section only when _isChecked is true and not walk-in
-        if (_isChecked && !isWalkInCustomer) ...[
-          const SizedBox(height: 10),
-          Row(children: [
-            Expanded(
-              child: AppDropdown(
-                label: "Payment Method",
-                hint: bloc.selectedPaymentMethod.isEmpty ? "Select Payment Method" : bloc.selectedPaymentMethod,
-                isLabel: false,
-                isRequired: true,
-                isNeedAll: false,
-                value: bloc.selectedPaymentMethod.isEmpty ? null : bloc.selectedPaymentMethod,
-                itemList: [] + bloc.paymentMethod,
-                onChanged: (newVal) {
-                  bloc.selectedPaymentMethod = newVal.toString();
-                  setState(() {});
-                },
-                validator: (value) => value == null ? 'Please select a payment method' : null,
-              ),
-            ),
-            const SizedBox(width: 6),
-            Expanded(
-              child: BlocBuilder<AccountBloc, AccountState>(
-                builder: (context, state) {
-                  if (state is AccountActiveListLoading) {
-                    return const Center(child: CircularProgressIndicator());
-                  } else if (state is AccountActiveListSuccess) {
-                    final filteredList = bloc.selectedPaymentMethod.isNotEmpty
-                        ? state.list.where((item) => item.acType?.toLowerCase() == bloc.selectedPaymentMethod.toLowerCase()).toList()
-                        : state.list;
-                    final selectedAccount = bloc.accountModel ?? (filteredList.isNotEmpty ? filteredList.first : null);
-                    bloc.accountModel = selectedAccount;
-                    return AppDropdown<AccountActiveModel>(
-                      label: "Account",
-                      hint: bloc.accountModel == null ? "Select Account" : bloc.accountModel!.name.toString(),
-                      isLabel: false,
-                      isRequired: true,
-                      isNeedAll: false,
-                      value: selectedAccount,
-                      itemList: filteredList,
-                      onChanged: (newVal) {
-                        bloc.accountModel = newVal;
-                        setState(() {});
-                      },
-                      validator: (value) => value == null ? 'Please select an account' : null,
-                    );
-                  } else {
-                    return Container();
-                  }
-                },
-              ),
-            )
-          ])
-        ],
-        const SizedBox(height: 10),
-        // Payable amount section (common for both)
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (_isChecked && bloc.selectClintModel?.id != -1)
+        if (_isChecked) ...[
+          const SizedBox(height: 4),
+          Row(
+            children: [
               Expanded(
-                child: AppTextField(
+                child: AppDropdown(
+                  label: "Payment Method",
+                  hint: bloc.selectedPaymentMethod.isEmpty
+                      ? "Select Payment Method"
+                      : bloc.selectedPaymentMethod,
+                  isLabel: false,
+                  isRequired: true,
+                  isNeedAll: false,
+                  value: bloc.selectedPaymentMethod.isEmpty
+                      ? null
+                      : bloc.selectedPaymentMethod,
+                  itemList: [] + bloc.paymentMethod,
+                  onChanged: (newVal) {
+                    bloc.selectedPaymentMethod = newVal.toString();
+                    setState(() {});
+                  },
+                  validator: (value) =>
+                      value == null ? 'Please select a payment method' : null,
+                ),
+              ),
+              const SizedBox(width: 6),
+              Expanded(
+                child: BlocBuilder<AccountBloc, AccountState>(
+                  builder: (context, state) {
+                    if (state is AccountActiveListLoading) {
+                      return const Center(child: CircularProgressIndicator());
+                    } else if (state is AccountActiveListSuccess) {
+                      final filteredList = bloc.selectedPaymentMethod.isNotEmpty
+                          ? state.list
+                                .where(
+                                  (item) =>
+                                      item.acType?.toLowerCase() ==
+                                      bloc.selectedPaymentMethod.toLowerCase(),
+                                )
+                                .toList()
+                          : state.list;
+                      final selectedAccount =
+                          bloc.accountModel ??
+                          (filteredList.isNotEmpty ? filteredList.first : null);
+                      bloc.accountModel = selectedAccount;
+                      return AppDropdown<AccountActiveModel>(
+                        label: "Account",
+                        hint: bloc.accountModel == null
+                            ? "Select Account"
+                            : bloc.accountModel!.name.toString(),
+                        isLabel: false,
+                        isRequired: true,
+                        isNeedAll: false,
+                        value: selectedAccount,
+                        itemList: filteredList,
+                        onChanged: (newVal) {
+                          bloc.accountModel = newVal;
+                          setState(() {});
+                        },
+                        validator: (value) =>
+                            value == null ? 'Please select an account' : null,
+                      );
+                    } else {
+                      return Container();
+                    }
+                  },
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          // Payable amount section (common for both)
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                flex: 1,
+                child: CustomInputField(
                   controller: changeAmountController,
                   hintText: 'Change Amount',
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
                   readOnly: true,
                 ),
               ),
-            if (_isChecked && bloc.selectClintModel?.id != -1) const SizedBox(width: 6),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  AppTextField(
-                    controller: bloc.payableAmount,
-                    hintText: (bloc.selectClintModel?.id == -1 && !_isChecked) ? 'Payable Amount (Auto-set to net total)' : 'Payable Amount',
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    validator: (value) {
-                      if (value!.isEmpty) return 'Please enter Payable Amount';
-                      final numericValue = double.tryParse(value);
-                      if (numericValue == null) return 'Enter valid number';
-                      if (numericValue < 0) return 'Cannot be negative';
+              const SizedBox(width: 6),
+              Expanded(
+                flex: 2,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    CustomInputField(
+                      controller: bloc.payableAmount,
+                      hintText: (bloc.selectClintModel?.id == -1 && !_isChecked)
+                          ? 'Payable Amount (Auto-set to net total)'
+                          : 'Payable Amount',
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      validator: (value) {
+                        if (value!.isEmpty)
+                          return 'Please enter Payable Amount';
+                        final numericValue = double.tryParse(value);
+                        if (numericValue == null) return 'Enter valid number';
+                        if (numericValue < 0) return 'Cannot be negative';
 
-                      if (bloc.selectClintModel?.id == -1) {
-                        final netTotal = calculateAllFinalTotal();
-                        if (numericValue != netTotal) return 'Must pay exact: ${netTotal.toStringAsFixed(2)}';
-                      }
-                      return null;
-                    },
-                    onChanged: (v) => setState(() {
-                      _updateChangeAmount();
-                    }),
-                  ),
-                  if (bloc.selectClintModel?.id == -1)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 4, left: 4),
-                      child: Text(
-                        "Walk-in: Must pay exact amount ${netTotal.toStringAsFixed(2)}",
-                        style: TextStyle(
-                          color: Colors.orange[700],
-                          fontSize: 12,
+                        if (bloc.selectClintModel?.id == -1) {
+                          final netTotal = calculateAllFinalTotal();
+                          if (numericValue != netTotal)
+                            return 'Must pay exact: ${netTotal.toStringAsFixed(2)}';
+                        }
+                        return null;
+                      },
+                      onChanged: (v) => setState(() {
+                        _updateChangeAmount();
+                      }),
+                    ),
+                    if (bloc.selectClintModel?.id == -1)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4, left: 4),
+                        child: Text(
+                          "Walk-in: Must pay exact amount ${netTotal.toStringAsFixed(2)}",
+                          style: TextStyle(
+                            color: Colors.orange[700],
+                            fontSize: 12,
+                          ),
                         ),
                       ),
-                    ),
-                  if (bloc.selectClintModel?.id != -1)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 4, left: 4),
-                      child: Text(
-                        "Due: ${(netTotal - (double.tryParse(bloc.payableAmount.text.trim()) ?? 0)).clamp(0, double.infinity).toStringAsFixed(2)}",
-                        style: TextStyle(
-                          color: (double.tryParse(bloc.payableAmount.text.trim()) ?? 0) >= netTotal ? Colors.green[700] : Colors.red[700],
-                          fontSize: 12,
+                    if (bloc.selectClintModel?.id != -1)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4, left: 4),
+                        child: Text(
+                          "Due: ${(netTotal - (double.tryParse(bloc.payableAmount.text.trim()) ?? 0)).clamp(0, double.infinity).toStringAsFixed(2)}",
+                          style: TextStyle(
+                            color:
+                                (double.tryParse(
+                                          bloc.payableAmount.text.trim(),
+                                        ) ??
+                                        0) >=
+                                    netTotal
+                                ? Colors.green[700]
+                                : Colors.red[700],
+                            fontSize: 12,
+                          ),
                         ),
                       ),
-                    ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          ],
-        ),
+            ],
+          ),
+        ],
 
         const SizedBox(height: 10),
         CustomInputField(
@@ -1243,12 +1390,20 @@ class _SalesScreenState extends State<MobileSalesScreen> {
       padding: const EdgeInsets.symmetric(vertical: 6.0),
       child: Row(
         children: [
-          Expanded(flex: 4, child: Text(label, style: AppTextStyle.cardLevelHead(context))),
+          Expanded(
+            flex: 4,
+            child: Text(label, style: AppTextStyle.cardLevelHead(context)),
+          ),
           Expanded(
             flex: 2,
             child: Text(
               value.toStringAsFixed(2),
-              style: isBold ? AppTextStyle.cardLevelText(context).copyWith(fontWeight: FontWeight.bold, color: AppColors.primaryColor(context)) : AppTextStyle.cardLevelText(context),
+              style: isBold
+                  ? AppTextStyle.cardLevelText(context).copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primaryColor(context),
+                    )
+                  : AppTextStyle.cardLevelText(context),
               textAlign: TextAlign.right,
             ),
           ),
@@ -1263,7 +1418,8 @@ class _SalesScreenState extends State<MobileSalesScreen> {
     final bloc = context.read<CreatePosSaleBloc>();
     final netTotal = calculateAllFinalTotal();
 
-    final overallDiscount = double.tryParse(bloc.discountOverAllController.text) ?? 0.0;
+    final overallDiscount =
+        double.tryParse(bloc.discountOverAllController.text) ?? 0.0;
     final vat = double.tryParse(bloc.vatOverAllController.text) ?? 0.0;
 
     final previewSale = PosSaleModel(
@@ -1291,7 +1447,11 @@ class _SalesScreenState extends State<MobileSalesScreen> {
     );
 
     try {
-      final companyInfo = context.read<ProfileBloc>().permissionModel?.data?.companyInfo;
+      final companyInfo = context
+          .read<ProfileBloc>()
+          .permissionModel
+          ?.data
+          ?.companyInfo;
       final pdfBytes = await generateSalesPreviewPdf(previewSale, companyInfo);
       await Printing.layoutPdf(onLayout: (format) => pdfBytes);
     } catch (e) {
@@ -1346,23 +1506,46 @@ class _SalesScreenState extends State<MobileSalesScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text("Product List ", style: AppTextStyle.titleMedium(context)),
-                      IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close))
+                      Text(
+                        "Product List ",
+                        style: AppTextStyle.titleMedium(context),
+                      ),
+                      IconButton(
+                        onPressed: () => Navigator.pop(context),
+                        icon: const Icon(Icons.close),
+                      ),
                     ],
                   ),
-                  Container(width: 48, height: 6, decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(8))),
+                  Container(
+                    width: 48,
+                    height: 6,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
                   const SizedBox(height: 8),
                   Row(
                     children: [
                       Expanded(
                         child: TextField(
                           controller: productSearchController,
-                          decoration: InputDecoration(prefixIcon: const Icon(Icons.search), hintText: 'Search by name / SKU / barcode', border: OutlineInputBorder(borderRadius: BorderRadius.circular(6))),
+                          decoration: InputDecoration(
+                            prefixIcon: const Icon(Icons.search),
+                            hintText: 'Search by name / SKU / barcode',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                          ),
                           onChanged: (_) => setState(() {}),
                         ),
                       ),
                       const SizedBox(width: 8),
-                      IconButton(onPressed: () => setState(() => productSearchController.clear()), icon: const Icon(Icons.clear)),
+                      IconButton(
+                        onPressed: () =>
+                            setState(() => productSearchController.clear()),
+                        icon: const Icon(Icons.clear),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 8),
@@ -1373,18 +1556,32 @@ class _SalesScreenState extends State<MobileSalesScreen> {
                         if (state is ProductsListStockSuccess) {
                           productList = state.list;
                         } else if (state is ProductsListLoading) {
-                          return const Center(child: CircularProgressIndicator());
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
                         } else if (state is ProductsListFailed) {
                           return Center(child: Text(state.content));
                         }
 
-                        final query = productSearchController.text.trim().toLowerCase();
+                        final query = productSearchController.text
+                            .trim()
+                            .toLowerCase();
                         final filteredProducts = productList.where((p) {
-                          final searchableText = [p.name, p.sku].whereType<String>().join(' ').toLowerCase();
-                          final matchesSearch = query.isEmpty || searchableText.contains(query);
-                          final matchesCategory = selectedCategoryFilter.isEmpty || p.categoryInfo?.name == selectedCategoryFilter;
-                          final matchesBrand = selectedBrandFilter.isEmpty || p.brand == selectedBrandFilter;
-                          return matchesSearch && matchesCategory && matchesBrand;
+                          final searchableText = [
+                            p.name,
+                            p.sku,
+                          ].whereType<String>().join(' ').toLowerCase();
+                          final matchesSearch =
+                              query.isEmpty || searchableText.contains(query);
+                          final matchesCategory =
+                              selectedCategoryFilter.isEmpty ||
+                              p.categoryInfo?.name == selectedCategoryFilter;
+                          final matchesBrand =
+                              selectedBrandFilter.isEmpty ||
+                              p.brand == selectedBrandFilter;
+                          return matchesSearch &&
+                              matchesCategory &&
+                              matchesBrand;
                         }).toList();
 
                         if (filteredProducts.isEmpty) {
@@ -1395,13 +1592,15 @@ class _SalesScreenState extends State<MobileSalesScreen> {
                           controller: controller,
                           padding: EdgeInsets.zero,
                           itemCount: filteredProducts.length,
-                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            childAspectRatio: 0.90,
-                            crossAxisSpacing: 8,
-                            mainAxisSpacing: 8,
-                          ),
-                          itemBuilder: (context, index) => _buildProductCard(filteredProducts[index]),
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 2,
+                                childAspectRatio: 0.90,
+                                crossAxisSpacing: 8,
+                                mainAxisSpacing: 8,
+                              ),
+                          itemBuilder: (context, index) =>
+                              _buildProductCard(filteredProducts[index]),
                         );
                       },
                     ),
@@ -1419,10 +1618,14 @@ class _SalesScreenState extends State<MobileSalesScreen> {
     final bloc = context.read<CreatePosSaleBloc>();
 
     // Check if this product is already in the sale
-    final existingIndex = bloc.products.indexWhere((row) => row["product_id"] == p.id);
+    final existingIndex = bloc.products.indexWhere(
+      (row) => row["product_id"] == p.id,
+    );
 
     final isAdded = existingIndex != -1;
-    final addedQuantity = isAdded ? (_toInt(bloc.products[existingIndex]["quantity"])) : 0;
+    final addedQuantity = isAdded
+        ? (_toInt(bloc.products[existingIndex]["quantity"]))
+        : 0;
 
     return InkWell(
       onTap: () {
@@ -1437,15 +1640,19 @@ class _SalesScreenState extends State<MobileSalesScreen> {
           return;
         }
 
-        final emptyIndex = bloc.products.indexWhere((row) => row["product_id"] == null);
-        final targetIndex = emptyIndex != -1 ? emptyIndex : bloc.products.length;
+        final emptyIndex = bloc.products.indexWhere(
+          (row) => row["product_id"] == null,
+        );
+        final targetIndex = emptyIndex != -1
+            ? emptyIndex
+            : bloc.products.length;
         if (emptyIndex == -1) bloc.addProduct();
 
         onProductChanged(targetIndex, p);
 
         controllers.putIfAbsent(
           targetIndex,
-              () => {
+          () => {
             "price": TextEditingController(),
             "discount": TextEditingController(),
             "quantity": TextEditingController(text: "1"),
@@ -1480,8 +1687,19 @@ class _SalesScreenState extends State<MobileSalesScreen> {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: isAdded ? AppColors.primaryColor(context) : Colors.grey.shade200, width: isAdded ? 2 : 1),
-          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: isAdded ? 0.1 : 0.02), blurRadius: isAdded ? 8 : 6, offset: const Offset(0, 2))],
+          border: Border.all(
+            color: isAdded
+                ? AppColors.primaryColor(context)
+                : Colors.grey.shade200,
+            width: isAdded ? 2 : 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: isAdded ? 0.1 : 0.02),
+              blurRadius: isAdded ? 8 : 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1492,7 +1710,9 @@ class _SalesScreenState extends State<MobileSalesScreen> {
                 children: [
                   if (p.image != null)
                     ClipRRect(
-                      borderRadius: const BorderRadius.vertical(top: Radius.circular(10)),
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(10),
+                      ),
                       child: Image.network(
                         p.image!,
                         fit: BoxFit.cover,
@@ -1500,10 +1720,18 @@ class _SalesScreenState extends State<MobileSalesScreen> {
                         errorBuilder: (context, error, stackTrace) {
                           return Container(
                             decoration: const BoxDecoration(
-                              borderRadius: BorderRadius.vertical(top: Radius.circular(10)),
+                              borderRadius: BorderRadius.vertical(
+                                top: Radius.circular(10),
+                              ),
                               color: Color(0xfff5f5f5),
                             ),
-                            child: const Center(child: Icon(Icons.image_not_supported, size: 36, color: Colors.black26)),
+                            child: const Center(
+                              child: Icon(
+                                Icons.image_not_supported,
+                                size: 36,
+                                color: Colors.black26,
+                              ),
+                            ),
                           );
                         },
                       ),
@@ -1511,23 +1739,46 @@ class _SalesScreenState extends State<MobileSalesScreen> {
                   else
                     Container(
                       decoration: const BoxDecoration(
-                        borderRadius: BorderRadius.vertical(top: Radius.circular(10)),
+                        borderRadius: BorderRadius.vertical(
+                          top: Radius.circular(10),
+                        ),
                         color: Color(0xfff5f5f5),
                       ),
-                      child: const Center(child: Icon(Icons.image_not_supported, size: 36, color: Colors.black26)),
+                      child: const Center(
+                        child: Icon(
+                          Icons.image_not_supported,
+                          size: 36,
+                          color: Colors.black26,
+                        ),
+                      ),
                     ),
                   if (isAdded)
                     Positioned(
                       top: 6,
                       right: 6,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: AppColors.primaryColor(context),
                           borderRadius: BorderRadius.circular(12),
-                          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 4)],
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.2),
+                              blurRadius: 4,
+                            ),
+                          ],
                         ),
-                        child: Text('×$addedQuantity', style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+                        child: Text(
+                          '×$addedQuantity',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                     ),
                 ],
@@ -1539,19 +1790,91 @@ class _SalesScreenState extends State<MobileSalesScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                    Text('৳ ${_toDouble(p.sellingPrice).toStringAsFixed(2)}', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-                    if (isAdded) Icon(Icons.check_circle, color: AppColors.primaryColor(context), size: 16),
-                  ]),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        '৳ ${_toDouble(p.sellingPrice).toStringAsFixed(2)}',
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      if (isAdded)
+                        Icon(
+                          Icons.check_circle,
+                          color: AppColors.primaryColor(context),
+                          size: 16,
+                        ),
+                    ],
+                  ),
                   const SizedBox(height: 6),
-                  Text(p.name ?? 'Product', maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 12, fontWeight: isAdded ? FontWeight.bold : FontWeight.w500, color: isAdded ? AppColors.primaryColor(context) : Colors.black)),
+                  Text(
+                    p.name ?? 'Product',
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: isAdded ? FontWeight.bold : FontWeight.w500,
+                      color: isAdded
+                          ? AppColors.primaryColor(context)
+                          : Colors.black,
+                    ),
+                  ),
                   const SizedBox(height: 6),
-                  Text('${p.brandInfo?.name ?? ''} • ${p.categoryInfo?.name ?? ''}', maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 11, color: Colors.grey.shade600)),
+                  Text(
+                    '${p.brandInfo?.name ?? ''} • ${p.categoryInfo?.name ?? ''}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
+                  ),
                   const SizedBox(height: 6),
-                  Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                    Container(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), decoration: BoxDecoration(color: p.stockQty == 0 ? Colors.grey : (p.stockQty != null && p.stockQty! < 10 ? Colors.orange : Colors.green), borderRadius: BorderRadius.circular(12)), child: Text('Stock: ${p.stockQty ?? 0}', style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w500))),
-                    Container(width: 36, height: 36, decoration: BoxDecoration(color: isAdded ? AppColors.primaryColor(context).withValues(alpha: 0.1) : AppColors.primaryColor(context), shape: BoxShape.circle), child: Icon(isAdded ? Icons.add_circle : Icons.add_circle_outline, color: isAdded ? AppColors.primaryColor(context) : Colors.white, size: 20)),
-                  ]),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: p.stockQty == 0
+                              ? Colors.grey
+                              : (p.stockQty != null && p.stockQty! < 10
+                                    ? Colors.orange
+                                    : Colors.green),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          'Stock: ${p.stockQty ?? 0}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                      Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          color: isAdded
+                              ? AppColors.primaryColor(
+                                  context,
+                                ).withValues(alpha: 0.1)
+                              : AppColors.primaryColor(context),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          isAdded ? Icons.add_circle : Icons.add_circle_outline,
+                          color: isAdded
+                              ? AppColors.primaryColor(context)
+                              : Colors.white,
+                          size: 20,
+                        ),
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),
@@ -1563,10 +1886,17 @@ class _SalesScreenState extends State<MobileSalesScreen> {
 
   // Date selector
   void _selectDate() async {
-    DateTime? pickedDate = await showDatePicker(context: context, initialDate: DateTime.now(), firstDate: DateTime(2000), lastDate: DateTime(2101));
+    DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2101),
+    );
     if (pickedDate != null) {
       final bloc = context.read<CreatePosSaleBloc>();
-      bloc.dateEditingController.text = appWidgets.convertDateTimeDDMMYYYY(pickedDate);
+      bloc.dateEditingController.text = appWidgets.convertDateTimeDDMMYYYY(
+        pickedDate,
+      );
       setState(() {});
     }
   }
@@ -1575,7 +1905,13 @@ class _SalesScreenState extends State<MobileSalesScreen> {
   void _validateAndSubmitForm() {
     // First validate the form
     if (!formKey.currentState!.validate()) {
-      showCustomToast(context: context, title: 'Validation Error', description: 'Please fix the errors in the form', icon: Icons.error, primaryColor: Colors.red);
+      showCustomToast(
+        context: context,
+        title: 'Validation Error',
+        description: 'Please fix the errors in the form',
+        icon: Icons.error,
+        primaryColor: Colors.red,
+      );
       return;
     }
 
@@ -1596,47 +1932,96 @@ class _SalesScreenState extends State<MobileSalesScreen> {
     }
 
     if (!hasProducts) {
-      showCustomToast(context: context, title: 'Validation Error', description: 'Please add at least one product', icon: Icons.error, primaryColor: Colors.red);
+      showCustomToast(
+        context: context,
+        title: 'Validation Error',
+        description: 'Please add at least one product',
+        icon: Icons.error,
+        primaryColor: Colors.red,
+      );
       return;
     }
 
     // Validate walk-in customer rules
     if (isWalkInCustomer) {
       if (paidAmount != netTotal) {
-        showCustomToast(context: context, title: 'Validation Error', description: "Walk-in customer must pay EXACT amount: ${netTotal.toStringAsFixed(2)}", icon: Icons.error, primaryColor: Colors.red);
+        showCustomToast(
+          context: context,
+          title: 'Validation Error',
+          description:
+              "Walk-in customer must pay EXACT amount: ${netTotal.toStringAsFixed(2)}",
+          icon: Icons.error,
+          primaryColor: Colors.red,
+        );
         return;
       }
       // For walk-in we disallow money receipt
-      if (_isChecked) {
-        showCustomToast(context: context, title: 'Validation Error', description: "Walk-in customer cannot have money receipt", icon: Icons.error, primaryColor: Colors.red);
-        return;
-      }
+      // if (_isChecked) {
+      //   showCustomToast(
+      //     context: context,
+      //     title: 'Validation Error',
+      //     description: "Walk-in customer cannot have money receipt",
+      //     icon: Icons.error,
+      //     primaryColor: Colors.red,
+      //   );
+      //   return;
+      // }
     } else {
       // Saved customer: money receipt must be enabled
       if (!_isChecked) {
-        showCustomToast(context: context, title: 'Validation Error', description: 'Saved customer must have money receipt', icon: Icons.error, primaryColor: Colors.red);
+        showCustomToast(
+          context: context,
+          title: 'Validation Error',
+          description: 'Saved customer must have money receipt',
+          icon: Icons.error,
+          primaryColor: Colors.red,
+        );
         return;
       }
 
       if (_isChecked) {
         if (bloc.selectedPaymentMethod.isEmpty) {
-          showCustomToast(context: context, title: 'Validation Error', description: 'Please select a payment method', icon: Icons.error, primaryColor: Colors.red);
+          showCustomToast(
+            context: context,
+            title: 'Validation Error',
+            description: 'Please select a payment method',
+            icon: Icons.error,
+            primaryColor: Colors.red,
+          );
           return;
         }
         if (bloc.accountModel == null) {
-          showCustomToast(context: context, title: 'Validation Error', description: 'Please select an account', icon: Icons.error, primaryColor: Colors.red);
+          showCustomToast(
+            context: context,
+            title: 'Validation Error',
+            description: 'Please select an account',
+            icon: Icons.error,
+            primaryColor: Colors.red,
+          );
           return;
         }
       }
     }
 
     if (bloc.payableAmount.text.isEmpty) {
-      showCustomToast(context: context, title: 'Validation Error', description: 'Please enter payable amount', icon: Icons.error, primaryColor: Colors.red);
+      showCustomToast(
+        context: context,
+        title: 'Validation Error',
+        description: 'Please enter payable amount',
+        icon: Icons.error,
+        primaryColor: Colors.red,
+      );
       return;
     }
 
     if (paidAmount < 0) {
-      showCustomToast(context: context, title: 'Validation Error', description: 'Paid amount cannot be negative', icon: Icons.error, primaryColor: Colors.red);
+      showCustomToast(
+        context: context,
+        title: 'Validation Error',
+        description: 'Paid amount cannot be negative',
+        icon: Icons.error,
+        primaryColor: Colors.red,
+      );
       return;
     }
 
@@ -1647,16 +2032,23 @@ class _SalesScreenState extends State<MobileSalesScreen> {
   void _submitForm() {
     final bloc = context.read<CreatePosSaleBloc>();
 
-    var transferProducts = products.map((product) {
-      return {
-        "product_id": _toInt(product["product_id"]),
-        "quantity": _toInt(product["quantity"]),
-        "unit_price": _toDouble(product["price"]),
-        "discount": _toDouble(product["discount"]),
-        // convert internal discount_type if necessary
-        "discount_type": (product["discount_type"]?.toString().toLowerCase() == 'percent') ? 'percentage' : (product["discount_type"]?.toString() ?? 'fixed'),
-      };
-    }).where((p) => p["product_id"] != 0).toList();
+    var transferProducts = products
+        .map((product) {
+          return {
+            "product_id": _toInt(product["product_id"]),
+            "quantity": _toInt(product["quantity"]),
+            "unit_price": _toDouble(product["price"]),
+            "discount": _toDouble(product["discount"]),
+            // convert internal discount_type if necessary
+            "discount_type":
+                (product["discount_type"]?.toString().toLowerCase() ==
+                    'percent')
+                ? 'percentage'
+                : (product["discount_type"]?.toString() ?? 'fixed'),
+          };
+        })
+        .where((p) => p["product_id"] != 0)
+        .toList();
 
     final selectedCustomer = bloc.selectClintModel;
     final isWalkInCustomer = selectedCustomer?.id == -1;
@@ -1667,34 +2059,51 @@ class _SalesScreenState extends State<MobileSalesScreen> {
 
     Map<String, dynamic> body = {
       "type": "normal_sale",
-      "sale_date": appWidgets.convertDateTime(DateFormat("dd-MM-yyyy").parse(bloc.dateEditingController.text.trim(), true), "yyyy-MM-dd"),
-      "sale_by": (isAdmin) ? bloc.selectSalesModel?.id?.toString() ?? '' : user?.id?.toString() ?? '',
+      "sale_date": appWidgets.convertDateTime(
+        DateFormat(
+          "dd-MM-yyyy",
+        ).parse(bloc.dateEditingController.text.trim(), true),
+        "yyyy-MM-dd",
+      ),
+      "sale_by": (isAdmin)
+          ? bloc.selectSalesModel?.id?.toString() ?? ''
+          : user?.id?.toString() ?? '',
       "overall_vat_type": selectedOverallVatType.toLowerCase(),
-      "vat": bloc.vatOverAllController.text.isEmpty ? 0 : double.tryParse(bloc.vatOverAllController.text),
+      "vat": bloc.vatOverAllController.text.isEmpty
+          ? 0
+          : double.tryParse(bloc.vatOverAllController.text),
       "overall_service_type": selectedOverallServiceChargeType.toLowerCase(),
-      "service_charge": bloc.serviceChargeOverAllController.text.isEmpty ? 0 : double.tryParse(bloc.serviceChargeOverAllController.text),
+      "service_charge": bloc.serviceChargeOverAllController.text.isEmpty
+          ? 0
+          : double.tryParse(bloc.serviceChargeOverAllController.text),
       "overall_delivery_type": selectedOverallDeliveryType.toLowerCase(),
-      "delivery_charge": bloc.deliveryChargeOverAllController.text.isEmpty ? 0 : double.tryParse(bloc.deliveryChargeOverAllController.text),
+      "delivery_charge": bloc.deliveryChargeOverAllController.text.isEmpty
+          ? 0
+          : double.tryParse(bloc.deliveryChargeOverAllController.text),
       "overall_discount_type": selectedOverallDiscountType.toLowerCase(),
-      "overall_discount": bloc.discountOverAllController.text.isEmpty ? 0.0 : double.tryParse(bloc.discountOverAllController.text),
+      "overall_discount": bloc.discountOverAllController.text.isEmpty
+          ? 0.0
+          : double.tryParse(bloc.discountOverAllController.text),
       "remark": bloc.remarkController.text,
       "items": transferProducts,
       "customer_type": isWalkInCustomer ? "walk_in" : "saved_customer",
       "with_money_receipt": _isChecked ? "Yes" : "No",
       "paid_amount": paidAmount,
-      "due_amount": isWalkInCustomer ? 0.0 : (netTotal - paidAmount).clamp(0, double.infinity),
+      "due_amount": isWalkInCustomer
+          ? 0.0
+          : (netTotal - paidAmount).clamp(0, double.infinity),
     };
 
     if (isWalkInCustomer) {
       body.remove('customer_id');
-      body['with_money_receipt'] = "No";
+      // body['with_money_receipt'] = "No";
       body['due_amount'] = 0.0;
     } else {
       body['customer_id'] = selectedCustomer?.id.toString() ?? '';
-      body['with_money_receipt'] = "Yes";
+      // body['with_money_receipt'] = "Yes";
     }
 
-    if (_isChecked && !isWalkInCustomer) {
+    if (_isChecked ) {
       body['payment_method'] = bloc.selectedPaymentMethod;
       body['account_id'] = bloc.accountModel?.id.toString() ?? '';
     }
@@ -1709,9 +2118,7 @@ class _SalesScreenState extends State<MobileSalesScreen> {
   Future<void> _openQrScanner() async {
     final code = await Navigator.push<String?>(
       context,
-      MaterialPageRoute(
-        builder: (context) => const QrScannerScreen(),
-      ),
+      MaterialPageRoute(builder: (context) => const QrScannerScreen()),
     );
 
     if (code != null && code.trim().isNotEmpty) {
@@ -1722,7 +2129,8 @@ class _SalesScreenState extends State<MobileSalesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final availableHeight = MediaQuery.of(context).size.height - kToolbarHeight - 24;
+    final availableHeight =
+        MediaQuery.of(context).size.height - kToolbarHeight - 24;
 
     return RawKeyboardListener(
       focusNode: _focusNode,
@@ -1732,7 +2140,12 @@ class _SalesScreenState extends State<MobileSalesScreen> {
         backgroundColor: AppColors.bottomNavBg(context),
         appBar: AppBar(
           backgroundColor: AppColors.bottomNavBg(context),
-          title: Text('Pos Sale', style: AppTextStyle.titleMedium(context).copyWith(color: AppColors.text(context))),
+          title: Text(
+            'Pos Sale',
+            style: AppTextStyle.titleMedium(
+              context,
+            ).copyWith(color: AppColors.text(context)),
+          ),
           actions: [
             IconButton(
               onPressed: _openProductBrowser,
@@ -1758,13 +2171,34 @@ class _SalesScreenState extends State<MobileSalesScreen> {
               if (state is CreatePosSaleLoading) {
                 appLoader(context, "Creating PosSale, please wait...");
               } else if (state is CreatePosSaleSuccess) {
-                showCustomToast(context: context, title: 'Success!', description: "Sale created successfully!", icon: Icons.check_circle, primaryColor: Colors.green);
+                showCustomToast(
+                  context: context,
+                  title: 'Success!',
+                  description: "Sale created successfully!",
+                  icon: Icons.check_circle,
+                  primaryColor: Colors.green,
+                );
                 changeAmountController.clear();
-                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const MobilePosSaleScreen()));
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const MobilePosSaleScreen(),
+                  ),
+                );
                 setState(() {});
               } else if (state is CreatePosSaleFailed) {
                 Navigator.pop(context);
-                appAlertDialog(context, state.content, title: state.title, actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text("Dismiss"))]);
+                appAlertDialog(
+                  context,
+                  state.content,
+                  title: state.title,
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text("Dismiss"),
+                    ),
+                  ],
+                );
               }
             },
             builder: (context, state) {
@@ -1851,10 +2285,7 @@ class _QrScannerScreenState extends State<QrScannerScreen> {
           ),
         ],
       ),
-      body: MobileScanner(
-        controller: _controller,
-        onDetect: _onDetect,
-      ),
+      body: MobileScanner(controller: _controller, onDetect: _onDetect),
     );
   }
 }
