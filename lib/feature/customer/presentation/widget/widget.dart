@@ -174,7 +174,7 @@ class CustomerTableCard extends StatelessWidget {
                   isImportant: true,
                   context: context
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 4),
 
                 // Phone
                 _buildDetailRow(
@@ -188,7 +188,7 @@ class CustomerTableCard extends StatelessWidget {
                   }
                       : null,
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 4),
 
                 // Email
                 if (customer.email?.isNotEmpty == true)
@@ -203,7 +203,7 @@ class CustomerTableCard extends StatelessWidget {
                           // Handle email
                         },
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 4),
                     ],
                   ),
 

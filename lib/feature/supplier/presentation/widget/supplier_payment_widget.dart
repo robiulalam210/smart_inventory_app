@@ -44,11 +44,11 @@ class SupplierPaymentWidget extends StatelessWidget {
   }
 
   Widget _buildPaymentCard(
-      SupplierPaymentModel payment,
-      int index,
-      BuildContext context,
-      bool isMobile,
-      ) {
+    SupplierPaymentModel payment,
+    int index,
+    BuildContext context,
+    bool isMobile,
+  ) {
     String formatDate(DateTime? date) {
       if (date == null) return '-';
       return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
@@ -80,7 +80,9 @@ class SupplierPaymentWidget extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color: _getStatusColors(getStatus(payment.paymentSummary)).$1.withValues(alpha:0.05),
+              color: _getStatusColors(
+                getStatus(payment.paymentSummary),
+              ).$1.withValues(alpha: 0.05),
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(16),
                 topRight: Radius.circular(16),
@@ -115,7 +117,7 @@ class SupplierPaymentWidget extends StatelessWidget {
                       Flexible(
                         child: Text(
                           payment.spNo ?? '-',
-                          style:  TextStyle(
+                          style: TextStyle(
                             fontWeight: FontWeight.w700,
                             color: AppColors.text(context),
                             fontSize: 14,
@@ -129,18 +131,27 @@ class SupplierPaymentWidget extends StatelessWidget {
                 // Status Chip
                 Flexible(
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
-                      color: _getStatusColors(getStatus(payment.paymentSummary)).$1.withValues(alpha: 0.2),
+                      color: _getStatusColors(
+                        getStatus(payment.paymentSummary),
+                      ).$1.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
-                        color: _getStatusColors(getStatus(payment.paymentSummary)).$1,
+                        color: _getStatusColors(
+                          getStatus(payment.paymentSummary),
+                        ).$1,
                       ),
                     ),
                     child: Text(
                       _formatStatusText(getStatus(payment.paymentSummary)),
                       style: TextStyle(
-                        color: _getStatusColors(getStatus(payment.paymentSummary)).$2,
+                        color: _getStatusColors(
+                          getStatus(payment.paymentSummary),
+                        ).$2,
                         fontWeight: FontWeight.w700,
                         fontSize: 11,
                       ),
@@ -158,35 +169,34 @@ class SupplierPaymentWidget extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(children: [
-                  Expanded(
-                    child: _buildDetailRow(
-                      context: context,
-                      icon: Iconsax.user,
-                      label: 'Supplier',
-                      value: payment.supplierName ?? '-',
-                      isImportant: true,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  if (payment.supplierPhone?.isNotEmpty == true)
-
+                Row(
+                  children: [
                     Expanded(
                       child: _buildDetailRow(
-                      context: context,
-                      icon: Iconsax.call,
-                      label: 'Phone',
-                      value: payment.supplierPhone!,
-                      onTap: () {
-                        // Add phone call functionality
-                      },
-                                        ),
+                        context: context,
+                        icon: Iconsax.user,
+                        label: 'Supplier',
+                        value: payment.supplierName ?? '-',
+                        isImportant: true,
+                      ),
                     ),
-                ],),
+                    const SizedBox(width: 12),
+                    if (payment.supplierPhone?.isNotEmpty == true)
+                      Expanded(
+                        child: _buildDetailRow(
+                          context: context,
+                          icon: Iconsax.call,
+                          label: 'Phone',
+                          value: payment.supplierPhone!,
+                          onTap: () {
+                            // Add phone call functionality
+                          },
+                        ),
+                      ),
+                  ],
+                ),
                 // Supplier Info
-SizedBox(height: 8,),
-
-
+                SizedBox(height: 8),
 
                 // Payment Details Grid
                 Container(
@@ -194,9 +204,7 @@ SizedBox(height: 8,),
                   decoration: BoxDecoration(
                     color: AppColors.bottomNavBg(context),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: Colors.grey.shade200,
-                    ),
+                    border: Border.all(color: Colors.grey.shade200),
                   ),
                   child: Column(
                     children: [
@@ -274,10 +282,7 @@ SizedBox(height: 8,),
                 bottomRight: Radius.circular(16),
               ),
               border: Border(
-                top: BorderSide(
-                  color: Colors.grey.shade200,
-                  width: 1,
-                ),
+                top: BorderSide(color: Colors.grey.shade200, width: 1),
               ),
             ),
             child: Row(
@@ -294,10 +299,7 @@ SizedBox(height: 8,),
                         ),
                       );
                     },
-                    icon: const Icon(
-                      Icons.visibility,
-                      size: 16,
-                    ),
+                    icon: const Icon(Icons.visibility, size: 16),
                     label: const Text('View'),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: Colors.blue,
@@ -317,7 +319,11 @@ SizedBox(height: 8,),
                         context,
                         MaterialPageRoute(
                           builder: (context) => Scaffold(
-                            backgroundColor: Colors.red,
+                            appBar: AppBar(
+                              title:  Text('Supplier Payment Invoice',style: AppTextStyle.titleMedium(context),),
+                              backgroundColor: AppColors.bottomNavBg(context),
+
+                            ),
                             body: PdfPreview.builder(
                               useActions: true,
                               allowSharing: false,
@@ -325,22 +331,23 @@ SizedBox(height: 8,),
                               canChangeOrientation: false,
                               canChangePageFormat: false,
                               dynamicLayout: true,
+
+                              pdfPreviewPageDecoration: BoxDecoration(color: AppColors.text(context)),
+
                               build: (format) =>
                                   generateSupplierPaymentPdf(payment),
-                              pdfPreviewPageDecoration:
-                              BoxDecoration(color: AppColors.white),
                               actionBarTheme: PdfActionBarTheme(
-                                backgroundColor: AppColors.primaryColor(context),
-                                iconColor: Colors.white,
-                                textStyle: const TextStyle(color: Colors.white),
+                                backgroundColor: AppColors.bottomNavBg(context),
+                                iconColor: AppColors.text(context),
+                                textStyle: AppTextStyle.body(context),
                               ),
                               actions: [
                                 IconButton(
                                   onPressed: () => AppRoutes.pop(context),
-                                  icon:
-                                  const Icon(Icons.cancel, color: Colors.red),
+                                  icon: const Icon(Icons.cancel, color: Colors.red),
                                 ),
                               ],
+
                               pagesBuilder: (context, pages) {
                                 debugPrint('Rendering ${pages.length} pages');
                                 return PageView.builder(
@@ -351,10 +358,8 @@ SizedBox(height: 8,),
                                     return Container(
                                       color: Colors.grey,
                                       alignment: Alignment.center,
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Image(
-                                          image: page.image,
-                                          fit: BoxFit.contain),
+                                      padding: const EdgeInsets.all(0.0),
+                                      child: Image(image: page.image, fit: BoxFit.fill),
                                     );
                                   },
                                 );
@@ -364,10 +369,7 @@ SizedBox(height: 8,),
                         ),
                       );
                     },
-                    icon: const Icon(
-                      Icons.picture_as_pdf,
-                      size: 16,
-                    ),
+                    icon: const Icon(Icons.picture_as_pdf, size: 16),
                     label: const Text('PDF'),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: Colors.red,
@@ -400,11 +402,7 @@ SizedBox(height: 8,),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(
-            icon,
-            size: 18,
-            color: AppColors.text(context),
-          ),
+          Icon(icon, size: 18, color: AppColors.text(context)),
           const SizedBox(width: 8),
           Expanded(
             child: Column(
@@ -423,7 +421,9 @@ SizedBox(height: 8,),
                   value,
                   style: TextStyle(
                     fontWeight: isImportant ? FontWeight.w700 : FontWeight.w500,
-                    color: isImportant ? AppColors.primaryColor(context): AppColors.text(context),
+                    color: isImportant
+                        ? AppColors.primaryColor(context)
+                        : AppColors.text(context),
                     fontSize: isImportant ? 15 : 14,
                   ),
                   maxLines: 2,
@@ -446,9 +446,9 @@ SizedBox(height: 8,),
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: color.withValues(alpha:0.05),
+        color: color.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withValues(alpha:0.2)),
+        border: Border.all(color: color.withValues(alpha: 0.2)),
       ),
       child: Row(
         children: [
@@ -517,16 +517,16 @@ SizedBox(height: 8,),
       case 'completed':
       case 'paid':
       case 'success':
-        return (Colors.green.withValues(alpha:0.2), Colors.green);
+        return (Colors.green.withValues(alpha: 0.2), Colors.green);
       case 'pending':
       case 'processing':
-        return (Colors.orange.withValues(alpha:0.2), Colors.orange);
+        return (Colors.orange.withValues(alpha: 0.2), Colors.orange);
       case 'failed':
       case 'cancelled':
       case 'rejected':
-        return (Colors.red.withValues(alpha:0.2), Colors.red);
+        return (Colors.red.withValues(alpha: 0.2), Colors.red);
       default:
-        return (Colors.grey.withValues(alpha:0.2), Colors.grey);
+        return (Colors.grey.withValues(alpha: 0.2), Colors.grey);
     }
   }
 
@@ -552,7 +552,7 @@ SizedBox(height: 8,),
             color: Colors.white,
             boxShadow: [
               BoxShadow(
-                color: Colors.grey.withValues(alpha:0.1),
+                color: Colors.grey.withValues(alpha: 0.1),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -580,15 +580,16 @@ SizedBox(height: 8,),
                             .entries
                             .map(
                               (e) => _buildRow(
-                            context,
-                            e.key + 1,
-                            e.value,
-                            dynamicColumnWidth,
-                          ),
-                        )
+                                context,
+                                e.key + 1,
+                                e.value,
+                                dynamicColumnWidth,
+                              ),
+                            )
                             .toList(),
-                        headingRowColor:
-                        WidgetStateProperty.all(AppColors.primaryColor(context)),
+                        headingRowColor: WidgetStateProperty.all(
+                          AppColors.primaryColor(context),
+                        ),
                         headingRowHeight: 40,
                         headingTextStyle: const TextStyle(
                           color: Colors.white,
@@ -644,11 +645,11 @@ SizedBox(height: 8,),
   }
 
   DataRow _buildRow(
-      BuildContext context,
-      int index,
-      SupplierPaymentModel supplier,
-      double columnWidth,
-      ) {
+    BuildContext context,
+    int index,
+    SupplierPaymentModel supplier,
+    double columnWidth,
+  ) {
     String formatDate(DateTime? date) {
       if (date == null) return '-';
       return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
@@ -676,10 +677,10 @@ SizedBox(height: 8,),
   }
 
   DataCell _buildActionsCell(
-      BuildContext context,
-      SupplierPaymentModel sale,
-      double width,
-      ) {
+    BuildContext context,
+    SupplierPaymentModel sale,
+    double width,
+  ) {
     return DataCell(
       SizedBox(
         width: width,
@@ -715,8 +716,9 @@ SizedBox(height: 8,),
                         canChangePageFormat: false,
                         dynamicLayout: true,
                         build: (format) => generateSupplierPaymentPdf(sale),
-                        pdfPreviewPageDecoration:
-                        BoxDecoration(color: AppColors.white),
+                        pdfPreviewPageDecoration: BoxDecoration(
+                          color: AppColors.white,
+                        ),
                         actionBarTheme: PdfActionBarTheme(
                           backgroundColor: AppColors.primaryColor(context),
                           iconColor: Colors.white,
@@ -739,8 +741,10 @@ SizedBox(height: 8,),
                                 color: Colors.grey,
                                 alignment: Alignment.center,
                                 padding: const EdgeInsets.all(8.0),
-                                child:
-                                Image(image: page.image, fit: BoxFit.contain),
+                                child: Image(
+                                  image: page.image,
+                                  fit: BoxFit.contain,
+                                ),
                               );
                             },
                           );
@@ -821,7 +825,7 @@ SizedBox(height: 8,),
             decoration: BoxDecoration(
               color: color,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: color.withValues(alpha:0.3)),
+              border: Border.all(color: color.withValues(alpha: 0.3)),
             ),
             constraints: const BoxConstraints(minWidth: 70),
             child: Text(

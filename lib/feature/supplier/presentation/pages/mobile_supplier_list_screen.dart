@@ -94,7 +94,7 @@ class _SupplierScreenState extends State<MobileSupplierListScreen> {
           },
         );
 
-      },child: Icon(Icons.add),),
+      },child: Icon(Icons.add,color: AppColors.whiteColor(context),),),
       body: SafeArea(
         child: Container(
           padding: AppTextStyle.getResponsivePaddingBody(context),

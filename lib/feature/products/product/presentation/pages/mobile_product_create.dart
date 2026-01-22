@@ -1,5 +1,4 @@
 import 'package:flutter/cupertino.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '/feature/products/brand/data/model/brand_model.dart';
 import '/feature/products/brand/presentation/bloc/brand/brand_bloc.dart';
 import '/feature/products/categories/data/model/categories_model.dart';
@@ -120,7 +119,9 @@ class _ProductsFormState extends State<MobileProductCreate> {
     productsBloc.selectedDiscountType = product.discountType ?? "fixed";
     productsBloc.isDiscountApplied = product.discountApplied ?? false;
 
-    productsBloc.selectedState = product.isActive == true ? "Active" : "Inactive";
+    productsBloc.selectedState = product.isActive == true
+        ? "Active"
+        : "Inactive";
 
     // Set selected category, unit, brand if available
     if (product.categoryInfo?.name != null) {
@@ -174,7 +175,7 @@ class _ProductsFormState extends State<MobileProductCreate> {
             children: [
               Text(
                 _isEditMode ? "Update Product" : "Create New Product",
-                style:  TextStyle(
+                style: TextStyle(
                   fontSize: 18,
                   color: AppColors.text(context),
                   fontWeight: FontWeight.bold,
@@ -206,7 +207,7 @@ class _ProductsFormState extends State<MobileProductCreate> {
                           SizedBox(child: _buildUnitDropdown()),
                         ],
                       ),
-gapH8,
+                      gapH8,
                       // Second Row: Groups, Brand, Source
                       Wrap(
                         runSpacing: 8,
@@ -219,7 +220,6 @@ gapH8,
                       ),
 
                       // Third Row: Product Name and Opening Stock
-
                       _buildProductNameField(),
 
                       // Seventh Row: Alert Quantity and Description
@@ -244,38 +244,11 @@ gapH8,
                         ],
                       ),
 
-                      // Fifth Row: Discount Toggle
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(child: _buildDiscountAppliedToggle()),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: BlocBuilder<ProductsBloc, ProductsState>(
-                              builder: (context, state) {
-                                return Visibility(
-                                  visible: productsBloc.isDiscountApplied,
-                                  child: Row(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    mainAxisAlignment: MainAxisAlignment.end,
-                                    children: [
-                                      Expanded(
-                                        child: _buildDiscountValueField(),
-                                      ),
-                                      const SizedBox(width: 5),
-                                      Expanded(
-                                        child: _buildDiscountTypeDropdown(),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
+                      // Discount Section
+                      _buildDiscountSection(),
 
-                      // Sixth Row: Discount Value and Type
+
+                      // Description Field
                       const SizedBox(height: 10),
                       _buildDescriptionField(),
 
@@ -292,20 +265,24 @@ gapH8,
                               child: AppDropdown(
                                 label: "Status",
                                 hint:
-                                    context
-                                        .read<ProductsBloc>()
-                                        .selectedState
-                                        .isEmpty
+                                context
+                                    .read<ProductsBloc>()
+                                    .selectedState
+                                    .isEmpty
                                     ? "Select Status"
-                                    : context.read<ProductsBloc>().selectedState,
+                                    : context
+                                    .read<ProductsBloc>()
+                                    .selectedState,
                                 isLabel: false,
                                 value:
-                                    context
-                                        .read<ProductsBloc>()
-                                        .selectedState
-                                        .isEmpty
+                                context
+                                    .read<ProductsBloc>()
+                                    .selectedState
+                                    .isEmpty
                                     ? null
-                                    : context.read<ProductsBloc>().selectedState,
+                                    : context
+                                    .read<ProductsBloc>()
+                                    .selectedState,
                                 itemList: ["Active", "Inactive"],
                                 onChanged: (newVal) {
                                   setState(() {
@@ -319,7 +296,6 @@ gapH8,
                         ),
                         SizedBox(height: AppSizes.height(context) * 0.01),
                       ],
-
 
                       // Buttons Row
                       Row(
@@ -360,6 +336,139 @@ gapH8,
     );
   }
 
+  Widget _buildDiscountSection() {
+    void onDiscountValueChanged(String value) {
+      if (value.isEmpty) return;
+
+      final parsed = double.tryParse(value);
+      if (parsed == null) return;
+
+      // Percentage discount should not exceed 100
+      if (productsBloc.selectedDiscountType == 'percentage' && parsed > 100) {
+        productsBloc.productDiscountValueController.text = '100';
+        productsBloc.productDiscountValueController.selection =
+        const TextSelection.collapsed(offset: 3);
+      }
+
+      setState(() {});
+    }
+
+    return Column(
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(child: _buildDiscountAppliedToggle()),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Visibility(
+                visible: productsBloc.isDiscountApplied,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: CustomInputField(
+                        isRequiredLable: false,
+                        isRequired: false,
+                        controller:
+                        productsBloc.productDiscountValueController,
+                        hintText: '0.00',
+                        fillColor:
+                        const Color.fromARGB(255, 255, 255, 255),
+                        keyboardType:
+                        const TextInputType.numberWithOptions(decimal: true),
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+
+                        ],
+                        onChanged: onDiscountValueChanged,
+                      ),
+                    ),
+                    const SizedBox(width: 5),
+                    Expanded(child: _buildDiscountTypeDropdown()),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+
+
+        /// Discount Preview
+        if (productsBloc.isDiscountApplied &&
+            productsBloc.productDiscountValueController.text.isNotEmpty &&
+            double.tryParse(
+                productsBloc.productDiscountValueController.text) !=
+                null &&
+            double.parse(
+                productsBloc.productDiscountValueController.text) >
+                0)
+          Container(
+            margin: const EdgeInsets.only(top: 8),
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.orange.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Discount will be:',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.orange.shade700,
+                  ),
+                ),
+                Text(
+                  productsBloc.selectedDiscountType == 'fixed'
+                      ? '৳${productsBloc.productDiscountValueController.text} off'
+                      : '${productsBloc.productDiscountValueController.text}% off',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.orange.shade800,
+                  ),
+                ),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+  Widget _buildDiscountTypeDropdown() {
+    return CupertinoSegmentedControl<String>(
+      padding: EdgeInsets.zero,
+      children: {
+        'fixed': Text(
+          'TK',
+          style: TextStyle(
+            color: productsBloc.selectedDiscountType == 'fixed'
+                ? Colors.white
+                : Colors.black,
+          ),
+        ),
+        'percentage': Text(
+          '%',
+          style: TextStyle(
+            color: productsBloc.selectedDiscountType == 'percentage'
+                ? Colors.white
+                : Colors.black,
+          ),
+        ),
+      },
+      groupValue: productsBloc.selectedDiscountType,
+      selectedColor: AppColors.primaryColor(context),
+      unselectedColor: Colors.grey[300],
+      borderColor: AppColors.primaryColor(context),
+      onValueChanged: (val) {
+        setState(() {
+          productsBloc.selectedDiscountType = val;
+          productsBloc.productDiscountValueController.clear();
+        });
+      },
+    );
+  }
+
   void _handleProductState(ProductsState state) {
     if (state is ProductsAddLoading) {
       appLoader(
@@ -378,14 +487,12 @@ gapH8,
       showCustomToast(
         context: context,
         title: 'Success!',
-        description:
-              _isEditMode
-                  ? 'Product updated successfully!'
-                  : 'Product created successfully!',
+        description: _isEditMode
+            ? 'Product updated successfully!'
+            : 'Product created successfully!',
         icon: Icons.check_circle,
         primaryColor: Colors.green,
       );
-
 
       Navigator.pop(context);
     } else if (state is ProductsAddFailed) {
@@ -412,7 +519,7 @@ gapH8,
 
         return AppDropdown(
           label: "Category",
-          hint: "Select Category" ,
+          hint: "Select Category",
           isLabel: false,
           isNeedAll: false,
           isRequired: true,
@@ -423,7 +530,7 @@ gapH8,
             setState(() {
               categoriesBloc.selectedState = newVal.toString();
               final matchingCategory = categoryList.firstWhere(
-                (category) => category.name.toString() == newVal.toString(),
+                    (category) => category.name.toString() == newVal.toString(),
                 orElse: () => CategoryModel(),
               );
               categoriesBloc.selectedStateId =
@@ -431,7 +538,6 @@ gapH8,
             });
           },
           validator: (value) => value == null ? 'Please select Category' : null,
-
         );
       },
     );
@@ -445,7 +551,7 @@ gapH8,
 
         return AppDropdown(
           label: "Unit ",
-          hint: "Select Unit" ,
+          hint: "Select Unit",
           isLabel: false,
           isNeedAll: false,
           isRequired: true,
@@ -456,14 +562,13 @@ gapH8,
             setState(() {
               unitBloc.selectedState = newVal.toString();
               final matchingUnit = unitList.firstWhere(
-                (unit) => unit.name.toString() == newVal.toString(),
+                    (unit) => unit.name.toString() == newVal.toString(),
                 orElse: () => UnitsModel(),
               );
               unitBloc.selectedIdState = matchingUnit.id?.toString() ?? "";
             });
           },
           validator: (value) => value == null ? 'Please select Unit' : null,
-
         );
       },
     );
@@ -488,13 +593,12 @@ gapH8,
             setState(() {
               groupsBloc.selectedState = newVal.toString();
               final matchingUnit = groupsList.firstWhere(
-                (unit) => unit.name.toString() == newVal.toString(),
+                    (unit) => unit.name.toString() == newVal.toString(),
                 orElse: () => GroupsModel(),
               );
               groupsBloc.selectedIdState = matchingUnit.id?.toString() ?? "";
             });
           },
-
         );
       },
     );
@@ -508,7 +612,7 @@ gapH8,
 
         return AppDropdown(
           label: "Source ",
-          hint:  "Select Source" ,
+          hint: "Select Source",
           isLabel: false,
           isNeedAll: false,
           isRequired: false,
@@ -519,13 +623,12 @@ gapH8,
             setState(() {
               sourceBloc.selectedState = newVal.toString();
               final matchingUnit = sourceList.firstWhere(
-                (unit) => unit.name.toString() == newVal.toString(),
+                    (unit) => unit.name.toString() == newVal.toString(),
                 orElse: () => SourceModel(),
               );
               sourceBloc.selectedIdState = matchingUnit.id?.toString() ?? "";
             });
           },
-
         );
       },
     );
@@ -539,7 +642,7 @@ gapH8,
 
         return AppDropdown(
           label: "Brand",
-          hint: "Select Brand" ,
+          hint: "Select Brand",
           isLabel: false,
           isNeedAll: false,
           isSearch: true,
@@ -556,7 +659,6 @@ gapH8,
               brandBloc.selectedId = matchingBrand.id?.toString() ?? "";
             });
           },
-
         );
       },
     );
@@ -646,14 +748,14 @@ gapH8,
   Widget _buildDiscountAppliedToggle() {
     return Container(
       height: 43,
-      padding: const EdgeInsets.symmetric(vertical: 2,horizontal: 4),
+      padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 4),
       decoration: BoxDecoration(
         color: AppColors.bottomNavBg(context),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: Colors.grey[300]!),
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text(
@@ -665,114 +767,26 @@ gapH8,
             ),
           ),
           const SizedBox(width: 5),
-
-          Transform.scale(
-            scale: 0.7,
-            child:     BlocBuilder<ProductsBloc, ProductsState>(
-              builder: (context, state) {
-                return Switch(
-                  padding: EdgeInsets.zero,
-                  value: productsBloc.isDiscountApplied,
-                  activeThumbColor: Colors.orange,
-                  onChanged: (value) {
-                    setState(() {
-                      productsBloc.isDiscountApplied = value;
-                    });
-                  },
-                );
-              },
-            ),
-          )
+          BlocBuilder<ProductsBloc, ProductsState>(
+            builder: (context, state) {
+              return Switch(
+                value: productsBloc.isDiscountApplied,
+                activeThumbColor: Colors.orange,
+                onChanged: (value) {
+                  setState(() {
+                    productsBloc.isDiscountApplied = value;
+                  });
+                },
+              );
+            },
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildDiscountValueField() {
-    return CustomInputField(
-      isRequiredLable: false,
-      isRequired: false,
-      controller: productsBloc.productDiscountValueController,
-      labelText: 'Discount Value',
-      hintText: '0.00',
-      fillColor: const Color.fromARGB(255, 255, 255, 255),
-      inputFormatters: [
-        FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
-      ],
-      keyboardType: TextInputType.number,
-      // prefixIcon: const Icon(Icons.discount, size: 20),
-    );
-  }
 
-  Widget _buildDiscountTypeDropdown() {
-    return BlocBuilder<ProductsBloc, ProductsState>(
-      builder: (context, state) {
-        return SizedBox(
-          child: BlocBuilder<ProductsBloc, ProductsState>(
-            builder: (context, state) {
-              return CupertinoSegmentedControl<String>(
-                padding: EdgeInsets.zero,
-                children: {
-                  'fixed': Text(
-                    'TK',
-                    style: TextStyle(
-                      fontFamily: GoogleFonts.playfairDisplay().fontFamily,
-                      color: productsBloc.selectedDiscountType == 'fixed'
-                          ? Colors.white
-                          : Colors.black,
-                    ),
-                  ),
-                  'percentage': Text(
-                    '%',
-                    style: TextStyle(
-                      fontFamily: GoogleFonts.playfairDisplay().fontFamily,
-                      color: productsBloc.selectedDiscountType == 'percentage'
-                          ? Colors.white
-                          : Colors.black,
-                    ),
-                  ),
-                },
-                onValueChanged: (val) {
-                  setState(() {
-                    productsBloc.selectedDiscountType = val;
-                  });
-                },
-                groupValue: productsBloc.selectedDiscountType,
-                unselectedColor: Colors.grey[300],
-                selectedColor: AppColors.primaryColor(context),
-                borderColor: AppColors.primaryColor(context),
-              );
-            },
-          ),
-        );
 
-        // return AppDropdown(
-        //   context: context,
-        //   label: "",
-        //
-        //   hint: "Type",
-        //   isLabel: true,
-        //   isNeedAll: false,
-        //   isRequired: false,
-        //   isSearch: false,
-        //   value: productsBloc.selectedDiscountType,
-        //   itemList: const ['fixed', 'percentage'],
-        //   onChanged: (newVal) {
-        //     setState(() {
-        //       productsBloc.selectedDiscountType = newVal.toString();
-        //     });
-        //   },
-        //   itemBuilder: (item) => DropdownMenuItem(
-        //     value: item,
-        //     child: Text(
-        //       item.toString().toUpperCase(),
-        //       style: const TextStyle(fontSize: 12),
-        //     ),
-        //   ),
-        // );
-      },
-    );
-  }
 
   void _submitProduct() {
     if (!formKey.currentState!.validate()) return;
@@ -829,8 +843,7 @@ gapH8,
 
     if (widget.productId != null &&
         context.read<ProductsBloc>().selectedState.trim().isNotEmpty) {
-      body["is_active"] =
-      context.read<ProductsBloc>().selectedState == "Active"
+      body["is_active"] = context.read<ProductsBloc>().selectedState == "Active"
           ? true
           : false;
     }

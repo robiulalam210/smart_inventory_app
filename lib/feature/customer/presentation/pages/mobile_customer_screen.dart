@@ -75,7 +75,7 @@ class _CustomerScreenState extends State<MobileCustomerScreen> {
     return AppScaffold(
       floatingActionButton: FloatingActionButton( 
         backgroundColor: AppColors.primaryColor(context),
-        onPressed: () => _showCreateCustomerDialog(context),child: Icon(Icons.add),),
+        onPressed: () => _showCreateCustomerDialog(context),child: Icon(Icons.add,color: AppColors.whiteColor(context),),),
       appBar: AppBar(title: Text("Customer",style: AppTextStyle.titleMedium(context),),),
       body: SafeArea(
         child:   _buildContentArea(),
@@ -222,7 +222,7 @@ class _CustomerScreenState extends State<MobileCustomerScreen> {
             ),
           ],
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 6),
 
         // Filter Chips
         ValueListenableBuilder<String?>(

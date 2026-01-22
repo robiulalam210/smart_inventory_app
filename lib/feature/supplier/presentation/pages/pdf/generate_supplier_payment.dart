@@ -14,21 +14,23 @@ Future<Uint8List> generateSupplierPaymentPdf(SupplierPaymentModel payment) async
 
   pdf.addPage(
     pw.MultiPage(
-      pageTheme: const pw.PageTheme(
+      pageTheme: pw.PageTheme(
         pageFormat: PdfPageFormat.a4,
-        margin: pw.EdgeInsets.all(25),
+        margin: const pw.EdgeInsets.all(25),
+        buildBackground: (context) => pw.Container(
+          color: PdfColors.white, // Solid color background
+        ),
       ),
       header: (context) => _buildHeader(),
-      footer: (context) => _buildFooter(context),
       build: (context) => [
         _buildPaymentHeader(payment),
-        pw.SizedBox(height: 20),
+        pw.SizedBox(height: 10),
         _buildSupplierInfo(payment),
-        pw.SizedBox(height: 20),
+        pw.SizedBox(height: 10),
         _buildPaymentDetails(payment, amount),
-        pw.SizedBox(height: 20),
+        pw.SizedBox(height: 10),
         if (summary != null) _buildPaymentSummary(summary),
-        pw.SizedBox(height: 20),
+        pw.SizedBox(height: 10),
         _buildAuthorizationSection(),
       ],
     ),
@@ -40,7 +42,9 @@ Future<Uint8List> generateSupplierPaymentPdf(SupplierPaymentModel payment) async
 // Header with Company Info
 pw.Widget _buildHeader() {
   return pw.Container(
-    margin: const pw.EdgeInsets.only(bottom: 20),
+    padding: const pw.EdgeInsets.all(16),
+
+    margin: const pw.EdgeInsets.only(bottom: 10),
     child: pw.Row(
       mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
       children: [
@@ -79,6 +83,7 @@ pw.Widget _buildPaymentHeader(SupplierPaymentModel payment) {
       borderRadius: pw.BorderRadius.circular(8),
     ),
     padding: const pw.EdgeInsets.all(16),
+    margin: const pw.EdgeInsets.all(16),
     child: pw.Row(
       mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
       crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -210,7 +215,9 @@ pw.Widget _buildInfoRow(String label, String value) {
 // Payment Details
 pw.Widget _buildPaymentDetails(SupplierPaymentModel payment, double amount) {
   return pw.Container(
-    padding: const pw.EdgeInsets.all(20),
+    margin: const pw.EdgeInsets.all(16),
+
+    padding: const pw.EdgeInsets.all(10),
     decoration: pw.BoxDecoration(
       color: PdfColors.blue50,
       border: pw.Border.all(color: PdfColors.blue200),
@@ -237,7 +244,7 @@ pw.Widget _buildPaymentDetails(SupplierPaymentModel payment, double amount) {
           child: pw.Column(
             children: [
               pw.Text(
-                '৳${amount.toStringAsFixed(2)}',
+                '${amount.toStringAsFixed(2)}',
                 style: pw.TextStyle(
                   fontSize: 28,
                   fontWeight: pw.FontWeight.bold,
@@ -321,6 +328,8 @@ pw.Widget _buildPaymentSummary(PaymentSummary summary) {
   final after = summary.afterPayment;
 
   return pw.Container(
+    padding: const pw.EdgeInsets.all(16),
+
     decoration: pw.BoxDecoration(
       border: pw.Border.all(color: PdfColors.grey400),
       borderRadius: pw.BorderRadius.circular(8),
