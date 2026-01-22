@@ -75,6 +75,7 @@ dependencies:
   flutter_secure_storage: ^10.0.0
   easy_localization: ^3.0.8
   speech_to_text: ^7.3.0
+  mobile_scanner: ^7.1.4
 
 
 dev_dependencies:

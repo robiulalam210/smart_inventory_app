@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:flutter/cupertino.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import '../../../../profile/presentation/bloc/profile_bloc/profile_bloc.dart';
 import '/core/core.dart';
 import '/feature/products/product/data/model/product_stock_model.dart';
 import '/feature/users_list/presentation/bloc/users/user_bloc.dart';
@@ -93,7 +94,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
 
     // Find matched user
     final matchedUser = userList.firstWhere(
-      (user) => user.id == loginUserId,
+          (user) => user.id == loginUserId,
       orElse: () => userList.first,
     );
 
@@ -110,11 +111,21 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
   void _updateChangeAmount() {
     final bloc = context.read<CreatePosSaleBloc>();
     final payableAmount = double.tryParse(bloc.payableAmount.text) ?? 0.0;
-    final changeAmount = calculateAllFinalTotal() - payableAmount;
+    // Align with mobile behavior: change = payable - netTotal
+    final changeAmount = payableAmount - calculateAllFinalTotal();
 
     setState(() {
       changeAmountController.text = changeAmount.toStringAsFixed(2);
     });
+  }
+
+  // Helper: normalize any incoming discount type string into internal keys ('percent' | 'fixed')
+  String _normalizeDiscountType(dynamic raw) {
+    if (raw == null) return 'fixed';
+    final s = raw.toString().toLowerCase();
+    if (s == 'percent' || s == 'percentage' || s.startsWith('perc')) return 'percent';
+    // treat anything else as fixed
+    return 'fixed';
   }
 
   // Get products from BLoC
@@ -143,7 +154,19 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
   double calculateTotalForAllProducts() {
     double totalSum = 0;
     for (var product in products) {
-      totalSum += (product["total"] ?? 0).toDouble();
+      final totalValue = product["total"] ?? 0;
+
+      // Convert to double safely (int / String / double)
+      if (totalValue is int) {
+        totalSum += totalValue.toDouble();
+      } else if (totalValue is String) {
+        totalSum += double.tryParse(totalValue) ?? 0;
+      } else if (totalValue is double) {
+        totalSum += totalValue;
+      } else {
+        // fallback
+        totalSum += 0;
+      }
     }
     return totalSum;
   }
@@ -151,7 +174,17 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
   double calculateTotalTicketForAllProducts() {
     double totalSum = 0;
     for (var product in products) {
-      totalSum += (product["ticket_total"] ?? 0).toDouble();
+      final ticketValue = product["ticket_total"] ?? 0;
+
+      if (ticketValue is int) {
+        totalSum += ticketValue.toDouble();
+      } else if (ticketValue is String) {
+        totalSum += double.tryParse(ticketValue) ?? 0;
+      } else if (ticketValue is double) {
+        totalSum += ticketValue;
+      } else {
+        totalSum += 0;
+      }
     }
     return totalSum;
   }
@@ -176,7 +209,9 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
           ? double.tryParse(ticketTotalValue) ?? 0
           : (ticketTotalValue is num ? ticketTotalValue.toDouble() : 0);
 
-      if (product["discount_type"] == 'percent') {
+      final discountType = _normalizeDiscountType(product["discount_type"]);
+
+      if (discountType == 'percent') {
         productDiscount = ticketTotal * (productDiscount / 100);
       }
 
@@ -237,6 +272,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
   }
 
   void updateTotal(int index) {
+    // Defensive checks for controllers and product map
     if (controllers[index] == null || products[index].isEmpty) {
       return;
     }
@@ -244,7 +280,8 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
     final priceText = controllers[index]?["price"]?.text ?? "0";
     final quantityText = controllers[index]?["quantity"]?.text ?? "0";
     final discountText = controllers[index]?["discount"]?.text ?? "0";
-    final discountType = products[index]["discount_type"] as String? ?? "fixed";
+
+    final discountType = _normalizeDiscountType(products[index]["discount_type"]);
 
     final price = double.tryParse(priceText) ?? 0;
     final quantity = int.tryParse(quantityText) ?? 0;
@@ -306,9 +343,9 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
     // Calculate final total
     double finalTotal =
         totalAfterDiscount +
-        overallVat +
-        overallServiceCharge +
-        overallDeliveryCharge;
+            overallVat +
+            overallServiceCharge +
+            overallDeliveryCharge;
 
     return finalTotal;
   }
@@ -348,17 +385,32 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
     // ✅ Set product data
     products[index]["product"] = newVal;
     products[index]["product_id"] = newVal.id;
-    products[index]["price"] = newVal.sellingPrice;
-    products[index]["discount"] = newVal.discountValue;
-    products[index]["discount_type"] = newVal.discountType ?? "fixed";
+
+    // Ensure controllers index exists before assigning (defensive)
+    if (controllers[index] != null) {
+      final sellingPrice = newVal.sellingPrice ?? 0.0;
+      controllers[index]!["price"]!.text = sellingPrice.toStringAsFixed(2);
+    } else {
+      // fallback assignment into product map
+      products[index]["price"] = newVal.sellingPrice ?? 0.0;
+    }
+
+    // Normalize incoming discount type to internal keys ('percent'|'fixed')
+    products[index]["discount_type"] = _normalizeDiscountType(newVal.discountType);
+
+    // Use discountValue if present, convert to double
+    products[index]["discount"] = newVal.discountValue ?? 0.0;
     products[index]["discountApplied"] = newVal.discountApplied;
 
-    controllers[index]!["price"]!.text = newVal.sellingPrice.toString();
+    // If controller exists, set discount field for display
+    if (controllers[index] != null) {
+      controllers[index]!["discount"]!.text = newVal.discountApplied == true
+          ? (newVal.discountValue?.toString() ?? "0")
+          : "0";
+    }
 
-    // ✅ Discount handling
-    controllers[index]!["discount"]!.text = newVal.discountApplied == true
-        ? newVal.discountValue.toString()
-        : "0";
+    // If price not set in map, set it
+    products[index]["price"] = newVal.sellingPrice ?? 0.0;
 
     updateTotal(index);
   }
@@ -367,12 +419,10 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
 
   @override
   Widget build(BuildContext context) {
-
-
     return Container(
       color: AppColors.bottomNavBg(context),
       child: SafeArea(
-        child:  _buildDesktopLayout() ,
+        child: _buildDesktopLayout(),
       ),
     );
   }
@@ -407,8 +457,6 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
       ],
     );
   }
-
-
 
   Widget _buildMainContent() {
     return SingleChildScrollView(
@@ -447,7 +495,8 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
         },
         builder: (context, state) {
           final bloc = context.read<CreatePosSaleBloc>();
-
+          final selectedCustomer = bloc.selectClintModel;
+          final isWalkInCustomer = selectedCustomer?.id == -1;
           return Form(
             key: formKey,
             child: Column(
@@ -459,7 +508,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                 const SizedBox(height: 8),
                 _buildChargesSection(bloc),
                 const SizedBox(height: 8),
-                _buildSummarySection(bloc),
+                _buildSummarySection(bloc,isWalkInCustomer),
                 const SizedBox(height: 8),
                 _buildActionButtons(),
                 const SizedBox(height: 20),
@@ -471,16 +520,15 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
     );
   }
 
-
-
   Widget _buildTopFormSection(CreatePosSaleBloc bloc) {
+    final user = context.read<ProfileBloc>().permissionModel?.data?.user;
+    final isAdmin = user?.role == "SUPER_ADMIN" || user?.role == "ADMIN";
     return Padding(
       padding: const EdgeInsets.all(0.0),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-
           ResponsiveRow(
             spacing: 6,
             runSpacing: 6,
@@ -500,58 +548,57 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                       isNeedAll: false,
                       isRequired: true,
                       value: bloc.selectClintModel,
-                      itemList:
-                          [
-                            CustomerActiveModel(
-                              name: 'Walk-in-customer',
-                              id: -1,
-                            ),
-                          ] +
+                      itemList: [
+                        CustomerActiveModel(
+                          name: 'Walk-in-customer',
+                          id: -1,
+                        ),
+                      ] +
                           context.read<CustomerBloc>().activeCustomer,
                       onChanged: (newVal) {
                         bloc.selectClintModel = newVal;
                         bloc.customType = (newVal?.id == -1)
                             ? "Walking Customer"
                             : "Saved Customer";
-                        if(  newVal?.id == -1){
-                          _isChecked=true;
+                        if (newVal?.id == -1) {
+                          _isChecked = true;
                         }
                         setState(() {});
                       },
                       validator: (value) =>
-                          value == null ? 'Please select Customer' : null,
-
+                      value == null ? 'Please select Customer' : null,
                     );
                   },
                 ),
               ),
-              ResponsiveCol(
-                xs: 12,
-                sm: 6,
-                md: 3,
-                lg: 3,
-                xl: 3,
-                child: BlocBuilder<UserBloc, UserState>(
-                  builder: (context, state) {
-                    return AppDropdown(
-                      label: "Sales By",
-                      hint: bloc.selectSalesModel?.username ?? "Select Sales",
-                      isSearch: true,
-                      isNeedAll: false,
-                      isRequired: true,
-                      value: bloc.selectSalesModel,
-                      itemList: context.read<UserBloc>().list,
-                      onChanged: (newVal) {
-                        bloc.selectSalesModel = newVal;
-                        setState(() {});
-                      },
-                      validator: (value) =>
-                          value == null ? 'Please select Sales' : null,
-
-                    );
-                  },
+              if (isAdmin)
+                ResponsiveCol(
+                  xs: 12,
+                  sm: 6,
+                  md: 3,
+                  lg: 3,
+                  xl: 3,
+                  child: BlocBuilder<UserBloc, UserState>(
+                    builder: (context, state) {
+                      return AppDropdown(
+                        label: "Sales By",
+                        hint:
+                        bloc.selectSalesModel?.username ?? "Select Sales",
+                        isSearch: true,
+                        isNeedAll: false,
+                        isRequired: true,
+                        value: bloc.selectSalesModel,
+                        itemList: context.read<UserBloc>().list,
+                        onChanged: (newVal) {
+                          bloc.selectSalesModel = newVal;
+                          setState(() {});
+                        },
+                        validator: (value) =>
+                        value == null ? 'Please select Sales' : null,
+                      );
+                    },
+                  ),
                 ),
-              ),
               ResponsiveCol(
                 xs: 12,
                 sm: 6,
@@ -561,13 +608,14 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                 child: CustomInputField(
                   isRequired: true,
                   readOnly: true,
+                  isRequiredLable: false,
                   controller: bloc.dateEditingController,
                   hintText: 'Sale Date',
                   keyboardType: TextInputType.datetime,
                   autofillHints: AutofillHints.name,
                   fillColor: AppColors.whiteColor(context),
                   validator: (value) =>
-                      value!.isEmpty ? 'Please enter date' : null,
+                  value!.isEmpty ? 'Please enter date' : null,
                   onTap: _selectDate,
                 ),
               ),
@@ -585,6 +633,9 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
         final product = entry.value;
 
         final discountApplied = product["discountApplied"] == true;
+
+        // Ensure discount_type fallback and safety for segmented control
+        final discountTypeSafe = _normalizeDiscountType(product["discount_type"]);
 
         return Container(
           padding: const EdgeInsets.all(6),
@@ -625,8 +676,8 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                           categoriesBloc.selectedState = newVal.toString();
 
                           final matchingCategory = categoryList.firstWhere(
-                            (category) =>
-                                category.name.toString() == newVal.toString(),
+                                (category) =>
+                            category.name.toString() == newVal.toString(),
                             orElse: () => CategoryModel(),
                           );
 
@@ -642,9 +693,6 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                           updateTotal(index);
                         });
                       },
-                      // validator: (value) =>
-                      // value == null ? 'Please select Category' : null,
-
                     );
                   },
                 ),
@@ -672,17 +720,16 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                         .read<ProductsBloc>()
                         .productList
                         .where((item) {
-                          final categoryMatch = selectedCategoryId.isEmpty
-                              ? true
-                              : item.id.toString() == selectedCategoryId;
+                      final categoryMatch = selectedCategoryId.isEmpty
+                          ? true
+                          : item.id.toString() == selectedCategoryId;
 
-                          final notDuplicate =
-                              !selectedProductIds.contains(item.id) ||
+                      final notDuplicate =
+                          !selectedProductIds.contains(item.id) ||
                               item.id == product["product_id"];
 
-                          return categoryMatch && notDuplicate;
-                        })
-                        .toList();
+                      return categoryMatch && notDuplicate;
+                    }).toList();
 
                     return AppDropdown<ProductModelStockModel>(
                       isRequired: false,
@@ -696,8 +743,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                       itemList: filteredProducts,
                       onChanged: (newVal) => onProductChanged(index, newVal),
                       validator: (value) =>
-                          value == null ? 'Please select Product' : null,
-
+                      value == null ? 'Please select Product' : null,
                     );
                   },
                 ),
@@ -769,11 +815,8 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                         child: Text(
                           'TK',
                           style: TextStyle(
-                            fontFamily:
-                                GoogleFonts.playfairDisplay().fontFamily,
-                            color: product["discount_type"] == 'fixed'
-                                ? Colors.white
-                                : Colors.black,
+                            fontFamily: GoogleFonts.playfairDisplay().fontFamily,
+                            color: discountTypeSafe == 'fixed' ? Colors.white : Colors.black,
                           ),
                         ),
                       ),
@@ -785,11 +828,8 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                         child: Text(
                           '%',
                           style: TextStyle(
-                            fontFamily:
-                                GoogleFonts.playfairDisplay().fontFamily,
-                            color: product["discount_type"] == 'percent'
-                                ? Colors.white
-                                : Colors.black,
+                            fontFamily: GoogleFonts.playfairDisplay().fontFamily,
+                            color: discountTypeSafe == 'percent' ? Colors.white : Colors.black,
                           ),
                         ),
                       ),
@@ -797,12 +837,13 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                     onValueChanged: discountApplied
                         ? (_) {}
                         : (value) {
-                            setState(() {
-                              // product["discount_type"] = value;
-                              // updateTotal(index);
-                            });
-                          },
-                    groupValue: product["discount_type"],
+                      // Update product discount type and recalc totals
+                      setState(() {
+                        product["discount_type"] = value; // 'fixed' | 'percent'
+                        updateTotal(index);
+                      });
+                    },
+                    groupValue: discountTypeSafe,
                     unselectedColor: Colors.grey[300],
                     selectedColor: AppColors.primaryColor(context),
                     borderColor: AppColors.primaryColor(context),
@@ -846,10 +887,9 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                   onChanged: discountApplied
                       ? null
                       : (value) {
-                          products[index]["discount"] =
-                              double.tryParse(value) ?? 0.0;
-                          updateTotal(index);
-                        },
+                    products[index]["discount"] = double.tryParse(value) ?? 0.0;
+                    updateTotal(index);
+                  },
                 ),
               ),
 
@@ -886,10 +926,9 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                       padding: EdgeInsets.zero,
                       icon: const Icon(Icons.add),
                       onPressed: () {
-                        int currentQuantity =
-                            int.tryParse(
-                              controllers[index]!["quantity"]!.text,
-                            ) ??
+                        int currentQuantity = int.tryParse(
+                          controllers[index]!["quantity"]!.text,
+                        ) ??
                             0;
                         controllers[index]!["quantity"]!.text =
                             (currentQuantity + 1).toString();
@@ -986,9 +1025,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                 child: IconButton(
                   padding: EdgeInsets.zero,
                   icon: Icon(
-                    product == products[products.length - 1]
-                        ? Icons.add
-                        : Icons.remove,
+                    product == products[products.length - 1] ? Icons.add : Icons.remove,
                     color: products.length == 1 ? Colors.green : Colors.red,
                   ),
                   onPressed: () {
@@ -1016,7 +1053,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
           "Overall Discount",
           selectedOverallDiscountType,
           bloc.discountOverAllController,
-          (value) {
+              (value) {
             setState(() {
               selectedOverallDiscountType = value;
               bloc.selectedOverallDiscountType = value;
@@ -1028,7 +1065,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
           "Overall Vat",
           selectedOverallVatType,
           bloc.vatOverAllController,
-          (value) {
+              (value) {
             setState(() {
               selectedOverallVatType = value;
               bloc.selectedOverallVatType = value;
@@ -1040,7 +1077,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
           "Service Charge",
           selectedOverallServiceChargeType,
           bloc.serviceChargeOverAllController,
-          (value) {
+              (value) {
             setState(() {
               selectedOverallServiceChargeType = value;
               bloc.selectedOverallServiceChargeType = value;
@@ -1052,7 +1089,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
           "Delivery Charge",
           selectedOverallDeliveryType,
           bloc.deliveryChargeOverAllController,
-          (value) {
+              (value) {
             setState(() {
               selectedOverallDeliveryType = value;
               bloc.selectedOverallDeliveryType = value;
@@ -1065,17 +1102,17 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
   }
 
   Widget _buildChargeField(
-    String label,
-    String selectedType,
-    TextEditingController controller,
-    Function(String) onTypeChanged,
-  ) {
+      String label,
+      String selectedType,
+      TextEditingController controller,
+      Function(String) onTypeChanged,
+      ) {
     return ResponsiveCol(
       xs: 12,
-      sm: 2,
-      md: 2,
-      lg: 2,
-      xl: 2,
+      sm:  2.5,
+      md: 2.5,
+      lg: 2.5,
+      xl: 2.5,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1091,18 +1128,14 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                       'TK',
                       style: TextStyle(
                         fontFamily: GoogleFonts.playfairDisplay().fontFamily,
-                        color: selectedType == 'fixed'
-                            ? Colors.white
-                            : Colors.black,
+                        color: selectedType == 'fixed' ? Colors.white : Colors.black,
                       ),
                     ),
                     'percent': Text(
                       '%',
                       style: TextStyle(
                         fontFamily: GoogleFonts.playfairDisplay().fontFamily,
-                        color: selectedType == 'percent'
-                            ? Colors.white
-                            : Colors.black,
+                        color: selectedType == 'percent' ? Colors.white : Colors.black,
                       ),
                     ),
                   },
@@ -1115,7 +1148,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
               ),
               const SizedBox(width: 4),
               SizedBox(
-                width: 110,
+                width: 125,
                 child: CustomInputFieldPayRoll(
                   isRequiredLevle: false,
                   controller: controller,
@@ -1139,7 +1172,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
     );
   }
 
-  Widget _buildSummarySection(CreatePosSaleBloc bloc) {
+  Widget _buildSummarySection(CreatePosSaleBloc bloc, bool isWalkInCustomer) {
     final productTotal = calculateTotalTicketForAllProducts();
     final specificDiscount = calculateSpecificDiscountTotal();
     final subTotal = calculateTotalForAllProducts();
@@ -1181,13 +1214,30 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
           md: 5,
           lg: 5,
           xl: 5,
-          child: _buildPaymentSection(bloc),
+          child: _buildPaymentSection(bloc, isWalkInCustomer, netTotal),
         ),
       ],
     );
   }
 
-  Widget _buildPaymentSection(CreatePosSaleBloc bloc) {
+  Widget _buildPaymentSection(CreatePosSaleBloc bloc,
+
+  bool isWalkInCustomer,
+  double netTotal,
+      ) {
+    void recalculateAndAutoFill() {
+      final bloc = context.read<CreatePosSaleBloc>();
+      final selectedCustomer = bloc.selectClintModel;
+
+      if (selectedCustomer?.id == -1) {
+        // Only auto-fill for walk-in customer
+        final netTotal = calculateAllFinalTotal();
+        bloc.payableAmount.text = netTotal.toStringAsFixed(2);
+        _updateChangeAmount();
+      }
+    }
+
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1219,17 +1269,13 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                   isLabel: false,
                   isRequired: true,
                   isNeedAll: false,
-                  value: bloc.selectedPaymentMethod.isEmpty
-                      ? null
-                      : bloc.selectedPaymentMethod,
+                  value: bloc.selectedPaymentMethod.isEmpty ? null : bloc.selectedPaymentMethod,
                   itemList: [] + bloc.paymentMethod,
                   onChanged: (newVal) {
                     bloc.selectedPaymentMethod = newVal.toString();
                     setState(() {});
                   },
-                  validator: (value) =>
-                      value == null ? 'Please select a payment method' : null,
-
+                  validator: (value) => value == null ? 'Please select a payment method' : null,
                 ),
               ),
               const SizedBox(width: 5),
@@ -1241,21 +1287,18 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                     } else if (state is AccountActiveListSuccess) {
                       final filteredList = bloc.selectedPaymentMethod.isNotEmpty
                           ? state.list.where((item) {
-                              return item.acType?.toLowerCase() ==
-                                  bloc.selectedPaymentMethod.toLowerCase();
-                            }).toList()
+                        return item.acType?.toLowerCase() ==
+                            bloc.selectedPaymentMethod.toLowerCase();
+                      }).toList()
                           : state.list;
 
                       final selectedAccount =
-                          bloc.accountModel ??
-                          (filteredList.isNotEmpty ? filteredList.first : null);
+                          bloc.accountModel ?? (filteredList.isNotEmpty ? filteredList.first : null);
                       bloc.accountModel = selectedAccount;
 
                       return AppDropdown<AccountActiveModel>(
                         label: "Account",
-                        hint: bloc.accountModel == null
-                            ? "Select Account"
-                            : bloc.accountModel!.name.toString(),
+                        hint: bloc.accountModel == null ? "Select Account" : bloc.accountModel!.name.toString(),
                         isLabel: false,
                         isRequired: true,
                         isNeedAll: false,
@@ -1265,9 +1308,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                           bloc.accountModel = newVal;
                           setState(() {});
                         },
-                        validator: (value) =>
-                            value == null ? 'Please select an account' : null,
-
+                        validator: (value) => value == null ? 'Please select an account' : null,
                       );
                     } else {
                       return Container();
@@ -1277,12 +1318,13 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
               ),
             ],
           ),
+          gapH8,
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
                 flex: 2,
-                child: AppTextField(
+                child: CustomInputField(
                   // isRequiredLable: false,
                   controller: changeAmountController,
                   hintText: 'Change Amount',
@@ -1296,21 +1338,53 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
               const SizedBox(width: 5),
               Expanded(
                 flex: 2,
-                child: AppTextField(
-                  // isRequiredLable: false,
+                child:     CustomInputField(
                   controller: bloc.payableAmount,
-                  hintText: 'Payable Amount',
-                  // fillColor: Colors.white,
+                  hintText: isWalkInCustomer
+                      ? 'Payable Amount (${netTotal.toStringAsFixed(2)})'
+                      : 'Payable Amount',
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
                   ),
-                  validator: (value) =>
-                      value!.isEmpty ? 'Please enter Payable Amount' : null,
+                  validator: (value) {
+                    if (value!.isEmpty) {
+                      return 'Please enter Payable Amount';
+                    }
+                    final numericValue = double.tryParse(value);
+                    if (numericValue == null) {
+                      return 'Enter valid number';
+                    }
+                    if (numericValue < 0) {
+                      return 'Cannot be negative';
+                    }
+
+                    // Walk-in customer validation
+                    if (isWalkInCustomer && numericValue != netTotal) {
+                      return 'Must pay exact: ${netTotal.toStringAsFixed(2)}';
+                    }
+
+                    return null;
+                  },
                   onChanged: (value) {
                     _updateChangeAmount();
+                    recalculateAndAutoFill();
                     setState(() {});
                   },
                 ),
+                // child: CustomInputField(
+                //   // isRequiredLable: false,
+                //   controller: bloc.payableAmount,
+                //   hintText: 'Payable Amount',
+                //   // fillColor: Colors.white,
+                //   keyboardType: const TextInputType.numberWithOptions(
+                //     decimal: true,
+                //   ),
+                //   validator: (value) => value!.isEmpty ? 'Please enter Payable Amount' : null,
+                //   onChanged: (value) {
+                //     _updateChangeAmount();
+                //     setState(() {});
+                //   },
+                // ),
               ),
             ],
           ),
@@ -1338,8 +1412,8 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
               label,
               style: isBold
                   ? AppTextStyle.cardLevelHead(
-                      context,
-                    ).copyWith(fontWeight: FontWeight.bold)
+                context,
+              ).copyWith(fontWeight: FontWeight.bold)
                   : AppTextStyle.cardLevelHead(context),
             ),
           ),
@@ -1347,9 +1421,9 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
             value.toStringAsFixed(2),
             style: isBold
                 ? AppTextStyle.cardLevelText(context).copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.primaryColor(context),
-                  )
+              fontWeight: FontWeight.bold,
+              color: AppColors.primaryColor(context),
+            )
                 : AppTextStyle.cardLevelText(context),
           ),
         ],
@@ -1413,21 +1487,24 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
     if (formKey.currentState!.validate()) {
       final bloc = context.read<CreatePosSaleBloc>();
 
-      var transferProducts = products
-          .map(
-            (product) => {
-              "product_id": int.tryParse(product["product_id"].toString()),
-              "quantity": int.tryParse(product["quantity"].toString()),
-              "unit_price": double.tryParse(product["price"].toString()),
-              "discount": double.tryParse(product["discount"].toString()),
-              "discount_type": product["discount_type"].toString(),
-            },
-          )
-          .toList();
+      var transferProducts = products.map((product) {
+        // convert internal discount_type ('percent'|'fixed') to backend expected value ('percentage' or 'fixed')
+        final internalType = _normalizeDiscountType(product["discount_type"]);
+        final backendType = internalType == 'percent' ? 'percentage' : 'fixed';
+
+        return {
+          "product_id": int.tryParse(product["product_id"].toString()),
+          "quantity": int.tryParse(product["quantity"].toString()),
+          "unit_price": double.tryParse(product["price"].toString()),
+          "discount": double.tryParse(product["discount"].toString()),
+          "discount_type": backendType,
+        };
+      }).toList();
 
       final selectedCustomer = bloc.selectClintModel;
       final isWalkInCustomer = selectedCustomer?.id == -1;
-
+      final user = context.read<ProfileBloc>().permissionModel?.data?.user;
+      final isAdmin = user?.role == "SUPER_ADMIN" || user?.role == "ADMIN";
       Map<String, dynamic> body = {
         "type": "normal_sale",
         "sale_date": appWidgets.convertDateTime(
@@ -1436,7 +1513,9 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
           ).parse(bloc.dateEditingController.text.trim(), true),
           "yyyy-MM-dd",
         ),
-        "sale_by": bloc.selectSalesModel?.id.toString() ?? '',
+        "sale_by": (isAdmin)
+            ? bloc.selectSalesModel?.id?.toString() ?? ''
+            : user?.id?.toString() ?? '',
         "overall_vat_type": selectedOverallVatType.toLowerCase(),
         "vat": bloc.vatOverAllController.text.isEmpty
             ? 0
@@ -1474,8 +1553,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
           showCustomToast(
             context: context,
             title: 'Warning!',
-            description:
-                "Walk-in customer: Full payment required. No due allowed.",
+            description: "Walk-in customer: Full payment required. No due allowed.",
             icon: Icons.error,
             primaryColor: Colors.redAccent,
           );

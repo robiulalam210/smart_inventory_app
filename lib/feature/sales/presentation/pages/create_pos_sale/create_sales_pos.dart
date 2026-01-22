@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 
+import '../../../../profile/presentation/bloc/profile_bloc/profile_bloc.dart';
 import '/core/core.dart';
 import '/feature/products/product/data/model/product_stock_model.dart';
 import '/feature/users_list/presentation/bloc/users/user_bloc.dart';
@@ -51,8 +52,7 @@ class _SalesScreenState extends State<SalesScreen> {
 
   // Replace with your API base URL / token or load from secure storage
   final String apiBaseUrl = '${AppUrls.baseUrl}/products/barcode-search';
-  final String jwtToken =
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzYyNjg2MTI1LCJpYXQiOjE3NjI1OTk3MjUsImp0aSI6ImRiNjAzMmFjOWFkOTQ2NzRiNTE5Njk5OGI0ZWI0OTMzIiwidXNlcl9pZCI6IjIifQ.LJv3l53GjkdDWHKT-YPiCpuNQfBK8NorsWN56WirY8s";
+   final jwtToken =  LocalDB.getLoginInfo();
 
   @override
   void initState() {
@@ -401,6 +401,8 @@ class _SalesScreenState extends State<SalesScreen> {
   // ---------------- UI builders ----------------
 
   Widget _buildTopFormSection(CreatePosSaleBloc bloc) {
+    final user = context.read<ProfileBloc>().permissionModel?.data?.user;
+    final isAdmin = user?.role == "SUPER_ADMIN" || user?.role == "ADMIN";
     return ResponsiveRow(
       spacing: 2,
       runSpacing: 2,
@@ -440,7 +442,9 @@ class _SalesScreenState extends State<SalesScreen> {
             },
           ),
         ),
-        ResponsiveCol(
+        if (isAdmin)
+
+          ResponsiveCol(
           xs: 12,
           sm: 3,
           md: 3,
@@ -476,6 +480,7 @@ class _SalesScreenState extends State<SalesScreen> {
           child: CustomInputField(
             isRequired: true,
             readOnly: true,
+            isRequiredLable: false,
             controller: bloc.dateEditingController,
             hintText: 'Sale Date',
             keyboardType: TextInputType.datetime,
@@ -1725,14 +1730,17 @@ class _SalesScreenState extends State<SalesScreen> {
 
     final selectedCustomer = bloc.selectClintModel;
     final isWalkInCustomer = selectedCustomer?.id == -1;
-
+    final user = context.read<ProfileBloc>().permissionModel?.data?.user;
+    final isAdmin = user?.role == "SUPER_ADMIN" || user?.role == "ADMIN";
     Map<String, dynamic> body = {
       "type": "normal_sale",
       "sale_date": appWidgets.convertDateTime(
         DateFormat("dd-MM-yyyy").parse(bloc.dateEditingController.text.trim(), true),
         "yyyy-MM-dd",
       ),
-      "sale_by": bloc.selectSalesModel?.id.toString() ?? '',
+      "sale_by": (isAdmin)
+          ? bloc.selectSalesModel?.id?.toString() ?? ''
+          : user?.id?.toString() ?? '',
       "overall_vat_type": selectedOverallVatType.toLowerCase(),
       "vat": bloc.vatOverAllController.text.isEmpty ? 0 : double.tryParse(bloc.vatOverAllController.text),
       "overall_service_type": selectedOverallServiceChargeType.toLowerCase(),
