@@ -1823,10 +1823,9 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
           gapH8,
           Wrap(
             spacing: 6,
-            runSpacing: 6,
             children: [
               SizedBox(
-                child: AppTextField(
+                child: CustomInputField(
                   controller: changeAmountController,
                   hintText: isWalkInCustomer
                       ? 'Change (0.00)'
@@ -1841,7 +1840,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    AppTextField(
+                    CustomInputField(
                       controller: bloc.payableAmount,
                       hintText: isWalkInCustomer
                           ? 'Payable Amount (${netTotal.toStringAsFixed(2)})'
