@@ -16,7 +16,10 @@ Future<LoginModel> loginService({required Map payload}) async {
     final response = await http
         .post(url, body: jsonEncode(payload), headers: headers)
         .timeout(const Duration(seconds: 120));
+    print("loginService");
+    print("${url}");
 
+    logger.i("login url: ${url}");
     logger.i("login response: ${response.body}");
 
     /// ✅ SUCCESS
@@ -51,9 +54,10 @@ Future<LoginModel> loginService({required Map payload}) async {
     );
   } on TimeoutException {
     return LoginModel(success: false, message: "Request timed out");
-  } on SocketException {
-    return LoginModel(success: false, message: "No internet connection");
-  } catch (e) {
+  } on SocketException catch (e) {
+    logger.e("SocketException: $e");
+    return LoginModel(success: false, message: "Cannot connect to server");
+  }catch (e) {
     return LoginModel(success: false, message: "Unexpected error occurred");
   }
 }

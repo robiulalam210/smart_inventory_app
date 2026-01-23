@@ -392,356 +392,361 @@ class _MobileProfileScreenState extends State<MobileProfileScreen> {
               },
               child: SingleChildScrollView(
                 padding: AppTextStyle.getResponsivePaddingBody(context),
-                child: BlocConsumer<ProfileBloc, ProfileState>(
-                  listener: (context, state) {
-                    _handleStateChanges(context, state);
-                  },
-                  builder: (context, state) {
-                    if (state is ProfilePermissionLoading) {
-                      return _buildLoadingState();
-                    } else if (state is ProfilePermissionSuccess) {
-                      final my = state.permissionData;
-                      _populateFormFields(state.permissionData);
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Profile Header
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            mainAxisAlignment: MainAxisAlignment.center,
+                child: Column(
+                  children: [
+                    BlocConsumer<ProfileBloc, ProfileState>(
+                      listener: (context, state) {
+                        _handleStateChanges(context, state);
+                      },
+                      builder: (context, state) {
+                        if (state is ProfilePermissionLoading) {
+                          return _buildLoadingState();
+                        } else if (state is ProfilePermissionSuccess) {
+                          final my = state.permissionData;
+                          _populateFormFields(state.permissionData);
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              GestureDetector(
-                                onTap: () {
-                                  _showImagePickerOptions(
-                                    allowCompanyLogo:
-                                        my.data?.companyInfo != null,
-                                  );
-                                },
-                                child: buildDoctorAvatar(
-                                  isMan: true,
-                                  imageUrl: "${my.data?.user?.profilePicture}",
-                                  fullName: my.data?.user?.fullName ?? '',
-                                  context: context,
-                                  isDoctor: true,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              GestureDetector(
-                                onTap: () {
-                                  if (my.data?.companyInfo != null) {
-                                    _showImagePickerOptions(
-                                      allowCompanyLogo: true,
-                                    );
-                                  }
-                                },
-                                child: Container(
-                                  width: 110,
-                                  height: 30,
-                                  decoration: BoxDecoration(
-                                    color: iconBg,
-                                    borderRadius: BorderRadius.circular(12),
+                              // Profile Header
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  GestureDetector(
+                                    onTap: () {
+                                      _showImagePickerOptions(
+                                        allowCompanyLogo:
+                                            my.data?.companyInfo != null,
+                                      );
+                                    },
+                                    child: buildDoctorAvatar(
+                                      isMan: true,
+                                      imageUrl: "${my.data?.user?.profilePicture}",
+                                      fullName: my.data?.user?.fullName ?? '',
+                                      context: context,
+                                      isDoctor: true,
+                                    ),
                                   ),
-                                  child: Center(
-                                    child: Text(
-                                      "change_image".tr(),
-                                      style: TextStyle(
-                                        color: primary,
-                                        fontSize: 12,
+                                  const SizedBox(height: 8),
+                                  GestureDetector(
+                                    onTap: () {
+                                      if (my.data?.companyInfo != null) {
+                                        _showImagePickerOptions(
+                                          allowCompanyLogo: true,
+                                        );
+                                      }
+                                    },
+                                    child: Container(
+                                      width: 110,
+                                      height: 30,
+                                      decoration: BoxDecoration(
+                                        color: iconBg,
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Center(
+                                        child: Text(
+                                          "change_image".tr(),
+                                          style: TextStyle(
+                                            color: primary,
+                                            fontSize: 12,
+                                          ),
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                my.data?.user?.username?.toString() ?? '',
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  color: primary,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 20,
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                my.data?.user?.fullName ?? '',
-                                style: TextStyle(
-                                  color: isDark ? Colors.white : Colors.black87,
-                                  fontSize: 16,
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                my.data?.user?.email ?? '',
-                                style: TextStyle(
-                                  color: isDark
-                                      ? Colors.white70
-                                      : Colors.black54,
-                                  fontSize: 13,
-                                ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    my.data?.user?.username?.toString() ?? '',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      color: primary,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 20,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    my.data?.user?.fullName ?? '',
+                                    style: TextStyle(
+                                      color: isDark ? Colors.white : Colors.black87,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    my.data?.user?.email ?? '',
+                                    style: TextStyle(
+                                      color: isDark
+                                          ? Colors.white70
+                                          : Colors.black54,
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  SizedBox(
+                                    width: double.infinity,
+                                    child: ElevatedButton(
+                                      onPressed: () => _showEditProfileDialog(),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: iconBg,
+                                        elevation: 0,
+                                        foregroundColor: primary,
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 14,
+                                        ),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                      ),
+                                      child: Text(
+                                        "edit_profile_details".tr(),
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                               const SizedBox(height: 8),
-                              SizedBox(
-                                width: double.infinity,
-                                child: ElevatedButton(
-                                  onPressed: () => _showEditProfileDialog(),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: iconBg,
-                                    elevation: 0,
-                                    foregroundColor: primary,
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 14,
-                                    ),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                  ),
-                                  child: Text(
-                                    "edit_profile_details".tr(),
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ),
+                              CompanyProfileCardWithUpload(
+                                company: state.permissionData.data?.companyInfo,
+                                onUpdated: _loadProfileData,
                               ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          CompanyProfileCardWithUpload(
-                            company: state.permissionData.data?.companyInfo,
-                            onUpdated: _loadProfileData,
-                          ),
-                          const SizedBox(height: 10),
+                              const SizedBox(height: 10),
 
-                          // Quick Action Buttons
-                          Row(
-                            children: [
-                              Expanded(
-                                child: _buildQuickActionButton(
-                                  icon: Icons.security,
-                                  label: "permissions".tr(),
-                                  color: primary,
-                                  onTap: () => showPermissionsDialog(context),
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: _buildQuickActionButton(
-                                  icon: Icons.lock,
-                                  label: "security".tr(),
-                                  color: primary,
-                                  onTap: () {
-                                    AppRoutes.push(
-                                      context,
-                                      ChangePasswordScreen(),
-                                    );
-                                  },
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 10),
-
-                          // Theme mode and color, language, menu items...
-                          Theme(
-                            data: ThemeData(dividerColor: Colors.transparent),
-                            child: ExpansionTile(
-                              tilePadding: EdgeInsets.zero,
-                              iconColor: primary,
-                              collapsedIconColor: primary,
-                              title: Row(
+                              // Quick Action Buttons
+                              Row(
                                 children: [
-                                  _iconBox(Icons.palette, primary, iconBg),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    'theme_mode'.tr(),
-                                    style: AppTextStyle.body(context),
+                                  Expanded(
+                                    child: _buildQuickActionButton(
+                                      icon: Icons.security,
+                                      label: "permissions".tr(),
+                                      color: primary,
+                                      onTap: () => showPermissionsDialog(context),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: _buildQuickActionButton(
+                                      icon: Icons.lock,
+                                      label: "security".tr(),
+                                      color: primary,
+                                      onTap: () {
+                                        AppRoutes.push(
+                                          context,
+                                          ChangePasswordScreen(),
+                                        );
+                                      },
+                                    ),
                                   ),
                                 ],
                               ),
-                              children: [
-                                RadioGroup<ThemeMode>(
-                                  groupValue: themeState.themeMode,
-                                  onChanged: (val) async {
-                                    if (val == null) return;
-                                    themeCubit.setThemeMode(val);
-                                    final modeStr = val == ThemeMode.light
-                                        ? 'light'
-                                        : val == ThemeMode.dark
-                                        ? 'dark'
-                                        : 'system';
-                                    await AuthLocalDB.saveThemeMode(modeStr);
-                                  },
-                                  child: Column(
-                                    children: ThemeMode.values.map((mode) {
-                                      final text = mode == ThemeMode.light
-                                          ? "Light"
-                                          : mode == ThemeMode.dark
-                                          ? "Dark"
-                                          : "System";
-                                      return RadioListTile<ThemeMode>(
-                                        title: Text(
-                                          text,
-                                          style: AppTextStyle.body(context),
-                                        ),
-                                        value: mode,
-                                        activeColor: primary,
-                                        groupValue: themeState.themeMode,
-                                        onChanged: (val) {
-                                          if (val != null) {
-                                            themeCubit.setThemeMode(val);
-                                            final modeStr =
-                                                val == ThemeMode.light
-                                                ? 'light'
-                                                : val == ThemeMode.dark
-                                                ? 'dark'
-                                                : 'system';
-                                            AuthLocalDB.saveThemeMode(modeStr);
-                                          }
-                                        },
-                                      );
-                                    }).toList(),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 12),
+                              const SizedBox(height: 10),
 
-                          InkWell(
-                            onTap: () => showThemeColorBottomSheet(
-                              context,
-                              themeCubit,
-                              themeState.primaryColor,
-                            ),
-                            child: Row(
-                              children: [
-                                _iconBox(Icons.palette, primary, iconBg),
-                                const SizedBox(width: 8),
-                                Text(
-                                  "theme_color".tr(),
-                                  style: AppTextStyle.body(context),
-                                ),
-                                const Spacer(),
-                                Builder(
-                                  builder: (context) {
-                                    final currentColor = context
-                                        .watch<ThemeCubit>()
-                                        .state
-                                        .primaryColor;
-                                    final colorMap = colors.firstWhere(
-                                      (c) =>
-                                          c['color'].value ==
-                                          currentColor.value,
-                                      orElse: () => {
-                                        'color': currentColor,
-                                        'name': 'Custom',
+                              // Theme mode and color, language, menu items...
+                              Theme(
+                                data: ThemeData(dividerColor: Colors.transparent),
+                                child: ExpansionTile(
+                                  tilePadding: EdgeInsets.zero,
+                                  iconColor: primary,
+                                  collapsedIconColor: primary,
+                                  title: Row(
+                                    children: [
+                                      _iconBox(Icons.palette, primary, iconBg),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        'theme_mode'.tr(),
+                                        style: AppTextStyle.body(context),
+                                      ),
+                                    ],
+                                  ),
+                                  children: [
+                                    RadioGroup<ThemeMode>(
+                                      groupValue: themeState.themeMode,
+                                      onChanged: (val) async {
+                                        if (val == null) return;
+                                        themeCubit.setThemeMode(val);
+                                        final modeStr = val == ThemeMode.light
+                                            ? 'light'
+                                            : val == ThemeMode.dark
+                                            ? 'dark'
+                                            : 'system';
+                                        await AuthLocalDB.saveThemeMode(modeStr);
                                       },
-                                    );
-                                    return Row(
-                                      children: [
-                                        Container(
-                                          width: 24,
-                                          height: 24,
-                                          decoration: BoxDecoration(
-                                            color: colorMap['color'],
-                                            shape: BoxShape.circle,
-                                            border: Border.all(
-                                              color: Colors.black12,
+                                      child: Column(
+                                        children: ThemeMode.values.map((mode) {
+                                          final text = mode == ThemeMode.light
+                                              ? "Light"
+                                              : mode == ThemeMode.dark
+                                              ? "Dark"
+                                              : "System";
+                                          return RadioListTile<ThemeMode>(
+                                            title: Text(
+                                              text,
+                                              style: AppTextStyle.body(context),
                                             ),
-                                          ),
-                                        ),
-                                        const SizedBox(width: 6),
-                                        Text(
-                                          colorMap['name'],
-                                          style: AppTextStyle.body(context),
-                                        ),
-                                        const SizedBox(width: 8),
-                                        Icon(
-                                          Icons.arrow_forward_ios_rounded,
-                                          size: 16,
-                                          color: primary,
-                                        ),
-                                      ],
-                                    );
-                                  },
+                                            value: mode,
+                                            activeColor: primary,
+                                            groupValue: themeState.themeMode,
+                                            onChanged: (val) {
+                                              if (val != null) {
+                                                themeCubit.setThemeMode(val);
+                                                final modeStr =
+                                                    val == ThemeMode.light
+                                                    ? 'light'
+                                                    : val == ThemeMode.dark
+                                                    ? 'dark'
+                                                    : 'system';
+                                                AuthLocalDB.saveThemeMode(modeStr);
+                                              }
+                                            },
+                                          );
+                                        }).toList(),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
-                          ),
+                              ),
+                              const SizedBox(height: 12),
 
-                          languageDropdown(context),
+                              InkWell(
+                                onTap: () => showThemeColorBottomSheet(
+                                  context,
+                                  themeCubit,
+                                  themeState.primaryColor,
+                                ),
+                                child: Row(
+                                  children: [
+                                    _iconBox(Icons.palette, primary, iconBg),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      "theme_color".tr(),
+                                      style: AppTextStyle.body(context),
+                                    ),
+                                    const Spacer(),
+                                    Builder(
+                                      builder: (context) {
+                                        final currentColor = context
+                                            .watch<ThemeCubit>()
+                                            .state
+                                            .primaryColor;
+                                        final colorMap = colors.firstWhere(
+                                          (c) =>
+                                              c['color'].value ==
+                                              currentColor.value,
+                                          orElse: () => {
+                                            'color': currentColor,
+                                            'name': 'Custom',
+                                          },
+                                        );
+                                        return Row(
+                                          children: [
+                                            Container(
+                                              width: 24,
+                                              height: 24,
+                                              decoration: BoxDecoration(
+                                                color: colorMap['color'],
+                                                shape: BoxShape.circle,
+                                                border: Border.all(
+                                                  color: Colors.black12,
+                                                ),
+                                              ),
+                                            ),
+                                            const SizedBox(width: 6),
+                                            Text(
+                                              colorMap['name'],
+                                              style: AppTextStyle.body(context),
+                                            ),
+                                            const SizedBox(width: 8),
+                                            Icon(
+                                              Icons.arrow_forward_ios_rounded,
+                                              size: 16,
+                                              color: primary,
+                                            ),
+                                          ],
+                                        );
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ),
 
-                          InkWell(
-                            onTap: () {
-                              // TODO
-                            },
-                            child: _menuItem(
-                              Icons.health_and_safety_rounded,
-                              "emergency_support".tr(),
-                              iconBg,
-                              primary,
-                              context,
-                            ),
-                          ),
+                              languageDropdown(context),
 
-                          InkWell(
-                            onTap: () {
-                              // TODO
-                            },
-                            child: _menuItem(
-                              Icons.shield_outlined,
-                              "privacy_policy".tr(),
-                              iconBg,
-                              primary,
-                              context,
-                            ),
-                          ),
+                              InkWell(
+                                onTap: () {
+                                  // TODO
+                                },
+                                child: _menuItem(
+                                  Icons.health_and_safety_rounded,
+                                  "emergency_support".tr(),
+                                  iconBg,
+                                  primary,
+                                  context,
+                                ),
+                              ),
 
-                          InkWell(
-                            onTap: () {
-                              appAdaptiveDialog(
-                                context: context,
-                                title: "logout".tr(),
-                                message: "are_you_sure_you_want_to_log_out"
-                                    .tr(),
-                                actions: [
-                                  AdaptiveDialogAction(
-                                    text: "cancel".tr(),
-                                    onPressed: () => Navigator.pop(context),
-                                  ),
-                                  AdaptiveDialogAction(
-                                    text: "yes".tr(),
-                                    isDestructive: true,
-                                    onPressed: () async {
-                                      await AuthLocalDB.clear();
-                                      if (!context.mounted) return;
-                                      AppRoutes.pushAndRemoveUntil(
-                                        context,
-                                        MobileLoginScr(),
-                                      );
-                                    },
-                                  ),
-                                ],
-                              );
-                            },
-                            child: _menuItem(
-                              Icons.logout,
-                              "logout".tr(),
-                              iconBg,
-                              primary,
-                              context,
+                              InkWell(
+                                onTap: () {
+                                  // TODO
+                                },
+                                child: _menuItem(
+                                  Icons.shield_outlined,
+                                  "privacy_policy".tr(),
+                                  iconBg,
+                                  primary,
+                                  context,
+                                ),
+                              ),
+
+
+                            ],
+                          );
+                        } else if (state is ProfilePermissionFailed) {
+                          return _buildErrorState(state, _loadProfileData);
+                        }
+                        return _buildLoadingState();
+                      },
+                    ),
+                    InkWell(
+                      onTap: () {
+                        appAdaptiveDialog(
+                          context: context,
+                          title: "logout".tr(),
+                          message: "are_you_sure_you_want_to_log_out"
+                              .tr(),
+                          actions: [
+                            AdaptiveDialogAction(
+                              text: "cancel".tr(),
+                              onPressed: () => Navigator.pop(context),
                             ),
-                          ),
-                        ],
-                      );
-                    } else if (state is ProfilePermissionFailed) {
-                      return _buildErrorState(state, _loadProfileData);
-                    }
-                    return _buildLoadingState();
-                  },
+                            AdaptiveDialogAction(
+                              text: "yes".tr(),
+                              isDestructive: true,
+                              onPressed: () async {
+                                await AuthLocalDB.clear();
+                                if (!context.mounted) return;
+                                AppRoutes.pushAndRemoveUntil(
+                                  context,
+                                  MobileLoginScr(),
+                                );
+                              },
+                            ),
+                          ],
+                        );
+                      },
+                      child: _menuItem(
+                        Icons.logout,
+                        "logout".tr(),
+                        iconBg,
+                        primary,
+                        context,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),

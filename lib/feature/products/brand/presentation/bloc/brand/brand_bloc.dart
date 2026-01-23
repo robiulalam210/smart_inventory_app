@@ -13,7 +13,6 @@ part 'brand_state.dart';
 
 class BrandBloc extends Bloc<BrandEvent, BrandState> {
   List<BrandModel> brandModel = [];
-  final int _itemsPerPage = 20;
   String selectedState = "";
   String selectedId = "";
   TextEditingController filterTextController = TextEditingController();
@@ -62,12 +61,11 @@ class BrandBloc extends Bloc<BrandEvent, BrandState> {
       // Apply filtering and pagination
       final filteredData = _filterBrand(brandModel, event.filterText);
 
-      final totalPages = (filteredData.length / _itemsPerPage).ceil();
 
       emit(
         BrandListSuccess(
           list: filteredData,
-          totalPages: totalPages,
+          totalPages: 1,
           currentPage: event.pageNumber,
         ),
       );
