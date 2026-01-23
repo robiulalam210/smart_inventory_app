@@ -56,7 +56,9 @@ class PriceTierModel extends Equatable {
 
 class ProductSaleModeModel extends Equatable {
   final int? id;
+  final int? productId; // Add this
   final int? product;
+  final int? saleModeId; // Add this
   final int? saleMode;
   final double? unitPrice;
   final double? flatPrice;
@@ -73,7 +75,9 @@ class ProductSaleModeModel extends Equatable {
 
   const ProductSaleModeModel({
     this.id,
+    this.productId,
     this.product,
+    this.saleModeId,
     this.saleMode,
     this.unitPrice,
     this.flatPrice,
@@ -92,7 +96,9 @@ class ProductSaleModeModel extends Equatable {
   factory ProductSaleModeModel.fromJson(Map<String, dynamic> json) {
     return ProductSaleModeModel(
       id: json['id'],
+      productId: json['product_id'] ?? json['product'], // Handle both
       product: json['product'],
+      saleModeId: json['sale_mode_id'] ?? json['sale_mode'], // Handle both
       saleMode: json['sale_mode'],
       unitPrice: json['unit_price'] != null
           ? double.tryParse(json['unit_price'].toString())
@@ -123,7 +129,9 @@ class ProductSaleModeModel extends Equatable {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
+      'product_id': productId,
       'product': product,
+      'sale_mode_id': saleModeId,
       'sale_mode': saleMode,
       'unit_price': unitPrice,
       'flat_price': flatPrice,
@@ -137,10 +145,14 @@ class ProductSaleModeModel extends Equatable {
     };
   }
 
+  // Getters for backward compatibility
+
   @override
   List<Object?> get props => [
     id,
+    productId,
     product,
+    saleModeId,
     saleMode,
     unitPrice,
     flatPrice,
@@ -156,4 +168,3 @@ class ProductSaleModeModel extends Equatable {
     tiers,
   ];
 }
-
