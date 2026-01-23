@@ -40,6 +40,7 @@ import '../../../../feature/return/purchase_return/presentation/purchase_return/
 import '../../../../feature/return/sales_return/presentation/page/mobile_sales_return_page.dart';
 import '../../../../feature/sales/presentation/pages/create_pos_sale/mobile_create_pos_sale.dart';
 import '../../../../feature/sales/presentation/pages/create_pos_sale/mobile_create_sales_pos.dart';
+import '../../../../feature/sales/presentation/pages/create_pos_sale/mobile_short_create_pos_sale.dart';
 import '../../../../feature/supplier/presentation/pages/mobile_supplier_list_screen.dart';
 import '../../../../feature/supplier/presentation/pages/mobile_supplier_payment_list_screen.dart';
 import '../../../../feature/transactions/presentation/pages/mobile_transaction_screen.dart';
@@ -462,12 +463,19 @@ class MobileTabSidebar extends StatelessWidget {
         AppRoutes.push(context, MobileCreatePosSale());
         break;
 
+      // case 2: // Pos Sale
+      //   if (permissions?.sales?.create != true) {
+      //     _showPermissionDeniedDialog(context);
+      //     return;
+      //   }
+      //   AppRoutes.push(context, MobileSalesScreen());
+      //   break;
       case 2: // Pos Sale
         if (permissions?.sales?.create != true) {
           _showPermissionDeniedDialog(context);
           return;
         }
-        AppRoutes.push(context, MobileSalesScreen());
+        AppRoutes.push(context, MobileShortCreatePosSale());
         break;
 
       case 3: // Sale List

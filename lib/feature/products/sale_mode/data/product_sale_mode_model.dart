@@ -156,3 +156,4 @@ class ProductSaleModeModel extends Equatable {
     tiers,
   ];
 }
+

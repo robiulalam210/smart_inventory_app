@@ -41,13 +41,14 @@ class ProductSaleModeListFailed extends ProductSaleModeState {
 class AvailableSaleModesLoading extends ProductSaleModeState {}
 
 class AvailableSaleModesSuccess extends ProductSaleModeState {
-  final List<Map<String, dynamic>> availableModes;
+  final List<AvlibleSaleModeModel> availableModes;
 
   const AvailableSaleModesSuccess({required this.availableModes});
 
   @override
   List<Object> get props => [availableModes];
 }
+
 
 class AvailableSaleModesFailed extends ProductSaleModeState {
   final String title;

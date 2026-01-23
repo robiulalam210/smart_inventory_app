@@ -9,7 +9,9 @@ import '../../../../../../core/widgets/app_button.dart';
 import '../../../../../../core/widgets/app_dropdown.dart';
 import '../../../../../../core/widgets/input_field.dart';
 import '../../../../../../core/widgets/show_custom_toast.dart';
+import '../../data/avliable_sales_model.dart';
 import '../../data/product_sale_mode_model.dart';
+import '../../data/sale_mode_model.dart';
 import '../bloc/product_sale_mode/product_sale_mode_bloc.dart';
 
 class PriceTierRow extends StatefulWidget {
@@ -217,7 +219,7 @@ class _ProductSaleModeConfigScreenState extends State<ProductSaleModeConfigScree
 
       final Map<String, dynamic> body = {
         'product_id': widget.productId,
-        'sale_mode_id': int.parse(selectedSaleModeId),
+        'sale_mode': int.parse(selectedSaleModeId),
         'unit_price': unitPriceController.text.isNotEmpty
             ? double.tryParse(unitPriceController.text)
             : null,
@@ -320,60 +322,36 @@ class _ProductSaleModeConfigScreenState extends State<ProductSaleModeConfigScree
 
             BlocBuilder<ProductSaleModeBloc, ProductSaleModeState>(
               builder: (context, state) {
-                print("Current state: $state");
-
-                if (state is ProductSaleModeListSuccess) {
-                  final availableModes = state.list;
-
-                  // Debug print to see what we have
-                  print("Available modes count: ${availableModes.length}");
-                  for (var mode in availableModes) {
-                    print("Mode: ${mode.saleModeName}, ID: ${mode.id}, Price Type: ${mode.priceType}");
-                  }
-
+                if (state is AvailableSaleModesLoading) {
+                  return Center(child: CircularProgressIndicator());
+                } else if (state is AvailableSaleModesSuccess) {
+                  final availableModes = state.availableModes; // List<ProductSaleModeModel>
                   if (availableModes.isEmpty) {
-                    return Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(
-                        "No sale modes available. Please create sale modes first.",
-                        style: TextStyle(color: Colors.orange),
-                      ),
+                    return Text(
+                      "No sale modes available. Please create sale modes first.",
+                      style: TextStyle(color: Colors.orange),
                     );
                   }
 
-                  return AppDropdown(
+                  return AppDropdown<AvlibleSaleModeModel>(
                     label: "Sale Mode",
                     hint: "Select Sale Mode",
                     isLabel: true,
-                    value: selectedSaleModeId.isNotEmpty ? selectedSaleModeId : null,
-                    itemList: availableModes
-                        .where((mode) => mode.id != null)
-                        .map((mode) => {
-                      'value': mode.id.toString(),
-                      'label': '${mode.saleModeName ?? "Unknown"} (${mode.priceType ?? "unit"})',
-                    })
-                        .toList(),
-                    onChanged: (newVal) {
-                      if (newVal != null) {
+                    value: selectedSaleModeId.isNotEmpty
+                        ? availableModes.firstWhere(
+                          (mode) => mode.id.toString() == selectedSaleModeId,
+                      orElse: () => AvlibleSaleModeModel(),
+                    )
+                        : null,
+                    itemList: availableModes, // Pass the models directly
+                    itemLabel: (mode) => '${mode.name ?? "Unknown"} (${mode.priceType ?? "unit"})', // how to display
+                    onChanged: (selectedMode) {
+                      if (selectedMode != null) {
                         setState(() {
-                          selectedSaleModeId = newVal.toString();
-
-                          // Find the selected mode from the list
-                          final selectedMode = availableModes.firstWhere(
-                                (mode) => mode.id.toString() == newVal.toString(),
-                            orElse: () => ProductSaleModeModel(), // Return empty model if not found
-                          );
-
-                          // Get price type from the model
+                          selectedSaleModeId = selectedMode.id.toString();
                           selectedPriceType = selectedMode.priceType ?? 'unit';
-
-                          // Also auto-fill prices if available
-                          if (selectedMode.unitPrice != null) {
-                            unitPriceController.text = selectedMode.unitPrice.toString();
-                          }
-                          if (selectedMode.flatPrice != null) {
-                            flatPriceController.text = selectedMode.flatPrice.toString();
-                          }
+                          unitPriceController.text = selectedMode.unitPrice?.toString() ?? '';
+                          flatPriceController.text = selectedMode.flatPrice?.toString() ?? '';
                         });
 
                         print("Selected Sale Mode ID: $selectedSaleModeId");
@@ -381,28 +359,17 @@ class _ProductSaleModeConfigScreenState extends State<ProductSaleModeConfigScree
                       }
                     },
                   );
-                } else if (state is ProductSaleModeListLoading) {
-                  return Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(20.0),
-                      child: CircularProgressIndicator(),
-                    ),
-                  );
-                } else if (state is ProductSaleModeListFailed) {
-                  return Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      "Error loading sale modes: ${state.content}",
-                      style: TextStyle(color: Colors.red),
-                    ),
+                } else if (state is AvailableSaleModesFailed) {
+                  return Text(
+                    "Error loading sale modes: ${state.content}",
+                    style: TextStyle(color: Colors.red),
                   );
                 }
 
-                return Center(
-                  child: CircularProgressIndicator(),
-                );
+                return Center(child: CircularProgressIndicator());
               },
             ),
+
 
             const SizedBox(height: 16),
 

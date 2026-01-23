@@ -269,7 +269,9 @@ class ProductDataTableWidget extends StatelessWidget {
                 Expanded(
                   child: OutlinedButton.icon(
                     onPressed: () {
-                      AppRoutes.push(context, ProductSaleModeListScreen(productId: product.id.toString(),));
+                      AppRoutes.push(context, ProductSaleModeListScreen(
+                        productName: product.name,
+                        productId: product.id.toString(),));
 
                     },
                     icon: const Icon(

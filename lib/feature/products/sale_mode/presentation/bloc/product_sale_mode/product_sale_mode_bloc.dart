@@ -1,18 +1,18 @@
+// features/products/sale_mode/presentation/bloc/product_sale_mode/product_sale_mode_bloc.dart
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:meta/meta.dart';
+import 'dart:convert';
 
 import '../../../../../../core/configs/configs.dart';
+import '../../../data/avliable_sales_model.dart';
 import '../../../data/product_sale_mode_model.dart';
-// features/products/sale_mode/presentation/bloc/product_sale_mode/product_sale_mode_bloc.dart
-
-
 import '../../../../../../core/repositories/delete_response.dart';
 import '../../../../../../core/repositories/get_response.dart';
 import '../../../../../../core/repositories/patch_response.dart';
 import '../../../../../../core/repositories/post_response.dart';
 import '../../../../../common/data/models/api_response_mod.dart';
 import '../../../../../common/data/models/app_parse_json.dart';
+import '../../../data/sale_mode_model.dart';
 
 part 'product_sale_mode_event.dart';
 part 'product_sale_mode_state.dart';
@@ -21,6 +21,7 @@ class ProductSaleModeBloc extends Bloc<ProductSaleModeEvent, ProductSaleModeStat
   List<ProductSaleModeModel> productSaleModeModel = [];
   String selectedId = "";
   TextEditingController filterTextController = TextEditingController();
+  List<AvlibleSaleModeModel> availableSaleModes = [];
 
   ProductSaleModeBloc() : super(ProductSaleModeInitial()) {
     on<FetchProductSaleModeList>(_onFetchProductSaleModeList);
@@ -48,7 +49,8 @@ class ProductSaleModeBloc extends Bloc<ProductSaleModeEvent, ProductSaleModeStat
       ApiResponse response = appParseJson(
         res,
             (data) => List<ProductSaleModeModel>.from(
-            data.map((x) => ProductSaleModeModel.fromJson(x))),
+          data.map((x) => ProductSaleModeModel.fromJson(x)),
+        ),
       );
 
       final data = response.data;
@@ -86,35 +88,38 @@ class ProductSaleModeBloc extends Bloc<ProductSaleModeEvent, ProductSaleModeStat
 
     try {
       final res = await getResponse(
-        url: "${AppUrls.products}/${event.productId}/available_sale_modes/",
+        url: "${AppUrls.products}${event.productId}/available_sale_modes/",
         context: event.context,
       );
 
       ApiResponse response = appParseJson(
         res,
-            (data) => List<Map<String, dynamic>>.from(data),
+            (data) => data, // just pass data as-is
       );
 
       final data = response.data;
-      if (data == null || data.isEmpty) {
+
+      if (data == null || (data as List).isEmpty) {
         emit(AvailableSaleModesSuccess(availableModes: []));
         return;
       }
 
-      emit(AvailableSaleModesSuccess(availableModes: data));
-    } catch (error) {
+      final dataList = data as List<dynamic>;
+
+      // Map JSON to your model
+      final modes = dataList
+          .map((e) => AvlibleSaleModeModel.fromJson(e as Map<String, dynamic>))
+          .toList();
+
+      availableSaleModes = modes; // store locally if needed
+      emit(AvailableSaleModesSuccess(availableModes: modes));
+    } catch (error, st) {
+      print(error);
+      print(st);
       emit(AvailableSaleModesFailed(title: "Error", content: error.toString()));
     }
   }
 
-  List<ProductSaleModeModel> _filterProductSaleMode(
-      List<ProductSaleModeModel> list, String filterText) {
-    return list.where((data) {
-      final matchesText = filterText.isEmpty ||
-          (data.saleModeName?.toLowerCase().contains(filterText.toLowerCase()) ?? false);
-      return matchesText;
-    }).toList();
-  }
 
   Future<void> _onCreateProductSaleModeList(
       AddProductSaleMode event,
@@ -141,6 +146,7 @@ class ProductSaleModeBloc extends Bloc<ProductSaleModeEvent, ProductSaleModeStat
 
       emit(ProductSaleModeAddSuccess());
     } catch (error) {
+
       emit(ProductSaleModeAddFailed(title: "Error", content: error.toString()));
     }
   }
@@ -239,7 +245,19 @@ class ProductSaleModeBloc extends Bloc<ProductSaleModeEvent, ProductSaleModeStat
       Emitter<ProductSaleModeState> emit,
       ) {
     productSaleModeModel.clear();
+    availableSaleModes.clear();
     filterTextController.clear();
     selectedId = "";
+  }
+
+  List<ProductSaleModeModel> _filterProductSaleMode(
+      List<ProductSaleModeModel> list,
+      String filterText,
+      ) {
+    return list.where((data) {
+      final matchesText = filterText.isEmpty ||
+          (data.saleModeName?.toLowerCase().contains(filterText.toLowerCase()) ?? false);
+      return matchesText;
+    }).toList();
   }
 }
