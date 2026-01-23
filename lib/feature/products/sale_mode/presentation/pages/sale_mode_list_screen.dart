@@ -85,7 +85,6 @@ class _SaleModeListScreenState extends State<SaleModeListScreen> {
           appLoader(context, "Deleting sale mode, please wait...");
         } else if (state is SaleModeAddSuccess) {
           Navigator.pop(context);
-          Navigator.pop(context);
           _fetchApi();
           showCustomToast(
             context: context,

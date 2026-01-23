@@ -156,6 +156,8 @@ class ProductSaleModeTableCard extends StatelessWidget {
               width: MediaQuery.of(context).size.width * 0.7,
               child: ProductSaleModeConfigScreen(
                 productId: mode.product?.toString() ?? '',
+
+
                 initialData: data,
               ),
             ),

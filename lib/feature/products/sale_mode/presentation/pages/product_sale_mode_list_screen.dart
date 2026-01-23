@@ -36,13 +36,9 @@ class _ProductSaleModeListScreenState extends State<ProductSaleModeListScreen> {
 
   @override
   void initState() {
-    _fetchApi();
-    context.read<SaleModeBloc>().add(
-      FetchSaleModeList(
-        context,
+    // _fetchApi();
+    _fetchAvailableSaleModes();
 
-      ),
-    );
     super.initState();
   }
 
@@ -80,7 +76,7 @@ class _ProductSaleModeListScreenState extends State<ProductSaleModeListScreen> {
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: () {
-              _fetchApi();
+              // _fetchApi();
               _fetchAvailableSaleModes();
             },
           ),
@@ -251,34 +247,34 @@ class _ProductSaleModeListScreenState extends State<ProductSaleModeListScreen> {
                   ],
                 ),
                 const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: availableModes.map((mode) {
-                    final isConfigured = mode['configured'] == true;
-                    final isActive = mode['is_active'] == true;
-
-                    return Chip(
-                      label: Text(mode['name'] ?? ''),
-                      backgroundColor: isConfigured
-                          ? (isActive ? Colors.green[100] : Colors.grey[300])
-                          : Colors.blue[100],
-                      labelStyle: TextStyle(
-                        color: isConfigured
-                            ? (isActive ? Colors.green[900] : Colors.grey[700])
-                            : Colors.blue[900],
-                        fontWeight: isConfigured ? FontWeight.bold : FontWeight.normal,
-                      ),
-                      avatar: isConfigured
-                          ? Icon(
-                        isActive ? Icons.check_circle : Icons.cancel,
-                        size: 16,
-                        color: isActive ? Colors.green : Colors.grey,
-                      )
-                          : const Icon(Icons.add_circle, size: 16, color: Colors.blue),
-                    );
-                  }).toList(),
-                ),
+                // Wrap(
+                //   spacing: 8,
+                //   runSpacing: 8,
+                //   children: availableModes.map((mode) {
+                //     final isConfigured = mode['configured'] == true;
+                //     final isActive = mode['is_active'] == true;
+                //
+                //     return Chip(
+                //       label: Text(mode['name'] ?? ''),
+                //       backgroundColor: isConfigured
+                //           ? (isActive ? Colors.green[100] : Colors.grey[300])
+                //           : Colors.blue[100],
+                //       labelStyle: TextStyle(
+                //         color: isConfigured
+                //             ? (isActive ? Colors.green[900] : Colors.grey[700])
+                //             : Colors.blue[900],
+                //         fontWeight: isConfigured ? FontWeight.bold : FontWeight.normal,
+                //       ),
+                //       avatar: isConfigured
+                //           ? Icon(
+                //         isActive ? Icons.check_circle : Icons.cancel,
+                //         size: 16,
+                //         color: isActive ? Colors.green : Colors.grey,
+                //       )
+                //           : const Icon(Icons.add_circle, size: 16, color: Colors.blue),
+                //     );
+                //   }).toList(),
+                // ),
               ],
             ),
           );
@@ -294,9 +290,12 @@ class _ProductSaleModeListScreenState extends State<ProductSaleModeListScreen> {
               children: [
                 const Icon(Icons.error, color: Colors.red, size: 18),
                 const SizedBox(width: 8),
-                Text(
-                  'Failed to load available modes: ${state.content}',
-                  style: const TextStyle(color: Colors.red),
+                SizedBox(
+                  width: AppSizes.width(context)*0.70,
+                  child: Text(
+                    'Failed to load available modes: ${state.content}',
+                    style: const TextStyle(color: Colors.red),
+                  ),
                 ),
               ],
             ),
