@@ -1,6 +1,6 @@
 
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-final bool isLive = true; // Set to true for production environment
+final bool isLive = false; // Set to true for production environment
 
 
 class AppUrls {
@@ -24,6 +24,9 @@ class AppUrls {
   static final String fullInvoiceRefund          = '$baseUrl/great-lab-invoice-full-refund/';
   static final String getInvoice          = '$baseUrl/lab-offline/invoice';
 
+  static  String saleModes = "$baseUrl/sale-modes/";
+  static  String productSaleModes = "$baseUrl/product-sale-modes/";
+  static  String products = "$baseUrl/products/";
 
   static final String brand          = '$baseUrl/brands/';
   static final String unit          = '$baseUrl/units/';

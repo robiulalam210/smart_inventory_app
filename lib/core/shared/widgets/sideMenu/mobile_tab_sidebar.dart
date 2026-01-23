@@ -18,6 +18,8 @@ import '../../../../feature/lab_dashboard/presentation/bloc/dashboard/dashboard_
 import '../../../../feature/money_receipt/presentation/page/mobile_monery_receipt_create.dart';
 import '../../../../feature/money_receipt/presentation/page/mobile_money_receipt_list.dart';
 import '../../../../feature/products/product/presentation/pages/mobile_product_screen.dart';
+import '../../../../feature/products/sale_mode/presentation/pages/product_sale_mode_list_screen.dart';
+import '../../../../feature/products/sale_mode/presentation/pages/sale_mode_list_screen.dart';
 import '../../../../feature/profile/data/model/profile_perrmission_model.dart';
 import '../../../../feature/profile/presentation/pages/moble_profile_screen.dart';
 import '../../../../feature/purchase/presentation/page/mobile_create_purchase_screen.dart';
@@ -236,7 +238,9 @@ class MobileTabSidebar extends StatelessWidget {
             MenuItem(title: "Brand", index: 34),
             MenuItem(title: "Category", index: 35),
             MenuItem(title: "Group", index: 36),
-            MenuItem(title: "Profile", index: 37),
+            MenuItem(title: "Sale Mode", index: 37),
+            MenuItem(title: "Product Sale Mode", index: 38),
+            MenuItem(title: "Profile", index: 39),
           ],
         ),
       );
@@ -248,9 +252,9 @@ class MobileTabSidebar extends StatelessWidget {
         MenuSection(
           title: "Transfer Balance",
           items: [
-            MenuItem(title: "Account Transfer From", index: 38),
-            MenuItem(title: "Account Transfer List", index: 39),
-            MenuItem(title: "Translation", index: 40),
+            MenuItem(title: "Account Transfer From", index: 40),
+            MenuItem(title: "Account Transfer List", index: 41),
+            MenuItem(title: "Translation", index: 42),
           ],
         ),
       );
@@ -272,7 +276,11 @@ class MobileTabSidebar extends StatelessWidget {
               currentIndex = state.index;
             }
 
-            final permission = context.read<ProfileBloc>().permissionModel?.data?.permissions;
+            final permission = context
+                .read<ProfileBloc>()
+                .permissionModel
+                ?.data
+                ?.permissions;
 
             // Get dynamic menu sections based on permissions
             final menuSections = getMenuSections(permission);
@@ -283,11 +291,7 @@ class MobileTabSidebar extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(
-                      Icons.lock_outline,
-                      size: 64,
-                      color: Colors.grey[400],
-                    ),
+                    Icon(Icons.lock_outline, size: 64, color: Colors.grey[400]),
                     const SizedBox(height: 16),
                     Text(
                       "No Menu Access",
@@ -300,9 +304,7 @@ class MobileTabSidebar extends StatelessWidget {
                     const SizedBox(height: 8),
                     Text(
                       "Contact administrator for access",
-                      style: TextStyle(
-                        color: Colors.grey[500],
-                      ),
+                      style: TextStyle(color: Colors.grey[500]),
                     ),
                   ],
                 ),
@@ -311,7 +313,6 @@ class MobileTabSidebar extends StatelessWidget {
 
             return Column(
               children: [
-
                 /// Drawer Header
                 DrawerHeader(
                   margin: EdgeInsets.zero,
@@ -366,14 +367,18 @@ class MobileTabSidebar extends StatelessWidget {
                             title: section.title,
                             isSelected: currentIndex == item.index,
                             onPressed: () {
-                              _handleMenuSelection(item.index, context, permission);
+                              _handleMenuSelection(
+                                item.index,
+                                context,
+                                permission,
+                              );
                             },
                           );
                         } else {
                           // Multiple items (with expansion)
                           return ExpansionTile(
                             initiallyExpanded: section.items.any(
-                                  (item) => currentIndex == item.index,
+                              (item) => currentIndex == item.index,
                             ),
                             title: Text(
                               section.title,
@@ -389,7 +394,11 @@ class MobileTabSidebar extends StatelessWidget {
                                 title: item.title,
                                 isSelected: currentIndex == item.index,
                                 onPressed: () {
-                                  _handleMenuSelection(item.index, context, permission);
+                                  _handleMenuSelection(
+                                    item.index,
+                                    context,
+                                    permission,
+                                  );
                                 },
                               );
                             }).toList(),
@@ -430,7 +439,11 @@ class MobileTabSidebar extends StatelessWidget {
     );
   }
 
-  void _handleMenuSelection(int index, BuildContext context, Permissions? permissions) {
+  void _handleMenuSelection(
+    int index,
+    BuildContext context,
+    Permissions? permissions,
+  ) {
     // Check permissions before navigation
     switch (index) {
       case 0: // Dashboard
@@ -728,8 +741,21 @@ class MobileTabSidebar extends StatelessWidget {
         }
         AppRoutes.push(context, MobileGroupsScreen());
         break;
+      case 37: // Group
+        if (permissions?.administration?.view != true) {
+          _showPermissionDeniedDialog(context);
+          return;
+        }
+        AppRoutes.push(context, SaleModeListScreen());
+        break;
+      case 38: // Group
+        if (permissions?.administration?.view != true) {
+          _showPermissionDeniedDialog(context);
+          return;
+        }
+        break;
 
-      case 37: // Profile
+      case 39: // Profile
         if (permissions?.administration?.view != true) {
           _showPermissionDeniedDialog(context);
           return;
@@ -737,7 +763,7 @@ class MobileTabSidebar extends StatelessWidget {
         AppRoutes.push(context, MobileProfileScreen());
         break;
 
-      case 38: // Account Transfer From
+      case 40: // Account Transfer From
         if (permissions?.accounts?.view != true) {
           _showPermissionDeniedDialog(context);
           return;
@@ -745,7 +771,7 @@ class MobileTabSidebar extends StatelessWidget {
         AppRoutes.push(context, MobileAccountTransferForm());
         break;
 
-      case 39: // Account Transfer List
+      case 41: // Account Transfer List
         if (permissions?.accounts?.view != true) {
           _showPermissionDeniedDialog(context);
           return;
@@ -753,7 +779,7 @@ class MobileTabSidebar extends StatelessWidget {
         AppRoutes.push(context, MobileAccountTransferScreen());
         break;
 
-      case 40: // Translation
+      case 42: // Translation
         if (permissions?.accounts?.view != true) {
           _showPermissionDeniedDialog(context);
           return;
@@ -762,7 +788,7 @@ class MobileTabSidebar extends StatelessWidget {
         break;
 
       default:
-      // Fallback: do nothing or show a snack bar
+        // Fallback: do nothing or show a snack bar
         break;
     }
   }
@@ -773,7 +799,9 @@ class MobileTabSidebar extends StatelessWidget {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text("Access Denied"),
-          content: const Text("You don't have permission to access this feature."),
+          content: const Text(
+            "You don't have permission to access this feature.",
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
@@ -804,7 +832,7 @@ class MobileTabSidebar extends StatelessWidget {
                 Navigator.pushAndRemoveUntil(
                   context,
                   MaterialPageRoute(builder: (context) => MobileLoginScr()),
-                      (route) => false,
+                  (route) => false,
                 );
               },
               child: const Text("Logout", style: TextStyle(color: Colors.red)),
@@ -814,7 +842,8 @@ class MobileTabSidebar extends StatelessWidget {
       },
     );
   }
-}// Helper classes for menu structure
+} // Helper classes for menu structure
+
 class MenuSection {
   final String title;
   final List<MenuItem> items;
@@ -832,9 +861,5 @@ class MenuItem {
   final int index;
   final bool Function(Permissions? permissions)? requiredPermission;
 
-  MenuItem({
-    required this.title,
-    required this.index,
-    this.requiredPermission,
-  });
+  MenuItem({required this.title, required this.index, this.requiredPermission});
 }

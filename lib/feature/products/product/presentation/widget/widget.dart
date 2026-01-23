@@ -1,6 +1,7 @@
 
 import '../../../../../core/configs/configs.dart';
 import '../../../../../core/widgets/delete_dialog.dart';
+import '../../../sale_mode/presentation/pages/product_sale_mode_list_screen.dart';
 import '../../data/model/product_model.dart';
 import '../pages/mobile_product_create.dart';
 
@@ -253,6 +254,29 @@ class ProductDataTableWidget extends StatelessWidget {
                       size: 16,
                     ),
                     label: const Text('Delete'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.red,
+                      side: BorderSide(color: Colors.red.shade300),
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+                ),  const SizedBox(width: 12),
+
+                // Delete Button
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      AppRoutes.push(context, ProductSaleModeListScreen(productId: product.id.toString(),));
+
+                    },
+                    icon: const Icon(
+                      HugeIcons.strokeRoundedDeleteThrow,
+                      size: 16,
+                    ),
+                    label: const Text('Sale Model'),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: Colors.red,
                       side: BorderSide(color: Colors.red.shade300),

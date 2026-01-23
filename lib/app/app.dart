@@ -1,5 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import '../feature/common/presentation/cubit/theme_cubit.dart';
+import '../feature/products/sale_mode/presentation/bloc/product_sale_mode/product_sale_mode_bloc.dart';
+import '../feature/products/sale_mode/presentation/bloc/sale_mode_bloc.dart';
 import '../feature/splash/presentation/pages/mobile_splash_screen.dart';
 import '/feature/account_transfer/presentation/bloc/account_transfer/account_transfer_bloc.dart';
 import '/feature/customer/presentation/bloc/customer/customer_bloc.dart';
@@ -67,6 +69,8 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (_) => BrandBloc()),
         BlocProvider(create: (_) => UnitBloc()),
         BlocProvider(create: (_) => CategoriesBloc()),
+        BlocProvider(create: (_) => SaleModeBloc()),
+        BlocProvider(create: (_) => ProductSaleModeBloc()),
 
         BlocProvider(create: (_) => GroupsBloc()),
         BlocProvider(create: (_) => SourceBloc()),
