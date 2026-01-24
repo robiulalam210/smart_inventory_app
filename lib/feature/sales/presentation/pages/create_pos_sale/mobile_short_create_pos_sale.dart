@@ -874,9 +874,8 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
                         margin: const EdgeInsets.only(bottom: 8),
                         child: AppDropdown(
                           label: "Category",
-                          hint: selectedCategory.isEmpty
-                              ? "Select Category"
-                              : selectedCategory,
+                          hint: "Select Category"
+                              ,
                           isLabel: true,
                           isSearch: true,
                           value: selectedCategory.isEmpty

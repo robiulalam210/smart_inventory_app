@@ -154,7 +154,7 @@ class SalesDetailsScreen extends StatelessWidget {
                           border: Border.all(color: sale.statusColor),
                         ),
                         child: Text(
-                          sale.paymentStatus.toUpperCase(),
+                          sale.paymentStatus??"N/A".toUpperCase(),
                           style: TextStyle(
                             color: sale.statusColor,
                             fontWeight: FontWeight.bold,
@@ -360,7 +360,7 @@ class SalesDetailsScreen extends StatelessWidget {
                               Row(
                                 children: [
                                   Text(
-                                    'Qty: ${item.quantity ?? 0}',
+                                    'Qty: ${item.quantityWithUnit}',
                                     style: TextStyle(
                                       fontSize: 13,
                                       color: AppColors.text(context),
@@ -679,7 +679,7 @@ class SalesDetailsScreen extends StatelessWidget {
                     border: Border.all(color: sale.statusColor),
                   ),
                   child: Text(
-                    sale.paymentStatus.toUpperCase(),
+                    sale.paymentStatus??"",
                     style: TextStyle(
                       color: sale.statusColor,
                       fontWeight: FontWeight.bold,

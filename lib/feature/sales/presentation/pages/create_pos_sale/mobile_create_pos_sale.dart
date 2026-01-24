@@ -1115,9 +1115,8 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
 
                     return AppDropdown(
                       label: "Category",
-                      hint: selectedCategory.isEmpty
-                          ? "Select Category"
-                          : selectedCategory,
+                      hint:  "Select Category"
+                          ,
                       isRequired: false,
                       isNeedAll: true,
                       isLabel: true,
