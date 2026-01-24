@@ -1,11 +1,8 @@
-import 'dart:convert';
 import 'dart:developer';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../../../../../core/widgets/app_scaffold.dart';
-import '../../../../products/sale_mode/data/product_sale_mode_model.dart';
 import '../../../../profile/presentation/bloc/profile_bloc/profile_bloc.dart';
 import '../mobile_pos_sale_screen.dart';
 import '/core/core.dart';
@@ -19,7 +16,6 @@ import '../../../../customer/presentation/bloc/customer/customer_bloc.dart';
 import '../../../../products/categories/data/model/categories_model.dart';
 import '../../../../products/categories/presentation/bloc/categories/categories_bloc.dart';
 import '../../../../products/product/presentation/bloc/products/products_bloc.dart';
-import '../../../../products/sale_mode/presentation/bloc/product_sale_mode/product_sale_mode_bloc.dart';
 import '../../bloc/possale/crate_pos_sale/create_pos_sale_bloc.dart';
 
 class MobileShortCreatePosSale extends StatefulWidget {
@@ -42,13 +38,16 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
   String selectedOverallDeliveryType = 'fixed';
   bool _isChecked = false;
 
-  // Sale Mode related
-  Map<int, ProductSaleModeModel?> _selectedSaleModes = {};
-  Map<int, List<ProductSaleModeModel>> _availableSaleModes = {};
-  Map<int, bool> _isLoadingSaleModes = {};
+  // Sale Mode related - Per product index
+  final Map<int, SaleMode?> _selectedSaleModes = {};
+  final Map<int, List<SaleMode>> _availableSaleModes = {};
+  final Map<int, bool> _isLoadingSaleModes = {};
 
   // Scroll controller for better UX
   final ScrollController _scrollController = ScrollController();
+
+  // Track disposed controllers to prevent reuse
+  final Set<int> _disposedProductIndexes = {};
 
   @override
   void initState() {
@@ -105,6 +104,13 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
   void dispose() {
     changeAmountController.dispose();
     _scrollController.dispose();
+
+    // Clear local state only, don't dispose controllers (bloc handles that)
+    _selectedSaleModes.clear();
+    _availableSaleModes.clear();
+    _isLoadingSaleModes.clear();
+    _disposedProductIndexes.clear();
+
     super.dispose();
   }
 
@@ -115,235 +121,243 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
   Map<int, Map<String, TextEditingController>> get controllers =>
       context.read<CreatePosSaleBloc>().controllers;
 
+  // Safe controller access methods
+  TextEditingController? getController(int index, String key) {
+    if (_disposedProductIndexes.contains(index)) return null;
+    return controllers[index]?[key];
+  }
+
+  void setControllerText(int index, String key, String value) {
+    if (_disposedProductIndexes.contains(index)) return;
+    final controller = controllers[index]?[key];
+    if (controller != null) {
+      controller.text = value;
+    }
+  }
+
+  String getControllerText(int index, String key) {
+    if (_disposedProductIndexes.contains(index)) return '';
+    final controller = controllers[index]?[key];
+    if (controller != null) {
+      return controller.text;
+    }
+    return '';
+  }
+
   void addProduct() {
     context.read<CreatePosSaleBloc>().addProduct();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _scrollController.animateTo(
-        _scrollController.position.maxScrollExtent,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOut,
-      );
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
     });
     setState(() {});
   }
 
   void removeProduct(int index) {
-    context.read<CreatePosSaleBloc>().removeProduct(index);
+    // Mark as disposed first
+    _disposedProductIndexes.add(index);
+
+    // Clean up local state
     _selectedSaleModes.remove(index);
     _availableSaleModes.remove(index);
     _isLoadingSaleModes.remove(index);
+
+    // Let the bloc handle controller disposal
+    context.read<CreatePosSaleBloc>().removeProduct(index);
+
     setState(() {});
   }
 
   // ==================== SALE MODE FUNCTIONS ====================
 
-  Future<void> _loadSaleModesForProduct(int index, int productId) async {
-    // Don't reload if already loading or loaded
-    if (_isLoadingSaleModes[index] == true ||
-        _availableSaleModes[index] != null) {
-      return;
-    }
+  void _loadSaleModesForProduct(int index, ProductModelStockModel product) {
+    if (_disposedProductIndexes.contains(index)) return;
+    if (_availableSaleModes.containsKey(index)) return;
 
-    log('🔄 Loading sale modes for product ID: $productId at index: $index');
+    log('🔄 Loading sale modes for product: ${product.name} at index: $index');
     setState(() => _isLoadingSaleModes[index] = true);
 
     try {
-      final productSaleModeBloc = context.read<ProductSaleModeBloc>();
+      List<SaleMode> activeConfigs = [];
 
-      // Clear any existing data first
-      productSaleModeBloc.productSaleModeModel.clear();
+      // Check if product has pre-configured sale modes in the JSON response
+      if (product.saleModes != null && product.saleModes!.isNotEmpty) {
+        log(
+          '✅ Product ${product.name} has ${product.saleModes!.length} pre-configured sale modes',
+        );
 
-      // Fetch product-specific sale mode configurations
-      productSaleModeBloc.add(
-        FetchProductSaleModeList(
-          context,
-          productId: productId.toString(),
-          pageNumber: 1,
-          filterText: '',
-        ),
-      );
+        // Get only active sale modes
+        activeConfigs = product.saleModes!
+            .where((mode) => mode.isActive == true)
+            .toList();
 
-      // Wait a bit for the state to update
-      await Future.delayed(Duration(milliseconds: 800));
+        log(
+          '✅ Product ${product.name}: Found ${activeConfigs.length} active sale modes',
+        );
 
-      // Get only ACTIVE configurations from the current state
-      final activeConfigs = productSaleModeBloc.productSaleModeModel
-          .where((config) => config.isActive == true)
-          .toList();
-
-      log(
-        '✅ Product $productId: Found ${activeConfigs.length} active sale mode configs',
-      );
-      log('✅ Configs: ${activeConfigs.map((c) => c.saleModeName).toList()}');
-
-      setState(() {
-        _availableSaleModes[index] = activeConfigs;
-        _isLoadingSaleModes[index] = false;
-
-        // If there's only one sale mode, auto-select it
-        if (activeConfigs.length == 1) {
-          _selectedSaleModes[index] = activeConfigs.first;
-          _calculatePriceWithSaleMode(index);
+        for (var mode in activeConfigs) {
+          log(
+            '   - Mode: ${mode.saleModeName}, Price: ${mode.unitPrice}, Discount: ${mode.discountValue}',
+          );
         }
-      });
+      } else {
+        log('ℹ️ No pre-configured sale modes for product ${product.name}');
+      }
+
+      if (!_disposedProductIndexes.contains(index)) {
+        setState(() {
+          _availableSaleModes[index] = activeConfigs;
+          _isLoadingSaleModes[index] = false;
+        });
+      }
     } catch (e) {
-      log('❌ Error loading sale modes for product $productId: $e');
-      setState(() {
-        _availableSaleModes[index] = [];
-        _isLoadingSaleModes[index] = false;
-      });
+      log('❌ Error loading sale modes for product ${product.name}: $e');
+      if (!_disposedProductIndexes.contains(index)) {
+        setState(() {
+          _availableSaleModes[index] = [];
+          _isLoadingSaleModes[index] = false;
+        });
+      }
     }
   }
 
-  void _onSaleModeChanged(int index, ProductSaleModeModel? saleMode) {
-    if (saleMode == null) {
-      // If sale mode is cleared, reset to regular pricing
-      setState(() => _selectedSaleModes.remove(index));
+  void _onSaleModeChanged(int index, SaleMode? saleMode) {
+    if (_disposedProductIndexes.contains(index)) return;
 
-      // Get the current product
+    setState(() {
+      _selectedSaleModes[index] = saleMode;
+    });
+
+    if (saleMode == null) {
+      // Reset to regular price
       final product = products[index]["product"] as ProductModelStockModel?;
       if (product != null) {
-        // Reset to regular selling price
         final sellingPrice = product.sellingPrice ?? 0.0;
-        controllers[index]?["price"]?.text = sellingPrice.toStringAsFixed(2);
+        setControllerText(index, "price", sellingPrice.toStringAsFixed(2));
         updateTotal(index);
       }
       return;
     }
 
-    setState(() => _selectedSaleModes[index] = saleMode);
-    _calculatePriceWithSaleMode(index);
-
-    showCustomToast(
-      context: context,
-      title: 'Sale Mode Selected!',
-      description: "${saleMode.saleModeName}",
-      icon: Icons.check_circle,
-      primaryColor: Colors.green,
-    );
+    // Apply sale mode pricing
+    _applySaleModePricing(index, saleMode);
   }
 
-  void _calculatePriceWithSaleMode(int index) {
-    final saleMode = _selectedSaleModes[index];
-    if (saleMode == null) {
-      updateTotal(index);
-      return;
+  void _applySaleModePricing(int index, SaleMode saleMode) {
+    if (_disposedProductIndexes.contains(index)) return;
+
+    final quantityStr = getControllerText(index, "quantity");
+    final quantity = int.tryParse(quantityStr) ?? 1;
+
+    double pricePerUnit = 0;
+
+    // Determine price based on sale mode type
+    if (saleMode.priceType?.toLowerCase() == 'flat' &&
+        saleMode.flatPrice != null) {
+      pricePerUnit = saleMode.flatPrice!;
+    } else if (saleMode.unitPrice != null) {
+      pricePerUnit = saleMode.unitPrice!;
+    } else {
+      // Fallback to regular selling price
+      final product = products[index]["product"] as ProductModelStockModel?;
+      pricePerUnit = product?.sellingPrice ?? 0.0;
     }
 
-    final quantityText = controllers[index]?["quantity"]?.text ?? "0";
-    final quantity = double.tryParse(quantityText) ?? 0;
-
-    double finalPrice = 0;
+    // Apply discount if available
+    double finalPrice = pricePerUnit;
     double discountAmount = 0;
 
-    // Calculate based on price type
-    switch (saleMode.priceType?.toLowerCase()) {
-      case 'unit':
-        if (saleMode.unitPrice != null) {
-          finalPrice = quantity * saleMode.unitPrice!;
-        }
-        break;
-      case 'flat':
-        if (saleMode.flatPrice != null) {
-          finalPrice = quantity * saleMode.flatPrice!;
-        }
-        break;
-      case 'tier':
-        finalPrice = _calculateTierPrice(quantity, saleMode);
-        break;
-      default:
-        finalPrice = quantity * (saleMode.unitPrice ?? 0);
-    }
-
-    // Apply discount
     if (saleMode.discountValue != null && saleMode.discountValue! > 0) {
       if (saleMode.discountType?.toLowerCase() == 'percentage' ||
           saleMode.discountType?.toLowerCase() == 'percent') {
-        discountAmount = finalPrice * (saleMode.discountValue! / 100);
+        discountAmount = pricePerUnit * (saleMode.discountValue! / 100);
+        finalPrice = pricePerUnit - discountAmount;
       } else {
         discountAmount = saleMode.discountValue!;
+        finalPrice = pricePerUnit - discountAmount;
       }
-      finalPrice -= discountAmount;
     }
 
-    // Update UI
-    final displayPrice = saleMode.flatPrice ?? saleMode.unitPrice ?? 0;
-    controllers[index]?["price"]?.text = displayPrice.toStringAsFixed(2);
-    controllers[index]?["total"]?.text = finalPrice.toStringAsFixed(2);
-
-    // Store data
-    products[index]["sale_mode_id"] = saleMode.saleModeId;
+    // Update UI and data using safe methods
+    setControllerText(index, "price", finalPrice.toStringAsFixed(2));
+    products[index]["sale_mode_id"] = saleMode.id;
     products[index]["sale_mode_name"] = saleMode.saleModeName;
-    products[index]["sale_mode_type"] = saleMode.priceType;
-    products[index]["discount_amount"] = discountAmount;
-    products[index]["discount_type"] = saleMode.discountType;
-    products[index]["discount_value"] = saleMode.discountValue;
-    products[index]["final_price"] = displayPrice;
-    products[index]["total"] = finalPrice;
+    products[index]["discount_amount"] = discountAmount * quantity;
+    products[index]["final_price"] = finalPrice;
 
-    setState(() {});
-  }
+    updateTotal(index);
 
-  double _calculateTierPrice(double quantity, ProductSaleModeModel saleMode) {
-    if (saleMode.tiers == null || saleMode.tiers!.isEmpty) {
-      return quantity * (saleMode.unitPrice ?? 0);
-    }
-
-    // Find matching tier
-    for (var tier in saleMode.tiers!) {
-      if (tier.minQuantity != null &&
-          quantity >= tier.minQuantity! &&
-          (tier.maxQuantity == null || quantity <= tier.maxQuantity!)) {
-        return quantity * (tier.price ?? (saleMode.unitPrice ?? 0));
-      }
-    }
-
-    // Use last tier
-    return quantity * (saleMode.tiers!.last.price ?? (saleMode.unitPrice ?? 0));
+    showCustomToast(
+      context: context,
+      title: 'Sale Mode Applied!',
+      description: "${saleMode.saleModeName} selected",
+      icon: Icons.check_circle,
+      primaryColor: Colors.green,
+    );
   }
 
   // ==================== CALCULATION METHODS ====================
 
   double calculateTotalForAllProducts() {
     double total = 0;
-    for (var product in products) {
+    for (int i = 0; i < products.length; i++) {
+      if (_disposedProductIndexes.contains(i)) continue;
+
+      final product = products[i];
       final totalValue = product["total"] ?? 0;
-      if (totalValue is int)
+      if (totalValue is int) {
         total += totalValue.toDouble();
-      else if (totalValue is String)
+      } else if (totalValue is String) {
         total += double.tryParse(totalValue) ?? 0;
-      else if (totalValue is double)
+      } else if (totalValue is double) {
         total += totalValue;
+      }
     }
     return total;
   }
 
   double calculateSpecificDiscountTotal() {
     double discount = 0;
-    for (var product in products) {
+    for (int i = 0; i < products.length; i++) {
+      if (_disposedProductIndexes.contains(i)) continue;
+
+      final product = products[i];
       final discountAmount = product["discount_amount"] ?? 0;
-      if (discountAmount is int)
+      if (discountAmount is int) {
         discount += discountAmount.toDouble();
-      else if (discountAmount is String)
+      } else if (discountAmount is String) {
         discount += double.tryParse(discountAmount) ?? 0;
-      else if (discountAmount is double)
+      } else if (discountAmount is double) {
         discount += discountAmount;
+      }
     }
     return discount;
   }
 
   double calculateTotalTicketForAllProducts() {
     double total = 0;
-    for (var product in products) {
+    for (int i = 0; i < products.length; i++) {
+      if (_disposedProductIndexes.contains(i)) continue;
+
+      final product = products[i];
       final price = product["final_price"] ?? 0;
       final quantity =
           double.tryParse(product["quantity"]?.toString() ?? "0") ?? 0;
-      if (price is int)
+      if (price is int) {
         total += price.toDouble() * quantity;
-      else if (price is String)
+      } else if (price is String)
+      {
         total += (double.tryParse(price) ?? 0) * quantity;
+      }
       else if (price is double)
-        total += price * quantity;
+       {
+         total += price * quantity;
+       }
     }
     return total;
   }
@@ -378,7 +392,6 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
 
   double calculateAllFinalTotal() {
     double subtotal = calculateTotalForAllProducts();
-    final bloc = context.read<CreatePosSaleBloc>();
 
     // Apply overall discount
     double overallDiscount = calculateDiscountTotal();
@@ -390,23 +403,17 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
   }
 
   void updateTotal(int index) {
-    if (_selectedSaleModes[index] != null) {
-      _calculatePriceWithSaleMode(index);
-      return;
-    }
+    if (_disposedProductIndexes.contains(index)) return;
 
-    // Regular calculation without sale mode
-    final price =
-        double.tryParse(controllers[index]?["price"]?.text ?? "0") ?? 0;
-    final quantity =
-        int.tryParse(controllers[index]?["quantity"]?.text ?? "0") ?? 0;
+    final priceStr = getControllerText(index, "price");
+    final quantityStr = getControllerText(index, "quantity");
+
+    final price = double.tryParse(priceStr) ?? 0;
+    final quantity = int.tryParse(quantityStr) ?? 0;
     final total = price * quantity;
 
-    controllers[index]?["total"]?.text = total.toStringAsFixed(2);
+    setControllerText(index, "total", total.toStringAsFixed(2));
     products[index]["total"] = total;
-    products[index]["discount_amount"] = 0;
-    products[index]["discount_type"] = null;
-    products[index]["discount_value"] = null;
 
     setState(() {});
   }
@@ -454,23 +461,23 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
       products[index]["product_name"] = newVal.name;
       products[index]["sale_mode_id"] = null;
       products[index]["sale_mode_name"] = null;
-      products[index]["sale_mode_type"] = null;
+      products[index]["discount_amount"] = 0;
 
-      // Set price
+      // Set price using safe method
       final sellingPrice = newVal.sellingPrice ?? 0.0;
-      controllers[index]!["price"]!.text = sellingPrice.toStringAsFixed(2);
+      setControllerText(index, "price", sellingPrice.toStringAsFixed(2));
       products[index]["final_price"] = sellingPrice;
 
-      // Set quantity
+      // Set quantity using safe method
       int initialQuantity = 1;
-      controllers[index]!["quantity"]!.text = initialQuantity.toString();
+      setControllerText(index, "quantity", initialQuantity.toString());
       products[index]["quantity"] = initialQuantity.toString();
 
       // Calculate initial total
       updateTotal(index);
 
-      // Load sale modes in background
-      _loadSaleModesForProduct(index, newVal.id!);
+      // Load sale modes from product data (no API call needed)
+      _loadSaleModesForProduct(index, newVal);
     });
   }
 
@@ -539,7 +546,7 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
           product["final_price"]?.toString() ?? "0",
         ),
         "discount": product["discount_amount"] ?? 0,
-        "discount_type": product["discount_type"] ?? "fixed",
+        "discount_type": "fixed",
         "sale_mode_id": saleModeId != null
             ? int.tryParse(saleModeId.toString())
             : null,
@@ -599,20 +606,7 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
     }
 
     bloc.add(AddPosSale(body: body));
-    log('📤 Sale submission body: ${json.encode(body)}');
-  }
-
-  Color _getPriceTypeColor(String? priceType) {
-    switch (priceType?.toLowerCase()) {
-      case 'unit':
-        return Colors.blue;
-      case 'flat':
-        return Colors.green;
-      case 'tier':
-        return Colors.purple;
-      default:
-        return Colors.grey;
-    }
+    log('📤 Sale submission body: $body');
   }
 
   // ==================== UI BUILDERS ====================
@@ -630,7 +624,7 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.refresh),
+            icon: const Icon(Icons.refresh),
             onPressed: () {
               // Reset form
               context.read<CreatePosSaleBloc>().products.clear();
@@ -638,6 +632,7 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
               _selectedSaleModes.clear();
               _availableSaleModes.clear();
               _isLoadingSaleModes.clear();
+              _disposedProductIndexes.clear();
               setState(() {});
             },
           ),
@@ -709,7 +704,7 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
                         AppButton(
                           onPressed: _validateAndSubmit,
                           name: 'Create Sale',
-                          icon: Icon(Icons.check_circle),
+                          icon: const Icon(Icons.check_circle),
                         ),
                         const SizedBox(height: 20),
                       ],
@@ -726,7 +721,7 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
 
   Widget _buildCustomerInfoSection(CreatePosSaleBloc bloc) {
     return Container(
-      padding: const EdgeInsets.all(0.0),
+      padding: const EdgeInsets.all(12.0),
       decoration: BoxDecoration(
         color: AppColors.bottomNavBg(context),
         borderRadius: BorderRadius.circular(8),
@@ -741,23 +736,13 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Icon(
-                Icons.person_outline,
-                color: AppColors.primaryColor(context),
-                size: 20,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                'Customer',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.text(context),
-                ),
-              ),
-            ],
+          Text(
+            'Customer Information',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: AppColors.text(context),
+            ),
           ),
           const SizedBox(height: 12),
           BlocBuilder<CustomerBloc, CustomerState>(
@@ -812,16 +797,45 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Products',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.text(context),
+                ),
+              ),
+              IconButton(
+                icon: Icon(
+                  Icons.add_circle_outline,
+                  color: AppColors.primaryColor(context),
+                ),
+                onPressed: addProduct,
+              ),
+            ],
+          ),
+
           ...products.asMap().entries.map((entry) {
             final index = entry.key;
             final productData = entry.value;
             final product = productData["product"] as ProductModelStockModel?;
-            final selectedSaleMode = _selectedSaleModes[index];
+
+            // Skip if this product index is disposed
+            if (_disposedProductIndexes.contains(index)) {
+              return const SizedBox.shrink();
+            }
 
             return Container(
-              margin: const EdgeInsets.only(bottom: 10),
-
-              decoration: BoxDecoration(color: AppColors.bottomNavBg(context)),
+              margin: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: AppColors.bottomNavBg(context),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.grey.shade300),
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -839,19 +853,13 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
                       ),
                       IconButton(
                         icon: Icon(
-                          index == 0
-                              ? Icons.add_circle_outline
-                              : Icons.remove_circle_outline,
-                          color: index == 0
-                              ? AppColors.primaryColor(context)
-                              : AppColors.errorColor(context),
+                          Icons.remove_circle_outline,
+                          color: AppColors.errorColor(context),
                           size: 20,
                         ),
                         padding: EdgeInsets.zero,
-                        constraints: BoxConstraints(),
-                        onPressed: index == 0
-                            ? addProduct
-                            : () => removeProduct(index),
+                        constraints: const BoxConstraints(),
+                        onPressed: () => removeProduct(index),
                       ),
                     ],
                   ),
@@ -869,7 +877,7 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
                           hint: selectedCategory.isEmpty
                               ? "Select Category"
                               : selectedCategory,
-                          isLabel: false,
+                          isLabel: true,
                           isSearch: true,
                           value: selectedCategory.isEmpty
                               ? null
@@ -890,8 +898,8 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
                                   matchingCategory.id?.toString() ?? "";
                               productData["product"] = null;
                               productData["product_id"] = null;
-                              controllers[index]!["price"]!.text = "0";
-                              controllers[index]!["quantity"]!.text = "1";
+                              setControllerText(index, "price", "0");
+                              setControllerText(index, "quantity", "1");
                               updateTotal(index);
                             });
                           },
@@ -901,68 +909,78 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
                   ),
 
                   // Product Dropdown
-                  BlocBuilder<ProductsBloc, ProductsState>(
-                    builder: (context, state) {
-                      final selectedCategoryId = categoriesBloc.selectedStateId;
-                      final selectedProductIds = products
-                          .where((p) => p["product_id"] != null)
-                          .map<int>((p) => p["product_id"])
-                          .toList();
+                  Row(
+                    children: [
+                      Expanded(
+                        flex: 3,
+                        child: BlocBuilder<ProductsBloc, ProductsState>(
+                          builder: (context, state) {
+                            final selectedCategoryId =
+                                categoriesBloc.selectedStateId;
+                            final selectedProductIds = products
+                                .where((p) => p["product_id"] != null)
+                                .map<int>((p) => p["product_id"])
+                                .toList();
 
-                      final filteredProducts = context
-                          .read<ProductsBloc>()
-                          .productList
-                          .where((item) {
-                            final categoryMatch = selectedCategoryId.isEmpty
-                                ? true
-                                : item.category?.toString() ==
-                                      selectedCategoryId;
-                            final notDuplicate =
-                                !selectedProductIds.contains(item.id) ||
-                                item.id == productData["product_id"];
-                            return categoryMatch && notDuplicate;
-                          })
-                          .toList();
+                            final filteredProducts = context
+                                .read<ProductsBloc>()
+                                .productList
+                                .where((item) {
+                                  final categoryMatch =
+                                      selectedCategoryId.isEmpty
+                                      ? true
+                                      : item.category?.toString() ==
+                                            selectedCategoryId;
+                                  final notDuplicate =
+                                      !selectedProductIds.contains(item.id) ||
+                                      item.id == productData["product_id"];
+                                  return categoryMatch && notDuplicate;
+                                })
+                                .toList();
 
-                      return Container(
-                        margin: const EdgeInsets.only(bottom: 8),
-                        child: AppDropdown<ProductModelStockModel>(
-                          isRequired: true,
-                          isLabel: false,
-                          isSearch: true,
-                          label: "Product *",
-                          hint: selectedCategoryId.isEmpty
-                              ? "Select Category First"
-                              : "Select Product",
-                          value: product,
-                          itemList: filteredProducts,
-                          onChanged: (newVal) =>
-                              onProductChanged(index, newVal),
-                          validator: (value) =>
-                              value == null ? 'Please select Product' : null,
+                            return Container(
+                              margin: const EdgeInsets.only(bottom: 8),
+                              child: AppDropdown<ProductModelStockModel>(
+                                isRequired: true,
+                                isLabel: true,
+                                isSearch: true,
+                                label: "Product *",
+                                hint: selectedCategoryId.isEmpty
+                                    ? "Select Category First"
+                                    : "Select Product",
+                                value: product,
+                                itemList: filteredProducts,
+                                onChanged: (newVal) =>
+                                    onProductChanged(index, newVal),
+                                validator: (value) => value == null
+                                    ? 'Please select Product'
+                                    : null,
+                              ),
+                            );
+                          },
                         ),
-                      );
-                    },
+                      ),
+                      if (product != null) SizedBox(width: 8),
+                      if (product != null)
+                        Expanded(
+                          flex: 2,
+
+                          child: _buildSaleModeDropdown(index, product),
+                        ),
+                    ],
                   ),
 
-                  // 🔥 SALE MODE DROPDOWN
-                  if (product != null)
-                    Container(
-                      margin: const EdgeInsets.only(bottom: 8),
-                      child: _buildSaleModeDropdown(index),
-                    ),
+                  // Sale Mode Dropdown - Show only if product is selected
 
                   // Price and Quantity Row
                   Row(
                     children: [
-                      // ================= PRICE =================
+                      // Price Input
                       Expanded(
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                          decoration: BoxDecoration(
-                            border: Border.all(color: Colors.grey.shade300),
-                            borderRadius: BorderRadius.circular(6),
-                            color: Colors.grey.shade50,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 6,
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -970,54 +988,61 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
                               Text(
                                 "Price",
                                 style: TextStyle(
-                                  fontSize: 11,
+                                  fontSize: 12,
                                   color: Colors.grey.shade600,
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
-                              const SizedBox(height: 2),
+                              const SizedBox(height: 4),
 
-                              TextField(
-                                controller: controllers[index]!["price"],
-                                keyboardType: TextInputType.number,
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                  color: AppColors.primaryColor(context),
+                              SizedBox(
+                                height: 32,
+                                child: TextField(
+                                  controller: getController(index, "price"),
+                                  keyboardType:
+                                      const TextInputType.numberWithOptions(
+                                        decimal: true,
+                                      ),
+                                  inputFormatters: [
+                                    FilteringTextInputFormatter.allow(
+                                      RegExp(r'^\d*\.?\d{0,2}$'),
+                                    ),
+                                  ],
+                                  decoration: InputDecoration(
+                                    hintText: "0.00",
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 10,
+                                      vertical: 0,
+                                    ),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(6),
+                                      borderSide: BorderSide(
+                                        color: AppColors.primaryColor(context),
+                                      ),
+                                    ),
+                                  ),
+                                  onChanged: (val) {
+                                    productData["price"] = val;
+                                    updateTotal(index);
+                                  },
                                 ),
-                                decoration: const InputDecoration(
-                                  isDense: true,
-                                  border: InputBorder.none,
-                                  contentPadding: EdgeInsets.zero,
-                                  prefixText: "৳",
-                                ),
-                                onChanged: (val) {
-                                  final price = double.tryParse(val) ?? 0.0;
-                                  productData["price"] = price;
-
-                                  // Recalculate total if needed
-                                  updateTotal(index);
-                                },
                               ),
                             ],
                           ),
                         ),
                       ),
 
-
                       const SizedBox(width: 8),
 
-                      // ================= QUANTITY =================
+                      // Quantity Controls
                       Expanded(
                         child: Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 10,
                             vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            border: Border.all(color: Colors.grey.shade300),
-                            borderRadius: BorderRadius.circular(6),
-                            color: Colors.white,
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -1025,139 +1050,132 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
                               Text(
                                 "Quantity *",
                                 style: TextStyle(
-                                  fontSize: 11,
+                                  fontSize: 12,
                                   color: Colors.grey.shade600,
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
-                              const SizedBox(height: 2),
+                              const SizedBox(height: 4),
 
                               Row(
                                 children: [
-                                  // ---------- MINUS ----------
+                                  // ➖ Minus Button
                                   Container(
-                                    width: 26,
-                                    height: 26,
+                                    width: 30,
+                                    height: 30,
                                     decoration: BoxDecoration(
                                       color: AppColors.primaryColor(
                                         context,
-                                      ).withOpacity(0.1),
-                                      borderRadius: BorderRadius.circular(5),
+                                      ).withValues(alpha: 0.1),
+                                      borderRadius: BorderRadius.circular(6),
                                     ),
                                     child: IconButton(
                                       padding: EdgeInsets.zero,
-                                      icon: Icon(
-                                        Icons.remove,
-                                        size: 14,
-                                        color: AppColors.primaryColor(context),
-                                      ),
+                                      icon: const Icon(Icons.remove, size: 16),
                                       onPressed: () {
                                         int q =
                                             int.tryParse(
-                                              controllers[index]!["quantity"]!
-                                                  .text,
+                                              getControllerText(
+                                                index,
+                                                "quantity",
+                                              ),
                                             ) ??
                                             1;
 
                                         if (q > 1) {
                                           q--;
-                                          controllers[index]!["quantity"]!
-                                              .text = q
-                                              .toString();
+                                          setControllerText(
+                                            index,
+                                            "quantity",
+                                            q.toString(),
+                                          );
                                           productData["quantity"] = q
                                               .toString();
-
-                                          if (_selectedSaleModes[index] !=
-                                              null) {
-                                            _calculatePriceWithSaleMode(index);
-                                          } else {
-                                            updateTotal(index);
-                                          }
-                                        }
-                                      },
-                                    ),
-                                  ),
-
-                                  // ---------- INPUT ----------
-                                  Expanded(
-                                    child: TextField(
-                                      controller:
-                                          controllers[index]!["quantity"],
-                                      keyboardType: TextInputType.number,
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w600,
-                                        color: AppColors.text(context),
-                                      ),
-                                      decoration: const InputDecoration(
-                                        isDense: true,
-                                        border: InputBorder.none,
-                                        contentPadding: EdgeInsets.zero,
-                                      ),
-                                      onChanged: (val) {
-                                        int q = int.tryParse(val) ?? 1;
-                                        if (q < 1) q = 1;
-
-                                        final stockQty = product?.stockQty ?? 0;
-                                        if (stockQty > 0 && q > stockQty) {
-                                          q = stockQty;
-                                          controllers[index]!["quantity"]!
-                                              .text = q
-                                              .toString();
-                                        }
-
-                                        productData["quantity"] = q.toString();
-
-                                        if (_selectedSaleModes[index] != null) {
-                                          _calculatePriceWithSaleMode(index);
-                                        } else {
                                           updateTotal(index);
                                         }
                                       },
                                     ),
                                   ),
 
-                                  // ---------- PLUS ----------
+                                  // ✍️ Quantity TextField
+                                  Expanded(
+                                    child: SizedBox(
+                                      height: 32,
+                                      child: TextField(
+                                        controller: getController(
+                                          index,
+                                          "quantity",
+                                        ),
+                                        keyboardType: TextInputType.number,
+                                        textAlign: TextAlign.center,
+                                        inputFormatters: [
+                                          FilteringTextInputFormatter
+                                              .digitsOnly,
+                                        ],
+                                        decoration: const InputDecoration(
+                                          isDense: true,
+                                          border: OutlineInputBorder(),
+                                          contentPadding: EdgeInsets.symmetric(
+                                            horizontal: 6,
+                                            vertical: 6,
+                                          ),
+                                        ),
+                                        onChanged: (val) {
+                                          int q = int.tryParse(val) ?? 1;
+
+                                          final stockQty =
+                                              product?.stockQty ?? 0;
+                                          if (stockQty > 0 && q > stockQty) {
+                                            q = stockQty;
+                                            setControllerText(
+                                              index,
+                                              "quantity",
+                                              q.toString(),
+                                            );
+                                          }
+
+                                          productData["quantity"] = q
+                                              .toString();
+                                          updateTotal(index);
+                                        },
+                                      ),
+                                    ),
+                                  ),
+
+                                  // ➕ Plus Button
                                   Container(
-                                    width: 60,
-                                    height: 26,
+                                    width: 30,
+                                    height: 30,
                                     decoration: BoxDecoration(
                                       color: AppColors.primaryColor(
                                         context,
-                                      ).withOpacity(0.1),
-                                      borderRadius: BorderRadius.circular(5),
+                                      ).withValues(alpha: 0.1),
+                                      borderRadius: BorderRadius.circular(6),
                                     ),
                                     child: IconButton(
                                       padding: EdgeInsets.zero,
-                                      icon: Icon(
-                                        Icons.add,
-                                        size: 14,
-                                        color: AppColors.primaryColor(context),
-                                      ),
+                                      icon: const Icon(Icons.add, size: 16),
                                       onPressed: () {
                                         int q =
                                             int.tryParse(
-                                              controllers[index]!["quantity"]!
-                                                  .text,
+                                              getControllerText(
+                                                index,
+                                                "quantity",
+                                              ),
                                             ) ??
                                             1;
 
                                         final stockQty = product?.stockQty ?? 0;
                                         if (stockQty == 0 || q < stockQty) {
                                           q++;
-                                          controllers[index]!["quantity"]!
-                                              .text = q
-                                              .toString();
+                                          setControllerText(
+                                            index,
+                                            "quantity",
+                                            q.toString(),
+                                          );
                                           productData["quantity"] = q
                                               .toString();
-
-                                          if (_selectedSaleModes[index] !=
-                                              null) {
-                                            _calculatePriceWithSaleMode(index);
-                                          } else {
-                                            updateTotal(index);
-                                          }
+                                          updateTotal(index);
                                         }
                                       },
                                     ),
@@ -1171,42 +1189,69 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
                     ],
                   ),
 
-                  // Price Summary (smaller)
-                  if (product != null)
-                    Container(
-                      margin: const EdgeInsets.only(top: 8),
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.green.withOpacity(0.05),
-                        borderRadius: BorderRadius.circular(6),
-                        border: Border.all(
-                          color: Colors.green.withOpacity(0.2),
-                        ),
-                      ),
-                      child: _buildPriceSummary(
-                        index,
-                        productData,
-                        selectedSaleMode,
+                  // Total Display
+                  Container(
+                    margin: const EdgeInsets.only(top: 8),
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.green.withValues(alpha: 0.05),
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(
+                        color: Colors.green.withValues(alpha: 0.2),
                       ),
                     ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Total:",
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey.shade800,
+                          ),
+                        ),
+                        Text(
+                          "৳${(double.tryParse(getControllerText(index, "total")) ?? 0).toStringAsFixed(2)}",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.green.shade700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             );
-          }).toList(),
+          }),
         ],
       ),
     );
   }
 
-  Widget _buildSaleModeDropdown(int index) {
+  Widget _buildSaleModeDropdown(int index, ProductModelStockModel product) {
     final isLoading = _isLoadingSaleModes[index] ?? false;
     final availableModes = _availableSaleModes[index] ?? [];
     final selectedMode = _selectedSaleModes[index];
 
+    // Debug log to see what's in the product
+    if (product.saleModes != null && product.saleModes!.isNotEmpty) {
+      log(
+        '🎯 Product ${product.name} has ${product.saleModes!.length} sale modes from API',
+      );
+      for (var mode in product.saleModes!) {
+        log(
+          '   - Mode: ${mode.saleModeName}, Active: ${mode.isActive}, Price: ${mode.unitPrice}',
+        );
+      }
+    }
+
     if (isLoading) {
       return Container(
-        height: 50,
-        padding: const EdgeInsets.all(10),
+        margin: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: Colors.blue.shade50,
           borderRadius: BorderRadius.circular(6),
@@ -1215,8 +1260,8 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
         child: Row(
           children: [
             SizedBox(
-              width: 18,
-              height: 18,
+              width: 20,
+              height: 20,
               child: CircularProgressIndicator(
                 strokeWidth: 2,
                 valueColor: AlwaysStoppedAnimation<Color>(
@@ -1224,16 +1269,10 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
                 ),
               ),
             ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                "Loading sale modes...",
-                style: TextStyle(
-                  fontSize: 13,
-                  color: Colors.blue.shade800,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
+            const SizedBox(width: 12),
+            Text(
+              "Loading sale modes...",
+              style: TextStyle(fontSize: 14, color: Colors.blue.shade800),
             ),
           ],
         ),
@@ -1242,8 +1281,8 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
 
     if (availableModes.isEmpty) {
       return Container(
-        height: 50,
-        padding: const EdgeInsets.all(10),
+        margin: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: Colors.orange.shade50,
           borderRadius: BorderRadius.circular(6),
@@ -1251,12 +1290,12 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
         ),
         child: Row(
           children: [
-            Icon(Icons.info_outline, size: 18, color: Colors.orange.shade700),
-            const SizedBox(width: 10),
+            Icon(Icons.info_outline, size: 20, color: Colors.orange.shade700),
+            const SizedBox(width: 12),
             Expanded(
               child: Text(
-                "No sale modes configured",
-                style: TextStyle(fontSize: 13, color: Colors.orange.shade800),
+                "No sale modes configured for this product",
+                style: TextStyle(fontSize: 14, color: Colors.orange.shade800),
               ),
             ),
           ],
@@ -1264,143 +1303,17 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
       );
     }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          "Sale Mode",
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-            color: AppColors.text(context),
-          ),
-        ),
-        const SizedBox(height: 4),
-        Container(
-          height: 50,
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey.shade300),
-            borderRadius: BorderRadius.circular(6),
-            color: Colors.white,
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<ProductSaleModeModel>(
-                isExpanded: true,
-                value: selectedMode,
-                hint: Text(
-                  'Select Sale Mode',
-                  style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
-                ),
-                items: [
-                  DropdownMenuItem<ProductSaleModeModel>(
-                    value: null,
-                    child: Text(
-                      'None (Regular Price)',
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Colors.grey.shade600,
-                      ),
-                    ),
-                  ),
-                  ...availableModes.map((mode) {
-                    return DropdownMenuItem<ProductSaleModeModel>(
-                      value: mode,
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.sell,
-                            size: 16,
-                            color: AppColors.primaryColor(context),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              mode.saleModeName ?? 'Unknown',
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 6,
-                              vertical: 1,
-                            ),
-                            decoration: BoxDecoration(
-                              color: _getPriceTypeColor(mode.priceType),
-                              borderRadius: BorderRadius.circular(3),
-                            ),
-                            child: Text(
-                              mode.priceType?.toUpperCase() ?? 'UNIT',
-                              style: TextStyle(
-                                fontSize: 9,
-                                color: Colors.white,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }).toList(),
-                ],
-                onChanged: (newVal) => _onSaleModeChanged(index, newVal),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPriceSummary(
-    int index,
-    Map<String, dynamic> productData,
-    ProductSaleModeModel? saleMode,
-  ) {
-    final total = double.tryParse(productData["total"]?.toString() ?? "0") ?? 0;
-    final discountAmount = productData["discount_amount"] ?? 0;
-    final saleModeName = productData["sale_mode_name"];
-
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "Item Total",
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: Colors.grey.shade800,
-              ),
-            ),
-            if (saleModeName != null)
-              Text(
-                saleModeName,
-                style: TextStyle(fontSize: 11, color: Colors.green.shade700),
-              ),
-            if (discountAmount > 0)
-              Text(
-                "Discount: -৳${discountAmount.toStringAsFixed(2)}",
-                style: TextStyle(fontSize: 11, color: Colors.red),
-              ),
-          ],
-        ),
-        Text(
-          "৳${total.toStringAsFixed(2)}",
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
-            color: Colors.green.shade700,
-          ),
-        ),
-      ],
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      child: AppDropdown<SaleMode>(
+        label: "Sale Mode (Optional)",
+        hint: selectedMode?.saleModeName ?? "Select Sale Mode",
+        isLabel: true,
+        isSearch: false,
+        value: selectedMode,
+        itemList: availableModes,
+        onChanged: (newVal) => _onSaleModeChanged(index, newVal),
+      ),
     );
   }
 
@@ -1478,48 +1391,72 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
       );
     }
 
-    return Column(
-      children: [
-        Row(
-          children: [
-            Expanded(
-              child: chargeField(
-                "Discount",
-                selectedOverallDiscountType,
-                context.read<CreatePosSaleBloc>().discountOverAllController,
-                (value) {
-                  setState(() {
-                    selectedOverallDiscountType = value;
-                    context
-                            .read<CreatePosSaleBloc>()
-                            .selectedOverallDiscountType =
-                        value;
-                  });
-                },
-              ),
+    return Container(
+      padding: const EdgeInsets.all(12.0),
+      decoration: BoxDecoration(
+        color: AppColors.bottomNavBg(context),
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Additional Charges',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: AppColors.text(context),
             ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: chargeField(
-                "Service",
-                selectedOverallServiceChargeType,
-                context
-                    .read<CreatePosSaleBloc>()
-                    .serviceChargeOverAllController,
-                (value) {
-                  setState(() {
-                    selectedOverallServiceChargeType = value;
-                    context
-                            .read<CreatePosSaleBloc>()
-                            .selectedOverallServiceChargeType =
-                        value;
-                  });
-                },
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: chargeField(
+                  "Discount",
+                  selectedOverallDiscountType,
+                  context.read<CreatePosSaleBloc>().discountOverAllController,
+                  (value) {
+                    setState(() {
+                      selectedOverallDiscountType = value;
+                      context
+                              .read<CreatePosSaleBloc>()
+                              .selectedOverallDiscountType =
+                          value;
+                    });
+                  },
+                ),
               ),
-            ),
-          ],
-        ),
-      ],
+              const SizedBox(width: 8),
+              Expanded(
+                child: chargeField(
+                  "Service",
+                  selectedOverallServiceChargeType,
+                  context
+                      .read<CreatePosSaleBloc>()
+                      .serviceChargeOverAllController,
+                  (value) {
+                    setState(() {
+                      selectedOverallServiceChargeType = value;
+                      context
+                              .read<CreatePosSaleBloc>()
+                              .selectedOverallServiceChargeType =
+                          value;
+                    });
+                  },
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -1534,11 +1471,11 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
     return Container(
       padding: const EdgeInsets.all(12.0),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.bottomNavBg(context),
         borderRadius: BorderRadius.circular(8),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -1547,23 +1484,13 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Icon(
-                Icons.summarize,
-                color: AppColors.primaryColor(context),
-                size: 20,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                'Summary & Payment',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.text(context),
-                ),
-              ),
-            ],
+          Text(
+            'Summary & Payment',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: AppColors.text(context),
+            ),
           ),
           const SizedBox(height: 12),
 

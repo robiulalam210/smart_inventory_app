@@ -27,7 +27,42 @@ class ProductSaleModeListSuccess extends ProductSaleModeState {
   @override
   List<Object> get props => [list, totalPages, currentPage];
 }
+// Combined state
+class ProductSaleModeLoaded extends ProductSaleModeState {
+  final List<ProductSaleModeModel> configuredModes;
+  final List<AvlibleSaleModeModel> availableModes;
+  final bool isLoadingConfigured;
+  final bool isLoadingAvailable;
+  final String configuredError;
+  final String availableError;
 
+  ProductSaleModeLoaded({
+    this.configuredModes = const [],
+    this.availableModes = const [],
+    this.isLoadingConfigured = false,
+    this.isLoadingAvailable = false,
+    this.configuredError = '',
+    this.availableError = '',
+  });
+
+  ProductSaleModeLoaded copyWith({
+    List<ProductSaleModeModel>? configuredModes,
+    List<AvlibleSaleModeModel>? availableModes,
+    bool? isLoadingConfigured,
+    bool? isLoadingAvailable,
+    String? configuredError,
+    String? availableError,
+  }) {
+    return ProductSaleModeLoaded(
+      configuredModes: configuredModes ?? this.configuredModes,
+      availableModes: availableModes ?? this.availableModes,
+      isLoadingConfigured: isLoadingConfigured ?? this.isLoadingConfigured,
+      isLoadingAvailable: isLoadingAvailable ?? this.isLoadingAvailable,
+      configuredError: configuredError ?? this.configuredError,
+      availableError: availableError ?? this.availableError,
+    );
+  }
+}
 class ProductSaleModeListFailed extends ProductSaleModeState {
   final String title;
   final String content;
