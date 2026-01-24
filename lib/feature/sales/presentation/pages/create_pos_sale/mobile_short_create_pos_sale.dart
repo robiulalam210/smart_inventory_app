@@ -1,4 +1,6 @@
+
 import 'dart:developer';
+
 import 'package:flutter/cupertino.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -8,7 +10,6 @@ import '../mobile_pos_sale_screen.dart';
 import '/core/core.dart';
 import '/feature/products/product/data/model/product_stock_model.dart';
 import '/feature/users_list/presentation/bloc/users/user_bloc.dart';
-
 import '../../../../accounts/data/model/account_active_model.dart';
 import '../../../../accounts/presentation/bloc/account/account_bloc.dart';
 import '../../../../customer/data/model/customer_active_model.dart';
@@ -37,6 +38,7 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
   String selectedOverallServiceChargeType = 'fixed';
   String selectedOverallDeliveryType = 'fixed';
   bool _isChecked = false;
+  bool _isWalkInCustomer = true; // Track customer type
 
   // Sale Mode related - Per product index
   final Map<int, SaleMode?> _selectedSaleModes = {};
@@ -232,6 +234,7 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
       }
     }
   }
+
   void _onSaleModeChanged(int index, SaleMode? saleMode) {
     if (_disposedProductIndexes.contains(index)) return;
 
@@ -404,8 +407,6 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
     return discount;
   }
 
-
-
   double calculateTotalForAllProducts() {
     double total = 0;
     for (int i = 0; i < products.length; i++) {
@@ -476,6 +477,20 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
     return discountValue;
   }
 
+  double calculateServiceChargeTotal() {
+    final bloc = context.read<CreatePosSaleBloc>();
+    final serviceText = bloc.serviceChargeOverAllController.text;
+    if (serviceText.isEmpty) return 0.0;
+
+    final serviceValue = double.tryParse(serviceText) ?? 0.0;
+    final subtotal = calculateTotalForAllProducts();
+
+    if (selectedOverallServiceChargeType == 'percent') {
+      return subtotal * (serviceValue / 100);
+    }
+    return serviceValue;
+  }
+
   double calculateDeliveryTotal() {
     final bloc = context.read<CreatePosSaleBloc>();
     final deliveryText = bloc.deliveryChargeOverAllController.text;
@@ -496,10 +511,13 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
     // Apply overall discount
     double overallDiscount = calculateDiscountTotal();
 
+    // Apply service charge
+    double serviceCharge = calculateServiceChargeTotal();
+
     // Apply delivery charge
     double deliveryCharge = calculateDeliveryTotal();
 
-    return (subtotal - overallDiscount) + deliveryCharge;
+    return (subtotal - overallDiscount) + serviceCharge + deliveryCharge;
   }
 
   void updateTotal(int index) {
@@ -514,6 +532,11 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
 
     setControllerText(index, "total", total.toStringAsFixed(2));
     products[index]["total"] = total;
+
+    // Auto-update payable amount for walk-in customer when money receipt is checked
+    if (_isWalkInCustomer && _isChecked) {
+      _updatePayableAmountForWalkIn();
+    }
 
     setState(() {});
   }
@@ -563,18 +586,10 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
       products[index]["sale_mode_name"] = null;
       products[index]["discount_amount"] = 0;
 
-      // Set price using safe method
-      final sellingPrice = newVal.sellingPrice ?? 0.0;
-      setControllerText(index, "price", sellingPrice.toStringAsFixed(2));
-      products[index]["final_price"] = sellingPrice;
-
-      // Set quantity using safe method
-      int initialQuantity = 1;
-      setControllerText(index, "quantity", initialQuantity.toString());
-      products[index]["quantity"] = initialQuantity.toString();
-
-      // Calculate initial total
-      updateTotal(index);
+      // Clear price and quantity fields
+      setControllerText(index, "price", "");
+      setControllerText(index, "quantity", "");
+      setControllerText(index, "total", "");
 
       // Load sale modes from product data (no API call needed)
       _loadSaleModesForProduct(index, newVal);
@@ -590,6 +605,21 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
     changeAmountController.text =
     change > 0 ? change.toStringAsFixed(2) : "0.00";
     setState(() {});
+  }
+
+  void _updatePayableAmountForWalkIn() {
+    if (!_isWalkInCustomer || !_isChecked) return;
+
+    final bloc = context.read<CreatePosSaleBloc>();
+    final netTotal = calculateAllFinalTotal();
+
+    // Only auto-update if the user hasn't manually changed it
+    // or if it's different from the calculated total
+    final currentPayable = double.tryParse(bloc.payableAmount.text) ?? 0;
+    if (currentPayable != netTotal) {
+      bloc.payableAmount.text = netTotal.toStringAsFixed(2);
+      _updateChangeAmount();
+    }
   }
 
   void _validateAndSubmit() {
@@ -616,12 +646,41 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
     }
 
     // Validate all products have been selected
-    for (var product in products) {
+    for (int i = 0; i < products.length; i++) {
+      if (_disposedProductIndexes.contains(i)) continue;
+
+      final product = products[i];
       if (product["product_id"] == null) {
         showCustomToast(
           context: context,
           title: 'Validation Error',
           description: "Please select product for all items",
+          icon: Icons.error,
+          primaryColor: Colors.red,
+        );
+        return;
+      }
+
+      // Validate product price and quantity are entered
+      final price = getControllerText(i, "price");
+      final quantity = getControllerText(i, "quantity");
+
+      if (price.isEmpty || double.tryParse(price) == 0) {
+        showCustomToast(
+          context: context,
+          title: 'Validation Error',
+          description: "Please enter price for item ${i + 1}",
+          icon: Icons.error,
+          primaryColor: Colors.red,
+        );
+        return;
+      }
+
+      if (quantity.isEmpty || int.tryParse(quantity) == 0) {
+        showCustomToast(
+          context: context,
+          title: 'Validation Error',
+          description: "Please enter quantity for item ${i + 1}",
           icon: Icons.error,
           primaryColor: Colors.red,
         );
@@ -795,13 +854,26 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
 
                         // Summary & Payment Section
                         _buildSummarySection(bloc, isWalkInCustomer),
-                        const SizedBox(height: 8),
 
                         // Submit Button
-                        AppButton(
-                          onPressed: _validateAndSubmit,
-                          name: 'Create Sale',
-                          icon: const Icon(Icons.check_circle),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            AppButton(
+                              size: 100,
+                              isOutlined: true,
+                              onPressed: () {
+                                // Cancel button - go back or clear form
+                                AppRoutes.pop(context);
+                              },
+                              name: 'Cancel',
+                            ),
+                            AppButton(
+                              size: 100,
+                              onPressed: _validateAndSubmit,
+                              name: 'Create Sale',
+                            ),
+                          ],
                         ),
                         const SizedBox(height: 20),
                       ],
@@ -818,7 +890,7 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
 
   Widget _buildCustomerInfoSection(CreatePosSaleBloc bloc) {
     return Container(
-      padding: const EdgeInsets.all(12.0),
+      padding: const EdgeInsets.all(0.0),
       decoration: BoxDecoration(
         color: AppColors.bottomNavBg(context),
         borderRadius: BorderRadius.circular(8),
@@ -855,19 +927,33 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
                   ...context.read<CustomerBloc>().activeCustomer,
                 ],
                 onChanged: (newVal) {
-                  bloc.selectClintModel = newVal;
-                  bloc.customType =
-                  (newVal?.id == -1) ? "Walking Customer" : "Saved Customer";
-                  if (newVal?.id == -1) {
-                    _isChecked = true;
-                    bloc.isChecked = true;
-                    Future.delayed(const Duration(milliseconds: 100), () {
-                      final netTotal = calculateAllFinalTotal();
-                      bloc.payableAmount.text = netTotal.toStringAsFixed(2);
-                      _updateChangeAmount();
-                    });
-                  }
-                  setState(() {});
+                  setState(() {
+                    bloc.selectClintModel = newVal;
+                    bloc.customType =
+                    (newVal?.id == -1) ? "Walking Customer" : "Saved Customer";
+                    _isWalkInCustomer = newVal?.id == -1;
+
+                    if (newVal?.id == -1) {
+                      // Walk-in customer: auto-check money receipt
+                      _isChecked = true;
+                      bloc.isChecked = true;
+
+                      // Auto-fill payable amount with exact total (read-only)
+                      Future.delayed(const Duration(milliseconds: 100), () {
+                        final netTotal = calculateAllFinalTotal();
+                        bloc.payableAmount.text = netTotal.toStringAsFixed(2);
+                        _updateChangeAmount();
+                      });
+                    } else {
+                      // Saved customer: uncheck money receipt by default
+                      _isChecked = false;
+                      bloc.isChecked = false;
+
+                      // Clear payable amount for saved customer (editable)
+                      bloc.payableAmount.clear();
+                      changeAmountController.clear();
+                    }
+                  });
                 },
                 validator: (value) =>
                 value == null ? 'Please select Customer' : null,
@@ -881,7 +967,7 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
 
   Widget _buildProductsSection(CreatePosSaleBloc bloc) {
     return Container(
-      padding: const EdgeInsets.all(12.0),
+      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8),
       decoration: BoxDecoration(
         color: AppColors.bottomNavBg(context),
         borderRadius: BorderRadius.circular(8),
@@ -904,16 +990,17 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
                   color: AppColors.text(context),
                 ),
               ),
-              IconButton(
-                icon: Icon(
+              InkWell(
+                onTap: addProduct,
+                child: Icon(
                   Icons.add_circle_outline,
                   color: AppColors.primaryColor(context),
                 ),
-                onPressed: addProduct,
               ),
             ],
           ),
 
+          gapH8,
           ...products.asMap().entries.map((entry) {
             final index = entry.key;
             final productData = entry.value;
@@ -925,7 +1012,7 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
             }
 
             return Container(
-              margin: const EdgeInsets.only(bottom: 12),
+              margin: const EdgeInsets.only(bottom: 8),
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
                 color: AppColors.bottomNavBg(context),
@@ -967,13 +1054,13 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
                       final selectedCategory = categoriesBloc.selectedState;
 
                       return Container(
-                        margin: const EdgeInsets.only(bottom: 8),
+                        margin: const EdgeInsets.only(bottom: 6),
                         child: AppDropdown(
                           label: "Category",
                           hint: "Select Category",
                           isLabel: true,
                           isSearch: true,
-                          value: selectedCategory.isEmpty ? null : selectedCategory,
+                          value: selectedCategory,
                           itemList:
                           categoryList.map((e) => e.name ?? "").toList(),
                           onChanged: (newVal) {
@@ -988,9 +1075,9 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
                                   matchingCategory.id?.toString() ?? "";
                               productData["product"] = null;
                               productData["product_id"] = null;
-                              setControllerText(index, "price", "0");
-                              setControllerText(index, "quantity", "1");
-                              updateTotal(index);
+                              setControllerText(index, "price", "");
+                              setControllerText(index, "quantity", "");
+                              setControllerText(index, "total", "");
                             });
                           },
                         ),
@@ -1032,7 +1119,7 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
                                 isRequired: true,
                                 isLabel: true,
                                 isSearch: true,
-                                label: "Product *",
+                                label: "Product",
                                 hint: selectedCategoryId.isEmpty
                                     ? "Select Category First"
                                     : "Select Product",
@@ -1070,7 +1157,7 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                "Price",
+                                "Price *",
                                 style: TextStyle(
                                   fontSize: 12,
                                   color: Colors.grey.shade600,
@@ -1081,7 +1168,7 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
 
                               SizedBox(
                                 height: 32,
-                                child: TextField(
+                                child: TextFormField(
                                   controller: getController(index, "price"),
                                   keyboardType:
                                   const TextInputType.numberWithOptions(
@@ -1111,6 +1198,19 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
                                   onChanged: (val) {
                                     productData["price"] = val;
                                     updateTotal(index);
+                                  },
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'Please enter price';
+                                    }
+                                    final price = double.tryParse(value);
+                                    if (price == null) {
+                                      return 'Enter valid price';
+                                    }
+                                    if (price <= 0) {
+                                      return 'Price must be greater than 0';
+                                    }
+                                    return null;
                                   },
                                 ),
                               ),
@@ -1183,7 +1283,7 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
                                   Expanded(
                                     child: SizedBox(
                                       height: 32,
-                                      child: TextField(
+                                      child: TextFormField(
                                         controller:
                                         getController(index, "quantity"),
                                         keyboardType: TextInputType.number,
@@ -1219,6 +1319,19 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
                                           } else {
                                             updateTotal(index);
                                           }
+                                        },
+                                        validator: (value) {
+                                          if (value == null || value.isEmpty) {
+                                            return 'Enter quantity';
+                                          }
+                                          final qty = int.tryParse(value);
+                                          if (qty == null) {
+                                            return 'Enter valid number';
+                                          }
+                                          if (qty <= 0) {
+                                            return 'Quantity must be > 0';
+                                          }
+                                          return null;
                                         },
                                       ),
                                     ),
@@ -1330,7 +1443,7 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
 
     if (isLoading) {
       return Container(
-        margin: const EdgeInsets.only(bottom: 8),
+        margin: const EdgeInsets.only(bottom: 6),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: Colors.blue.shade50,
@@ -1360,27 +1473,7 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
     }
 
     if (availableModes.isEmpty) {
-      return Container(
-        margin: const EdgeInsets.only(bottom: 8),
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Colors.orange.shade50,
-          borderRadius: BorderRadius.circular(6),
-          border: Border.all(color: Colors.orange.shade100),
-        ),
-        child: Row(
-          children: [
-            Icon(Icons.info_outline, size: 20, color: Colors.orange.shade700),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                "No sale modes configured for this product",
-                style: TextStyle(fontSize: 14, color: Colors.orange.shade800),
-              ),
-            ),
-          ],
-        ),
-      );
+      return SizedBox.shrink();
     }
 
     return Container(
@@ -1472,7 +1565,7 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
     }
 
     return Container(
-      padding: const EdgeInsets.all(12.0),
+      padding: const EdgeInsets.all(8.0),
       decoration: BoxDecoration(
         color: AppColors.bottomNavBg(context),
         borderRadius: BorderRadius.circular(8),
@@ -1495,7 +1588,7 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
               color: AppColors.text(context),
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 6),
           Row(
             children: [
               Expanded(
@@ -1545,11 +1638,12 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
     final subTotal = calculateTotalForAllProducts();
     final specificDiscount = calculateSpecificDiscountTotal();
     final overallDiscount = calculateDiscountTotal();
+    final serviceCharge = calculateServiceChargeTotal();
     final deliveryCharge = calculateDeliveryTotal();
     final netTotal = calculateAllFinalTotal();
 
     return Container(
-      padding: const EdgeInsets.all(12.0),
+      padding: const EdgeInsets.all(8.0),
       decoration: BoxDecoration(
         color: AppColors.bottomNavBg(context),
         borderRadius: BorderRadius.circular(8),
@@ -1572,11 +1666,11 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
               color: AppColors.text(context),
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 6),
 
           // Customer type info
           Container(
-            padding: const EdgeInsets.all(10),
+            padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
               color: isWalkInCustomer
                   ? Colors.orange.shade50
@@ -1613,14 +1707,14 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
               ],
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
 
           // Summary
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(6),
-              color: Colors.grey.shade50,
+              color: AppColors.greyColor(context).withValues(alpha: 0.1),
             ),
             child: Column(
               children: [
@@ -1630,9 +1724,11 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
                 _buildSummaryRow("Sub Total:", subTotal),
                 if (overallDiscount > 0)
                   _buildSummaryRow("Overall Discount (-):", overallDiscount),
+                if (serviceCharge > 0)
+                  _buildSummaryRow("Service Charge (+):", serviceCharge),
                 if (deliveryCharge > 0)
                   _buildSummaryRow("Delivery Charge (+):", deliveryCharge),
-                const Divider(height: 16),
+                const Divider(height: 8),
                 _buildSummaryRow("NET TOTAL:", netTotal, isBold: true),
               ],
             ),
@@ -1651,18 +1747,6 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
       bool isWalkInCustomer,
       double netTotal,
       ) {
-    void recalculateAndAutoFill() {
-      final bloc = context.read<CreatePosSaleBloc>();
-      final selectedCustomer = bloc.selectClintModel;
-
-      if (selectedCustomer?.id == -1) {
-        // Only auto-fill for walk-in customer
-        final netTotal = calculateAllFinalTotal();
-        bloc.payableAmount.text = netTotal.toStringAsFixed(2);
-        _updateChangeAmount();
-      }
-    }
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1674,7 +1758,6 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
             color: AppColors.text(context),
           ),
         ),
-        const SizedBox(height: 8),
 
         CheckboxListTile(
           contentPadding: EdgeInsets.zero,
@@ -1687,13 +1770,60 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
             setState(() {
               _isChecked = newValue ?? false;
               bloc.isChecked = _isChecked;
+
+              if (isWalkInCustomer && _isChecked) {
+                // Walk-in with money receipt: auto-fill exact amount (read-only)
+                Future.delayed(const Duration(milliseconds: 50), () {
+                  final netTotal = calculateAllFinalTotal();
+                  bloc.payableAmount.text = netTotal.toStringAsFixed(2);
+                  _updateChangeAmount();
+                });
+              } else if (!isWalkInCustomer && _isChecked) {
+                // Saved customer with money receipt: auto-fill with net total (editable)
+                Future.delayed(const Duration(milliseconds: 50), () {
+                  final netTotal = calculateAllFinalTotal();
+                  bloc.payableAmount.text = netTotal.toStringAsFixed(2);
+                  _updateChangeAmount();
+                });
+              } else if (!_isChecked) {
+                // Money receipt unchecked for both: clear fields
+                bloc.payableAmount.clear();
+                changeAmountController.clear();
+              }
             });
           },
           controlAffinity: ListTileControlAffinity.leading,
         ),
 
+        // Add a note about payment options
+        if (!isWalkInCustomer && !_isChecked)
+          Container(
+            padding: const EdgeInsets.all(8),
+            margin: const EdgeInsets.only(bottom: 8),
+            decoration: BoxDecoration(
+              color: Colors.blue.shade50,
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(color: Colors.blue.shade200),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.info, color: Colors.blue.shade700, size: 18),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    "Without money receipt: No payment tracking",
+                    style: TextStyle(
+                      color: Colors.blue.shade800,
+                      fontSize: 13,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
         if (_isChecked) ...[
-          const SizedBox(height: 8),
+          const SizedBox(height: 4),
           Row(
             children: [
               Expanded(
@@ -1762,15 +1892,15 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 10),
 
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
                 child: CustomInputField(
                   controller: changeAmountController,
-                  hintText:
-                  isWalkInCustomer ? 'Change (0.00)' : 'Change Amount',
+                  hintText: 'Change Amount',
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
                   ),
@@ -1784,10 +1914,13 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
                   children: [
                     CustomInputField(
                       controller: bloc.payableAmount,
-                      hintText: 'Payable Amount *',
+                      hintText: isWalkInCustomer
+                          ? 'Payable Amount (Exact)'
+                          : 'Payable Amount *',
                       keyboardType: const TextInputType.numberWithOptions(
                         decimal: true,
                       ),
+                      readOnly: isWalkInCustomer && _isChecked, // Read-only for walk-in
                       validator: (value) {
                         if (value!.isEmpty) {
                           return 'Please enter Payable Amount';
@@ -1801,34 +1934,90 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
                         }
 
                         // Walk-in customer validation
-                        if (isWalkInCustomer && numericValue != netTotal) {
-                          return 'Must pay exact: ${netTotal.toStringAsFixed(2)}';
+                        if (isWalkInCustomer) {
+                          final netTotal = calculateAllFinalTotal();
+                          if (numericValue != netTotal) {
+                            return 'Must pay exact amount: ৳${netTotal.toStringAsFixed(2)}';
+                          }
                         }
 
                         return null;
                       },
                       onChanged: (value) {
                         _updateChangeAmount();
-                        recalculateAndAutoFill();
                         setState(() {});
                       },
                     ),
-                    if (isWalkInCustomer)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 4, left: 4),
-                        child: Text(
-                          "Walk-in: Pay exact amount only",
-                          style: TextStyle(
-                            color: Colors.orange[700],
-                            fontSize: 11,
-                          ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 2, left: 4),
+                      child: Text(
+                        isWalkInCustomer
+                            ? "Walk-in: Pay exact total (auto-filled)"
+                            : "Saved: Enter due or advance amount",
+                        style: TextStyle(
+                          color: isWalkInCustomer
+                              ? Colors.orange[700]
+                              : Colors.green[700],
+                          fontSize: 11,
                         ),
                       ),
+                    ),
                   ],
                 ),
               ),
             ],
           ),
+
+          // Display due/advance amount for saved customer
+          if (!isWalkInCustomer && bloc.payableAmount.text.isNotEmpty)
+            FutureBuilder<double>(
+              future: Future.value(calculateAllFinalTotal()),
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  final netTotal = snapshot.data!;
+                  final payable = double.tryParse(bloc.payableAmount.text) ?? 0;
+                  final difference = payable - netTotal;
+
+                  if (difference != 0) {
+                    return Container(
+                      margin: const EdgeInsets.only(top: 8),
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: difference > 0
+                            ? Colors.green.shade50
+                            : Colors.blue.shade50,
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(
+                          color: difference > 0
+                              ? Colors.green.shade200
+                              : Colors.blue.shade200,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            difference > 0 ? Icons.arrow_upward : Icons.arrow_downward,
+                            color: difference > 0 ? Colors.green : Colors.blue,
+                            size: 16,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            difference > 0
+                                ? "Advance Payment: ৳${difference.abs().toStringAsFixed(2)}"
+                                : "Due Amount: ৳${difference.abs().toStringAsFixed(2)}",
+                            style: TextStyle(
+                              color: difference > 0 ? Colors.green.shade800 : Colors.blue.shade800,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+                }
+                return const SizedBox.shrink();
+              },
+            ),
         ],
 
         const SizedBox(height: 8),
@@ -1875,4 +2064,3 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
     );
   }
 }
-
