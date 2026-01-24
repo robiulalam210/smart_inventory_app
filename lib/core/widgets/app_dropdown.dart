@@ -373,6 +373,7 @@ class AppDropdown<T> extends FormField<T> {
     T? value,
     required this.itemList,
     required this.onChanged,
+     this.onClear,
     String Function(T)? itemLabel,
     super.validator,
   }) : super(
@@ -421,8 +422,14 @@ class AppDropdown<T> extends FormField<T> {
 
       void handleClear() {
         state.didChange(null);
+
+        if (onClear != null) {
+          onClear!(null);
+        }
+
         onChanged(null);
       }
+
 
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -516,6 +523,7 @@ class AppDropdown<T> extends FormField<T> {
   final T? allItem;
   final List<T> itemList;
   final void Function(T?) onChanged;
+  final void Function(T?)? onClear;
 }
 
 class _DropdownBottomSheet<T> extends StatefulWidget {

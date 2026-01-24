@@ -75,8 +75,10 @@ class MobileTabSidebar extends StatelessWidget {
               MenuItem(title: "Sale", index: 1),
             if (permissions?.sales?.create == true)
               MenuItem(title: "Pos Sale", index: 2),
+            if (permissions?.sales?.create == true)
+              MenuItem(title: "Short Sale", index: 3),
             if (permissions?.sales?.view == true)
-              MenuItem(title: "Sale List", index: 3),
+              MenuItem(title: "Sale List", index: 4),
           ],
         ),
       );
@@ -89,9 +91,9 @@ class MobileTabSidebar extends StatelessWidget {
           title: "Money Receipt",
           items: [
             if (permissions?.moneyReceipt?.create == true)
-              MenuItem(title: "Create Money Receipt", index: 4),
+              MenuItem(title: "Create Money Receipt", index: 5),
             if (permissions?.moneyReceipt?.view == true)
-              MenuItem(title: "Money Receipt", index: 5),
+              MenuItem(title: "Money Receipt", index: 6),
           ],
         ),
       );
@@ -104,9 +106,9 @@ class MobileTabSidebar extends StatelessWidget {
           title: "Purchase",
           items: [
             if (permissions?.purchases?.create == true)
-              MenuItem(title: "Create Purchase", index: 6),
+              MenuItem(title: "Create Purchase", index: 7),
             if (permissions?.purchases?.view == true)
-              MenuItem(title: "Purchase List", index: 7),
+              MenuItem(title: "Purchase List", index: 8),
           ],
         ),
       );
@@ -117,7 +119,7 @@ class MobileTabSidebar extends StatelessWidget {
       sections.add(
         MenuSection(
           title: "Products",
-          items: [MenuItem(title: "Product", index: 8)],
+          items: [MenuItem(title: "Product", index: 9)],
         ),
       );
     }
@@ -127,7 +129,7 @@ class MobileTabSidebar extends StatelessWidget {
       sections.add(
         MenuSection(
           title: "Accounts",
-          items: [MenuItem(title: "Accounts", index: 9)],
+          items: [MenuItem(title: "Accounts", index: 10)],
         ),
       );
     }
@@ -137,7 +139,7 @@ class MobileTabSidebar extends StatelessWidget {
       sections.add(
         MenuSection(
           title: "Customers",
-          items: [MenuItem(title: "Customer", index: 10)],
+          items: [MenuItem(title: "Customer", index: 11)],
         ),
       );
     }
@@ -149,9 +151,9 @@ class MobileTabSidebar extends StatelessWidget {
           title: "Supplier",
           items: [
             if (permissions?.suppliers?.view == true)
-              MenuItem(title: "Supplier List", index: 11),
+              MenuItem(title: "Supplier List", index: 12),
             if (permissions?.suppliers?.view == true)
-              MenuItem(title: "Supplier Payment", index: 12),
+              MenuItem(title: "Supplier Payment", index: 13),
           ],
         ),
       );
@@ -164,11 +166,11 @@ class MobileTabSidebar extends StatelessWidget {
           title: "Expense",
           items: [
             if (permissions?.expense?.view == true)
-              MenuItem(title: "Expense List", index: 13),
+              MenuItem(title: "Expense List", index: 14),
             if (permissions?.expense?.view == true)
-              MenuItem(title: "Expense Head", index: 14),
+              MenuItem(title: "Expense Head", index: 15),
             if (permissions?.expense?.view == true)
-              MenuItem(title: "Expense Sub Head", index: 15),
+              MenuItem(title: "Expense Sub Head", index: 16),
           ],
         ),
       );
@@ -181,11 +183,11 @@ class MobileTabSidebar extends StatelessWidget {
           title: "Return",
           items: [
             if (permissions?.permissionsReturn?.view == true)
-              MenuItem(title: "Sales Return", index: 16),
+              MenuItem(title: "Sales Return", index: 17),
             if (permissions?.permissionsReturn?.view == true)
-              MenuItem(title: "Bad Stock List", index: 17),
+              MenuItem(title: "Bad Stock List", index: 18),
             if (permissions?.permissionsReturn?.view == true)
-              MenuItem(title: "Purchase Return", index: 18),
+              MenuItem(title: "Purchase Return", index: 19),
           ],
         ),
       );
@@ -198,29 +200,29 @@ class MobileTabSidebar extends StatelessWidget {
           title: "Reports",
           items: [
             if (permissions?.reports?.view == true)
-              MenuItem(title: "Sales Report", index: 19),
+              MenuItem(title: "Sales Report", index: 20),
             if (permissions?.reports?.view == true)
-              MenuItem(title: "Purchase Report", index: 20),
+              MenuItem(title: "Purchase Report", index: 21),
             if (permissions?.reports?.view == true)
-              MenuItem(title: "Profit/Loss Report", index: 21),
+              MenuItem(title: "Profit/Loss Report", index: 22),
             if (permissions?.reports?.view == true)
-              MenuItem(title: "Top Sale Product Report", index: 22),
+              MenuItem(title: "Top Sale Product Report", index: 23),
             if (permissions?.reports?.view == true)
-              MenuItem(title: "Low Stock Product Report", index: 23),
+              MenuItem(title: "Low Stock Product Report", index: 24),
             if (permissions?.reports?.view == true)
-              MenuItem(title: "Stock Product Report", index: 24),
+              MenuItem(title: "Stock Product Report", index: 25),
             if (permissions?.reports?.view == true)
-              MenuItem(title: "Customer Ledger", index: 25),
+              MenuItem(title: "Customer Ledger", index: 26),
             if (permissions?.reports?.view == true)
-              MenuItem(title: "Customer Due/Advance Report", index: 26),
+              MenuItem(title: "Customer Due/Advance Report", index: 27),
             if (permissions?.reports?.view == true)
-              MenuItem(title: "Supplier Ledger", index: 27),
+              MenuItem(title: "Supplier Ledger", index: 28),
             if (permissions?.reports?.view == true)
-              MenuItem(title: "Supplier Due/Advance Report", index: 28),
+              MenuItem(title: "Supplier Due/Advance Report", index: 29),
             if (permissions?.reports?.view == true)
-              MenuItem(title: "Expense Report", index: 29),
+              MenuItem(title: "Expense Report", index: 30),
             if (permissions?.reports?.view == true)
-              MenuItem(title: "Bad Stock Report", index: 30),
+              MenuItem(title: "Bad Stock Report", index: 31),
           ],
         ),
       );
@@ -233,14 +235,13 @@ class MobileTabSidebar extends StatelessWidget {
           title: "Administration",
           items: [
             if (permissions?.users?.view == true)
-              MenuItem(title: "Staff", index: 31),
-            MenuItem(title: "Source", index: 32),
-            MenuItem(title: "Unit", index: 33),
-            MenuItem(title: "Brand", index: 34),
-            MenuItem(title: "Category", index: 35),
-            MenuItem(title: "Group", index: 36),
-            MenuItem(title: "Sale Mode", index: 37),
-            MenuItem(title: "Product Sale Mode", index: 38),
+              MenuItem(title: "Staff", index: 32),
+            MenuItem(title: "Source", index: 33),
+            MenuItem(title: "Unit", index: 34),
+            MenuItem(title: "Brand", index: 35),
+            MenuItem(title: "Category", index: 36),
+            MenuItem(title: "Group", index: 37),
+            MenuItem(title: "Sale Mode", index: 38),
             MenuItem(title: "Profile", index: 39),
           ],
         ),
@@ -379,7 +380,7 @@ class MobileTabSidebar extends StatelessWidget {
                           // Multiple items (with expansion)
                           return ExpansionTile(
                             initiallyExpanded: section.items.any(
-                              (item) => currentIndex == item.index,
+                                  (item) => currentIndex == item.index,
                             ),
                             title: Text(
                               section.title,
@@ -441,10 +442,10 @@ class MobileTabSidebar extends StatelessWidget {
   }
 
   void _handleMenuSelection(
-    int index,
-    BuildContext context,
-    Permissions? permissions,
-  ) {
+      int index,
+      BuildContext context,
+      Permissions? permissions,
+      ) {
     // Check permissions before navigation
     switch (index) {
       case 0: // Dashboard
@@ -463,14 +464,15 @@ class MobileTabSidebar extends StatelessWidget {
         AppRoutes.push(context, MobileCreatePosSale());
         break;
 
-      // case 2: // Pos Sale
-      //   if (permissions?.sales?.create != true) {
-      //     _showPermissionDeniedDialog(context);
-      //     return;
-      //   }
-      //   AppRoutes.push(context, MobileSalesScreen());
-      //   break;
       case 2: // Pos Sale
+        if (permissions?.sales?.create != true) {
+          _showPermissionDeniedDialog(context);
+          return;
+        }
+        AppRoutes.push(context, MobileSalesScreen());
+        break;
+
+      case 3: // Short Sale
         if (permissions?.sales?.create != true) {
           _showPermissionDeniedDialog(context);
           return;
@@ -478,7 +480,7 @@ class MobileTabSidebar extends StatelessWidget {
         AppRoutes.push(context, MobileShortCreatePosSale());
         break;
 
-      case 3: // Sale List
+      case 4: // Sale List
         if (permissions?.sales?.view != true) {
           _showPermissionDeniedDialog(context);
           return;
@@ -486,7 +488,7 @@ class MobileTabSidebar extends StatelessWidget {
         AppRoutes.push(context, MobilePosSaleScreen());
         break;
 
-      case 4: // Create Money Receipt
+      case 5: // Create Money Receipt
         if (permissions?.moneyReceipt?.create != true) {
           _showPermissionDeniedDialog(context);
           return;
@@ -494,7 +496,7 @@ class MobileTabSidebar extends StatelessWidget {
         AppRoutes.push(context, MobileMoneyReceiptForm());
         break;
 
-      case 5: // Money Receipt List
+      case 6: // Money Receipt List
         if (permissions?.moneyReceipt?.view != true) {
           _showPermissionDeniedDialog(context);
           return;
@@ -502,7 +504,7 @@ class MobileTabSidebar extends StatelessWidget {
         AppRoutes.push(context, MobileMoneyReceiptList());
         break;
 
-      case 6: // Create Purchase
+      case 7: // Create Purchase
         if (permissions?.purchases?.create != true) {
           _showPermissionDeniedDialog(context);
           return;
@@ -510,7 +512,7 @@ class MobileTabSidebar extends StatelessWidget {
         AppRoutes.push(context, MobileCreatePurchaseScreen());
         break;
 
-      case 7: // Purchase List
+      case 8: // Purchase List
         if (permissions?.purchases?.view != true) {
           _showPermissionDeniedDialog(context);
           return;
@@ -518,7 +520,7 @@ class MobileTabSidebar extends StatelessWidget {
         AppRoutes.push(context, MobilePurchaseScreen());
         break;
 
-      case 8: // Product
+      case 9: // Product
         if (permissions?.products?.view != true) {
           _showPermissionDeniedDialog(context);
           return;
@@ -526,7 +528,7 @@ class MobileTabSidebar extends StatelessWidget {
         AppRoutes.push(context, MobileProductScreen());
         break;
 
-      case 9: // Accounts
+      case 10: // Accounts
         if (permissions?.accounts?.view != true) {
           _showPermissionDeniedDialog(context);
           return;
@@ -534,7 +536,7 @@ class MobileTabSidebar extends StatelessWidget {
         AppRoutes.push(context, MobileAccountScreen());
         break;
 
-      case 10: // Customer
+      case 11: // Customer
         if (permissions?.customers?.view != true) {
           _showPermissionDeniedDialog(context);
           return;
@@ -542,7 +544,7 @@ class MobileTabSidebar extends StatelessWidget {
         AppRoutes.push(context, MobileCustomerScreen());
         break;
 
-      case 11: // Supplier List
+      case 12: // Supplier List
         if (permissions?.suppliers?.view != true) {
           _showPermissionDeniedDialog(context);
           return;
@@ -550,7 +552,7 @@ class MobileTabSidebar extends StatelessWidget {
         AppRoutes.push(context, MobileSupplierListScreen());
         break;
 
-      case 12: // Supplier Payment
+      case 13: // Supplier Payment
         if (permissions?.suppliers?.view != true) {
           _showPermissionDeniedDialog(context);
           return;
@@ -558,7 +560,7 @@ class MobileTabSidebar extends StatelessWidget {
         AppRoutes.push(context, MobileSupplierPaymentListScreen());
         break;
 
-      case 13: // Expense List
+      case 14: // Expense List
         if (permissions?.expense?.view != true) {
           _showPermissionDeniedDialog(context);
           return;
@@ -566,7 +568,7 @@ class MobileTabSidebar extends StatelessWidget {
         AppRoutes.push(context, MobileExpenseListScreen());
         break;
 
-      case 14: // Expense Head
+      case 15: // Expense Head
         if (permissions?.expense?.view != true) {
           _showPermissionDeniedDialog(context);
           return;
@@ -574,7 +576,7 @@ class MobileTabSidebar extends StatelessWidget {
         AppRoutes.push(context, MobileExpenseHeadScreen());
         break;
 
-      case 15: // Expense Sub Head
+      case 16: // Expense Sub Head
         if (permissions?.expense?.view != true) {
           _showPermissionDeniedDialog(context);
           return;
@@ -582,7 +584,7 @@ class MobileTabSidebar extends StatelessWidget {
         AppRoutes.push(context, MobileExpenseSubHeadScreen());
         break;
 
-      case 16: // Sales Return
+      case 17: // Sales Return
         if (permissions?.permissionsReturn?.view != true) {
           _showPermissionDeniedDialog(context);
           return;
@@ -590,7 +592,7 @@ class MobileTabSidebar extends StatelessWidget {
         AppRoutes.push(context, MobileSalesReturnPage());
         break;
 
-      case 17: // Bad Stock List
+      case 18: // Bad Stock List
         if (permissions?.permissionsReturn?.view != true) {
           _showPermissionDeniedDialog(context);
           return;
@@ -598,7 +600,7 @@ class MobileTabSidebar extends StatelessWidget {
         AppRoutes.push(context, MobileBadStockScreen());
         break;
 
-      case 18: // Purchase Return
+      case 19: // Purchase Return
         if (permissions?.permissionsReturn?.view != true) {
           _showPermissionDeniedDialog(context);
           return;
@@ -606,7 +608,7 @@ class MobileTabSidebar extends StatelessWidget {
         AppRoutes.push(context, MobilePurchaseReturnScreen());
         break;
 
-      case 19: // Sales Report
+      case 20: // Sales Report
         if (permissions?.reports?.view != true) {
           _showPermissionDeniedDialog(context);
           return;
@@ -614,7 +616,7 @@ class MobileTabSidebar extends StatelessWidget {
         AppRoutes.push(context, MobileSalesReportScreen());
         break;
 
-      case 20: // Purchase Report
+      case 21: // Purchase Report
         if (permissions?.reports?.view != true) {
           _showPermissionDeniedDialog(context);
           return;
@@ -622,7 +624,7 @@ class MobileTabSidebar extends StatelessWidget {
         AppRoutes.push(context, MobilePurchaseReportScreen());
         break;
 
-      case 21: // Profit/Loss Report
+      case 22: // Profit/Loss Report
         if (permissions?.reports?.view != true) {
           _showPermissionDeniedDialog(context);
           return;
@@ -630,7 +632,7 @@ class MobileTabSidebar extends StatelessWidget {
         AppRoutes.push(context, MobileProfitLossScreen());
         break;
 
-      case 22: // Top Sale Product Report
+      case 23: // Top Sale Product Report
         if (permissions?.reports?.view != true) {
           _showPermissionDeniedDialog(context);
           return;
@@ -638,7 +640,7 @@ class MobileTabSidebar extends StatelessWidget {
         AppRoutes.push(context, MobileTopProductsScreen());
         break;
 
-      case 23: // Low Stock Product Report
+      case 24: // Low Stock Product Report
         if (permissions?.reports?.view != true) {
           _showPermissionDeniedDialog(context);
           return;
@@ -646,7 +648,7 @@ class MobileTabSidebar extends StatelessWidget {
         AppRoutes.push(context, MobileLowStockScreen());
         break;
 
-      case 24: // Stock Product Report
+      case 25: // Stock Product Report
         if (permissions?.reports?.view != true) {
           _showPermissionDeniedDialog(context);
           return;
@@ -654,7 +656,7 @@ class MobileTabSidebar extends StatelessWidget {
         AppRoutes.push(context, MobileStockReportScreen());
         break;
 
-      case 25: // Customer Ledger
+      case 26: // Customer Ledger
         if (permissions?.reports?.view != true) {
           _showPermissionDeniedDialog(context);
           return;
@@ -662,7 +664,7 @@ class MobileTabSidebar extends StatelessWidget {
         AppRoutes.push(context, MobileCustomerLedgerScreen());
         break;
 
-      case 26: // Customer Due/Advance Report
+      case 27: // Customer Due/Advance Report
         if (permissions?.reports?.view != true) {
           _showPermissionDeniedDialog(context);
           return;
@@ -670,7 +672,7 @@ class MobileTabSidebar extends StatelessWidget {
         AppRoutes.push(context, MobileCustomerDueAdvanceScreen());
         break;
 
-      case 27: // Supplier Ledger
+      case 28: // Supplier Ledger
         if (permissions?.reports?.view != true) {
           _showPermissionDeniedDialog(context);
           return;
@@ -678,7 +680,7 @@ class MobileTabSidebar extends StatelessWidget {
         AppRoutes.push(context, MobileSupplierLedgerScreen());
         break;
 
-      case 28: // Supplier Due/Advance Report
+      case 29: // Supplier Due/Advance Report
         if (permissions?.reports?.view != true) {
           _showPermissionDeniedDialog(context);
           return;
@@ -686,7 +688,7 @@ class MobileTabSidebar extends StatelessWidget {
         AppRoutes.push(context, MobileSupplierDueAdvanceScreen());
         break;
 
-      case 29: // Expense Report
+      case 30: // Expense Report
         if (permissions?.reports?.view != true) {
           _showPermissionDeniedDialog(context);
           return;
@@ -694,7 +696,7 @@ class MobileTabSidebar extends StatelessWidget {
         AppRoutes.push(context, MobileExpenseReportScreen());
         break;
 
-      case 30: // Bad Stock Report
+      case 31: // Bad Stock Report
         if (permissions?.reports?.view != true) {
           _showPermissionDeniedDialog(context);
           return;
@@ -702,7 +704,7 @@ class MobileTabSidebar extends StatelessWidget {
         AppRoutes.push(context, MobileBadStockScreen());
         break;
 
-      case 31: // Staff
+      case 32: // Staff
         if (permissions?.users?.view != true) {
           _showPermissionDeniedDialog(context);
           return;
@@ -710,7 +712,7 @@ class MobileTabSidebar extends StatelessWidget {
         AppRoutes.push(context, MoblieUsersScreen());
         break;
 
-      case 32: // Source
+      case 33: // Source
         if (permissions?.administration?.view != true) {
           _showPermissionDeniedDialog(context);
           return;
@@ -718,7 +720,7 @@ class MobileTabSidebar extends StatelessWidget {
         AppRoutes.push(context, MobileSourceScreen());
         break;
 
-      case 33: // Unit
+      case 34: // Unit
         if (permissions?.administration?.view != true) {
           _showPermissionDeniedDialog(context);
           return;
@@ -726,7 +728,7 @@ class MobileTabSidebar extends StatelessWidget {
         AppRoutes.push(context, MobileUnitScreen());
         break;
 
-      case 34: // Brand
+      case 35: // Brand
         if (permissions?.administration?.view != true) {
           _showPermissionDeniedDialog(context);
           return;
@@ -734,7 +736,7 @@ class MobileTabSidebar extends StatelessWidget {
         AppRoutes.push(context, MobileBrandScreen());
         break;
 
-      case 35: // Category
+      case 36: // Category
         if (permissions?.administration?.view != true) {
           _showPermissionDeniedDialog(context);
           return;
@@ -742,25 +744,20 @@ class MobileTabSidebar extends StatelessWidget {
         AppRoutes.push(context, MobileCategoriesScreen());
         break;
 
-      case 36: // Group
+      case 37: // Group
         if (permissions?.administration?.view != true) {
           _showPermissionDeniedDialog(context);
           return;
         }
         AppRoutes.push(context, MobileGroupsScreen());
         break;
-      case 37: // Group
+
+      case 38: // Sale Mode
         if (permissions?.administration?.view != true) {
           _showPermissionDeniedDialog(context);
           return;
         }
         AppRoutes.push(context, SaleModeListScreen());
-        break;
-      case 38: // Group
-        if (permissions?.administration?.view != true) {
-          _showPermissionDeniedDialog(context);
-          return;
-        }
         break;
 
       case 39: // Profile
@@ -796,7 +793,7 @@ class MobileTabSidebar extends StatelessWidget {
         break;
 
       default:
-        // Fallback: do nothing or show a snack bar
+      // Fallback: do nothing or show a snack bar
         break;
     }
   }
@@ -840,7 +837,7 @@ class MobileTabSidebar extends StatelessWidget {
                 Navigator.pushAndRemoveUntil(
                   context,
                   MaterialPageRoute(builder: (context) => MobileLoginScr()),
-                  (route) => false,
+                      (route) => false,
                 );
               },
               child: const Text("Logout", style: TextStyle(color: Colors.red)),
@@ -850,8 +847,9 @@ class MobileTabSidebar extends StatelessWidget {
       },
     );
   }
-} // Helper classes for menu structure
+}
 
+// Helper classes for menu structure
 class MenuSection {
   final String title;
   final List<MenuItem> items;

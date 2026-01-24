@@ -192,7 +192,7 @@ class _SaleModeCreateScreenState extends State<SaleModeCreateScreen> {
                 Text(
                   widget.id == null ? 'Create Sale Mode' : 'Update Sale Mode',
                   style: TextStyle(
-                    fontSize: 18,
+                    fontSize: 14,
                     fontWeight: FontWeight.bold,
                     color: AppColors.primaryColor(context),
                   ),
@@ -210,7 +210,6 @@ class _SaleModeCreateScreenState extends State<SaleModeCreateScreen> {
               ],
             ),
 
-            const SizedBox(height: 10),
 
             // Name Input Field
             CustomInputField(
@@ -230,7 +229,6 @@ class _SaleModeCreateScreenState extends State<SaleModeCreateScreen> {
               },
             ),
 
-            const SizedBox(height: 10),
 
             // Code Input Field
             CustomInputField(
@@ -250,7 +248,6 @@ class _SaleModeCreateScreenState extends State<SaleModeCreateScreen> {
               },
             ),
 
-            const SizedBox(height: 10),
 
             // Base Unit Input Field
           BlocBuilder<UnitBloc, UnitState>(
@@ -281,24 +278,9 @@ class _SaleModeCreateScreenState extends State<SaleModeCreateScreen> {
               );
             },
           ),
-            // CustomInputField(
-            //   isRequired: true,
-            //   controller: baseUnitController,
-            //   hintText: 'e.g., 1 (for KG unit ID)',
-            //   labelText: 'Base Unit ID',
-            //   keyboardType: TextInputType.number,
-            //   validator: (value) {
-            //     if (value == null || value.isEmpty) {
-            //       return 'Please enter base unit ID';
-            //     }
-            //     if (int.tryParse(value) == null) {
-            //       return 'Please enter a valid unit ID';
-            //     }
-            //     return null;
-            //   },
-            // ),
 
-            const SizedBox(height: 10),
+
+            const SizedBox(height: 5),
 
             // Conversion Factor Input Field
             CustomInputField(
@@ -318,7 +300,6 @@ class _SaleModeCreateScreenState extends State<SaleModeCreateScreen> {
               },
             ),
 
-            const SizedBox(height: 10),
 
             // Price Type Dropdown
             LayoutBuilder(
@@ -386,7 +367,7 @@ class _SaleModeCreateScreenState extends State<SaleModeCreateScreen> {
               children: [
                 AppButton(
                   isOutlined: true,
-                  size: 120,
+                  size: 100,
                   color: AppColors.primaryColor(context),
                   borderColor: AppColors.primaryColor(context),
                   textColor: AppColors.errorColor(context),
@@ -398,7 +379,7 @@ class _SaleModeCreateScreenState extends State<SaleModeCreateScreen> {
                   child: BlocBuilder<SaleModeBloc, SaleModeState>(
                     builder: (context, state) {
                       return AppButton(
-                        size: 120,
+                        size: 100,
                         name: widget.id == null ? 'Create' : 'Update',
                         onPressed: (state is SaleModeAddLoading)
                             ? null

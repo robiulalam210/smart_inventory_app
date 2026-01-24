@@ -1439,7 +1439,7 @@ class _SalesScreenState extends State<MobileSalesScreen> {
         final product = p["product"] as ProductModelStockModel?;
         return PosSaleItem(
           productName: product?.name ?? 'Product',
-          quantity: _toInt(p["quantity"]),
+          quantity: 1,
           unitPrice: _toDouble(p["price"]),
           subtotal: _toDouble(p["total"]),
         );
@@ -1968,7 +1968,7 @@ class _SalesScreenState extends State<MobileSalesScreen> {
       // }
     } else {
       // Saved customer: money receipt must be enabled
-      if (!_isChecked) {
+      if (_isChecked) {
         showCustomToast(
           context: context,
           title: 'Validation Error',
@@ -2000,19 +2000,12 @@ class _SalesScreenState extends State<MobileSalesScreen> {
           );
           return;
         }
+
+
       }
     }
 
-    if (bloc.payableAmount.text.isEmpty) {
-      showCustomToast(
-        context: context,
-        title: 'Validation Error',
-        description: 'Please enter payable amount',
-        icon: Icons.error,
-        primaryColor: Colors.red,
-      );
-      return;
-    }
+
 
     if (paidAmount < 0) {
       showCustomToast(

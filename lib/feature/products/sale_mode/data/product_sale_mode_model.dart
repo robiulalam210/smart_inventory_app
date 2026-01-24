@@ -147,12 +147,17 @@ class ProductSaleModeModel extends Equatable {
 
   // Getters for backward compatibility
 
+@override
+  String toString() {
+    // TODO: implement toString
+    return "${ saleModeName??""} $unitPrice ${flatPrice??""} ${priceType??""}";
+  }
   @override
   List<Object?> get props => [
     id,
     productId,
     product,
-    saleModeId,
+
     saleMode,
     unitPrice,
     flatPrice,

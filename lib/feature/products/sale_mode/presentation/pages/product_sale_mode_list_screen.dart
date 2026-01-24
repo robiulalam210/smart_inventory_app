@@ -1,8 +1,7 @@
-// features/products/sale_mode/presentation/screens/product_sale_mode_list_screen.dart
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lottie/lottie.dart';
+import 'package:meherinMart/feature/products/sale_mode/presentation/pages/sale_mode_create_screen.dart';
 
 import '../../../../../../core/configs/configs.dart';
 import '../../../../../../core/widgets/app_scaffold.dart';
@@ -10,11 +9,11 @@ import '../../../../../../core/widgets/app_alert_dialog.dart';
 import '../../../../../../core/widgets/app_loader.dart';
 import '../../../../../../core/widgets/coustom_search_text_field.dart';
 import '../../../../../../core/widgets/show_custom_toast.dart';
-import '../bloc/product_sale_mode/product_sale_mode_bloc.dart';
 
+import '../../data/product_sale_mode_model.dart';
+import '../bloc/product_sale_mode/product_sale_mode_bloc.dart';
 import '../bloc/sale_mode_bloc.dart';
 import 'product_sale_mode_config_screen.dart';
-import 'widgets/product_sale_mode_table_card.dart';
 
 class ProductSaleModeListScreen extends StatefulWidget {
   final String productId;
@@ -27,39 +26,35 @@ class ProductSaleModeListScreen extends StatefulWidget {
   });
 
   @override
-  State<ProductSaleModeListScreen> createState() => _ProductSaleModeListScreenState();
+  State<ProductSaleModeListScreen> createState() =>
+      _ProductSaleModeListScreenState();
 }
 
 class _ProductSaleModeListScreenState extends State<ProductSaleModeListScreen> {
-  late var productSaleModeBloc = context.read<ProductSaleModeBloc>();
-  late var saleModeBloc = context.read<SaleModeBloc>();
+  late final ProductSaleModeBloc productSaleModeBloc;
 
   @override
   void initState() {
-    // _fetchApi();
-    _fetchAvailableSaleModes();
-
     super.initState();
+    productSaleModeBloc = context.read<ProductSaleModeBloc>();
+    // _fetchAvailableModes();
+    _fetchConfiguredModes();
+
   }
 
-  void _fetchApi({String filterText = '', int pageNumber = 0}) {
-    context.read<ProductSaleModeBloc>().add(
-      FetchProductSaleModeList(
-        context,
-        productId: widget.productId,
-        filterText: filterText,
-        pageNumber: pageNumber,
-      ),
-    );
+  void _fetchConfiguredModes({String filterText = ''}) {
+    productSaleModeBloc.add(FetchProductSaleModeList(
+      context,
+      productId: widget.productId,
+      filterText: filterText,
+    ));
   }
 
-  void _fetchAvailableSaleModes() {
-    context.read<ProductSaleModeBloc>().add(
-      FetchAvailableSaleModes(
-        context,
-        productId: widget.productId,
-      ),
-    );
+  void _fetchAvailableModes() {
+    productSaleModeBloc.add(FetchAvailableSaleModes(
+      context,
+      productId: widget.productId,
+    ));
   }
 
   @override
@@ -76,8 +71,8 @@ class _ProductSaleModeListScreenState extends State<ProductSaleModeListScreen> {
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: () {
-              // _fetchApi();
-              _fetchAvailableSaleModes();
+              _fetchConfiguredModes();
+              // _fetchAvailableModes();
             },
           ),
         ],
@@ -90,14 +85,20 @@ class _ProductSaleModeListScreenState extends State<ProductSaleModeListScreen> {
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: () async {
-            _fetchApi();
-            _fetchAvailableSaleModes();
+            _fetchConfiguredModes();
+            _fetchAvailableModes();
           },
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
-            child: Container(
-              padding: const EdgeInsets.all(12),
-              child: buildContent(),
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              children: [
+                _buildSearchField(),
+                const SizedBox(height: 12),
+                _buildAvailableModesSection(),
+                const SizedBox(height: 16),
+                _buildConfiguredModesList(),
+              ],
             ),
           ),
         ),
@@ -105,122 +106,42 @@ class _ProductSaleModeListScreenState extends State<ProductSaleModeListScreen> {
     );
   }
 
-  Widget buildContent() {
-    return MultiBlocListener(
-      listeners: [
-        BlocListener<ProductSaleModeBloc, ProductSaleModeState>(
-          listener: (context, state) {
-            if (state is ProductSaleModeAddLoading) {
-              appLoader(context, "Configuring sale mode, please wait...");
-            } else if (state is ProductSaleModeDeleteLoading) {
-              appLoader(context, "Deleting configuration, please wait...");
-            } else if (state is ProductSaleModeBulkUpdateLoading) {
-              appLoader(context, "Updating configurations, please wait...");
-            } else if (state is ProductSaleModeAddSuccess) {
-              Navigator.pop(context);
-              _fetchApi();
-              showCustomToast(
-                context: context,
-                title: 'Success!',
-                description: 'Sale mode configured successfully',
-                icon: Icons.check_circle,
-                primaryColor: Colors.green,
-              );
-            } else if (state is ProductSaleModeDeleteSuccess) {
-              showCustomToast(
-                context: context,
-                title: 'Success!',
-                description: state.message,
-                icon: Icons.check_circle,
-                primaryColor: Colors.green,
-              );
-              Navigator.pop(context);
-              _fetchApi();
-            } else if (state is ProductSaleModeBulkUpdateSuccess) {
-              Navigator.pop(context);
-              _fetchApi();
-              showCustomToast(
-                context: context,
-                title: 'Success!',
-                description: 'Sale modes updated successfully',
-                icon: Icons.check_circle,
-                primaryColor: Colors.green,
-              );
-            } else if (state is ProductSaleModeAddFailed) {
-              Navigator.pop(context);
-              appAlertDialog(
-                context,
-                state.content,
-                title: state.title,
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text("Dismiss"),
-                  ),
-                ],
-              );
-            }
-          },
-        ),
-      ],
-      child: Column(
-        children: [
-          _buildHeaderRow(),
-          const SizedBox(height: 8),
-          _buildAvailableModesSection(),
-          const SizedBox(height: 16),
-          _buildConfiguredModesList(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildHeaderRow() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        CustomSearchTextFormField(
-          controller: productSaleModeBloc.filterTextController,
-          onClear: () {
-            productSaleModeBloc.filterTextController.clear();
-            _fetchApi();
-            FocusScope.of(context).unfocus();
-          },
-          onChanged: (value) {
-            _fetchApi(filterText: value);
-          },
-          hintText: "Search configured sale modes...",
-          isRequiredLabel: false,
-        ),
-      ],
+  Widget _buildSearchField() {
+    return CustomSearchTextFormField(
+      controller: productSaleModeBloc.filterTextController,
+      hintText: "configured sale modes...",
+      isRequiredLabel: false,
+      onClear: () {
+        productSaleModeBloc.filterTextController.clear();
+        _fetchConfiguredModes();
+        FocusScope.of(context).unfocus();
+      },
+      onChanged: (value) => _fetchConfiguredModes(filterText: value),
     );
   }
 
   Widget _buildAvailableModesSection() {
     return BlocBuilder<ProductSaleModeBloc, ProductSaleModeState>(
+      buildWhen: (previous, current) =>
+      previous.runtimeType != current.runtimeType,
       builder: (context, state) {
         if (state is AvailableSaleModesLoading) {
-          return const Center(
-            child: Padding(
-              padding: EdgeInsets.all(8.0),
-              child: CircularProgressIndicator(),
-            ),
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (state is AvailableSaleModesFailed) {
+          return _buildErrorContainer(
+            'Failed to load: ${state.content}',
+            Colors.red,
           );
-        } else if (state is AvailableSaleModesSuccess) {
+        }
+
+        if (state is AvailableSaleModesSuccess) {
           final availableModes = state.availableModes;
+
           if (availableModes.isEmpty) {
-            return Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.grey[100],
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: AppColors.greyColor(context)),
-              ),
-              child: const Text(
-                "No sale modes available for this product's unit",
-                textAlign: TextAlign.center,
-              ),
-            );
+            return _buildInfoContainer(
+                "No sale modes available for this product's unit");
           }
 
           return Container(
@@ -240,144 +161,304 @@ class _ProductSaleModeListScreenState extends State<ProductSaleModeListScreen> {
                     Text(
                       "Available Sale Modes (${availableModes.length})",
                       style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.blue,
-                      ),
+                          fontWeight: FontWeight.bold, color: Colors.blue),
                     ),
                   ],
                 ),
                 const SizedBox(height: 8),
-                // Wrap(
-                //   spacing: 8,
-                //   runSpacing: 8,
-                //   children: availableModes.map((mode) {
-                //     final isConfigured = mode['configured'] == true;
-                //     final isActive = mode['is_active'] == true;
-                //
-                //     return Chip(
-                //       label: Text(mode['name'] ?? ''),
-                //       backgroundColor: isConfigured
-                //           ? (isActive ? Colors.green[100] : Colors.grey[300])
-                //           : Colors.blue[100],
-                //       labelStyle: TextStyle(
-                //         color: isConfigured
-                //             ? (isActive ? Colors.green[900] : Colors.grey[700])
-                //             : Colors.blue[900],
-                //         fontWeight: isConfigured ? FontWeight.bold : FontWeight.normal,
-                //       ),
-                //       avatar: isConfigured
-                //           ? Icon(
-                //         isActive ? Icons.check_circle : Icons.cancel,
-                //         size: 16,
-                //         color: isActive ? Colors.green : Colors.grey,
-                //       )
-                //           : const Icon(Icons.add_circle, size: 16, color: Colors.blue),
-                //     );
-                //   }).toList(),
-                // ),
-              ],
-            ),
-          );
-        } else if (state is AvailableSaleModesFailed) {
-          return Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.red[50],
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: AppColors.errorColor(context)),
-            ),
-            child: Row(
-              children: [
-                const Icon(Icons.error, color: Colors.red, size: 18),
-                const SizedBox(width: 8),
-                SizedBox(
-                  width: AppSizes.width(context)*0.70,
-                  child: Text(
-                    'Failed to load available modes: ${state.content}',
-                    style: const TextStyle(color: Colors.red),
-                  ),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: availableModes.map((mode) {
+                    final isConfigured = mode.configured == true;
+                    final isActive = mode.isActive == true;
+
+                    return Chip(
+                      label: Text(mode.name ?? ''),
+                      backgroundColor: isConfigured
+                          ? (isActive ? Colors.green[100] : Colors.grey[300])
+                          : Colors.blue[100],
+                      labelStyle: TextStyle(
+                        color: isConfigured
+                            ? (isActive ? Colors.green[900] : Colors.grey[700])
+                            : Colors.blue[900],
+                        fontWeight:
+                        isConfigured ? FontWeight.bold : FontWeight.normal,
+                      ),
+                      avatar: isConfigured
+                          ? Icon(
+                        isActive ? Icons.check_circle : Icons.cancel,
+                        size: 16,
+                        color: isActive ? Colors.green : Colors.grey,
+                      )
+                          : const Icon(Icons.add_circle,
+                          size: 16, color: Colors.blue),
+                    );
+                  }).toList(),
                 ),
               ],
             ),
           );
-        } else {
-          return const SizedBox.shrink();
         }
+
+        return const SizedBox.shrink();
       },
     );
   }
 
   Widget _buildConfiguredModesList() {
     return BlocBuilder<ProductSaleModeBloc, ProductSaleModeState>(
+      buildWhen: (previous, current) =>
+      previous.runtimeType != current.runtimeType ||
+          (previous is ProductSaleModeListSuccess &&
+              current is ProductSaleModeListSuccess &&
+              previous.list != current.list),
       builder: (context, state) {
         if (state is ProductSaleModeListLoading) {
-          return const Center(
-            child: Padding(
-              padding: EdgeInsets.all(20),
-              child: CircularProgressIndicator(),
-            ),
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (state is ProductSaleModeListFailed) {
+          return Center(
+            child: Text('Failed to load: ${state.content}',
+                style: const TextStyle(color: Colors.red)),
           );
-        } else if (state is ProductSaleModeListSuccess) {
-          if (state.list.isEmpty) {
-            return Padding(
-              padding: const EdgeInsets.all(20),
-              child: Center(
-                child: Column(
-                  children: [
-                    Lottie.asset(AppImages.noData, width: 150, height: 150),
-                    const SizedBox(height: 16),
-                    const Text(
-                      'No sale modes configured for this product',
-                      style: TextStyle(color: Colors.grey),
-                    ),
-                    const SizedBox(height: 8),
-                    ElevatedButton(
-                      onPressed: _fetchAvailableSaleModes,
-                      child: const Text('View Available Modes'),
-                    ),
-                  ],
+        }
+
+        if (state is ProductSaleModeListSuccess) {
+          final list = state.list;
+
+          if (list.isEmpty) {
+            return Column(
+              children: [
+                Lottie.asset(AppImages.noData, width: 150, height: 150),
+                const SizedBox(height: 16),
+                const Text(
+                  'No sale modes configured for this product',
+                  style: TextStyle(color: Colors.grey),
                 ),
-              ),
-            );
-          } else {
-            return ProductSaleModeTableCard(
-              productSaleModes: state.list,
-              onRefresh: _fetchApi,
+                const SizedBox(height: 8),
+                ElevatedButton(
+                  onPressed: _fetchAvailableModes,
+                  child: const Text('View Available Modes'),
+                ),
+              ],
             );
           }
-        } else if (state is ProductSaleModeListFailed) {
-          return Center(
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Text('Failed to load: ${state.content}'),
-            ),
+
+          return ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: list.length,
+            itemBuilder: (context, index) {
+              final ProductSaleModeModel mode = list[index];
+
+              return _buildModeCard(mode);
+            },
           );
-        } else {
-          return const SizedBox.shrink();
         }
+
+        return const SizedBox.shrink();
       },
     );
   }
 
-  void _showBulkConfigDialog(BuildContext context) {
+  Widget _buildModeCard(ProductSaleModeModel mode) {
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppSizes.radius),
+        side: BorderSide(color: AppColors.greyColor(context)),
+      ),
+      elevation: 2,
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(mode.saleModeName ?? '-',
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold, fontSize: 16)),
+                Text(mode.saleModeCode ?? '',
+                    style: const TextStyle(fontSize: 14, color: Colors.grey)),
+              ],
+            ),
+            const SizedBox(height: 8),
+            // Prices & Conversion
+            Wrap(
+              spacing: 12,
+              runSpacing: 6,
+              children: [
+                if (mode.unitPrice != null)
+                  Chip(
+                    label: Text(
+                        'Unit: ${mode.unitPrice!.toStringAsFixed(2)}',
+                        style:
+                        const TextStyle(color: Colors.white, fontSize: 12)),
+                    backgroundColor: Colors.blue,
+                  ),
+                if (mode.flatPrice != null)
+                  Chip(
+                    label: Text(
+                        'Flat: ${mode.flatPrice!.toStringAsFixed(2)}',
+                        style:
+                        const TextStyle(color: Colors.white, fontSize: 12)),
+                    backgroundColor: Colors.orange,
+                  ),
+                if (mode.conversionFactor != null)
+                  Chip(
+                    label: Text(
+                        'Conv: ${mode.conversionFactor!.toStringAsFixed(2)}',
+                        style:
+                        const TextStyle(color: Colors.white, fontSize: 12)),
+                    backgroundColor: Colors.purple,
+                  ),
+              ],
+            ),
+            if (mode.discountValue != null)
+              Text(
+                'Discount: ${mode.discountValue} (${mode.discountType ?? ''})',
+                style: const TextStyle(fontSize: 13, color: Colors.black87),
+              ),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 6),
+              child: Chip(
+                label: Text(mode.isActive == true ? 'Active' : 'Inactive',
+                    style: TextStyle(
+                      color: mode.isActive == true ? Colors.white : Colors.black,
+                      fontSize: 12,
+                    )),
+                backgroundColor:
+                mode.isActive == true ? Colors.green : Colors.grey[300],
+              ),
+            ),
+            if (mode.tiers != null && mode.tiers!.isNotEmpty) ...[
+              const Divider(),
+              const Text('Price Tiers:',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+              ...mode.tiers!.map((tier) => Text(
+                  '${tier.minQuantity ?? 0} - ${tier.maxQuantity ?? 0}: ${tier.price?.toStringAsFixed(2) ?? 0}',
+                  style: const TextStyle(fontSize: 13)))
+            ],
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                IconButton(
+                  icon: Icon(Icons.edit, color: AppColors.primaryColor(context)),
+                  onPressed: () => _showEditDialog(context, mode),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.delete, color: Colors.red),
+                  onPressed: () => _showDeleteDialog(context, mode),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoContainer(String message) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.grey[100],
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: AppColors.greyColor(context)),
+      ),
+      child: Text(message, textAlign: TextAlign.center),
+    );
+  }
+
+  Widget _buildErrorContainer(String message, Color color) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.2),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.error, color: color, size: 18),
+          const SizedBox(width: 8),
+          Expanded(
+              child: Text(message, style: TextStyle(color: color, fontSize: 13))),
+        ],
+      ),
+    );
+  }
+
+  void _showEditDialog(BuildContext context, ProductSaleModeModel mode) {
     showDialog(
       context: context,
-      builder: (context) {
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppSizes.radius),
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppSizes.radius),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(AppSizes.radius),
+          child: SizedBox(
+            width: MediaQuery.of(context).size.width * 0.8,
+            // child: SaleModeCreateScreen(
+            //   id: mode.id?.toString(),
+            //   saleMode: mode,
+            // ),
           ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(AppSizes.radius),
-            child: SizedBox(
-              width: Responsive.isMobile(context)
-                  ? MediaQuery.of(context).size.width * 0.9
-                  : MediaQuery.of(context).size.width * 0.7,
-              child: ProductSaleModeConfigScreen(productId: widget.productId),
-            ),
+        ),
+      ),
+    );
+  }
+
+  void _showDeleteDialog(BuildContext context, ProductSaleModeModel mode) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Sale Mode'),
+        content: Text(
+          'Are you sure you want to delete "${mode.saleModeName}"?',
+          style: AppTextStyle.body(context),
+        ),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel')),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              productSaleModeBloc
+                  .add(DeleteProductSaleMode(id: mode.id.toString()));
+            },
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
           ),
-        );
-      },
+        ],
+      ),
+    );
+  }
+
+  void _showBulkConfigDialog(BuildContext context) {
+    _fetchAvailableModes();
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppSizes.radius),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(AppSizes.radius),
+          child: SizedBox(
+            width: Responsive.isMobile(context)
+                ? MediaQuery.of(context).size.width * 0.9
+                : MediaQuery.of(context).size.width * 0.7,
+            child: ProductSaleModeConfigScreen(productId: widget.productId),
+          ),
+        ),
+      ),
     );
   }
 }

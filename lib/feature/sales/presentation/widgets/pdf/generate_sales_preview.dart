@@ -191,11 +191,11 @@ Future<Uint8List> generateSalesPreviewPdf(
                   vertical: 8,
                 ),
                 decoration: pw.BoxDecoration(
-                  color: getStatusColor(sale.paymentStatus),
+                  color: getStatusColor(sale.paymentStatus??""),
                   borderRadius: pw.BorderRadius.circular(20),
                 ),
                 child: pw.Text(
-                  sale.paymentStatus.toUpperCase(),
+                  sale.paymentStatus??"".toUpperCase(),
                   style: pw.TextStyle(
                     fontWeight: pw.FontWeight.bold,
                     fontSize: 12,

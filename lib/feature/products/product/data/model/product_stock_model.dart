@@ -4,7 +4,7 @@
 
 import 'dart:convert';
 
-List<ProductModelStockModel> productModelStockModelFromJson(String str) => List<ProductModelStockModel>.from(json.decode(str).map((x) => ProductModelStockModel.fromJson(x)));
+List<ProductModelStockModel> productModelStockModelFromJson(String str) => List<ProductModelStockModel>.from(json.decode(str)['data'].map((x) => ProductModelStockModel.fromJson(x)));
 
 String productModelStockModelToJson(List<ProductModelStockModel> data) => json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
 
@@ -35,13 +35,19 @@ class ProductModelStockModel {
   final Info? groupInfo;
   final Info? sourceInfo;
   final CreatedByInfo? createdByInfo;
-  final dynamic stockStatus;
+  final String? stockStatus;
+  final String? stockStatusDisplay;
+  final int? stockStatusCode;
 
   // --- Discount Fields ---
   final bool? discountApplied;
+  final bool? discountAppliedOn;
   final String? discountType;
   final double? discountValue;
   final double? finalPrice;
+
+  // --- Sale Modes ---
+  final List<SaleMode>? saleModes;
 
   ProductModelStockModel({
     this.id,
@@ -71,10 +77,14 @@ class ProductModelStockModel {
     this.sourceInfo,
     this.createdByInfo,
     this.stockStatus,
+    this.stockStatusDisplay,
+    this.stockStatusCode,
     this.discountApplied,
+    this.discountAppliedOn,
     this.discountType,
     this.discountValue,
     this.finalPrice,
+    this.saleModes,
   });
 
   @override
@@ -151,15 +161,17 @@ class ProductModelStockModel {
       createdByInfo: json["created_by_info"] == null
           ? null
           : CreatedByInfo.fromJson(json["created_by_info"]),
-      stockStatus: json["stock_status"],
-
-      // --- Discount --- with proper parsing
-      discountApplied: _parseBool(json["discount_applied"]) ??
-          _parseBool(json["discount_applied_on"]) ??
-          false,
+      stockStatus: json["stock_status"]?.toString(),
+      stockStatusDisplay: json["stock_status_display"]?.toString(),
+      stockStatusCode: json["stock_status_code"],
+      discountApplied: _parseBool(json["discount_applied"]),
+      discountAppliedOn: _parseBool(json["discount_applied_on"]),
       discountType: json["discount_type"]?.toString(),
       discountValue: _parseDouble(json["discount_value"]),
       finalPrice: _parseDouble(json["final_price"]),
+      saleModes: json["sale_modes"] == null
+          ? null
+          : List<SaleMode>.from(json["sale_modes"].map((x) => SaleMode.fromJson(x))),
     );
   }
 
@@ -191,12 +203,16 @@ class ProductModelStockModel {
     "source_info": sourceInfo?.toJson(),
     "created_by_info": createdByInfo?.toJson(),
     "stock_status": stockStatus,
-
-    // --- Discount ---
+    "stock_status_display": stockStatusDisplay,
+    "stock_status_code": stockStatusCode,
     "discount_applied": discountApplied,
+    "discount_applied_on": discountAppliedOn,
     "discount_type": discountType,
     "discount_value": discountValue,
     "final_price": finalPrice,
+    "sale_modes": saleModes == null
+        ? null
+        : List<SaleMode>.from(saleModes!.map((x) => x.toJson())),
   };
 }
 
@@ -265,5 +281,64 @@ class CreatedByInfo {
     "id": id,
     "username": username,
     "email": email,
+  };
+}
+
+class SaleMode {
+  final int? id;
+  final int? saleModeId;
+  final String? saleModeName;
+  final String? saleModeCode;
+  final String? priceType;
+  final double? unitPrice;
+  final double? flatPrice;
+  final String? discountType;
+  final double? discountValue;
+  final bool? isActive;
+
+  SaleMode({
+    this.id,
+    this.saleModeId,
+    this.saleModeName,
+    this.saleModeCode,
+    this.priceType,
+    this.unitPrice,
+    this.flatPrice,
+    this.discountType,
+    this.discountValue,
+    this.isActive,
+  });
+
+  @override
+  String toString() {
+    // TODO: implement toString
+    return "${saleModeName} Price : ${unitPrice}" ;
+  }
+  factory SaleMode.fromJson(Map<String, dynamic> json) {
+    return SaleMode(
+      id: json["id"],
+      saleModeId: json["sale_mode_id"],
+      saleModeName: json["sale_mode_name"]?.toString(),
+      saleModeCode: json["sale_mode_code"]?.toString(),
+      priceType: json["price_type"]?.toString(),
+      unitPrice: ProductModelStockModel._parseDouble(json["unit_price"]),
+      flatPrice: ProductModelStockModel._parseDouble(json["flat_price"]),
+      discountType: json["discount_type"]?.toString(),
+      discountValue: ProductModelStockModel._parseDouble(json["discount_value"]),
+      isActive: ProductModelStockModel._parseBool(json["is_active"]),
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+    "id": id,
+    "sale_mode_id": saleModeId,
+    "sale_mode_name": saleModeName,
+    "sale_mode_code": saleModeCode,
+    "price_type": priceType,
+    "unit_price": unitPrice,
+    "flat_price": flatPrice,
+    "discount_type": discountType,
+    "discount_value": discountValue,
+    "is_active": isActive,
   };
 }

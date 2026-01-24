@@ -155,7 +155,9 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
           responseData['message'] ?? "Failed to fetch dashboard data",
         ));
       }
-    } catch (error) {
+    } catch (error,st) {
+      print(error);
+      print(st);
       emit(DashboardError(error.toString()));
     }
   }

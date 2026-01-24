@@ -177,7 +177,7 @@ class Purchase {
   final String? supplier;
   final dynamic amount;
   final dynamic dueAmount;
-  final int? quantity;
+  final dynamic quantity;
   final DateTime? date;
   final String? customer;
 
