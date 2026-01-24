@@ -10,6 +10,7 @@ import '../../../../../../core/widgets/app_loader.dart';
 import '../../../../../../core/widgets/coustom_search_text_field.dart';
 import '../../../../../../core/widgets/show_custom_toast.dart';
 
+import '../../../price_tier/presentation/page/price_tier_management_dialog.dart';
 import '../../data/product_sale_mode_model.dart';
 import '../bloc/product_sale_mode/product_sale_mode_bloc.dart';
 import '../bloc/sale_mode_bloc.dart';
@@ -39,22 +40,22 @@ class _ProductSaleModeListScreenState extends State<ProductSaleModeListScreen> {
     productSaleModeBloc = context.read<ProductSaleModeBloc>();
     // _fetchAvailableModes();
     _fetchConfiguredModes();
-
   }
 
   void _fetchConfiguredModes({String filterText = ''}) {
-    productSaleModeBloc.add(FetchProductSaleModeList(
-      context,
-      productId: widget.productId,
-      filterText: filterText,
-    ));
+    productSaleModeBloc.add(
+      FetchProductSaleModeList(
+        context,
+        productId: widget.productId,
+        filterText: filterText,
+      ),
+    );
   }
 
   void _fetchAvailableModes() {
-    productSaleModeBloc.add(FetchAvailableSaleModes(
-      context,
-      productId: widget.productId,
-    ));
+    productSaleModeBloc.add(
+      FetchAvailableSaleModes(context, productId: widget.productId),
+    );
   }
 
   @override
@@ -123,7 +124,7 @@ class _ProductSaleModeListScreenState extends State<ProductSaleModeListScreen> {
   Widget _buildAvailableModesSection() {
     return BlocBuilder<ProductSaleModeBloc, ProductSaleModeState>(
       buildWhen: (previous, current) =>
-      previous.runtimeType != current.runtimeType,
+          previous.runtimeType != current.runtimeType,
       builder: (context, state) {
         if (state is AvailableSaleModesLoading) {
           return const Center(child: CircularProgressIndicator());
@@ -141,7 +142,8 @@ class _ProductSaleModeListScreenState extends State<ProductSaleModeListScreen> {
 
           if (availableModes.isEmpty) {
             return _buildInfoContainer(
-                "No sale modes available for this product's unit");
+              "No sale modes available for this product's unit",
+            );
           }
 
           return Container(
@@ -161,7 +163,9 @@ class _ProductSaleModeListScreenState extends State<ProductSaleModeListScreen> {
                     Text(
                       "Available Sale Modes (${availableModes.length})",
                       style: const TextStyle(
-                          fontWeight: FontWeight.bold, color: Colors.blue),
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blue,
+                      ),
                     ),
                   ],
                 ),
@@ -182,17 +186,21 @@ class _ProductSaleModeListScreenState extends State<ProductSaleModeListScreen> {
                         color: isConfigured
                             ? (isActive ? Colors.green[900] : Colors.grey[700])
                             : Colors.blue[900],
-                        fontWeight:
-                        isConfigured ? FontWeight.bold : FontWeight.normal,
+                        fontWeight: isConfigured
+                            ? FontWeight.bold
+                            : FontWeight.normal,
                       ),
                       avatar: isConfigured
                           ? Icon(
-                        isActive ? Icons.check_circle : Icons.cancel,
-                        size: 16,
-                        color: isActive ? Colors.green : Colors.grey,
-                      )
-                          : const Icon(Icons.add_circle,
-                          size: 16, color: Colors.blue),
+                              isActive ? Icons.check_circle : Icons.cancel,
+                              size: 16,
+                              color: isActive ? Colors.green : Colors.grey,
+                            )
+                          : const Icon(
+                              Icons.add_circle,
+                              size: 16,
+                              color: Colors.blue,
+                            ),
                     );
                   }).toList(),
                 ),
@@ -209,7 +217,7 @@ class _ProductSaleModeListScreenState extends State<ProductSaleModeListScreen> {
   Widget _buildConfiguredModesList() {
     return BlocBuilder<ProductSaleModeBloc, ProductSaleModeState>(
       buildWhen: (previous, current) =>
-      previous.runtimeType != current.runtimeType ||
+          previous.runtimeType != current.runtimeType ||
           (previous is ProductSaleModeListSuccess &&
               current is ProductSaleModeListSuccess &&
               previous.list != current.list),
@@ -220,8 +228,10 @@ class _ProductSaleModeListScreenState extends State<ProductSaleModeListScreen> {
 
         if (state is ProductSaleModeListFailed) {
           return Center(
-            child: Text('Failed to load: ${state.content}',
-                style: const TextStyle(color: Colors.red)),
+            child: Text(
+              'Failed to load: ${state.content}',
+              style: const TextStyle(color: Colors.red),
+            ),
           );
         }
 
@@ -270,21 +280,32 @@ class _ProductSaleModeListScreenState extends State<ProductSaleModeListScreen> {
         borderRadius: BorderRadius.circular(AppSizes.radius),
         side: BorderSide(color: AppColors.greyColor(context)),
       ),
-      elevation: 2,
+      color: AppColors.bottomNavBg(context),
+      elevation: 0,
       child: Padding(
         padding: const EdgeInsets.all(12.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Text(
+              mode.id.toString() ?? '-',
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
             // Header
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(mode.saleModeName ?? '-',
-                    style: const TextStyle(
-                        fontWeight: FontWeight.bold, fontSize: 16)),
-                Text(mode.saleModeCode ?? '',
-                    style: const TextStyle(fontSize: 14, color: Colors.grey)),
+                Text(
+                  mode.saleModeName ?? '-',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+                Text(
+                  mode.saleModeCode ?? '',
+                  style: const TextStyle(fontSize: 14, color: Colors.grey),
+                ),
               ],
             ),
             const SizedBox(height: 8),
@@ -296,25 +317,25 @@ class _ProductSaleModeListScreenState extends State<ProductSaleModeListScreen> {
                 if (mode.unitPrice != null)
                   Chip(
                     label: Text(
-                        'Unit: ${mode.unitPrice!.toStringAsFixed(2)}',
-                        style:
-                        const TextStyle(color: Colors.white, fontSize: 12)),
+                      'Unit: ${mode.unitPrice!.toStringAsFixed(2)}',
+                      style: const TextStyle(color: Colors.white, fontSize: 12),
+                    ),
                     backgroundColor: Colors.blue,
                   ),
                 if (mode.flatPrice != null)
                   Chip(
                     label: Text(
-                        'Flat: ${mode.flatPrice!.toStringAsFixed(2)}',
-                        style:
-                        const TextStyle(color: Colors.white, fontSize: 12)),
+                      'Flat: ${mode.flatPrice!.toStringAsFixed(2)}',
+                      style: const TextStyle(color: Colors.white, fontSize: 12),
+                    ),
                     backgroundColor: Colors.orange,
                   ),
                 if (mode.conversionFactor != null)
                   Chip(
                     label: Text(
-                        'Conv: ${mode.conversionFactor!.toStringAsFixed(2)}',
-                        style:
-                        const TextStyle(color: Colors.white, fontSize: 12)),
+                      'Conv: ${mode.conversionFactor!.toStringAsFixed(2)}',
+                      style: const TextStyle(color: Colors.white, fontSize: 12),
+                    ),
                     backgroundColor: Colors.purple,
                   ),
               ],
@@ -327,28 +348,46 @@ class _ProductSaleModeListScreenState extends State<ProductSaleModeListScreen> {
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 6),
               child: Chip(
-                label: Text(mode.isActive == true ? 'Active' : 'Inactive',
-                    style: TextStyle(
-                      color: mode.isActive == true ? Colors.white : Colors.black,
-                      fontSize: 12,
-                    )),
-                backgroundColor:
-                mode.isActive == true ? Colors.green : Colors.grey[300],
+                label: Text(
+                  mode.isActive == true ? 'Active' : 'Inactive',
+                  style: TextStyle(
+                    color: mode.isActive == true ? Colors.white : Colors.black,
+                    fontSize: 12,
+                  ),
+                ),
+                backgroundColor: mode.isActive == true
+                    ? Colors.green
+                    : Colors.grey[300],
               ),
             ),
             if (mode.tiers != null && mode.tiers!.isNotEmpty) ...[
               const Divider(),
-              const Text('Price Tiers:',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-              ...mode.tiers!.map((tier) => Text(
+              const Text(
+                'Price Tiers:',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+              ),
+              ...mode.tiers!.map(
+                (tier) => Text(
                   '${tier.minQuantity ?? 0} - ${tier.maxQuantity ?? 0}: ${tier.price?.toStringAsFixed(2) ?? 0}',
-                  style: const TextStyle(fontSize: 13)))
+                  style: const TextStyle(fontSize: 13),
+                ),
+              ),
             ],
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 IconButton(
-                  icon: Icon(Icons.edit, color: AppColors.primaryColor(context)),
+                  icon: Icon(
+                    Icons.earbuds,
+                    color: AppColors.primaryColor(context),
+                  ),
+                  onPressed: () => _openPriceTierDialog(context, mode),
+                ),
+                IconButton(
+                  icon: Icon(
+                    Icons.edit,
+                    color: AppColors.primaryColor(context),
+                  ),
                   onPressed: () => _showEditDialog(context, mode),
                 ),
                 IconButton(
@@ -388,9 +427,33 @@ class _ProductSaleModeListScreenState extends State<ProductSaleModeListScreen> {
           Icon(Icons.error, color: color, size: 18),
           const SizedBox(width: 8),
           Expanded(
-              child: Text(message, style: TextStyle(color: color, fontSize: 13))),
+            child: Text(message, style: TextStyle(color: color, fontSize: 13)),
+          ),
         ],
       ),
+    );
+  }
+
+  void _openPriceTierDialog(BuildContext context, ProductSaleModeModel mode) {
+    print("object${mode.toJson()}");
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: SizedBox(
+            width: MediaQuery.of(context).size.width * 0.9,
+            child: PriceTierManagementDialog(
+              productId: widget.productId.toString(),
+              productSaleModeId: mode.id,
+              title: "Price Tier Management",
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -426,13 +489,15 @@ class _ProductSaleModeListScreenState extends State<ProductSaleModeListScreen> {
         ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel')),
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
           TextButton(
             onPressed: () {
               Navigator.pop(context);
-              productSaleModeBloc
-                  .add(DeleteProductSaleMode(id: mode.id.toString()));
+              productSaleModeBloc.add(
+                DeleteProductSaleMode(id: mode.id.toString()),
+              );
             },
             child: const Text('Delete', style: TextStyle(color: Colors.red)),
           ),

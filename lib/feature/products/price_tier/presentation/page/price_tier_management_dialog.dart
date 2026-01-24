@@ -1,4 +1,3 @@
-// features/products/sale_mode/presentation/screens/price_tier_management_dialog.dart
 import 'package:intl/intl.dart';
 import '../../../../../../core/configs/configs.dart';
 import '../../../../../../core/widgets/app_button.dart';
@@ -10,13 +9,13 @@ import '../bloc/price_tier_bloc.dart';
 
 class PriceTierManagementDialog extends StatefulWidget {
   final int? productSaleModeId;
-  final int? productId;
+  final String? productId;
   final String? title;
   final bool showAddButton;
 
   const PriceTierManagementDialog({
     super.key,
-    this.productSaleModeId,
+    required this.productSaleModeId,
     this.productId,
     this.title,
     this.showAddButton = true,
@@ -53,7 +52,8 @@ class _PriceTierManagementDialogState extends State<PriceTierManagementDialog> {
       text: isEditing ? priceTier.minQuantity?.toString() ?? '' : '',
     );
     final maxQuantityController = TextEditingController(
-      text: isEditing ? (priceTier.maxQuantity != null && priceTier.maxQuantity! > 0
+      text: isEditing ? (priceTier.maxQuantity != null &&
+          priceTier.maxQuantity! > 0
           ? priceTier.maxQuantity?.toString()
           : '') : '',
     );
@@ -81,7 +81,8 @@ class _PriceTierManagementDialogState extends State<PriceTierManagementDialog> {
                         controller: minQuantityController,
                         labelText: 'Minimum Quantity',
                         hintText: 'Enter minimum quantity',
-                        keyboardType: TextInputType.numberWithOptions(decimal: true),
+                        keyboardType: TextInputType.numberWithOptions(
+                            decimal: true),
                         isRequired: true,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -102,14 +103,16 @@ class _PriceTierManagementDialogState extends State<PriceTierManagementDialog> {
                         controller: maxQuantityController,
                         labelText: 'Maximum Quantity (Optional)',
                         hintText: 'Leave empty for unlimited',
-                        keyboardType: TextInputType.numberWithOptions(decimal: true),
+                        keyboardType: TextInputType.numberWithOptions(
+                            decimal: true),
                         validator: (value) {
                           if (value != null && value.isNotEmpty) {
                             final maxQty = double.tryParse(value);
                             if (maxQty == null) {
                               return 'Please enter a valid number';
                             }
-                            final minQty = double.tryParse(minQuantityController.text) ?? 0;
+                            final minQty = double.tryParse(
+                                minQuantityController.text) ?? 0;
                             if (maxQty <= minQty) {
                               return 'Maximum quantity must be greater than minimum';
                             }
@@ -122,7 +125,8 @@ class _PriceTierManagementDialogState extends State<PriceTierManagementDialog> {
                         controller: priceController,
                         labelText: 'Price per Unit',
                         hintText: 'Enter price per unit',
-                        keyboardType: TextInputType.numberWithOptions(decimal: true),
+                        keyboardType: TextInputType.numberWithOptions(
+                            decimal: true),
                         isRequired: true,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -160,26 +164,34 @@ class _PriceTierManagementDialogState extends State<PriceTierManagementDialog> {
                           ? null
                           : () {
                         if (_formKey.currentState?.validate() ?? false) {
-                          final newPriceTier = PriceTierModel(
-                            id: isEditing ? priceTier.id : null,
-                            minQuantity: double.parse(minQuantityController.text),
-                            maxQuantity: maxQuantityController.text.isNotEmpty
-                                ? double.parse(maxQuantityController.text)
-                                : null,
-                            price: double.parse(priceController.text),
-                            unit: 'unit',
-                            productSaleMode: widget.productSaleModeId,
-                          );
+                          // final newPriceTier = PriceTierModel(
+                          //   id: isEditing ? priceTier.id : null,
+                          //   minQuantity: double.parse(minQuantityController.text),
+                          //   maxQuantity: maxQuantityController.text.isNotEmpty
+                          //       ? double.parse(maxQuantityController.text)
+                          //       : null,
+                          //   price: double.parse(priceController.text),
+                          //   productSaleMode: widget.productSaleModeId,
+                          // );
 
+                          Map<String ,dynamic> payload = {
+                            "product_sale_mode": widget.productSaleModeId,
+                            "min_quantity": double.parse(minQuantityController.text),
+                            "max_quantity":
+                            maxQuantityController.text.isNotEmpty
+                                  ? double.parse(maxQuantityController.text)
+                                  : null,
+                            "price": 44.0,
+                          };
                           if (isEditing) {
                             _priceTierBloc.add(UpdatePriceTier(
                               context: context,
-                              priceTier: newPriceTier,
+                              priceTier: payload,
                             ));
                           } else {
                             _priceTierBloc.add(AddPriceTier(
                               context: context,
-                              priceTier: newPriceTier,
+                              priceTier: payload,
                             ));
                           }
                         }
@@ -210,7 +222,8 @@ class _PriceTierManagementDialogState extends State<PriceTierManagementDialog> {
       builder: (context) {
         return AlertDialog(
           title: const Text('Confirm Delete'),
-          content: const Text('Are you sure you want to delete this price tier?'),
+          content: const Text(
+              'Are you sure you want to delete this price tier?'),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
@@ -269,62 +282,35 @@ class _PriceTierManagementDialogState extends State<PriceTierManagementDialog> {
       itemCount: priceTiers.length,
       itemBuilder: (context, index) {
         final tier = priceTiers[index];
-        final isLast = index == priceTiers.length - 1;
+        print(tier);
+        final maxQuantityText = tier.maxQuantity != null &&
+            tier.maxQuantity! > 0
+            ? '- ${tier.maxQuantity?.toStringAsFixed(2)}'
+            : 'and above';
 
         return Card(
-          margin: EdgeInsets.only(
-            bottom: isLast ? 0 : 8,
-            left: 4,
-            right: 4,
-          ),
+
           child: ListTile(
-            leading: Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: AppColors.primaryColor(context).withOpacity(0.1),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Center(
-                child: Text(
-                  '${index + 1}',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.primaryColor(context),
-                  ),
-                ),
-              ),
-            ),
+
             title: Text(
-              '${tier.minQuantity} ${tier.unit ?? 'units'} ${tier.maxQuantity != null && tier.maxQuantity! > 0 ? '- ${tier.maxQuantity}' : 'and above'}',
+              '${tier.minQuantity?.toStringAsFixed(2)} $maxQuantityText',
               style: AppTextStyle.subtitle(context).copyWith(
                 fontWeight: FontWeight.w600,
               ),
             ),
-            subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Price: ${_currencyFormat.format(tier.price ?? 0)} per ${tier.unit ?? 'unit'}',
-                  style: AppTextStyle.body(context).copyWith(
-                    fontWeight: FontWeight.w500,
-                    color: AppColors.primaryColor(context),
-                  ),
-                ),
-                if (tier.createdAt != null)
-                  Text(
-                    'Added: ${DateFormat('MMM dd, yyyy').format(tier.createdAt!)}',
-                    style: AppTextStyle.body(context).copyWith(
-                      fontSize: 10,
-                    ),
-                  ),
-              ],
+            subtitle: Text(
+              'Price: ${_currencyFormat.format(tier.price ?? 0)} per unit',
+              style: AppTextStyle.body(context).copyWith(
+                fontWeight: FontWeight.w500,
+                color: AppColors.primaryColor(context),
+              ),
             ),
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 IconButton(
-                  icon: Icon(Icons.edit, size: 20, color: AppColors.primaryColor(context)),
+                  icon: Icon(Icons.edit, size: 20,
+                      color: AppColors.primaryColor(context)),
                   onPressed: () => _showAddEditDialog(priceTier: tier),
                   tooltip: 'Edit',
                 ),
@@ -357,6 +343,8 @@ class _PriceTierManagementDialogState extends State<PriceTierManagementDialog> {
             icon: Icons.check_circle,
             primaryColor: Colors.green,
           );
+          // Refresh the list after success
+          _loadPriceTiers();
         } else if (state is PriceTierOperationFailed) {
           Navigator.pop(context); // Close loader
           showCustomToast(
@@ -375,9 +363,9 @@ class _PriceTierManagementDialogState extends State<PriceTierManagementDialog> {
             borderRadius: BorderRadius.circular(AppSizes.radius),
           ),
           child: Container(
-            width: 600,
+
             constraints: const BoxConstraints(maxHeight: 600),
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(20), // Added padding
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -400,13 +388,14 @@ class _PriceTierManagementDialogState extends State<PriceTierManagementDialog> {
                     ),
                     IconButton(
                       onPressed: () => Navigator.pop(context),
-                      icon: const Icon(Icons.close, color: Colors.red, size: 20),
+                      icon: const Icon(
+                          Icons.close, color: Colors.red, size: 20),
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(),
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 8),
 
                 if (widget.showAddButton) ...[
                   // Add Button
@@ -415,7 +404,7 @@ class _PriceTierManagementDialogState extends State<PriceTierManagementDialog> {
                     child: AppButton(
                       size: 120,
                       name: 'Add Tier',
-                      icon:Icon( Icons.add),
+                      icon: Icon(Icons.add),
                       onPressed: () => _showAddEditDialog(),
                     ),
                   ),
@@ -428,16 +417,7 @@ class _PriceTierManagementDialogState extends State<PriceTierManagementDialog> {
                 ),
 
                 const SizedBox(height: 16),
-                // Close Button
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: AppButton(
-                    isOutlined: true,
-                    size: 100,
-                    name: 'Close',
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                ),
+
               ],
             ),
           ),

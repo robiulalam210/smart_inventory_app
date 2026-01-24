@@ -12,7 +12,7 @@ abstract class PriceTierEvent extends Equatable {
 class LoadPriceTiers extends PriceTierEvent {
   final BuildContext context;
   final int? productSaleModeId;
-  final int? productId;
+  final String? productId;
 
   const LoadPriceTiers({
     required this.context,
@@ -26,7 +26,7 @@ class LoadPriceTiers extends PriceTierEvent {
 
 class AddPriceTier extends PriceTierEvent {
   final BuildContext context;
-  final PriceTierModel priceTier;
+  final Map<String ,dynamic> priceTier;
 
   const AddPriceTier({
     required this.context,
@@ -39,7 +39,7 @@ class AddPriceTier extends PriceTierEvent {
 
 class UpdatePriceTier extends PriceTierEvent {
   final BuildContext context;
-  final PriceTierModel priceTier;
+  final Map<String ,dynamic> priceTier;
 
   const UpdatePriceTier({
     required this.context,

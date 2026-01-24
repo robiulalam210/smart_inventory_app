@@ -1,3 +1,5 @@
+// features/products/sale_mode/data/model/price_tier_model.dart
+
 import 'package:equatable/equatable.dart';
 
 class PriceTierModel extends Equatable {
@@ -6,9 +8,8 @@ class PriceTierModel extends Equatable {
   final double? minQuantity;
   final double? maxQuantity;
   final double? price;
-  final String? unit; // ADD THIS FIELD
-  final DateTime? createdAt; // ADD THIS IF NEEDED
-  final DateTime? updatedAt; // ADD THIS IF NEEDED
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
 
   const PriceTierModel({
     this.id,
@@ -16,42 +17,36 @@ class PriceTierModel extends Equatable {
     this.minQuantity,
     this.maxQuantity,
     this.price,
-    this.unit, // ADD THIS
-    this.createdAt, // ADD THIS
-    this.updatedAt, // ADD THIS
+    this.createdAt,
+    this.updatedAt,
   });
 
   factory PriceTierModel.fromJson(Map<String, dynamic> json) {
     return PriceTierModel(
       id: json['id'],
-      productSaleMode: json['product_sale_mode'],
-      minQuantity: json['min_quantity'] != null
-          ? double.tryParse(json['min_quantity'].toString())
-          : null,
-      maxQuantity: json['max_quantity'] != null
-          ? double.tryParse(json['max_quantity'].toString())
-          : null,
-      price: json['price'] != null
-          ? double.tryParse(json['price'].toString())
-          : null,
-      unit: json['unit'], // ADD THIS
+      productSaleMode: json['product_sale_mode'] is int
+          ? json['product_sale_mode']
+          : int.tryParse(json['product_sale_mode'].toString()),
+      minQuantity: json['min_quantity']?.toDouble(),
+      maxQuantity: json['max_quantity']?.toDouble(),
+      price: json['price']?.toDouble(),
       createdAt: json['created_at'] != null
           ? DateTime.tryParse(json['created_at'])
-          : null, // ADD THIS
+          : null,
       updatedAt: json['updated_at'] != null
           ? DateTime.tryParse(json['updated_at'])
-          : null, // ADD THIS
+          : null,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
-      'product_sale_mode': productSaleMode,
-      'min_quantity': minQuantity,
-      'max_quantity': maxQuantity,
-      'price': price,
-      'unit': unit, // ADD THIS
+      if (id != null) 'id': id,
+      if (productSaleMode != null) 'product_sale_mode': productSaleMode,
+      if (minQuantity != null) 'min_quantity': minQuantity,
+      if (maxQuantity != null) 'max_quantity': maxQuantity,
+      if (price != null) 'price': price,
+      // Do NOT include createdAt or updatedAt in POST requests
     };
   }
 
@@ -62,8 +57,7 @@ class PriceTierModel extends Equatable {
     minQuantity,
     maxQuantity,
     price,
-    unit, // ADD THIS
-    createdAt, // ADD THIS
-    updatedAt, // ADD THIS
+    createdAt,
+    updatedAt,
   ];
 }
