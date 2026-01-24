@@ -71,6 +71,7 @@ class PriceTierBloc extends Bloc<PriceTierEvent, PriceTierState> {
       emit(PriceTierOperationFailed(error: error.toString()));
     }
   }
+// In your PriceTierBloc, update the _onAddPriceTier method:
 
   Future<void> _onAddPriceTier(
       AddPriceTier event,
@@ -79,9 +80,14 @@ class PriceTierBloc extends Bloc<PriceTierEvent, PriceTierState> {
     emit(PriceTierLoading());
 
     try {
+      // Add debug logging
+      print('🔄 Creating price tier with data: ${event.priceTier}');
+      print('📱 productSaleMode value: ${event.priceTier}');
+      print('📱 productSaleMode type: ${event.priceTier.runtimeType}');
+
       final res = await postResponse(
         url: AppUrls.priceTiers,
-        payload: event.priceTier.toJson(),
+        payload: event.priceTier,
       );
 
       final jsonString = jsonEncode(res);
@@ -108,10 +114,10 @@ class PriceTierBloc extends Bloc<PriceTierEvent, PriceTierState> {
         ));
       }
     } catch (error) {
+      print('❌ Error adding price tier: $error');
       emit(PriceTierOperationFailed(error: error.toString()));
     }
   }
-
   Future<void> _onUpdatePriceTier(
       UpdatePriceTier event,
       Emitter<PriceTierState> emit,
@@ -120,8 +126,8 @@ class PriceTierBloc extends Bloc<PriceTierEvent, PriceTierState> {
 
     try {
       final res = await patchResponse(
-        url: '${AppUrls.priceTiers}${event.priceTier.id}/',
-        payload: event.priceTier.toJson(),
+        url: '${AppUrls.priceTiers}${event.priceTier}/',
+        payload: event.priceTier,
       );
 
       final jsonString = jsonEncode(res);
