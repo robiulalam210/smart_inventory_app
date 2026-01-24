@@ -10,6 +10,7 @@ import '../../../../../../core/widgets/app_loader.dart';
 import '../../../../../../core/widgets/coustom_search_text_field.dart';
 import '../../../../../../core/widgets/show_custom_toast.dart';
 
+import '../../../price_tier/presentation/bloc/price_tier_bloc.dart';
 import '../../../price_tier/presentation/page/price_tier_management_dialog.dart';
 import '../../data/product_sale_mode_model.dart';
 import '../bloc/product_sale_mode/product_sale_mode_bloc.dart';
@@ -33,12 +34,14 @@ class ProductSaleModeListScreen extends StatefulWidget {
 
 class _ProductSaleModeListScreenState extends State<ProductSaleModeListScreen> {
   late final ProductSaleModeBloc productSaleModeBloc;
+  late final PriceTierBloc priceTier;
 
   @override
   void initState() {
     super.initState();
     productSaleModeBloc = context.read<ProductSaleModeBloc>();
-    // _fetchAvailableModes();
+    priceTier = context.read<PriceTierBloc>();
+    _fetchAvailableModes();
     _fetchConfiguredModes();
   }
 
@@ -53,7 +56,7 @@ class _ProductSaleModeListScreenState extends State<ProductSaleModeListScreen> {
   }
 
   void _fetchAvailableModes() {
-    productSaleModeBloc.add(
+    priceTier.add(
       FetchAvailableSaleModes(context, productId: widget.productId),
     );
   }
@@ -81,7 +84,7 @@ class _ProductSaleModeListScreenState extends State<ProductSaleModeListScreen> {
       floatingActionButton: FloatingActionButton(
         backgroundColor: AppColors.primaryColor(context),
         onPressed: () => _showBulkConfigDialog(context),
-        child: const Icon(Icons.settings),
+        child:  Icon(Icons.settings,color: AppColors.whiteColor(context),),
       ),
       body: SafeArea(
         child: RefreshIndicator(
@@ -96,8 +99,8 @@ class _ProductSaleModeListScreenState extends State<ProductSaleModeListScreen> {
               children: [
                 _buildSearchField(),
                 const SizedBox(height: 12),
-                // _buildAvailableModesSection(),
-                const SizedBox(height: 16),
+                _buildAvailableModesSection(),
+                // const SizedBox(height: 16),
                 _buildConfiguredModesList(),
               ],
             ),
@@ -122,7 +125,7 @@ class _ProductSaleModeListScreenState extends State<ProductSaleModeListScreen> {
   }
 
   Widget _buildAvailableModesSection() {
-    return BlocBuilder<ProductSaleModeBloc, ProductSaleModeState>(
+    return BlocBuilder<PriceTierBloc, PriceTierState>(
       buildWhen: (previous, current) =>
           previous.runtimeType != current.runtimeType,
       builder: (context, state) {
@@ -277,7 +280,7 @@ class _ProductSaleModeListScreenState extends State<ProductSaleModeListScreen> {
 
   Widget _buildModeCard(ProductSaleModeModel mode) {
     return Card(
-      margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+      margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 0),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppSizes.radius),
         side: BorderSide(color: AppColors.greyColor(context)),
@@ -289,32 +292,28 @@ class _ProductSaleModeListScreenState extends State<ProductSaleModeListScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              mode.id.toString() ?? '-',
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-            ),
+          
             // Header
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  mode.saleModeName ?? '-',
+                  mode.saleModeName,
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
                   ),
                 ),
                 Text(
-                  mode.saleModeCode ?? '',
-                  style: const TextStyle(fontSize: 14, color: Colors.grey),
+                  mode.saleModeCode,
+                  style:  TextStyle(fontSize: 14, color: AppColors.text(context)),
                 ),
               ],
             ),
-            const SizedBox(height: 8),
             // Prices & Conversion
             Wrap(
-              spacing: 12,
-              runSpacing: 6,
+              spacing: 6,
+              runSpacing: 2,
               children: [
                 if (mode.unitPrice != null)
                   Chip(
@@ -340,6 +339,18 @@ class _ProductSaleModeListScreenState extends State<ProductSaleModeListScreen> {
                     ),
                     backgroundColor: Colors.purple,
                   ),
+                Chip(
+                  label: Text(
+                    mode.isActive == true ? 'Active' : 'Inactive',
+                    style: TextStyle(
+                      color: mode.isActive == true ? Colors.white : Colors.black,
+                      fontSize: 12,
+                    ),
+                  ),
+                  backgroundColor: mode.isActive == true
+                      ? Colors.green
+                      : Colors.grey[300],
+                ),
               ],
             ),
             if (mode.discountValue != null)
@@ -347,21 +358,7 @@ class _ProductSaleModeListScreenState extends State<ProductSaleModeListScreen> {
                 'Discount: ${mode.discountValue} (${mode.discountType ?? ''})',
                 style: const TextStyle(fontSize: 13, color: Colors.black87),
               ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 6),
-              child: Chip(
-                label: Text(
-                  mode.isActive == true ? 'Active' : 'Inactive',
-                  style: TextStyle(
-                    color: mode.isActive == true ? Colors.white : Colors.black,
-                    fontSize: 12,
-                  ),
-                ),
-                backgroundColor: mode.isActive == true
-                    ? Colors.green
-                    : Colors.grey[300],
-              ),
-            ),
+
             if (mode.tiers != null && mode.tiers.isNotEmpty) ...[
               const Divider(),
               const Text(
@@ -387,13 +384,13 @@ class _ProductSaleModeListScreenState extends State<ProductSaleModeListScreen> {
                 ),
                 IconButton(
                   icon: Icon(
-                    Icons.edit,
+                    Iconsax.edit,
                     color: AppColors.primaryColor(context),
                   ),
                   onPressed: () => _showEditDialog(context, mode),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.delete, color: Colors.red),
+                  icon: const Icon(  HugeIcons.strokeRoundedDeleteThrow, color: Colors.red),
                   onPressed: () => _showDeleteDialog(context, mode),
                 ),
               ],
@@ -437,28 +434,38 @@ class _ProductSaleModeListScreenState extends State<ProductSaleModeListScreen> {
   }
 
   void _openPriceTierDialog(BuildContext context, ProductSaleModeModel mode) {
-    print("object${mode.toJson()}");
-    showDialog(
+    debugPrint("object ${mode.toJson()}");
+
+    showModalBottomSheet(
       context: context,
-      barrierDismissible: false,
+      isScrollControlled: true, // 🔥 important for full height
+      useSafeArea: true,
+      backgroundColor: AppColors.bottomNavBg(context), // allows rounded corners
       builder: (context) {
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: SizedBox(
-            // width: MediaQuery.of(context).size.width * 0.9,
-            child: PriceTierManagementDialog(
-              productId: widget.productId.toString(),
-              productSaleModeId: mode.id,
-              title: "Price Tier Management",
-            ),
-          ),
+        return DraggableScrollableSheet(
+          initialChildSize: 0.95, // almost full screen
+          minChildSize: 0.6,
+          maxChildSize: 0.95,
+          expand: false,
+          builder: (context, scrollController) {
+            return Container(
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(
+                  top: Radius.circular(16),
+                ),
+              ),
+              child: PriceTierManagementDialog(
+                productId: widget.productId.toString(),
+                productSaleModeId: mode.id,
+                title: "Price Tier Management",
+              ),
+            );
+          },
         );
       },
     );
   }
-
   void _showEditDialog(BuildContext context, ProductSaleModeModel mode) {
     showDialog(
       context: context,
@@ -469,16 +476,19 @@ class _ProductSaleModeListScreenState extends State<ProductSaleModeListScreen> {
         child: ClipRRect(
           borderRadius: BorderRadius.circular(AppSizes.radius),
           child: SizedBox(
-            width: MediaQuery.of(context).size.width * 0.8,
-            // child: SaleModeCreateScreen(
-            //   id: mode.id?.toString(),
-            //   saleMode: mode,
-            // ),
+            width: MediaQuery.of(context).size.width * 0.9,
+            height: MediaQuery.of(context).size.height * 0.5,
+
+            child: ProductSaleModeConfigScreen(
+              productId: widget.productId, // ✅ REQUIRED
+              initialData: mode.toJson(),            // ✅ EDIT MODE DATA
+            ),
           ),
         ),
       ),
     );
   }
+
 
   void _showDeleteDialog(BuildContext context, ProductSaleModeModel mode) {
     showDialog(
@@ -509,7 +519,6 @@ class _ProductSaleModeListScreenState extends State<ProductSaleModeListScreen> {
   }
 
   void _showBulkConfigDialog(BuildContext context) {
-    _fetchAvailableModes();
     showDialog(
       context: context,
       builder: (context) => Dialog(
@@ -522,6 +531,7 @@ class _ProductSaleModeListScreenState extends State<ProductSaleModeListScreen> {
             width: Responsive.isMobile(context)
                 ? MediaQuery.of(context).size.width * 0.9
                 : MediaQuery.of(context).size.width * 0.7,
+            height: MediaQuery.of(context).size.height * 0.5,
             child: ProductSaleModeConfigScreen(productId: widget.productId),
           ),
         ),

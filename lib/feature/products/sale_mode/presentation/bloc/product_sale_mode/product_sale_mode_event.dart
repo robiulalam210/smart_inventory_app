@@ -26,15 +26,6 @@ class FetchProductSaleModeList extends ProductSaleModeEvent {
   List<Object> get props => [context, productId, filterText, pageNumber];
 }
 
-class FetchAvailableSaleModes extends ProductSaleModeEvent {
-  final BuildContext context;
-  final String productId;
-
-  const FetchAvailableSaleModes(this.context, {required this.productId});
-
-  @override
-  List<Object> get props => [context, productId];
-}
 
 class AddProductSaleMode extends ProductSaleModeEvent {
   final Map<String, dynamic> body;

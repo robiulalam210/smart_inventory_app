@@ -12,6 +12,7 @@ import '../../../../../../core/repositories/delete_response.dart';
 import '../../../../../../core/repositories/get_response.dart';
 import '../../../../../../core/repositories/post_response.dart';
 import '../../../../../../core/repositories/patch_response.dart';
+import '../../../sale_mode/data/avliable_sales_model.dart';
 import '../../../sale_mode/data/product_sale_mode_model.dart';
 import '../../data/model/price_tier_model.dart';
 
@@ -20,8 +21,11 @@ part 'price_tier_state.dart';
 
 class PriceTierBloc extends Bloc<PriceTierEvent, PriceTierState> {
   List<PriceTierModel> priceTiers = [];
+  List<AvlibleSaleModeModel> availableSaleModes = [];
 
   PriceTierBloc() : super(PriceTierInitial()) {
+    on<FetchAvailableSaleModes>(_onFetchAvailableSaleModes);
+
     on<LoadPriceTiers>(_onLoadPriceTiers);
     on<AddPriceTier>(_onAddPriceTier);
     on<UpdatePriceTier>(_onUpdatePriceTier);
@@ -71,6 +75,46 @@ class PriceTierBloc extends Bloc<PriceTierEvent, PriceTierState> {
     }
   }
 
+
+  Future<void> _onFetchAvailableSaleModes(
+      FetchAvailableSaleModes event,
+      Emitter<PriceTierState> emit,
+      ) async {
+    emit(AvailableSaleModesLoading());
+
+    try {
+      final res = await getResponse(
+        url: "${AppUrls.products}${event.productId}/available_sale_modes/",
+        context: event.context,
+      );
+
+      ApiResponse response = appParseJson(
+        res,
+            (data) => data, // just pass data as-is
+      );
+
+      final data = response.data;
+
+      if (data == null || (data as List).isEmpty) {
+        emit(AvailableSaleModesSuccess(availableModes: []));
+        return;
+      }
+
+      final dataList = data as List<dynamic>;
+
+      // Map JSON to your model
+      final modes = dataList
+          .map((e) => AvlibleSaleModeModel.fromJson(e as Map<String, dynamic>))
+          .toList();
+
+      availableSaleModes = modes; // store locally if needed
+      emit(AvailableSaleModesSuccess(availableModes: modes));
+    } catch (error, st) {
+      print(error);
+      print(st);
+      emit(AvailableSaleModesFailed(title: "Error", content: error.toString()));
+    }
+  }
 
 
   Future<void> _onAddPriceTier(

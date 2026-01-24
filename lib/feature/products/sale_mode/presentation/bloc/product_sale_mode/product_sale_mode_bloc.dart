@@ -21,11 +21,9 @@ class ProductSaleModeBloc extends Bloc<ProductSaleModeEvent, ProductSaleModeStat
   List<ProductSaleModeModel> productSaleModeModel = [];
   String selectedId = "";
   TextEditingController filterTextController = TextEditingController();
-  List<AvlibleSaleModeModel> availableSaleModes = [];
 
   ProductSaleModeBloc() : super(ProductSaleModeInitial()) {
     on<FetchProductSaleModeList>(_onFetchProductSaleModeList);
-    // on<FetchAvailableSaleModes>(_onFetchAvailableSaleModes);
     on<AddProductSaleMode>(_onCreateProductSaleModeList);
     on<UpdateProductSaleMode>(_onUpdateProductSaleModeList);
     on<DeleteProductSaleMode>(_onDeleteProductSaleModeList);
@@ -79,47 +77,6 @@ class ProductSaleModeBloc extends Bloc<ProductSaleModeEvent, ProductSaleModeStat
 
 
 
-  // Future<void> _onFetchAvailableSaleModes(
-  //     FetchAvailableSaleModes event,
-  //     Emitter<ProductSaleModeState> emit,
-  //     ) async {
-  //   emit(AvailableSaleModesLoading());
-  //
-  //   try {
-  //     final res = await getResponse(
-  //       url: "${AppUrls.products}${event.productId}/available_sale_modes/",
-  //       context: event.context,
-  //     );
-  //
-  //     ApiResponse response = appParseJson(
-  //       res,
-  //           (data) => data, // just pass data as-is
-  //     );
-  //
-  //     final data = response.data;
-  //
-  //     if (data == null || (data as List).isEmpty) {
-  //       emit(AvailableSaleModesSuccess(availableModes: []));
-  //       return;
-  //     }
-  //
-  //     final dataList = data as List<dynamic>;
-  //
-  //     // Map JSON to your model
-  //     final modes = dataList
-  //         .map((e) => AvlibleSaleModeModel.fromJson(e as Map<String, dynamic>))
-  //         .toList();
-  //
-  //     availableSaleModes = modes; // store locally if needed
-  //     emit(AvailableSaleModesSuccess(availableModes: modes));
-  //   } catch (error, st) {
-  //     print(error);
-  //     print(st);
-  //     emit(AvailableSaleModesFailed(title: "Error", content: error.toString()));
-  //   }
-  // }
-  //
-
   Future<void> _onCreateProductSaleModeList(
       AddProductSaleMode event,
       Emitter<ProductSaleModeState> emit,
@@ -132,21 +89,38 @@ class ProductSaleModeBloc extends Bloc<ProductSaleModeEvent, ProductSaleModeStat
         payload: event.body,
       );
 
-      final jsonString = jsonEncode(res);
-      ApiResponse response = appParseJson(
-        jsonString,
-            (data) => ProductSaleModeModel.fromJson(data),
-      );
+      print("RAW RESPONSE => $res");
 
-      if (response.success == false) {
-        emit(ProductSaleModeAddFailed(title: '', content: response.message ?? ""));
+      final bool success = res['status'] == true;
+
+      if (!success) {
+        /// 🔥 Handle Django validation error
+        String message = res['message'] ?? 'Something went wrong';
+
+        final data = res['data'];
+        if (data is Map && data['data'] is Map) {
+          final errors = data['data']['non_field_errors'];
+          if (errors is List && errors.isNotEmpty) {
+            message = errors.first.toString();
+          }
+        }
+
+        emit(ProductSaleModeAddFailed(
+          title: res['title'] ?? 'Error',
+          content: message,
+        ));
         return;
       }
 
       emit(ProductSaleModeAddSuccess());
-    } catch (error) {
+    } catch (error, st) {
+      print(error);
+      print(st);
 
-      emit(ProductSaleModeAddFailed(title: "Error", content: error.toString()));
+      emit(ProductSaleModeAddFailed(
+        title: "Error",
+        content: error.toString(),
+      ));
     }
   }
 
@@ -162,14 +136,26 @@ class ProductSaleModeBloc extends Bloc<ProductSaleModeEvent, ProductSaleModeStat
         payload: event.body!,
       );
 
-      final jsonString = jsonEncode(res);
-      ApiResponse response = appParseJson(
-        jsonString,
-            (data) => ProductSaleModeModel.fromJson(data),
-      );
+      print("RAW RESPONSE => $res");
 
-      if (response.success == false) {
-        emit(ProductSaleModeAddFailed(title: 'Alert', content: response.message ?? ""));
+      final bool success = res['status'] == true;
+
+      if (!success) {
+        /// 🔥 Handle Django validation error
+        String message = res['message'] ?? 'Something went wrong';
+
+        final data = res['data'];
+        if (data is Map && data['data'] is Map) {
+          final errors = data['data']['non_field_errors'];
+          if (errors is List && errors.isNotEmpty) {
+            message = errors.first.toString();
+          }
+        }
+
+        emit(ProductSaleModeAddFailed(
+          title: res['title'] ?? 'Error',
+          content: message,
+        ));
         return;
       }
 
@@ -244,7 +230,6 @@ class ProductSaleModeBloc extends Bloc<ProductSaleModeEvent, ProductSaleModeStat
       Emitter<ProductSaleModeState> emit,
       ) {
     productSaleModeModel.clear();
-    availableSaleModes.clear();
     filterTextController.clear();
     selectedId = "";
   }

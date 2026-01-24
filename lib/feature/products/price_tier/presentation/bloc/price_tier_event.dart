@@ -37,6 +37,17 @@ class AddPriceTier extends PriceTierEvent {
   List<Object> get props => [context, priceTier];
 }
 
+
+class FetchAvailableSaleModes extends PriceTierEvent {
+  final BuildContext context;
+  final String productId;
+
+  const FetchAvailableSaleModes(this.context, {required this.productId});
+
+  @override
+  List<Object> get props => [context, productId];
+}
+
 class UpdatePriceTier extends PriceTierEvent {
   final BuildContext context;
   final Map<String ,dynamic> priceTier;

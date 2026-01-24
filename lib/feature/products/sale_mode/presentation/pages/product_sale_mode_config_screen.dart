@@ -1,50 +1,66 @@
 // features/products/sale_mode/presentation/screens/product_sale_mode_config_screen.dart
 
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'dart:convert';
 
 import '../../../../../../core/configs/configs.dart';
 import '../../../../../../core/widgets/app_button.dart';
 import '../../../../../../core/widgets/app_dropdown.dart';
 import '../../../../../../core/widgets/input_field.dart';
 import '../../../../../../core/widgets/show_custom_toast.dart';
+import '../../../../../core/widgets/app_alert_dialog.dart';
+import '../../../../../core/widgets/app_loader.dart';
+import '../../../price_tier/presentation/bloc/price_tier_bloc.dart';
 import '../../data/avliable_sales_model.dart';
-import '../../data/product_sale_mode_model.dart';
-import '../../data/sale_mode_model.dart';
 import '../bloc/product_sale_mode/product_sale_mode_bloc.dart';
 
+/// ================= PRICE TIER ROW =================
 class PriceTierRow extends StatefulWidget {
   final Function(Map<String, dynamic>) onUpdate;
   final Map<String, dynamic>? initialData;
 
-  const PriceTierRow({
-    super.key,
-    required this.onUpdate,
-    this.initialData,
-  });
+  const PriceTierRow({super.key, required this.onUpdate, this.initialData});
 
   @override
   State<PriceTierRow> createState() => _PriceTierRowState();
 }
 
 class _PriceTierRowState extends State<PriceTierRow> {
-  late TextEditingController minQuantityController;
-  late TextEditingController maxQuantityController;
-  late TextEditingController priceController;
+  late final TextEditingController minQtyCtrl;
+  late final TextEditingController maxQtyCtrl;
+  late final TextEditingController priceCtrl;
 
   @override
   void initState() {
     super.initState();
-    minQuantityController = TextEditingController(
+    minQtyCtrl = TextEditingController(
       text: widget.initialData?['min_quantity']?.toString() ?? '0',
     );
-    maxQuantityController = TextEditingController(
+    maxQtyCtrl = TextEditingController(
       text: widget.initialData?['max_quantity']?.toString() ?? '',
     );
-    priceController = TextEditingController(
+    priceCtrl = TextEditingController(
       text: widget.initialData?['price']?.toString() ?? '',
     );
+  }
+
+  @override
+  void dispose() {
+    minQtyCtrl.dispose();
+    maxQtyCtrl.dispose();
+    priceCtrl.dispose();
+    super.dispose();
+  }
+
+  void _update() {
+    widget.onUpdate({
+      'min_quantity': double.tryParse(minQtyCtrl.text) ?? 0,
+      'max_quantity': maxQtyCtrl.text.isNotEmpty
+          ? double.tryParse(maxQtyCtrl.text)
+          : null,
+      'price': double.tryParse(priceCtrl.text) ?? 0,
+    });
   }
 
   @override
@@ -52,36 +68,36 @@ class _PriceTierRowState extends State<PriceTierRow> {
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 4),
       child: Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.all(8),
         child: Row(
           children: [
             Expanded(
               child: CustomInputField(
-                controller: minQuantityController,
-                hintText: 'Min Qty',
-                labelText: 'Min Quantity',
+                controller: minQtyCtrl,
+                labelText: 'Min Qty',
                 keyboardType: TextInputType.number,
-                onChanged: (_) => _updateData(),
+                onChanged: (_) => _update(),
+                hintText: 'Enter Min Quantity',
               ),
             ),
             const SizedBox(width: 8),
             Expanded(
               child: CustomInputField(
-                controller: maxQuantityController,
-                hintText: 'Max Qty (leave empty for unlimited)',
-                labelText: 'Max Quantity',
+                controller: maxQtyCtrl,
+                labelText: 'Max Qty',
+                hintText: 'Optional',
                 keyboardType: TextInputType.number,
-                onChanged: (_) => _updateData(),
+                onChanged: (_) => _update(),
               ),
             ),
             const SizedBox(width: 8),
             Expanded(
               child: CustomInputField(
-                controller: priceController,
-                hintText: 'Price',
+                controller: priceCtrl,
+                hintText: 'Enter Price',
                 labelText: 'Price',
                 keyboardType: TextInputType.number,
-                onChanged: (_) => _updateData(),
+                onChanged: (_) => _update(),
               ),
             ),
           ],
@@ -89,18 +105,9 @@ class _PriceTierRowState extends State<PriceTierRow> {
       ),
     );
   }
-
-  void _updateData() {
-    widget.onUpdate({
-      'min_quantity': double.tryParse(minQuantityController.text) ?? 0,
-      'max_quantity': maxQuantityController.text.isNotEmpty
-          ? double.tryParse(maxQuantityController.text)
-          : null,
-      'price': double.tryParse(priceController.text) ?? 0,
-    });
-  }
 }
 
+/// ================= MAIN SCREEN =================
 class ProductSaleModeConfigScreen extends StatefulWidget {
   final String productId;
   final Map<String, dynamic>? initialData;
@@ -112,14 +119,17 @@ class ProductSaleModeConfigScreen extends StatefulWidget {
   });
 
   @override
-  State<ProductSaleModeConfigScreen> createState() => _ProductSaleModeConfigScreenState();
+  State<ProductSaleModeConfigScreen> createState() =>
+      _ProductSaleModeConfigScreenState();
 }
 
-class _ProductSaleModeConfigScreenState extends State<ProductSaleModeConfigScreen> {
-  final GlobalKey<FormState> formKey = GlobalKey<FormState>();
-  late TextEditingController unitPriceController;
-  late TextEditingController flatPriceController;
-  late TextEditingController discountValueController;
+class _ProductSaleModeConfigScreenState
+    extends State<ProductSaleModeConfigScreen> {
+  final formKey = GlobalKey<FormState>();
+
+  late final TextEditingController unitPriceCtrl;
+  late final TextEditingController flatPriceCtrl;
+  late final TextEditingController discountCtrl;
 
   String selectedSaleModeId = '';
   String selectedPriceType = 'unit';
@@ -128,130 +138,87 @@ class _ProductSaleModeConfigScreenState extends State<ProductSaleModeConfigScree
 
   List<Map<String, dynamic>> tiers = [];
 
+  bool isEditInitialized = false; // ✅ prevent overwriting controllers multiple times
+
   @override
   void initState() {
     super.initState();
-    unitPriceController = TextEditingController();
-    flatPriceController = TextEditingController();
-    discountValueController = TextEditingController();
 
-    // Load initial data if provided
+    unitPriceCtrl = TextEditingController();
+    flatPriceCtrl = TextEditingController();
+    discountCtrl = TextEditingController();
+
     if (widget.initialData != null) {
-      selectedSaleModeId = widget.initialData!['sale_mode_id']?.toString() ?? '';
-      selectedPriceType = widget.initialData!['price_type'] ?? 'unit';
-      selectedDiscountType = widget.initialData!['discount_type'] ?? 'fixed';
-      selectedStatus = widget.initialData!['is_active'] == true ? 'Active' : 'Inactive';
-      unitPriceController.text = widget.initialData!['unit_price']?.toString() ?? '';
-      flatPriceController.text = widget.initialData!['flat_price']?.toString() ?? '';
-      discountValueController.text = widget.initialData!['discount_value']?.toString() ?? '';
-      tiers = List<Map<String, dynamic>>.from(widget.initialData!['tiers'] ?? []);
+      final data = widget.initialData!;
+      selectedSaleModeId = data['sale_mode_id']?.toString() ?? '';
+      selectedPriceType = data['price_type'] ?? 'unit';
+      selectedDiscountType = data['discount_type'] ?? 'fixed';
+      selectedStatus = data['is_active'] == true ? 'Active' : 'Inactive';
+
+      unitPriceCtrl.text = data['unit_price']?.toString() ?? '';
+      flatPriceCtrl.text = data['flat_price']?.toString() ?? '';
+      discountCtrl.text = data['discount_value']?.toString() ?? '';
+      tiers = List<Map<String, dynamic>>.from(data['tiers'] ?? []);
     }
+
+    context.read<PriceTierBloc>().add(
+      FetchAvailableSaleModes(context, productId: widget.productId),
+    );
   }
 
   @override
   void dispose() {
-    unitPriceController.dispose();
-    flatPriceController.dispose();
-    discountValueController.dispose();
+    unitPriceCtrl.dispose();
+    flatPriceCtrl.dispose();
+    discountCtrl.dispose();
     super.dispose();
   }
 
-  void _addTier() {
-    setState(() {
-      tiers.add({
-        'min_quantity': 0,
-        'max_quantity': null,
-        'price': 0,
-      });
-    });
-  }
+  void _submit() {
+    if (!formKey.currentState!.validate()) return;
 
-  void _removeTier(int index) {
-    setState(() {
-      tiers.removeAt(index);
-    });
-  }
+    if (selectedPriceType == 'tier' && tiers.isEmpty) {
+      showCustomToast(
+        context: context,
+        title: 'Error',
+        description: 'Add at least one tier',
+        type: ToastificationType.error,
+        icon: Icons.error,
+        primaryColor: Colors.redAccent,
+      );
+      return;
+    }
 
-  void _updateTier(int index, Map<String, dynamic> data) {
-    setState(() {
-      tiers[index] = data;
-    });
-  }
+    final body = {
+      'product': int.parse(widget.productId),
+      'sale_mode': int.parse(selectedSaleModeId),
+      'unit_price': unitPriceCtrl.text.isNotEmpty
+          ? double.tryParse(unitPriceCtrl.text)
+          : null,
+      'flat_price': flatPriceCtrl.text.isNotEmpty
+          ? double.tryParse(flatPriceCtrl.text)
+          : null,
+      'discount_type': discountCtrl.text.isNotEmpty
+          ? selectedDiscountType
+          : null,
+      'discount_value': discountCtrl.text.isNotEmpty
+          ? double.tryParse(discountCtrl.text)
+          : null,
+      'is_active': selectedStatus == 'Active',
+      if (selectedPriceType == 'tier') 'tiers': tiers,
+    };
 
-  void _showConfirmationDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Confirm Configuration'),
-          content: const Text('Are you sure you want to save this sale mode configuration?'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                _submitForm();
-              },
-              child: const Text('Confirm'),
-            ),
-          ],
-        );
-      },
-    );
-  }
+    final bloc = context.read<ProductSaleModeBloc>();
 
-  void _submitForm() {
-    if (formKey.currentState!.validate()) {
-      if (selectedSaleModeId.isEmpty) {
-        showCustomToast(
-          context: context,
-          title: 'Error',
-          description: 'Please select a sale mode',
-          type: ToastificationType.error,
-          icon: Icons.error,
-          primaryColor: Colors.redAccent,
-        );
-        return;
-      }
-
-      final Map<String, dynamic> body = {
-        'product_id': widget.productId,
-        'sale_mode': int.parse(selectedSaleModeId),
-        'unit_price': unitPriceController.text.isNotEmpty
-            ? double.tryParse(unitPriceController.text)
-            : null,
-        'flat_price': flatPriceController.text.isNotEmpty
-            ? double.tryParse(flatPriceController.text)
-            : null,
-        'discount_type': discountValueController.text.isNotEmpty
-            ? selectedDiscountType
-            : null,
-        'discount_value': discountValueController.text.isNotEmpty
-            ? double.tryParse(discountValueController.text)
-            : null,
-        'is_active': selectedStatus == 'Active',
-      };
-
-      if (selectedPriceType == 'tier' && tiers.isNotEmpty) {
-        body['tiers'] = tiers;
-      }
-
-      // Check if we're updating or creating
-      if (widget.initialData != null && widget.initialData!['id'] != null) {
-        context.read<ProductSaleModeBloc>().add(
-          UpdateProductSaleMode(
-            id: widget.initialData!['id'].toString(),
-            body: body,
-          ),
-        );
-      } else {
-        context.read<ProductSaleModeBloc>().add(
-          AddProductSaleMode(body: body),
-        );
-      }
+    if (widget.initialData?['id'] != null) {
+      bloc.add(
+        UpdateProductSaleMode(
+          id: widget.initialData!['id'].toString(),
+          body: body,
+        ),
+      );
+    } else {
+      bloc.add(AddProductSaleMode(body: body));
     }
   }
 
@@ -259,301 +226,185 @@ class _ProductSaleModeConfigScreenState extends State<ProductSaleModeConfigScree
   Widget build(BuildContext context) {
     return BlocListener<ProductSaleModeBloc, ProductSaleModeState>(
       listener: (context, state) {
+        if (state is ProductSaleModeAddLoading) {
+          // Optionally show loader
+        }
+
         if (state is ProductSaleModeAddSuccess) {
+          Navigator.of(context).pop(true); // close screen safely
+          context.read<ProductSaleModeBloc>().add(
+            FetchProductSaleModeList(context, productId: widget.productId),
+          );
           showCustomToast(
             context: context,
             title: 'Success!',
-            description: 'Sale mode configuration saved successfully',
-            type: ToastificationType.success,
+            description: "Configuration saved successfully",
             icon: Icons.check_circle,
             primaryColor: Colors.green,
           );
-          Navigator.pop(context, true);
         } else if (state is ProductSaleModeAddFailed) {
+          Navigator.of(context).pop(true); // close screen safely
+          context.read<ProductSaleModeBloc>().add(
+            FetchProductSaleModeList(context, productId: widget.productId),
+          );
           showCustomToast(
             context: context,
-            title: state.title,
+            title: state.title.isNotEmpty ? state.title : 'Error',
             description: state.content,
-            type: ToastificationType.error,
-            icon: Icons.error,
+            icon: Icons.add_alert,
             primaryColor: Colors.redAccent,
           );
         }
       },
-      child: _buildDialogContent(),
-    );
-  }
-
-  Widget _buildDialogContent() {
-    return Container(
-      color: AppColors.bottomNavBg(context),
-      padding: const EdgeInsets.all(20),
-      child: Form(
-        key: formKey,
-        child: ListView(
-          shrinkWrap: true,
-          children: [
-            // Header
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Scaffold(
+        backgroundColor: AppColors.bottomNavBg(context),
+        body: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Form(
+            key: formKey,
+            child: ListView(
               children: [
-                Text(
-                  widget.initialData == null
-                      ? 'Configure Sale Mode'
-                      : 'Update Sale Mode Configuration',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.primaryColor(context),
-                  ),
-                ),
-                IconButton(
-                  onPressed: () => Navigator.pop(context),
-                  icon: const Icon(Icons.close, color: Colors.red, size: 20),
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 20),
-
-            // Sale Mode Selection
-
-            BlocBuilder<ProductSaleModeBloc, ProductSaleModeState>(
-              builder: (context, state) {
-                if (state is AvailableSaleModesLoading) {
-                  return Center(child: CircularProgressIndicator());
-                } else if (state is AvailableSaleModesSuccess) {
-                  final availableModes = state.availableModes; // List<ProductSaleModeModel>
-                  if (availableModes.isEmpty) {
-                    return Text(
-                      "No sale modes available. Please create sale modes first.",
-                      style: TextStyle(color: Colors.orange),
-                    );
-                  }
-
-                  return AppDropdown<AvlibleSaleModeModel>(
-                    label: "Sale Mode",
-                    hint: "Select Sale Mode",
-                    isLabel: true,
-                    value: selectedSaleModeId.isNotEmpty
-                        ? availableModes.firstWhere(
-                          (mode) => mode.id.toString() == selectedSaleModeId,
-                      orElse: () => AvlibleSaleModeModel(),
-                    )
-                        : null,
-                    itemList: availableModes, // Pass the models directly
-                    itemLabel: (mode) => '${mode.name ?? "Unknown"} (${mode.priceType ?? "unit"})', // how to display
-                    onChanged: (selectedMode) {
-                      if (selectedMode != null) {
-                        setState(() {
-                          selectedSaleModeId = selectedMode.id.toString();
-                          selectedPriceType = selectedMode.priceType ?? 'unit';
-                          unitPriceController.text = selectedMode.unitPrice?.toString() ?? '';
-                          flatPriceController.text = selectedMode.flatPrice?.toString() ?? '';
-                        });
-
-                        print("Selected Sale Mode ID: $selectedSaleModeId");
-                        print("Selected Price Type: $selectedPriceType");
-                      }
-                    },
-                  );
-                } else if (state is AvailableSaleModesFailed) {
-                  return Text(
-                    "Error loading sale modes: ${state.content}",
-                    style: TextStyle(color: Colors.red),
-                  );
-                }
-
-                return Center(child: CircularProgressIndicator());
-              },
-            ),
-
-
-            const SizedBox(height: 16),
-
-            // Price Type Selection
-            AppDropdown(
-              label: "Price Type",
-              hint: "Select Price Type",
-              isLabel: true,
-              value: selectedPriceType,
-              itemList: const [
-                {'value': 'unit', 'label': 'Unit Price'},
-                {'value': 'flat', 'label': 'Flat Price'},
-                {'value': 'tier', 'label': 'Tier Price'},
-              ],
-              onChanged: (newVal) {
-                setState(() {
-                  selectedPriceType = newVal.toString();
-                });
-              },
-            ),
-
-            const SizedBox(height: 16),
-
-            // Unit Price (for unit price type)
-            if (selectedPriceType == 'unit' || selectedPriceType == 'tier')
-              CustomInputField(
-                controller: unitPriceController,
-                hintText: 'e.g., 100.00',
-                labelText: 'Unit Price',
-                keyboardType: TextInputType.number,
-                validator: (value) {
-                  if (selectedPriceType == 'unit' && (value == null || value.isEmpty)) {
-                    return 'Please enter unit price';
-                  }
-                  if (value != null && value.isNotEmpty) {
-                    if (double.tryParse(value) == null) {
-                      return 'Please enter a valid number';
-                    }
-                  }
-                  return null;
-                },
-              ),
-
-            const SizedBox(height: 16),
-
-            // Flat Price (for flat price type)
-            if (selectedPriceType == 'flat')
-              CustomInputField(
-                controller: flatPriceController,
-                hintText: 'e.g., 4000.00 (for BOSTA)',
-                labelText: 'Flat Price',
-                keyboardType: TextInputType.number,
-                validator: (value) {
-                  if (selectedPriceType == 'flat' && (value == null || value.isEmpty)) {
-                    return 'Please enter flat price';
-                  }
-                  if (value != null && value.isNotEmpty) {
-                    if (double.tryParse(value) == null) {
-                      return 'Please enter a valid number';
-                    }
-                  }
-                  return null;
-                },
-              ),
-
-            const SizedBox(height: 16),
-
-            // Tier Pricing (for tier price type)
-            if (selectedPriceType == 'tier') ...[
-              const Text(
-                'Tier Pricing',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-              ),
-              const SizedBox(height: 8),
-              ...tiers.asMap().entries.map((entry) {
-                final index = entry.key;
-                final tier = entry.value;
-                return Row(
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Expanded(
-                      child: PriceTierRow(
-                        initialData: tier,
-                        onUpdate: (data) => _updateTier(index, data),
-                      ),
+                    Text(
+                      'Product Configuration',
+                      style: AppTextStyle.titleMedium(context),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.remove_circle, color: Colors.red),
-                      onPressed: () => _removeTier(index),
+                      icon: const Icon(HugeIcons.strokeRoundedCancelSquare),
+                      onPressed: () => Navigator.of(context).pop(),
                     ),
                   ],
-                );
-              }).toList(),
-              ElevatedButton.icon(
-                onPressed: _addTier,
-                icon: const Icon(Icons.add),
-                label: const Text('Add Tier'),
-              ),
-              const SizedBox(height: 16),
-            ],
-
-            const SizedBox(height: 16),
-
-            // Discount Section
-            Row(
-              children: [
-                Expanded(
-                  child: AppDropdown(
-                    label: "Discount Type",
-                    hint: "Select Discount Type",
-                    isLabel: true,
-                    value: selectedDiscountType,
-                    itemList: const [
-                      {'value': 'fixed', 'label': 'Fixed Amount'},
-                      {'value': 'percentage', 'label': 'Percentage'},
-                    ],
-                    onChanged: (newVal) {
-                      setState(() {
-                        selectedDiscountType = newVal.toString();
-                      });
-                    },
-                  ),
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: CustomInputField(
-                    controller: discountValueController,
-                    hintText: selectedDiscountType == 'percentage' ? 'e.g., 10' : 'e.g., 50',
-                    labelText: 'Discount Value',
-                    keyboardType: TextInputType.number,
-                  ),
-                ),
-              ],
-            ),
+                const SizedBox(height: 12),
 
-            const SizedBox(height: 16),
-
-            // Status Selection
-            AppDropdown(
-              label: "Status",
-              hint: "Select Status",
-              isLabel: true,
-              value: selectedStatus,
-              itemList: const [
-                {'value': 'Active', 'label': 'Active'},
-                {'value': 'Inactive', 'label': 'Inactive'},
-              ],
-              onChanged: (newVal) {
-                setState(() {
-                  selectedStatus = newVal.toString();
-                });
-              },
-            ),
-
-            const SizedBox(height: 24),
-
-            // Buttons Row
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                AppButton(
-                  isOutlined: true,
-                  size: 120,
-                  color: AppColors.primaryColor(context),
-                  borderColor: AppColors.primaryColor(context),
-                  textColor: AppColors.errorColor(context),
-                  name: 'Cancel',
-                  onPressed: () => Navigator.pop(context),
-                ),
-                const SizedBox(width: 16),
-                BlocBuilder<ProductSaleModeBloc, ProductSaleModeState>(
+                /// SALE MODE
+                BlocBuilder<PriceTierBloc, PriceTierState>(
                   builder: (context, state) {
-                    return AppButton(
-                      size: 120,
-                      name: widget.initialData == null ? 'Save' : 'Update',
-                      onPressed: (state is ProductSaleModeAddLoading)
-                          ? null
-                          : _showConfirmationDialog,
-                      isLoading: state is ProductSaleModeAddLoading,
-                    );
+                    if (state is AvailableSaleModesSuccess) {
+                      AvlibleSaleModeModel? selectedMode;
+
+                      // Only set selectedMode if we are in edit mode
+                      if (selectedSaleModeId.isNotEmpty && !isEditInitialized) {
+                        selectedMode = state.availableModes.firstWhereOrNull(
+                              (e) => e.id.toString() == selectedSaleModeId,
+                        );
+
+                        if (selectedMode != null) {
+                          unitPriceCtrl.text =
+                              selectedMode.unitPrice?.toString() ?? '';
+                          flatPriceCtrl.text =
+                              selectedMode.flatPrice?.toString() ?? '';
+                          selectedPriceType = selectedMode.priceType ?? 'unit';
+                        }
+
+                        isEditInitialized = true; // prevent overwriting
+                      }
+
+                      return AppDropdown<AvlibleSaleModeModel>(
+                        label: "Sale Mode",
+                        hint: "Select Sale Mode",
+                        value: selectedMode,
+                        itemList: state.availableModes,
+                        itemLabel: (m) => '${m.name} (${m.priceType})',
+                        onChanged: (m) {
+                          setState(() {
+                            selectedSaleModeId = m!.id.toString();
+                            selectedPriceType = m.priceType ?? 'unit';
+                            unitPriceCtrl.text = m.unitPrice?.toString() ?? '';
+                            flatPriceCtrl.text = m.flatPrice?.toString() ?? '';
+                            tiers.clear();
+                          });
+                        },
+                      );
+                    }
+                    return const Center(child: CircularProgressIndicator());
                   },
                 ),
+
+                const SizedBox(height: 16),
+
+                /// PRICE TYPE
+                AppDropdown<Map<String, String>>(
+                  label: "Price Type",
+                  hint: "Select Price Type",
+                  value: {
+                    'value': selectedPriceType,
+                    'label': selectedPriceType == 'unit'
+                        ? 'Unit Price'
+                        : selectedPriceType == 'flat'
+                        ? 'Flat Price'
+                        : 'Tier Price',
+                  },
+                  itemList: const [
+                    {'value': 'unit', 'label': 'Unit Price'},
+                    {'value': 'flat', 'label': 'Flat Price'},
+                    {'value': 'tier', 'label': 'Tier Price'},
+                  ],
+                  itemLabel: (i) => i['label']!,
+                  onChanged: (v) {
+                    setState(() {
+                      selectedPriceType = v?['value'] ?? '';
+                      if (selectedPriceType != 'tier') tiers.clear();
+                    });
+                  },
+                ),
+
+                const SizedBox(height: 12),
+
+                if (selectedPriceType != 'flat')
+                  CustomInputField(
+                    controller: unitPriceCtrl,
+                    labelText: 'Unit Price',
+                    keyboardType: TextInputType.number,
+                    hintText: 'Enter unit price',
+                  ),
+
+                if (selectedPriceType == 'flat')
+                  CustomInputField(
+                    controller: flatPriceCtrl,
+                    labelText: 'Flat Price',
+                    hintText: "Enter flat price",
+                    keyboardType: TextInputType.number,
+                  ),
+
+                if (selectedPriceType == 'tier') ...[
+                  const SizedBox(height: 12),
+                  ...tiers.asMap().entries.map(
+                        (e) => Row(
+                      children: [
+                        Expanded(
+                          child: PriceTierRow(
+                            initialData: e.value,
+                            onUpdate: (d) => tiers[e.key] = d,
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.delete, color: Colors.red),
+                          onPressed: () => setState(() => tiers.removeAt(e.key)),
+                        ),
+                      ],
+                    ),
+                  ),
+                  TextButton.icon(
+                    onPressed: () => setState(() {
+                      tiers.add({
+                        'min_quantity': 0,
+                        'max_quantity': null,
+                        'price': 0,
+                      });
+                    }),
+                    icon: const Icon(Icons.add),
+                    label: const Text('Add Tier'),
+                  ),
+                ],
+
+                const SizedBox(height: 30),
+                AppButton(name: 'Save', onPressed: _submit),
               ],
             ),
-          ],
+          ),
         ),
       ),
     );
