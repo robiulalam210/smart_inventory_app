@@ -3,56 +3,8 @@
 import 'dart:convert';
 import 'package:equatable/equatable.dart';
 
-class PriceTierModel extends Equatable {
-  final int? id;
-  final int? productSaleMode;
-  final double? minQuantity;
-  final double? maxQuantity;
-  final double? price;
+import '../../price_tier/data/model/price_tier_model.dart';
 
-  const PriceTierModel({
-    this.id,
-    this.productSaleMode,
-    this.minQuantity,
-    this.maxQuantity,
-    this.price,
-  });
-
-  factory PriceTierModel.fromJson(Map<String, dynamic> json) {
-    return PriceTierModel(
-      id: json['id'],
-      productSaleMode: json['product_sale_mode'],
-      minQuantity: json['min_quantity'] != null
-          ? double.tryParse(json['min_quantity'].toString())
-          : null,
-      maxQuantity: json['max_quantity'] != null
-          ? double.tryParse(json['max_quantity'].toString())
-          : null,
-      price: json['price'] != null
-          ? double.tryParse(json['price'].toString())
-          : null,
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'product_sale_mode': productSaleMode,
-      'min_quantity': minQuantity,
-      'max_quantity': maxQuantity,
-      'price': price,
-    };
-  }
-
-  @override
-  List<Object?> get props => [
-    id,
-    productSaleMode,
-    minQuantity,
-    maxQuantity,
-    price,
-  ];
-}
 
 class ProductSaleModeModel extends Equatable {
   final int? id;

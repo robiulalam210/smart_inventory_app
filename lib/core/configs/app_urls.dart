@@ -25,6 +25,7 @@ class AppUrls {
   static final String getInvoice          = '$baseUrl/lab-offline/invoice';
 
   static  String saleModes = "$baseUrl/sale-modes/";
+  static  String priceTiers = "$baseUrl/price-tiers/";
   static  String productSaleModes = "$baseUrl/product-sale-modes/";
   static  String products = "$baseUrl/products/";
 
