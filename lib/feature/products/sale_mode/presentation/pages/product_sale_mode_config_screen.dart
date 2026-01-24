@@ -9,8 +9,6 @@ import '../../../../../../core/widgets/app_button.dart';
 import '../../../../../../core/widgets/app_dropdown.dart';
 import '../../../../../../core/widgets/input_field.dart';
 import '../../../../../../core/widgets/show_custom_toast.dart';
-import '../../../../../core/widgets/app_alert_dialog.dart';
-import '../../../../../core/widgets/app_loader.dart';
 import '../../../price_tier/presentation/bloc/price_tier_bloc.dart';
 import '../../data/avliable_sales_model.dart';
 import '../bloc/product_sale_mode/product_sale_mode_bloc.dart';
@@ -137,8 +135,7 @@ class _ProductSaleModeConfigScreenState
   String selectedStatus = 'Active';
 
   List<Map<String, dynamic>> tiers = [];
-
-  bool isEditInitialized = false; // ✅ prevent overwriting controllers multiple times
+  bool isEditInitialized = false;
 
   @override
   void initState() {
@@ -148,6 +145,7 @@ class _ProductSaleModeConfigScreenState
     flatPriceCtrl = TextEditingController();
     discountCtrl = TextEditingController();
 
+    // Load initial data
     if (widget.initialData != null) {
       final data = widget.initialData!;
       selectedSaleModeId = data['sale_mode_id']?.toString() ?? '';
@@ -161,6 +159,7 @@ class _ProductSaleModeConfigScreenState
       tiers = List<Map<String, dynamic>>.from(data['tiers'] ?? []);
     }
 
+    // Fetch sale modes
     context.read<PriceTierBloc>().add(
       FetchAvailableSaleModes(context, productId: widget.productId),
     );
@@ -192,10 +191,11 @@ class _ProductSaleModeConfigScreenState
     final body = {
       'product': int.parse(widget.productId),
       'sale_mode': int.parse(selectedSaleModeId),
-      'unit_price': unitPriceCtrl.text.isNotEmpty
+      'price_type': selectedPriceType,
+      'unit_price': selectedPriceType == 'unit'
           ? double.tryParse(unitPriceCtrl.text)
           : null,
-      'flat_price': flatPriceCtrl.text.isNotEmpty
+      'flat_price': selectedPriceType == 'flat'
           ? double.tryParse(flatPriceCtrl.text)
           : null,
       'discount_type': discountCtrl.text.isNotEmpty
@@ -208,9 +208,12 @@ class _ProductSaleModeConfigScreenState
       if (selectedPriceType == 'tier') 'tiers': tiers,
     };
 
+    debugPrint('Payload: $body'); // 🔹 debug print
+
     final bloc = context.read<ProductSaleModeBloc>();
 
     if (widget.initialData?['id'] != null) {
+      body['id'] = widget.initialData!['id'];
       bloc.add(
         UpdateProductSaleMode(
           id: widget.initialData!['id'].toString(),
@@ -226,14 +229,11 @@ class _ProductSaleModeConfigScreenState
   Widget build(BuildContext context) {
     return BlocListener<ProductSaleModeBloc, ProductSaleModeState>(
       listener: (context, state) {
-        if (state is ProductSaleModeAddLoading) {
-          // Optionally show loader
-        }
-
         if (state is ProductSaleModeAddSuccess) {
-          Navigator.of(context).pop(true); // close screen safely
+          Navigator.of(context).pop(true);
           context.read<ProductSaleModeBloc>().add(
-            FetchProductSaleModeList(context, productId: widget.productId),
+            FetchProductSaleModeList(
+                context, productId: widget.productId),
           );
           showCustomToast(
             context: context,
@@ -243,9 +243,10 @@ class _ProductSaleModeConfigScreenState
             primaryColor: Colors.green,
           );
         } else if (state is ProductSaleModeAddFailed) {
-          Navigator.of(context).pop(true); // close screen safely
+          Navigator.of(context).pop(true);
           context.read<ProductSaleModeBloc>().add(
-            FetchProductSaleModeList(context, productId: widget.productId),
+            FetchProductSaleModeList(
+                context, productId: widget.productId),
           );
           showCustomToast(
             context: context,
@@ -279,28 +280,13 @@ class _ProductSaleModeConfigScreenState
                 ),
                 const SizedBox(height: 12),
 
-                /// SALE MODE
+                /// SALE MODE DROPDOWN
                 BlocBuilder<PriceTierBloc, PriceTierState>(
                   builder: (context, state) {
                     if (state is AvailableSaleModesSuccess) {
-                      AvlibleSaleModeModel? selectedMode;
-
-                      // Only set selectedMode if we are in edit mode
-                      if (selectedSaleModeId.isNotEmpty && !isEditInitialized) {
-                        selectedMode = state.availableModes.firstWhereOrNull(
-                              (e) => e.id.toString() == selectedSaleModeId,
-                        );
-
-                        if (selectedMode != null) {
-                          unitPriceCtrl.text =
-                              selectedMode.unitPrice?.toString() ?? '';
-                          flatPriceCtrl.text =
-                              selectedMode.flatPrice?.toString() ?? '';
-                          selectedPriceType = selectedMode.priceType ?? 'unit';
-                        }
-
-                        isEditInitialized = true; // prevent overwriting
-                      }
+                      AvlibleSaleModeModel? selectedMode = state.availableModes
+                          .firstWhereOrNull(
+                              (e) => e.id.toString() == selectedSaleModeId);
 
                       return AppDropdown<AvlibleSaleModeModel>(
                         label: "Sale Mode",
@@ -312,20 +298,32 @@ class _ProductSaleModeConfigScreenState
                           setState(() {
                             selectedSaleModeId = m!.id.toString();
                             selectedPriceType = m.priceType ?? 'unit';
-                            unitPriceCtrl.text = m.unitPrice?.toString() ?? '';
-                            flatPriceCtrl.text = m.flatPrice?.toString() ?? '';
-                            tiers.clear();
+
+                            debugPrint(
+                                'Selected Mode: ${m.name}, Price Type: $selectedPriceType');
+
+                            // Update controllers based on price type
+                            if (selectedPriceType == 'unit') {
+                              unitPriceCtrl.text = m.unitPrice?.toString() ?? '';
+                              tiers.clear();
+                            } else if (selectedPriceType == 'flat') {
+                              flatPriceCtrl.text = m.flatPrice?.toString() ?? '';
+                              tiers.clear();
+                            } else if (selectedPriceType == 'tier') {
+                              tiers.clear(); // start empty, user adds tiers
+                            }
                           });
                         },
                       );
                     }
+
                     return const Center(child: CircularProgressIndicator());
                   },
                 ),
 
                 const SizedBox(height: 16),
 
-                /// PRICE TYPE
+                /// PRICE TYPE DROPDOWN
                 AppDropdown<Map<String, String>>(
                   label: "Price Type",
                   hint: "Select Price Type",
@@ -346,14 +344,40 @@ class _ProductSaleModeConfigScreenState
                   onChanged: (v) {
                     setState(() {
                       selectedPriceType = v?['value'] ?? '';
-                      if (selectedPriceType != 'tier') tiers.clear();
+                      tiers.clear();
+
+                      debugPrint(
+                          'Price Type manually changed: $selectedPriceType');
+
+                      // Sync controllers with selected sale mode
+                      final selectedMode = context
+                          .read<PriceTierBloc>()
+                          .state is AvailableSaleModesSuccess
+                          ? (context.read<PriceTierBloc>().state
+                      as AvailableSaleModesSuccess)
+                          .availableModes
+                          .firstWhereOrNull((e) =>
+                      e.id.toString() == selectedSaleModeId)
+                          : null;
+
+                      if (selectedPriceType == 'unit') {
+                        unitPriceCtrl.text =
+                            selectedMode?.unitPrice?.toString() ??
+                                widget.initialData?['unit_price']?.toString() ??
+                                '';
+                      } else if (selectedPriceType == 'flat') {
+                        flatPriceCtrl.text =
+                            selectedMode?.flatPrice?.toString() ??
+                                widget.initialData?['flat_price']?.toString() ??
+                                '';
+                      }
                     });
                   },
                 ),
 
                 const SizedBox(height: 12),
 
-                if (selectedPriceType != 'flat')
+                if (selectedPriceType == 'unit')
                   CustomInputField(
                     controller: unitPriceCtrl,
                     labelText: 'Unit Price',
@@ -365,8 +389,8 @@ class _ProductSaleModeConfigScreenState
                   CustomInputField(
                     controller: flatPriceCtrl,
                     labelText: 'Flat Price',
-                    hintText: "Enter flat price",
                     keyboardType: TextInputType.number,
+                    hintText: 'Enter flat price',
                   ),
 
                 if (selectedPriceType == 'tier') ...[
