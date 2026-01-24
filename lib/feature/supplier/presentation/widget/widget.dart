@@ -1,16 +1,17 @@
 import '/feature/supplier/data/model/supplier_list_model.dart';
-
 import '../../../../core/configs/configs.dart';
 
 class SupplierDataTableWidget extends StatelessWidget {
   final List<SupplierListModel> suppliers;
   final Function(SupplierListModel)? onEdit;
+  final Function(SupplierListModel)? onEditMobile;
   final Function(SupplierListModel)? onDelete;
 
   const SupplierDataTableWidget({
     super.key,
     required this.suppliers,
     this.onEdit,
+    this.onEditMobile,
     this.onDelete,
   });
 
@@ -22,7 +23,7 @@ class SupplierDataTableWidget extends StatelessWidget {
     if (isMobile || isTablet) {
       return _buildMobileCardView(context, isMobile);
     } else {
-      return _buildDesktopDataTable();
+      return _buildDesktopDataTable(context);
     }
   }
 
@@ -52,7 +53,6 @@ class SupplierDataTableWidget extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.bottomNavBg(context),
         borderRadius: BorderRadius.circular(AppSizes.radius),
-
         border: Border.all(
           color: AppColors.greyColor(context).withValues(alpha: 0.5),
           width: 0.5,
@@ -97,8 +97,9 @@ class SupplierDataTableWidget extends StatelessWidget {
                     const SizedBox(width: 8),
                     Text(
                       supplier.supplierNo ?? '-',
-                      style:  TextStyle(
-                        fontWeight: FontWeight.w600,color: AppColors.text(context),
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.text(context),
                         fontSize: 14,
                       ),
                     ),
@@ -125,6 +126,34 @@ class SupplierDataTableWidget extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
 
+                // Shop Name Row (NEW)
+                if (supplier.shopName?.isNotEmpty == true)
+                  Column(
+                    children: [
+                      _buildDetailRow(
+                        context: context,
+                        icon: Iconsax.shop,
+                        label: 'Shop Name',
+                        value: supplier.shopName ?? '-',
+                      ),
+                      const SizedBox(height: 2),
+                    ],
+                  ),
+
+                // Product Name Row (NEW)
+                if (supplier.productName?.isNotEmpty == true)
+                  Column(
+                    children: [
+                      _buildDetailRow(
+                        context: context,
+                        icon: Iconsax.box,
+                        label: 'Products/Services',
+                        value: supplier.productName ?? '-',
+                      ),
+                      const SizedBox(height: 2),
+                    ],
+                  ),
+
                 // Phone Row
                 _buildDetailRow(
                   context: context,
@@ -139,6 +168,25 @@ class SupplierDataTableWidget extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
 
+                // Email Row
+                if (supplier.email?.toString().isNotEmpty == true)
+                  Column(
+                    children: [
+                      _buildDetailRow(
+                        context: context,
+                        icon: Iconsax.sms,
+                        label: 'Email',
+                        value: supplier.email?.toString() ?? '-',
+                        onTap: supplier.email?.toString() != null
+                            ? () {
+                          // Add email functionality
+                        }
+                            : null,
+                      ),
+                      const SizedBox(height: 2),
+                    ],
+                  ),
+
                 // Address Row
                 if (supplier.address?.isNotEmpty == true)
                   Column(
@@ -149,7 +197,7 @@ class SupplierDataTableWidget extends StatelessWidget {
                           Icon(
                             Iconsax.location,
                             size: 18,
-                            color:AppColors.text(context),
+                            color: AppColors.text(context),
                           ),
                           const SizedBox(width: 8),
                           Text(
@@ -282,7 +330,7 @@ class SupplierDataTableWidget extends StatelessWidget {
               children: [
                 Expanded(
                   child: OutlinedButton.icon(
-                    onPressed: () => onEdit?.call(supplier),
+                    onPressed: () => onEditMobile?.call(supplier),
                     icon: const Icon(
                       Iconsax.edit,
                       size: 16,
@@ -361,7 +409,9 @@ class SupplierDataTableWidget extends StatelessWidget {
                   value,
                   style: TextStyle(
                     fontWeight: isImportant ? FontWeight.w700 : FontWeight.w500,
-                    color: isImportant ? AppColors.primaryColor(context) : AppColors.text(context),
+                    color: isImportant
+                        ? AppColors.primaryColor(context)
+                        : AppColors.text(context),
                     fontSize: isImportant ? 15 : 14,
                   ),
                   maxLines: 2,
@@ -479,15 +529,15 @@ class SupplierDataTableWidget extends StatelessWidget {
     if (balance < 0) return Colors.red;
     return Colors.grey;
   }
-// Keep your existing desktop DataTable code here
-  Widget _buildDesktopDataTable() {
+
+  Widget _buildDesktopDataTable(BuildContext context) {
     final verticalController = ScrollController();
     final horizontalController = ScrollController();
 
     return LayoutBuilder(
       builder: (context, constraints) {
         final totalWidth = constraints.maxWidth;
-        const numColumns = 11;
+        const numColumns = 13; // Updated from 11 to 13 for new columns
         const minColumnWidth = 100.0;
 
         final dynamicColumnWidth = (totalWidth / numColumns).clamp(
@@ -527,7 +577,7 @@ class SupplierDataTableWidget extends StatelessWidget {
                         rows: suppliers
                             .asMap()
                             .entries
-                            .map((e) => _buildRow(e.key + 1, e.value))
+                            .map((e) => _buildRow(e.key + 1, e.value, context))
                             .toList(),
                         headingRowColor: WidgetStateProperty.all(
                           AppColors.primaryColor(context),
@@ -541,7 +591,6 @@ class SupplierDataTableWidget extends StatelessWidget {
                         headingRowHeight: 40,
                         columnSpacing: 0,
                         dataTextStyle: const TextStyle(fontSize: 12),
-                        // Add these properties for better alignment
                         dataRowMaxHeight: 50,
                         horizontalMargin: 12,
                       ),
@@ -556,19 +605,22 @@ class SupplierDataTableWidget extends StatelessWidget {
     );
   }
 
-// Keep your existing desktop _buildColumns method
   List<DataColumn> _buildColumns(double columnWidth) {
     final columns = [
-      _DataColumnConfig("SL", columnWidth, TextAlign.center),
+      _DataColumnConfig("SL", columnWidth * 0.7, TextAlign.center),
       _DataColumnConfig("Supplier No", columnWidth, TextAlign.left),
       _DataColumnConfig("Name", columnWidth, TextAlign.left),
+      _DataColumnConfig("Shop Name", columnWidth, TextAlign.left), // NEW COLUMN
+      _DataColumnConfig("Products/Services", columnWidth * 1.2, TextAlign.left), // NEW COLUMN
       _DataColumnConfig("Phone", columnWidth, TextAlign.left),
-      _DataColumnConfig("Address", columnWidth, TextAlign.left),
-      _DataColumnConfig("Total Purchases", columnWidth, TextAlign.right),
-      _DataColumnConfig("Total Paid", columnWidth, TextAlign.right),
-      _DataColumnConfig("Total Due", columnWidth, TextAlign.right),
-      _DataColumnConfig("Advance Balance", columnWidth, TextAlign.center),
-      _DataColumnConfig("Actions", columnWidth, TextAlign.center),
+      _DataColumnConfig("Email", columnWidth * 1.2, TextAlign.left), // Added email column
+      _DataColumnConfig("Address", columnWidth * 1.5, TextAlign.left),
+      _DataColumnConfig("Purchases", columnWidth, TextAlign.right),
+      _DataColumnConfig("Paid", columnWidth, TextAlign.right),
+      _DataColumnConfig("Due", columnWidth, TextAlign.right),
+      _DataColumnConfig("Advance", columnWidth, TextAlign.center),
+      _DataColumnConfig("Status", columnWidth * 0.8, TextAlign.center), // Added status column
+      _DataColumnConfig("Actions", columnWidth * 1.2, TextAlign.center),
     ];
 
     return columns
@@ -592,30 +644,20 @@ class SupplierDataTableWidget extends StatelessWidget {
         .toList();
   }
 
-// Keep your existing desktop _buildRow method
-  DataRow _buildRow(int index, SupplierListModel supplier) {
+  DataRow _buildRow(int index, SupplierListModel supplier, BuildContext context) {
     return DataRow(
       cells: [
         _buildDataCell(index.toString(), TextAlign.center),
         _buildDataCell(supplier.supplierNo ?? '-', TextAlign.left),
-        _buildDataCell(supplier.name ?? '-', TextAlign.left),
+        _buildDataCell(supplier.name ?? '-', TextAlign.left, isImportant: true),
+        _buildDataCell(supplier.shopName ?? '-', TextAlign.left),
+        _buildDataCell(supplier.productName ?? '-', TextAlign.left),
         _buildDataCell(supplier.phone ?? '-', TextAlign.left),
-        _buildDataCell(supplier.address ?? '-', TextAlign.left),
-        _buildDataCell(
-          '৳${supplier.totalPurchases}',
-          TextAlign.center,
-          isNumeric: true,
-        ),
-        _buildDataCell(
-          '৳${supplier.totalPaid.toString()}',
-          TextAlign.center,
-          isNumeric: true,
-        ),
-        _buildDataCell(
-          '৳${supplier.totalDue}',
-          TextAlign.right,
-          isNumeric: true,
-        ),
+        _buildDataCell(supplier.email?.toString() ?? '-', TextAlign.left),
+        _buildDataCell(supplier.address ?? '-', TextAlign.left, maxLines: 2),
+        _buildFinancialCell('৳${supplier.totalPurchases}', Colors.blue, TextAlign.right),
+        _buildFinancialCell('৳${supplier.totalPaid}', Colors.green, TextAlign.right),
+        _buildFinancialCell('৳${supplier.totalDue}', Colors.orange, TextAlign.right),
         DataCell(
           Align(
             alignment: Alignment.center,
@@ -642,6 +684,7 @@ class SupplierDataTableWidget extends StatelessWidget {
             ),
           ),
         ),
+        _buildStatusCell(supplier.isActive == true),
         DataCell(
           Align(
             alignment: Alignment.center,
@@ -678,7 +721,12 @@ class SupplierDataTableWidget extends StatelessWidget {
     );
   }
 
-  DataCell _buildDataCell(String text, TextAlign align, {bool isNumeric = false}) {
+  DataCell _buildDataCell(
+      String text,
+      TextAlign align, {
+        bool isImportant = false,
+        int maxLines = 1,
+      }) {
     return DataCell(
       Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -688,17 +736,68 @@ class SupplierDataTableWidget extends StatelessWidget {
           textAlign: align,
           style: TextStyle(
             fontSize: 12,
-            fontFamily: isNumeric ? 'RobotoMono' : null,
-            fontWeight: isNumeric ? FontWeight.w500 : FontWeight.normal,
+            fontWeight: isImportant ? FontWeight.w600 : FontWeight.normal,
+            color: isImportant ? Colors.blue.shade700 : Colors.grey.shade800,
           ),
           overflow: TextOverflow.ellipsis,
-          maxLines: 2,
+          maxLines: maxLines,
         ),
       ),
     );
   }
 
-// Helper function to convert TextAlign to Alignment
+  DataCell _buildFinancialCell(String text, Color color, TextAlign align) {
+    return DataCell(
+      Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        alignment: _getAlignment(align),
+        child: Text(
+          text,
+          textAlign: align,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: color,
+            fontFamily: 'RobotoMono',
+          ),
+          overflow: TextOverflow.ellipsis,
+          maxLines: 1,
+        ),
+      ),
+    );
+  }
+
+  DataCell _buildStatusCell(bool isActive) {
+    return DataCell(
+      Align(
+        alignment: Alignment.center,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          decoration: BoxDecoration(
+            color: isActive
+                ? Colors.green.withOpacity(0.1)
+                : Colors.red.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isActive ? Colors.green : Colors.red,
+              width: 1,
+            ),
+          ),
+          child: Text(
+            isActive ? 'Active' : 'Inactive',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: isActive ? Colors.green : Colors.red,
+              fontWeight: FontWeight.w600,
+              fontSize: 11,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Helper function to convert TextAlign to Alignment
   AlignmentGeometry _getAlignment(TextAlign align) {
     switch (align) {
       case TextAlign.left:
@@ -710,15 +809,13 @@ class SupplierDataTableWidget extends StatelessWidget {
       default:
         return Alignment.centerLeft;
     }
-  }}
+  }
+}
 
-  class _DataColumnConfig {
+class _DataColumnConfig {
   final String label;
   final double width;
   final TextAlign textAlign;
 
   const _DataColumnConfig(this.label, this.width, this.textAlign);
-
-
-
 }

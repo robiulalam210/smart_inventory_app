@@ -275,13 +275,13 @@ class ProductDataTableWidget extends StatelessWidget {
 
                     },
                     icon: const Icon(
-                      HugeIcons.strokeRoundedDeleteThrow,
+                      HugeIcons.strokeRoundedMobileNavigator01,
                       size: 16,
                     ),
                     label: const Text('Sale Model'),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.red,
-                      side: BorderSide(color: Colors.red.shade300),
+                      foregroundColor: Colors.orange,
+                      side: BorderSide(color: Colors.orange.shade300),
                       padding: const EdgeInsets.symmetric(vertical: 10),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),

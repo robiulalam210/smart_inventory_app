@@ -1,13 +1,16 @@
+import 'package:meherinMart/feature/customer/presentation/pages/mobile_customer_screen.dart';
 
 import '../../../../core/configs/configs.dart';
 import '../../../../core/widgets/delete_dialog.dart';
 import '../../data/model/customer_model.dart';
 import '../bloc/customer/customer_bloc.dart';
 import '../pages/create_customer_screen.dart';
+import '../pages/mobile_create_customer_screen.dart';
 
 class CustomerTableCard extends StatelessWidget {
   final List<CustomerModel> customers;
-  final VoidCallback? onCustomerTap;
+  final void Function(dynamic)
+  ? onCustomerTap;
 
   const CustomerTableCard({
     super.key,
@@ -22,7 +25,7 @@ class CustomerTableCard extends StatelessWidget {
     if (isMobile || isTablet) {
       return _buildMobileCardView(context, isMobile);
     } else {
-      return _buildDesktopDataTable();
+      return _buildDesktopDataTable(context);
     }
   }
 
@@ -76,10 +79,11 @@ class CustomerTableCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.bottomNavBg(context),
         borderRadius: BorderRadius.circular(AppSizes.radius),
-
         border: Border.all(
-          color: AppColors.greyColor(context).withValues(alpha: 0.5),
-          width: 0.5,
+          color: customer.specialCustomer
+              ? Colors.amber.withOpacity(0.3)
+              : AppColors.greyColor(context).withValues(alpha: 0.5),
+          width: customer.specialCustomer ? 1.5 : 0.5,
         ),
       ),
       child: Column(
@@ -89,7 +93,9 @@ class CustomerTableCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color: AppColors.primaryColor(context).withValues(alpha: 0.05),
+              color: customer.specialCustomer
+                  ? Colors.amber.withOpacity(0.1)
+                  : AppColors.primaryColor(context).withValues(alpha: 0.05),
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(16),
                 topRight: Radius.circular(16),
@@ -100,35 +106,111 @@ class CustomerTableCard extends StatelessWidget {
               children: [
                 Row(
                   children: [
+                    // Client No Badge
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 10,
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: AppColors.primaryColor(context),
+                        color: customer.specialCustomer
+                            ? Colors.amber
+                            : AppColors.primaryColor(context),
                         borderRadius: BorderRadius.circular(20),
                       ),
+                      child: Row(
+                        children: [
+                          if (customer.specialCustomer)
+                            const Icon(
+                              Icons.star,
+                              size: 12,
+                              color: Colors.white,
+                            ),
+                          if (customer.specialCustomer)
+                            const SizedBox(width: 4),
+                          Text(
+                            '#${customer.clientNo}',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+
+                    // Status Badge
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: (customer.isActive ?? false)
+                            ? Colors.green.withOpacity(0.1)
+                            : Colors.red.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: (customer.isActive ?? false)
+                              ? Colors.green
+                              : Colors.red,
+                          width: 1,
+                        ),
+                      ),
                       child: Text(
-                        '#${customer.clientNo}',
-                        style: const TextStyle(
-                          color: Colors.white,
+                        customer.isActive ?? false ? 'Active' : 'Inactive',
+                        style: TextStyle(
+                          color: (customer.isActive ?? false)
+                              ? Colors.green
+                              : Colors.red,
                           fontWeight: FontWeight.w600,
                           fontSize: 12,
                         ),
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    Text(
-                      customer.isActive ?? false ? 'Active' : 'Inactive',
-                      style: TextStyle(
-                        color: customer.isActive ?? false ? Colors.green : Colors.red,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 12,
+
+                    // Special Customer Badge (only if special)
+                    if (customer.specialCustomer) ...[
+                      const SizedBox(width: 12),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.amber.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: Colors.amber,
+                            width: 1,
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.star,
+                              size: 12,
+                              color: Colors.amber,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              'Special',
+                              style: TextStyle(
+                                color: Colors.amber,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
+                    ],
                   ],
                 ),
+
+                // Balance/Amount Badge
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
@@ -166,13 +248,25 @@ class CustomerTableCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Name
-                _buildDetailRow(
-                  icon: Iconsax.user,
-                  label: 'Name',
-                  value: customer.name ?? 'N/A',
-                  isImportant: true,
-                  context: context
+                // Name with Special Icon
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildDetailRow(
+                        icon: Iconsax.user,
+                        label: 'Name',
+                        value: customer.name ?? 'N/A',
+                        isImportant: true,
+                        context: context,
+                      ),
+                    ),
+                    if (customer.specialCustomer)
+                      Icon(
+                        Icons.star,
+                        color: Colors.amber,
+                        size: 20,
+                      ),
+                  ],
                 ),
                 const SizedBox(height: 4),
 
@@ -224,7 +318,7 @@ class CustomerTableCard extends StatelessWidget {
                             'Address:',
                             style: TextStyle(
                               fontWeight: FontWeight.w600,
-                              color:AppColors.text(context),
+                              color: AppColors.text(context),
                               fontSize: 13,
                             ),
                           ),
@@ -245,6 +339,27 @@ class CustomerTableCard extends StatelessWidget {
                       ),
                     ],
                   ),
+
+                // Customer Type
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Icon(
+                      customer.specialCustomer ? Icons.star : Icons.person,
+                      size: 16,
+                      color: customer.specialCustomer ? Colors.amber : AppColors.text(context),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      customer.specialCustomer ? 'Special Customer' : 'Regular Customer',
+                      style: TextStyle(
+                        color: customer.specialCustomer ? Colors.amber : AppColors.text(context),
+                        fontWeight: FontWeight.w600,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
@@ -268,9 +383,10 @@ class CustomerTableCard extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
+                // Edit Button
                 Expanded(
                   child: OutlinedButton.icon(
-                    onPressed: () => _showEditDialog(context, customer, true),
+                    onPressed: () => _showEditDialogMobile(context, customer, true),
                     icon: const Icon(
                       Iconsax.edit,
                       size: 16,
@@ -287,6 +403,41 @@ class CustomerTableCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 12),
+
+                // Toggle Special Button
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () => _toggleSpecialCustomer(context, customer),
+                    icon: Icon(
+                      customer.specialCustomer
+                          ? Icons.star_border
+                          : Icons.star,
+                      size: 16,
+                    ),
+                    label: Text(
+                      customer.specialCustomer
+                          ? 'Remove Special'
+                          : 'Mark Special',
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: customer.specialCustomer
+                          ? Colors.grey
+                          : Colors.amber,
+                      side: BorderSide(
+                        color: customer.specialCustomer
+                            ? Colors.grey.shade300
+                            : Colors.amber.shade300,
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+
+                // Delete Button
                 Expanded(
                   child: OutlinedButton.icon(
                     onPressed: () => _confirmDelete(context, customer),
@@ -363,15 +514,15 @@ class CustomerTableCard extends StatelessWidget {
     );
   }
 
-  Widget _buildDesktopDataTable() {
+  Widget _buildDesktopDataTable(BuildContext context) {
     final verticalScrollController = ScrollController();
     final horizontalScrollController = ScrollController();
 
     return LayoutBuilder(
       builder: (context, constraints) {
         final totalWidth = constraints.maxWidth;
-        const numColumns = 7;
-        const minColumnWidth = 90.0;
+        const numColumns = 9; // Increased for new columns
+        const minColumnWidth = 80.0;
 
         final dynamicColumnWidth =
         (totalWidth / numColumns).clamp(minColumnWidth, double.infinity);
@@ -455,6 +606,12 @@ class CustomerTableCard extends StatelessWidget {
       ),
       DataColumn(
         label: SizedBox(
+          width: columnWidth * 0.8,
+          child: const Text('Type', textAlign: TextAlign.center),
+        ),
+      ),
+      DataColumn(
+        label: SizedBox(
           width: columnWidth,
           child: const Text('Name', textAlign: TextAlign.center),
         ),
@@ -467,13 +624,13 @@ class CustomerTableCard extends StatelessWidget {
       ),
       DataColumn(
         label: SizedBox(
-          width: columnWidth,
+          width: columnWidth * 1.2,
           child: const Text('Address', textAlign: TextAlign.center),
         ),
       ),
       DataColumn(
         label: SizedBox(
-          width: columnWidth,
+          width: columnWidth * 0.8,
           child: const Text('Status', textAlign: TextAlign.center),
         ),
       ),
@@ -485,23 +642,31 @@ class CustomerTableCard extends StatelessWidget {
       ),
       DataColumn(
         label: SizedBox(
-          width: columnWidth,
+          width: columnWidth * 0.8,
+          child: const Text('Special', textAlign: TextAlign.center),
+        ),
+      ),
+      DataColumn(
+        label: SizedBox(
+          width: columnWidth * 1.2,
           child: const Text('Actions', textAlign: TextAlign.center),
         ),
       ),
     ];
   }
 
-  DataRow _buildDataRow(BuildContext context,CustomerModel customer, int index, double columnWidth) {
+  DataRow _buildDataRow(BuildContext context, CustomerModel customer, int index, double columnWidth) {
     return DataRow(
       cells: [
-        _buildDataCell('${customer.clientNo}', columnWidth * 0.6, TextAlign.center),
+        _buildDataCell('#${customer.clientNo}', columnWidth * 0.6, TextAlign.center),
+        _buildCustomerTypeCell(customer.specialCustomer, columnWidth * 0.8),
         _buildDataCell(customer.name ?? "N/A", columnWidth, TextAlign.center),
         _buildDataCell(customer.phone ?? "N/A", columnWidth, TextAlign.center),
-        _buildDataCell(customer.address ?? "N/A", columnWidth, TextAlign.center),
-        _buildStatusCell(customer.isActive ?? false, columnWidth),
+        _buildDataCell(customer.address ?? "N/A", columnWidth * 1.2, TextAlign.center),
+        _buildStatusCell(customer.isActive ?? false, columnWidth * 0.8),
         _buildBalanceCell(customer, columnWidth),
-        _buildActionCell(context,customer, columnWidth),
+        _buildSpecialCustomerCell(customer.specialCustomer, columnWidth * 0.8),
+        _buildActionCell(context, customer, columnWidth * 1.2),
       ],
     );
   }
@@ -524,6 +689,48 @@ class CustomerTableCard extends StatelessWidget {
     );
   }
 
+  DataCell _buildCustomerTypeCell(bool isSpecial, double width) {
+    return DataCell(
+      SizedBox(
+        width: width,
+        child: Center(
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: isSpecial ? Colors.amber.withOpacity(0.1) : Colors.grey.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(4),
+              border: Border.all(
+                color: isSpecial ? Colors.amber : Colors.grey,
+                width: 1,
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (isSpecial)
+                  const Icon(
+                    Icons.star,
+                    size: 10,
+                    color: Colors.amber,
+                  ),
+                if (isSpecial)
+                  const SizedBox(width: 4),
+                Text(
+                  isSpecial ? 'Special' : 'Regular',
+                  style: TextStyle(
+                    color: isSpecial ? Colors.amber : Colors.grey,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 10,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   DataCell _buildStatusCell(bool isActive, double width) {
     return DataCell(
       SizedBox(
@@ -534,13 +741,17 @@ class CustomerTableCard extends StatelessWidget {
             decoration: BoxDecoration(
               color: isActive ? Colors.green.withValues(alpha: 0.1) : Colors.red.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(4),
+              border: Border.all(
+                color: isActive ? Colors.green : Colors.red,
+                width: 1,
+              ),
             ),
             child: Text(
               isActive ? 'Active' : 'Inactive',
               style: TextStyle(
                 color: isActive ? Colors.green : Colors.red,
                 fontWeight: FontWeight.w600,
-                fontSize: 11,
+                fontSize: 10,
               ),
             ),
           ),
@@ -577,57 +788,136 @@ class CustomerTableCard extends StatelessWidget {
     return DataCell(
       SizedBox(
         width: width,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              amount.toStringAsFixed(2),
-              style: TextStyle(
-                color: color,
-                fontWeight: FontWeight.w600,
-                fontSize: 11,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(4),
+            border: Border.all(color: color, width: 1),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                '৳${amount.toStringAsFixed(2)}',
+                style: TextStyle(
+                  color: color,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 11,
+                ),
               ),
-            ),
-            Text(
-              label,
-              style: TextStyle(
-                color: color,
-                fontWeight: FontWeight.w400,
-                fontSize: 9,
+              Text(
+                label,
+                style: TextStyle(
+                  color: color,
+                  fontWeight: FontWeight.w400,
+                  fontSize: 9,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 
-  DataCell _buildActionCell(BuildContext context,CustomerModel customer, double width) {
+  DataCell _buildSpecialCustomerCell(bool isSpecial, double width) {
+    return DataCell(
+      SizedBox(
+        width: width,
+        child: Center(
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+            decoration: BoxDecoration(
+              color: isSpecial ? Colors.amber.withOpacity(0.1) : Colors.transparent,
+              borderRadius: BorderRadius.circular(4),
+              border: Border.all(
+                color: isSpecial ? Colors.amber : Colors.grey.withOpacity(0.3),
+                width: 1,
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  isSpecial ? Icons.star : Icons.star_border,
+                  size: 14,
+                  color: isSpecial ? Colors.amber : Colors.grey,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  isSpecial ? 'Yes' : 'No',
+                  style: TextStyle(
+                    color: isSpecial ? Colors.amber : Colors.grey,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 10,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  DataCell _buildActionCell(BuildContext context, CustomerModel customer, double width) {
     return DataCell(
       SizedBox(
         width: width,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            IconButton(
-              onPressed: () => _showEditDialog(context, customer, false),
-              icon: const Icon(
-                Iconsax.edit,
-                size: 18,
-                color: Colors.blue,
+            // Edit Button
+            Tooltip(
+              message: 'Edit Customer',
+              child: IconButton(
+                onPressed: () => _showEditDialog(context, customer, false),
+                icon: const Icon(
+                  Iconsax.edit,
+                  size: 16,
+                  color: Colors.blue,
+                ),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(minWidth: 30, minHeight: 30),
               ),
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
             ),
-            IconButton(
-              onPressed: () => _confirmDelete(context, customer),
-              icon: const Icon(
-                HugeIcons.strokeRoundedDeleteThrow,
-                size: 18,
-                color: Colors.red,
+            const SizedBox(width: 4),
+
+            // Toggle Special Button
+            Tooltip(
+              message: customer.specialCustomer
+                  ? 'Remove Special Status'
+                  : 'Mark as Special Customer',
+              child: IconButton(
+                onPressed: () => _toggleSpecialCustomer(context, customer),
+                icon: Icon(
+                  customer.specialCustomer
+                      ? Icons.star
+                      : Icons.star_border,
+                  size: 16,
+                  color: customer.specialCustomer ? Colors.amber : Colors.grey,
+                ),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(minWidth: 30, minHeight: 30),
               ),
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+            ),
+            const SizedBox(width: 4),
+
+            // Delete Button
+            Tooltip(
+              message: 'Delete Customer',
+              child: IconButton(
+                onPressed: () => _confirmDelete(context, customer),
+                icon: const Icon(
+                  HugeIcons.strokeRoundedDeleteThrow,
+                  size: 16,
+                  color: Colors.red,
+                ),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(minWidth: 30, minHeight: 30),
+              ),
             ),
           ],
         ),
@@ -644,13 +934,115 @@ class CustomerTableCard extends StatelessWidget {
     }
   }
 
+  void _toggleSpecialCustomer(BuildContext context, CustomerModel customer) {
+    final action = customer.specialCustomer ? 'set_false' : 'set_true';
+    final message = customer.specialCustomer
+        ? 'Remove ${customer.name} from special customers?'
+        : 'Mark ${customer.name} as special customer?';
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(
+            customer.specialCustomer ? 'Remove Special Status' : 'Mark as Special',
+            style: const TextStyle(
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                context.read<CustomerBloc>().add(
+                  ToggleSpecialCustomer(
+                    context: context,
+                    customerId: customer.id.toString(),
+                    action: action,
+                  ),
+                );
+              },
+              child: Text(
+                customer.specialCustomer ? 'Remove' : 'Mark Special',
+                style: TextStyle(
+                  color: customer.specialCustomer ? Colors.red : Colors.amber,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+  void _showEditDialogMobile(BuildContext context, CustomerModel customer, bool isMobile) {
+    // Pre-fill form
+    final customerBloc = context.read<CustomerBloc>();
+    customerBloc.customerNameController.text = customer.name ?? "";
+    customerBloc.customerNumberController.text = customer.phone ?? "";
+    customerBloc.addressController.text = customer.address ?? "";
+    customerBloc.customerEmailController.text = customer.email?.toString() ?? "";
+    customerBloc.selectedState = customer.isActive == true ? "Active" : "Inactive";
+
+    // You'll need to update your CreateCustomerScreen to handle specialCustomer
+    // For now, we'll pass it in the customer data
+    final Map<String, dynamic> customerData = {
+      'id': customer.id,
+      'name': customer.name,
+      'phone': customer.phone,
+      'email': customer.email,
+      'address': customer.address,
+      'is_active': customer.isActive,
+      'special_customer': customer.specialCustomer,
+    };
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          insetPadding: const EdgeInsets.all(20),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: isMobile
+                  ? AppSizes.width(context)
+                  : AppSizes.width(context) * 0.55,
+              maxHeight: AppSizes.height(context) * 0.8,
+            ),
+            child: MobileCreateCustomerScreen(
+              id: customer.id.toString(),
+              submitText: "Update Customer",
+              customer: customerData,
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   void _showEditDialog(BuildContext context, CustomerModel customer, bool isMobile) {
     // Pre-fill form
-    context.read<CustomerBloc>().customerNameController.text = customer.name ?? "";
-    context.read<CustomerBloc>().customerNumberController.text = customer.phone ?? "";
-    context.read<CustomerBloc>().addressController.text = customer.address ?? "";
-    context.read<CustomerBloc>().customerEmailController.text = customer.email?.toString() ?? "";
-    context.read<CustomerBloc>().selectedState = customer.isActive == true ? "Active" : "Inactive";
+    final customerBloc = context.read<CustomerBloc>();
+    customerBloc.customerNameController.text = customer.name ?? "";
+    customerBloc.customerNumberController.text = customer.phone ?? "";
+    customerBloc.addressController.text = customer.address ?? "";
+    customerBloc.customerEmailController.text = customer.email?.toString() ?? "";
+    customerBloc.selectedState = customer.isActive == true ? "Active" : "Inactive";
+
+    // You'll need to update your CreateCustomerScreen to handle specialCustomer
+    // For now, we'll pass it in the customer data
+    final Map<String, dynamic> customerData = {
+      'id': customer.id,
+      'name': customer.name,
+      'phone': customer.phone,
+      'email': customer.email,
+      'address': customer.address,
+      'is_active': customer.isActive,
+      'special_customer': customer.specialCustomer,
+    };
 
     showDialog(
       context: context,

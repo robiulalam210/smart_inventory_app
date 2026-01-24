@@ -33,7 +33,30 @@ final class CustomerListFailed extends CustomerState {
   CustomerListFailed({required this.title, required this.content});
 }
 
+class CustomerToggleSpecialLoading extends CustomerState {
+   CustomerToggleSpecialLoading();
 
+  @override
+  List<Object> get props => [];
+}
+
+class CustomerToggleSpecialSuccess extends CustomerState {
+  final String message;
+
+   CustomerToggleSpecialSuccess(this.message);
+
+  @override
+  List<Object> get props => [message];
+}
+
+class CustomerToggleSpecialFailed extends CustomerState {
+  final String message;
+
+   CustomerToggleSpecialFailed(this.message);
+
+  @override
+  List<Object> get props => [message];
+}
 
 
 final class CustomerActiveListLoading extends CustomerState {}

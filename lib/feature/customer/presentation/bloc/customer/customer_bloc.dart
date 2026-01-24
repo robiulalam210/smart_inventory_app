@@ -45,6 +45,7 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
     on<AddCustomer>(_onCreateCustomerList);
     on<UpdateCustomer>(_onUpdateCustomerList);
     on<DeleteCustomer>(_onDeleteCustomer);
+    on<ToggleSpecialCustomer>(_onToggleSpecialCustomer);
   }
 
   Future<void> _onFetchCustomerActiveList(
@@ -91,10 +92,43 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
     }
   }
 
+  Future<void> _onToggleSpecialCustomer(
+      ToggleSpecialCustomer event,
+      Emitter<CustomerState> emit,
+      ) async {
+    emit(CustomerToggleSpecialLoading());
+
+    try {
+      // Make API call to toggle special status
+      Map<String, dynamic> body = {
+        'action': event.action,
+      };
+
+      final res = await postResponse(
+        url: '${AppUrls.customer}${event.customerId}/toggle_special/',
+        payload: body,
+      );
+
+      ApiResponse<Map<String, dynamic>> response =
+      appParseJson<Map<String, dynamic>>(jsonEncode(res), (data) => data);
+
+      if (response.success) {
+        emit(CustomerToggleSpecialSuccess('Customer status updated successfully'));
+
+        // Refresh the customer list
+        // You might want to refetch the current page
+        // or you can trigger a refetch from the UI
+      } else {
+        emit(CustomerToggleSpecialFailed(response.message ?? 'Failed to update customer status'));
+      }
+    } catch (error) {
+      emit(CustomerToggleSpecialFailed(error.toString()));
+    }
+  }
   Future<void> _onFetchCustomerList(
-    FetchCustomerList event,
-    Emitter<CustomerState> emit,
-  ) async {
+      FetchCustomerList event,
+      Emitter<CustomerState> emit,
+      ) async {
     emit(CustomerListLoading());
 
     try {
@@ -108,14 +142,46 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
       if (event.filterText.isNotEmpty) {
         queryParams['search'] = event.filterText;
       }
+
+      // Status filter (active/inactive)
       if (event.status.isNotEmpty) {
-        queryParams['status'] = event.status;
+        if (event.status == 'active') {
+          queryParams['is_active'] = 'true';
+        } else if (event.status == 'inactive') {
+          queryParams['is_active'] = 'false';
+        }
       }
+
+      // Customer type filter (special/regular)
+      if (event.customerType.isNotEmpty) {
+        if (event.customerType == 'special') {
+          queryParams['special_customer'] = 'true';
+        } else if (event.customerType == 'regular') {
+          queryParams['special_customer'] = 'false';
+        }
+        // You can also use customer_type parameter if your API supports it
+        // queryParams['customer_type'] = event.customerType;
+      }
+
+      // Amount type filter (advance/due/paid)
+      if (event.amountType.isNotEmpty) {
+        queryParams['amount_type'] = event.amountType;
+      }
+
+      // Date range filter
+      if (event.startDate.isNotEmpty && event.endDate.isNotEmpty) {
+        queryParams['start_date'] = event.startDate;
+        queryParams['end_date'] = event.endDate;
+      }
+
+      // Add any existing dropdown filter parameters
       if (event.dropdownFilter.isNotEmpty) {
-        // Parse existing dropdown filter and merge with new params
         final existingParams = Uri.parse(event.dropdownFilter).queryParameters;
         queryParams.addAll(existingParams);
       }
+
+      // Remove any null or empty values
+      queryParams.removeWhere((key, value) => value == null || value.toString().isEmpty);
 
       // Build the complete URL with query parameters
       Uri uri = Uri.parse(
@@ -129,7 +195,7 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
 
       // Parse the response
       ApiResponse<Map<String, dynamic>> response =
-          appParseJson<Map<String, dynamic>>(res, (data) => data);
+      appParseJson<Map<String, dynamic>>(res, (data) => data);
 
       final data = response.data;
 
@@ -165,8 +231,8 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
           pagination['count'] ?? pagination['total'] ?? customerList.length;
       int totalPages =
           pagination['total_pages'] ??
-          pagination['last_page'] ??
-          ((count / event.pageSize).ceil());
+              pagination['last_page'] ??
+              ((count / event.pageSize).ceil());
       int currentPage =
           pagination['current_page'] ?? pagination['page'] ?? event.pageNumber;
       int pageSize =
@@ -188,7 +254,9 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
           to: to,
         ),
       );
-    } catch (error) {
+    } catch (error,st) {
+      print(error);
+      print(st);
       emit(CustomerListFailed(title: "Error", content: error.toString()));
     }
   }

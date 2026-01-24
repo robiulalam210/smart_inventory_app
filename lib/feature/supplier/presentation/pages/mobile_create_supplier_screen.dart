@@ -14,6 +14,26 @@ class MobileCreateSupplierScreen extends StatefulWidget {
 class _CreateSupplierScreenState extends State<MobileCreateSupplierScreen> {
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
+  // Add controllers for new fields
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Initialize controllers with existing values if editing
+    if (widget.id.isNotEmpty) {
+      final supplierBloc = context.read<SupplierListBloc>();
+      // Note: You might need to pass the supplier data differently
+      // For now, we'll set the controllers in the build method
+    }
+  }
+
+  @override
+  void dispose() {
+
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -66,6 +86,24 @@ class _CreateSupplierScreenState extends State<MobileCreateSupplierScreen> {
 
                 const SizedBox(height: 8),
 
+                // Shop/Business Name (NEW FIELD)
+                AppTextField(
+                  controller: context.read<SupplierListBloc>().shopName,
+                  hintText: 'Shop/Business Name (Optional)',
+                  keyboardType: TextInputType.text,
+                ),
+
+                const SizedBox(height: 8),
+
+                // Products/Services (NEW FIELD)
+                AppTextField(
+                  controller: context.read<SupplierListBloc>().productName,
+                  hintText: 'Products/Services (Optional)',
+                  keyboardType: TextInputType.multiline,
+                ),
+
+                const SizedBox(height: 8),
+
                 // Phone Number
                 AppTextField(
                   isRequired: true,
@@ -78,6 +116,23 @@ class _CreateSupplierScreenState extends State<MobileCreateSupplierScreen> {
                         : AppConstants.phoneValidation.hasMatch(value.trim())
                         ? null
                         : 'Invalid phone number';
+                  },
+                ),
+
+                const SizedBox(height: 8),
+
+                // Email (Optional)
+                AppTextField(
+                  controller: context.read<SupplierListBloc>().customerEmailController,
+                  hintText: 'Email (Optional)',
+                  keyboardType: TextInputType.emailAddress,
+                  validator: (value) {
+                    if (value != null && value.isNotEmpty) {
+                      // if (!AppConstants.emailValidation.hasMatch(value.trim())) {
+                      //   return 'Invalid email format';
+                      // }
+                    }
+                    return null;
                   },
                 ),
 
@@ -103,21 +158,23 @@ class _CreateSupplierScreenState extends State<MobileCreateSupplierScreen> {
                 ],
 
                 const SizedBox(height: 16),
+
+                // Buttons
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     AppButton(
                       size: 120,
-                      name:  "Cancel",
+                      name: "Cancel",
                       isOutlined: true,
                       textColor: AppColors.errorColor(context),
                       borderColor: AppColors.primaryColor(context),
-                      onPressed: (){
+                      onPressed: () {
                         AppRoutes.pop(context);
                       },
                     ),
-                    SizedBox(width: 10,),
+                    const SizedBox(width: 10),
                     AppButton(
                       size: 120,
                       name: widget.submitText.isEmpty ? "Submit" : widget.submitText,
@@ -127,11 +184,8 @@ class _CreateSupplierScreenState extends State<MobileCreateSupplierScreen> {
                         }
                       },
                     ),
-
                   ],
                 ),
-                // Submit Button
-
               ],
             ),
           ),
@@ -156,7 +210,6 @@ class _CreateSupplierScreenState extends State<MobileCreateSupplierScreen> {
           context.read<SupplierListBloc>().selectedState = newVal.toString();
         });
       },
-
     );
   }
 
@@ -169,6 +222,24 @@ class _CreateSupplierScreenState extends State<MobileCreateSupplierScreen> {
       "address": supplierBloc.addressController.text.trim(),
     };
 
+    // Add email if provided
+    final email = supplierBloc.customerEmailController.text.trim();
+    if (email.isNotEmpty) {
+      body["email"] = email;
+    }
+
+    // Add new fields if provided
+    final shopName = supplierBloc.shopName.text.trim();
+    if (shopName.isNotEmpty) {
+      body["shop_name"] = shopName;
+    }
+
+    final productName = supplierBloc.productName.text.trim();
+    if (productName.isNotEmpty) {
+      body["product_name"] = productName;
+    }
+
+    // Add status for edit mode
     if (widget.id.isNotEmpty && supplierBloc.selectedState.isNotEmpty) {
       body["is_active"] = supplierBloc.selectedState == "Active";
     }
@@ -180,14 +251,5 @@ class _CreateSupplierScreenState extends State<MobileCreateSupplierScreen> {
     } else {
       supplierBloc.add(UpdateSupplierList(body: body, branchId: widget.id));
     }
-
-    // Navigator.of(context).pop(); // Close dialog after submission
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
   }
 }
-
-// Function to show as Dialog
