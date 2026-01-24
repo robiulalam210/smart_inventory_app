@@ -1,4 +1,5 @@
 import 'package:easy_localization/easy_localization.dart';
+import 'package:meherinMart/feature/products/price_tier/presentation/bloc/price_tier_bloc.dart';
 import '../feature/common/presentation/cubit/theme_cubit.dart';
 import '../feature/products/sale_mode/presentation/bloc/product_sale_mode/product_sale_mode_bloc.dart';
 import '../feature/products/sale_mode/presentation/bloc/sale_mode_bloc.dart';
@@ -70,6 +71,7 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (_) => UnitBloc()),
         BlocProvider(create: (_) => CategoriesBloc()),
         BlocProvider(create: (_) => SaleModeBloc()),
+        BlocProvider(create: (_) => PriceTierBloc()),
         BlocProvider(create: (_) => ProductSaleModeBloc()),
 
         BlocProvider(create: (_) => GroupsBloc()),
