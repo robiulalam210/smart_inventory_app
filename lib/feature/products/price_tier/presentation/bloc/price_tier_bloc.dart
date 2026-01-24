@@ -30,6 +30,7 @@ class PriceTierBloc extends Bloc<PriceTierEvent, PriceTierState> {
     on<CalculatePrice>(_onCalculatePrice);
   }
 
+
   Future<void> _onLoadPriceTiers(
       LoadPriceTiers event,
       Emitter<PriceTierState> emit,
@@ -37,15 +38,13 @@ class PriceTierBloc extends Bloc<PriceTierEvent, PriceTierState> {
     emit(PriceTierLoading());
 
     try {
-      Map<String, dynamic> queryParams = {};
-
-      if (event.productSaleModeId != null) {
-        queryParams['product_sale_mode_id'] = event.productSaleModeId;
-      }
-
-      if (event.productId != null) {
-        queryParams['product_id'] = event.productId;
-      }
+      // Query params must be string
+      final Map<String, String> queryParams = {
+        if (event.productSaleModeId != null)
+          'product_sale_mode_id': event.productSaleModeId.toString(),
+        if (event.productId != null)
+          'product_id': event.productId.toString(),
+      };
 
       final res = await getResponse(
         url: AppUrls.priceTiers,
@@ -53,31 +52,32 @@ class PriceTierBloc extends Bloc<PriceTierEvent, PriceTierState> {
         queryParams: queryParams.isNotEmpty ? queryParams : null,
       );
 
-      ApiResponse response = appParseJson(
-        res,
-            (data) => List<PriceTierModel>.from(
-          data.map((x) => PriceTierModel.fromJson(x)),
-        ),
-      );
+      // Decode JSON string
+      final Map<String, dynamic> json = jsonDecode(res) as Map<String, dynamic>;
 
-      if (response.success == true && response.data != null) {
-        priceTiers = response.data as List<PriceTierModel>;
+      if (json['results'] != null && json['results'] is List) {
+        final List<PriceTierModel> priceTiers = (json['results'] as List)
+            .map((e) => PriceTierModel.fromJson(e))
+            .toList();
+
         emit(PriceTierListLoaded(priceTiers: priceTiers));
       } else {
-        priceTiers = [];
-        emit(PriceTierListLoaded(priceTiers: []));
+        emit(const PriceTierListLoaded(priceTiers: []));
       }
-    } catch (error) {
+    } catch (error, st) {
+      print('❌ LoadPriceTiers Error: $error');
+      print(st);
       emit(PriceTierOperationFailed(error: error.toString()));
     }
   }
-// In your PriceTierBloc, update the _onAddPriceTier method:
+
+
 
   Future<void> _onAddPriceTier(
       AddPriceTier event,
       Emitter<PriceTierState> emit,
       ) async {
-    emit(PriceTierLoading());
+    emit(PriceTierOperationLoading());
 
     try {
       // Add debug logging

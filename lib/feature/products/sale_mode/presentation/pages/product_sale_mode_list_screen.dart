@@ -87,7 +87,7 @@ class _ProductSaleModeListScreenState extends State<ProductSaleModeListScreen> {
         child: RefreshIndicator(
           onRefresh: () async {
             _fetchConfiguredModes();
-            _fetchAvailableModes();
+            // _fetchAvailableModes();
           },
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
@@ -96,7 +96,7 @@ class _ProductSaleModeListScreenState extends State<ProductSaleModeListScreen> {
               children: [
                 _buildSearchField(),
                 const SizedBox(height: 12),
-                _buildAvailableModesSection(),
+                // _buildAvailableModesSection(),
                 const SizedBox(height: 16),
                 _buildConfiguredModesList(),
               ],
@@ -216,12 +216,13 @@ class _ProductSaleModeListScreenState extends State<ProductSaleModeListScreen> {
 
   Widget _buildConfiguredModesList() {
     return BlocBuilder<ProductSaleModeBloc, ProductSaleModeState>(
-      buildWhen: (previous, current) =>
-          previous.runtimeType != current.runtimeType ||
-          (previous is ProductSaleModeListSuccess &&
-              current is ProductSaleModeListSuccess &&
-              previous.list != current.list),
+      // buildWhen: (previous, current) =>
+      //     previous.runtimeType != current.runtimeType ||
+      //     (previous is ProductSaleModeListSuccess &&
+      //         current is ProductSaleModeListSuccess &&
+      //         previous.list != current.list),
       builder: (context, state) {
+        print(state);
         if (state is ProductSaleModeListLoading) {
           return const Center(child: CircularProgressIndicator());
         }
@@ -236,6 +237,7 @@ class _ProductSaleModeListScreenState extends State<ProductSaleModeListScreen> {
         }
 
         if (state is ProductSaleModeListSuccess) {
+          print("ProductSaleModeListSuccess $ProductSaleModeListSuccess");
           final list = state.list;
 
           if (list.isEmpty) {
@@ -333,7 +335,7 @@ class _ProductSaleModeListScreenState extends State<ProductSaleModeListScreen> {
                 if (mode.conversionFactor != null)
                   Chip(
                     label: Text(
-                      'Conv: ${mode.conversionFactor!.toStringAsFixed(2)}',
+                      'Conv: ${mode.conversionFactor.toStringAsFixed(2)}',
                       style: const TextStyle(color: Colors.white, fontSize: 12),
                     ),
                     backgroundColor: Colors.purple,
@@ -360,15 +362,15 @@ class _ProductSaleModeListScreenState extends State<ProductSaleModeListScreen> {
                     : Colors.grey[300],
               ),
             ),
-            if (mode.tiers != null && mode.tiers!.isNotEmpty) ...[
+            if (mode.tiers != null && mode.tiers.isNotEmpty) ...[
               const Divider(),
               const Text(
                 'Price Tiers:',
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
               ),
-              ...mode.tiers!.map(
+              ...mode.tiers.map(
                 (tier) => Text(
-                  '${tier.minQuantity ?? 0} - ${tier.maxQuantity ?? 0}: ${tier.price?.toStringAsFixed(2) ?? 0}',
+                  '${tier.minQuantity ?? 0} - ${tier.maxQuantity ?? 0}: ${tier.price?.toString() ?? 0}',
                   style: const TextStyle(fontSize: 13),
                 ),
               ),
@@ -445,7 +447,7 @@ class _ProductSaleModeListScreenState extends State<ProductSaleModeListScreen> {
             borderRadius: BorderRadius.circular(12),
           ),
           child: SizedBox(
-            width: MediaQuery.of(context).size.width * 0.9,
+            // width: MediaQuery.of(context).size.width * 0.9,
             child: PriceTierManagementDialog(
               productId: widget.productId.toString(),
               productSaleModeId: mode.id,

@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../../core/configs/configs.dart';
-import '../../../../../../core/widgets/app_alert_dialog.dart';
 import '../../../data/product_sale_mode_model.dart';
 import '../../bloc/product_sale_mode/product_sale_mode_bloc.dart';
 import '../product_sale_mode_config_screen.dart';
@@ -133,7 +132,7 @@ class ProductSaleModeTableCard extends StatelessWidget {
   void _showEditDialog(BuildContext context, ProductSaleModeModel mode) {
     final data = {
       'id': mode.id,
-      'sale_mode_id': mode.saleMode,
+      'sale_mode_id': mode.id,
       'price_type': mode.priceType,
       'unit_price': mode.unitPrice,
       'flat_price': mode.flatPrice,
@@ -155,7 +154,7 @@ class ProductSaleModeTableCard extends StatelessWidget {
             child: SizedBox(
               width: MediaQuery.of(context).size.width * 0.7,
               child: ProductSaleModeConfigScreen(
-                productId: mode.product?.toString() ?? '',
+                productId: mode.toString() ?? '',
 
 
                 initialData: data,
