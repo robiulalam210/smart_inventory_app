@@ -56,7 +56,7 @@ class _SaleModeListScreenState extends State<SaleModeListScreen> {
           ? FloatingActionButton(
         backgroundColor: AppColors.primaryColor(context),
         onPressed: () => _showCreateDialog(context),
-        child: const Icon(Icons.add),
+        child:  Icon(Icons.add,color: AppColors.whiteColor(context),),
       )
           : null,
       body: SafeArea(
@@ -68,7 +68,56 @@ class _SaleModeListScreenState extends State<SaleModeListScreen> {
             physics: const AlwaysScrollableScrollPhysics(),
             child: Container(
               padding: const EdgeInsets.all(12),
-              child: buildContent(),
+              child: BlocListener<SaleModeBloc, SaleModeState>(
+                listener: (context, state) {
+                  if (state is SaleModeAddLoading) {
+                    appLoader(context, "Creating sale mode, please wait...");
+                  } else if (state is SaleModeDeleteLoading) {
+                    appLoader(context, "Deleting sale mode, please wait...");
+                  } else if (state is SaleModeAddSuccess) {
+                    Navigator.pop(context);
+                    _fetchApi();
+                    showCustomToast(
+                      context: context,
+                      title: 'Success!',
+                      description: 'Sale mode saved successfully',
+                      icon: Icons.check_circle,
+                      primaryColor: Colors.green,
+                    );
+                  } else if (state is SaleModeDeleteSuccess) {
+                    showCustomToast(
+                      context: context,
+                      title: 'Success!',
+                      description: state.message,
+                      icon: Icons.check_circle,
+                      primaryColor: Colors.green,
+                    );
+                    Navigator.pop(context);
+                    _fetchApi();
+                  } else if (state is SaleModeAddFailed) {
+                    Navigator.pop(context);
+                    Navigator.pop(context);
+                    appAlertDialog(
+                      context,
+                      state.content,
+                      title: state.title,
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text("Dismiss"),
+                        ),
+                      ],
+                    );
+                  }
+                },
+                child: Column(
+                  children: [
+                    _buildHeaderRow(),
+                    const SizedBox(height: 8),
+                    _buildSaleModesList(),
+                  ],
+                ),
+              )
             ),
           ),
         ),
@@ -76,58 +125,6 @@ class _SaleModeListScreenState extends State<SaleModeListScreen> {
     );
   }
 
-  Widget buildContent() {
-    return BlocListener<SaleModeBloc, SaleModeState>(
-      listener: (context, state) {
-        if (state is SaleModeAddLoading) {
-          appLoader(context, "Creating sale mode, please wait...");
-        } else if (state is SaleModeDeleteLoading) {
-          appLoader(context, "Deleting sale mode, please wait...");
-        } else if (state is SaleModeAddSuccess) {
-          Navigator.pop(context);
-          _fetchApi();
-          showCustomToast(
-            context: context,
-            title: 'Success!',
-            description: 'Sale mode saved successfully',
-            icon: Icons.check_circle,
-            primaryColor: Colors.green,
-          );
-        } else if (state is SaleModeDeleteSuccess) {
-          showCustomToast(
-            context: context,
-            title: 'Success!',
-            description: state.message,
-            icon: Icons.check_circle,
-            primaryColor: Colors.green,
-          );
-          Navigator.pop(context);
-          _fetchApi();
-        } else if (state is SaleModeAddFailed) {
-          Navigator.pop(context);
-          Navigator.pop(context);
-          appAlertDialog(
-            context,
-            state.content,
-            title: state.title,
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text("Dismiss"),
-              ),
-            ],
-          );
-        }
-      },
-      child: Column(
-        children: [
-          _buildHeaderRow(),
-          const SizedBox(height: 8),
-          _buildSaleModesList(),
-        ],
-      ),
-    );
-  }
 
   Widget _buildHeaderRow() {
     return Column(
@@ -143,7 +140,7 @@ class _SaleModeListScreenState extends State<SaleModeListScreen> {
           onChanged: (value) {
             _fetchApi(filterText: value);
           },
-          hintText: "Search sale modes...",
+          hintText: "sale modes...",
           isRequiredLabel: false,
         ),
       ],

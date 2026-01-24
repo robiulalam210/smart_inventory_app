@@ -22,6 +22,29 @@ class PriceTierListLoaded extends PriceTierState {
   List<Object> get props => [priceTiers];
 }
 
+class AvailableSaleModesLoading extends PriceTierState {}
+
+class AvailableSaleModesSuccess extends PriceTierState {
+  final List<AvlibleSaleModeModel> availableModes;
+
+  const AvailableSaleModesSuccess({required this.availableModes});
+
+  @override
+  List<Object> get props => [availableModes];
+}
+
+
+class AvailableSaleModesFailed extends PriceTierState {
+  final String title;
+  final String content;
+
+  const AvailableSaleModesFailed({required this.title, required this.content});
+
+  @override
+  List<Object> get props => [title, content];
+}
+
+
 class PriceTierOperationLoading extends PriceTierState {}
 
 class PriceTierOperationSuccess extends PriceTierState {
