@@ -1,30 +1,30 @@
-// To parse this JSON data, do
-//
-//     final customerModel = customerModelFromJson(jsonString);
-
 import 'dart:convert';
 
-List<CustomerModel> customerModelFromJson(String str) => List<CustomerModel>.from(json.decode(str).map((x) => CustomerModel.fromJson(x)));
+List<CustomerModel> customerModelFromJson(String str) =>
+    List<CustomerModel>.from(json.decode(str).map((x) => CustomerModel.fromJson(x)));
 
-String customerModelToJson(List<CustomerModel> data) => json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
+String customerModelToJson(List<CustomerModel> data) =>
+    json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
 
 class CustomerModel {
   final int? id;
   final String? name;
   final String? phone;
-  final dynamic email;
+  final String? email;
   final String? address;
   final bool? isActive;
   final String? clientNo;
-  final dynamic totalDue;
-  final dynamic totalPaid;
+  final double? totalDue;
+  final double? totalPaid;
   final String? amountType;
   final int? company;
   final int? totalSales;
   final DateTime? dateCreated;
   final int? createdBy;
-  final dynamic advanceBalance;
+  final double? advanceBalance;
   final PaymentBreakdown? paymentBreakdown;
+  final bool specialCustomer;
+  final String? customerType;
 
   CustomerModel({
     this.id,
@@ -43,25 +43,34 @@ class CustomerModel {
     this.createdBy,
     this.advanceBalance,
     this.paymentBreakdown,
+    required this.specialCustomer,
+    this.customerType,
   });
 
   factory CustomerModel.fromJson(Map<String, dynamic> json) => CustomerModel(
     id: json["id"],
     name: json["name"],
     phone: json["phone"],
-    email: json["email"],
+    email: json["email"]?.toString(),
     address: json["address"],
     isActive: json["is_active"],
     clientNo: json["client_no"],
-    totalDue: json["total_due"],
-    totalPaid: json["total_paid"],
+    totalDue: (json["total_due"] ?? 0).toDouble(),
+    totalPaid: (json["total_paid"] ?? 0).toDouble(),
     amountType: json["amount_type"],
     company: json["company"],
     totalSales: json["total_sales"],
-    dateCreated: json["date_created"] == null ? null : DateTime.parse(json["date_created"]),
+    dateCreated: json["date_created"] == null
+        ? null
+        : DateTime.parse(json["date_created"]),
     createdBy: json["created_by"],
-    advanceBalance: json["advance_balance"],
-    paymentBreakdown: json["payment_breakdown"] == null ? null : PaymentBreakdown.fromJson(json["payment_breakdown"]),
+    specialCustomer: json["special_customer"],
+    advanceBalance: (json["advance_balance"] ?? 0).toDouble(),
+    customerType:
+    json["customer_type"],
+    paymentBreakdown: json["payment_breakdown"] == null
+        ? null
+        : PaymentBreakdown.fromJson(json["payment_breakdown"]),
   );
 
   Map<String, dynamic> toJson() => {
@@ -81,8 +90,12 @@ class CustomerModel {
     "created_by": createdBy,
     "advance_balance": advanceBalance,
     "payment_breakdown": paymentBreakdown?.toJson(),
+    "customer_type": customerType,
+    "special_customer": specialCustomer,
   };
 }
+
+// ================= Nested Models =================
 
 class PaymentBreakdown {
   final int? customerId;
@@ -101,14 +114,20 @@ class PaymentBreakdown {
     this.syncInfo,
   });
 
-  factory PaymentBreakdown.fromJson(Map<String, dynamic> json) => PaymentBreakdown(
-    customerId: json["customer_id"],
-    customerName: json["customer_name"],
-    summary: json["summary"] == null ? null : Summary.fromJson(json["summary"]),
-    details: json["details"] == null ? null : Details.fromJson(json["details"]),
-    calculation: json["calculation"] == null ? null : Calculation.fromJson(json["calculation"]),
-    syncInfo: json["sync_info"] == null ? null : SyncInfo.fromJson(json["sync_info"]),
-  );
+  factory PaymentBreakdown.fromJson(Map<String, dynamic> json) =>
+      PaymentBreakdown(
+        customerId: json["customer_id"],
+        customerName: json["customer_name"],
+        summary:
+        json["summary"] == null ? null : Summary.fromJson(json["summary"]),
+        details:
+        json["details"] == null ? null : Details.fromJson(json["details"]),
+        calculation: json["calculation"] == null
+            ? null
+            : Calculation.fromJson(json["calculation"]),
+        syncInfo:
+        json["sync_info"] == null ? null : SyncInfo.fromJson(json["sync_info"]),
+      );
 
   Map<String, dynamic> toJson() => {
     "customer_id": customerId,
@@ -125,16 +144,18 @@ class Calculation {
   final AdvanceAnalysis? advanceAnalysis;
   final DueAnalysis? dueAnalysis;
 
-  Calculation({
-    this.saleAnalysis,
-    this.advanceAnalysis,
-    this.dueAnalysis,
-  });
+  Calculation({this.saleAnalysis, this.advanceAnalysis, this.dueAnalysis});
 
   factory Calculation.fromJson(Map<String, dynamic> json) => Calculation(
-    saleAnalysis: json["sale_analysis"] == null ? null : SaleAnalysis.fromJson(json["sale_analysis"]),
-    advanceAnalysis: json["advance_analysis"] == null ? null : AdvanceAnalysis.fromJson(json["advance_analysis"]),
-    dueAnalysis: json["due_analysis"] == null ? null : DueAnalysis.fromJson(json["due_analysis"]),
+    saleAnalysis: json["sale_analysis"] == null
+        ? null
+        : SaleAnalysis.fromJson(json["sale_analysis"]),
+    advanceAnalysis: json["advance_analysis"] == null
+        ? null
+        : AdvanceAnalysis.fromJson(json["advance_analysis"]),
+    dueAnalysis: json["due_analysis"] == null
+        ? null
+        : DueAnalysis.fromJson(json["due_analysis"]),
   );
 
   Map<String, dynamic> toJson() => {
@@ -144,63 +165,11 @@ class Calculation {
   };
 }
 
-class AdvanceAnalysis {
-  final dynamic advanceFromReceipts;
-  final dynamic advanceFromSalesOverpayment;
-  final dynamic totalAdvanceAvailable;
-  final dynamic storedAdvanceInDb;
-
-  AdvanceAnalysis({
-    this.advanceFromReceipts,
-    this.advanceFromSalesOverpayment,
-    this.totalAdvanceAvailable,
-    this.storedAdvanceInDb,
-  });
-
-  factory AdvanceAnalysis.fromJson(Map<String, dynamic> json) => AdvanceAnalysis(
-    advanceFromReceipts: json["advance_from_receipts"],
-    advanceFromSalesOverpayment: json["advance_from_sales_overpayment"],
-    totalAdvanceAvailable: json["total_advance_available"],
-    storedAdvanceInDb: json["stored_advance_in_db"],
-  );
-
-  Map<String, dynamic> toJson() => {
-    "advance_from_receipts": advanceFromReceipts,
-    "advance_from_sales_overpayment": advanceFromSalesOverpayment,
-    "total_advance_available": totalAdvanceAvailable,
-    "stored_advance_in_db": storedAdvanceInDb,
-  };
-}
-
-class DueAnalysis {
-  final dynamic basicDueBeforeAdvance;
-  final dynamic netDueAfterAdvance;
-  final dynamic remainingAdvanceBalance;
-
-  DueAnalysis({
-    this.basicDueBeforeAdvance,
-    this.netDueAfterAdvance,
-    this.remainingAdvanceBalance,
-  });
-
-  factory DueAnalysis.fromJson(Map<String, dynamic> json) => DueAnalysis(
-    basicDueBeforeAdvance: json["basic_due_before_advance"],
-    netDueAfterAdvance: json["net_due_after_advance"],
-    remainingAdvanceBalance: json["remaining_advance_balance"],
-  );
-
-  Map<String, dynamic> toJson() => {
-    "basic_due_before_advance": basicDueBeforeAdvance,
-    "net_due_after_advance": netDueAfterAdvance,
-    "remaining_advance_balance": remainingAdvanceBalance,
-  };
-}
-
 class SaleAnalysis {
-  final dynamic totalSaleAmount;
-  final dynamic totalPaidToSales;
-  final dynamic salesOverpayment;
-  final dynamic salesUnderpayment;
+  final double? totalSaleAmount;
+  final double? totalPaidToSales;
+  final double? salesOverpayment;
+  final double? salesUnderpayment;
 
   SaleAnalysis({
     this.totalSaleAmount,
@@ -210,10 +179,10 @@ class SaleAnalysis {
   });
 
   factory SaleAnalysis.fromJson(Map<String, dynamic> json) => SaleAnalysis(
-    totalSaleAmount: json["total_sale_amount"],
-    totalPaidToSales: json["total_paid_to_sales"],
-    salesOverpayment: json["sales_overpayment"],
-    salesUnderpayment: json["sales_underpayment"],
+    totalSaleAmount: (json["total_sale_amount"] ?? 0).toDouble(),
+    totalPaidToSales: (json["total_paid_to_sales"] ?? 0).toDouble(),
+    salesOverpayment: (json["sales_overpayment"] ?? 0).toDouble(),
+    salesUnderpayment: (json["sales_underpayment"] ?? 0).toDouble(),
   );
 
   Map<String, dynamic> toJson() => {
@@ -224,40 +193,97 @@ class SaleAnalysis {
   };
 }
 
+class AdvanceAnalysis {
+  final double? advanceFromReceipts;
+  final double? advanceFromSalesOverpayment;
+  final double? totalAdvanceAvailable;
+  final double? storedAdvanceInDb;
+
+  AdvanceAnalysis({
+    this.advanceFromReceipts,
+    this.advanceFromSalesOverpayment,
+    this.totalAdvanceAvailable,
+    this.storedAdvanceInDb,
+  });
+
+  factory AdvanceAnalysis.fromJson(Map<String, dynamic> json) => AdvanceAnalysis(
+    advanceFromReceipts: (json["advance_from_receipts"] ?? 0).toDouble(),
+    advanceFromSalesOverpayment:
+    (json["advance_from_sales_overpayment"] ?? 0).toDouble(),
+    totalAdvanceAvailable: (json["total_advance_available"] ?? 0).toDouble(),
+    storedAdvanceInDb: (json["stored_advance_in_db"] ?? 0).toDouble(),
+  );
+
+  Map<String, dynamic> toJson() => {
+    "advance_from_receipts": advanceFromReceipts,
+    "advance_from_sales_overpayment": advanceFromSalesOverpayment,
+    "total_advance_available": totalAdvanceAvailable,
+    "stored_in_db": storedAdvanceInDb,
+  };
+}
+
+class DueAnalysis {
+  final double? basicDueBeforeAdvance;
+  final double? netDueAfterAdvance;
+  final double? remainingAdvanceBalance;
+
+  DueAnalysis({
+    this.basicDueBeforeAdvance,
+    this.netDueAfterAdvance,
+    this.remainingAdvanceBalance,
+  });
+
+  factory DueAnalysis.fromJson(Map<String, dynamic> json) => DueAnalysis(
+    basicDueBeforeAdvance: (json["basic_due_before_advance"] ?? 0).toDouble(),
+    netDueAfterAdvance: (json["net_due_after_advance"] ?? 0).toDouble(),
+    remainingAdvanceBalance: (json["remaining_advance_balance"] ?? 0).toDouble(),
+  );
+
+  Map<String, dynamic> toJson() => {
+    "basic_due_before_advance": basicDueBeforeAdvance,
+    "net_due_after_advance": netDueAfterAdvance,
+    "remaining_advance_balance": remainingAdvanceBalance,
+  };
+}
+
 class Details {
   final List<AdvanceReceipt>? advanceReceipts;
   final List<DueSale>? dueSales;
   final List<PaidSale>? paidSales;
 
-  Details({
-    this.advanceReceipts,
-    this.dueSales,
-    this.paidSales,
-  });
+  Details({this.advanceReceipts, this.dueSales, this.paidSales});
 
   factory Details.fromJson(Map<String, dynamic> json) => Details(
-    advanceReceipts: json["advance_receipts"] == null ? [] : List<AdvanceReceipt>.from(json["advance_receipts"]!.map((x) => AdvanceReceipt.fromJson(x))),
-    dueSales: json["due_sales"] == null ? [] : List<DueSale>.from(json["due_sales"]!.map((x) => DueSale.fromJson(x))),
-    paidSales: json["paid_sales"] == null ? [] : List<PaidSale>.from(json["paid_sales"]!.map((x) => PaidSale.fromJson(x))),
+    advanceReceipts: json["advance_receipts"] == null
+        ? []
+        : List<AdvanceReceipt>.from(
+        json["advance_receipts"].map((x) => AdvanceReceipt.fromJson(x))),
+    dueSales: json["due_sales"] == null
+        ? []
+        : List<DueSale>.from(json["due_sales"].map((x) => DueSale.fromJson(x))),
+    paidSales: json["paid_sales"] == null
+        ? []
+        : List<PaidSale>.from(
+        json["paid_sales"].map((x) => PaidSale.fromJson(x))),
   );
 
   Map<String, dynamic> toJson() => {
-    "advance_receipts": advanceReceipts == null ? [] : List<dynamic>.from(advanceReceipts!.map((x) => x.toJson())),
-    "due_sales": dueSales == null ? [] : List<dynamic>.from(dueSales!.map((x) => x.toJson())),
-    "paid_sales": paidSales == null ? [] : List<dynamic>.from(paidSales!.map((x) => x.toJson())),
+    "advance_receipts": advanceReceipts?.map((x) => x.toJson()).toList() ?? [],
+    "due_sales": dueSales?.map((x) => x.toJson()).toList() ?? [],
+    "paid_sales": paidSales?.map((x) => x.toJson()).toList() ?? [],
   };
 }
 
 class AdvanceReceipt {
   final int? id;
   final String? receiptNo;
-  final dynamic amount;
+  final double? amount;
   final DateTime? date;
   final String? type;
   final String? paymentType;
   final bool? isAdvancePayment;
   final bool? saleLinked;
-  final dynamic saleInvoiceNo;
+  final String? saleInvoiceNo;
 
   AdvanceReceipt({
     this.id,
@@ -274,13 +300,13 @@ class AdvanceReceipt {
   factory AdvanceReceipt.fromJson(Map<String, dynamic> json) => AdvanceReceipt(
     id: json["id"],
     receiptNo: json["receipt_no"],
-    amount: json["amount"],
+    amount: (json["amount"] ?? 0).toDouble(),
     date: json["date"] == null ? null : DateTime.parse(json["date"]),
     type: json["type"],
     paymentType: json["payment_type"],
     isAdvancePayment: json["is_advance_payment"],
     saleLinked: json["sale_linked"],
-    saleInvoiceNo: json["sale_invoice_no"],
+    saleInvoiceNo: json["sale_invoice_no"]?.toString(),
   );
 
   Map<String, dynamic> toJson() => {
@@ -299,20 +325,15 @@ class AdvanceReceipt {
 class DueSale {
   final int? id;
   final String? invoiceNo;
-  final dynamic dueAmount;
+  final double? dueAmount;
   final DateTime? date;
 
-  DueSale({
-    this.id,
-    this.invoiceNo,
-    this.dueAmount,
-    this.date,
-  });
+  DueSale({this.id, this.invoiceNo, this.dueAmount, this.date});
 
   factory DueSale.fromJson(Map<String, dynamic> json) => DueSale(
     id: json["id"],
     invoiceNo: json["invoice_no"],
-    dueAmount: json["due_amount"],
+    dueAmount: (json["due_amount"] ?? 0).toDouble(),
     date: json["date"] == null ? null : DateTime.parse(json["date"]),
   );
 
@@ -327,26 +348,19 @@ class DueSale {
 class PaidSale {
   final int? id;
   final String? invoiceNo;
-  final dynamic grandTotal;
-  final dynamic paidAmount;
-  final dynamic overpayment;
+  final double? grandTotal;
+  final double? paidAmount;
+  final double? overpayment;
   final DateTime? date;
 
-  PaidSale({
-    this.id,
-    this.invoiceNo,
-    this.grandTotal,
-    this.paidAmount,
-    this.overpayment,
-    this.date,
-  });
+  PaidSale({this.id, this.invoiceNo, this.grandTotal, this.paidAmount, this.overpayment, this.date});
 
   factory PaidSale.fromJson(Map<String, dynamic> json) => PaidSale(
     id: json["id"],
     invoiceNo: json["invoice_no"],
-    grandTotal: json["grand_total"],
-    paidAmount: json["paid_amount"],
-    overpayment: json["overpayment"],
+    grandTotal: (json["grand_total"] ?? 0).toDouble(),
+    paidAmount: (json["paid_amount"] ?? 0).toDouble(),
+    overpayment: (json["overpayment"] ?? 0).toDouble(),
     date: json["date"] == null ? null : DateTime.parse(json["date"]),
   );
 
@@ -365,11 +379,7 @@ class Summary {
   final Due? due;
   final Due? paid;
 
-  Summary({
-    this.advance,
-    this.due,
-    this.paid,
-  });
+  Summary({this.advance, this.due, this.paid});
 
   factory Summary.fromJson(Map<String, dynamic> json) => Summary(
     advance: json["advance"] == null ? null : Advance.fromJson(json["advance"]),
@@ -385,18 +395,14 @@ class Summary {
 }
 
 class Advance {
-  final dynamic total;
+  final double? total;
   final Breakdown? breakdown;
   final int? count;
 
-  Advance({
-    this.total,
-    this.breakdown,
-    this.count,
-  });
+  Advance({this.total, this.breakdown, this.count});
 
   factory Advance.fromJson(Map<String, dynamic> json) => Advance(
-    total: json["total"],
+    total: (json["total"] ?? 0).toDouble(),
     breakdown: json["breakdown"] == null ? null : Breakdown.fromJson(json["breakdown"]),
     count: json["count"],
   );
@@ -409,23 +415,18 @@ class Advance {
 }
 
 class Breakdown {
-  final dynamic fromSalesOverpayment;
-  final dynamic fromAdvanceReceipts;
-  final dynamic storedInDb;
-  final dynamic totalCalculated;
+  final double? fromSalesOverpayment;
+  final double? fromAdvanceReceipts;
+  final double? storedInDb;
+  final double? totalCalculated;
 
-  Breakdown({
-    this.fromSalesOverpayment,
-    this.fromAdvanceReceipts,
-    this.storedInDb,
-    this.totalCalculated,
-  });
+  Breakdown({this.fromSalesOverpayment, this.fromAdvanceReceipts, this.storedInDb, this.totalCalculated});
 
   factory Breakdown.fromJson(Map<String, dynamic> json) => Breakdown(
-    fromSalesOverpayment: json["from_sales_overpayment"],
-    fromAdvanceReceipts: json["from_advance_receipts"],
-    storedInDb: json["stored_in_db"],
-    totalCalculated: json["total_calculated"],
+    fromSalesOverpayment: (json["from_sales_overpayment"] ?? 0).toDouble(),
+    fromAdvanceReceipts: (json["from_advance_receipts"] ?? 0).toDouble(),
+    storedInDb: (json["stored_in_db"] ?? 0).toDouble(),
+    totalCalculated: (json["total_calculated"] ?? 0).toDouble(),
   );
 
   Map<String, dynamic> toJson() => {
@@ -437,16 +438,13 @@ class Breakdown {
 }
 
 class Due {
-  final dynamic total;
+  final double? total;
   final int? count;
 
-  Due({
-    this.total,
-    this.count,
-  });
+  Due({this.total, this.count});
 
   factory Due.fromJson(Map<String, dynamic> json) => Due(
-    total: json["total"],
+    total: (json["total"] ?? 0).toDouble(),
     count: json["count"],
   );
 
@@ -458,16 +456,13 @@ class Due {
 
 class SyncInfo {
   final bool? wasSynced;
-  final dynamic previousValue;
+  final double? previousValue;
 
-  SyncInfo({
-    this.wasSynced,
-    this.previousValue,
-  });
+  SyncInfo({this.wasSynced, this.previousValue});
 
   factory SyncInfo.fromJson(Map<String, dynamic> json) => SyncInfo(
     wasSynced: json["was_synced"],
-    previousValue: json["previous_value"],
+    previousValue: (json["previous_value"] ?? 0).toDouble(),
   );
 
   Map<String, dynamic> toJson() => {

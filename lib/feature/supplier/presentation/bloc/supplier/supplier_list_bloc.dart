@@ -22,6 +22,8 @@ class SupplierListBloc extends Bloc<SupplierListEvent, SupplierListState> {
 
   SourceModel? sourceModel;
 
+  TextEditingController shopName = TextEditingController();
+  TextEditingController productName = TextEditingController();
   TextEditingController customerNameController = TextEditingController();
   TextEditingController customerNumberController = TextEditingController();
   TextEditingController customerEmailController = TextEditingController();

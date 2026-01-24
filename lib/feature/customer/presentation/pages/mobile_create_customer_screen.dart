@@ -2,10 +2,16 @@ import '/core/core.dart';
 import '../../../customer/presentation/bloc/customer/customer_bloc.dart';
 
 class MobileCreateCustomerScreen extends StatefulWidget {
-  const MobileCreateCustomerScreen({super.key, this.submitText = '', this.id = ''});
+  const MobileCreateCustomerScreen({
+    super.key,
+    this.submitText = '',
+    this.id = '',
+    this.customer
+  });
 
   final String id;
   final String submitText;
+  final Map<String, dynamic>? customer;
 
   @override
   State<MobileCreateCustomerScreen> createState() => _CreateCustomerScreenState();
@@ -13,6 +19,16 @@ class MobileCreateCustomerScreen extends StatefulWidget {
 
 class _CreateCustomerScreenState extends State<MobileCreateCustomerScreen> {
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  bool _isSpecialCustomer = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize special customer status if editing
+    if (widget.customer != null) {
+      _isSpecialCustomer = widget.customer?['special_customer'] ?? false;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +73,12 @@ class _CreateCustomerScreenState extends State<MobileCreateCustomerScreen> {
                   ],
                 ),
               ),
+              const SizedBox(height: 16),
 
+              // Special Customer Toggle
+              _buildSpecialCustomerToggle(),
+
+              const SizedBox(height: 8),
 
               // Row 1: Customer Name & Phone
               _buildTwoColumnRow(
@@ -112,6 +133,7 @@ class _CreateCustomerScreenState extends State<MobileCreateCustomerScreen> {
               // Status dropdown (only in edit mode)
               if (widget.id.isNotEmpty) ...[
                 _buildStatusDropdown(),
+                const SizedBox(height: 8),
               ],
 
               Row(
@@ -120,15 +142,15 @@ class _CreateCustomerScreenState extends State<MobileCreateCustomerScreen> {
                 children: [
                   AppButton(
                     size: 120,
-                    name:  "Cancel",
+                    name: "Cancel",
                     isOutlined: true,
                     textColor: AppColors.errorColor(context),
                     borderColor: AppColors.primaryColor(context),
-                    onPressed: (){
+                    onPressed: () {
                       AppRoutes.pop(context);
                     },
                   ),
-                  SizedBox(width: 10,),
+                  const SizedBox(width: 10),
                   AppButton(
                     size: 120,
                     name: widget.submitText.isEmpty ? "Submit" : widget.submitText,
@@ -138,16 +160,69 @@ class _CreateCustomerScreenState extends State<MobileCreateCustomerScreen> {
                       }
                     },
                   ),
-
                 ],
               ),
-              // Submit button
 
               const SizedBox(height: 16),
-
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildSpecialCustomerToggle() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: AppColors.bottomNavBg(context),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: AppColors.greyColor(context)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.star,
+                color: _isSpecialCustomer
+                    ? Colors.amber[600]
+                    : AppColors.text(context).withOpacity(0.5),
+                size: 20,
+              ),
+              const SizedBox(width: 12),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Special Customer",
+                    style: AppTextStyle.body(context).copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  Text(
+                    _isSpecialCustomer
+                        ? "Marked as special customer"
+                        : "Regular customer",
+                    style: AppTextStyle.body(context).copyWith(
+                      color: AppColors.text(context).withOpacity(0.7),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          Switch.adaptive(
+            value: _isSpecialCustomer,
+            activeColor: Colors.amber[600],
+            onChanged: (value) {
+              setState(() {
+                _isSpecialCustomer = value;
+              });
+            },
+          ),
+        ],
       ),
     );
   }
@@ -188,8 +263,7 @@ class _CreateCustomerScreenState extends State<MobileCreateCustomerScreen> {
           width: isSmallScreen ? double.infinity : constraints.maxWidth * 0.5,
           child: AppDropdown(
             label: "Status",
-            hint:  "Select Status"
-              ,
+            hint: "Select Status",
             isLabel: false,
             value: context.read<CustomerBloc>().selectedState.isEmpty
                 ? null
@@ -212,6 +286,7 @@ class _CreateCustomerScreenState extends State<MobileCreateCustomerScreen> {
     Map<String, dynamic> body = {
       "name": customerBloc.customerNameController.text.trim(),
       "phone": customerBloc.customerNumberController.text.trim(),
+      "special_customer": _isSpecialCustomer, // Add special customer field
     };
 
     if (customerBloc.customerEmailController.text.trim().isNotEmpty) {
@@ -235,5 +310,3 @@ class _CreateCustomerScreenState extends State<MobileCreateCustomerScreen> {
     Navigator.of(context).pop(); // Close dialog after submission
   }
 }
-
-

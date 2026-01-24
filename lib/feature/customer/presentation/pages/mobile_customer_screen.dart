@@ -1,6 +1,4 @@
-
 import 'package:meherinMart/core/widgets/app_scaffold.dart';
-
 import '../../../../core/configs/configs.dart';
 import '../../../../core/widgets/app_alert_dialog.dart';
 import '../../../../core/widgets/app_button.dart';
@@ -22,6 +20,7 @@ class MobileCustomerScreen extends StatefulWidget {
 class _CustomerScreenState extends State<MobileCustomerScreen> {
   final TextEditingController filterTextController = TextEditingController();
   final ValueNotifier<String?> selectedStatusNotifier = ValueNotifier(null);
+  final ValueNotifier<String?> selectedCustomerTypeNotifier = ValueNotifier(null);
   final ScrollController _scrollController = ScrollController();
 
   @override
@@ -37,6 +36,7 @@ class _CustomerScreenState extends State<MobileCustomerScreen> {
   void dispose() {
     filterTextController.dispose();
     selectedStatusNotifier.dispose();
+    selectedCustomerTypeNotifier.dispose();
     _scrollController.dispose();
     super.dispose();
   }
@@ -44,6 +44,7 @@ class _CustomerScreenState extends State<MobileCustomerScreen> {
   void _fetchApi({
     String filterText = '',
     String status = '',
+    String customerType = '',
     int pageNumber = 1,
     int pageSize = 10,
   }) {
@@ -54,6 +55,7 @@ class _CustomerScreenState extends State<MobileCustomerScreen> {
         context,
         filterText: filterText,
         status: status,
+        customerType: customerType,
         pageNumber: pageNumber,
         pageSize: pageSize,
       ),
@@ -66,57 +68,59 @@ class _CustomerScreenState extends State<MobileCustomerScreen> {
       pageSize: pageSize,
       filterText: filterTextController.text,
       status: selectedStatusNotifier.value?.toString() ?? '',
+      customerType: selectedCustomerTypeNotifier.value?.toString() ?? '',
     );
   }
 
   @override
   Widget build(BuildContext context) {
-
     return AppScaffold(
-      floatingActionButton: FloatingActionButton( 
+      floatingActionButton: FloatingActionButton(
         backgroundColor: AppColors.primaryColor(context),
-        onPressed: () => _showCreateCustomerDialog(context),child: Icon(Icons.add,color: AppColors.whiteColor(context),),),
-      appBar: AppBar(title: Text("Customer",style: AppTextStyle.titleMedium(context),),),
+        onPressed: () => _showCreateCustomerDialog(context),
+        child: Icon(Icons.add, color: AppColors.whiteColor(context)),
+      ),
+      appBar: AppBar(
+        title: Text("Customer", style: AppTextStyle.titleMedium(context)),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.filter_alt),
+            onPressed: () => _showMobileFilterSheet(context),
+          ),
+        ],
+      ),
       body: SafeArea(
-        child:   _buildContentArea(),
+        child: _buildContentArea(),
       ),
     );
   }
 
-
   Widget _buildContentArea() {
-    return ResponsiveCol(
-      xs: 12,
-      sm: 12,
-      md: 12,
-      lg: 10,
-      xl: 10,
-      child: RefreshIndicator(
-        color: AppColors.primaryColor(context),
-        onRefresh: () async {
-          _fetchApi();
-        },
-        child: Container(
-          padding: AppTextStyle.getResponsivePaddingBody(context),
-          child: BlocConsumer<CustomerBloc, CustomerState>(
-            listener: (context, state) {
-              _handleBlocState(state);
-            },
-            builder: (context, state) {
-              return  SingleChildScrollView(
-                physics: AlwaysScrollableScrollPhysics(),
-                child: Column(
-                  children: [
-
-                      _buildMobileHeader(),
-                    SizedBox(
-                      child: _buildCustomerList(state),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
+    return RefreshIndicator(
+      color: AppColors.primaryColor(context),
+      onRefresh: () async {
+        _fetchApi();
+      },
+      child: Container(
+        padding: AppTextStyle.getResponsivePaddingBody(context),
+        child: BlocConsumer<CustomerBloc, CustomerState>(
+          listener: (context, state) {
+            _handleBlocState(state);
+          },
+          builder: (context, state) {
+            return SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: Column(
+                children: [
+                  _buildMobileHeader(),
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    child: _buildCustomerList(state),
+                  ),
+                ],
+              ),
+            );
+          },
         ),
       ),
     );
@@ -178,9 +182,30 @@ class _CustomerScreenState extends State<MobileCustomerScreen> {
           ],
         );
       }
+    } else if (state is CustomerToggleSpecialSuccess) {
+      if (context.mounted) {
+        showCustomToast(
+          context: context,
+          title: 'Success!',
+          description: state.message,
+          icon: Icons.check_circle,
+          primaryColor: Colors.green,
+        );
+        _fetchApi();
+      }
+    } else if (state is CustomerToggleSpecialFailed) {
+      _fetchApi();
+      if (context.mounted) {
+        showCustomToast(
+          context: context,
+          title: 'Error!',
+          description: state.message,
+          icon: Icons.error,
+          primaryColor: Colors.red,
+        );
+      }
     }
   }
-
 
   Widget _buildMobileHeader() {
     return Column(
@@ -196,56 +221,70 @@ class _CustomerScreenState extends State<MobileCustomerScreen> {
                 onClear: () {
                   filterTextController.clear();
                   selectedStatusNotifier.value = null;
+                  selectedCustomerTypeNotifier.value = null;
                   _fetchApi();
                   FocusScope.of(context).unfocus();
-
                 },
                 isRequiredLabel: false,
-                hintText: "customers...",
+                hintText: "Search customers...",
               ),
             ),
             IconButton(
-              icon: Icon(
-                Iconsax.filter,
-                color: AppColors.primaryColor(context),
-              ),
-              onPressed: () => _showMobileFilterSheet(context),
-            ),
-            IconButton(
-              onPressed: (){
+              icon: const Icon(Icons.refresh),
+              onPressed: () {
                 filterTextController.clear();
                 selectedStatusNotifier.value = null;
+                selectedCustomerTypeNotifier.value = null;
                 _fetchApi();
               },
-              icon: const Icon(Icons.refresh),
               tooltip: "Refresh",
             ),
           ],
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: 8),
 
-        // Filter Chips
+        // Active Filter Chips
         ValueListenableBuilder<String?>(
           valueListenable: selectedStatusNotifier,
           builder: (context, status, child) {
-            return Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                if (status != null && status != "All")
-                  Chip(
-                    label: Text(status),
-                    onDeleted: () {
-                      selectedStatusNotifier.value = null;
-                      _fetchApi();
-                    },
-                  ),
-              ],
+            return ValueListenableBuilder<String?>(
+              valueListenable: selectedCustomerTypeNotifier,
+              builder: (context, customerType, child) {
+                final List<String> activeFilters = [];
+
+                if (status != null && status != "All") {
+                  activeFilters.add("Status: $status");
+                }
+
+                if (customerType != null && customerType != "All") {
+                  activeFilters.add("Type: $customerType");
+                }
+
+                if (activeFilters.isEmpty) {
+                  return const SizedBox.shrink();
+                }
+
+                return Wrap(
+                  spacing: 8,
+                  runSpacing: 4,
+                  children: [
+                    ...activeFilters.map((filter) => Chip(
+                      label: Text(filter),
+                      onDeleted: () {
+                        if (filter.startsWith("Status:")) {
+                          selectedStatusNotifier.value = null;
+                        } else if (filter.startsWith("Type:")) {
+                          selectedCustomerTypeNotifier.value = null;
+                        }
+                        _fetchApi();
+                      },
+                    )).toList(),
+                  ],
+                );
+              },
             );
           },
         ),
-
-
       ],
     );
   }
@@ -259,13 +298,12 @@ class _CustomerScreenState extends State<MobileCustomerScreen> {
       } else {
         return Column(
           children: [
-            SizedBox(
-              child: CustomerTableCard(
-                customers: state.list,
-                onCustomerTap: () {
-                  // Handle customer tap if needed
-                },
-              ),
+            CustomerTableCard(
+              customers: state.list,
+              onCustomerTap: (v) {
+                print(v);
+                _showCustomerOptions(context, v);
+              },
             ),
             const SizedBox(height: 16),
             PaginationBar(
@@ -330,14 +368,263 @@ class _CustomerScreenState extends State<MobileCustomerScreen> {
             borderRadius: BorderRadius.circular(AppSizes.radius),
             child: ConstrainedBox(
               constraints: BoxConstraints(
-                // maxWidth: Responsive.isMobile(context)
-                //     ? AppSizes.width(context)
-                //     : AppSizes.width(context) * 0.55,
-                // maxHeight: AppSizes.height(context) * 0.8,
+                maxWidth: MediaQuery.of(context).size.width * 0.95,
+                maxHeight: MediaQuery.of(context).size.height * 0.9,
               ),
               child: const MobileCreateCustomerScreen(),
             ),
           ),
+        );
+      },
+    );
+  }
+
+  void _showCustomerOptions(BuildContext context, Map<String, dynamic> customer) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Customer Info Header
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppColors.bottomNavBg(context),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryColor(context).withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Icon(
+                          customer['special_customer'] == true
+                              ? Icons.star
+                              : Icons.person,
+                          color: customer['special_customer'] == true
+                              ? Colors.amber
+                              : AppColors.primaryColor(context),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              customer['name'] ?? '',
+                              style: AppTextStyle.bodyLarge(context).copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            Text(
+                              customer['phone'] ?? '',
+                              style: AppTextStyle.body(context),
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (customer['special_customer'] == true)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.amber.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.amber),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(Icons.star, size: 14, color: Colors.amber),
+                              const SizedBox(width: 4),
+                              Text(
+                                "Special",
+                                style: AppTextStyle.body(context).copyWith(
+                                  color: Colors.amber,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // Options
+                _buildOptionItem(
+                  icon: Icons.edit,
+                  title: "Edit Customer",
+                  onTap: () {
+                    Navigator.pop(context);
+                    _showEditCustomerDialog(context, customer);
+                  },
+                ),
+                _buildOptionItem(
+                  icon: customer['special_customer'] == true
+                      ? Icons.star_border
+                      : Icons.star,
+                  title: customer['special_customer'] == true
+                      ? "Remove from Special"
+                      : "Mark as Special",
+                  onTap: () {
+                    Navigator.pop(context);
+                    _toggleSpecialCustomer(customer);
+                  },
+                ),
+                _buildOptionItem(
+                  icon: Icons.delete,
+                  title: "Delete Customer",
+                  color: Colors.red,
+                  onTap: () {
+                    Navigator.pop(context);
+                    _showDeleteConfirmation(context, customer);
+                  },
+                ),
+                const SizedBox(height: 8),
+
+                // Cancel Button
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    child: Text(
+                      "Cancel",
+                      style: AppTextStyle.body(context),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildOptionItem({
+    required IconData icon,
+    required String title,
+    Color? color,
+    required VoidCallback onTap,
+  }) {
+    return ListTile(
+      leading: Icon(icon, color: color ?? AppColors.primaryColor(context)),
+      title: Text(
+        title,
+        style: AppTextStyle.bodyLarge(context).copyWith(
+          color: color ?? AppColors.text(context),
+        ),
+      ),
+      onTap: onTap,
+      contentPadding: EdgeInsets.zero,
+    );
+  }
+
+  void _showEditCustomerDialog(BuildContext context, Map<String, dynamic> customer) {
+    // Pre-fill the form with customer data
+    final customerBloc = context.read<CustomerBloc>();
+    customerBloc.customerNameController.text = customer['name'] ?? '';
+    customerBloc.customerNumberController.text = customer['phone'] ?? '';
+    customerBloc.customerEmailController.text = customer['email'] ?? '';
+    customerBloc.addressController.text = customer['address'] ?? '';
+    customerBloc.selectedState = customer['is_active'] == true ? "Active" : "Inactive";
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppSizes.radius),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(AppSizes.radius),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: MediaQuery.of(context).size.width * 0.95,
+                maxHeight: MediaQuery.of(context).size.height * 0.9,
+              ),
+              child: MobileCreateCustomerScreen(
+                id: customer['id'].toString(),
+                submitText: "Update",
+                customer: customer,
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _toggleSpecialCustomer(Map<String, dynamic> customer) {
+    final customerBloc = context.read<CustomerBloc>();
+    final action = customer['special_customer'] == true ? 'set_false' : 'set_true';
+
+    customerBloc.add(ToggleSpecialCustomer(
+      context: context,
+      customerId: customer['id'].toString(),
+      action: action,
+    ));
+  }
+
+  void _showDeleteConfirmation(BuildContext context, Map<String, dynamic> customer) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(
+            "Delete Customer",
+            style: AppTextStyle.titleMedium(context),
+          ),
+          content: Text(
+            "Are you sure you want to delete ${customer['name']}?",
+            style: AppTextStyle.bodyLarge(context),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                "Cancel",
+                style: AppTextStyle.body(context).copyWith(
+                  color: AppColors.text(context),
+                ),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                context.read<CustomerBloc>().add(
+                  DeleteCustomer(
+                    customer['id'].toString(),
+
+                  ),
+                );
+              },
+              child: Text(
+                "Delete",
+                style: AppTextStyle.body(context).copyWith(
+                  color: Colors.red,
+                ),
+              ),
+            ),
+          ],
         );
       },
     );
@@ -364,7 +651,7 @@ class _CustomerScreenState extends State<MobileCustomerScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                         Text(
+                        Text(
                           "Filter Customers",
                           style: TextStyle(
                             fontSize: 18,
@@ -381,7 +668,7 @@ class _CustomerScreenState extends State<MobileCustomerScreen> {
                     const SizedBox(height: 10),
 
                     // Status Filter
-                     Text(
+                    Text(
                       "Status",
                       style: TextStyle(
                         color: AppColors.text(context),
@@ -404,13 +691,49 @@ class _CustomerScreenState extends State<MobileCustomerScreen> {
                               selectedStatusNotifier.value = selected ? status : null;
                             });
                           },
-                          selectedColor: AppColors.primaryColor(context).withValues(alpha: 0.2),
+                          selectedColor: AppColors.primaryColor(context).withOpacity(0.2),
                           checkmarkColor: AppColors.primaryColor(context),
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Customer Type Filter
+                    Text(
+                      "Customer Type",
+                      style: TextStyle(
+                        color: AppColors.text(context),
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      children: ["All", "Special", "Regular"].map((type) {
+                        final bool isSelected =
+                            selectedCustomerTypeNotifier.value == type ||
+                                (type == "All" && selectedCustomerTypeNotifier.value == null);
+                        return FilterChip(
+                          label: Text(type),
+                          selected: isSelected,
+                          onSelected: (selected) {
+                            setState(() {
+                              selectedCustomerTypeNotifier.value = selected ? type : null;
+                            });
+                          },
+                          selectedColor: type == "Special"
+                              ? Colors.amber.withOpacity(0.2)
+                              : AppColors.primaryColor(context).withOpacity(0.2),
+                          checkmarkColor: type == "Special"
+                              ? Colors.amber
+                              : AppColors.primaryColor(context),
                         );
                       }).toList(),
                     ),
                     const SizedBox(height: 10),
 
+                    // Action Buttons
                     Row(
                       children: [
                         Expanded(
@@ -419,21 +742,22 @@ class _CustomerScreenState extends State<MobileCustomerScreen> {
                               setState(() {
                                 filterTextController.clear();
                                 selectedStatusNotifier.value = null;
+                                selectedCustomerTypeNotifier.value = null;
                               });
                               Navigator.pop(context);
                               _fetchApi();
                             },
                             style: OutlinedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              padding: const EdgeInsets.symmetric(vertical: 12),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10),
                               ),
                             ),
                             child: Text(
                               "Clear All",
-                              style: AppTextStyle.body(
-                                context,
-                              ).copyWith(color: AppColors.error),
+                              style: AppTextStyle.body(context).copyWith(
+                                color: AppColors.error,
+                              ),
                             ),
                           ),
                         ),
@@ -445,24 +769,26 @@ class _CustomerScreenState extends State<MobileCustomerScreen> {
                               _fetchApi(
                                 filterText: filterTextController.text,
                                 status: selectedStatusNotifier.value?.toLowerCase() ?? '',
+                                customerType: selectedCustomerTypeNotifier.value?.toLowerCase() ?? '',
                               );
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColors.primaryColor(context),
-                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              padding: const EdgeInsets.symmetric(vertical: 12),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10),
                               ),
                             ),
-                            child:  Text("Apply Filters",style: AppTextStyle.body(
-                              context,
-                            ).copyWith(color: AppColors.text(context)),),
+                            child: Text(
+                              "Apply Filters",
+                              style: AppTextStyle.body(context).copyWith(
+                                color: AppColors.whiteColor(context),
+                              ),
+                            ),
                           ),
                         ),
                       ],
                     ),
-                    // Action Buttons
-
                     SizedBox(height: MediaQuery.of(context).viewInsets.bottom),
                   ],
                 ),

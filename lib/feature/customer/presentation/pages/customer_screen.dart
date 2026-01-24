@@ -269,7 +269,7 @@ class _CustomerScreenState extends State<CustomerScreen> {
             SizedBox(
               child: CustomerTableCard(
                 customers: state.list,
-                onCustomerTap: () {
+                onCustomerTap: (v) {
                   // Handle customer tap if needed
                 },
               ),

@@ -276,6 +276,10 @@ class _SupplierScreenState extends State<MobileSupplierListScreen> {
                                     child: SupplierDataTableWidget(
                                       suppliers: state.list,
                                       onEdit: (v) {
+                                        final supplierBloc = context.read<SupplierListBloc>();
+
+                                        supplierBloc.customerNameController.text = v.name ?? "";
+                                        supplierBloc.customerNumberController.text = v.phone ?? "";
                                         context
                                                 .read<SupplierListBloc>()
                                                 .customerNameController
@@ -302,6 +306,38 @@ class _SupplierScreenState extends State<MobileSupplierListScreen> {
                                             ? "Active"
                                             : "Inactive";
                                         _showEditDialog(context, v);
+                                      },
+                                      onEditMobile: (v) {
+                                        final supplierBloc = context.read<SupplierListBloc>();
+
+                                        supplierBloc.customerNameController.text = v.name ?? "";
+                                        supplierBloc.customerNumberController.text = v.phone ?? "";
+                                        context
+                                            .read<SupplierListBloc>()
+                                            .customerNameController
+                                            .text =
+                                            v.name ?? "";
+                                        context
+                                            .read<SupplierListBloc>()
+                                            .customerNumberController
+                                            .text =
+                                            v.phone ?? "";
+                                        context
+                                            .read<SupplierListBloc>()
+                                            .addressController
+                                            .text =
+                                            v.address ?? "";
+                                        context
+                                            .read<SupplierListBloc>()
+                                            .customerEmailController
+                                            .text =
+                                            v.email ?? "";
+                                        context
+                                            .read<SupplierListBloc>()
+                                            .selectedState = v.isActive == true
+                                            ? "Active"
+                                            : "Inactive";
+                                        _showEditDialogMobile(context, v);
                                       },
                                       onDelete: (v) async {
                                         bool shouldDelete =
@@ -483,7 +519,23 @@ class _SupplierScreenState extends State<MobileSupplierListScreen> {
       },
     );
   }
-
+  void _showEditDialogMobile(BuildContext context, SupplierListModel customer) {
+    // Implement edit dialog logic
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          child: SizedBox(
+            width: AppSizes.width(context) * 0.80,
+            child: MobileCreateSupplierScreen(
+              id: customer.id.toString(),
+              submitText: "Update Supplier",
+            ),
+          ),
+        );
+      },
+    );
+  }
   void _showEditDialog(BuildContext context, SupplierListModel customer) {
     // Implement edit dialog logic
     showDialog(

@@ -27,6 +27,10 @@ class SupplierListModel {
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
+  // NEW FIELDS
+  final String? shopName;
+  final String? productName;
+
   SupplierListModel({
     this.id,
     this.name,
@@ -45,14 +49,17 @@ class SupplierListModel {
     this.createdBy,
     this.createdAt,
     this.updatedAt,
-  });
 
+    // NEW FIELDS
+    this.shopName,
+    this.productName,
+  });
 
   @override
   String toString() {
-    // TODO: implement toString
-    return name??"";
+    return name ?? "";
   }
+
   factory SupplierListModel.fromJson(Map<String, dynamic> json) => SupplierListModel(
     id: json["id"],
     name: json["name"],
@@ -71,6 +78,10 @@ class SupplierListModel {
     createdBy: json["created_by"],
     createdAt: json["created_at"] == null ? null : DateTime.parse(json["created_at"]),
     updatedAt: json["updated_at"] == null ? null : DateTime.parse(json["updated_at"]),
+
+    // NEW FIELDS
+    shopName: json["shop_name"],
+    productName: json["product_name"],
   );
 
   Map<String, dynamic> toJson() => {
@@ -91,5 +102,9 @@ class SupplierListModel {
     "created_by": createdBy,
     "created_at": createdAt?.toIso8601String(),
     "updated_at": updatedAt?.toIso8601String(),
+
+    // NEW FIELDS
+    "shop_name": shopName,
+    "product_name": productName,
   };
 }
