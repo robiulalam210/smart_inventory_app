@@ -25,14 +25,13 @@ class ProductSaleModeBloc extends Bloc<ProductSaleModeEvent, ProductSaleModeStat
 
   ProductSaleModeBloc() : super(ProductSaleModeInitial()) {
     on<FetchProductSaleModeList>(_onFetchProductSaleModeList);
-    on<FetchAvailableSaleModes>(_onFetchAvailableSaleModes);
+    // on<FetchAvailableSaleModes>(_onFetchAvailableSaleModes);
     on<AddProductSaleMode>(_onCreateProductSaleModeList);
     on<UpdateProductSaleMode>(_onUpdateProductSaleModeList);
     on<DeleteProductSaleMode>(_onDeleteProductSaleModeList);
     on<BulkUpdateProductSaleModes>(_onBulkUpdateProductSaleModes);
     on<ClearProductSaleModeData>(_onClearProductSaleModeData);
   }
-
   Future<void> _onFetchProductSaleModeList(
       FetchProductSaleModeList event,
       Emitter<ProductSaleModeState> emit,
@@ -46,80 +45,80 @@ class ProductSaleModeBloc extends Bloc<ProductSaleModeEvent, ProductSaleModeStat
         queryParams: {'product_id': event.productId},
       );
 
-      ApiResponse response = appParseJson(
-        res,
-            (data) => List<ProductSaleModeModel>.from(
-          data.map((x) => ProductSaleModeModel.fromJson(x)),
-        ),
+      final Map<String, dynamic> body = jsonDecode(res);
+
+      final List<ProductSaleModeModel> data =
+      (body['data'] as List<dynamic>)
+          .map((e) => ProductSaleModeModel.fromJson(e))
+          .toList();
+
+      debugPrint(
+        'Fetched Sale Modes (${data.length}): '
+            '${data.map((e) => e.saleModeName).join(', ')}',
       );
-
-      final data = response.data;
-      if (data == null || data.isEmpty) {
-        emit(
-          ProductSaleModeListSuccess(
-            list: [],
-            totalPages: 0,
-            currentPage: event.pageNumber,
-          ),
-        );
-        return;
-      }
-
-      productSaleModeModel = data;
-      final filteredData = _filterProductSaleMode(productSaleModeModel, event.filterText);
 
       emit(
         ProductSaleModeListSuccess(
-          list: filteredData,
+          list: data,
           totalPages: 1,
           currentPage: event.pageNumber,
         ),
       );
-    } catch (error) {
-      emit(ProductSaleModeListFailed(title: "Error", content: error.toString()));
+    } catch (e, stack) {
+      debugPrint('❌ SaleMode Error: $e');
+      debugPrintStack(stackTrace: stack);
+
+      emit(
+        ProductSaleModeListFailed(
+          title: 'Error',
+          content: e.toString(),
+        ),
+      );
     }
   }
 
-  Future<void> _onFetchAvailableSaleModes(
-      FetchAvailableSaleModes event,
-      Emitter<ProductSaleModeState> emit,
-      ) async {
-    emit(AvailableSaleModesLoading());
 
-    try {
-      final res = await getResponse(
-        url: "${AppUrls.products}${event.productId}/available_sale_modes/",
-        context: event.context,
-      );
 
-      ApiResponse response = appParseJson(
-        res,
-            (data) => data, // just pass data as-is
-      );
-
-      final data = response.data;
-
-      if (data == null || (data as List).isEmpty) {
-        emit(AvailableSaleModesSuccess(availableModes: []));
-        return;
-      }
-
-      final dataList = data as List<dynamic>;
-
-      // Map JSON to your model
-      final modes = dataList
-          .map((e) => AvlibleSaleModeModel.fromJson(e as Map<String, dynamic>))
-          .toList();
-
-      availableSaleModes = modes; // store locally if needed
-      emit(AvailableSaleModesSuccess(availableModes: modes));
-    } catch (error, st) {
-      print(error);
-      print(st);
-      emit(AvailableSaleModesFailed(title: "Error", content: error.toString()));
-    }
-  }
-
+  // Future<void> _onFetchAvailableSaleModes(
+  //     FetchAvailableSaleModes event,
+  //     Emitter<ProductSaleModeState> emit,
+  //     ) async {
+  //   emit(AvailableSaleModesLoading());
+  //
+  //   try {
+  //     final res = await getResponse(
+  //       url: "${AppUrls.products}${event.productId}/available_sale_modes/",
+  //       context: event.context,
+  //     );
+  //
+  //     ApiResponse response = appParseJson(
+  //       res,
+  //           (data) => data, // just pass data as-is
+  //     );
+  //
+  //     final data = response.data;
+  //
+  //     if (data == null || (data as List).isEmpty) {
+  //       emit(AvailableSaleModesSuccess(availableModes: []));
+  //       return;
+  //     }
+  //
+  //     final dataList = data as List<dynamic>;
+  //
+  //     // Map JSON to your model
+  //     final modes = dataList
+  //         .map((e) => AvlibleSaleModeModel.fromJson(e as Map<String, dynamic>))
+  //         .toList();
+  //
+  //     availableSaleModes = modes; // store locally if needed
+  //     emit(AvailableSaleModesSuccess(availableModes: modes));
+  //   } catch (error, st) {
+  //     print(error);
+  //     print(st);
+  //     emit(AvailableSaleModesFailed(title: "Error", content: error.toString()));
+  //   }
+  // }
+  //
 
   Future<void> _onCreateProductSaleModeList(
       AddProductSaleMode event,

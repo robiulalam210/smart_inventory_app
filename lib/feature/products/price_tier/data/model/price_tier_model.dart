@@ -1,8 +1,4 @@
-// features/products/sale_mode/data/model/price_tier_model.dart
-
-import 'package:equatable/equatable.dart';
-
-class PriceTierModel extends Equatable {
+class PriceTierModel {
   final int? id;
   final int? productSaleMode;
   final double? minQuantity;
@@ -11,7 +7,7 @@ class PriceTierModel extends Equatable {
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
-  const PriceTierModel({
+  PriceTierModel({
     this.id,
     this.productSaleMode,
     this.minQuantity,
@@ -23,41 +19,35 @@ class PriceTierModel extends Equatable {
 
   factory PriceTierModel.fromJson(Map<String, dynamic> json) {
     return PriceTierModel(
-      id: json['id'],
-      productSaleMode: json['product_sale_mode'] is int
-          ? json['product_sale_mode']
-          : int.tryParse(json['product_sale_mode'].toString()),
-      minQuantity: json['min_quantity']?.toDouble(),
-      maxQuantity: json['max_quantity']?.toDouble(),
-      price: json['price']?.toDouble(),
+      id: json['id'] as int?,
+      productSaleMode: json['product_sale_mode'] as int?,
+      minQuantity: json['min_quantity'] != null
+          ? double.tryParse(json['min_quantity'].toString())
+          : null,
+      maxQuantity: json['max_quantity'] != null
+          ? double.tryParse(json['max_quantity'].toString())
+          : null,
+      price: json['price'] != null
+          ? double.tryParse(json['price'].toString())
+          : null,
       createdAt: json['created_at'] != null
-          ? DateTime.tryParse(json['created_at'])
+          ? DateTime.parse(json['created_at'])
           : null,
       updatedAt: json['updated_at'] != null
-          ? DateTime.tryParse(json['updated_at'])
+          ? DateTime.parse(json['updated_at'])
           : null,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      if (id != null) 'id': id,
-      if (productSaleMode != null) 'product_sale_mode': productSaleMode,
-      if (minQuantity != null) 'min_quantity': minQuantity,
-      if (maxQuantity != null) 'max_quantity': maxQuantity,
-      if (price != null) 'price': price,
-      // Do NOT include createdAt or updatedAt in POST requests
+      'id': id,
+      'product_sale_mode': productSaleMode,
+      'min_quantity': minQuantity,
+      'max_quantity': maxQuantity,
+      'price': price,
+      'created_at': createdAt?.toIso8601String(),
+      'updated_at': updatedAt?.toIso8601String(),
     };
   }
-
-  @override
-  List<Object?> get props => [
-    id,
-    productSaleMode,
-    minQuantity,
-    maxQuantity,
-    price,
-    createdAt,
-    updatedAt,
-  ];
 }

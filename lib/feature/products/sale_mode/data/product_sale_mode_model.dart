@@ -5,112 +5,134 @@ import 'package:equatable/equatable.dart';
 
 import '../../price_tier/data/model/price_tier_model.dart';
 
+import 'package:equatable/equatable.dart';
 
 class ProductSaleModeModel extends Equatable {
-  final int? id;
-  final int? productId; // Add this
-  final int? product;
-  final int? saleModeId; // Add this
-  final int? saleMode;
+  final int id;
+
+  // Product info
+  final String productName;
+  final String productSku;
+
+  // Sale mode info
+  final String saleModeName;
+  final String saleModeCode;
+  final String baseUnitName;
+
+  // Pricing
   final double? unitPrice;
   final double? flatPrice;
-  final String? priceType;
-  final double? conversionFactor;
+  final String priceType;
+  final double conversionFactor;
+
+  // Discount
   final String? discountType;
   final double? discountValue;
-  final bool? isActive;
-  final String? createdAt;
-  final String? updatedAt;
-  final String? saleModeName;
-  final String? saleModeCode;
-  final List<PriceTierModel>? tiers;
+
+  // Status
+  final bool isActive;
+
+  // Meta
+  final String createdAt;
+  final String updatedAt;
+
+  // Price tiers
+  final List<PriceTierModel> tiers;
 
   const ProductSaleModeModel({
-    this.id,
-    this.productId,
-    this.product,
-    this.saleModeId,
-    this.saleMode,
-    this.unitPrice,
-    this.flatPrice,
-    this.priceType,
-    this.conversionFactor,
-    this.discountType,
-    this.discountValue,
-    this.isActive,
-    this.createdAt,
-    this.updatedAt,
-    this.saleModeName,
-    this.saleModeCode,
-    this.tiers,
+    required this.id,
+    required this.productName,
+    required this.productSku,
+    required this.saleModeName,
+    required this.saleModeCode,
+    required this.baseUnitName,
+    required this.unitPrice,
+    required this.flatPrice,
+    required this.priceType,
+    required this.conversionFactor,
+    required this.discountType,
+    required this.discountValue,
+    required this.isActive,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.tiers,
   });
 
   factory ProductSaleModeModel.fromJson(Map<String, dynamic> json) {
     return ProductSaleModeModel(
       id: json['id'],
-      productId: json['product_id'] ?? json['product'], // Handle both
-      product: json['product'],
-      saleModeId: json['sale_mode_id'] ?? json['sale_mode'], // Handle both
-      saleMode: json['sale_mode'],
+
+      productName: json['product_name'] ?? '',
+      productSku: json['product_sku'] ?? '',
+
+      saleModeName: json['sale_mode_name'] ?? '',
+      saleModeCode: json['sale_mode_code'] ?? '',
+      baseUnitName: json['base_unit_name'] ?? '',
+
       unitPrice: json['unit_price'] != null
           ? double.tryParse(json['unit_price'].toString())
           : null,
+
       flatPrice: json['flat_price'] != null
           ? double.tryParse(json['flat_price'].toString())
           : null,
-      priceType: json['price_type'],
-      conversionFactor: json['conversion_factor'] != null
-          ? double.tryParse(json['conversion_factor'].toString())
-          : null,
+
+      priceType: json['price_type'] ?? 'unit',
+
+      conversionFactor: double.tryParse(
+        json['conversion_factor']?.toString() ?? '1',
+      ) ??
+          1,
+
       discountType: json['discount_type'],
+
       discountValue: json['discount_value'] != null
           ? double.tryParse(json['discount_value'].toString())
           : null,
-      isActive: json['is_active'],
-      createdAt: json['created_at'],
-      updatedAt: json['updated_at'],
-      saleModeName: json['sale_mode_name'],
-      saleModeCode: json['sale_mode_code'],
-      tiers: json['tiers'] != null
-          ? List<PriceTierModel>.from(
-          json['tiers'].map((x) => PriceTierModel.fromJson(x)))
-          : null,
+
+      isActive: json['is_active'] ?? false,
+
+      createdAt: json['created_at'] ?? '',
+      updatedAt: json['updated_at'] ?? '',
+
+      tiers: (json['tiers'] as List<dynamic>? ?? [])
+          .map((e) => PriceTierModel.fromJson(e))
+          .toList(),
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'product_id': productId,
-      'product': product,
-      'sale_mode_id': saleModeId,
-      'sale_mode': saleMode,
+      'product_name': productName,
+      'product_sku': productSku,
+      'sale_mode_name': saleModeName,
+      'sale_mode_code': saleModeCode,
+      'base_unit_name': baseUnitName,
       'unit_price': unitPrice,
       'flat_price': flatPrice,
       'price_type': priceType,
+      'conversion_factor': conversionFactor,
       'discount_type': discountType,
       'discount_value': discountValue,
       'is_active': isActive,
-      'tiers': tiers != null
-          ? List<dynamic>.from(tiers!.map((x) => x.toJson()))
-          : null,
+      'tiers': tiers.map((e) => e.toJson()).toList(),
     };
   }
 
-  // Getters for backward compatibility
-
-@override
+  @override
   String toString() {
-    // TODO: implement toString
-    return "${ saleModeName??""} $unitPrice ${flatPrice??""} ${priceType??""}";
+    return '$saleModeName | price: ${unitPrice ?? flatPrice} | type: $priceType';
   }
+
   @override
   List<Object?> get props => [
     id,
-    productId,
-    product,
-
-    saleMode,
+    productName,
+    productSku,
+    saleModeName,
+    saleModeCode,
+    baseUnitName,
     unitPrice,
     flatPrice,
     priceType,
@@ -120,8 +142,7 @@ class ProductSaleModeModel extends Equatable {
     isActive,
     createdAt,
     updatedAt,
-    saleModeName,
-    saleModeCode,
     tiers,
   ];
 }
+

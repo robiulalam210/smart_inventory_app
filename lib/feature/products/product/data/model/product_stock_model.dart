@@ -295,6 +295,9 @@ class SaleMode {
   final String? discountType;
   final double? discountValue;
   final bool? isActive;
+  final List<SaleModeTier>? tiers;
+  final double? conversionFactor; // Add this
+  final String? baseUnitName; // Add this
 
   SaleMode({
     this.id,
@@ -307,13 +310,16 @@ class SaleMode {
     this.discountType,
     this.discountValue,
     this.isActive,
+    this.tiers,
+    this.conversionFactor, // Add this
+    this.baseUnitName, // Add this
   });
 
   @override
   String toString() {
-    // TODO: implement toString
-    return "${saleModeName} Price : ${unitPrice}" ;
+    return "${saleModeName} Price: ${unitPrice}, Conv: ${conversionFactor}, Base: ${baseUnitName}";
   }
+
   factory SaleMode.fromJson(Map<String, dynamic> json) {
     return SaleMode(
       id: json["id"],
@@ -326,6 +332,12 @@ class SaleMode {
       discountType: json["discount_type"]?.toString(),
       discountValue: ProductModelStockModel._parseDouble(json["discount_value"]),
       isActive: ProductModelStockModel._parseBool(json["is_active"]),
+      tiers: json['tiers'] != null
+          ? List<SaleModeTier>.from(
+          json['tiers'].map((x) => SaleModeTier.fromJson(x)))
+          : null,
+      conversionFactor: ProductModelStockModel._parseDouble(json["conversion_factor"]), // Add this
+      baseUnitName: json["base_unit_name"]?.toString(), // Add this
     );
   }
 
@@ -340,5 +352,32 @@ class SaleMode {
     "discount_type": discountType,
     "discount_value": discountValue,
     "is_active": isActive,
+    "conversion_factor": conversionFactor, // Add this
+    "base_unit_name": baseUnitName, // Add this
   };
+}
+
+
+
+class SaleModeTier {
+  final int? id;
+  final String minQuantity;
+  final String maxQuantity;
+  final String price;
+
+  SaleModeTier({
+    this.id,
+    required this.minQuantity,
+    required this.maxQuantity,
+    required this.price,
+  });
+
+  factory SaleModeTier.fromJson(Map<String, dynamic> json) {
+    return SaleModeTier(
+      id: json['id'] as int?,
+      minQuantity: json['min_quantity'].toString(),
+      maxQuantity: json['max_quantity'].toString(),
+      price: json['price'].toString(),
+    );
+  }
 }

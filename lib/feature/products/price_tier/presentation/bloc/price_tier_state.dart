@@ -22,6 +22,8 @@ class PriceTierListLoaded extends PriceTierState {
   List<Object> get props => [priceTiers];
 }
 
+class PriceTierOperationLoading extends PriceTierState {}
+
 class PriceTierOperationSuccess extends PriceTierState {
   final String message;
   final PriceTierModel? priceTier;
