@@ -1,7 +1,9 @@
-
+import 'dart:convert';
 import 'dart:developer';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../../../../../core/widgets/app_scaffold.dart';
@@ -51,6 +53,12 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
   // Track disposed controllers to prevent reuse
   final Set<int> _disposedProductIndexes = {};
 
+  // Track product stock and unit conversions
+  final Map<int, Map<String, dynamic>> _productStockInfo = {};
+
+  // Track if we should auto-update payable amount
+  bool _shouldAutoUpdatePayable = true;
+
   @override
   void initState() {
     super.initState();
@@ -78,7 +86,31 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
     selectedOverallDeliveryType = bloc.selectedOverallDeliveryType;
     _isChecked = bloc.isChecked;
 
+    // Listen to charge controller changes
+    _setupChargeListeners(bloc);
+
     Future.microtask(() => setDefaultSalesUser());
+  }
+
+  void _setupChargeListeners(CreatePosSaleBloc bloc) {
+    // Listen to charge controller changes to update payable amount
+    bloc.discountOverAllController.addListener(_updatePayableAndChangeAmount);
+    bloc.serviceChargeOverAllController.addListener(_updatePayableAndChangeAmount);
+    bloc.deliveryChargeOverAllController.addListener(_updatePayableAndChangeAmount);
+    bloc.vatOverAllController.addListener(_updatePayableAndChangeAmount);
+  }
+
+  void _updatePayableAndChangeAmount() {
+    if (!_shouldAutoUpdatePayable) return;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_isWalkInCustomer && _isChecked) {
+        // Auto-update payable amount for walk-in customer
+        _updatePayableAmountForWalkIn();
+      }
+      _updateChangeAmount();
+      setState(() {});
+    });
   }
 
   Future<void> setDefaultSalesUser() async {
@@ -107,11 +139,19 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
     changeAmountController.dispose();
     _scrollController.dispose();
 
+    // Remove listeners
+    final bloc = context.read<CreatePosSaleBloc>();
+    bloc.discountOverAllController.removeListener(_updatePayableAndChangeAmount);
+    bloc.serviceChargeOverAllController.removeListener(_updatePayableAndChangeAmount);
+    bloc.deliveryChargeOverAllController.removeListener(_updatePayableAndChangeAmount);
+    bloc.vatOverAllController.removeListener(_updatePayableAndChangeAmount);
+
     // Clear local state only, don't dispose controllers (bloc handles that)
     _selectedSaleModes.clear();
     _availableSaleModes.clear();
     _isLoadingSaleModes.clear();
     _disposedProductIndexes.clear();
+    _productStockInfo.clear();
 
     super.dispose();
   }
@@ -168,11 +208,47 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
     _selectedSaleModes.remove(index);
     _availableSaleModes.remove(index);
     _isLoadingSaleModes.remove(index);
+    _productStockInfo.remove(index);
 
     // Let the bloc handle controller disposal
     context.read<CreatePosSaleBloc>().removeProduct(index);
 
+    // Update totals
+    _updateAllTotals();
     setState(() {});
+  }
+
+  void _clearProductSelection(int index) {
+    log('🔄 Clearing product selection at index: $index');
+
+    setState(() {
+      // Clear local state
+      _selectedSaleModes.remove(index);
+      _availableSaleModes.remove(index);
+      _isLoadingSaleModes.remove(index);
+      _productStockInfo.remove(index);
+
+      // Clear product data
+      products[index]["product"] = null;
+      products[index]["product_id"] = null;
+      products[index]["product_name"] = null;
+      products[index]["sale_mode_id"] = null;
+      products[index]["sale_mode_name"] = null;
+      products[index]["discount_amount"] = 0;
+      products[index]["final_price"] = 0;
+      products[index]["total"] = 0;
+      products[index]["conversion_factor"] = 1.0;
+
+      // Clear controllers
+      setControllerText(index, "price", "");
+      setControllerText(index, "quantity", "");
+      setControllerText(index, "total", "");
+
+      // Update totals
+      _updateAllTotals();
+    });
+
+    log('✅ Product cleared at index: $index');
   }
 
   // ==================== SALE MODE FUNCTIONS ====================
@@ -204,8 +280,12 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
 
         for (var mode in activeConfigs) {
           log(
-            '   - Mode: ${mode.saleModeName}, Price: ${mode.unitPrice}, Conv: ${mode.conversionFactor}, Base: ${mode.baseUnitName}, Tiers: ${mode.tiers?.length ?? 0}',
+            '   - Mode: ${mode.saleModeName}, Sale Mode ID: ${mode.saleModeId}, ID: ${mode.id}',
           );
+          log('   - Unit Price: ${mode.unitPrice}, Conv Factor: ${mode.conversionFactor}, Base Unit: ${mode.baseUnitName}');
+          log('   - Price Type: ${mode.priceType}, Flat Price: ${mode.flatPrice}');
+          log('   - Discount: ${mode.discountValue} (${mode.discountType})');
+          log('   - Tiers: ${mode.tiers?.length ?? 0}');
 
           // Log tier details
           if (mode.tiers != null && mode.tiers!.isNotEmpty) {
@@ -268,8 +348,8 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
     SaleModeTier? applicableTier;
     bool isTierPrice = false;
 
-    // Log sale mode details for debugging
-    log('🎯 Applying Sale Mode: ${saleMode.saleModeName}');
+    // Log sale mode details for debugging - FIXED: Use correct ID
+    log('🎯 Applying Sale Mode: ${saleMode.saleModeName} (Sale Mode ID: ${saleMode.saleModeId})');
     log('   - Unit Price: ${saleMode.unitPrice}');
     log('   - Conversion Factor: ${saleMode.conversionFactor}');
     log('   - Base Unit: ${saleMode.baseUnitName}');
@@ -340,21 +420,35 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
       discountAmount = pricePerUnit; // Adjust discount to not exceed price
     }
 
-    // Update UI and data using safe methods
+    // Update UI and data using safe methods - FIXED: Use saleMode.saleModeId instead of saleMode.id
     setControllerText(index, "price", finalPrice.toStringAsFixed(2));
-    products[index]["sale_mode_id"] = saleMode.id;
+    products[index]["sale_mode_id"] = saleMode.saleModeId; // FIXED: Changed from saleMode.id to saleMode.saleModeId
     products[index]["sale_mode_name"] = saleMode.saleModeName;
     products[index]["discount_amount"] = discountAmount * quantity;
     products[index]["final_price"] = finalPrice;
     products[index]["current_tier"] = applicableTier;
-    products[index]["conversion_factor"] = saleMode.conversionFactor;
+    products[index]["conversion_factor"] = saleMode.conversionFactor ?? 1.0;
     products[index]["is_tier_price"] = isTierPrice; // Store if this is a tier price
+
+    // Store conversion factor for stock validation
+    final conversionFactor = saleMode.conversionFactor ?? 1.0;
+    final product = products[index]["product"] as ProductModelStockModel?;
+    if (product != null) {
+      _productStockInfo[index] = {
+        'product_id': product.id,
+        'conversion_factor': conversionFactor,
+        'base_unit': saleMode.baseUnitName,
+        'sale_mode_name': saleMode.saleModeName,
+        'stock_qty': product.stockQty ?? 0,
+      };
+    }
 
     updateTotal(index);
 
     // Show detailed debug info
     log('📊 FINAL CALCULATION:');
     log('   - Sale Mode: ${saleMode.saleModeName}');
+    log('   - Sale Mode ID being sent: ${saleMode.saleModeId}'); // FIXED: Show the correct ID
     log('   - Quantity: $quantity');
     log('   - Tier Applied: ${applicableTier != null ? "${applicableTier.minQuantity}-${applicableTier.maxQuantity} => ${applicableTier.price}" : "None"}');
     log('   - Is Tier Price: $isTierPrice');
@@ -366,10 +460,9 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
     showCustomToast(
       context: context,
       title: 'Sale Mode Applied!',
-      description: "${saleMode.saleModeName} selected" +
-          (applicableTier != null
+      description: "${saleMode.saleModeName} selected${applicableTier != null
               ? " (Tier Price: ${applicableTier.price} - No additional discount)"
-              : " (Regular Price: $pricePerUnit, Discount: $discountAmount)"),
+              : " (Regular Price: $pricePerUnit, Discount: $discountAmount)"}",
       icon: Icons.check_circle,
       primaryColor: Colors.green,
     );
@@ -405,6 +498,48 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
     }
 
     return discount;
+  }
+
+  // NEW: Calculate base quantity for stock validation
+  double _calculateBaseQuantity(int index, double saleQuantity) {
+    if (_disposedProductIndexes.contains(index)) return saleQuantity;
+
+    final saleMode = _selectedSaleModes[index];
+    final conversionFactor = saleMode?.conversionFactor ?? 1.0;
+
+    return saleQuantity * conversionFactor;
+  }
+
+  // NEW: Validate stock before submitting
+  bool _validateStockForProduct(int index, ProductModelStockModel product, double quantity) {
+    if (_disposedProductIndexes.contains(index)) return true;
+
+    final saleMode = _selectedSaleModes[index];
+    final baseQuantity = _calculateBaseQuantity(index, quantity);
+    final availableStock = product.stockQty ?? 0;
+
+    log('📦 Stock Validation for ${product.name}:');
+    log('   - Sale Mode: ${saleMode?.saleModeName ?? "None"}');
+    log('   - Sale Quantity: $quantity');
+    log('   - Conversion Factor: ${saleMode?.conversionFactor ?? 1.0}');
+    log('   - Base Quantity: $baseQuantity');
+    log('   - Available Stock: $availableStock');
+
+    if (baseQuantity > availableStock) {
+      showCustomToast(
+        context: context,
+        title: 'Stock Insufficient!',
+        description: "Not enough stock for ${product.name}\n"
+            "Available: $availableStock ${product.unitInfo?.name ?? 'units'}\n"
+            "Requested: $quantity ${saleMode?.saleModeName ?? product.unitInfo?.name ?? 'units'}\n"
+            "(Base quantity: ${baseQuantity.toStringAsFixed(3)} ${product.unitInfo?.name ?? 'units'})",
+        icon: Icons.error,
+        primaryColor: Colors.redAccent,
+      );
+      return false;
+    }
+
+    return true;
   }
 
   double calculateTotalForAllProducts() {
@@ -465,7 +600,7 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
 
   double calculateDiscountTotal() {
     final bloc = context.read<CreatePosSaleBloc>();
-    final discountText = bloc.discountOverAllController.text;
+    final discountText = bloc.discountOverAllController.text.trim();
     if (discountText.isEmpty) return 0.0;
 
     final discountValue = double.tryParse(discountText) ?? 0.0;
@@ -479,7 +614,7 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
 
   double calculateServiceChargeTotal() {
     final bloc = context.read<CreatePosSaleBloc>();
-    final serviceText = bloc.serviceChargeOverAllController.text;
+    final serviceText = bloc.serviceChargeOverAllController.text.trim();
     if (serviceText.isEmpty) return 0.0;
 
     final serviceValue = double.tryParse(serviceText) ?? 0.0;
@@ -493,7 +628,7 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
 
   double calculateDeliveryTotal() {
     final bloc = context.read<CreatePosSaleBloc>();
-    final deliveryText = bloc.deliveryChargeOverAllController.text;
+    final deliveryText = bloc.deliveryChargeOverAllController.text.trim();
     if (deliveryText.isEmpty) return 0.0;
 
     final deliveryValue = double.tryParse(deliveryText) ?? 0.0;
@@ -503,6 +638,20 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
       return subtotal * (deliveryValue / 100);
     }
     return deliveryValue;
+  }
+
+  double calculateVatTotal() {
+    final bloc = context.read<CreatePosSaleBloc>();
+    final vatText = bloc.vatOverAllController.text.trim();
+    if (vatText.isEmpty) return 0.0;
+
+    final vatValue = double.tryParse(vatText) ?? 0.0;
+    final subtotal = calculateTotalForAllProducts();
+
+    if (selectedOverallVatType == 'percent') {
+      return subtotal * (vatValue / 100);
+    }
+    return vatValue;
   }
 
   double calculateAllFinalTotal() {
@@ -517,7 +666,13 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
     // Apply delivery charge
     double deliveryCharge = calculateDeliveryTotal();
 
-    return (subtotal - overallDiscount) + serviceCharge + deliveryCharge;
+    // Apply VAT
+    double vatCharge = calculateVatTotal();
+
+    double finalTotal = (subtotal - overallDiscount) + serviceCharge + deliveryCharge + vatCharge;
+
+    // Ensure non-negative
+    return finalTotal > 0 ? finalTotal : 0;
   }
 
   void updateTotal(int index) {
@@ -541,8 +696,23 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
     setState(() {});
   }
 
+  void _updateAllTotals() {
+    // Recalculate all totals and update UI
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_isWalkInCustomer && _isChecked) {
+        _updatePayableAmountForWalkIn();
+      }
+      _updateChangeAmount();
+      setState(() {});
+    });
+  }
+
   void onProductChanged(int index, ProductModelStockModel? newVal) {
-    if (newVal == null) return;
+    if (newVal == null) {
+      // Clear product selection
+      _clearProductSelection(index);
+      return;
+    }
 
     // Prevent duplicate
     final alreadyAdded = products.any((p) => p["product_id"] == newVal.id);
@@ -557,7 +727,7 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
       return;
     }
 
-    // Stock check
+    // Stock check (initial check without sale mode)
     final stockQty = newVal.stockQty ?? 0;
     final openingStock = newVal.openingStock ?? 0;
     final availableStock = stockQty > 0 ? stockQty : openingStock;
@@ -578,6 +748,7 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
       _selectedSaleModes.remove(index);
       _availableSaleModes.remove(index);
       _isLoadingSaleModes.remove(index);
+      _productStockInfo.remove(index);
 
       products[index]["product"] = newVal;
       products[index]["product_id"] = newVal.id;
@@ -585,14 +756,19 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
       products[index]["sale_mode_id"] = null;
       products[index]["sale_mode_name"] = null;
       products[index]["discount_amount"] = 0;
+      products[index]["conversion_factor"] = 1.0;
 
-      // Clear price and quantity fields
-      setControllerText(index, "price", "");
-      setControllerText(index, "quantity", "");
-      setControllerText(index, "total", "");
+      // Set default price to product selling price
+      final sellingPrice = newVal.sellingPrice ?? 0.0;
+      setControllerText(index, "price", sellingPrice.toStringAsFixed(2));
+      setControllerText(index, "quantity", "1");
+      setControllerText(index, "total", sellingPrice.toStringAsFixed(2));
 
       // Load sale modes from product data (no API call needed)
       _loadSaleModesForProduct(index, newVal);
+
+      // Update total after setting values
+      updateTotal(index);
     });
   }
 
@@ -686,6 +862,13 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
         );
         return;
       }
+
+      // Validate stock with unit conversion
+      final productModel = product["product"] as ProductModelStockModel?;
+      final saleQuantity = double.tryParse(quantity) ?? 0;
+      if (productModel != null && !_validateStockForProduct(i, productModel, saleQuantity)) {
+        return; // Stock validation failed, don't submit
+      }
     }
 
     _submitForm();
@@ -699,7 +882,7 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
 
       return {
         "product_id": int.tryParse(product["product_id"].toString()),
-        "quantity": int.tryParse(product["quantity"].toString()),
+        "quantity": double.tryParse(product["quantity"].toString())?.toInt() ?? 1,
         "unit_price": double.tryParse(
           product["final_price"]?.toString() ?? "0",
         ),
@@ -725,18 +908,18 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
         "yyyy-MM-dd",
       ),
       "sale_by": user?.id?.toString() ?? '',
-      "overall_vat_type": selectedOverallVatType.toLowerCase(),
-      "vat": bloc.vatOverAllController.text.isEmpty
-          ? 0
-          : double.tryParse(bloc.vatOverAllController.text),
+      // "overall_vat_type": selectedOverallVatType.toLowerCase(),
+      // "vat": bloc.vatOverAllController.text.isEmpty
+      //     ? 0
+      //     : double.tryParse(bloc.vatOverAllController.text),
       "overall_service_type": selectedOverallServiceChargeType.toLowerCase(),
       "service_charge": bloc.serviceChargeOverAllController.text.isEmpty
           ? 0
           : double.tryParse(bloc.serviceChargeOverAllController.text),
-      "overall_delivery_type": selectedOverallDeliveryType.toLowerCase(),
-      "delivery_charge": bloc.deliveryChargeOverAllController.text.isEmpty
-          ? 0
-          : double.tryParse(bloc.deliveryChargeOverAllController.text),
+      // "overall_delivery_type": selectedOverallDeliveryType.toLowerCase(),
+      // "delivery_charge": bloc.deliveryChargeOverAllController.text.isEmpty
+      //     ? 0
+      //     : double.tryParse(bloc.deliveryChargeOverAllController.text),
       "overall_discount_type": selectedOverallDiscountType.toLowerCase(),
       "overall_discount": bloc.discountOverAllController.text.isEmpty
           ? 0.0
@@ -763,7 +946,17 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
     }
 
     bloc.add(AddPosSale(body: body));
-    log('📤 Sale submission body: $body');
+
+    // Log the body for debugging
+    final jsonBody = jsonEncode(body);
+    log('📤 Sale submission body: $jsonBody');
+
+    // Log sale_mode_ids being sent
+    for (var item in transferProducts) {
+      if (item["sale_mode_id"] != null) {
+        log('   - Item sale_mode_id: ${item["sale_mode_id"]}');
+      }
+    }
   }
 
   // ==================== UI BUILDERS ====================
@@ -789,6 +982,7 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
               _availableSaleModes.clear();
               _isLoadingSaleModes.clear();
               _disposedProductIndexes.clear();
+              _productStockInfo.clear();
               setState(() {});
             },
           ),
@@ -813,23 +1007,44 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
                 AppRoutes.pushReplacement(context, MobilePosSaleScreen());
               } else if (state is CreatePosSaleFailed) {
                 Navigator.pop(context);
-                appAlertDialog(
-                  context,
-                  state.content,
-                  title: state.title,
-                  actions: [
-                    TextButton(
-                      onPressed: () => AppRoutes.pop(context),
-                      child: const Text("Dismiss"),
-                    ),
-                  ],
-                );
+
+                // Check if error is about insufficient stock
+                final errorMessage = state.content.toLowerCase();
+                if (errorMessage.contains('insufficient stock') ||
+                    errorMessage.contains('not enough stock')) {
+                  // Show stock-specific error
+                  showCustomToast(
+                    context: context,
+                    title: 'Stock Error',
+                    description: state.content,
+                    icon: Icons.error,
+                    primaryColor: Colors.red,
+                  );
+                } else {
+                  // Show generic error dialog
+                  appAlertDialog(
+                    context,
+                    state.content,
+                    title: state.title,
+                    actions: [
+                      TextButton(
+                        onPressed: () => AppRoutes.pop(context),
+                        child: const Text("Dismiss"),
+                      ),
+                    ],
+                  );
+                }
               }
             },
             builder: (context, state) {
               final bloc = context.read<CreatePosSaleBloc>();
               final selectedCustomer = bloc.selectClintModel;
               final isWalkInCustomer = selectedCustomer?.id == -1;
+
+              // Calculate final total for display
+              final netTotal = calculateAllFinalTotal();
+              final payableAmount = double.tryParse(bloc.payableAmount.text) ?? 0;
+              final changeAmount = payableAmount - netTotal;
 
               return SingleChildScrollView(
                 controller: _scrollController,
@@ -853,7 +1068,7 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
                         const SizedBox(height: 8),
 
                         // Summary & Payment Section
-                        _buildSummarySection(bloc, isWalkInCustomer),
+                        _buildSummarySection(bloc, isWalkInCustomer, netTotal),
 
                         // Submit Button
                         Row(
@@ -914,8 +1129,63 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
             ),
           ),
           const SizedBox(height: 12),
+          // BlocBuilder<CustomerBloc, CustomerState>(
+          //   builder: (context, state) {
+          //     return AppDropdown<CustomerActiveModel>(
+          //       label: "Customer *",
+          //       hint: bloc.selectClintModel?.name ?? "Select Customer",
+          //       isSearch: true,
+          //       isRequired: true,
+          //       value: bloc.selectClintModel,
+          //       itemList: [
+          //         CustomerActiveModel(name: 'Walk-in-customer', id: -1),
+          //         ...context.read<CustomerBloc>().activeCustomer,
+          //       ],
+          //       onChanged: (newVal) {
+          //         setState(() {
+          //           bloc.selectClintModel = newVal;
+          //           bloc.customType =
+          //           (newVal?.id == -1) ? "Walking Customer" : "Saved Customer";
+          //           _isWalkInCustomer = newVal?.id == -1;
+          //
+          //           if (newVal?.id == -1) {
+          //             // Walk-in customer: auto-check money receipt
+          //             _isChecked = true;
+          //             bloc.isChecked = true;
+          //
+          //             // Auto-fill payable amount with exact total (read-only)
+          //             Future.delayed(const Duration(milliseconds: 100), () {
+          //               final netTotal = calculateAllFinalTotal();
+          //               bloc.payableAmount.text = netTotal.toStringAsFixed(2);
+          //               _updateChangeAmount();
+          //             });
+          //           } else {
+          //             // Saved customer: uncheck money receipt by default
+          //             _isChecked = false;
+          //             bloc.isChecked = false;
+          //
+          //             // Clear payable amount for saved customer (editable)
+          //             bloc.payableAmount.clear();
+          //             changeAmountController.clear();
+          //           }
+          //         });
+          //       },
+          //       validator: (value) =>
+          //       value == null ? 'Please select Customer' : null,
+          //     );
+          //   },
+          // ),
+
           BlocBuilder<CustomerBloc, CustomerState>(
             builder: (context, state) {
+              // Fast View: Special গ্রাহক আগে, Regular পরে
+              List<CustomerActiveModel> sortedCustomers = [
+                ...context.read<CustomerBloc>().activeCustomer
+                    .where((c) => c.specialCustomer == true),
+                ...context.read<CustomerBloc>().activeCustomer
+                    .where((c) => c.specialCustomer != true),
+              ];
+
               return AppDropdown<CustomerActiveModel>(
                 label: "Customer *",
                 hint: bloc.selectClintModel?.name ?? "Select Customer",
@@ -924,7 +1194,7 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
                 value: bloc.selectClintModel,
                 itemList: [
                   CustomerActiveModel(name: 'Walk-in-customer', id: -1),
-                  ...context.read<CustomerBloc>().activeCustomer,
+                  ...sortedCustomers,
                 ],
                 onChanged: (newVal) {
                   setState(() {
@@ -934,22 +1204,18 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
                     _isWalkInCustomer = newVal?.id == -1;
 
                     if (newVal?.id == -1) {
-                      // Walk-in customer: auto-check money receipt
                       _isChecked = true;
                       bloc.isChecked = true;
 
-                      // Auto-fill payable amount with exact total (read-only)
                       Future.delayed(const Duration(milliseconds: 100), () {
                         final netTotal = calculateAllFinalTotal();
                         bloc.payableAmount.text = netTotal.toStringAsFixed(2);
                         _updateChangeAmount();
                       });
                     } else {
-                      // Saved customer: uncheck money receipt by default
                       _isChecked = false;
                       bloc.isChecked = false;
 
-                      // Clear payable amount for saved customer (editable)
                       bloc.payableAmount.clear();
                       changeAmountController.clear();
                     }
@@ -960,6 +1226,8 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
               );
             },
           ),
+
+
         ],
       ),
     );
@@ -1073,11 +1341,7 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
                               );
                               categoriesBloc.selectedStateId =
                                   matchingCategory.id?.toString() ?? "";
-                              productData["product"] = null;
-                              productData["product_id"] = null;
-                              setControllerText(index, "price", "");
-                              setControllerText(index, "quantity", "");
-                              setControllerText(index, "total", "");
+                              _clearProductSelection(index);
                             });
                           },
                         ),
@@ -1085,7 +1349,7 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
                     },
                   ),
 
-                  // Product Dropdown
+                  // Product Dropdown - FIXED: Added onClear callback
                   Row(
                     children: [
                       Expanded(
@@ -1119,6 +1383,10 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
                                 isRequired: true,
                                 isLabel: true,
                                 isSearch: true,
+                                onClear: (value) {
+                                  // Clear product selection
+                                  _clearProductSelection(index);
+                                },
                                 label: "Product",
                                 hint: selectedCategoryId.isEmpty
                                     ? "Select Category First"
@@ -1142,6 +1410,34 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
                         ),
                     ],
                   ),
+
+                  // Stock Info Display
+                  if (product != null && _selectedSaleModes[index] != null)
+                    Container(
+                      margin: const EdgeInsets.only(bottom: 8),
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: Colors.blue.shade50,
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(color: Colors.blue.shade100),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.info, size: 14, color: Colors.blue.shade700),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              "Stock: ${product.stockQty ?? 0} ${product.unitInfo?.name ?? 'units'} "
+                                  "(${_calculateBaseQuantity(index, 1).toStringAsFixed(3)} ${_selectedSaleModes[index]?.baseUnitName} per ${_selectedSaleModes[index]?.saleModeName})",
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: Colors.blue.shade800,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
 
                   // Price and Quantity Row
                   Row(
@@ -1309,11 +1605,41 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
                                         onChanged: (val) {
                                           int q = int.tryParse(val) ?? 1;
 
-                                          final stockQty = product?.stockQty ?? 0;
-                                          if (stockQty > 0 && q > stockQty) {
-                                            q = stockQty;
-                                            setControllerText(
-                                                index, "quantity", q.toString());
+                                          // Check stock with unit conversion
+                                          final saleMode = _selectedSaleModes[index];
+                                          if (saleMode != null && product != null) {
+                                            final conversionFactor = saleMode.conversionFactor ?? 1.0;
+                                            final baseQuantity = q * conversionFactor;
+                                            final stockQty = product.stockQty ?? 0;
+
+                                            if (baseQuantity > stockQty) {
+                                              // Find maximum possible quantity
+                                              final maxPossible = (stockQty / conversionFactor).floor();
+                                              if (maxPossible > 0) {
+                                                q = maxPossible;
+                                                setControllerText(
+                                                    index, "quantity", q.toString());
+                                              } else {
+                                                q = 0;
+                                                setControllerText(
+                                                    index, "quantity", "0");
+                                                showCustomToast(
+                                                  context: context,
+                                                  title: 'Stock Limit',
+                                                  description: "Not enough stock for this sale mode",
+                                                  icon: Icons.warning,
+                                                  primaryColor: Colors.orange,
+                                                );
+                                              }
+                                            }
+                                          } else {
+                                            // Normal stock check without sale mode
+                                            final stockQty = product?.stockQty ?? 0;
+                                            if (stockQty > 0 && q > stockQty) {
+                                              q = stockQty;
+                                              setControllerText(
+                                                  index, "quantity", q.toString());
+                                            }
                                           }
 
                                           productData["quantity"] = q.toString();
@@ -1337,6 +1663,19 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
                                           if (qty <= 0) {
                                             return 'Quantity must be > 0';
                                           }
+
+                                          // Additional stock validation with unit conversion
+                                          if (product != null) {
+                                            final saleMode = _selectedSaleModes[index];
+                                            final conversionFactor = saleMode?.conversionFactor ?? 1.0;
+                                            final baseQuantity = qty * conversionFactor;
+                                            final stockQty = product.stockQty ?? 0;
+
+                                            if (baseQuantity > stockQty) {
+                                              return 'Insufficient stock (${baseQuantity.toStringAsFixed(3)} ${product.unitInfo?.name ?? 'units'} needed)';
+                                            }
+                                          }
+
                                           return null;
                                         },
                                       ),
@@ -1361,19 +1700,41 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
                                                 index, "quantity")) ??
                                             1;
 
-                                        final stockQty = product?.stockQty ?? 0;
-                                        if (stockQty == 0 || q < stockQty) {
-                                          q++;
-                                          setControllerText(
-                                              index, "quantity", q.toString());
-                                          productData["quantity"] = q.toString();
+                                        final saleMode = _selectedSaleModes[index];
+                                        if (saleMode != null && product != null) {
+                                          final conversionFactor = saleMode.conversionFactor ?? 1.0;
+                                          final baseQuantity = (q + 1) * conversionFactor;
+                                          final stockQty = product.stockQty ?? 0;
 
-                                          // Reapply sale mode pricing if selected
-                                          final selectedSaleMode = _selectedSaleModes[index];
-                                          if (selectedSaleMode != null) {
-                                            _applySaleModePricing(index, selectedSaleMode);
-                                          } else {
-                                            updateTotal(index);
+                                          if (baseQuantity <= stockQty) {
+                                            q++;
+                                            setControllerText(
+                                                index, "quantity", q.toString());
+                                            productData["quantity"] = q.toString();
+
+                                            // Reapply sale mode pricing if selected
+                                            if (saleMode != null) {
+                                              _applySaleModePricing(index, saleMode);
+                                            } else {
+                                              updateTotal(index);
+                                            }
+                                          }
+                                        } else {
+                                          // Normal stock check without sale mode
+                                          final stockQty = product?.stockQty ?? 0;
+                                          if (stockQty == 0 || q < stockQty) {
+                                            q++;
+                                            setControllerText(
+                                                index, "quantity", q.toString());
+                                            productData["quantity"] = q.toString();
+
+                                            // Reapply sale mode pricing if selected
+                                            final selectedSaleMode = _selectedSaleModes[index];
+                                            if (selectedSaleMode != null) {
+                                              _applySaleModePricing(index, selectedSaleMode);
+                                            } else {
+                                              updateTotal(index);
+                                            }
                                           }
                                         }
                                       },
@@ -1442,7 +1803,7 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
       );
       for (var mode in product.saleModes!) {
         log(
-          '   - Mode: ${mode.saleModeName}, Active: ${mode.isActive}, Price: ${mode.unitPrice}, Tiers: ${mode.tiers?.length ?? 0}',
+          '   - Mode: ${mode.saleModeName}, Sale Mode ID: ${mode.saleModeId}, ID: ${mode.id}',
         );
       }
     }
@@ -1558,7 +1919,11 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
                     keyboardType: const TextInputType.numberWithOptions(
                       decimal: true,
                     ),
-                    onChanged: (_) => setState(() {}),
+                    onChanged: (_) {
+                      // Update payable and change amounts when charges change
+                      _updatePayableAndChangeAmount();
+                      setState(() {});
+                    },
                     autofillHints: '',
                     levelText: '',
                   ),
@@ -1609,6 +1974,8 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
                           .read<CreatePosSaleBloc>()
                           .selectedOverallDiscountType =
                           value;
+                      // Update payable amount
+                      _updatePayableAndChangeAmount();
                     });
                   },
                 ),
@@ -1628,25 +1995,28 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
                           .read<CreatePosSaleBloc>()
                           .selectedOverallServiceChargeType =
                           value;
+                      // Update payable amount
+                      _updatePayableAndChangeAmount();
                     });
                   },
                 ),
               ),
             ],
           ),
+
         ],
       ),
     );
   }
 
-  Widget _buildSummarySection(CreatePosSaleBloc bloc, bool isWalkInCustomer) {
+  Widget _buildSummarySection(CreatePosSaleBloc bloc, bool isWalkInCustomer, double netTotal) {
     final productTotal = calculateTotalTicketForAllProducts();
     final subTotal = calculateTotalForAllProducts();
     final specificDiscount = calculateSpecificDiscountTotal();
     final overallDiscount = calculateDiscountTotal();
     final serviceCharge = calculateServiceChargeTotal();
     final deliveryCharge = calculateDeliveryTotal();
-    final netTotal = calculateAllFinalTotal();
+    final vatCharge = calculateVatTotal();
 
     return Container(
       padding: const EdgeInsets.all(8.0),
@@ -1733,7 +2103,7 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
                 if (serviceCharge > 0)
                   _buildSummaryRow("Service Charge (+):", serviceCharge),
                 if (deliveryCharge > 0)
-                  _buildSummaryRow("Delivery Charge (+):", deliveryCharge),
+
                 const Divider(height: 8),
                 _buildSummaryRow("NET TOTAL:", netTotal, isBold: true),
               ],
@@ -1940,7 +2310,7 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
                         }
 
                         // Walk-in customer validation
-                        if (isWalkInCustomer) {
+                        if (isWalkInCustomer && _isChecked) {
                           final netTotal = calculateAllFinalTotal();
                           if (numericValue != netTotal) {
                             return 'Must pay exact amount: ৳${netTotal.toStringAsFixed(2)}';
@@ -1957,11 +2327,13 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
                     Padding(
                       padding: const EdgeInsets.only(top: 2, left: 4),
                       child: Text(
-                        isWalkInCustomer
+                        isWalkInCustomer && _isChecked
                             ? "Walk-in: Pay exact total (auto-filled)"
+                            : isWalkInCustomer
+                            ? "Walk-in: Enter amount (no receipt)"
                             : "Saved: Enter due or advance amount",
                         style: TextStyle(
-                          color: isWalkInCustomer
+                          color: isWalkInCustomer && _isChecked
                               ? Colors.orange[700]
                               : Colors.green[700],
                           fontSize: 11,
@@ -1976,53 +2348,67 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
 
           // Display due/advance amount for saved customer
           if (!isWalkInCustomer && bloc.payableAmount.text.isNotEmpty)
-            FutureBuilder<double>(
-              future: Future.value(calculateAllFinalTotal()),
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  final netTotal = snapshot.data!;
-                  final payable = double.tryParse(bloc.payableAmount.text) ?? 0;
-                  final difference = payable - netTotal;
-
-                  if (difference != 0) {
-                    return Container(
-                      margin: const EdgeInsets.only(top: 8),
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: difference > 0
-                            ? Colors.green.shade50
-                            : Colors.blue.shade50,
-                        borderRadius: BorderRadius.circular(6),
-                        border: Border.all(
-                          color: difference > 0
-                              ? Colors.green.shade200
-                              : Colors.blue.shade200,
+            Container(
+              margin: const EdgeInsets.only(top: 8),
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.blue.shade50,
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(
+                  color: Colors.blue.shade200,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.info,
+                    color: Colors.blue.shade700,
+                    size: 16,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Total: ৳${netTotal.toStringAsFixed(2)}",
+                          style: TextStyle(
+                            color: Colors.blue.shade800,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            difference > 0 ? Icons.arrow_upward : Icons.arrow_downward,
-                            color: difference > 0 ? Colors.green : Colors.blue,
-                            size: 16,
+                        if (bloc.payableAmount.text.isNotEmpty)
+                          FutureBuilder<double>(
+                            future: Future.value(calculateAllFinalTotal()),
+                            builder: (context, snapshot) {
+                              if (snapshot.hasData) {
+                                final netTotal = snapshot.data!;
+                                final payable = double.tryParse(bloc.payableAmount.text) ?? 0;
+                                final difference = payable - netTotal;
+
+                                if (difference != 0) {
+                                  return Padding(
+                                    padding: const EdgeInsets.only(top: 4),
+                                    child: Text(
+                                      difference > 0
+                                          ? "Advance: ৳${difference.abs().toStringAsFixed(2)}"
+                                          : "Due: ৳${difference.abs().toStringAsFixed(2)}",
+                                      style: TextStyle(
+                                        color: difference > 0 ? Colors.green.shade700 : Colors.orange.shade700,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  );
+                                }
+                              }
+                              return const SizedBox.shrink();
+                            },
                           ),
-                          const SizedBox(width: 8),
-                          Text(
-                            difference > 0
-                                ? "Advance Payment: ৳${difference.abs().toStringAsFixed(2)}"
-                                : "Due Amount: ৳${difference.abs().toStringAsFixed(2)}",
-                            style: TextStyle(
-                              color: difference > 0 ? Colors.green.shade800 : Colors.blue.shade800,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }
-                }
-                return const SizedBox.shrink();
-              },
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
         ],
 
@@ -2042,31 +2428,31 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
 
   Widget _buildSummaryRow(String label, double value, {bool isBold = false}) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              label,
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey.shade700,
-                fontWeight: isBold ? FontWeight.w600 : FontWeight.normal,
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey.shade700,
+                  fontWeight: isBold ? FontWeight.w600 : FontWeight.normal,
+                ),
               ),
             ),
-          ),
-          Text(
-            "৳${value.toStringAsFixed(2)}",
-            style: TextStyle(
-              fontSize: isBold ? 16 : 14,
-              color: isBold
-                  ? AppColors.primaryColor(context)
-                  : Colors.grey.shade800,
-              fontWeight: isBold ? FontWeight.w700 : FontWeight.w600,
+            Text(
+              "৳${value.toStringAsFixed(2)}",
+              style: TextStyle(
+                fontSize: isBold ? 16 : 14,
+                color: isBold
+                    ? AppColors.primaryColor(context)
+                    : Colors.grey.shade800,
+                fontWeight: isBold ? FontWeight.w700 : FontWeight.w600,
+              ),
             ),
-          ),
-        ],
-      ),
+          ],
+        )
     );
   }
 }

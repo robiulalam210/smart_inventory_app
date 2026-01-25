@@ -46,12 +46,13 @@ class SalesDetailsScreen extends StatelessWidget {
   }
 
   void _generatePdf(BuildContext context) {
+    // print("object")
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => Scaffold(
           appBar: AppBar(
-            title: Text("Sales Invoice",style: AppTextStyle.titleMedium(context),),
+            title: Text("Sales Invoice", style: AppTextStyle.titleMedium(context)),
           ),
           backgroundColor: AppColors.bottomNavBg(context),
           body: PdfPreview.builder(
@@ -404,14 +405,15 @@ class SalesDetailsScreen extends StatelessWidget {
     final netTotal = toDouble(sale.netTotal);
     final grandTotal = toDouble(sale.grandTotal);
     final discount = toDouble(sale.overallDiscount);
-    final delivery = toDouble(sale.overallDeliveryCharge);
+
+    // Try multiple property names for charges
+    final delivery = toDouble(sale.overallDeliveryCharge) ;
     final service = toDouble(sale.overallServiceCharge);
     final vat = toDouble(sale.overallVatAmount);
 
     return Card(
       elevation: 0,
       color: AppColors.bottomNavBg(context),
-
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Column(
@@ -430,7 +432,6 @@ class SalesDetailsScreen extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 16,
                     color: AppColors.text(context),
-
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -438,18 +439,32 @@ class SalesDetailsScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             _mobileSummaryRow(context, 'Gross Total', grossTotal),
-            if (discount > 0)
-              _mobileSummaryRow(
-                context,
-                'Discount',
-                -discount,
-                isNegative: true,
-              ),
-            if (delivery > 0)
-              _mobileSummaryRow(context, 'Delivery Charge', delivery),
-            if (service > 0)
-              _mobileSummaryRow(context, 'Service Charge', service),
-            if (vat > 0) _mobileSummaryRow(context, 'VAT', vat),
+
+            // Always show discount row
+            _mobileSummaryRow(
+              context,
+              'Discount',
+              -discount,
+              isNegative: true,
+            ),
+
+            // Always show delivery charge row
+            _mobileSummaryRow(
+              context,
+              'Delivery Charge',
+              delivery,
+            ),
+
+            // Always show service charge row
+            _mobileSummaryRow(
+              context,
+              'Service Charge',
+              service,
+            ),
+
+            // Always show VAT row
+            _mobileSummaryRow(context, 'VAT', vat),
+
             const Divider(height: 16),
             _mobileSummaryRow(context, 'Net Total', netTotal, isBold: true),
             const SizedBox(height: 8),
@@ -467,13 +482,13 @@ class SalesDetailsScreen extends StatelessWidget {
   }
 
   Widget _mobileSummaryRow(
-    dynamic context,
-    String label,
-    double value, {
-    bool isNegative = false,
-    bool isBold = false,
-    bool isHighlighted = false,
-  }) {
+      BuildContext context,
+      String label,
+      double value, {
+        bool isNegative = false,
+        bool isBold = false,
+        bool isHighlighted = false,
+      }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
@@ -490,12 +505,14 @@ class SalesDetailsScreen extends StatelessWidget {
             ),
           ),
           Text(
-            '${isNegative ? '-' : ''}৳${value.abs().toStringAsFixed(2)}',
+            '${isNegative && value > 0 ? '-' : ''}৳${value.abs().toStringAsFixed(2)}',
             style: TextStyle(
               fontSize: 14,
               fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
               color: isHighlighted
                   ? AppColors.primaryColor(context)
+                  : isNegative && value > 0
+                  ? Colors.red
                   : AppColors.text(context),
             ),
           ),
@@ -543,7 +560,6 @@ class SalesDetailsScreen extends StatelessWidget {
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
                 color: AppColors.bottomNavBg(context),
-
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
                   color: isDue ? Colors.orange.shade200 : Colors.green.shade200,
@@ -589,11 +605,11 @@ class SalesDetailsScreen extends StatelessWidget {
   }
 
   Widget _mobilePaymentRow(
-    BuildContext context,
-    String label,
-    double amount, {
-    Color? color,
-  }) {
+      BuildContext context,
+      String label,
+      double amount, {
+        Color? color,
+      }) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -617,8 +633,13 @@ class SalesDetailsScreen extends StatelessWidget {
     );
   }
 
-  // ===================== DESKTOP VIEW (unchanged) =====================
+  // ===================== DESKTOP VIEW =====================
   Widget _buildDesktopView(BuildContext context) {
+    final delivery = toDouble(sale.overallDeliveryCharge);
+    final service = toDouble(sale.overallServiceCharge) ;
+    final vat = toDouble(sale.overallVatAmount)
+        ;
+
     return Padding(
       padding: const EdgeInsets.all(24),
       child: Row(
@@ -635,7 +656,7 @@ class SalesDetailsScreen extends StatelessWidget {
             flex: 1,
             child: Column(
               children: [
-                _buildSummaryCard(context),
+                _buildSummaryCard(context, delivery, service, vat),
                 const SizedBox(height: 16),
                 _buildPaymentCard(),
               ],
@@ -831,7 +852,12 @@ class SalesDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSummaryCard(BuildContext context) {
+  Widget _buildSummaryCard(BuildContext context, double delivery, double service, double vat) {
+    final grossTotal = toDouble(sale.grossTotal);
+    final netTotal = toDouble(sale.netTotal);
+    final grandTotal = toDouble(sale.grandTotal);
+    final discount = toDouble(sale.overallDiscount);
+
     return Card(
       elevation: 3,
       child: Padding(
@@ -844,31 +870,30 @@ class SalesDetailsScreen extends StatelessWidget {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 4),
-            _buildDesktopSummaryList(context),
+            _buildDesktopSummaryList(context, grossTotal, discount, delivery, service, vat, netTotal, grandTotal),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildDesktopSummaryList(BuildContext context) {
-    final grossTotal = toDouble(sale.grossTotal);
-    final netTotal = toDouble(sale.netTotal);
-    final grandTotal = toDouble(sale.grandTotal);
-
-    final discount = toDouble(sale.overallDiscount);
-    final delivery = toDouble(sale.overallDeliveryCharge);
-    final service = toDouble(sale.overallServiceCharge);
-    final vat = toDouble(sale.overallVatAmount);
-
+  Widget _buildDesktopSummaryList(
+      BuildContext context,
+      double grossTotal,
+      double discount,
+      double delivery,
+      double service,
+      double vat,
+      double netTotal,
+      double grandTotal,
+      ) {
     return Column(
       children: [
         _summaryRow(context, 'Gross Total', grossTotal),
-        if (discount > 0)
-          _summaryRow(context, 'Discount', -discount, negative: true),
-        if (delivery > 0) _summaryRow(context, 'Delivery Charge', delivery),
-        if (service > 0) _summaryRow(context, 'Service Charge', service),
-        if (vat > 0) _summaryRow(context, 'VAT', vat),
+        _summaryRow(context, 'Discount', -discount, negative: true),
+        _summaryRow(context, 'Delivery Charge', delivery),
+        _summaryRow(context, 'Service Charge', service),
+        _summaryRow(context, 'VAT', vat),
         const Divider(),
         _summaryRow(context, 'Net Total', netTotal, bold: true),
         _summaryRow(
@@ -883,31 +908,38 @@ class SalesDetailsScreen extends StatelessWidget {
   }
 
   Widget _summaryRow(
-    BuildContext context,
-    String label,
-    double value, {
-    bool negative = false,
-    bool bold = false,
-    bool highlight = false,
-  }) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontWeight: bold ? FontWeight.bold : FontWeight.normal,
-            color: highlight ? AppColors.primaryColor(context) : Colors.black,
+      BuildContext context,
+      String label,
+      double value, {
+        bool negative = false,
+        bool bold = false,
+        bool highlight = false,
+      }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: bold ? FontWeight.bold : FontWeight.normal,
+              color: highlight ? AppColors.primaryColor(context) : Colors.black,
+            ),
           ),
-        ),
-        Text(
-          '${negative ? '-' : ''}৳${value.abs().toStringAsFixed(2)}',
-          style: TextStyle(
-            fontWeight: bold ? FontWeight.bold : FontWeight.normal,
-            color: highlight ? AppColors.primaryColor(context) : Colors.black,
+          Text(
+            '${negative && value > 0 ? '-' : ''}৳${value.abs().toStringAsFixed(2)}',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: bold ? FontWeight.bold : FontWeight.normal,
+              color: highlight
+                  ? AppColors.primaryColor(context)
+                  : (negative && value > 0 ? Colors.red : Colors.black),
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -915,10 +947,11 @@ class SalesDetailsScreen extends StatelessWidget {
     final payable = toDouble(sale.payableAmount);
     final paid = toDouble(sale.paidAmount);
     final due = sale.calculatedDueAmount;
+    final isDue = due > 0;
 
     return Card(
       elevation: 3,
-      color: due > 0 ? Colors.orange.shade50 : Colors.green.shade50,
+      color: isDue ? Colors.orange.shade50 : Colors.green.shade50,
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -932,9 +965,9 @@ class SalesDetailsScreen extends StatelessWidget {
             _paymentRow('Payable', payable),
             _paymentRow('Paid', paid),
             _paymentRow(
-              due > 0 ? 'Due' : 'Advance',
+              isDue ? 'Due' : 'Advance',
               due.abs(),
-              color: due > 0 ? Colors.red : Colors.green,
+              color: isDue ? Colors.red : Colors.green,
             ),
           ],
         ),
@@ -943,19 +976,29 @@ class SalesDetailsScreen extends StatelessWidget {
   }
 
   Widget _paymentRow(
-    String label,
-    double amount, {
-    Color color = Colors.black,
-  }) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(label),
-        Text(
-          '৳${amount.toStringAsFixed(2)}',
-          style: TextStyle(fontWeight: FontWeight.bold, color: color),
-        ),
-      ],
+      String label,
+      double amount, {
+        Color color = Colors.black,
+      }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(fontSize: 14),
+          ),
+          Text(
+            '৳${amount.toStringAsFixed(2)}',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
