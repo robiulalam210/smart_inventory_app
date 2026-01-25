@@ -524,7 +524,11 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                   primaryColor: Colors.green,
                 );
 
+
                 changeAmountController.clear();
+                AppRoutes.pop(context);
+
+                context.read<CreatePosSaleBloc>().clearData();
                 AppRoutes.pushReplacement(context, MobilePosSaleScreen());
                 setState(() {});
               } else if (state is CreatePosSaleFailed) {
@@ -1387,9 +1391,9 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                     width: double.infinity,
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Colors.green.withOpacity(0.08),
+                      color: Colors.green.withValues(alpha: 0.08),
                       borderRadius: BorderRadius.circular(6),
-                      border: Border.all(color: Colors.green.withOpacity(0.3)),
+                      border: Border.all(color: Colors.green.withValues(alpha: 0.3)),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1948,20 +1952,64 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
       setState(() {});
     }
   }
-
   void _submitForm() {
     final bloc = context.read<CreatePosSaleBloc>();
 
     var transferProducts = products
         .map(
-          (product) => {
-            "product_id": int.tryParse(product["product_id"].toString()),
-            "quantity": int.tryParse(product["quantity"].toString()),
-            "unit_price": double.tryParse(product["price"].toString()),
-            "discount": double.tryParse(product["discount"].toString()),
-            "discount_type": product["discount_type"].toString(),
-          },
-        )
+          (product) {
+        // Get the product model
+        final productModel = product["product"] as ProductModelStockModel?;
+
+        // Determine the correct unit price
+        double unitPrice = 0.0;
+
+        if (productModel != null) {
+          // Check if auto-discount is applied
+          final bool hasAutoDiscount = product["discountApplied"] == true;
+
+          if (hasAutoDiscount && productModel.finalPrice != null) {
+            // Use final price when auto-discount is applied
+            unitPrice = productModel.finalPrice!;
+          } else if (productModel.sellingPrice != null) {
+            // Use selling price when no auto-discount
+            unitPrice = productModel.sellingPrice!;
+          }
+        } else {
+          // Fallback to the price from controllers
+          final priceStr = product["price"]?.toString() ?? "0";
+          unitPrice = double.tryParse(priceStr) ?? 0.0;
+        }
+
+        // Get discount value - check if auto-discount was applied
+        double discountValue = 0.0;
+        String discountType = "fixed";
+
+        if (product["discountApplied"] == true) {
+          // For auto-discounted products, use the stored discount value
+          discountValue = product["discount_value"] is int
+              ? (product["discount_value"] as int).toDouble()
+              : product["discount_value"] is String
+              ? double.tryParse(product["discount_value"] as String) ?? 0.0
+              : product["discount_value"] as double? ?? 0.0;
+
+          discountType = product["discount_type"]?.toString() ?? "fixed";
+        } else {
+          // For manually discounted products, get from controller
+          final discountStr = product["discount"]?.toString() ?? "0";
+          discountValue = double.tryParse(discountStr) ?? 0.0;
+          discountType = "fixed";
+        }
+
+        return {
+          "product_id": int.tryParse(product["product_id"].toString()),
+          "quantity": int.tryParse(product["quantity"].toString()),
+          "unit_price": unitPrice, // Use the correct unit price
+          "discount": discountValue,
+          "discount_type": discountType,
+        };
+      },
+    )
         .toList();
 
     final selectedCustomer = bloc.selectClintModel;
@@ -1970,6 +2018,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
     final paidAmount = double.tryParse(bloc.payableAmount.text.trim()) ?? 0;
     final user = context.read<ProfileBloc>().permissionModel?.data?.user;
     final isAdmin = user?.role == "SUPER_ADMIN" || user?.role == "ADMIN";
+
     Map<String, dynamic> body = {
       "type": "normal_sale",
       "sale_date": appWidgets.convertDateTime(
@@ -1981,8 +2030,6 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
       "sale_by": (isAdmin)
           ? bloc.selectSalesModel?.id?.toString() ?? ''
           : user?.id?.toString() ?? '',
-
-      // "sale_by": bloc.selectSalesModel?.id.toString() ?? '',
       "overall_vat_type": selectedOverallVatType.toLowerCase(),
       "vat": bloc.vatOverAllController.text.isEmpty
           ? 0
@@ -2023,4 +2070,78 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
     bloc.add(AddPosSale(body: body));
     log(body.toString());
   }
+  // void _submitForm() {
+  //   final bloc = context.read<CreatePosSaleBloc>();
+  //
+  //   var transferProducts = products
+  //       .map(
+  //         (product) => {
+  //           "product_id": int.tryParse(product["product_id"].toString()),
+  //           "quantity": int.tryParse(product["quantity"].toString()),
+  //           "unit_price": double.tryParse(product["price"].toString()),
+  //           "discount": double.tryParse(product["discount"].toString()),
+  //           "discount_type": product["discount_type"].toString(),
+  //         },
+  //       )
+  //       .toList();
+  //
+  //   final selectedCustomer = bloc.selectClintModel;
+  //   final isWalkInCustomer = selectedCustomer?.id == -1;
+  //   final netTotal = calculateAllFinalTotal();
+  //   final paidAmount = double.tryParse(bloc.payableAmount.text.trim()) ?? 0;
+  //   final user = context.read<ProfileBloc>().permissionModel?.data?.user;
+  //   final isAdmin = user?.role == "SUPER_ADMIN" || user?.role == "ADMIN";
+  //   Map<String, dynamic> body = {
+  //     "type": "normal_sale",
+  //     "sale_date": appWidgets.convertDateTime(
+  //       DateFormat(
+  //         "dd-MM-yyyy",
+  //       ).parse(bloc.dateEditingController.text.trim(), true),
+  //       "yyyy-MM-dd",
+  //     ),
+  //     "sale_by": (isAdmin)
+  //         ? bloc.selectSalesModel?.id?.toString() ?? ''
+  //         : user?.id?.toString() ?? '',
+  //
+  //     // "sale_by": bloc.selectSalesModel?.id.toString() ?? '',
+  //     "overall_vat_type": selectedOverallVatType.toLowerCase(),
+  //     "vat": bloc.vatOverAllController.text.isEmpty
+  //         ? 0
+  //         : double.tryParse(bloc.vatOverAllController.text),
+  //     "overall_service_type": selectedOverallServiceChargeType.toLowerCase(),
+  //     "service_charge": bloc.serviceChargeOverAllController.text.isEmpty
+  //         ? 0
+  //         : double.tryParse(bloc.serviceChargeOverAllController.text),
+  //     "overall_delivery_type": selectedOverallDeliveryType.toLowerCase(),
+  //     "delivery_charge": bloc.deliveryChargeOverAllController.text.isEmpty
+  //         ? 0
+  //         : double.tryParse(bloc.deliveryChargeOverAllController.text),
+  //     "overall_discount_type": selectedOverallDiscountType.toLowerCase(),
+  //     "overall_discount": bloc.discountOverAllController.text.isEmpty
+  //         ? 0.0
+  //         : double.tryParse(bloc.discountOverAllController.text),
+  //     "remark": bloc.remarkController.text,
+  //     "items": transferProducts,
+  //     "customer_type": isWalkInCustomer ? "walk_in" : "saved_customer",
+  //     "with_money_receipt": _isChecked ? "Yes" : "No",
+  //     "paid_amount": paidAmount,
+  //     "due_amount": isWalkInCustomer
+  //         ? 0.0
+  //         : (netTotal - paidAmount).clamp(0, double.infinity),
+  //   };
+  //
+  //   if (isWalkInCustomer) {
+  //     body.remove('customer_id');
+  //   } else {
+  //     body['customer_id'] = selectedCustomer?.id.toString() ?? '';
+  //   }
+  //
+  //   if (_isChecked) {
+  //     body['payment_method'] = bloc.selectedPaymentMethod;
+  //     body['account_id'] = bloc.accountModel?.id.toString() ?? '';
+  //   }
+  //
+  //   bloc.add(AddPosSale(body: body));
+  //   log(body.toString());
+  // }
 }

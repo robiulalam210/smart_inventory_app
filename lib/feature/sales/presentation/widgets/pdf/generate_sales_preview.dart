@@ -1,12 +1,38 @@
 
 // Helper functions for PDF generation
 import 'dart:typed_data';
+import 'package:http/http.dart'as http;
 
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
+import '../../../../../core/configs/app_urls.dart';
 import '../../../../profile/data/model/profile_perrmission_model.dart';
 import '../../../data/models/pos_sale_model.dart';
+Future<Uint8List> _loadImageBytes(String? imageUrl) async {
+  if (imageUrl == null || imageUrl.isEmpty) {
+    // Return empty bytes for placeholder
+    return Uint8List(0);
+  }
+
+  try {
+    final fullUrl = imageUrl.startsWith('http')
+        ? imageUrl
+        : '${AppUrls.baseUrlMain}$imageUrl';
+
+    print(fullUrl);
+    final response = await http.get(Uri.parse(fullUrl));
+
+    if (response.statusCode == 200) {
+      return response.bodyBytes;
+    } else {
+      throw Exception('Failed to load image: ${response.statusCode}');
+    }
+  } catch (e) {
+    print('Error loading image: $e');
+    return Uint8List(0);
+  }
+}
 
 Future<Uint8List> generateSalesPreviewPdf(
     PosSaleModel sale,

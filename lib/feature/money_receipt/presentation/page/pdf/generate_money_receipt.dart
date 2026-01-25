@@ -6,17 +6,44 @@ import 'package:printing/printing.dart';
 import '../../../../../core/configs/configs.dart';
 import '../../../../profile/data/model/profile_perrmission_model.dart';
 import '../../../data/model/money_receipt_model/money_receipt_model.dart';
+import 'package:http/http.dart'as http;
+
+Future<Uint8List> _loadImageBytes(String? imageUrl) async {
+  if (imageUrl == null || imageUrl.isEmpty) {
+    // Return empty bytes for placeholder
+    return Uint8List(0);
+  }
+
+  try {
+    final fullUrl = imageUrl.startsWith('http')
+        ? imageUrl
+        : '${AppUrls.baseUrlMain}$imageUrl';
+
+    print(fullUrl);
+    final response = await http.get(Uri.parse(fullUrl));
+
+    if (response.statusCode == 200) {
+      return response.bodyBytes;
+    } else {
+      throw Exception('Failed to load image: ${response.statusCode}');
+    }
+  } catch (e) {
+    print('Error loading image: $e');
+    return Uint8List(0);
+  }
+}
 
 Future<Uint8List> generateMoneyReceiptPdf(MoneyreceiptModel receipt, CompanyInfo? company,) async {
   // Fetch company logo as Uint8List
+
+  // Load company logo asynchronously
   Uint8List? logoBytes;
   if (company?.logo != null && company!.logo.isNotEmpty) {
     try {
-      logoBytes =
-      (await networkImage("${AppUrls.baseUrlMain}${company.logo}"))
-      as Uint8List?;
+      logoBytes = await _loadImageBytes(company.logo);
     } catch (e) {
-      logoBytes = null; // fallback if network fails
+      print('Failed to load logo: $e');
+      logoBytes = null;
     }
   }
   final pdf = pw.Document();
@@ -75,7 +102,6 @@ Future<Uint8List> generateMoneyReceiptPdf(MoneyreceiptModel receipt, CompanyInfo
             ),
 
             // Logo
-            // Logo
             pw.Container(
               width: 80,
               height: 80,
@@ -83,22 +109,26 @@ Future<Uint8List> generateMoneyReceiptPdf(MoneyreceiptModel receipt, CompanyInfo
                 border: pw.Border.all(color: PdfColors.grey400),
                 borderRadius: pw.BorderRadius.circular(8),
               ),
-              child: logoBytes != null
-                  ? pw.Image(pw.MemoryImage(logoBytes), fit: pw.BoxFit.cover)
+              child: logoBytes != null && logoBytes!.isNotEmpty
+                  ? pw.Image(
+                pw.MemoryImage(logoBytes!),
+                fit: pw.BoxFit.cover,
+              )
                   : pw.Center(
                 child: pw.Text(
-                  "Logo",
-                  style: pw.TextStyle(fontSize: 12, color: PdfColors.grey600),
+                  "LOGO",
+                  style: pw.TextStyle(
+                    fontSize: 12,
+                    color: PdfColors.grey600,
+                  ),
                 ),
               ),
             ),
-
           ],
         ),
       ),
       build: (context) => [
         _buildReceiptHeader(receipt),
-        pw.SizedBox(height: 4),
         _buildCustomerInfo(receipt),
         pw.SizedBox(height: 4),
         _buildPaymentDetails(receipt, amount),
@@ -268,7 +298,7 @@ pw.Widget _buildPaymentDetails(MoneyreceiptModel receipt, double amount) {
         pw.Text(
           'PAYMENT RECEIVED',
           style: pw.TextStyle(
-            fontSize: 14,
+            fontSize: 12,
             fontWeight: pw.FontWeight.bold,
             color: PdfColors.green800,
           ),
@@ -286,7 +316,7 @@ pw.Widget _buildPaymentDetails(MoneyreceiptModel receipt, double amount) {
               pw.Text(
                 amount.toStringAsFixed(2),
                 style: pw.TextStyle(
-                  fontSize: 16,
+                  fontSize: 14,
                   fontWeight: pw.FontWeight.bold,
                   color: PdfColors.green800,
                 ),
@@ -295,7 +325,7 @@ pw.Widget _buildPaymentDetails(MoneyreceiptModel receipt, double amount) {
               pw.Text(
                 'Amount Received',
                 style: const pw.TextStyle(
-                  fontSize: 12,
+                  fontSize: 10,
                   color: PdfColors.grey600,
                 ),
               ),
