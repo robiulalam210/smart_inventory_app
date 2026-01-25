@@ -375,13 +375,13 @@ class _ProductSaleModeListScreenState extends State<ProductSaleModeListScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                IconButton(
-                  icon: Icon(
-                    Icons.earbuds,
-                    color: AppColors.primaryColor(context),
-                  ),
-                  onPressed: () => _openPriceTierDialog(context, mode),
-                ),
+                // IconButton(
+                //   icon: Icon(
+                //     Icons.earbuds,
+                //     color: AppColors.primaryColor(context),
+                //   ),
+                //   onPressed: () => _openPriceTierDialog(context, mode),
+                // ),
                 IconButton(
                   icon: Icon(
                     Iconsax.edit,
@@ -417,7 +417,7 @@ class _ProductSaleModeListScreenState extends State<ProductSaleModeListScreen> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.2),
+        color: color.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: color),
       ),
