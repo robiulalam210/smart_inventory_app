@@ -8,6 +8,7 @@ import 'package:iconsax/iconsax.dart';
 import 'package:lottie/lottie.dart';
 import 'package:meherinMart/core/configs/gaps.dart';
 import 'package:printing/printing.dart';
+import '../../../../profile/presentation/bloc/profile_bloc/profile_bloc.dart';
 import '/core/configs/app_colors.dart';
 import '/core/configs/app_images.dart';
 import '/core/configs/app_text.dart';
@@ -334,7 +335,7 @@ AppButton(name: "Clear", onPressed: (){
                       canChangePageFormat: false,
                       dynamicLayout: true,
                       build: (format) => generateCustomerDueAdvanceReportPdf(
-                        state.response,
+                        state.response,context.read<ProfileBloc>().permissionModel?.data?.companyInfo
 
                       ),
                       pdfPreviewPageDecoration:

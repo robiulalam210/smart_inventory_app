@@ -8,6 +8,7 @@ import 'package:lottie/lottie.dart';
 import 'package:meherinMart/core/configs/app_text.dart';
 import 'package:meherinMart/core/widgets/app_scaffold.dart';
 import 'package:printing/printing.dart';
+import '../../../../profile/presentation/bloc/profile_bloc/profile_bloc.dart';
 import '../../../data/model/low_stock_model.dart';
 import '/core/configs/app_colors.dart';
 import '/core/configs/app_images.dart';
@@ -417,7 +418,7 @@ class _MobileLowStockScreenState extends State<MobileLowStockScreen> {
               title: const Text('Low Stock PDF'),
               actions: [IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close))],
             ),
-            body: PdfPreview(build: (format) => generateLowStockReportPdf(state.response)),
+            body: PdfPreview(build: (format) => generateLowStockReportPdf(state.response, context.read<ProfileBloc>().permissionModel?.data?.companyInfo)),
           ),
         ),
       );

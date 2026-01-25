@@ -8,6 +8,7 @@ import 'package:meherinMart/core/core.dart';
 import 'package:meherinMart/core/widgets/app_scaffold.dart';
 import 'package:printing/printing.dart';
 import '../../../../../core/configs/app_sizes.dart';
+import '../../../../profile/presentation/bloc/profile_bloc/profile_bloc.dart';
 import '/core/configs/app_colors.dart';
 import '/core/configs/app_images.dart';
 import '/core/widgets/app_dropdown.dart';
@@ -910,7 +911,7 @@ class _MobileCustomerDueAdvanceScreenState
         MaterialPageRoute(
           builder: (context) => Scaffold(
             appBar: AppBar(
-              title: const Text('Customer Due & Advance PDF'),
+              title:  Text('Customer Due & Advance PDF',style: AppTextStyle.titleMedium(context),),
               actions: [
                 IconButton(
                   onPressed: () => Navigator.pop(context),
@@ -920,7 +921,7 @@ class _MobileCustomerDueAdvanceScreenState
             ),
             body: PdfPreview(
               build: (format) =>
-                  generateCustomerDueAdvanceReportPdf(state.response),
+                  generateCustomerDueAdvanceReportPdf(state.response,context.read<ProfileBloc>().permissionModel?.data?.companyInfo),
               canChangeOrientation: false,
               canChangePageFormat: false,
               canDebug: false,

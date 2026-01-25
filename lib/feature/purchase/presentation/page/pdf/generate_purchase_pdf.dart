@@ -5,21 +5,20 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 
 import '../../../../../core/configs/app_urls.dart';
+import '../../../../../core/utilities/load_image_bytes.dart';
 import '../../../../profile/data/model/profile_perrmission_model.dart';
 import '../../../data/model/purchase_sale_model.dart';
 
 Future<Uint8List> generatePurchasePdf(PurchaseModel purchase,  CompanyInfo? company,
     ) async {
 
-  // Fetch company logo as Uint8List
   Uint8List? logoBytes;
   if (company?.logo != null && company!.logo.isNotEmpty) {
     try {
-      logoBytes =
-      (await networkImage("${AppUrls.baseUrlMain}${company.logo}"))
-      as Uint8List?;
+      logoBytes = await loadImageBytes(company.logo);
     } catch (e) {
-      logoBytes = null; // fallback if network fails
+      print('Failed to load logo: $e');
+      logoBytes = null;
     }
   }
   final pdf = pw.Document();

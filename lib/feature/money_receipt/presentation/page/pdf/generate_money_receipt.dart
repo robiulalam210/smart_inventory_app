@@ -4,34 +4,11 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 
 import '../../../../../core/configs/configs.dart';
+import '../../../../../core/utilities/load_image_bytes.dart';
 import '../../../../profile/data/model/profile_perrmission_model.dart';
 import '../../../data/model/money_receipt_model/money_receipt_model.dart';
 import 'package:http/http.dart'as http;
 
-Future<Uint8List> _loadImageBytes(String? imageUrl) async {
-  if (imageUrl == null || imageUrl.isEmpty) {
-    // Return empty bytes for placeholder
-    return Uint8List(0);
-  }
-
-  try {
-    final fullUrl = imageUrl.startsWith('http')
-        ? imageUrl
-        : '${AppUrls.baseUrlMain}$imageUrl';
-
-    print(fullUrl);
-    final response = await http.get(Uri.parse(fullUrl));
-
-    if (response.statusCode == 200) {
-      return response.bodyBytes;
-    } else {
-      throw Exception('Failed to load image: ${response.statusCode}');
-    }
-  } catch (e) {
-    print('Error loading image: $e');
-    return Uint8List(0);
-  }
-}
 
 Future<Uint8List> generateMoneyReceiptPdf(MoneyreceiptModel receipt, CompanyInfo? company,) async {
   // Fetch company logo as Uint8List
@@ -40,23 +17,20 @@ Future<Uint8List> generateMoneyReceiptPdf(MoneyreceiptModel receipt, CompanyInfo
   Uint8List? logoBytes;
   if (company?.logo != null && company!.logo.isNotEmpty) {
     try {
-      logoBytes = await _loadImageBytes(company.logo);
+      logoBytes = await loadImageBytes(company.logo);
     } catch (e) {
       print('Failed to load logo: $e');
       logoBytes = null;
     }
   }
   final pdf = pw.Document();
-
   final amount = double.tryParse(receipt.amount ?? '0') ?? 0;
   final summary = receipt.paymentSummary;
-
   // Load fonts
   final roboto = pw.Font.ttf(await rootBundle.load("assets/fonts/Roboto-Regular.ttf"));
   final robotoBold = pw.Font.ttf(await rootBundle.load("assets/fonts/Roboto-Bold.ttf"));
   final notoSans = pw.Font.ttf(await rootBundle.load("assets/fonts/NotoSans-Regular.ttf"));
-
-  // Global Theme with fallback
+  // Global Teme with fallback
   final theme = pw.ThemeData.withFont(
     base: roboto,
     bold: robotoBold,

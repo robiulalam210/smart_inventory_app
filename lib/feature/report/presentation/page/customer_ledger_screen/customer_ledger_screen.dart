@@ -4,6 +4,7 @@ import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
 import 'package:printing/printing.dart';
+import '../../../../profile/presentation/bloc/profile_bloc/profile_bloc.dart';
 import '/core/configs/app_colors.dart';
 import '/core/configs/app_images.dart';
 import '/core/configs/app_text.dart';
@@ -292,7 +293,7 @@ class _CustomerLedgerScreenState extends State<CustomerLedgerScreen> {
                             canChangePageFormat: false,
                             dynamicLayout: true,
                             build: (format) => generateCustomerLedgerReportPdf(
-                             state.response,
+                             state.response,context.read<ProfileBloc>().permissionModel?.data?.companyInfo
 
                             ),
                             pdfPreviewPageDecoration:

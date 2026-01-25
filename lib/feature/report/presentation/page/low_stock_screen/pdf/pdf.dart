@@ -3,11 +3,23 @@ import 'dart:typed_data';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
+import '../../../../../../core/utilities/load_image_bytes.dart';
+import '../../../../../profile/data/model/profile_perrmission_model.dart';
 import '../../../../data/model/low_stock_model.dart';
 
 Future<Uint8List> generateLowStockReportPdf(
-    LowStockResponse reportResponse,
+    LowStockResponse reportResponse,CompanyInfo? company,
     ) async {
+  // Load company logo asynchronously
+  Uint8List? logoBytes;
+  if (company?.logo != null && company!.logo.isNotEmpty) {
+    try {
+      logoBytes = await loadImageBytes(company.logo);
+    } catch (e) {
+      print('Failed to load logo: $e');
+      logoBytes = null;
+    }
+  }
   final pdf = pw.Document();
 
   pdf.addPage(
@@ -19,9 +31,65 @@ Future<Uint8List> generateLowStockReportPdf(
           color: PdfColors.white,
         ),
       ),
-      header: (context) => _buildHeader(reportResponse),
+      header: (context) => pw.Container(
+        padding: const pw.EdgeInsets.fromLTRB(20, 30, 20, 20),
+        child: pw.Row(
+          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: [
+            // Company Info
+            pw.Expanded(
+              child: pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                children: [
+                  pw.Text(
+                    company?.name ?? "",
+                    style: pw.TextStyle(
+                      fontSize: 14,
+                      fontWeight: pw.FontWeight.bold,
+                      color: PdfColors.blue800,
+                    ),
+                  ),
+                  pw.SizedBox(height: 4),
+                  if (company?.address != null )
+                    pw.Text(company?.address??"", style: const pw.TextStyle(fontSize: 10)),
+                  if (company?.phone != null )
+                    pw.Text(company?.phone??"", style: const pw.TextStyle(fontSize: 10)),
+                  if (company?.email != null )
+                    pw.Text(company?.email??"", style: const pw.TextStyle(fontSize: 10)),
+                ],
+              ),
+            ),
+
+            // Logo
+            pw.Container(
+              width: 80,
+              height: 80,
+              decoration: pw.BoxDecoration(
+                border: pw.Border.all(color: PdfColors.grey400),
+                borderRadius: pw.BorderRadius.circular(8),
+              ),
+              child: logoBytes != null && logoBytes!.isNotEmpty
+                  ? pw.Image(
+                pw.MemoryImage(logoBytes!),
+                fit: pw.BoxFit.cover,
+              )
+                  : pw.Center(
+                child: pw.Text(
+                  "LOGO",
+                  style: pw.TextStyle(
+                    fontSize: 12,
+                    color: PdfColors.grey600,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
       footer: (context) => _buildFooter(context),
       build: (context) => [
+        _buildHeader(reportResponse),
         _buildReportTitle(),
         pw.SizedBox(height: 0),
         _buildCriticalAlertSection(reportResponse.summary),

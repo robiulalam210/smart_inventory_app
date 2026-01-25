@@ -3,6 +3,7 @@ import 'package:meherinMart/core/core.dart';
 import 'package:meherinMart/core/widgets/app_scaffold.dart';
 import 'package:printing/printing.dart';
 
+import '../../../../profile/presentation/bloc/profile_bloc/profile_bloc.dart';
 import '/core/widgets/date_range.dart';
 import '/feature/report/presentation/bloc/profit_loss_bloc/profit_loss_bloc.dart';
 import '/feature/report/presentation/page/profit_loss_screen/pdf.dart';
@@ -255,7 +256,7 @@ class _MobileProfitLossScreenState extends State<MobileProfitLossScreen> {
       context,
       MaterialPageRoute(
         builder: (_) => PdfPreview(
-          build: (_) => generateProfitLossReportPdf(state.response),
+          build: (_) => generateProfitLossReportPdf(state.response, context.read<ProfileBloc>().permissionModel?.data?.companyInfo),
           canChangeOrientation: false,
           canChangePageFormat: false,
         ),
