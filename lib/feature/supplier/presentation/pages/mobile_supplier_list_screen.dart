@@ -80,21 +80,26 @@ class _SupplierScreenState extends State<MobileSupplierListScreen> {
       floatingActionButton: FloatingActionButton(
         backgroundColor: AppColors.primaryColor(context),
         onPressed: (){
-        showDialog(
-          context: context,
-          builder: (context) {
-            return Dialog(
-              insetPadding: const EdgeInsets.all(20),
-              child: SizedBox(
-
-                height: AppSizes.height(context) * 0.5,
+          showModalBottomSheet(
+            context: context,
+            isScrollControlled: true, // IMPORTANT for tall sheets
+            backgroundColor: Colors.transparent, // optional, for rounded corners
+            builder: (context) {
+              return Container(
+                height: AppSizes.height(context) * 0.9,
+                padding: const EdgeInsets.all(20),
+                decoration: const BoxDecoration(
+                  borderRadius: BorderRadius.vertical(
+                    top: Radius.circular(20),
+                  ),
+                ),
                 child: const MobileCreateSupplierScreen(),
-              ),
-            );
-          },
-        );
+              );
+            },
+          );
 
-      },child: Icon(Icons.add,color: AppColors.whiteColor(context),),),
+
+        },child: Icon(Icons.add,color: AppColors.whiteColor(context),),),
       body: SafeArea(
         child: Container(
           padding: AppTextStyle.getResponsivePaddingBody(context),
@@ -520,21 +525,30 @@ class _SupplierScreenState extends State<MobileSupplierListScreen> {
     );
   }
   void _showEditDialogMobile(BuildContext context, SupplierListModel customer) {
-    // Implement edit dialog logic
-    showDialog(
+
+    showModalBottomSheet(
       context: context,
+      isScrollControlled: true, // IMPORTANT for tall sheets
+      backgroundColor: Colors.transparent, // optional, for rounded corners
       builder: (context) {
-        return Dialog(
-          child: SizedBox(
-            width: AppSizes.width(context) * 0.80,
-            child: MobileCreateSupplierScreen(
-              id: customer.id.toString(),
-              submitText: "Update Supplier",
+        return Container(
+          height: AppSizes.height(context) * 0.88,
+          padding: const EdgeInsets.all(20),
+          decoration: const BoxDecoration(
+            borderRadius: BorderRadius.vertical(
+              top: Radius.circular(20),
             ),
+          ),
+          child: MobileCreateSupplierScreen(
+
+            id: customer.id.toString(),
+            submitText: "Update Supplier",
           ),
         );
       },
     );
+
+
   }
   void _showEditDialog(BuildContext context, SupplierListModel customer) {
     // Implement edit dialog logic

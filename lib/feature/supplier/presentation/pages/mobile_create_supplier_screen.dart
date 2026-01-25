@@ -86,6 +86,36 @@ class _CreateSupplierScreenState extends State<MobileCreateSupplierScreen> {
 
                 const SizedBox(height: 8),
 
+                // Phone Number
+                AppTextField(
+                  isRequired: true,
+                  controller: context.read<SupplierListBloc>().customerNumberController,
+                  hintText: 'Phone Number',
+                  keyboardType: TextInputType.phone,
+                  validator: (value) {
+                    return value!.trim().isEmpty
+                        ? 'Please enter Phone number'
+                        : AppConstants.phoneValidation.hasMatch(value.trim())
+                        ? null
+                        : 'Invalid phone number';
+                  },
+                ),
+
+                const SizedBox(height: 8),
+
+                // Address
+                AppTextField(
+                  isRequired: true,
+                  controller: context.read<SupplierListBloc>().addressController,
+                  hintText: 'Address',
+                  keyboardType: TextInputType.multiline,
+                  validator: (value) {
+                    return value!.trim().isEmpty ? 'Please enter address' : null;
+                  },
+                ),
+
+                const SizedBox(height: 8),
+
                 // Shop/Business Name (NEW FIELD)
                 AppTextField(
                   controller: context.read<SupplierListBloc>().shopName,
@@ -102,22 +132,7 @@ class _CreateSupplierScreenState extends State<MobileCreateSupplierScreen> {
                   keyboardType: TextInputType.multiline,
                 ),
 
-                const SizedBox(height: 8),
 
-                // Phone Number
-                AppTextField(
-                  isRequired: true,
-                  controller: context.read<SupplierListBloc>().customerNumberController,
-                  hintText: 'Phone Number',
-                  keyboardType: TextInputType.phone,
-                  validator: (value) {
-                    return value!.trim().isEmpty
-                        ? 'Please enter Phone number'
-                        : AppConstants.phoneValidation.hasMatch(value.trim())
-                        ? null
-                        : 'Invalid phone number';
-                  },
-                ),
 
                 const SizedBox(height: 8),
 
@@ -136,18 +151,6 @@ class _CreateSupplierScreenState extends State<MobileCreateSupplierScreen> {
                   },
                 ),
 
-                const SizedBox(height: 8),
-
-                // Address
-                AppTextField(
-                  isRequired: true,
-                  controller: context.read<SupplierListBloc>().addressController,
-                  hintText: 'Address',
-                  keyboardType: TextInputType.multiline,
-                  validator: (value) {
-                    return value!.trim().isEmpty ? 'Please enter address' : null;
-                  },
-                ),
 
                 const SizedBox(height: 8),
 
