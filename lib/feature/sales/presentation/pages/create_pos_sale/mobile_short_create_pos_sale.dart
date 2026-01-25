@@ -1160,7 +1160,7 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
                                 "Price *",
                                 style: TextStyle(
                                   fontSize: 12,
-                                  color: Colors.grey.shade600,
+                                  color: AppColors.text(context),
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
@@ -1184,6 +1184,9 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
                                     contentPadding: const EdgeInsets.symmetric(
                                       horizontal: 10,
                                       vertical: 0,
+                                    ),
+                                    hintStyle: AppTextStyle.body(context).copyWith(
+                                      color:  AppColors.greyColor(context),
                                     ),
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(6),
@@ -1235,7 +1238,7 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
                                 "Quantity *",
                                 style: TextStyle(
                                   fontSize: 12,
-                                  color: Colors.grey.shade600,
+                                  color:  AppColors.text(context),
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
@@ -1292,8 +1295,11 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
                                           FilteringTextInputFormatter
                                               .digitsOnly,
                                         ],
-                                        decoration: const InputDecoration(
+                                        decoration:  InputDecoration(
                                           isDense: true,
+                                          hintStyle: AppTextStyle.body(context).copyWith(
+                                            color:  AppColors.greyColor(context),
+                                          ),
                                           border: OutlineInputBorder(),
                                           contentPadding: EdgeInsets.symmetric(
                                             horizontal: 6,
@@ -1479,7 +1485,7 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       child: AppDropdown<SaleMode>(
-        label: "Sale Mode (Optional)",
+        label: "Sale Mode ",
         hint: selectedMode?.saleModeName ?? "Select Sale Mode",
         isLabel: true,
         isSearch: false,

@@ -171,42 +171,7 @@ class CustomerTableCard extends StatelessWidget {
                       ),
                     ),
 
-                    // Special Customer Badge (only if special)
-                    if (customer.specialCustomer) ...[
-                      const SizedBox(width: 12),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.amber.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: Colors.amber,
-                            width: 1,
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(
-                              Icons.star,
-                              size: 12,
-                              color: Colors.amber,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              'Special',
-                              style: TextStyle(
-                                color: Colors.amber,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
+
                   ],
                 ),
 
@@ -408,18 +373,18 @@ class CustomerTableCard extends StatelessWidget {
                 Expanded(
                   child: OutlinedButton.icon(
                     onPressed: () => _toggleSpecialCustomer(context, customer),
-                    icon: Icon(
-                      customer.specialCustomer
-                          ? Icons.star_border
-                          : Icons.star,
-                      size: 16,
-                    ),
+
                     label: Text(
                       customer.specialCustomer
                           ? 'Remove Special'
                           : 'Mark Special',
+                      
+                      style: AppTextStyle.body(context).copyWith(
+                        fontSize: 10
+                      ),
                     ),
                     style: OutlinedButton.styleFrom(
+                      
                       foregroundColor: customer.specialCustomer
                           ? Colors.grey
                           : Colors.amber,
@@ -428,7 +393,7 @@ class CustomerTableCard extends StatelessWidget {
                             ? Colors.grey.shade300
                             : Colors.amber.shade300,
                       ),
-                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      padding: const EdgeInsets.symmetric(vertical: 2),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
