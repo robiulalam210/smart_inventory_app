@@ -2,6 +2,7 @@
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:printing/printing.dart';
+import '../../../../profile/presentation/bloc/profile_bloc/profile_bloc.dart';
 import '/core/core.dart';
 import '/core/widgets/date_range.dart';
 import '/feature/report/presentation/bloc/stock_report_bloc/stock_report_bloc.dart';
@@ -273,7 +274,7 @@ class _StockReportScreenState extends State<StockReportScreen> {
                       canChangePageFormat: false,
                       dynamicLayout: true,
                       build: (format) => generateStockReportPdf(
-                        state.response,
+                        state.response,context.read<ProfileBloc>().permissionModel?.data?.companyInfo
 
                       ),
                       pdfPreviewPageDecoration:

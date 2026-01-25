@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:printing/printing.dart';
+import '../../../../profile/presentation/bloc/profile_bloc/profile_bloc.dart';
 import '/core/configs/app_colors.dart';
 import '/core/configs/app_text.dart';
 import '/core/shared/widgets/sideMenu/sidebar.dart';
@@ -164,7 +165,7 @@ class _ProfitLossScreenState extends State<ProfitLossScreen> {
                       canChangePageFormat: false,
                       dynamicLayout: true,
                       build: (format) => generateProfitLossReportPdf(
-                        state.response,
+                        state.response, context.read<ProfileBloc>().permissionModel?.data?.companyInfo
 
                       ),
                       pdfPreviewPageDecoration:

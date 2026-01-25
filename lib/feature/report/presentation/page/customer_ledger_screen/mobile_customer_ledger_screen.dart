@@ -7,6 +7,7 @@ import 'package:lottie/lottie.dart';
 import 'package:meherinMart/core/configs/app_text.dart';
 import 'package:printing/printing.dart';
 import '../../../../../core/widgets/app_button.dart';
+import '../../../../profile/presentation/bloc/profile_bloc/profile_bloc.dart';
 import '/core/configs/app_colors.dart';
 import '/core/configs/app_images.dart';
 import '/core/widgets/app_dropdown.dart';
@@ -1030,7 +1031,7 @@ class _MobileCustomerLedgerScreenState
         MaterialPageRoute(
           builder: (context) => Scaffold(
             appBar: AppBar(
-              title: const Text('Customer Ledger PDF'),
+              title:  Text('Customer Ledger PDF',style: AppTextStyle.titleMedium(context),),
               actions: [
                 IconButton(
                   onPressed: () => Navigator.pop(context),
@@ -1040,7 +1041,7 @@ class _MobileCustomerLedgerScreenState
             ),
             body: PdfPreview(
               build: (format) =>
-                  generateCustomerLedgerReportPdf(state.response),
+                  generateCustomerLedgerReportPdf(state.response,context.read<ProfileBloc>().permissionModel?.data?.companyInfo),
               canChangeOrientation: false,
               canChangePageFormat: false,
               canDebug: false,

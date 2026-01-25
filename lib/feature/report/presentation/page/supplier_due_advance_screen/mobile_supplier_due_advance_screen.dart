@@ -8,6 +8,7 @@ import 'package:lottie/lottie.dart';
 import 'package:meherinMart/core/widgets/app_scaffold.dart';
 import 'package:printing/printing.dart';
 import '../../../../../core/widgets/app_button.dart';
+import '../../../../profile/presentation/bloc/profile_bloc/profile_bloc.dart';
 import '/core/configs/app_colors.dart';
 import '/core/configs/app_images.dart';
 import '/core/configs/app_text.dart';
@@ -814,7 +815,7 @@ class _MobileSupplierDueAdvanceScreenState
             ),
             body: PdfPreview(
               build: (format) =>
-                  generateSupplierDueAdvanceReportPdf(state.response),
+                  generateSupplierDueAdvanceReportPdf(state.response, context.read<ProfileBloc>().permissionModel?.data?.companyInfo),
               canChangeOrientation: false,
               canChangePageFormat: false,
               canDebug: false,

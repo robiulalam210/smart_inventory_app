@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:meherinMart/core/core.dart';
 import 'package:meherinMart/core/widgets/app_scaffold.dart';
 import 'package:printing/printing.dart';
+import '../../../../profile/presentation/bloc/profile_bloc/profile_bloc.dart';
 import '/core/widgets/date_range.dart';
 import '/feature/report/presentation/page/expense_report_screen/pdf.dart';
 
@@ -915,7 +916,7 @@ class _MobileExpenseReportScreenState extends State<MobileExpenseReportScreen> {
               ],
             ),
             body: PdfPreview(
-              build: (format) => generateExpenseReportPdf(state.response),
+              build: (format) => generateExpenseReportPdf(state.response, context.read<ProfileBloc>().permissionModel?.data?.companyInfo),
               canChangeOrientation: false,
               canChangePageFormat: false,
               canDebug: false,
