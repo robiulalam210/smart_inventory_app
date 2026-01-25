@@ -317,8 +317,28 @@ class SaleMode {
 
   @override
   String toString() {
-    return "${saleModeName} Price: ${unitPrice}, Conv: ${conversionFactor}, Base: ${baseUnitName}";
+    String priceLabel;
+
+    if (priceType == 'unit') {
+      priceLabel = unitPrice != null ? "Unit Price: $unitPrice" : "";
+    } else if (priceType == 'flat') {
+      priceLabel = flatPrice != null ? "Flat Price: $flatPrice" : "";
+    } else if (priceType == 'tier') {
+      if (tiers != null && tiers!.isNotEmpty) {
+        final tierRanges = tiers!
+            .map((t) => "${t.minQuantity}-${t.maxQuantity}: ${t.price}")
+            .join(" | ");
+        priceLabel = "Tier Prices: $tierRanges";
+      } else {
+        priceLabel = "";
+      }
+    } else {
+      priceLabel = "Price: N/A";
+    }
+
+    return "$saleModeName | $priceLabel | Conv: ${conversionFactor ?? 'N/A'} | Base: ${baseUnitName ?? 'N/A'} ";
   }
+
 
   factory SaleMode.fromJson(Map<String, dynamic> json) {
     return SaleMode(
