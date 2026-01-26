@@ -24,6 +24,14 @@ class AppUrls {
   static final String fullInvoiceRefund          = '$baseUrl/great-lab-invoice-full-refund/';
   static final String getInvoice          = '$baseUrl/lab-offline/invoice';
 
+
+  // Permission management
+  static  String userPermissions = '$baseUrl/user-permissions';
+  static  String updatePermissions = '$baseUrl/user-permissions/update/';
+  static  String resetPermissions = '$baseUrl/user-permissions/reset/';
+  static  String checkPermission = '$baseUrl/permissions/check/';
+  static  String companyUsers = '$baseUrl/company-users/';
+
   static  String saleModes = "$baseUrl/sale-modes/";
   static  String priceTiers = "$baseUrl/price-tiers/";
   static  String productSaleModes = "$baseUrl/product-sale-modes/";

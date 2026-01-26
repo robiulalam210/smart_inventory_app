@@ -17,7 +17,8 @@ Future<LoginModel> loginService({required Map payload}) async {
         .post(url, body: jsonEncode(payload), headers: headers)
         .timeout(const Duration(seconds: 120));
 
-    logger.i("login url: ${url}");
+    logger.i("login url: $url");
+    logger.i("login statusCode: ${response.statusCode}");
     logger.i("login response: ${response.body}");
 
     /// ✅ SUCCESS

@@ -300,19 +300,23 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
       final res = await postResponse(
         url: AppUrls.customer,
         payload: event.body,
-      ); // Use the correct API URL
-      // Convert the Map to JSON string for appParseJson
-      final jsonString = jsonEncode(res);
-
-      ApiResponse response = appParseJson(
-        jsonString,
-        (data) => CustomerModel.fromJson(data),
       );
 
-      if (response.success == false) {
-        emit(CustomerAddFailed(title: '', content: response.message ?? ""));
+      if (res['status'] == false) {
+        emit(CustomerAddFailed(
+          title: '',
+          content: res['message'] ?? "Unknown error",
+        ));
         return;
       }
+
+      // Only parse model if status == true
+      final jsonString = jsonEncode(res);
+      ApiResponse response = appParseJson(
+        jsonString,
+            (data) => CustomerModel.fromJson(data),
+      );
+
       clearData();
       emit(CustomerAddSuccess());
     } catch (error) {

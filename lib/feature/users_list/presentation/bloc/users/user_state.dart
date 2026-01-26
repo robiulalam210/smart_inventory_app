@@ -1,67 +1,155 @@
 part of 'user_bloc.dart';
 
-sealed class UserState {}
+abstract class UserState extends Equatable {
+  const UserState();
 
-final class UserInitial extends UserState {}
+  @override
+  List<Object> get props => [];
+}
 
+class UserInitial extends UserState {}
 
+// Existing states
+class UserListLoading extends UserState {}
 
-
-final class UserListLoading extends UserState {}
-
-final class UserListSuccess extends UserState {
-  String selectedState = "";
-
+class UserListSuccess extends UserState {
   final List<UsersListModel> list;
   final int totalPages;
   final int currentPage;
 
-  UserListSuccess({
+  const UserListSuccess({
     required this.list,
     required this.totalPages,
     required this.currentPage,
   });
+
+  @override
+  List<Object> get props => [list, totalPages, currentPage];
 }
 
+class UserListFailed extends UserState {
+  final String title;
+  final String content;
 
-final class UserListFailed extends UserState {
-  final String title, content;
+  const UserListFailed({required this.title, required this.content});
 
-  UserListFailed({required this.title, required this.content});
+  @override
+  List<Object> get props => [title, content];
 }
 
+class UserAddLoading extends UserState {}
 
-final class UserAddInitial extends UserState {}
+class UserAddSuccess extends UserState {}
 
-final class UserAddLoading extends UserState {}
+class UserAddFailed extends UserState {
+  final String title;
+  final String content;
 
-final class UserAddSuccess extends UserState {
+  const UserAddFailed({required this.title, required this.content});
 
-  UserAddSuccess();
+  @override
+  List<Object> get props => [title, content];
 }
 
+class UserSwitchLoading extends UserState {}
 
+class UserSwitchSuccess extends UserState {}
 
-final class UserAddFailed extends UserState {
-  final String title, content;
+class UserSwitchFailed extends UserState {
+  final String title;
+  final String content;
 
-  UserAddFailed({required this.title, required this.content});
+  const UserSwitchFailed({required this.title, required this.content});
+
+  @override
+  List<Object> get props => [title, content];
 }
 
+// New Permission States
+class UserPermissionsLoading extends UserState {}
 
+class UserPermissionsSuccess extends UserState {
+  final Map<String, dynamic> permissions;
+  final List<UserPermissionModel> customPermissions;
+  final UserModel user;
 
-final class UserSwitchInitial extends UserState {}
+  const UserPermissionsSuccess({
+    required this.permissions,
+    required this.customPermissions,
+    required this.user,
+  });
 
-final class UserSwitchLoading extends UserState {}
-
-final class UserSwitchSuccess extends UserState {
-  UserSwitchSuccess();
+  @override
+  List<Object> get props => [permissions, customPermissions, user];
 }
 
+class UserPermissionsFailed extends UserState {
+  final String title;
+  final String content;
 
+  const UserPermissionsFailed({required this.title, required this.content});
 
-final class UserSwitchFailed extends UserState {
-  final String title, content;
+  @override
+  List<Object> get props => [title, content];
+}
 
-  UserSwitchFailed({required this.title, required this.content});
+class PermissionUpdateLoading extends UserState {}
+
+class PermissionUpdateSuccess extends UserState {
+  final UserModel user;
+
+  const PermissionUpdateSuccess({required this.user});
+
+  @override
+  List<Object> get props => [user];
+}
+
+class PermissionUpdateFailed extends UserState {
+  final String title;
+  final String content;
+
+  const PermissionUpdateFailed({required this.title, required this.content});
+
+  @override
+  List<Object> get props => [title, content];
+}
+
+class PermissionResetLoading extends UserState {}
+
+class PermissionResetSuccess extends UserState {
+  final UserModel user;
+
+  const PermissionResetSuccess({required this.user});
+
+  @override
+  List<Object> get props => [user];
+}
+
+class PermissionResetFailed extends UserState {
+  final String title;
+  final String content;
+
+  const PermissionResetFailed({required this.title, required this.content});
+
+  @override
+  List<Object> get props => [title, content];
+}
+
+class PermissionCheckSuccess extends UserState {
+  final bool hasPermission;
+
+  const PermissionCheckSuccess({required this.hasPermission});
+
+  @override
+  List<Object> get props => [hasPermission];
+}
+
+class PermissionCheckFailed extends UserState {
+  final String title;
+  final String content;
+
+  const PermissionCheckFailed({required this.title, required this.content});
+
+  @override
+  List<Object> get props => [title, content];
 }

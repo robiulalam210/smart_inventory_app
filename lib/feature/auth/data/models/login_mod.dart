@@ -7,10 +7,9 @@ import 'dart:convert';
 LoginModel loginModelFromJson(String str) => LoginModel.fromJson(json.decode(str));
 
 String loginModelToJson(LoginModel data) => json.encode(data.toJson());
-
 class LoginModel {
-   bool? success;
-   String? message;
+  bool? success;
+  String? message;
   final User? user;
   final Tokens? tokens;
   final Company? company;
@@ -23,20 +22,27 @@ class LoginModel {
     this.company,
   });
 
-  factory LoginModel.fromJson(Map<String, dynamic> json) => LoginModel(
-    success: json["success"],
-    message: json["message"],
-    user: json["user"] == null ? null : User.fromJson(json["user"]),
-    tokens: json["tokens"] == null ? null : Tokens.fromJson(json["tokens"]),
-    company: json["company"] == null ? null : Company.fromJson(json["company"]),
-  );
+  factory LoginModel.fromJson(Map<String, dynamic> json) {
+    final data = json['data'];
+
+    return LoginModel(
+      success: json["success"],
+      message: json["message"],
+      user: data?["user"] == null ? null : User.fromJson(data["user"]),
+      tokens: data?["tokens"] == null ? null : Tokens.fromJson(data["tokens"]),
+      company:
+      data?["company"] == null ? null : Company.fromJson(data["company"]),
+    );
+  }
 
   Map<String, dynamic> toJson() => {
     "success": success,
     "message": message,
-    "user": user?.toJson(),
-    "tokens": tokens?.toJson(),
-    "company": company?.toJson(),
+    "data": {
+      "user": user?.toJson(),
+      "tokens": tokens?.toJson(),
+      "company": company?.toJson(),
+    }
   };
 }
 

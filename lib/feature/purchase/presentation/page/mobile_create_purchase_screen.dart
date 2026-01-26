@@ -359,147 +359,138 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
         appBar: AppBar(
           title: Text("Purchase", style: AppTextStyle.titleMedium(context)),
         ),
-        body: _buildMobileLayout(),
+        body: ResponsiveCol(
+          xs: 12,
+          sm: 12,
+          md: 12,
+          lg: 12,
+          xl: 12,
+          child: BlocConsumer<CreatePurchaseBloc, CreatePurchaseState>(
+            listener: (context, state) {
+              if (state is CreatePurchaseLoading) {
+                appLoader(context, "Creating Purchase, please wait...");
+              } else if (state is CreatePurchaseSuccess) {
+                Navigator.pop(context);
+                AppRoutes.pushReplacement(context, MobilePurchaseScreen());
+              } else if (state is CreatePurchaseFailed) {
+                Navigator.pop(context);
+                appAlertDialog(
+                  context,
+                  state.content,
+                  title: state.title,
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text("Dismiss"),
+                    ),
+                  ],
+                );
+              }
+            },
+            builder: (context, state) {
+              return SingleChildScrollView(
+                padding: const EdgeInsets.all(0.0),
+                child: Stepper(
+
+                  physics: const ClampingScrollPhysics(),
+                  type: StepperType.vertical,
+                  currentStep: currentStep,
+                  onStepContinue: () {
+                    debugPrint("onStepContinue called, currentStep: $currentStep");
+
+                    // Validate current step before moving
+                    if (!_validateCurrentStep()) {
+                      return; // Don't proceed if validation fails
+                    }
+
+                    // Check if we're at the last step
+                    if (currentStep == 3) {
+                      _submitForm();
+                    } else {
+                      // Move to next step
+                      setState(() {
+                        currentStep += 1;
+                      });
+                    }
+                  },
+                  onStepCancel: () {
+                    if (currentStep > 0) {
+                      setState(() {
+                        currentStep -= 1;
+                      });
+                    }
+                  },
+                  onStepTapped: (step) {
+                    setState(() {
+                      currentStep = step;
+                    });
+                  },
+                  controlsBuilder: (context, details) {
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: Row(
+                        children: [
+                          if (currentStep > 0)
+                            Expanded(
+                              child: AppButton(
+                                onPressed: details.onStepCancel,
+                                name: "Back",
+                                color: AppColors.redColor,
+                              ),
+                            ),
+                          if (currentStep > 0) const SizedBox(width: 8),
+                          Expanded(
+                            child: AppButton(
+                              onPressed: details.onStepContinue,
+                              name: currentStep < 3 ? 'Next' : 'Submit',
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                  steps: [
+                    Step(
+
+                      title: Text(
+                        'Supplier & Date',
+                        style: AppTextStyle.cardLevelHead(context),
+                      ),
+                      content: _buildMobileTopFormSection(),
+                      isActive: currentStep >= 0,
+                      state: currentStep > 0 ? StepState.complete : StepState.indexed,
+                    ),
+                    Step(
+                      title: Text('Products', style: AppTextStyle.cardLevelHead(context)),
+                      content: _buildMobileProductListSection(),
+                      isActive: currentStep >= 1,
+                      state: currentStep > 1 ? StepState.complete : StepState.indexed,
+                    ),
+                    Step(
+                      title: Text('Charges', style: AppTextStyle.cardLevelHead(context)),
+                      content: _buildMobileChargesSection(),
+                      isActive: currentStep >= 2,
+                      state: currentStep > 2 ? StepState.complete : StepState.indexed,
+                    ),
+                    Step(
+                      title: Text(
+                        'Summary & Payment',
+                        style: AppTextStyle.cardLevelHead(context),
+                      ),
+                      content: _buildSummarySection(),
+                      isActive: currentStep >= 3,
+                      state: StepState.indexed,
+                    ),
+                  ],
+                )
+              );
+            },
+          ),
+        )
       ),
     );
   }
 
-  // -----------------------
-  // Mobile layout & stepper
-  // -----------------------
-
-  Widget _buildMobileLayout() {
-    return ResponsiveCol(
-      xs: 12,
-      sm: 12,
-      md: 12,
-      lg: 12,
-      xl: 12,
-      child: BlocConsumer<CreatePurchaseBloc, CreatePurchaseState>(
-        listener: (context, state) {
-          if (state is CreatePurchaseLoading) {
-            appLoader(context, "Creating Purchase, please wait...");
-          } else if (state is CreatePurchaseSuccess) {
-            Navigator.pop(context);
-            AppRoutes.pushReplacement(context, MobilePurchaseScreen());
-          } else if (state is CreatePurchaseFailed) {
-            Navigator.pop(context);
-            appAlertDialog(
-              context,
-              state.content,
-              title: state.title,
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text("Dismiss"),
-                ),
-              ],
-            );
-          }
-        },
-        builder: (context, state) {
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(12.0),
-            child: _buildMobileStepperContent(),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildMobileStepperContent() {
-    return Stepper(
-      physics: const ClampingScrollPhysics(),
-      type: StepperType.vertical,
-      currentStep: currentStep,
-      onStepContinue: () {
-        debugPrint("onStepContinue called, currentStep: $currentStep");
-
-        // Validate current step before moving
-        if (!_validateCurrentStep()) {
-          return; // Don't proceed if validation fails
-        }
-
-        // Check if we're at the last step
-        if (currentStep == 3) {
-          _submitForm();
-        } else {
-          // Move to next step
-          setState(() {
-            currentStep += 1;
-          });
-        }
-      },
-      onStepCancel: () {
-        if (currentStep > 0) {
-          setState(() {
-            currentStep -= 1;
-          });
-        }
-      },
-      onStepTapped: (step) {
-        setState(() {
-          currentStep = step;
-        });
-      },
-      controlsBuilder: (context, details) {
-        return Padding(
-          padding: const EdgeInsets.only(top: 8.0),
-          child: Row(
-            children: [
-              if (currentStep > 0)
-                Expanded(
-                  child: AppButton(
-                    onPressed: details.onStepCancel,
-                    name: "Back",
-                    color: AppColors.redColor,
-                  ),
-                ),
-              if (currentStep > 0) const SizedBox(width: 8),
-              Expanded(
-                child: AppButton(
-                  onPressed: details.onStepContinue,
-                  name: currentStep < 3 ? 'Next' : 'Submit',
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-      steps: [
-        Step(
-          title: Text(
-            'Supplier & Date',
-            style: AppTextStyle.cardLevelHead(context),
-          ),
-          content: _buildMobileTopFormSection(),
-          isActive: currentStep >= 0,
-          state: currentStep > 0 ? StepState.complete : StepState.indexed,
-        ),
-        Step(
-          title: Text('Products', style: AppTextStyle.cardLevelHead(context)),
-          content: _buildMobileProductListSection(),
-          isActive: currentStep >= 1,
-          state: currentStep > 1 ? StepState.complete : StepState.indexed,
-        ),
-        Step(
-          title: Text('Charges', style: AppTextStyle.cardLevelHead(context)),
-          content: _buildMobileChargesSection(),
-          isActive: currentStep >= 2,
-          state: currentStep > 2 ? StepState.complete : StepState.indexed,
-        ),
-        Step(
-          title: Text(
-            'Summary & Payment',
-            style: AppTextStyle.cardLevelHead(context),
-          ),
-          content: _buildSummarySection(),
-          isActive: currentStep >= 3,
-          state: StepState.indexed,
-        ),
-      ],
-    );
-  }
 
   bool _validateCurrentStep() {
     switch (currentStep) {
@@ -982,9 +973,9 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
                         ),
                       ),
                       contentPadding: const EdgeInsets.only(
-                        top: 10.0,
-                        bottom: 10.0,
-                        left: 12,
+                        top: 6.0,
+                        bottom: 6.0,
+                        left: 6,
                       ),
                       isDense: true,
                       hintText: "price",
@@ -1023,10 +1014,9 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       /// ➖ Minus
-                      IconButton(
-                        padding: EdgeInsets.zero,
-                        icon: const Icon(Icons.remove),
-                        onPressed: () {
+                      InkWell(
+                        child: const Icon(Icons.remove),
+                        onTap: () {
                           setState(() {
                             int qty = int.tryParse(
                               controllers[index]!["quantity"]!.text,
@@ -1045,7 +1035,7 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
 
                       /// 🔢 Quantity input
                       SizedBox(
-                        width: 65,
+                        width: 70,
                         child: TextField(
                           controller: controllers[index]!["quantity"],
                           textAlign: TextAlign.center,
@@ -1072,10 +1062,9 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
                       ),
 
                       /// ➕ Plus
-                      IconButton(
-                        padding: EdgeInsets.zero,
-                        icon: const Icon(Icons.add),
-                        onPressed: () {
+                      InkWell(
+                        child: const Icon(Icons.add),
+                        onTap: () {
                           setState(() {
                             int qty = int.tryParse(
                               controllers[index]!["quantity"]!.text,
@@ -1172,9 +1161,9 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
                         ),
                       ),
                       contentPadding: const EdgeInsets.only(
-                        top: 10.0,
-                        bottom: 10.0,
-                        left: 10,
+                        top: 6.0,
+                        bottom: 6.0,
+                        left: 6,
                       ),
                       isDense: true,
                       hintText: "Discount",
