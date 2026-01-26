@@ -1,17 +1,10 @@
-import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:meta/meta.dart';
 
 import '../../../../../core/configs/configs.dart';
 import '../../../../common/data/models/api_response_mod.dart';
 import '../../../../common/data/models/app_parse_json.dart';
 import '../../data/sale_mode_model.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:equatable/equatable.dart';
-import 'dart:convert';
 
-import '../../../../../../core/configs/configs.dart';
 import '../../../../../../core/repositories/delete_response.dart';
 import '../../../../../../core/repositories/get_response.dart';
 import '../../../../../../core/repositories/patch_response.dart';

@@ -70,9 +70,9 @@ Future<Uint8List> generateCustomerLedgerReportPdf(
                 border: pw.Border.all(color: PdfColors.grey400),
                 borderRadius: pw.BorderRadius.circular(8),
               ),
-              child: logoBytes != null && logoBytes!.isNotEmpty
+              child: logoBytes != null && logoBytes.isNotEmpty
                   ? pw.Image(
-                pw.MemoryImage(logoBytes!),
+                pw.MemoryImage(logoBytes),
                 fit: pw.BoxFit.cover,
               )
                   : pw.Center(

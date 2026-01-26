@@ -22,7 +22,7 @@ class _CreateSupplierScreenState extends State<MobileCreateSupplierScreen> {
 
     // Initialize controllers with existing values if editing
     if (widget.id.isNotEmpty) {
-      final supplierBloc = context.read<SupplierListBloc>();
+      context.read<SupplierListBloc>();
       // Note: You might need to pass the supplier data differently
       // For now, we'll set the controllers in the build method
     }

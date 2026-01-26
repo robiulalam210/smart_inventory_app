@@ -18,7 +18,6 @@ import '../../../../feature/lab_dashboard/presentation/bloc/dashboard/dashboard_
 import '../../../../feature/money_receipt/presentation/page/mobile_monery_receipt_create.dart';
 import '../../../../feature/money_receipt/presentation/page/mobile_money_receipt_list.dart';
 import '../../../../feature/products/product/presentation/pages/mobile_product_screen.dart';
-import '../../../../feature/products/sale_mode/presentation/pages/product_sale_mode_list_screen.dart';
 import '../../../../feature/products/sale_mode/presentation/pages/sale_mode_list_screen.dart';
 import '../../../../feature/profile/data/model/profile_perrmission_model.dart';
 import '../../../../feature/profile/presentation/pages/moble_profile_screen.dart';

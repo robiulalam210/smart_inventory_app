@@ -1,10 +1,7 @@
 // features/products/sale_mode/presentation/bloc/product_sale_mode/product_sale_mode_bloc.dart
-import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'dart:convert';
 
 import '../../../../../../core/configs/configs.dart';
-import '../../../data/avliable_sales_model.dart';
 import '../../../data/product_sale_mode_model.dart';
 import '../../../../../../core/repositories/delete_response.dart';
 import '../../../../../../core/repositories/get_response.dart';
@@ -12,7 +9,6 @@ import '../../../../../../core/repositories/patch_response.dart';
 import '../../../../../../core/repositories/post_response.dart';
 import '../../../../../common/data/models/api_response_mod.dart';
 import '../../../../../common/data/models/app_parse_json.dart';
-import '../../../data/sale_mode_model.dart';
 
 part 'product_sale_mode_event.dart';
 part 'product_sale_mode_state.dart';
@@ -89,7 +85,6 @@ class ProductSaleModeBloc extends Bloc<ProductSaleModeEvent, ProductSaleModeStat
         payload: event.body,
       );
 
-      print("RAW RESPONSE => $res");
 
       final bool success = res['status'] == true;
 
@@ -114,8 +109,6 @@ class ProductSaleModeBloc extends Bloc<ProductSaleModeEvent, ProductSaleModeStat
 
       emit(ProductSaleModeAddSuccess());
     } catch (error, st) {
-      print(error);
-      print(st);
 
       emit(ProductSaleModeAddFailed(
         title: "Error",
@@ -136,7 +129,6 @@ class ProductSaleModeBloc extends Bloc<ProductSaleModeEvent, ProductSaleModeStat
         payload: event.body!,
       );
 
-      print("RAW RESPONSE => $res");
 
       final bool success = res['status'] == true;
 
@@ -234,14 +226,4 @@ class ProductSaleModeBloc extends Bloc<ProductSaleModeEvent, ProductSaleModeStat
     selectedId = "";
   }
 
-  List<ProductSaleModeModel> _filterProductSaleMode(
-      List<ProductSaleModeModel> list,
-      String filterText,
-      ) {
-    return list.where((data) {
-      final matchesText = filterText.isEmpty ||
-          (data.saleModeName?.toLowerCase().contains(filterText.toLowerCase()) ?? false);
-      return matchesText;
-    }).toList();
-  }
 }

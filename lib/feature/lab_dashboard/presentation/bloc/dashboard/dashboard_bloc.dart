@@ -156,8 +156,6 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
         ));
       }
     } catch (error,st) {
-      print(error);
-      print(st);
       emit(DashboardError(error.toString()));
     }
   }

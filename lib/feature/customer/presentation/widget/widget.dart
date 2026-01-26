@@ -1,4 +1,3 @@
-import 'package:meherinMart/feature/customer/presentation/pages/mobile_customer_screen.dart';
 
 import '../../../../core/configs/configs.dart';
 import '../../../../core/widgets/delete_dialog.dart';

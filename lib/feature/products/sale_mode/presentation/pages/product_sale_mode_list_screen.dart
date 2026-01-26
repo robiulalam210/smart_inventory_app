@@ -1,20 +1,11 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:lottie/lottie.dart';
-import 'package:meherinMart/feature/products/sale_mode/presentation/pages/sale_mode_create_screen.dart';
 
 import '../../../../../../core/configs/configs.dart';
 import '../../../../../../core/widgets/app_scaffold.dart';
-import '../../../../../../core/widgets/app_alert_dialog.dart';
-import '../../../../../../core/widgets/app_loader.dart';
 import '../../../../../../core/widgets/coustom_search_text_field.dart';
-import '../../../../../../core/widgets/show_custom_toast.dart';
 
 import '../../../price_tier/presentation/bloc/price_tier_bloc.dart';
-import '../../../price_tier/presentation/page/price_tier_management_dialog.dart';
 import '../../data/product_sale_mode_model.dart';
 import '../bloc/product_sale_mode/product_sale_mode_bloc.dart';
-import '../bloc/sale_mode_bloc.dart';
 import 'product_sale_mode_config_screen.dart';
 
 class ProductSaleModeListScreen extends StatefulWidget {
@@ -225,7 +216,6 @@ class _ProductSaleModeListScreenState extends State<ProductSaleModeListScreen> {
       //         current is ProductSaleModeListSuccess &&
       //         previous.list != current.list),
       builder: (context, state) {
-        print(state);
         if (state is ProductSaleModeListLoading) {
           return const Center(child: CircularProgressIndicator());
         }
@@ -240,7 +230,6 @@ class _ProductSaleModeListScreenState extends State<ProductSaleModeListScreen> {
         }
 
         if (state is ProductSaleModeListSuccess) {
-          print("ProductSaleModeListSuccess $ProductSaleModeListSuccess");
           final list = state.list;
 
           if (list.isEmpty) {
@@ -433,39 +422,6 @@ class _ProductSaleModeListScreenState extends State<ProductSaleModeListScreen> {
     );
   }
 
-  void _openPriceTierDialog(BuildContext context, ProductSaleModeModel mode) {
-    debugPrint("object ${mode.toJson()}");
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true, // 🔥 important for full height
-      useSafeArea: true,
-      backgroundColor: AppColors.bottomNavBg(context), // allows rounded corners
-      builder: (context) {
-        return DraggableScrollableSheet(
-          initialChildSize: 0.95, // almost full screen
-          minChildSize: 0.6,
-          maxChildSize: 0.95,
-          expand: false,
-          builder: (context, scrollController) {
-            return Container(
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.vertical(
-                  top: Radius.circular(16),
-                ),
-              ),
-              child: PriceTierManagementDialog(
-                productId: widget.productId.toString(),
-                productSaleModeId: mode.id,
-                title: "Price Tier Management",
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
   void _showEditDialog(BuildContext context, ProductSaleModeModel mode) {
     showDialog(
       context: context,
