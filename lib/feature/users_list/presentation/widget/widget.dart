@@ -1,6 +1,7 @@
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/configs/configs.dart';
 import '../../data/model/user_model.dart';
+import '../pages/user_permission_screen.dart';
 
 class UserTableCard extends StatelessWidget {
   final List<UsersListModel> users;
@@ -65,6 +66,16 @@ class UserTableCard extends StatelessWidget {
                   child: IconButton(
                     icon: const Icon(Icons.visibility, color: Colors.green),
                     onPressed: () => _showViewDialog(context, user),
+                  ),
+                ),    Align(
+                  alignment: Alignment.centerRight,
+                  child: IconButton(
+                    icon: const Icon(Icons.edit, color: Colors.green),
+                    onPressed: () {
+                      AppRoutes.push(context, UserPermissionScreen(userId: user.id.toString(), userName: user.fullName??"",
+
+                      ));
+                    },
                   ),
                 ),
               ],

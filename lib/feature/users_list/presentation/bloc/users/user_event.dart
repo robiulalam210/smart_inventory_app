@@ -1,56 +1,94 @@
 part of 'user_bloc.dart';
 
-// @immutable
-sealed class UserEvent {}
+abstract class UserEvent extends Equatable {
+  const UserEvent();
 
+  @override
+  List<Object> get props => [];
+}
 
-
-
+// Existing events
 class FetchUserList extends UserEvent {
-  BuildContext context;
-
+  final BuildContext context;
   final String filterText;
-  final String dropdownFilter;
-  final String location;
-
   final int pageNumber;
+  final String dropdownFilter;
 
-  FetchUserList(
+  const FetchUserList(
+      this.context, {
+        this.filterText = '',
+        this.pageNumber = 0,
+        this.dropdownFilter = '',
+      });
+
+  @override
+  List<Object> get props => [context, filterText, pageNumber, dropdownFilter];
+}
+
+class UserAdd extends UserEvent {
+  final BuildContext context;
+  final Map<String, dynamic> data;
+
+  const UserAdd(this.context, this.data);
+
+  @override
+  List<Object> get props => [context, data];
+}
+
+class UserSwitch extends UserEvent {
+  final BuildContext context;
+  final int userId;
+  final bool status;
+
+  const UserSwitch(this.context, this.userId, this.status);
+
+  @override
+  List<Object> get props => [context, userId, status];
+}
+
+// New Permission Events
+class FetchUserPermissions extends UserEvent {
+  final BuildContext context;
+  final String userId;
+
+  const FetchUserPermissions(this.context, this.userId);
+
+  @override
+  List<Object> get props => [context, userId];
+}
+
+class UpdateUserPermissions extends UserEvent {
+  final BuildContext context;
+  final String userId;
+  final Map<String, PermissionActionUser> permissions;
+
+  const UpdateUserPermissions(
       this.context,
-      {this.filterText = '',
-    this.dropdownFilter='',
-    this.location='',
-    this.pageNumber = 0});
+      this.userId,
+      this.permissions,
+      );
+
+  @override
+  List<Object> get props => [context, userId, permissions];
 }
 
-class AddUser extends UserEvent {
-  final Map<String, String>? body;
+class ResetUserPermissions extends UserEvent {
+  final BuildContext context;
+  final String userId;
 
-  String? photoPath;
-  String? id;
+  const ResetUserPermissions(this.context, this.userId);
 
-
-  AddUser({this.body,this.photoPath});
+  @override
+  List<Object> get props => [context, userId];
 }
 
-class UpdateUser extends UserEvent {
-  final Map<String, dynamic>? body;String? photoPath;String? id;
+class CheckPermission extends UserEvent {
+  final BuildContext context;
+  final String module;
+  final String? action;
 
+  const CheckPermission(this.context, this.module, {this.action});
 
-  UpdateUser({this.body,this.photoPath,this.id=""});
+  @override
+  List<Object> get props => [context, module, action ?? ''];
 }
-
-class UpdateSwitchUser extends UserEvent {
-  final Map<String, String>? branch;
-  final String? branchId;
-
-  UpdateSwitchUser({this.branch, this.branchId});
-}
-class DeleteUser  extends UserEvent {
-  final String id;
-
-  DeleteUser({this.id=""});
-}
-
-
-

@@ -48,6 +48,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
       final response = await loginService(payload: payload);
 
+      print("object${response.success}");
+      print("object${response.message}");
+      print("object${response.message}");
       if (response.success == true && response.user != null) {
         // Validate company status with complete data
         final validationResult = _validateCompany(response);

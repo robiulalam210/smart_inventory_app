@@ -139,6 +139,10 @@ class _UsersScreenState extends State<UsersScreen> {
               ),
               gapH8,
               BlocBuilder<UserBloc, UserState>(
+                buildWhen: (previous, current) {
+                  // Only rebuild for success or failed states
+                  return current is UserListSuccess || current is UserListFailed;
+                },
                 builder: (context, state) {
                   if (state is UserListLoading) {
                     return const Center(child: CircularProgressIndicator());
