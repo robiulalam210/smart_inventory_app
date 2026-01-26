@@ -1,8 +1,5 @@
 // features/products/sale_mode/presentation/screens/sale_mode_list_screen.dart
 
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:lottie/lottie.dart';
 
 import '../../../../../../core/configs/configs.dart';
 import '../../../../../../core/widgets/app_scaffold.dart';

@@ -46,7 +46,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         payload["username"] = loginIdentifier;
       }
 
-      print("sdaffhg");
       final response = await loginService(payload: payload);
 
       if (response.success == true && response.user != null) {

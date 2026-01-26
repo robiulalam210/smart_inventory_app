@@ -1,6 +1,5 @@
 // features/products/sale_mode/data/models/sale_mode_model.dart
 
-import 'dart:convert';
 import 'package:equatable/equatable.dart';
 
 class SaleModeModel extends Equatable {

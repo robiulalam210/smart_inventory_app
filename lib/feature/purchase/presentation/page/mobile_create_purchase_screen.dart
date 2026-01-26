@@ -949,9 +949,9 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
                 ),
 
                 ResponsiveCol(
-                  xs: 3,
-                  sm: 1,
-                  md: 1,
+                  xs: 5,
+                  sm: 2,
+                  md: 2,
                   lg: 1,
                   xl: 1,
                   child: TextFormField(
@@ -1014,7 +1014,87 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
                   ),
                 ),
                 ResponsiveCol(
-                  xs: 3,
+                  xs: 6,
+                  sm: 1.1,
+                  md: 1.1,
+                  lg: 1.1,
+                  xl: 1.1,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      /// ➖ Minus
+                      IconButton(
+                        padding: EdgeInsets.zero,
+                        icon: const Icon(Icons.remove),
+                        onPressed: () {
+                          setState(() {
+                            int qty = int.tryParse(
+                              controllers[index]!["quantity"]!.text,
+                            ) ??
+                                1;
+
+                            if (qty > 1) {
+                              qty--;
+                              controllers[index]!["quantity"]!.text = qty.toString();
+                              products[index]["quantity"] = qty.toString();
+                              updateTotal(index);
+                            }
+                          });
+                        },
+                      ),
+
+                      /// 🔢 Quantity input
+                      SizedBox(
+                        width: 65,
+                        child: TextField(
+                          controller: controllers[index]!["quantity"],
+                          textAlign: TextAlign.center,
+                          keyboardType: TextInputType.number,
+                          readOnly: false,
+                          decoration: const InputDecoration(
+
+                            isDense: true,
+                            contentPadding: EdgeInsets.symmetric(vertical: 6),
+                            border: OutlineInputBorder(),
+                          ),
+                          onChanged: (value) {
+                            int qty = int.tryParse(value) ?? 1;
+                            if (qty < 1) qty = 1;
+
+                            controllers[index]!["quantity"]!.text = qty.toString();
+                            controllers[index]!["quantity"]!.selection =
+                                TextSelection.collapsed(offset: qty.toString().length);
+
+                            products[index]["quantity"] = qty.toString();
+                            updateTotal(index);
+                          },
+                        ),
+                      ),
+
+                      /// ➕ Plus
+                      IconButton(
+                        padding: EdgeInsets.zero,
+                        icon: const Icon(Icons.add),
+                        onPressed: () {
+                          setState(() {
+                            int qty = int.tryParse(
+                              controllers[index]!["quantity"]!.text,
+                            ) ??
+                                0;
+
+                            qty++;
+                            controllers[index]!["quantity"]!.text = qty.toString();
+                            products[index]["quantity"] = qty.toString();
+                            updateTotal(index);
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+
+                ResponsiveCol(
+                  xs: 4,
                   sm: 1,
                   md: 1,
                   lg: 1,
@@ -1061,7 +1141,7 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
                   ),
                 ),
                 ResponsiveCol(
-                  xs: 3,
+                  xs: 4,
                   sm: 0.7,
                   md: 0.7,
                   lg: 0.7,
@@ -1119,60 +1199,10 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
                     },
                   ),
                 ),
-                ResponsiveCol(
-                  xs: 4.5,
-                  sm: 1.1,
-                  md: 1.1,
-                  lg: 1.1,
-                  xl: 1.1,
-                  child: Row(
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.remove),
-                        onPressed: () {
-                          setState(() {
-                            int? currentQuantity = int.tryParse(
-                              controllers[index]?["quantity"]?.text ?? "0",
-                            );
-                            if (currentQuantity != null && currentQuantity > 1) {
-                              controllers[index]!["quantity"]!.text =
-                                  (currentQuantity - 1).toString();
-                              products[index]["quantity"] =
-                                  controllers[index]!["quantity"]!.text;
-                              updateTotal(index);
-                            }
-                          });
-                        },
-                        padding: EdgeInsets.zero,
-                      ),
-                      Text(
-                        controllers[index]!["quantity"]!.text,
-                        style: AppTextStyle.cardTitle(context),
-                      ),
-                      IconButton(
-                        padding: EdgeInsets.zero,
-                        icon: const Icon(Icons.add),
-                        onPressed: () {
-                          setState(() {
-                            int currentQuantity =
-                                int.tryParse(
-                                  controllers[index]!["quantity"]!.text,
-                                ) ??
-                                    0;
-                            controllers[index]!["quantity"]!.text =
-                                (currentQuantity + 1).toString();
-                            products[index]["quantity"] =
-                                controllers[index]!["quantity"]!.text;
-                            updateTotal(index);
-                          });
-                        },
-                      ),
-                    ],
-                  ),
-                ),
+
 
                 ResponsiveCol(
-                  xs: 2.8,
+                  xs: 5,
                   sm: 0.8,
                   md: 0.8,
                   lg: 0.8,
@@ -1226,7 +1256,7 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
                   ),
                 ),
                 ResponsiveCol(
-                  xs: 4,
+                  xs: 5,
                   sm: 1,
                   md: 1,
                   lg: 1,

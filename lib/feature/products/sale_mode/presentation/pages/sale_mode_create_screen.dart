@@ -1,7 +1,5 @@
 // features/products/sale_mode/presentation/screens/sale_mode_create_screen.dart
 
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../../core/configs/configs.dart';
 import '../../../../../../core/widgets/app_button.dart';

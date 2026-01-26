@@ -14,7 +14,6 @@ Future<Uint8List> loadImageBytes(String? imageUrl) async {
         ? imageUrl
         : '${AppUrls.baseUrlMain}$imageUrl';
 
-    print(fullUrl);
     final response = await http.get(Uri.parse(fullUrl));
 
     if (response.statusCode == 200) {
@@ -23,7 +22,6 @@ Future<Uint8List> loadImageBytes(String? imageUrl) async {
       throw Exception('Failed to load image: ${response.statusCode}');
     }
   } catch (e) {
-    print('Error loading image: $e');
     return Uint8List(0);
   }
 }

@@ -2,9 +2,7 @@
 import 'dart:typed_data';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
-import 'package:printing/printing.dart';
 
-import '../../../../../core/configs/app_urls.dart';
 import '../../../../../core/utilities/load_image_bytes.dart';
 import '../../../../profile/data/model/profile_perrmission_model.dart';
 import '../../../data/model/purchase_sale_model.dart';

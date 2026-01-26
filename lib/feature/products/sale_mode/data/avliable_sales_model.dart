@@ -13,7 +13,7 @@ class AvlibleSaleModeModel {
   String? name;
   String? code;
   String? priceType;
-  dynamic? conversionFactor;
+  dynamic conversionFactor;
   bool? configured;
   dynamic unitPrice;
   dynamic flatPrice;

@@ -138,9 +138,9 @@ Future<Uint8List> generateSalesPdf(
                   border: pw.Border.all(color: PdfColors.grey400),
                   borderRadius: pw.BorderRadius.circular(8),
                 ),
-                child: logoBytes != null && logoBytes!.isNotEmpty
+                child: logoBytes != null && logoBytes.isNotEmpty
                     ? pw.Image(
-                  pw.MemoryImage(logoBytes!),
+                  pw.MemoryImage(logoBytes),
                   fit: pw.BoxFit.cover,
                 )
                     : pw.Center(
@@ -863,28 +863,6 @@ pw.Widget _buildSummaryRow(String label, double value, {bool isNegative = false,
   );
 }
 
-pw.Widget _buildPaymentRow(String label, double value, {PdfColor? color}) {
-  return pw.Padding(
-    padding: const pw.EdgeInsets.only(bottom: 4),
-    child: pw.Row(
-      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-      children: [
-        pw.Text(
-          label,
-          style: const pw.TextStyle(fontSize: 11),
-        ),
-        pw.Text(
-          '৳${value.toStringAsFixed(2)}',
-          style: pw.TextStyle(
-            fontSize: 11,
-            fontWeight: pw.FontWeight.bold,
-            color: color ?? PdfColors.blue800,
-          ),
-        ),
-      ],
-    ),
-  );
-}
 
 pw.Widget _buildPreviewSummaryRow(String label, double value, {bool isNegative = false, bool isTotal = false}) {
   return pw.Padding(

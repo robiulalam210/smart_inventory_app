@@ -33,7 +33,7 @@ Future<Uint8List> generateSalesReportPdf(
         ),
       ),
       header: (context) => pw.Container(
-        padding: const pw.EdgeInsets.fromLTRB(20, 30, 20, 20),
+        padding: const pw.EdgeInsets.fromLTRB(20, 20, 20, 20),
         child: pw.Row(
           mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
           crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -70,9 +70,9 @@ Future<Uint8List> generateSalesReportPdf(
                 border: pw.Border.all(color: PdfColors.grey400),
                 borderRadius: pw.BorderRadius.circular(8),
               ),
-              child: logoBytes != null && logoBytes!.isNotEmpty
+              child: logoBytes != null && logoBytes.isNotEmpty
                   ? pw.Image(
-                pw.MemoryImage(logoBytes!),
+                pw.MemoryImage(logoBytes),
                 fit: pw.BoxFit.cover,
               )
                   : pw.Center(
@@ -109,8 +109,8 @@ Future<Uint8List> generateSalesReportPdf(
 // Header with Report Info
 pw.Widget _buildHeader(SalesReportResponse report) {
   return pw.Container(
-    padding: const pw.EdgeInsets.all(8),
-    margin: const pw.EdgeInsets.all(8),
+    padding: const pw.EdgeInsets.symmetric(horizontal: 8),
+    margin: const pw.EdgeInsets.symmetric(horizontal: 8),
     child: pw.Row(
       mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
       children: [
@@ -120,7 +120,7 @@ pw.Widget _buildHeader(SalesReportResponse report) {
             pw.Text(
               'SALES ANALYSIS REPORT',
               style: pw.TextStyle(
-                fontSize: 16,
+                fontSize: 14,
                 fontWeight: pw.FontWeight.bold,
                 color: PdfColors.blue800,
               ),
@@ -232,13 +232,13 @@ pw.Widget _buildSummarySection(
             children: [
               _buildSummaryCard(
                 'Total Sales',
-                '\$${summary.totalSales.toStringAsFixed(2)}',
+                summary.totalSales.toStringAsFixed(2),
                 'Gross Revenue',
                 PdfColors.blue800,
               ),
               _buildSummaryCard(
                 'Total Profit',
-                '\$${summary.totalProfit.toStringAsFixed(2)}',
+                summary.totalProfit.toStringAsFixed(2),
                 'Net Profit',
                 summary.totalProfit >= 0 ? PdfColors.green : PdfColors.red,
               ),
@@ -254,13 +254,13 @@ pw.Widget _buildSummarySection(
               ),
               _buildSummaryCard(
                 'Total Collected',
-                '\$${summary.totalCollected.toStringAsFixed(2)}',
+                summary.totalCollected.toStringAsFixed(2),
                 'Amount Received',
                 PdfColors.purple,
               ),
               _buildSummaryCard(
                 'Total Due',
-                '\$${summary.totalDue.toStringAsFixed(2)}',
+                summary.totalDue.toStringAsFixed(2),
                 'Outstanding',
                 summary.totalDue > 0 ? PdfColors.orange : PdfColors.green,
               ),

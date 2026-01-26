@@ -1,11 +1,9 @@
 // features/products/sale_mode/data/models/product_sale_mode_model.dart
 
-import 'dart:convert';
 import 'package:equatable/equatable.dart';
 
 import '../../price_tier/data/model/price_tier_model.dart';
 
-import 'package:equatable/equatable.dart';
 
 class ProductSaleModeModel extends Equatable {
   final int id;

@@ -27,7 +27,6 @@ class FetchCustomerList extends CustomerEvent {
         this.pageSize = 10,
       });
 
-  @override
   List<Object> get props => [
     context,
     filterText,

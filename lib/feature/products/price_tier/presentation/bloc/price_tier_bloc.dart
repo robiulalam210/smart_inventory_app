@@ -1,9 +1,5 @@
 // features/products/sale_mode/presentation/bloc/price_tier_bloc.dart
-import 'dart:convert';
-import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:flutter/material.dart';
-import 'package:meta/meta.dart';
 
 import '../../../../../core/configs/configs.dart';
 import '../../../../common/data/models/api_response_mod.dart';
@@ -13,7 +9,6 @@ import '../../../../../../core/repositories/get_response.dart';
 import '../../../../../../core/repositories/post_response.dart';
 import '../../../../../../core/repositories/patch_response.dart';
 import '../../../sale_mode/data/avliable_sales_model.dart';
-import '../../../sale_mode/data/product_sale_mode_model.dart';
 import '../../data/model/price_tier_model.dart';
 
 part 'price_tier_event.dart';
@@ -68,9 +63,7 @@ class PriceTierBloc extends Bloc<PriceTierEvent, PriceTierState> {
       } else {
         emit(const PriceTierListLoaded(priceTiers: []));
       }
-    } catch (error, st) {
-      print('❌ LoadPriceTiers Error: $error');
-      print(st);
+    } catch (error) {
       emit(PriceTierOperationFailed(error: error.toString()));
     }
   }
@@ -100,7 +93,7 @@ class PriceTierBloc extends Bloc<PriceTierEvent, PriceTierState> {
         return;
       }
 
-      final dataList = data as List<dynamic>;
+      final dataList = data;
 
       // Map JSON to your model
       final modes = dataList
@@ -109,9 +102,8 @@ class PriceTierBloc extends Bloc<PriceTierEvent, PriceTierState> {
 
       availableSaleModes = modes; // store locally if needed
       emit(AvailableSaleModesSuccess(availableModes: modes));
-    } catch (error, st) {
-      print(error);
-      print(st);
+    } catch (error) {
+
       emit(AvailableSaleModesFailed(title: "Error", content: error.toString()));
     }
   }
@@ -125,9 +117,6 @@ class PriceTierBloc extends Bloc<PriceTierEvent, PriceTierState> {
 
     try {
       // Add debug logging
-      print('🔄 Creating price tier with data: ${event.priceTier}');
-      print('📱 productSaleMode value: ${event.priceTier}');
-      print('📱 productSaleMode type: ${event.priceTier.runtimeType}');
 
       final res = await postResponse(
         url: AppUrls.priceTiers,
@@ -158,7 +147,6 @@ class PriceTierBloc extends Bloc<PriceTierEvent, PriceTierState> {
         ));
       }
     } catch (error) {
-      print('❌ Error adding price tier: $error');
       emit(PriceTierOperationFailed(error: error.toString()));
     }
   }

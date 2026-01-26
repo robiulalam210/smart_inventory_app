@@ -526,16 +526,6 @@ pw.Widget _buildAuthorizationSection() {
 }
 
 // Footer
-pw.Widget _buildFooter(pw.Context context) {
-  return pw.Container(
-    alignment: pw.Alignment.center,
-    margin: const pw.EdgeInsets.only(top: 20),
-    child: pw.Text(
-      'Page ${context.pageNumber} of ${context.pagesCount} • Generated on ${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}',
-      style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey600),
-    ),
-  );
-}
 
 // Helper functions
 String _formatDate(dynamic date) {
