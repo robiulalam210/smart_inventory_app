@@ -68,6 +68,9 @@ class UserModel extends Equatable {
         : DateTime.parse(json["last_login"] as String),
   );
 
+  @override
+  String toString() => fullName ?? username ?? "";
+
   Map<String, dynamic> toJson() => {
     "id": id,
     "username": username,
