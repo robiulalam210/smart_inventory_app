@@ -140,11 +140,11 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
     _scrollController.dispose();
 
     // Remove listeners
-    final bloc = context.read<CreatePosSaleBloc>();
-    bloc.discountOverAllController.removeListener(_updatePayableAndChangeAmount);
-    bloc.serviceChargeOverAllController.removeListener(_updatePayableAndChangeAmount);
-    bloc.deliveryChargeOverAllController.removeListener(_updatePayableAndChangeAmount);
-    bloc.vatOverAllController.removeListener(_updatePayableAndChangeAmount);
+    // final bloc = context.read<CreatePosSaleBloc>();
+    // bloc.discountOverAllController.removeListener(_updatePayableAndChangeAmount);
+    // bloc.serviceChargeOverAllController.removeListener(_updatePayableAndChangeAmount);
+    // bloc.deliveryChargeOverAllController.removeListener(_updatePayableAndChangeAmount);
+    // bloc.vatOverAllController.removeListener(_updatePayableAndChangeAmount);
 
     // Clear local state only, don't dispose controllers (bloc handles that)
     _selectedSaleModes.clear();

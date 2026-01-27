@@ -85,27 +85,5 @@ final class ProductsAddFailed extends ProductsState {
 
 
 
-sealed class ProductDetailsState {}
 
-final class ProductDetailsInitial
-    extends ProductDetailsState {}
 
-final class ProductDetailsLoading
-    extends ProductDetailsState {}
-
-// final class ProductDetailsSuccess
-//     extends ProductDetailsState {
-//
-//
-//   final ProductDetailsModel productDetailsModel;
-//
-//   ProductDetailsSuccess({
-//     required this.productDetailsModel,
-//   });
-// }
-
-final class ProductDetailsFailed extends ProductDetailsState {
-  final String title, content;
-
-  ProductDetailsFailed({required this.title, required this.content});
-}

@@ -1,9 +1,9 @@
 
 import '../../../../../core/configs/configs.dart';
 import '../../../../../core/widgets/delete_dialog.dart';
-import '../../../sale_mode/presentation/pages/product_sale_mode_list_screen.dart';
 import '../../data/model/product_model.dart';
 import '../pages/mobile_product_create.dart';
+import '../pages/product_details.dart';
 
 class ProductDataTableWidget extends StatelessWidget {
   final List<ProductModel> products;
@@ -269,16 +269,15 @@ class ProductDataTableWidget extends StatelessWidget {
                 Expanded(
                   child: OutlinedButton.icon(
                     onPressed: () {
-                      AppRoutes.push(context, ProductSaleModeListScreen(
-                        productName: product.name,
-                        productId: product.id.toString(),));
+                      AppRoutes.push(context, ProductDetailsScreen(productId: product.id.toString(),));
+
 
                     },
                     icon: const Icon(
                       HugeIcons.strokeRoundedMobileNavigator01,
                       size: 16,
                     ),
-                    label: const Text('Sale Model'),
+                    label: const Text('View'),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: Colors.orange,
                       side: BorderSide(color: Colors.orange.shade300),

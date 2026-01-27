@@ -1047,9 +1047,14 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
           final value = product["discount_value"] ?? 0;
           final total = product["ticket_total"] ?? 0.0;
 // Inside your product container (Auto Discount Section)
-          final double finalPricePerUnit = product["final_price"] is String
-              ? double.tryParse(product["final_price"]) ?? 0.0
-              : product["final_price"] ?? 0.0;
+          final dynamic rawPrice = product["final_price"];
+
+          final double finalPricePerUnit = rawPrice is String
+              ? double.tryParse(rawPrice) ?? 0.0
+              : (rawPrice is int)
+              ? rawPrice.toDouble()
+              : (rawPrice as double? ?? 0.0);
+
 
           final int quantity = int.tryParse(
               controllers[index]!["quantity"]!.text) ??

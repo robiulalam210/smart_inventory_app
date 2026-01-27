@@ -417,6 +417,13 @@ class UsersListModel {
   final bool? isVerified;
   final CompanyModel? company;
   final Map<String, dynamic>? permissions;
+  @override
+  String toString() {
+    if (fullName != null && fullName!.isNotEmpty) return fullName!;
+    if (username != null && username!.isNotEmpty) return username!;
+    return "No Name";
+  }
+
 
   const UsersListModel({
     this.id,
