@@ -142,7 +142,7 @@ class _StockReportScreenState extends State<StockReportScreen> {
             ),
             _buildSummaryCard(
               "Total Stock ",
-              "\$${summary.totalStockValue.toStringAsFixed(2)}",
+              summary.totalStockValue.toStringAsFixed(2),
               Icons.attach_money,
               Colors.green,
             ),
@@ -154,7 +154,7 @@ class _StockReportScreenState extends State<StockReportScreen> {
             ),
             _buildSummaryCard(
               "Avg Stock ",
-              "\$${summary.averageStockValue.toStringAsFixed(2)}",
+              summary.averageStockValue.toStringAsFixed(2),
               Icons.analytics,
               Colors.orange,
             ),
@@ -793,7 +793,7 @@ class StockReportTableCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
-              '\$${value.toStringAsFixed(2)}',
+              value.toStringAsFixed(2),
               style: const TextStyle(
                 color: Colors.green,
                 fontWeight: FontWeight.w600,
@@ -813,7 +813,7 @@ class StockReportTableCard extends StatelessWidget {
         width: width,
         child: Center(
           child: Text(
-            '\$${product.potentialValue.toStringAsFixed(2)}',
+            product.potentialValue.toStringAsFixed(2),
             style: TextStyle(
               fontSize: 10,
               fontWeight: FontWeight.w500,

@@ -282,14 +282,14 @@ class _MobileSaleReportScreenState extends State<MobileSalesReportScreen> {
               children: [
                 _buildSummaryCard(
                   "Total Sales",
-                  "\$${summary.totalSales.toStringAsFixed(2)}",
+                  summary.totalSales.toStringAsFixed(2),
                   Icons.shopping_cart,
                   AppColors.primaryColor(context),
                 ),
                 const SizedBox(width: 8),
                 _buildSummaryCard(
                   "Total Profit",
-                  "\$${summary.totalProfit.toStringAsFixed(2)}",
+                  summary.totalProfit.toStringAsFixed(2),
                   Icons.trending_up,
                   Colors.green,
                 ),
@@ -300,14 +300,14 @@ class _MobileSaleReportScreenState extends State<MobileSalesReportScreen> {
               children: [
                 _buildSummaryCard(
                   "Collected",
-                  "\$${summary.totalCollected.toStringAsFixed(2)}",
+                  summary.totalCollected.toStringAsFixed(2),
                   Icons.payment,
                   Colors.blue,
                 ),
                 const SizedBox(width: 8),
                 _buildSummaryCard(
                   "Total Due",
-                  "\$${summary.totalDue.toStringAsFixed(2)}",
+                  summary.totalDue.toStringAsFixed(2),
                   Icons.money_off,
                   Colors.orange,
                 ),
@@ -477,12 +477,12 @@ class _MobileSaleReportScreenState extends State<MobileSalesReportScreen> {
                   children: [
                     _buildMobileAmountItem(
                       'Sales Price',
-                      '\$${report.salesPrice.toStringAsFixed(2)}',
+                      report.salesPrice.toStringAsFixed(2),
                       Colors.blue,
                     ),
                     _buildMobileAmountItem(
                       'Profit',
-                      '\$${report.profit.toStringAsFixed(2)}',
+                      report.profit.toStringAsFixed(2),
                       report.profit >= 0 ? Colors.green : Colors.red,
                     ),
                   ],

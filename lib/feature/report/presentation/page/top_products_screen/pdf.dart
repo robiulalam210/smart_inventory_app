@@ -87,7 +87,6 @@ Future<Uint8List> generateTopProductsReportPdf(
         ),
       ),
       build: (context) => [
-        _buildHeader(reportResponse),
         _buildReportTitle(),
         pw.SizedBox(height: 0),
         _buildExecutiveSummary(reportResponse.summary),
@@ -102,48 +101,6 @@ Future<Uint8List> generateTopProductsReportPdf(
 }
 
 // Header with Report Info
-pw.Widget _buildHeader(TopProductsResponse report) {
-  return pw.Container(
-    padding: const pw.EdgeInsets.all(8),
-    margin: const pw.EdgeInsets.all(8),
-    child: pw.Row(
-      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-      children: [
-        pw.Column(
-          crossAxisAlignment: pw.CrossAxisAlignment.start,
-          children: [
-            pw.Text(
-              'TOP PRODUCTS PERFORMANCE REPORT',
-              style: pw.TextStyle(
-                fontSize: 16,
-                fontWeight: pw.FontWeight.bold,
-                color: PdfColors.deepPurple800,
-              ),
-            ),
-            pw.SizedBox(height: 4),
-            pw.Text(
-              'Best Selling Products Analysis',
-              style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey600),
-            ),
-          ],
-        ),
-        pw.Column(
-          crossAxisAlignment: pw.CrossAxisAlignment.end,
-          children: [
-            pw.Text(
-              'Generated: ${_formatDateTime(DateTime.now())}',
-              style: const pw.TextStyle(fontSize: 9),
-            ),
-            pw.Text(
-              'Top ${report.report.length} Products',
-              style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey600),
-            ),
-          ],
-        ),
-      ],
-    ),
-  );
-}
 
 // Report Title
 pw.Widget _buildReportTitle() {
@@ -222,7 +179,7 @@ pw.Widget _buildExecutiveSummary(TopProductsSummary summary) {
             children: [
               _buildSummaryCard(
                 'Total Sales Revenue',
-                '\$${summary.totalSales.toStringAsFixed(2)}',
+                summary.totalSales.toStringAsFixed(2),
                 'Gross Revenue',
                 PdfColors.deepPurple800,
               ),
@@ -240,7 +197,7 @@ pw.Widget _buildExecutiveSummary(TopProductsSummary summary) {
               ),
               _buildSummaryCard(
                 'Avg. Revenue per Product',
-                '\$${averageSalePerProduct.toStringAsFixed(2)}',
+                averageSalePerProduct.toStringAsFixed(2),
                 'Per Product',
                 PdfColors.orange,
               ),
@@ -380,7 +337,7 @@ pw.Widget _buildPerformanceMetrics(List<TopProductModel> products, TopProductsSu
                               crossAxisAlignment: pw.CrossAxisAlignment.start,
                               children: [
                                 pw.Text(
-                                  'Revenue: \$${topProduct.totalSoldPrice.toStringAsFixed(2)}',
+                                  'Revenue: ${topProduct.totalSoldPrice.toStringAsFixed(2)}',
                                   style: const pw.TextStyle(fontSize: 8),
                                 ),
                                 pw.Text(
@@ -438,7 +395,7 @@ pw.Widget _buildPerformanceMetrics(List<TopProductModel> products, TopProductsSu
                     ),
                     pw.SizedBox(height: 4),
                     pw.Text(
-                      'Avg. Price: \$${performanceAnalysis['averagePrice'].toStringAsFixed(2)}',
+                      'Avg. Price: ${performanceAnalysis['averagePrice'].toStringAsFixed(2)}',
                       style: const pw.TextStyle(fontSize: 8),
                     ),
                     pw.SizedBox(height: 4),
@@ -557,7 +514,7 @@ pw.TableRow _buildTableRow(TopProductModel product, int rank) {
       _buildDataCell(product.sl.toString(), alignment: pw.TextAlign.center),
       _buildDataCell(_truncateText(product.productName, 25)),
       _buildDataCell(
-        '\$${product.sellingPrice.toStringAsFixed(2)}',
+        '${product.sellingPrice.toStringAsFixed(2)}',
         alignment: pw.TextAlign.right,
       ),
       _buildDataCell(
@@ -565,7 +522,7 @@ pw.TableRow _buildTableRow(TopProductModel product, int rank) {
         alignment: pw.TextAlign.center,
       ),
       _buildDataCell(
-        '\$${product.totalSoldPrice.toStringAsFixed(2)}',
+        '${product.totalSoldPrice.toStringAsFixed(2)}',
         alignment: pw.TextAlign.right,
         color: PdfColors.green,
       ),

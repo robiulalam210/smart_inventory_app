@@ -222,7 +222,7 @@ pw.Widget _buildExecutiveSummary(ExpenseReportSummary summary) {
             children: [
               _buildSummaryCard(
                 'Total Expenses',
-                '\$${summary.totalAmount.toStringAsFixed(2)}',
+                summary.totalAmount.toStringAsFixed(2),
                 'Total Amount',
                 PdfColors.red800,
               ),
@@ -234,7 +234,7 @@ pw.Widget _buildExecutiveSummary(ExpenseReportSummary summary) {
               ),
               _buildSummaryCard(
                 'Average Expense',
-                '\$${averageExpense.toStringAsFixed(2)}',
+                averageExpense.toStringAsFixed(2),
                 'Per Transaction',
                 PdfColors.purple,
               ),
@@ -246,7 +246,7 @@ pw.Widget _buildExecutiveSummary(ExpenseReportSummary summary) {
               ),
               _buildSummaryCard(
                 'Daily Average',
-                '\$${(summary.totalAmount / _getDaysInRange(summary.dateRange)).toStringAsFixed(2)}',
+                (summary.totalAmount / _getDaysInRange(summary.dateRange)).toStringAsFixed(2),
                 'Per Day',
                 PdfColors.orange,
               ),
@@ -383,7 +383,7 @@ pw.Widget _buildExpenseBreakdown(List<ExpenseReport> expenses) {
                             pw.Expanded(
                               flex: 2,
                               child: pw.Text(
-                                '\$${entry.value.toStringAsFixed(2)}',
+                                entry.value.toStringAsFixed(2),
                                 style: const pw.TextStyle(fontSize: 8),
                                 textAlign: pw.TextAlign.right,
                               ),
@@ -434,7 +434,7 @@ pw.Widget _buildExpenseBreakdown(List<ExpenseReport> expenses) {
                             pw.Expanded(
                               flex: 2,
                               child: pw.Text(
-                                '\$${entry.value.toStringAsFixed(2)}',
+                                entry.value.toStringAsFixed(2),
                                 style: const pw.TextStyle(fontSize: 8),
                                 textAlign: pw.TextAlign.right,
                               ),
@@ -563,7 +563,7 @@ pw.TableRow _buildTableRow(ExpenseReport expense) {
       _buildDataCell(_truncateText(expense.head, 20)),
       _buildDataCell(_truncateText(expense.subhead ?? '-', 18)),
       _buildDataCell(
-        '\$${expense.amount.toStringAsFixed(2)}',
+        expense.amount.toStringAsFixed(2),
         alignment: pw.TextAlign.right,
         color: PdfColors.red,
       ),
@@ -632,7 +632,7 @@ pw.TableRow _buildTotalRow(List<ExpenseReport> expenses) {
       _buildDataCell('', color: PdfColors.red800),
       _buildDataCell('', color: PdfColors.red800),
       _buildDataCell(
-        '\$${totalAmount.toStringAsFixed(2)}',
+        totalAmount.toStringAsFixed(2),
         alignment: pw.TextAlign.right,
         color: PdfColors.red800,
       ),
@@ -691,7 +691,7 @@ pw.Widget _buildSpendingAnalysis(List<ExpenseReport> expenses, ExpenseReportSumm
             children: [
               _buildAnalysisRow(
                 'Average Transaction Size',
-                '\$${averageExpense.toStringAsFixed(2)}',
+                averageExpense.toStringAsFixed(2),
                 averageExpense > 100 ? 'High' : 'Moderate',
                 averageExpense > 100 ? PdfColors.red : PdfColors.orange,
               ),
@@ -699,7 +699,7 @@ pw.Widget _buildSpendingAnalysis(List<ExpenseReport> expenses, ExpenseReportSumm
               if (largestExpense != null)
                 _buildAnalysisRow(
                   'Largest Expense',
-                  '\$${largestExpense.amount.toStringAsFixed(2)}',
+                  largestExpense.amount.toStringAsFixed(2),
                   largestExpense.head,
                   PdfColors.red,
                 ),
@@ -707,7 +707,7 @@ pw.Widget _buildSpendingAnalysis(List<ExpenseReport> expenses, ExpenseReportSumm
               if (smallestExpense != null)
                 _buildAnalysisRow(
                   'Smallest Expense',
-                  '\$${smallestExpense.amount.toStringAsFixed(2)}',
+                  smallestExpense.amount.toStringAsFixed(2),
                   smallestExpense.head,
                   PdfColors.green,
                 ),
@@ -732,7 +732,7 @@ pw.Widget _buildSpendingAnalysis(List<ExpenseReport> expenses, ExpenseReportSumm
                 return pw.Padding(
                   padding: const pw.EdgeInsets.only(bottom: 4),
                   child: pw.Text(
-                    '• ${category['head']}: \$${category['amount'].toStringAsFixed(2)} (${category['percentage'].toStringAsFixed(1)}%)',
+                    '• ${category['head']}: ${category['amount'].toStringAsFixed(2)} (${category['percentage'].toStringAsFixed(1)}%)',
                     style: const pw.TextStyle(fontSize: 9),
                   ),
                 );

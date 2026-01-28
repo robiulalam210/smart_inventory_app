@@ -56,16 +56,15 @@ Future<Uint8List> generateSalesReportPdf(
                     pw.Text(company?.address??"", style: const pw.TextStyle(fontSize: 10)),
                   if (company?.phone != null )
                     pw.Text(company?.phone??"", style: const pw.TextStyle(fontSize: 10)),
-                  if (company?.email != null )
-                    pw.Text(company?.email??"", style: const pw.TextStyle(fontSize: 10)),
+
                 ],
               ),
             ),
 
             // Logo
             pw.Container(
-              width: 80,
-              height: 80,
+              width: 60,
+              height: 60,
               decoration: pw.BoxDecoration(
                 border: pw.Border.all(color: PdfColors.grey400),
                 borderRadius: pw.BorderRadius.circular(8),
@@ -88,9 +87,7 @@ Future<Uint8List> generateSalesReportPdf(
           ],
         ),
       ),
-      footer: (context) => _buildFooter(context),
       build: (context) => [
-        _buildHeader(reportResponse),
         _buildReportTitle(),
         pw.SizedBox(height: 0),
         _buildSummarySection(
@@ -474,7 +471,7 @@ pw.TableRow _buildTableRow(SalesReportModel report) {
       _buildDataCell(_formatDate(report.saleDate)),
       _buildDataCell(_truncateText(report.customerName, 20)),
       _buildDataCell(
-        '\$${report.salesPrice.toStringAsFixed(2)}',
+        report.salesPrice.toStringAsFixed(2),
         alignment: pw.TextAlign.right,
       ),
       _buildDataCell(
@@ -483,11 +480,11 @@ pw.TableRow _buildTableRow(SalesReportModel report) {
         color: profitMargin >= 0 ? PdfColors.green : PdfColors.red,
       ),
       _buildDataCell(
-        '\$${report.collectAmount.toStringAsFixed(2)}',
+        report.collectAmount.toStringAsFixed(2),
         alignment: pw.TextAlign.right,
       ),
       _buildDataCell(
-        '\$${report.dueAmount.toStringAsFixed(2)}',
+        report.dueAmount.toStringAsFixed(2),
         alignment: pw.TextAlign.right,
         color: report.dueAmount > 0 ? PdfColors.orange : PdfColors.green,
       ),
@@ -564,22 +561,22 @@ pw.TableRow _buildTotalRow(List<SalesReportModel> reports) {
       _buildDataCell('', color: PdfColors.blue800),
       _buildDataCell('', color: PdfColors.blue800),
       _buildDataCell(
-        '\$${totalSales.toStringAsFixed(2)}',
+        totalSales.toStringAsFixed(2),
         alignment: pw.TextAlign.right,
         color: PdfColors.blue800,
       ),
       _buildDataCell(
-        '\$${totalProfit.toStringAsFixed(2)}',
+        totalProfit.toStringAsFixed(2),
         alignment: pw.TextAlign.right,
         color: PdfColors.blue800,
       ),
       _buildDataCell(
-        '\$${totalCollected.toStringAsFixed(2)}',
+        totalCollected.toStringAsFixed(2),
         alignment: pw.TextAlign.right,
         color: PdfColors.blue800,
       ),
       _buildDataCell(
-        '\$${totalDue.toStringAsFixed(2)}',
+        totalDue.toStringAsFixed(2),
         alignment: pw.TextAlign.right,
         color: PdfColors.blue800,
       ),
@@ -664,14 +661,14 @@ pw.Widget _buildPerformanceInsights(SalesReportSummary summary) {
               pw.SizedBox(height: 8),
               _buildInsightRow(
                 'Outstanding Balance',
-                '\$${summary.totalDue.toStringAsFixed(2)}',
+                summary.totalDue.toStringAsFixed(2),
                 summary.totalDue > 0 ? 'Follow-up Required' : 'All Collected',
                 summary.totalDue > 0 ? PdfColors.orange : PdfColors.green,
               ),
               pw.SizedBox(height: 8),
               _buildInsightRow(
                 'Average Transaction Value',
-                '\$${(summary.totalSales / summary.totalTransactions).toStringAsFixed(2)}',
+                (summary.totalSales / summary.totalTransactions).toStringAsFixed(2),
                 'Per Transaction',
                 PdfColors.purple,
               ),

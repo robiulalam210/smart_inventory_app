@@ -87,9 +87,7 @@ Future<Uint8List> generateLowStockReportPdf(
           ],
         ),
       ),
-      footer: (context) => _buildFooter(context),
       build: (context) => [
-        _buildHeader(reportResponse),
         _buildReportTitle(),
         pw.SizedBox(height: 0),
         _buildCriticalAlertSection(reportResponse.summary),
@@ -104,48 +102,6 @@ Future<Uint8List> generateLowStockReportPdf(
 }
 
 // Header with Report Info
-pw.Widget _buildHeader(LowStockResponse report) {
-  return pw.Container(
-    padding: const pw.EdgeInsets.all(8),
-    margin: const pw.EdgeInsets.all(8),
-    child: pw.Row(
-      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-      children: [
-        pw.Column(
-          crossAxisAlignment: pw.CrossAxisAlignment.start,
-          children: [
-            pw.Text(
-              'LOW STOCK ALERT REPORT',
-              style: pw.TextStyle(
-                fontSize: 16,
-                fontWeight: pw.FontWeight.bold,
-                color: PdfColors.orange800,
-              ),
-            ),
-            pw.SizedBox(height: 4),
-            pw.Text(
-              'Inventory Management & Replenishment',
-              style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey600),
-            ),
-          ],
-        ),
-        pw.Column(
-          crossAxisAlignment: pw.CrossAxisAlignment.end,
-          children: [
-            pw.Text(
-              'Generated: ${_formatDateTime(DateTime.now())}',
-              style: const pw.TextStyle(fontSize: 9),
-            ),
-            pw.Text(
-              'Critical Items: ${report.summary.criticalItems}',
-              style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey600),
-            ),
-          ],
-        ),
-      ],
-    ),
-  );
-}
 
 // Report Title
 pw.Widget _buildReportTitle() {
@@ -516,7 +472,7 @@ pw.TableRow _buildTableRow(LowStockProduct product) {
       _buildDataCell(_truncateText(product.category, 15)),
       _buildDataCell(_truncateText(product.brand, 12)),
       _buildDataCell(
-        '\$${product.sellingPrice.toStringAsFixed(2)}',
+        product.sellingPrice.toStringAsFixed(2),
         alignment: pw.TextAlign.right,
       ),
       _buildDataCell(
@@ -686,7 +642,7 @@ pw.Widget _buildActionRecommendations(List<LowStockProduct> products, LowStockSu
               ),
               pw.SizedBox(height: 8),
               pw.Text(
-                '• Potential sales at risk: \$${totalValueAtRisk.toStringAsFixed(2)}',
+                '• Potential sales at risk: ${totalValueAtRisk.toStringAsFixed(2)}',
                 style: const pw.TextStyle(fontSize: 9),
               ),
               pw.Text(
@@ -702,33 +658,12 @@ pw.Widget _buildActionRecommendations(List<LowStockProduct> products, LowStockSu
 }
 
 // Footer
-pw.Widget _buildFooter(pw.Context context) {
-  return pw.Container(
-    alignment: pw.Alignment.center,
-    margin: const pw.EdgeInsets.only(top: 20),
-    child: pw.Column(
-      children: [
-        pw.Divider(color: PdfColors.grey300),
-        pw.SizedBox(height: 8),
-        pw.Text(
-          'Page ${context.pageNumber} of ${context.pagesCount} • '
-              'Generated on ${_formatDateTime(DateTime.now())} • '
-              'Inventory Management Document',
-          style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey600),
-        ),
-      ],
-    ),
-  );
-}
 
 // Helper functions
 String _formatDate(DateTime date) {
   return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
 }
 
-String _formatDateTime(DateTime date) {
-  return '${_formatDate(date)} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
-}
 
 String _truncateText(String text, int maxLength) {
   if (text.length <= maxLength) return text;

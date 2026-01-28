@@ -229,31 +229,31 @@ pw.Widget _buildCustomerSummary(CustomerLedgerSummary summary, List<CustomerLedg
             children: [
               _buildSummaryCard(
                 'Opening Balance',
-                '\$${openingBalance.toStringAsFixed(2)}',
+                openingBalance.toStringAsFixed(2),
                 'Period Start',
                 PdfColors.blue,
               ),
               _buildSummaryCard(
                 'Closing Balance',
-                '\$${summary.closingBalance.toStringAsFixed(2)}',
+                summary.closingBalance.toStringAsFixed(2),
                 'Period End',
                 _getBalanceColor(summary.closingBalance),
               ),
               _buildSummaryCard(
                 'Net Movement',
-                '\$${netMovement.abs().toStringAsFixed(2)}',
+                netMovement.abs().toStringAsFixed(2),
                 netMovement >= 0 ? 'Increase' : 'Decrease',
                 netMovement >= 0 ? PdfColors.red : PdfColors.green,
               ),
               _buildSummaryCard(
                 'Total Debit',
-                '\$${totalDebit.toStringAsFixed(2)}',
+                totalDebit.toStringAsFixed(2),
                 'Sales/Charges',
                 PdfColors.red,
               ),
               _buildSummaryCard(
                 'Total Credit',
-                '\$${totalCredit.toStringAsFixed(2)}',
+                totalCredit.toStringAsFixed(2),
                 'Payments/Credits',
                 PdfColors.green,
               ),
@@ -564,7 +564,7 @@ pw.TableRow _buildOpeningBalanceRow(List<CustomerLedgerTransaction> transactions
       _buildDataCell(''),
       _buildDataCell(''),
       _buildDataCell(
-        '\$${openingBalance.toStringAsFixed(2)}',
+        openingBalance.toStringAsFixed(2),
         alignment: pw.TextAlign.right,
         color: _getBalanceColor(openingBalance),
       ),
@@ -585,17 +585,17 @@ pw.TableRow _buildTableRow(CustomerLedgerTransaction transaction, double running
       _buildTransactionTypeCell(transaction.type),
       _buildDataCell(_truncateText(transaction.method, 10)),
       _buildDataCell(
-        transaction.debit > 0 ? '\$${transaction.debit.toStringAsFixed(2)}' : '-',
+        transaction.debit > 0 ? transaction.debit.toStringAsFixed(2) : '-',
         alignment: pw.TextAlign.right,
         color: transaction.debit > 0 ? PdfColors.red : PdfColors.grey,
       ),
       _buildDataCell(
-        transaction.credit > 0 ? '\$${transaction.credit.toStringAsFixed(2)}' : '-',
+        transaction.credit > 0 ? transaction.credit.toStringAsFixed(2) : '-',
         alignment: pw.TextAlign.right,
         color: transaction.credit > 0 ? PdfColors.green : PdfColors.grey,
       ),
       _buildDataCell(
-        '\$${runningBalance.toStringAsFixed(2)}',
+        runningBalance.toStringAsFixed(2),
         alignment: pw.TextAlign.right,
         color: _getBalanceColor(runningBalance),
       ),
@@ -723,19 +723,19 @@ pw.Widget _buildBalanceMovement(List<CustomerLedgerTransaction> transactions, Cu
               ),
               pw.SizedBox(height: 8),
               pw.Text(
-                '• Opening Balance: \$${openingBalance.toStringAsFixed(2)}',
+                '• Opening Balance: ${openingBalance.toStringAsFixed(2)}',
                 style: const pw.TextStyle(fontSize: 9),
               ),
               pw.Text(
-                '• Closing Balance: \$${summary.closingBalance.toStringAsFixed(2)}',
+                '• Closing Balance: ${summary.closingBalance.toStringAsFixed(2)}',
                 style: const pw.TextStyle(fontSize: 9),
               ),
               pw.Text(
-                '• Net Change: \$${(summary.closingBalance - openingBalance).abs().toStringAsFixed(2)} ${summary.closingBalance >= openingBalance ? 'Increase' : 'Decrease'}',
+                '• Net Change: ${(summary.closingBalance - openingBalance).abs().toStringAsFixed(2)} ${summary.closingBalance >= openingBalance ? 'Increase' : 'Decrease'}',
                 style: const pw.TextStyle(fontSize: 9),
               ),
               pw.Text(
-                '• Largest Transaction: \$${movementAnalysis['largestTransaction'].toStringAsFixed(2)}',
+                '• Largest Transaction: ${movementAnalysis['largestTransaction'].toStringAsFixed(2)}',
                 style: const pw.TextStyle(fontSize: 9),
               ),
               pw.SizedBox(height: 8),

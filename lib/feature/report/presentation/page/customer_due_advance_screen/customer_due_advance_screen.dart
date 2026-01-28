@@ -283,19 +283,19 @@ AppButton(name: "Clear", onPressed: (){
             ),
             _buildSummaryCard(
               "Total Due Amount",
-              "\$${summary.totalDueAmount.toStringAsFixed(2)}",
+              summary.totalDueAmount.toStringAsFixed(2),
               Icons.money_off,
               Colors.red,
             ),
             _buildSummaryCard(
               "Total Advance Amount",
-              "\$${summary.totalAdvanceAmount.toStringAsFixed(2)}",
+              summary.totalAdvanceAmount.toStringAsFixed(2),
               Icons.attach_money,
               Colors.green,
             ),
             _buildSummaryCard(
               "Net Balance",
-              "\$${summary.netBalance.abs().toStringAsFixed(2)}",
+              summary.netBalance.abs().toStringAsFixed(2),
               summary.netBalance >= 0 ? Icons.arrow_upward : Icons.arrow_downward,
               summary.overallStatusColor,
               // subtitle: summary.overallStatus,
@@ -787,7 +787,7 @@ class CustomerDueAdvanceTableCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
-              '\$${customer.presentDue.toStringAsFixed(2)}',
+              customer.presentDue.toStringAsFixed(2),
               style: const TextStyle(
                 color: Colors.red,
                 fontWeight: FontWeight.w600,
@@ -858,7 +858,7 @@ class CustomerDueAdvanceTableCard extends StatelessWidget {
               border: Border.all(color: customer.balanceStatusColor),
             ),
             child: Text(
-              '\$${customer.netBalance.abs().toStringAsFixed(2)}',
+              customer.netBalance.abs().toStringAsFixed(2),
               style: TextStyle(
                 color: customer.balanceStatusColor,
                 fontWeight: FontWeight.w600,
@@ -975,9 +975,9 @@ class CustomerDueAdvanceTableCard extends StatelessWidget {
                 const SizedBox(height: 16),
                 _buildDetailRow('Phone:', customer.phone),
                 _buildDetailRow('Email:', customer.email),
-                _buildDetailRow('Due Amount:', '\$${customer.presentDue.toStringAsFixed(2)}'),
-                _buildDetailRow('Advance Amount:', '\$${customer.presentAdvance.toStringAsFixed(2)}'),
-                _buildDetailRow('Net Balance:', '\$${customer.netBalance.abs().toStringAsFixed(2)}'),
+                _buildDetailRow('Due Amount:', customer.presentDue.toStringAsFixed(2)),
+                _buildDetailRow('Advance Amount:', customer.presentAdvance.toStringAsFixed(2)),
+                _buildDetailRow('Net Balance:', customer.netBalance.abs().toStringAsFixed(2)),
                 _buildDetailRow('Status:', customer.balanceStatus),
 
                 const SizedBox(height: 20),

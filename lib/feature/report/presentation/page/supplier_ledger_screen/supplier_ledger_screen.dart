@@ -317,16 +317,16 @@ class _SupplierLedgerScreenState extends State<SupplierLedgerScreen> {
                 spacing: 12,
                 runSpacing: 12,
                 children: [
-                  _buildSummaryItem("Opening Balance", "\$${summary.openingBalance.toStringAsFixed(2)}", Icons.account_balance_wallet, Colors.blue),
+                  _buildSummaryItem("Opening Balance", summary.openingBalance.toStringAsFixed(2), Icons.account_balance_wallet, Colors.blue),
                   _buildSummaryItem(
                       "Closing Balance",
-                      "\$${summary.closingBalance.toStringAsFixed(2)}",
+                      summary.closingBalance.toStringAsFixed(2),
                       summary.closingBalance > 0 ? Icons.arrow_upward : Icons.arrow_downward,
                       summary.closingBalance > 0 ? Colors.red : Colors.green,
                       // subtitle: summary.closingBalance > 0 ? 'Due' : 'Advance'
                   ),
-                  _buildSummaryItem("Total Debit", "\$${summary.totalDebit.toStringAsFixed(2)}", Icons.arrow_circle_up, Colors.red),
-                  _buildSummaryItem("Total Credit", "\$${summary.totalCredit.toStringAsFixed(2)}", Icons.arrow_circle_down, Colors.green),
+                  _buildSummaryItem("Total Debit", summary.totalDebit.toStringAsFixed(2), Icons.arrow_circle_up, Colors.red),
+                  _buildSummaryItem("Total Credit", summary.totalCredit.toStringAsFixed(2), Icons.arrow_circle_down, Colors.green),
                   _buildSummaryItem("Total Transactions", summary.totalTransactions.toString(), Icons.receipt_long, Colors.purple),
 
 
@@ -862,7 +862,7 @@ class SupplierLedgerTableCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
-              '\$${debit.toStringAsFixed(2)}',
+              debit.toStringAsFixed(2),
               style: const TextStyle(
                 color: Colors.red,
                 fontWeight: FontWeight.w600,
@@ -897,7 +897,7 @@ class SupplierLedgerTableCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
-              '\$${credit.toStringAsFixed(2)}',
+              credit.toStringAsFixed(2),
               style: const TextStyle(
                 color: Colors.green,
                 fontWeight: FontWeight.w600,
@@ -936,7 +936,7 @@ class SupplierLedgerTableCard extends StatelessWidget {
               ),
             ),
             child: Text(
-              '\$${balance.abs().toStringAsFixed(2)}',
+              balance.abs().toStringAsFixed(2),
               style: TextStyle(
                 color: isPositive ? Colors.red : Colors.green,
                 fontWeight: FontWeight.w600,
@@ -1017,9 +1017,9 @@ class SupplierLedgerTableCard extends StatelessWidget {
                 _buildDetailRow('Particular:', ledger.particular),
                 _buildDetailRow('Details:', ledger.details),
                 _buildDetailRow('Method:', ledger.method),
-                _buildDetailRow('Debit:', '\$${ledger.debit.toStringAsFixed(2)}'),
-                _buildDetailRow('Credit:', '\$${ledger.credit.toStringAsFixed(2)}'),
-                _buildDetailRow('Balance:', '\$${ledger.due.toStringAsFixed(2)}'),
+                _buildDetailRow('Debit:', ledger.debit.toStringAsFixed(2)),
+                _buildDetailRow('Credit:', ledger.credit.toStringAsFixed(2)),
+                _buildDetailRow('Balance:', ledger.due.toStringAsFixed(2)),
 
                 const SizedBox(height: 20),
                 Align(

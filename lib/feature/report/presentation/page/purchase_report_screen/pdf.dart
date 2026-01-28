@@ -66,15 +66,15 @@ Future<Uint8List> generatePurchaseReportPdf(
 
             // Logo
             pw.Container(
-              width: 80,
-              height: 80,
+              width: 60,
+              height: 60,
               decoration: pw.BoxDecoration(
                 border: pw.Border.all(color: PdfColors.grey400),
                 borderRadius: pw.BorderRadius.circular(8),
               ),
-              child: logoBytes != null && logoBytes!.isNotEmpty
+              child: logoBytes != null && logoBytes.isNotEmpty
                   ? pw.Image(
-                pw.MemoryImage(logoBytes!),
+                pw.MemoryImage(logoBytes),
                 fit: pw.BoxFit.cover,
               )
                   : pw.Center(
@@ -90,9 +90,7 @@ Future<Uint8List> generatePurchaseReportPdf(
           ],
         ),
       ),
-      footer: (context) => _buildFooter(context),
       build: (context) => [
-        _buildHeader(reportResponse),
         _buildReportTitle(),
         pw.SizedBox(height: 0),
         _buildSummarySection(
@@ -109,48 +107,6 @@ Future<Uint8List> generatePurchaseReportPdf(
 }
 
 // Header with Report Info
-pw.Widget _buildHeader(PurchaseReportResponse report) {
-  return pw.Container(
-    padding: const pw.EdgeInsets.all(8),
-    margin: const pw.EdgeInsets.all(8),
-    child: pw.Row(
-      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-      children: [
-        pw.Column(
-          crossAxisAlignment: pw.CrossAxisAlignment.start,
-          children: [
-            pw.Text(
-              'PURCHASE ANALYSIS REPORT',
-              style: pw.TextStyle(
-                fontSize: 16,
-                fontWeight: pw.FontWeight.bold,
-                color: PdfColors.orange800,
-              ),
-            ),
-            pw.SizedBox(height: 4),
-            pw.Text(
-              'Comprehensive Purchase Overview',
-              style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey600),
-            ),
-          ],
-        ),
-        pw.Column(
-          crossAxisAlignment: pw.CrossAxisAlignment.end,
-          children: [
-            pw.Text(
-              'Generated: ${_formatDateTime(DateTime.now())}',
-              style: const pw.TextStyle(fontSize: 9),
-            ),
-            pw.Text(
-              'Total Records: ${report.report.length}',
-              style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey600),
-            ),
-          ],
-        ),
-      ],
-    ),
-  );
-}
 
 // Report Title
 pw.Widget _buildReportTitle() {
@@ -737,33 +693,12 @@ pw.Widget _buildInsightRow(
 }
 
 // Footer
-pw.Widget _buildFooter(pw.Context context) {
-  return pw.Container(
-    alignment: pw.Alignment.center,
-    margin: const pw.EdgeInsets.only(top: 20),
-    child: pw.Column(
-      children: [
-        pw.Divider(color: PdfColors.grey300),
-        pw.SizedBox(height: 8),
-        pw.Text(
-          'Page ${context.pageNumber} of ${context.pagesCount} • '
-              'Generated on ${_formatDateTime(DateTime.now())} • '
-              'Confidential Business Document',
-          style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey600),
-        ),
-      ],
-    ),
-  );
-}
 
 // Helper functions
 String _formatDate(DateTime date) {
   return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
 }
 
-String _formatDateTime(DateTime date) {
-  return '${_formatDate(date)} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
-}
 
 String _truncateText(String text, int maxLength) {
   if (text.length <= maxLength) return text;

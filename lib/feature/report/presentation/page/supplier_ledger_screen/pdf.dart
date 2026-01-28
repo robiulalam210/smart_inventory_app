@@ -161,31 +161,31 @@ pw.Widget _buildSupplierSummary(SupplierLedgerSummary summary) {
             children: [
               _buildSummaryCard(
                 'Opening Balance',
-                '\$${summary.openingBalance.toStringAsFixed(2)}',
+                summary.openingBalance.toStringAsFixed(2),
                 'Period Start',
                 PdfColors.blue,
               ),
               _buildSummaryCard(
                 'Closing Balance',
-                '\$${summary.closingBalance.abs().toStringAsFixed(2)}',
+                summary.closingBalance.abs().toStringAsFixed(2),
                 balanceStatus,
                 _getBalanceColor(summary.closingBalance),
               ),
               _buildSummaryCard(
                 'Total Purchases',
-                '\$${summary.totalDebit.toStringAsFixed(2)}',
+                summary.totalDebit.toStringAsFixed(2),
                 'Debit Amount',
                 PdfColors.red,
               ),
               _buildSummaryCard(
                 'Total Payments',
-                '\$${summary.totalCredit.toStringAsFixed(2)}',
+                summary.totalCredit.toStringAsFixed(2),
                 'Credit Amount',
                 PdfColors.green,
               ),
               _buildSummaryCard(
                 'Net Movement',
-                '\$${netMovement.abs().toStringAsFixed(2)}',
+                netMovement.abs().toStringAsFixed(2),
                 netMovement >= 0 ? 'Increase' : 'Decrease',
                 netMovement >= 0 ? PdfColors.red : PdfColors.green,
               ),
@@ -494,7 +494,7 @@ pw.TableRow _buildOpeningBalanceRow(double openingBalance) {
       _buildDataCell(''),
       _buildDataCell(''),
       _buildDataCell(
-        '\$${openingBalance.toStringAsFixed(2)}',
+        openingBalance.toStringAsFixed(2),
         alignment: pw.TextAlign.right,
         color: _getBalanceColor(openingBalance),
       ),
@@ -515,17 +515,17 @@ pw.TableRow _buildTableRow(SupplierLedger transaction, double runningBalance) {
       _buildTransactionTypeCell(transaction.type),
       _buildDataCell(_truncateText(transaction.method, 10)),
       _buildDataCell(
-        transaction.debit > 0 ? '\$${transaction.debit.toStringAsFixed(2)}' : '-',
+        transaction.debit > 0 ? transaction.debit.toStringAsFixed(2) : '-',
         alignment: pw.TextAlign.right,
         color: transaction.debit > 0 ? PdfColors.red : PdfColors.grey,
       ),
       _buildDataCell(
-        transaction.credit > 0 ? '\$${transaction.credit.toStringAsFixed(2)}' : '-',
+        transaction.credit > 0 ? transaction.credit.toStringAsFixed(2) : '-',
         alignment: pw.TextAlign.right,
         color: transaction.credit > 0 ? PdfColors.green : PdfColors.grey,
       ),
       _buildDataCell(
-        '\$${runningBalance.toStringAsFixed(2)}',
+        runningBalance.toStringAsFixed(2),
         alignment: pw.TextAlign.right,
         color: _getBalanceColor(runningBalance),
       ),
@@ -653,11 +653,11 @@ pw.Widget _buildPaymentTrends(List<SupplierLedger> transactions, SupplierLedgerS
               ),
               pw.SizedBox(height: 8),
               pw.Text(
-                '• Average Purchase: \$${trendAnalysis['averagePurchase'].toStringAsFixed(2)}',
+                '• Average Purchase: ${trendAnalysis['averagePurchase'].toStringAsFixed(2)}',
                 style: const pw.TextStyle(fontSize: 9),
               ),
               pw.Text(
-                '• Average Payment: \$${trendAnalysis['averagePayment'].toStringAsFixed(2)}',
+                '• Average Payment: ${trendAnalysis['averagePayment'].toStringAsFixed(2)}',
                 style: const pw.TextStyle(fontSize: 9),
               ),
               pw.Text(
@@ -813,7 +813,7 @@ List<String> _generatePaymentRecommendations(SupplierLedgerSummary summary) {
   final recommendations = <String>[];
 
   if (summary.closingBalance > 0) {
-    recommendations.add('Consider scheduling payment for outstanding balance of \$${summary.closingBalance.toStringAsFixed(2)}');
+    recommendations.add('Consider scheduling payment for outstanding balance of ${summary.closingBalance.toStringAsFixed(2)}');
     recommendations.add('Review payment terms with supplier to optimize cash flow');
   } else if (summary.closingBalance < 0) {
     recommendations.add('Supplier has advance balance - consider utilizing for future purchases');

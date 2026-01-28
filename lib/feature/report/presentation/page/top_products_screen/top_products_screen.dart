@@ -592,7 +592,7 @@ class TopProductsTableCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
-              '\$${price.toStringAsFixed(2)}',
+              price.toStringAsFixed(2),
               style: const TextStyle(
                 color: Colors.blue,
                 fontWeight: FontWeight.w600,
@@ -644,7 +644,7 @@ class TopProductsTableCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
-              '\$${revenue.toStringAsFixed(2)}',
+              revenue.toStringAsFixed(2),
               style: const TextStyle(
                 color: Colors.purple,
                 fontWeight: FontWeight.w600,
@@ -816,7 +816,7 @@ class TopProductsTableCard extends StatelessWidget {
                 _buildDetailRow('Product Name:', product.productName),
                 _buildDetailRow(
                   'Selling Price:',
-                  '\$${product.sellingPrice.toStringAsFixed(2)}',
+                  product.sellingPrice.toStringAsFixed(2),
                 ),
                 _buildDetailRow(
                   'Quantity Sold:',
@@ -824,7 +824,7 @@ class TopProductsTableCard extends StatelessWidget {
                 ),
                 _buildDetailRow(
                   'Total Revenue:',
-                  '\$${product.totalSoldPrice.toStringAsFixed(2)}',
+                  product.totalSoldPrice.toStringAsFixed(2),
                 ),
 
                 const SizedBox(height: 20),

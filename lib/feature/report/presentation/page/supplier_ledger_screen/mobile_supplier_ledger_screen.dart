@@ -51,7 +51,7 @@ class _MobileSupplierLedgerScreenState
     );
   }
 
-  String _formatCurrency(double value) => '\$${value.toStringAsFixed(2)}';
+  String _formatCurrency(double value) => value.toStringAsFixed(2);
 
   @override
   Widget build(BuildContext context) {

@@ -234,14 +234,14 @@ class _MobilePurchaseReportScreenState
               children: [
                 _buildSummaryCard(
                   "Total Purchases",
-                  "\$${summary.totalPurchases.toStringAsFixed(2)}",
+                  summary.totalPurchases.toStringAsFixed(2),
                   Icons.shopping_cart,
                   AppColors.primaryColor(context),
                 ),
                 const SizedBox(width: 8),
                 _buildSummaryCard(
                   "Total Paid",
-                  "\$${summary.totalPaid.toStringAsFixed(2)}",
+                  summary.totalPaid.toStringAsFixed(2),
                   Icons.payment,
                   Colors.green,
                 ),
@@ -252,7 +252,7 @@ class _MobilePurchaseReportScreenState
               children: [
                 _buildSummaryCard(
                   "Total Due",
-                  "\$${summary.totalDue.toStringAsFixed(2)}",
+                  summary.totalDue.toStringAsFixed(2),
                   Icons.money_off,
                   Colors.orange,
                 ),
@@ -422,12 +422,12 @@ class _MobilePurchaseReportScreenState
                   children: [
                     _buildMobileAmountItem(
                       'Net Total',
-                      '\$${report.netTotal.toStringAsFixed(2)}',
+                      report.netTotal.toStringAsFixed(2),
                       Colors.blue,
                     ),
                     _buildMobileAmountItem(
                       'Paid',
-                      '\$${report.paidTotal.toStringAsFixed(2)}',
+                      report.paidTotal.toStringAsFixed(2),
                       Colors.green,
                     ),
                   ],
@@ -438,7 +438,7 @@ class _MobilePurchaseReportScreenState
                   children: [
                     _buildMobileAmountItem(
                       'Due',
-                      '\$${report.dueTotal.toStringAsFixed(2)}',
+                      report.dueTotal.toStringAsFixed(2),
                       Colors.orange,
                     ),
                     Container(
@@ -564,17 +564,17 @@ class _MobilePurchaseReportScreenState
               _buildMobileDetailItem('Supplier:', report.supplier, context),
               _buildMobileDetailItem(
                 'Net Total:',
-                '\$${report.netTotal.toStringAsFixed(2)}',
+                report.netTotal.toStringAsFixed(2),
                 context,
               ),
               _buildMobileDetailItem(
                 'Paid Amount:',
-                '\$${report.paidTotal.toStringAsFixed(2)}',
+                report.paidTotal.toStringAsFixed(2),
                 context,
               ),
               _buildMobileDetailItem(
                 'Due Amount:',
-                '\$${report.dueTotal.toStringAsFixed(2)}',
+                report.dueTotal.toStringAsFixed(2),
                 context,
               ),
               _buildMobileDetailItem(

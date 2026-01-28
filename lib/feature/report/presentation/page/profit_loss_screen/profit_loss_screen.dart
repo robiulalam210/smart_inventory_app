@@ -868,7 +868,7 @@ class ExpenseBreakdownList extends StatelessWidget {
 //             ),
 //           ),
 //           Text(
-//             '\$$prefix$formattedAmount',
+//             '$prefix$formattedAmount',
 //             style: TextStyle(
 //               fontSize: isMobile ? 14 : 16,
 //               fontWeight: FontWeight.bold,

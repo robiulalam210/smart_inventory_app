@@ -181,7 +181,7 @@ class _MobileSupplierDueAdvanceScreenState
                 const SizedBox(width: 8),
                 _buildMobileSummaryCard(
                   "Net Balance",
-                  '\$${summary.netBalance.abs().toStringAsFixed(2)}',
+                  summary.netBalance.abs().toStringAsFixed(2),
                   summary.netBalance >= 0
                       ? Icons.arrow_upward
                       : Icons.arrow_downward,
@@ -196,14 +196,14 @@ class _MobileSupplierDueAdvanceScreenState
               children: [
                 _buildMobileSummaryCard(
                   "Total Due",
-                  '\$${summary.totalDueAmount.toStringAsFixed(2)}',
+                  summary.totalDueAmount.toStringAsFixed(2),
                   Icons.money_off,
                   Colors.red,
                 ),
                 const SizedBox(width: 8),
                 _buildMobileSummaryCard(
                   "Total Advance",
-                  '\$${summary.totalAdvanceAmount.toStringAsFixed(2)}',
+                  summary.totalAdvanceAmount.toStringAsFixed(2),
                   Icons.attach_money,
                   Colors.green,
                 ),
@@ -336,8 +336,8 @@ class _MobileSupplierDueAdvanceScreenState
         final hasDue = supplier.presentDue > 0;
         final hasAdvance = supplier.presentAdvance > 0;
         final netBalanceText = supplier.netBalance >= 0
-            ? '\$${supplier.netBalance.toStringAsFixed(2)}'
-            : '-\$${supplier.netBalance.abs().toStringAsFixed(2)}';
+            ? supplier.netBalance.toStringAsFixed(2)
+            : '-${supplier.netBalance.abs().toStringAsFixed(2)}';
 
         return Card(
           elevation: 0,
@@ -450,7 +450,7 @@ class _MobileSupplierDueAdvanceScreenState
                                 ),
                               ),
                               Text(
-                                '\$${supplier.presentDue.toStringAsFixed(2)}',
+                                supplier.presentDue.toStringAsFixed(2),
                                 style: const TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.bold,
@@ -480,7 +480,7 @@ class _MobileSupplierDueAdvanceScreenState
                                 ),
                               ),
                               Text(
-                                '\$${supplier.presentAdvance.toStringAsFixed(2)}',
+                                supplier.presentAdvance.toStringAsFixed(2),
                                 style: const TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.bold,
@@ -656,8 +656,8 @@ class _MobileSupplierDueAdvanceScreenState
 
   void _showSupplierDetails(BuildContext context, SupplierDueAdvance supplier) {
     final netBalanceText = supplier.netBalance >= 0
-        ? '\$${supplier.netBalance.toStringAsFixed(2)}'
-        : '-\$${supplier.netBalance.abs().toStringAsFixed(2)}';
+        ? supplier.netBalance.toStringAsFixed(2)
+        : '-${supplier.netBalance.abs().toStringAsFixed(2)}';
 
     showModalBottomSheet(
       context: context,
@@ -714,11 +714,11 @@ class _MobileSupplierDueAdvanceScreenState
                 _buildMobileDetailRow('Email:', supplier.email),
                 _buildMobileDetailRow(
                   'Due Amount:',
-                  '\$${supplier.presentDue.toStringAsFixed(2)}',
+                  supplier.presentDue.toStringAsFixed(2),
                 ),
                 _buildMobileDetailRow(
                   'Advance Amount:',
-                  '\$${supplier.presentAdvance.toStringAsFixed(2)}',
+                  supplier.presentAdvance.toStringAsFixed(2),
                 ),
                 _buildMobileDetailRow('Net Balance:', netBalanceText),
                 _buildMobileDetailRow('Status:', supplier.balanceStatus),

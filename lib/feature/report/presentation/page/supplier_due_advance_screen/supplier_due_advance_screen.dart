@@ -239,21 +239,21 @@ Spacer(),
             ),
             _buildSummaryCard(
               "Total Due",
-              "\$${summary.totalDueAmount.toStringAsFixed(2)}",
+              summary.totalDueAmount.toStringAsFixed(2),
               Icons.money_off,
               Colors.red,
               subtitle: '$suppliersWithDue due',
             ),
             _buildSummaryCard(
               "Total Advance",
-              "\$${summary.totalAdvanceAmount.toStringAsFixed(2)}",
+              summary.totalAdvanceAmount.toStringAsFixed(2),
               Icons.attach_money,
               Colors.green,
               subtitle: '$suppliersWithAdvance advance',
             ),
             _buildSummaryCard(
               "Net Balance",
-              "\$${summary.netBalance.abs().toStringAsFixed(2)}",
+              summary.netBalance.abs().toStringAsFixed(2),
               summary.netBalance >= 0 ? Icons.arrow_upward : Icons.arrow_downward,
               summary.overallStatusColor,
               subtitle: summary.overallStatus,
@@ -523,13 +523,13 @@ class SupplierDueAdvanceDataTable extends StatelessWidget {
       ),
       child: Row(
         children: [
-          _buildSummaryItem("Total Due", "\$${totalDue.toStringAsFixed(2)}", Colors.red),
+          _buildSummaryItem("Total Due", totalDue.toStringAsFixed(2), Colors.red),
           const SizedBox(width: 8),
-          _buildSummaryItem("Total Advance", "\$${totalAdvance.toStringAsFixed(2)}", Colors.green),
+          _buildSummaryItem("Total Advance", totalAdvance.toStringAsFixed(2), Colors.green),
           const SizedBox(width: 8),
           _buildSummaryItem(
               "Net Balance",
-              "\$${netBalance.abs().toStringAsFixed(2)}",
+              netBalance.abs().toStringAsFixed(2),
               netBalance >= 0 ? Colors.red : Colors.green,
               subtitle: netBalance >= 0 ? 'Due' : 'Advance'
           ),
@@ -803,7 +803,7 @@ class SupplierDueAdvanceDataTable extends StatelessWidget {
 
   Widget _buildAmountCell(double amount, Color color, String tooltip) {
     return Tooltip(
-      message: '$tooltip: \$${amount.toStringAsFixed(2)}',
+      message: '$tooltip: ${amount.toStringAsFixed(2)}',
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         decoration: BoxDecoration(
@@ -812,7 +812,7 @@ class SupplierDueAdvanceDataTable extends StatelessWidget {
           border: amount > 0 ? Border.all(color: color.withValues(alpha: 0.3)) : null,
         ),
         child: Text(
-          amount > 0 ? '\$${amount.toStringAsFixed(2)}' : '-',
+          amount > 0 ? amount.toStringAsFixed(2) : '-',
           style: TextStyle(
             color: amount > 0 ? color : Colors.grey,
             fontWeight: amount > 0 ? FontWeight.bold : FontWeight.normal,
@@ -830,10 +830,10 @@ class SupplierDueAdvanceDataTable extends StatelessWidget {
 
     return Tooltip(
       message: isDue
-          ? 'Due: \$${netBalance.toStringAsFixed(2)}'
+          ? 'Due: ${netBalance.toStringAsFixed(2)}'
           : isSettled
           ? 'Settled'
-          : 'Advance: \$${netBalance.abs().toStringAsFixed(2)}',
+          : 'Advance: ${netBalance.abs().toStringAsFixed(2)}',
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         decoration: BoxDecoration(
@@ -857,7 +857,7 @@ class SupplierDueAdvanceDataTable extends StatelessWidget {
             ),
             const SizedBox(width: 4),
             Text(
-              '\$${netBalance.abs().toStringAsFixed(2)}',
+              netBalance.abs().toStringAsFixed(2),
               style: TextStyle(
                 color: isSettled ? Colors.green : (isDue ? Colors.red : Colors.green),
                 fontWeight: FontWeight.bold,
@@ -872,7 +872,7 @@ class SupplierDueAdvanceDataTable extends StatelessWidget {
 
   Widget _buildStatusCell(SupplierDueAdvance supplier) {
     return Tooltip(
-      message: '${supplier.balanceStatus}: \$${supplier.netBalance.abs().toStringAsFixed(2)}',
+      message: '${supplier.balanceStatus}: ${supplier.netBalance.abs().toStringAsFixed(2)}',
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         decoration: BoxDecoration(
