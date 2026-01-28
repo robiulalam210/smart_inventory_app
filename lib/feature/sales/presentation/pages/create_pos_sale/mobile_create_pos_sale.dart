@@ -1047,9 +1047,14 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
           final value = product["discount_value"] ?? 0;
           final total = product["ticket_total"] ?? 0.0;
 // Inside your product container (Auto Discount Section)
-          final double finalPricePerUnit = product["final_price"] is String
-              ? double.tryParse(product["final_price"]) ?? 0.0
-              : product["final_price"] ?? 0.0;
+          final dynamic rawPrice = product["final_price"];
+
+          final double finalPricePerUnit = rawPrice is String
+              ? double.tryParse(rawPrice) ?? 0.0
+              : (rawPrice is int)
+              ? rawPrice.toDouble()
+              : (rawPrice as double? ?? 0.0);
+
 
           final int quantity = int.tryParse(
               controllers[index]!["quantity"]!.text) ??
@@ -1196,6 +1201,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                 Row(
                   children: [
                     Expanded(
+                      flex: 1,
                       child: TextFormField(
 
                         controller: controllers[index]!["price"],
@@ -1209,12 +1215,10 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                     ),
                     const SizedBox(width: 8),
                     Expanded(
+                      flex: 2,
                       child: Container(
                         height: 35,
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey.shade400),
-                          borderRadius: BorderRadius.circular(5),
-                        ),
+
                         child: Row(
                           children: [
                             IconButton(
@@ -1235,12 +1239,77 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                               },
                             ),
                             Expanded(
-                              child: Text(
-                                controllers[index]!["quantity"]!.text,
+                              child: TextField(
+                                controller: controllers[index]!["quantity"],
                                 textAlign: TextAlign.center,
+                                keyboardType: TextInputType.number,
                                 style: AppTextStyle.cardTitle(context),
+                                decoration: InputDecoration(
+                                  isDense: true,
+                                  contentPadding: EdgeInsets.symmetric(vertical: 8),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(5),
+                                    borderSide: BorderSide(
+                                      color: AppColors.greyColor(context),
+                                      width: 0.4,
+                                    ),
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(5),
+                                    borderSide: BorderSide(
+                                      color: AppColors.greyColor(context),
+                                      width: 0.4,
+                                    ),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(5),
+                                    borderSide: BorderSide(
+                                      color: AppColors.primaryColor(context),
+                                      width: 0.4,
+                                    ),
+                                  ),
+                                ),
+
+                                onChanged: (value) {
+                                  final productData = products[index];
+                                  final product =
+                                  productData["product"] as ProductModelStockModel?;
+
+                                  if (product == null) {
+                                    controllers[index]!["quantity"]!.text = "1";
+                                    return;
+                                  }
+
+                                  int qty = int.tryParse(value) ?? 1;
+                                  if (qty < 1) qty = 1;
+
+                                  final stockQty = product.stockQty ?? 0;
+                                  final openingStock = product.openingStock ?? 0;
+                                  final availableStock =
+                                  stockQty > 0 ? stockQty : openingStock;
+
+                                  if (availableStock > 0 && qty > availableStock) {
+                                    qty = availableStock;
+                                    showCustomToast(
+                                      context: context,
+                                      title: 'Stock Limit!',
+                                      description:
+                                      "Cannot exceed available stock: $availableStock",
+                                      icon: Icons.warning,
+                                      primaryColor: Colors.orange,
+                                    );
+                                  }
+
+                                  controllers[index]!["quantity"]!.text = qty.toString();
+                                  controllers[index]!["quantity"]!.selection =
+                                      TextSelection.collapsed(offset: qty.toString().length);
+
+                                  products[index]["quantity"] = qty.toString();
+                                  updateTotal(index);
+                                },
                               ),
                             ),
+
                             IconButton(
                               icon: const Icon(Icons.add, size: 18),
                               onPressed: () {

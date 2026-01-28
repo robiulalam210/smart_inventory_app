@@ -43,6 +43,7 @@ class ProductsBloc extends Bloc<ProductsEvent, ProductsState> {
     context.read<UnitBloc>().selectedState = "";
     // context.read<InventoryListBloc>().selectedLocation = "";
   }
+  ProductModel? currentProductDetails;
 
   ProductsBloc() : super(ProductsInitial()) {
     on<FetchProductsList>(_onFetchProductList);
@@ -50,94 +51,46 @@ class ProductsBloc extends Bloc<ProductsEvent, ProductsState> {
     on<AddProducts>(_onCreateProductList);
     on<UpdateProducts>(_onUpdateProductList);
     on<DeleteProducts>(_onDeleteProductList);
-  }
+    on<FetchProductDetails>(_onFetchProductDetails);
 
-  // Future<void> _onFetchProductList(
-  //     FetchProductsList event,
-  //     Emitter<ProductsState> emit,
-  //     ) async {
-  //   emit(ProductsListLoading());
-  //
-  //   try {
-  //     // Build query parameters that match Django backend
-  //     Map<String, dynamic> queryParams = {
-  //       'page': event.pageNumber.toString(),
-  //       'page_size': event.pageSize.toString(),
-  //     };
-  //
-  //     // Add search parameter (Django uses 'search' for the search_fields)
-  //     if (event.filterText.isNotEmpty) {
-  //       queryParams['search'] = event.filterText;
-  //     }
-  //
-  //     // Add category filter
-  //     if (event.category.isNotEmpty) {
-  //       queryParams['category_id'] = event.category;
-  //     }
-  //
-  //     // Add status filter (Django uses 'is_active' for status)
-  //     if (event.state.isNotEmpty) {
-  //       if (event.state.toLowerCase() == 'active') {
-  //         queryParams['is_active'] = 'true';
-  //       } else if (event.state.toLowerCase() == 'inactive') {
-  //         queryParams['is_active'] = 'false';
-  //       }
-  //     }
-  //
-  //     final res = await getResponse(
-  //       url: AppUrls.product,
-  //       queryParams: queryParams, // Add query parameters here
-  //       context: event.context,
-  //     );
-  //
-  //     // Rest of your parsing code remains the same...
-  //     final Map<String, dynamic> payload;
-  //     payload = jsonDecode(res) as Map<String, dynamic>;
-  //
-  //     final bool ok = (payload['status'] == true) || (payload['success'] == true);
-  //
-  //     if (ok) {
-  //       final data = payload['data'] ?? {};
-  //       final List<dynamic> results = (data['results'] is List) ? List<dynamic>.from(data['results']) : [];
-  //
-  //       // Parse product list
-  //       final list = results.map((x) => ProductModel.fromJson(Map<String, dynamic>.from(x))).toList();
-  //
-  //       // Pagination info
-  //       final Map<String, dynamic> pagination = Map<String, dynamic>.from(data['pagination'] ?? {});
-  //       final int totalPages = (pagination['total_pages'] is int) ? pagination['total_pages'] as int : (pagination['totalPages'] is int ? pagination['totalPages'] as int : 1);
-  //       final int currentPage = (pagination['current_page'] is int) ? pagination['current_page'] as int : (event.pageNumber);
-  //       final int count = (pagination['count'] is int) ? pagination['count'] as int : list.length;
-  //       final int pageSize = (pagination['page_size'] is int) ? pagination['page_size'] as int : (event.pageSize);
-  //       final int from = (pagination['from'] is int) ? pagination['from'] as int : ((currentPage - 1) * pageSize + 1);
-  //       final int to = (pagination['to'] is int) ? pagination['to'] as int : (from + list.length - 1);
-  //
-  //       emit(
-  //         ProductsListSuccess(
-  //           list: list,
-  //           totalPages: totalPages < 1 ? 1 : totalPages,
-  //           currentPage: currentPage < 1 ? 1 : currentPage,
-  //           count: count,
-  //           pageSize: pageSize,
-  //           from: from,
-  //           to: to,
-  //         ),
-  //       );
-  //     } else {
-  //       final message = payload['message'] ?? payload['error'] ?? 'Unknown Error';
-  //       emit(
-  //         ProductsListFailed(
-  //           title: "Error",
-  //           content: message.toString(),
-  //         ),
-  //       );
-  //     }
-  //   } catch (error, st) {
-  //     debugPrint(error.toString());
-  //     debugPrint(st.toString());
-  //     emit(ProductsListFailed(title: "Error", content: error.toString()));
-  //   }
-  // }
+  }
+  Future<void> _onFetchProductDetails(
+      FetchProductDetails event,
+      Emitter<ProductsState> emit,
+      ) async {
+    emit(ProductDetailsLoading());
+
+    try {
+      final res = await getResponse(
+        url: "${AppUrls.product}${event.productId}/",
+        context: event.context,
+      );
+
+      final Map<String, dynamic> payload = jsonDecode(res);
+      final bool ok = (payload['status'] == true) || (payload['success'] == true);
+
+      if (ok) {
+        final data = payload['data'];
+        final product = ProductModel.fromJson(Map<String, dynamic>.from(data));
+        currentProductDetails = product;
+
+        emit(ProductDetailsSuccess(product: product));
+      } else {
+        final message = payload['message'] ?? payload['error'] ?? 'Unknown Error';
+        emit(ProductDetailsFailed(
+          title: "Error",
+          content: message.toString(),
+        ));
+      }
+    } catch (error, st) {
+      debugPrint('Error fetching product details: $error');
+      debugPrint('Stack trace: $st');
+      emit(ProductDetailsFailed(
+        title: "Error",
+        content: "Failed to load product details: ${error.toString()}",
+      ));
+    }
+  }
   Future<void> _onFetchProductList(
       FetchProductsList event,
       Emitter<ProductsState> emit,

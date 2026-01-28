@@ -326,9 +326,9 @@ class SaleMode {
     } else if (priceType == 'tier') {
       if (tiers != null && tiers!.isNotEmpty) {
         final tierRanges = tiers!
-            .map((t) => "${t.minQuantity}-${t.maxQuantity}: ${t.price}")
+            .map((t) => "${t.minQuantity}-${t.maxQuantity=="null"?"No":t.maxQuantity}: ${t.price}")
             .join(" | ");
-        priceLabel = "Tier Prices: $tierRanges";
+        priceLabel = "Tier : $tierRanges";
       } else {
         priceLabel = "";
       }
@@ -336,7 +336,7 @@ class SaleMode {
       priceLabel = "Price: N/A";
     }
 
-    return "$saleModeName | $priceLabel | Conv: ${conversionFactor ?? 'N/A'} | Base: ${baseUnitName ?? 'N/A'} ";
+    return "$saleModeName | $priceLabel | Conv: ${conversionFactor ?? 'N/A'} ";
   }
 
 

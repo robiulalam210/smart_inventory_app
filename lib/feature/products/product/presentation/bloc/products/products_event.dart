@@ -21,39 +21,58 @@ class FetchProductsList extends ProductsEvent {
   final int pageNumber;
   final int pageSize;
 
-   FetchProductsList(
-      this.context, {
-        this.filterText = '',
-        this.category = '',
-        this.state = '',
-        this.brand = '',
-        this.unit = '',
-        this.group = '',
-        this.source = '',
-        this.minPrice = '',
-        this.maxPrice = '',
-        this.minStock = '',
-        this.maxStock = '',
-        this.productName = '',
-        this.sku = '',
-        this.pageNumber = 1,
-        this.pageSize = 10,
-      });
+  FetchProductsList(
+    this.context, {
+    this.filterText = '',
+    this.category = '',
+    this.state = '',
+    this.brand = '',
+    this.unit = '',
+    this.group = '',
+    this.source = '',
+    this.minPrice = '',
+    this.maxPrice = '',
+    this.minStock = '',
+    this.maxStock = '',
+    this.productName = '',
+    this.sku = '',
+    this.pageNumber = 1,
+    this.pageSize = 10,
+  });
 }
 
 class FetchProductsStockList extends ProductsEvent {
   BuildContext context;
 
+  FetchProductsStockList(this.context);
+}
+class FetchProductDetails extends ProductsEvent {
+  final BuildContext context;
+  final String productId;
+
+   FetchProductDetails(this.context, {required this.productId});
+}
 
 
-  FetchProductsStockList(
-    this.context);
+class ProductDetailsLoading extends ProductsState {}
+
+class ProductDetailsSuccess extends ProductsState {
+  final ProductModel product;
+
+   ProductDetailsSuccess({required this.product});
+}
+
+class ProductDetailsFailed extends ProductsState {
+  final String title;
+  final String content;
+
+   ProductDetailsFailed({required this.title, required this.content});
 }
 
 class AddProducts extends ProductsEvent {
   final Map<String, dynamic>? body;
 
-  AddProducts({this.body, });
+  AddProducts({this.body});
 }
 
 class UpdateProducts extends ProductsEvent {
