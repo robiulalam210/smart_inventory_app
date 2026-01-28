@@ -292,12 +292,14 @@ class SaleMode {
   final String? priceType;
   final double? unitPrice;
   final double? flatPrice;
+  final double? effectiveUnitPrice;  // 🔥 NEW: Add this
+  final double? effectiveFlatPrice;  // 🔥 NEW: Add this
   final String? discountType;
   final double? discountValue;
   final bool? isActive;
   final List<SaleModeTier>? tiers;
-  final double? conversionFactor; // Add this
-  final String? baseUnitName; // Add this
+  final double? conversionFactor;
+  final String? baseUnitName;
 
   SaleMode({
     this.id,
@@ -307,22 +309,40 @@ class SaleMode {
     this.priceType,
     this.unitPrice,
     this.flatPrice,
+    this.effectiveUnitPrice,  // 🔥 NEW
+    this.effectiveFlatPrice,  // 🔥 NEW
     this.discountType,
     this.discountValue,
     this.isActive,
     this.tiers,
-    this.conversionFactor, // Add this
-    this.baseUnitName, // Add this
+    this.conversionFactor,
+    this.baseUnitName,
   });
+
+  // Helper getter to get the correct price
+  double get effectivePrice {
+    if (priceType?.toLowerCase() == 'flat') {
+      return effectiveFlatPrice ?? flatPrice ?? unitPrice ?? 0.0;
+    } else {
+      return effectiveUnitPrice ?? unitPrice ?? flatPrice ?? 0.0;
+    }
+  }
+
+  // Helper to check if this is a valid sale mode
+  bool get isValid => isActive == true && effectivePrice > 0;
 
   @override
   String toString() {
     String priceLabel;
 
     if (priceType == 'unit') {
-      priceLabel = unitPrice != null ? "Unit Price: $unitPrice" : "";
+      priceLabel = effectiveUnitPrice != null
+          ? "Unit Price: $effectiveUnitPrice"
+          : (unitPrice != null ? "Unit Price: $unitPrice" : "");
     } else if (priceType == 'flat') {
-      priceLabel = flatPrice != null ? "Flat Price: $flatPrice" : "";
+      priceLabel = effectiveFlatPrice != null
+          ? "Flat Price: $effectiveFlatPrice"
+          : (flatPrice != null ? "Flat Price: $flatPrice" : "");
     } else if (priceType == 'tier') {
       if (tiers != null && tiers!.isNotEmpty) {
         final tierRanges = tiers!
@@ -336,9 +356,8 @@ class SaleMode {
       priceLabel = "Price: N/A";
     }
 
-    return "$saleModeName | $priceLabel | Conv: ${conversionFactor ?? 'N/A'} ";
+    return "$saleModeName | $priceLabel | Conv: ${conversionFactor ?? 'N/A'} | Base: $baseUnitName";
   }
-
 
   factory SaleMode.fromJson(Map<String, dynamic> json) {
     return SaleMode(
@@ -349,6 +368,9 @@ class SaleMode {
       priceType: json["price_type"]?.toString(),
       unitPrice: ProductModelStockModel._parseDouble(json["unit_price"]),
       flatPrice: ProductModelStockModel._parseDouble(json["flat_price"]),
+      // 🔥 NEW: Parse effective prices
+      effectiveUnitPrice: ProductModelStockModel._parseDouble(json["effective_unit_price"]),
+      effectiveFlatPrice: ProductModelStockModel._parseDouble(json["effective_flat_price"]),
       discountType: json["discount_type"]?.toString(),
       discountValue: ProductModelStockModel._parseDouble(json["discount_value"]),
       isActive: ProductModelStockModel._parseBool(json["is_active"]),
@@ -356,8 +378,8 @@ class SaleMode {
           ? List<SaleModeTier>.from(
           json['tiers'].map((x) => SaleModeTier.fromJson(x)))
           : null,
-      conversionFactor: ProductModelStockModel._parseDouble(json["conversion_factor"]), // Add this
-      baseUnitName: json["base_unit_name"]?.toString(), // Add this
+      conversionFactor: ProductModelStockModel._parseDouble(json["conversion_factor"]),
+      baseUnitName: json["base_unit_name"]?.toString(),
     );
   }
 
@@ -369,35 +391,121 @@ class SaleMode {
     "price_type": priceType,
     "unit_price": unitPrice,
     "flat_price": flatPrice,
+    "effective_unit_price": effectiveUnitPrice,  // 🔥 NEW
+    "effective_flat_price": effectiveFlatPrice,  // 🔥 NEW
     "discount_type": discountType,
     "discount_value": discountValue,
     "is_active": isActive,
-    "conversion_factor": conversionFactor, // Add this
-    "base_unit_name": baseUnitName, // Add this
+    "conversion_factor": conversionFactor,
+    "base_unit_name": baseUnitName,
   };
+
+  // Helper method for debugging
+  void printDebugInfo() {
+    print('=== SALE MODE DEBUG ===');
+    print('Name: $saleModeName');
+    print('ID: $saleModeId');
+    print('Price Type: $priceType');
+    print('Conversion: $conversionFactor');
+    print('Base Unit: $baseUnitName');
+    print('Unit Price: $unitPrice');
+    print('Flat Price: $flatPrice');
+    print('Effective Unit Price: $effectiveUnitPrice');
+    print('Effective Flat Price: $effectiveFlatPrice');
+    print('Final Effective Price: $effectivePrice');
+    print('Discount: $discountValue ($discountType)');
+    print('Active: $isActive');
+
+    if (tiers != null && tiers!.isNotEmpty) {
+      print('Tiers:');
+      for (var tier in tiers!) {
+        print('  - ${tier.minQuantity}-${tier.maxQuantity} = ${tier.price}');
+        print('    Display: ${tier.minQuantityDisplay} - ${tier.maxQuantityDisplay}');
+      }
+    }
+    print('=======================');
+  }
 }
 
-
-
 class SaleModeTier {
-  final int? id;
-  final String minQuantity;
-  final String maxQuantity;
-  final String price;
+  final String? id;
+  final String minQuantity;  // Base unit এ (Pics)
+  final String? maxQuantity; // Base unit এ (Pics)
+  final String price;        // Sale mode unit price (Dozon)
+  final String? minQuantityDisplay;  // "50.00 Dozon"
+  final String? maxQuantityDisplay;  // "99.00 Dozon"
+  final Map<String, dynamic>? unitInfo; // Conversion info
 
   SaleModeTier({
     this.id,
     required this.minQuantity,
-    required this.maxQuantity,
+    this.maxQuantity,
     required this.price,
+    this.minQuantityDisplay,
+    this.maxQuantityDisplay,
+    this.unitInfo,
   });
+
+  double get minQuantityInBaseUnit => double.tryParse(minQuantity) ?? 0.0;
+  double get maxQuantityInBaseUnit => maxQuantity != null && maxQuantity!.isNotEmpty
+      ? double.tryParse(maxQuantity!) ?? double.infinity
+      : double.infinity;
+  double get priceValue => double.tryParse(price) ?? 0.0;
+
+  // Display range with sale mode units
+  String get displayRange {
+    if (maxQuantityDisplay == null || maxQuantityDisplay!.isEmpty) {
+      return "$minQuantityDisplay+";
+    }
+    return "$minQuantityDisplay - $maxQuantityDisplay";
+  }
+
+  // Get min quantity in sale mode units
+  double get minQuantityInSaleMode {
+    if (unitInfo != null && unitInfo!['conversion_factor'] != null) {
+      final conversion = unitInfo!['conversion_factor'] as double;
+      return minQuantityInBaseUnit / conversion;
+    }
+    return minQuantityInBaseUnit;
+  }
+
+  // Get max quantity in sale mode units
+  double get maxQuantityInSaleMode {
+    if (maxQuantityInBaseUnit == double.infinity) return double.infinity;
+
+    if (unitInfo != null && unitInfo!['conversion_factor'] != null) {
+      final conversion = unitInfo!['conversion_factor'] as double;
+      return maxQuantityInBaseUnit / conversion;
+    }
+    return maxQuantityInBaseUnit;
+  }
 
   factory SaleModeTier.fromJson(Map<String, dynamic> json) {
     return SaleModeTier(
-      id: json['id'] as int?,
-      minQuantity: json['min_quantity'].toString(),
-      maxQuantity: json['max_quantity'].toString(),
-      price: json['price'].toString(),
+      id: json["id"]?.toString(),
+      minQuantity: json["min_quantity"]?.toString() ?? "0",
+      maxQuantity: json["max_quantity"]?.toString(),
+      price: json["price"]?.toString() ?? "0.00",
+      minQuantityDisplay: json["min_quantity_display"]?.toString(),
+      maxQuantityDisplay: json["max_quantity_display"]?.toString(),
+      unitInfo: json["unit_info"] != null
+          ? Map<String, dynamic>.from(json["unit_info"])
+          : null,
     );
+  }
+
+  Map<String, dynamic> toJson() => {
+    "id": id,
+    "min_quantity": minQuantity,
+    "max_quantity": maxQuantity,
+    "price": price,
+    "min_quantity_display": minQuantityDisplay,
+    "max_quantity_display": maxQuantityDisplay,
+    "unit_info": unitInfo,
+  };
+
+  @override
+  String toString() {
+    return "$displayRange = $price";
   }
 }

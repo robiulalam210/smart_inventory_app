@@ -251,7 +251,11 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
     if (_disposedProductIndexes.contains(index)) return;
     if (_availableSaleModes.containsKey(index)) return;
 
-    log('🔄 Loading sale modes for product: ${product.name} at index: $index');
+    log('🔄 LOADING SALE MODES for product: ${product.name}');
+    log('   - Product ID: ${product.id}');
+    log('   - Product Unit: ${product.unitInfo?.name}');
+    log('   - Product Stock: ${product.stockQty}');
+
     setState(() => _isLoadingSaleModes[index] = true);
 
     try {
@@ -259,62 +263,125 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
 
       // Check if product has pre-configured sale modes in the JSON response
       if (product.saleModes != null && product.saleModes!.isNotEmpty) {
-        log(
-          '✅ Product ${product.name} has ${product.saleModes!.length} pre-configured sale modes',
-        );
+        log('✅ Found ${product.saleModes!.length} sale modes in API response');
+
+        // Dump ALL sale mode data for debugging
+        for (var mode in product.saleModes!) {
+          log('   ┌─────────────────────────────────────');
+          log('   │ SaleMode Object:');
+          log('   │   Database ID: ${mode.id}');
+          log('   │   Sale Mode ID: ${mode.saleModeId}');
+          log('   │   Sale Mode Name: ${mode.saleModeName}');
+          log('   │   Base Unit Name: ${mode.baseUnitName}');
+          log('   │   Conversion Factor: ${mode.conversionFactor}');
+          log('   │   Price Type: ${mode.priceType}');
+          log('   │   Unit Price: ${mode.unitPrice}');
+          log('   │   Flat Price: ${mode.flatPrice}');
+          log('   │   Discount Type: ${mode.discountType}');
+          log('   │   Discount Value: ${mode.discountValue}');
+          log('   │   Is Active: ${mode.isActive}');
+
+          // Check if this is a "Dozen" type
+          if ((mode.saleModeName?.toLowerCase().contains('dozen') == true ||
+              mode.saleModeName?.toLowerCase().contains('ডজন') == true) &&
+              mode.conversionFactor != null) {
+            log('   │   ⚠️ DOZEN DETECTED!');
+            log('   │   Conversion: 1 ${mode.saleModeName} = ${mode.conversionFactor} ${mode.baseUnitName}');
+            log('   │   User enters ${mode.saleModeName}, convert to ${mode.baseUnitName}');
+            log('   │   Formula: baseQuantity = userInput × ${mode.conversionFactor}');
+          }
+
+          // Check tiers
+          if (mode.tiers != null && mode.tiers!.isNotEmpty) {
+            log('   │   Tiers (${mode.tiers!.length}):');
+            for (var tier in mode.tiers!) {
+              log('   │     └─ ${tier.minQuantity} - ${tier.maxQuantity ?? "∞"} = ${tier.price}');
+              // Check tier units
+              log('   │         Tier is in: ${mode.baseUnitName}');
+            }
+          } else {
+            log('   │   No tiers');
+          }
+          log('   └─────────────────────────────────────');
+        }
 
         // Get only active sale modes
         activeConfigs = product.saleModes!
             .where((mode) => mode.isActive == true)
             .toList();
 
-        log(
-          '✅ Product ${product.name}: Found ${activeConfigs.length} active sale modes',
-        );
+        log('✅ Active sale modes: ${activeConfigs.length}');
 
-        for (var mode in activeConfigs) {
-          log(
-            '   - Mode: ${mode.saleModeName}, Sale Mode ID: ${mode.saleModeId}, ID: ${mode.id}',
-          );
-          log(
-            '   - Unit Price: ${mode.unitPrice}, Conv Factor: ${mode.conversionFactor}, Base Unit: ${mode.baseUnitName}',
-          );
-          log(
-            '   - Price Type: ${mode.priceType}, Flat Price: ${mode.flatPrice}',
-          );
-          log('   - Discount: ${mode.discountValue} (${mode.discountType})');
-          log('   - Tiers: ${mode.tiers?.length ?? 0}');
+        // Sort for better UX
+        activeConfigs.sort((a, b) {
+          // Put default/commonly used modes first
+          final aName = a.saleModeName?.toLowerCase() ?? '';
+          final bName = b.saleModeName?.toLowerCase() ?? '';
 
-          // Log tier details
-          if (mode.tiers != null && mode.tiers!.isNotEmpty) {
-            for (var tier in mode.tiers!) {
-              log(
-                '     Tier: ${tier.minQuantity}-${tier.maxQuantity} => ${tier.price}',
-              );
-            }
-          }
-        }
+          // Sort order: Piece/KG first, then others
+          if (aName.contains('piece') || aName.contains('pcs')) return -1;
+          if (bName.contains('piece') || bName.contains('pcs')) return 1;
+          if (aName.contains('kg') || aName.contains('kilo')) return -1;
+          if (bName.contains('kg') || bName.contains('kilo')) return 1;
+
+          return aName.compareTo(bName);
+        });
+
       } else {
         log('ℹ️ No pre-configured sale modes for product ${product.name}');
+
+        // Optional: Create default sale mode from product unit
+        if (product.unitInfo != null) {
+          log('   Creating default sale mode from product unit');
+          final defaultMode = SaleMode(
+            id: -1, // Temporary ID
+            saleModeId: -1,
+            saleModeName: product.unitInfo!.name ?? 'Unit',
+            baseUnitName: product.unitInfo!.name,
+            conversionFactor: 1.0,
+            priceType: 'unit',
+            unitPrice: product.sellingPrice ?? 0.0,
+            isActive: true,
+            tiers: [],
+          );
+          activeConfigs.add(defaultMode);
+        }
       }
 
       if (!_disposedProductIndexes.contains(index)) {
         setState(() {
           _availableSaleModes[index] = activeConfigs;
           _isLoadingSaleModes[index] = false;
+
+          // Auto-select first sale mode if only one exists
+          if (activeConfigs.length == 1) {
+            _selectedSaleModes[index] = activeConfigs.first;
+            _applySaleModePricing(index, activeConfigs.first);
+            log('✅ Auto-selected single sale mode: ${activeConfigs.first.saleModeName}');
+          }
         });
       }
-    } catch (e) {
-      log('❌ Error loading sale modes for product ${product.name}: $e');
+
+    } catch (e, stackTrace) {
+      log('❌ ERROR loading sale modes for product ${product.name}: $e');
+      log('Stack trace: $stackTrace');
+
       if (!_disposedProductIndexes.contains(index)) {
         setState(() {
           _availableSaleModes[index] = [];
           _isLoadingSaleModes[index] = false;
         });
       }
+
+      showCustomToast(
+        context: context,
+        title: 'Error',
+        description: "Failed to load sale modes",
+        icon: Icons.error,
+        primaryColor: Colors.redAccent,
+      );
     }
   }
-
   void _onSaleModeChanged(int index, SaleMode? saleMode) {
     if (_disposedProductIndexes.contains(index)) return;
 
@@ -337,133 +404,193 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
     _applySaleModePricing(index, saleMode);
   }
 
+
   void _applySaleModePricing(int index, SaleMode saleMode) {
     if (_disposedProductIndexes.contains(index)) return;
 
     final quantityStr = getControllerText(index, "quantity");
     final quantity = double.tryParse(quantityStr) ?? 1.0;
+    final product = products[index]["product"] as ProductModelStockModel?;
 
-    // -------------------------------
-    // 🔐 PREVIOUS STATE (FOR COMPARISON)
-    // -------------------------------
-    final prevSaleModeId = products[index]["sale_mode_id"];
-    final prevTier = products[index]["current_tier"] as SaleModeTier?;
+    if (product == null) return;
 
+    log('🔍 APPLYING SALE MODE: ${saleMode.saleModeName}');
+    log('   - Price Type: ${saleMode.priceType}');
+    log('   - Conversion: 1 ${saleMode.saleModeName} = ${saleMode.conversionFactor} ${saleMode.baseUnitName}');
+
+    // ==================== CORRECT CONVERSION ====================
+    final conversionFactor = saleMode.conversionFactor ?? 1.0;
+
+    // User inputs in sale mode unit (Dozon)
+    final saleModeQuantity = quantity; // Dojon
+    // Convert to base unit for tier checking
+    final baseQuantity = quantity * conversionFactor; // Pics
+
+    log('   📐 User Input: $saleModeQuantity ${saleMode.saleModeName}');
+    log('   📐 Base Quantity: $baseQuantity ${saleMode.baseUnitName}');
+
+    // ==================== TIER PRICE CALCULATION ====================
     double pricePerUnit = 0;
     double discountAmount = 0;
     SaleModeTier? applicableTier;
     bool isTierPrice = false;
 
-    log(
-      '🎯 Applying Sale Mode: ${saleMode.saleModeName} (ID: ${saleMode.saleModeId})',
-    );
+    if (saleMode.priceType?.toLowerCase() == 'tier' &&
+        saleMode.tiers != null && saleMode.tiers!.isNotEmpty) {
 
-    // -------------------------------
-    // 🔍 TIER CHECK
-    // -------------------------------
-    if (saleMode.tiers != null && saleMode.tiers!.isNotEmpty) {
+      log('🔢 CHECKING ${saleMode.tiers!.length} TIERS');
+      log('   Tier quantities are in: ${saleMode.baseUnitName}');
+
+      // 🔥 IMPORTANT: Check tiers in BASE UNIT (Pics)
       for (var tier in saleMode.tiers!) {
         final minQty = double.tryParse(tier.minQuantity) ?? 0;
-        final maxQty = double.tryParse(tier.maxQuantity) ?? double.infinity;
+        final maxQtyStr = tier.maxQuantity;
+        final maxQty = (maxQtyStr != null && maxQtyStr.isNotEmpty)
+            ? double.tryParse(maxQtyStr) ?? double.infinity
+            : double.infinity;
 
-        if (quantity >= minQty && quantity <= maxQty) {
+        log('   Tier: ${tier.minQuantity} - ${maxQty == double.infinity ? "∞" : tier.maxQuantity} ${saleMode.baseUnitName} @ ${tier.price}');
+        log('   Check: $baseQuantity ${saleMode.baseUnitName} >= $minQty && $baseQuantity <= $maxQty');
+
+        if (baseQuantity >= minQty && baseQuantity <= maxQty) {
           applicableTier = tier;
           isTierPrice = true;
+          pricePerUnit = double.tryParse(tier.price) ?? 0;
+
+          // 🔥 IMPORTANT: Tier price is in BASE UNIT per SALE MODE UNIT
+          // Example: Tier price 140 means 140 per Dojon (not per Pics)
+          log('   ✅ TIER MATCHED!');
+          log('   💰 Tier Price: $pricePerUnit per ${saleMode.saleModeName}');
           break;
         }
       }
 
-      if (applicableTier != null) {
-        final tierPrice = double.tryParse(applicableTier.price) ?? 0;
-        if (tierPrice > 0) {
-          pricePerUnit = tierPrice;
-          discountAmount = 0; // Tier price is FINAL
-        } else {
-          pricePerUnit = _calculateBasePrice(saleMode);
-          discountAmount = _calculateDiscount(saleMode, pricePerUnit);
+      if (!isTierPrice) {
+        log('⚠️ No tier matched for $baseQuantity ${saleMode.baseUnitName}');
+
+        // Check minimum tier requirement in base unit
+        final firstTier = saleMode.tiers!.first;
+        final minTierQty = double.tryParse(firstTier.minQuantity) ?? 0;
+
+        if (baseQuantity < minTierQty) {
+          log('⚠️ Below minimum tier requirement');
+          log('   Required: $minTierQty ${saleMode.baseUnitName}');
+          log('   Current: $baseQuantity ${saleMode.baseUnitName}');
+          log('   In ${saleMode.saleModeName}: ${minTierQty / conversionFactor}');
+
+          showCustomToast(
+            context: context,
+            title: 'Minimum Quantity Required!',
+            description: "Minimum ${(minTierQty / conversionFactor).toStringAsFixed(2)} ${saleMode.saleModeName} "
+                "($minTierQty ${saleMode.baseUnitName}) required for tier pricing",
+            icon: Icons.warning,
+            primaryColor: Colors.orange,
+          );
         }
-      } else {
-        pricePerUnit = _calculateBasePrice(saleMode);
-        discountAmount = _calculateDiscount(saleMode, pricePerUnit);
+
+        // Use default price
+        pricePerUnit = _calculateBasePriceForTier(saleMode, product);
       }
     } else {
-      pricePerUnit = _calculateBasePrice(saleMode);
+      // Not tier pricing
+      pricePerUnit = _calculateBasePrice(saleMode, product);
       discountAmount = _calculateDiscount(saleMode, pricePerUnit);
     }
 
-    // -------------------------------
-    // 🔁 FALLBACK PRICE
-    // -------------------------------
-    if (pricePerUnit == 0) {
-      final product = products[index]["product"] as ProductModelStockModel?;
-      pricePerUnit = product?.sellingPrice ?? 0.0;
-    }
-
     double finalPrice = pricePerUnit - discountAmount;
-    if (finalPrice < 0) {
-      finalPrice = 0;
-      discountAmount = pricePerUnit;
-    }
+    if (finalPrice < 0) finalPrice = 0;
 
-    // -------------------------------
-    // 💾 SAVE STATE
-    // -------------------------------
+    // ==================== SAVE TO STATE ====================
     setControllerText(index, "price", finalPrice.toStringAsFixed(2));
     products[index]["sale_mode_id"] = saleMode.saleModeId;
     products[index]["sale_mode_name"] = saleMode.saleModeName;
-    products[index]["discount_amount"] = discountAmount * quantity;
+    products[index]["discount_amount"] = discountAmount * saleModeQuantity;
     products[index]["final_price"] = finalPrice;
     products[index]["current_tier"] = applicableTier;
-    products[index]["conversion_factor"] = saleMode.conversionFactor ?? 1.0;
+    products[index]["conversion_factor"] = conversionFactor;
     products[index]["is_tier_price"] = isTierPrice;
+    products[index]["price_type"] = saleMode.priceType;
+    products[index]["sale_mode_quantity"] = saleModeQuantity;
+    products[index]["base_quantity"] = baseQuantity;
 
     updateTotal(index);
 
-    // -------------------------------
-    // 🚦 CHANGE DETECTION (IMPORTANT)
-    // -------------------------------
-    final saleModeChanged = prevSaleModeId != saleMode.saleModeId;
-
-    bool tierChanged = false;
-    if (prevTier == null && applicableTier != null) {
-      tierChanged = true;
-    } else if (prevTier != null && applicableTier == null) {
-      tierChanged = true;
-    } else if (prevTier != null &&
-        applicableTier != null &&
-        (prevTier.minQuantity != applicableTier.minQuantity ||
-            prevTier.maxQuantity != applicableTier.maxQuantity)) {
-      tierChanged = true;
-    }
-
-    // -------------------------------
-    // 🔔 SHOW TOAST ONLY WHEN NEEDED
-    // -------------------------------
-    if (saleModeChanged || tierChanged) {
+    // ==================== SHOW MESSAGE ====================
+    if (isTierPrice && applicableTier != null) {
       showCustomToast(
         context: context,
-        title: 'Sale Mode Applied!',
-        description: saleModeChanged
-            ? "${saleMode.saleModeName} selected"
-            : "Tier applied: ${applicableTier?.minQuantity}-${applicableTier?.maxQuantity}",
-        icon: Icons.check_circle,
+        title: 'Tier Price Applied!',
+        description: "${applicableTier.minQuantity}-${applicableTier.maxQuantity} ${saleMode.baseUnitName} = "
+            "$finalPrice per ${saleMode.saleModeName}",
+        icon: Icons.star,
         primaryColor: Colors.green,
       );
     }
   }
 
-  double _calculateBasePrice(SaleMode saleMode) {
+// নতুন হেল্পার ফাংশন Tier এর জন্য
+  double _calculateBasePriceForTier(SaleMode saleMode, ProductModelStockModel product) {
+    final conversionFactor = saleMode.conversionFactor ?? 1.0;
+    final productPrice = product.sellingPrice ?? 0.0;
+
+    // Calculate price per sale mode unit
+    return productPrice * conversionFactor;
+  }
+  double _calculateBasePrice(SaleMode saleMode, ProductModelStockModel? product) {
     double price = 0;
 
-    if (saleMode.priceType?.toLowerCase() == 'flat' &&
-        saleMode.flatPrice != null) {
-      price = saleMode.flatPrice!;
-      log('💰 Using flat price: $price');
-    } else if (saleMode.unitPrice != null) {
-      price = saleMode.unitPrice!;
-      log('💰 Using unit price: $price');
+    log('💰 CALCULATING BASE PRICE for ${saleMode.saleModeName}');
+    log('   - Price Type: ${saleMode.priceType}');
+    log('   - Unit Price: ${saleMode.unitPrice}');
+    log('   - Flat Price: ${saleMode.flatPrice}');
+    log('   - Product Selling Price: ${product?.sellingPrice}');
+    log('   - Conversion Factor: ${saleMode.conversionFactor}');
+
+    // First check sale mode specific prices
+    if (saleMode.priceType?.toLowerCase() == 'flat') {
+      if (saleMode.flatPrice != null && saleMode.flatPrice! > 0) {
+        price = saleMode.flatPrice!;
+        log('   ✅ Using sale mode flat price: $price');
+      } else if (saleMode.unitPrice != null && saleMode.unitPrice! > 0) {
+        price = saleMode.unitPrice!;
+        log('   ⚠️ Flat price is null, using unit price: $price');
+      }
+    } else if (saleMode.priceType?.toLowerCase() == 'unit') {
+      if (saleMode.unitPrice != null && saleMode.unitPrice! > 0) {
+        price = saleMode.unitPrice!;
+        log('   ✅ Using sale mode unit price: $price');
+      }
     }
 
+    // If still 0, check product price
+    if (price == 0 && product != null) {
+      final productPrice = product.sellingPrice ?? 0.0;
+      final conversionFactor = saleMode.conversionFactor ?? 1.0;
+
+      log('   ⚠️ Sale mode price is 0, using product price: $productPrice');
+      log('   📐 Conversion Factor: $conversionFactor');
+
+      // 🔥 IMPORTANT FIX: Correct conversion logic
+      if (conversionFactor > 1) {
+        // Sale mode is LARGER unit (Dogon/Dozen = 12 Pics)
+        // Price should be HIGHER, not lower!
+        // Example: 1 Dozen = 12 Pics × 12 Taka = 144 Taka
+        price = productPrice * conversionFactor;
+        log('   🔥 MULTIPLY: $productPrice × $conversionFactor = $price');
+        log('   💡 1 ${saleMode.saleModeName} (${conversionFactor} ${saleMode.baseUnitName}) = $price Tk');
+      } else if (conversionFactor < 1) {
+        // Sale mode is SMALLER unit (Gram = 0.001 Kg)
+        // Price should be LOWER
+        price = productPrice * conversionFactor;
+        log('   🔥 MULTIPLY (smaller): $productPrice × $conversionFactor = $price');
+      } else {
+        // No conversion
+        price = productPrice;
+        log('   🔥 No conversion: $price');
+      }
+    }
+
+    log('   💰 Final Base Price: $price');
     return price;
   }
 
@@ -496,43 +623,113 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
     return saleQuantity * conversionFactor;
   }
 
-  // NEW: Validate stock before submitting
   bool _validateStockForProduct(
-    int index,
-    ProductModelStockModel product,
-    double quantity,
-  ) {
+      int index,
+      ProductModelStockModel product,
+      double quantity,
+      ) {
     if (_disposedProductIndexes.contains(index)) return true;
 
     final saleMode = _selectedSaleModes[index];
-    final baseQuantity = _calculateBaseQuantity(index, quantity);
+
+    log('📦 STOCK VALIDATION START for ${product.name}');
+    log('   - Product ID: ${product.id}');
+    log('   - Product Unit: ${product.unitInfo?.name}');
+    log('   - Available Stock: ${product.stockQty} ${product.unitInfo?.name}');
+    log('   - User Quantity: $quantity');
+
+    if (saleMode == null) {
+      // No sale mode - validate directly in product units
+      final availableStock = product.stockQty ?? 0;
+
+      if (quantity > availableStock) {
+        log('❌ STOCK FAILED: No sale mode, direct comparison');
+        showCustomToast(
+          context: context,
+          title: 'Stock Insufficient!',
+          description:
+          "Not enough stock for ${product.name}\n"
+              "Available: $availableStock ${product.unitInfo?.name ?? 'units'}\n"
+              "Requested: $quantity ${product.unitInfo?.name ?? 'units'}",
+          icon: Icons.error,
+          primaryColor: Colors.redAccent,
+        );
+        return false;
+      }
+
+      log('✅ STOCK OK: No sale mode');
+      return true;
+    }
+
+    // With sale mode - need conversion
+    final conversionFactor = saleMode.conversionFactor ?? 1.0;
+    final baseUnitName = saleMode.baseUnitName ?? product.unitInfo?.name ?? 'units';
+    final saleModeName = saleMode.saleModeName ?? 'units';
+
+    log('   - Sale Mode: $saleModeName');
+    log('   - Conversion Factor: $conversionFactor');
+    log('   - Base Unit Name: $baseUnitName');
+
+    // 🔧 FIXED: CORRECT CONVERSION
+    double baseQuantity;
+
+    if (conversionFactor >= 1 && conversionFactor != 1.0) {
+      // User is entering in larger unit (dozen, kg)
+      // Convert to smaller base unit (pieces, grams)
+      baseQuantity = quantity * conversionFactor;
+      log('   - Convert: $quantity $saleModeName × $conversionFactor = $baseQuantity $baseUnitName');
+    } else if (conversionFactor < 1) {
+      // User is entering in smaller unit (gram), convert to larger (kg)
+      baseQuantity = quantity * conversionFactor;
+      log('   - Convert: $quantity × $conversionFactor = $baseQuantity');
+    } else {
+      // No conversion (1:1)
+      baseQuantity = quantity;
+      log('   - No conversion needed: $baseQuantity');
+    }
+
+    // Product stock is always in BASE UNIT (product.unitInfo)
     final availableStock = product.stockQty ?? 0;
+    final productUnitName = product.unitInfo?.name ?? 'units';
 
-    log('📦 Stock Validation for ${product.name}:');
-    log('   - Sale Mode: ${saleMode?.saleModeName ?? "None"}');
-    log('   - Sale Quantity: $quantity');
-    log('   - Conversion Factor: ${saleMode?.conversionFactor ?? 1.0}');
-    log('   - Base Quantity: $baseQuantity');
-    log('   - Available Stock: $availableStock');
+    log('   - Base Quantity Needed: $baseQuantity $productUnitName');
+    log('   - Available Stock: $availableStock $productUnitName');
 
+    // Check if baseQuantity exceeds available stock
     if (baseQuantity > availableStock) {
+      log('❌ STOCK FAILED: Insufficient');
+
+      // Calculate maximum possible quantity user can order
+      double maxPossible;
+      if (conversionFactor >= 1 && conversionFactor != 1.0) {
+        maxPossible = (availableStock / conversionFactor).floorToDouble();
+      } else if (conversionFactor < 1) {
+        maxPossible = (availableStock / conversionFactor).floorToDouble();
+      } else {
+        maxPossible = availableStock.toDouble();
+      }
+
       showCustomToast(
         context: context,
         title: 'Stock Insufficient!',
         description:
-            "Not enough stock for ${product.name}\n"
-            "Available: $availableStock ${product.unitInfo?.name ?? 'units'}\n"
-            "Requested: $quantity ${saleMode?.saleModeName ?? product.unitInfo?.name ?? 'units'}\n"
-            "(Base quantity: ${baseQuantity.toStringAsFixed(3)} ${product.unitInfo?.name ?? 'units'})",
+        "Not enough stock for ${product.name}\n\n"
+            "📊 Details:\n"
+            "• Available: $availableStock $productUnitName\n"
+            "• Requested: $quantity $saleModeName\n"
+            "• = $baseQuantity $baseUnitName\n\n"
+            "📦 You can order max: ${maxPossible.toStringAsFixed(2)} $saleModeName\n"
+            "   (= ${(maxPossible * conversionFactor).toStringAsFixed(2)} $baseUnitName)",
         icon: Icons.error,
         primaryColor: Colors.redAccent,
+        duration: const Duration(seconds: 5),
       );
       return false;
     }
 
+    log('✅ STOCK OK: Sufficient');
     return true;
   }
-
   double calculateTotalForAllProducts() {
     double total = 0;
     for (int i = 0; i < products.length; i++) {
@@ -675,10 +872,27 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
 
     final priceStr = getControllerText(index, "price");
     final quantityStr = getControllerText(index, "quantity");
+    final saleMode = _selectedSaleModes[index];
+    final priceType = products[index]["price_type"] as String?;
 
-    final price = double.tryParse(priceStr) ?? 0;
-    final quantity = int.tryParse(quantityStr) ?? 0;
-    final total = price * quantity;
+    double price = double.tryParse(priceStr) ?? 0;
+    double quantity = double.tryParse(quantityStr) ?? 1;
+    double total;
+
+    // Handle FLAT price differently
+    if (priceType?.toLowerCase() == 'flat' && saleMode != null) {
+      // For flat price, price is already the total for the quantity
+      // But we need to multiply by quantity if it's per sale mode unit
+      total = price * quantity;
+      log('🔄 FLAT PRICE Total Calculation:');
+      log('   - Flat Price: $price per ${saleMode.saleModeName}');
+      log('   - Quantity: $quantity ${saleMode.saleModeName}');
+      log('   - Total: $total');
+    } else {
+      // Normal unit price calculation
+      total = price * quantity;
+      log('🔄 UNIT PRICE Total Calculation: $price × $quantity = $total');
+    }
 
     setControllerText(index, "total", total.toStringAsFixed(2));
     products[index]["total"] = total;
