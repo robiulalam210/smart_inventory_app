@@ -45,7 +45,7 @@ Future<Uint8List> generateMoneyReceiptPdf(MoneyreceiptModel receipt, CompanyInfo
         margin: const pw.EdgeInsets.all(25),
       ),
       header: (context) => pw.Container(
-        padding: const pw.EdgeInsets.fromLTRB(20, 30, 20, 20),
+        padding: const pw.EdgeInsets.fromLTRB(20, 20, 20, 10),
         child: pw.Row(
           mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
           crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -76,8 +76,8 @@ Future<Uint8List> generateMoneyReceiptPdf(MoneyreceiptModel receipt, CompanyInfo
 
             // Logo
             pw.Container(
-              width: 80,
-              height: 80,
+              width: 60,
+              height: 60,
               decoration: pw.BoxDecoration(
                 border: pw.Border.all(color: PdfColors.grey400),
                 borderRadius: pw.BorderRadius.circular(8),
@@ -142,7 +142,7 @@ pw.Widget _buildReceiptHeader(MoneyreceiptModel receipt) {
                 color: PdfColors.blue800,
               ),
             ),
-            pw.SizedBox(height: 8),
+            pw.SizedBox(height: 4),
             pw.Text(
               'Payment Receipt',
               style: pw.TextStyle(

@@ -18,7 +18,7 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
         centerTitle: false,
         actions: [
           IconButton(
-            icon: const Icon(Icons.print, size: 22),
+            icon: const Icon(Iconsax.document_download, size: 22),
             onPressed: () => _generatePdf(context),
             tooltip: 'Generate PDF',
           ),

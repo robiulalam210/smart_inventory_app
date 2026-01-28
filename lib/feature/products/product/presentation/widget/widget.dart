@@ -274,7 +274,7 @@ class ProductDataTableWidget extends StatelessWidget {
 
                     },
                     icon: const Icon(
-                      HugeIcons.strokeRoundedMobileNavigator01,
+                      Iconsax.eye,
                       size: 16,
                     ),
                     label: const Text('View'),
