@@ -22,7 +22,7 @@ class PurchaseDetailsScreen extends StatelessWidget {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.print),
+            icon: const Icon(Iconsax.document_download),
             onPressed: () => _generatePdf(context),
             tooltip: 'Generate PDF',
           ),
@@ -68,7 +68,7 @@ class PurchaseDetailsScreen extends StatelessWidget {
 
   Widget _buildMobileView(BuildContext context) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(8),
       child: Column(
         children: [
           _buildHeaderCard(context),
@@ -85,7 +85,7 @@ class PurchaseDetailsScreen extends StatelessWidget {
 
   Widget _buildHeaderCard(BuildContext context) {
     return Card(
-      elevation: 3,
+      elevation: 0,
       color: AppColors.bottomNavBg(context),
 
       child: Padding(
@@ -195,7 +195,7 @@ class PurchaseDetailsScreen extends StatelessWidget {
 
   Widget _buildItemsCard(BuildContext context) {
     return Card(
-      elevation: 3,
+      elevation: 0,
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -342,10 +342,10 @@ class PurchaseDetailsScreen extends StatelessWidget {
     final subTotal = double.tryParse(purchase.subTotal.toString()) ?? 0.0;
 
     return Card(
-      elevation: 1,
+      elevation: 0,
       color: AppColors.bottomNavBg(context),
       child: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(10),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -464,7 +464,7 @@ class PurchaseDetailsScreen extends StatelessWidget {
     final change = double.tryParse(purchase.changeAmount.toString()) ?? 0.0;
 
     return Card(
-      elevation: 1,
+      elevation: 0,
       color: AppColors.bottomNavBg(context),
       child: Padding(
         padding: const EdgeInsets.all(20),

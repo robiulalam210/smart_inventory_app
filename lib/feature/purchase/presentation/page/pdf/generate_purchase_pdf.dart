@@ -51,7 +51,7 @@ Future<Uint8List> generatePurchasePdf(PurchaseModel purchase,  CompanyInfo? comp
         ),
       ),
       header: (context) => pw.Container(
-        padding: const pw.EdgeInsets.fromLTRB(20, 30, 20, 20),
+        padding: const pw.EdgeInsets.fromLTRB(20, 15, 20, 10),
         child: pw.Row(
           mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
           crossAxisAlignment: pw.CrossAxisAlignment.start,
