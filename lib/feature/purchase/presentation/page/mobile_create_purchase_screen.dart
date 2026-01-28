@@ -685,7 +685,7 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
               );
             },
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 6),
           CustomInputField(
             isRequired: true,
             readOnly: true,
@@ -698,9 +698,10 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
             },
             onTap: _selectDate,
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
           // Optional: VAT small input in mobile top (if needed)
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
                 child: CupertinoSegmentedControl<String>(
@@ -993,15 +994,38 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
                       }
                       return null;
                     },
-                    onChanged: (value) {
-                      setState(() {
-                        final parsedValue = double.tryParse(value) ?? 1;
-                        products[index]["price"] = parsedValue;
-                        controllers[index]?["price"]?.text = parsedValue
-                            .toString();
-                        updateTotal(index);
-                      });
+                    onEditingComplete: () {
+                      final text = controllers[index]?["price"]?.text ?? "";
+                      double price = double.tryParse(text) ?? 1;
+
+                      if (price <= 0) price = 1;
+
+                      controllers[index]?["price"]!
+                        ?..text = price.toString()
+                        ..selection = TextSelection.collapsed(
+                          offset: price.toString().length,
+                        );
+
+                      products[index]["price"] = price;
+                      updateTotal(index);
                     },
+                    onChanged: (value) {
+                      final parsedValue = double.tryParse(value);
+                      if (parsedValue == null) return;
+
+                      products[index]["price"] = parsedValue;
+                      updateTotal(index);
+                    },
+
+                    // onChanged: (value) {
+                    //   setState(() {
+                    //     final parsedValue = double.tryParse(value) ?? 1;
+                    //     products[index]["price"] = parsedValue;
+                    //     controllers[index]?["price"]?.text = parsedValue
+                    //         .toString();
+                    //     updateTotal(index);
+                    //   });
+                    // },
                   ),
                 ),
                 ResponsiveCol(
@@ -1040,20 +1064,35 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
                           controller: controllers[index]!["quantity"],
                           textAlign: TextAlign.center,
                           keyboardType: TextInputType.number,
-                          readOnly: false,
                           decoration: const InputDecoration(
-
                             isDense: true,
                             contentPadding: EdgeInsets.symmetric(vertical: 6),
                             border: OutlineInputBorder(),
                           ),
                           onChanged: (value) {
-                            int qty = int.tryParse(value) ?? 1;
+                            if (value.isEmpty) {
+                              products[index]["quantity"] = "0";
+                              updateTotal(index);
+                              return;
+                            }
+
+                            final qty = int.tryParse(value);
+                            if (qty == null) return;
+
+                            products[index]["quantity"] = qty.toString();
+                            updateTotal(index);
+                          },
+                          onEditingComplete: () {
+                            final text = controllers[index]!["quantity"]!.text;
+                            int qty = int.tryParse(text) ?? 1;
+
                             if (qty < 1) qty = 1;
 
-                            controllers[index]!["quantity"]!.text = qty.toString();
-                            controllers[index]!["quantity"]!.selection =
-                                TextSelection.collapsed(offset: qty.toString().length);
+                            controllers[index]!["quantity"]!
+                              ..text = qty.toString()
+                              ..selection = TextSelection.collapsed(
+                                offset: qty.toString().length,
+                              );
 
                             products[index]["quantity"] = qty.toString();
                             updateTotal(index);

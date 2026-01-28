@@ -592,14 +592,14 @@ class PurchaseDataTableWidget extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             IconButton(
-              icon: const Icon(Icons.visibility, size: 16),
+              icon:  Icon(Iconsax.eye, size: 16),
               onPressed: () => _viewPurchaseDetails(context, purchase),
               padding: const EdgeInsets.all(4),
               constraints: const BoxConstraints(),
               tooltip: 'View Details',
             ),
             IconButton(
-              icon: const Icon(Icons.picture_as_pdf, size: 16),
+              icon: const Icon(Iconsax.document_download, size: 16),
               onPressed: () => _generatePdf(context, purchase),
               padding: const EdgeInsets.all(4),
               constraints: const BoxConstraints(),

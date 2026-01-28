@@ -483,7 +483,7 @@ gapH16,
                           ),
                           child:  Text("Apply Filters",style: AppTextStyle.body(
                             context,
-                          ).copyWith(color: AppColors.text(context)),),
+                          ).copyWith(color: AppColors.whiteColor(context)),),
                         ),
                       ),
                     ],
