@@ -1,4 +1,5 @@
 import 'package:intl/intl.dart';
+import '../../../profile/presentation/bloc/profile_bloc/profile_bloc.dart';
 import '/core/core.dart';
 import '../../../accounts/data/model/account_active_model.dart';
 import '../../../accounts/presentation/bloc/account/account_bloc.dart';
@@ -371,6 +372,8 @@ class _MoneyReceiptListScreenState extends State<MobileMoneyReceiptForm> {
   }
 
   Widget _buildMobileTopFormSection() {
+    final user = context.read<ProfileBloc>().permissionModel?.data?.user;
+    final isAdmin = user?.role == "SUPER_ADMIN" || user?.role == "ADMIN";
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -412,7 +415,9 @@ class _MoneyReceiptListScreenState extends State<MobileMoneyReceiptForm> {
           },
         ),
         const SizedBox(height: 12),
-        BlocBuilder<UserBloc, UserState>(
+        if (isAdmin)
+
+          BlocBuilder<UserBloc, UserState>(
           builder: (context, state) {
             final userBloc = context.read<UserBloc>();
             final userList = userBloc.list;
@@ -812,7 +817,8 @@ class _MoneyReceiptListScreenState extends State<MobileMoneyReceiptForm> {
       );
       return;
     }
-
+    final user = context.read<ProfileBloc>().permissionModel?.data?.user;
+    final isAdmin = user?.role == "SUPER_ADMIN" || user?.role == "ADMIN";
     Map<String, dynamic> body = {
       "amount": double.tryParse(moneyReceiptBloc.amountController.text.trim()),
       "customer_id": moneyReceiptBloc.selectCustomerModel!.id.toString(),
@@ -821,7 +827,9 @@ class _MoneyReceiptListScreenState extends State<MobileMoneyReceiptForm> {
         "yyyy-MM-dd",
       ),
       "payment_method": selectedPaymentMethodNotifier.value.toString(),
-      "seller_id": moneyReceiptBloc.selectUserModel!.id.toString(),
+      "seller_id": (isAdmin)
+          ? moneyReceiptBloc.selectUserModel?.id.toString()
+          : user?.id?.toString() ?? '',
       "account": moneyReceiptBloc.selectedAccountId,
       "specific_invoice": selectedPaymentToState.value == "Specific",
       "payment_type": selectedPaymentToState.value == "Over All"
