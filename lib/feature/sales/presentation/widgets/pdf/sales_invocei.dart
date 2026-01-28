@@ -87,7 +87,7 @@ Future<Uint8List> generateSalesPdf(
       // Header with company logo
       header: (context) {
         return pw.Container(
-          padding: const pw.EdgeInsets.fromLTRB(10, 10, 10, 10),
+          padding: const pw.EdgeInsets.fromLTRB(10, 10, 10, 1),
           child: pw.Row(
             mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
             crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -121,19 +121,15 @@ Future<Uint8List> generateSalesPdf(
                         "Email: ${company!.email!}",
                         style: const pw.TextStyle(fontSize: 10),
                       ),
-                    if (company?.website != null)
-                      pw.Text(
-                        "Web: ${company!.website!}",
-                        style: const pw.TextStyle(fontSize: 10),
-                      ),
+
                   ],
                 ),
               ),
 
               // Logo
               pw.Container(
-                width: 80,
-                height: 80,
+                width: 60,
+                height: 60,
                 decoration: pw.BoxDecoration(
                   border: pw.Border.all(color: PdfColors.grey400),
                   borderRadius: pw.BorderRadius.circular(8),
@@ -164,11 +160,11 @@ Future<Uint8List> generateSalesPdf(
         // Invoice Header
         pw.Container(
           decoration: pw.BoxDecoration(
-            border: pw.Border.all(color: PdfColors.blue800, width: 2),
+            border: pw.Border.all(color: PdfColors.blue800, width: 0.5),
             borderRadius: pw.BorderRadius.circular(8),
           ),
           padding: const pw.EdgeInsets.all(8),
-          margin:const pw.EdgeInsets.all(12),
+          margin:const pw.EdgeInsets.all(8),
           child: pw.Row(
             mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
             children: [
@@ -178,7 +174,7 @@ Future<Uint8List> generateSalesPdf(
                   pw.Text(
                     'SALES INVOICE',
                     style: pw.TextStyle(
-                      fontSize: 18,
+                      fontSize: 14,
                       fontWeight: pw.FontWeight.bold,
                       color: PdfColors.blue800,
                     ),
@@ -187,7 +183,6 @@ Future<Uint8List> generateSalesPdf(
                   _buildInvoiceInfoRow('Invoice No:', sale.invoiceNo ?? 'N/A'),
                   _buildInvoiceInfoRow('Date:', sale.formattedSaleDate),
                   _buildInvoiceInfoRow('Time:', sale.formattedTime),
-                  _buildInvoiceInfoRow('Sale Type:', sale.saleType ?? 'Retail'),
                 ],
               ),
               pw.Container(
@@ -219,7 +214,7 @@ Future<Uint8List> generateSalesPdf(
             borderRadius: pw.BorderRadius.circular(6),
           ),
           padding: const pw.EdgeInsets.all(8),
-          margin:const pw.EdgeInsets.all(12),
+          margin:const pw.EdgeInsets.all(8),
           child: pw.Row(
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
@@ -230,20 +225,18 @@ Future<Uint8List> generateSalesPdf(
                     pw.Text(
                       'CUSTOMER INFORMATION',
                       style: pw.TextStyle(
-                        fontSize: 14,
+                        fontSize: 12,
                         fontWeight: pw.FontWeight.bold,
                         color: PdfColors.blue800,
                       ),
                     ),
-                    pw.SizedBox(height: 8),
+                    pw.SizedBox(height: 4),
                     _buildInfoRow(
                       'Customer:',
                       sale.customerName ?? 'Walk-in Customer',
                     ),
                     _buildInfoRow('Sales Person:', sale.saleByName ?? 'N/A'),
-                    _buildInfoRow('Created By:', sale.createdByName ?? 'N/A'),
-                    _buildInfoRow('Customer Type:',
-                        sale.customerType == 'walk_in' ? 'Walk-in' : 'Saved Customer'),
+
                   ],
                 ),
               ),
@@ -259,19 +252,17 @@ Future<Uint8List> generateSalesPdf(
                     pw.Text(
                       'PAYMENT INFORMATION',
                       style: pw.TextStyle(
-                        fontSize: 14,
+                        fontSize: 12,
                         fontWeight: pw.FontWeight.bold,
                         color: PdfColors.blue800,
                       ),
                     ),
-                    pw.SizedBox(height: 8),
+                    pw.SizedBox(height: 4),
                     _buildInfoRow(
                       'Payment Method:',
                       sale.paymentMethod ?? 'Cash',
                     ),
-                    _buildInfoRow('Account:', sale.accountName ?? 'N/A'),
-                    _buildInfoRow('Money Receipt:',
-                        sale.withMoneyReceipt == 'Yes' ? 'Yes' : 'No'),
+
                     if (sale.remark != null && sale.remark!.isNotEmpty)
                       pw.Column(
                         crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -302,7 +293,7 @@ Future<Uint8List> generateSalesPdf(
   child:  pw.Text(
           'ITEMS DETAILS',
           style: pw.TextStyle(
-            fontSize: 16,
+            fontSize: 14,
             fontWeight: pw.FontWeight.bold,
             color: PdfColors.blue800,
           ),
@@ -312,7 +303,7 @@ Future<Uint8List> generateSalesPdf(
         child:
         pw.Table(
 
-          border: pw.TableBorder.all(color: PdfColors.grey400, width: 1),
+          border: pw.TableBorder.all(color: PdfColors.grey400, width: 0.5,),
           columnWidths: {
             0: const pw.FlexColumnWidth(4),
             1: const pw.FlexColumnWidth(1.2),
@@ -427,9 +418,8 @@ Future<Uint8List> generateSalesPdf(
                         pw.SizedBox(height: 4),
                         pw.Text(
                           ' Goods sold are not returnable\n'
-                              ' Payment due within 15 days\n'
-                              ' Subject to jurisdiction of local courts\n'
-                              ' All prices include applicable taxes',
+                              ' Payment due within 15 days\n',
+
                           style: const pw.TextStyle(
                             fontSize: 10,
                             color: PdfColors.grey700,

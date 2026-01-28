@@ -58,7 +58,7 @@ class _SourceScreenState extends State<MobileSourceScreen> {
           );
 
         },
-        child: Icon(Icons.add),
+        child: Icon(Icons.add,color: AppColors.whiteColor(context),),
       ),
       body: SafeArea(
         child: SizedBox(

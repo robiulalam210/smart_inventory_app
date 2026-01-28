@@ -71,7 +71,7 @@ class _UnitScreenState extends State<MobileUnitScreen> {
 
 
         },
-        child: Icon(Icons.add),
+        child: Icon(Icons.add,color: AppColors.whiteColor(context),),
       ),
       body: SafeArea(
         child: ResponsiveCol(

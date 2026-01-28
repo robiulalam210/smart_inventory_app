@@ -65,7 +65,7 @@ class _CategoriesScreenState extends State<MobileCategoriesScreen> {
             },
           );
         },
-        child: Icon(Icons.add),
+        child: Icon(Icons.add,color: AppColors.whiteColor(context),),
       ),
       body: SafeArea(
         child: Padding(

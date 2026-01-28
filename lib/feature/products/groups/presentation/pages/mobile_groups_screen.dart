@@ -53,7 +53,7 @@ class _GroupsScreenState extends State<MobileGroupsScreen> {
         backgroundColor: AppColors.primaryColor(context),
 
         onPressed: () => _showCreateDialog(context),
-        child: Icon(Icons.add),
+        child: Icon(Icons.add,color: AppColors.whiteColor(context),),
       ),
       body: SafeArea(
         child: ResponsiveCol(

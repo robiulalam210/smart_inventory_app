@@ -39,7 +39,7 @@ class _BrandScreenState extends State<MobileBrandScreen> {
       floatingActionButton: FloatingActionButton(
         backgroundColor: AppColors.primaryColor(context),
         onPressed: () => _showCreateDialog(context),
-        child: Icon(Icons.add),
+        child: Icon(Icons.add,color: AppColors.whiteColor(context),),
       ),
       body: SafeArea(
         child: RefreshIndicator(
