@@ -152,7 +152,7 @@ class _MobileStockReportScreenState extends State<MobileStockReportScreen> {
                 Flexible(
                   child: _buildMobileSummaryCard(
                     "Stock Value",
-                    "\$${summary.totalStockValue.toStringAsFixed(2)}",
+                    summary.totalStockValue.toStringAsFixed(2),
                     Icons.attach_money,
                     Colors.green,
                   ),
@@ -174,7 +174,7 @@ class _MobileStockReportScreenState extends State<MobileStockReportScreen> {
                 Flexible(
                   child: _buildMobileSummaryCard(
                     "Avg Value",
-                    "\$${summary.averageStockValue.toStringAsFixed(2)}",
+                    summary.averageStockValue.toStringAsFixed(2),
                     Icons.analytics,
                     Colors.orange,
                   ),
@@ -502,17 +502,17 @@ class _MobileStockReportScreenState extends State<MobileStockReportScreen> {
                   children: [
                     _buildPriceItem(
                       'Cost',
-                      '\$${product.avgPurchasePrice.toStringAsFixed(2)}',
+                      product.avgPurchasePrice.toStringAsFixed(2),
                       Colors.orange,
                     ),
                     _buildPriceItem(
                       'Selling',
-                      '\$${product.sellingPrice.toStringAsFixed(2)}',
+                      product.sellingPrice.toStringAsFixed(2),
                       Colors.blue,
                     ),
                     _buildPriceItem(
                       'Value',
-                      '\$${product.value.toStringAsFixed(2)}',
+                      product.value.toStringAsFixed(2),
                       Colors.green,
                     ),
                   ],

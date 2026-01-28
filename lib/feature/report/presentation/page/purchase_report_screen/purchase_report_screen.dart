@@ -161,19 +161,19 @@ class _PurchaseReportScreenState extends State<PurchaseReportScreen> {
 
             _buildSummaryCard(
               "Total Purchases",
-              "\$${summary.totalPurchases.toStringAsFixed(2)}",
+              summary.totalPurchases.toStringAsFixed(2),
               Icons.shopping_cart,
               AppColors.primaryColor(context),
             ),
             _buildSummaryCard(
               "Total Paid",
-              "\$${summary.totalPaid.toStringAsFixed(2)}",
+              summary.totalPaid.toStringAsFixed(2),
               Icons.payment,
               Colors.green,
             ),
             _buildSummaryCard(
               "Total Due",
-              "\$${summary.totalDue.toStringAsFixed(2)}",
+              summary.totalDue.toStringAsFixed(2),
               Icons.money_off,
               Colors.orange,
             ),
@@ -780,15 +780,15 @@ class PurchaseReportTableCard extends StatelessWidget {
                 _buildDetailRow('Supplier:', report.supplier),
                 _buildDetailRow(
                   'Net Total:',
-                  '\$${report.netTotal.toStringAsFixed(2)}',
+                  report.netTotal.toStringAsFixed(2),
                 ),
                 _buildDetailRow(
                   'Paid Amount:',
-                  '\$${report.paidTotal.toStringAsFixed(2)}',
+                  report.paidTotal.toStringAsFixed(2),
                 ),
                 _buildDetailRow(
                   'Due Amount:',
-                  '\$${report.dueTotal.toStringAsFixed(2)}',
+                  report.dueTotal.toStringAsFixed(2),
                 ),
                 _buildDetailRow('Status:', report.paymentStatus.toUpperCase()),
 

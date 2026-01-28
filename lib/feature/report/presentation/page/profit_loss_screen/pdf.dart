@@ -88,9 +88,7 @@ Future<Uint8List> generateProfitLossReportPdf(
           ],
         ),
       ),
-      footer: (context) => _buildFooter(context),
       build: (context) => [
-        _buildHeader(reportResponse),
         _buildReportTitle(),
         pw.SizedBox(height: 0),
         _buildExecutiveSummary(reportResponse.summary),
@@ -228,31 +226,31 @@ pw.Widget _buildExecutiveSummary(ProfitLossSummary summary) {
             children: [
               _buildSummaryCard(
                 'Total Revenue',
-                '\$${summary.totalSales.toStringAsFixed(2)}',
+                summary.totalSales.toStringAsFixed(2),
                 'Gross Sales',
                 PdfColors.green800,
               ),
               _buildSummaryCard(
                 'Gross Profit',
-                '\$${summary.grossProfit.toStringAsFixed(2)}',
+                summary.grossProfit.toStringAsFixed(2),
                 '${grossProfitMargin.toStringAsFixed(1)}% Margin',
                 summary.grossProfit >= 0 ? PdfColors.green : PdfColors.red,
               ),
               _buildSummaryCard(
                 'Net Profit',
-                '\$${summary.netProfit.toStringAsFixed(2)}',
+                summary.netProfit.toStringAsFixed(2),
                 '${netProfitMargin.toStringAsFixed(1)}% Margin',
                 summary.netProfit >= 0 ? PdfColors.green : PdfColors.red,
               ),
               _buildSummaryCard(
                 'Total Expenses',
-                '\$${summary.totalExpenses.toStringAsFixed(2)}',
+                summary.totalExpenses.toStringAsFixed(2),
                 '${expenseRatio.toStringAsFixed(1)}% of Revenue',
                 PdfColors.orange,
               ),
               _buildSummaryCard(
                 'COGS',
-                '\$${summary.totalPurchase.toStringAsFixed(2)}',
+                summary.totalPurchase.toStringAsFixed(2),
                 'Cost of Goods Sold',
                 PdfColors.blue,
               ),
@@ -400,7 +398,7 @@ pw.Widget _buildIncomeStatement(ProfitLossSummary summary) {
               // ),
               _buildStatementRow(
                 'Total Purchases',
-                '(\$${summary.totalPurchase.toStringAsFixed(2)})',
+                '(${summary.totalPurchase.toStringAsFixed(2)})',
                 summary.totalSales > 0
                     ? '${(summary.totalPurchase / summary.totalSales * 100).toStringAsFixed(1)}%'
                     : '0.0%',
@@ -409,7 +407,7 @@ pw.Widget _buildIncomeStatement(ProfitLossSummary summary) {
               // Gross Profit
               _buildStatementRow(
                 'GROSS PROFIT',
-                '\$${summary.grossProfit.toStringAsFixed(2)}',
+                summary.grossProfit.toStringAsFixed(2),
                 '${grossProfitMargin.toStringAsFixed(1)}%',
                 isHeader: true,
                 backgroundColor: PdfColors.blue50,
@@ -426,7 +424,7 @@ pw.Widget _buildIncomeStatement(ProfitLossSummary summary) {
               ),
               _buildStatementRow(
                 'Total Expenses',
-                '(\$${summary.totalExpenses.toStringAsFixed(2)})',
+                '(${summary.totalExpenses.toStringAsFixed(2)})',
                 summary.totalSales > 0
                     ? '${(summary.totalExpenses / summary.totalSales * 100).toStringAsFixed(1)}%'
                     : '0.0%',
@@ -435,7 +433,7 @@ pw.Widget _buildIncomeStatement(ProfitLossSummary summary) {
               // Net Profit
               _buildStatementRow(
                 'NET PROFIT',
-                '\$${summary.netProfit.toStringAsFixed(2)}',
+                summary.netProfit.toStringAsFixed(2),
                 '${netProfitMargin.toStringAsFixed(1)}%',
                 isHeader: true,
                 backgroundColor: summary.netProfit >= 0 ? PdfColors.green50 : PdfColors.red50,
@@ -574,7 +572,7 @@ pw.Widget _buildExpenseBreakdown(ProfitLossSummary summary) {
                     _buildDataCell(expense.head),
                     _buildDataCell(expense.subhead),
                     _buildDataCell(
-                      '\$${expense.total.toStringAsFixed(2)}',
+                      expense.total.toStringAsFixed(2),
                       alignment: pw.TextAlign.right,
                     ),
                     _buildDataCell(
@@ -595,7 +593,7 @@ pw.Widget _buildExpenseBreakdown(ProfitLossSummary summary) {
                   ),
                   _buildDataCell('', isBold: true),
                   _buildDataCell(
-                    '\$${summary.totalExpenses.toStringAsFixed(2)}',
+                    summary.totalExpenses.toStringAsFixed(2),
                     alignment: pw.TextAlign.right,
                     isBold: true,
                     color: PdfColors.green800,

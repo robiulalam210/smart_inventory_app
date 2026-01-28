@@ -227,19 +227,19 @@ pw.Widget _buildExecutiveSummary(SupplierDueAdvanceSummary summary, List<Supplie
             children: [
               _buildSummaryCard(
                 'Total Due to Suppliers',
-                '\$${summary.totalDueAmount.toStringAsFixed(2)}',
+                summary.totalDueAmount.toStringAsFixed(2),
                 'Payable Amount',
                 PdfColors.red,
               ),
               _buildSummaryCard(
                 'Total Advance to Suppliers',
-                '\$${summary.totalAdvanceAmount.toStringAsFixed(2)}',
+                summary.totalAdvanceAmount.toStringAsFixed(2),
                 'Prepaid Amount',
                 PdfColors.green,
               ),
               _buildSummaryCard(
                 'Net Balance',
-                '\$${summary.netBalance.abs().toStringAsFixed(2)}',
+                summary.netBalance.abs().toStringAsFixed(2),
                 summary.overallStatus,
                 _getNetBalanceColor(summary.netBalance),
               ),
@@ -418,12 +418,12 @@ pw.Widget _buildBalanceOverview(List<SupplierDueAdvance> suppliers, SupplierDueA
                     ),
                     pw.SizedBox(height: 8),
                     pw.Text(
-                      'High Due (> \$1000): ${balanceAnalysis['highDueSuppliers']} suppliers',
+                      'High Due (> 1000): ${balanceAnalysis['highDueSuppliers']} suppliers',
                       style: const pw.TextStyle(fontSize: 8),
                     ),
                     pw.SizedBox(height: 4),
                     pw.Text(
-                      'Total High Due: \$${balanceAnalysis['highDueAmount'].toStringAsFixed(2)}',
+                      'Total High Due: ${balanceAnalysis['highDueAmount'].toStringAsFixed(2)}',
                       style: const pw.TextStyle(fontSize: 8),
                     ),
                     pw.SizedBox(height: 4),
@@ -560,17 +560,17 @@ pw.TableRow _buildTableRow(SupplierDueAdvance supplier) {
       _buildDataCell(_formatPhone(supplier.phone)),
       _buildDataCell(_truncateText(supplier.email, 18)),
       _buildDataCell(
-        supplier.presentDue > 0 ? '\$${supplier.presentDue.toStringAsFixed(2)}' : '-',
+        supplier.presentDue > 0 ? supplier.presentDue.toStringAsFixed(2) : '-',
         alignment: pw.TextAlign.right,
         color: supplier.presentDue > 0 ? PdfColors.red : PdfColors.grey,
       ),
       _buildDataCell(
-        supplier.presentAdvance > 0 ? '\$${supplier.presentAdvance.toStringAsFixed(2)}' : '-',
+        supplier.presentAdvance > 0 ? supplier.presentAdvance.toStringAsFixed(2) : '-',
         alignment: pw.TextAlign.right,
         color: supplier.presentAdvance > 0 ? PdfColors.green : PdfColors.grey,
       ),
       _buildDataCell(
-        '\$${netBalance.abs().toStringAsFixed(2)}',
+        netBalance.abs().toStringAsFixed(2),
         alignment: pw.TextAlign.right,
         color: _getNetBalanceColor(netBalance),
       ),
@@ -641,17 +641,17 @@ pw.TableRow _buildTotalRow(List<SupplierDueAdvance> suppliers) {
       _buildDataCell('', color: PdfColors.deepOrange800),
       _buildDataCell('', color: PdfColors.deepOrange800),
       _buildDataCell(
-        '\$${totalDue.toStringAsFixed(2)}',
+        totalDue.toStringAsFixed(2),
         alignment: pw.TextAlign.right,
         color: PdfColors.deepOrange800,
       ),
       _buildDataCell(
-        '\$${totalAdvance.toStringAsFixed(2)}',
+        totalAdvance.toStringAsFixed(2),
         alignment: pw.TextAlign.right,
         color: PdfColors.deepOrange800,
       ),
       _buildDataCell(
-        '\$${netBalance.abs().toStringAsFixed(2)}',
+        netBalance.abs().toStringAsFixed(2),
         alignment: pw.TextAlign.right,
         color: _getNetBalanceColor(netBalance),
       ),
@@ -717,7 +717,7 @@ pw.Widget _buildPaymentAnalysis(List<SupplierDueAdvance> suppliers, SupplierDueA
                   return pw.Padding(
                     padding: const pw.EdgeInsets.only(bottom: 4),
                     child: pw.Text(
-                      '• ${supplier.supplierName}: \$${dueAmount.toStringAsFixed(2)}',
+                      '• ${supplier.supplierName}: ${dueAmount.toStringAsFixed(2)}',
                       style: const pw.TextStyle(fontSize: 9),
                     ),
                   );
@@ -740,7 +740,7 @@ pw.Widget _buildPaymentAnalysis(List<SupplierDueAdvance> suppliers, SupplierDueA
                   return pw.Padding(
                     padding: const pw.EdgeInsets.only(bottom: 4),
                     child: pw.Text(
-                      '• ${supplier.supplierName}: \$${advanceAmount.toStringAsFixed(2)}',
+                      '• ${supplier.supplierName}: ${advanceAmount.toStringAsFixed(2)}',
                       style: const pw.TextStyle(fontSize: 9),
                     ),
                   );
@@ -780,11 +780,11 @@ pw.Widget _buildPaymentAnalysis(List<SupplierDueAdvance> suppliers, SupplierDueA
               ),
               pw.SizedBox(height: 8),
               pw.Text(
-                '• Immediate payment requirement: \$${summary.totalDueAmount.toStringAsFixed(2)}',
+                '• Immediate payment requirement: ${summary.totalDueAmount.toStringAsFixed(2)}',
                 style: const pw.TextStyle(fontSize: 9),
               ),
               pw.Text(
-                '• Available credit with suppliers: \$${summary.totalAdvanceAmount.toStringAsFixed(2)}',
+                '• Available credit with suppliers: ${summary.totalAdvanceAmount.toStringAsFixed(2)}',
                 style: const pw.TextStyle(fontSize: 9),
               ),
             ],

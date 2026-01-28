@@ -1,17 +1,9 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:lottie/lottie.dart';
-import 'package:meherinMart/core/configs/app_text.dart';
 import 'package:meherinMart/core/core.dart';
 import 'package:meherinMart/core/widgets/app_scaffold.dart';
 import 'package:printing/printing.dart';
-import '../../../../../core/configs/app_sizes.dart';
 import '../../../../profile/presentation/bloc/profile_bloc/profile_bloc.dart';
-import '/core/configs/app_colors.dart';
-import '/core/configs/app_images.dart';
-import '/core/widgets/app_dropdown.dart';
 import '/core/widgets/date_range.dart';
 import '/feature/customer/data/model/customer_active_model.dart';
 import '/feature/customer/presentation/bloc/customer/customer_bloc.dart';
@@ -93,10 +85,10 @@ class _MobileCustomerDueAdvanceScreenState
 
   String _formatCurrencySigned(double value) {
     final absVal = value.abs().toStringAsFixed(2);
-    return value >= 0 ? '\$$absVal' : '-\$$absVal';
+    return value >= 0 ? absVal : '-$absVal';
   }
 
-  String _formatCurrency(double value) => '\$${value.toStringAsFixed(2)}';
+  String _formatCurrency(double value) => value.toStringAsFixed(2);
 
   @override
   Widget build(BuildContext context) {
@@ -445,8 +437,8 @@ class _MobileCustomerDueAdvanceScreenState
         final hasDue = customer.presentDue > 0;
         final hasAdvance = customer.presentAdvance > 0;
         final netBalanceText = customer.netBalance >= 0
-            ? '\$${customer.netBalance.toStringAsFixed(2)}'
-            : '-\$${customer.netBalance.abs().toStringAsFixed(2)}';
+            ? customer.netBalance.toStringAsFixed(2)
+            : '-${customer.netBalance.abs().toStringAsFixed(2)}';
 
         return Container(
           decoration: BoxDecoration(
@@ -761,8 +753,8 @@ class _MobileCustomerDueAdvanceScreenState
 
   void _showCustomerDetails(BuildContext context, CustomerDueAdvance customer) {
     final netBalanceText = customer.netBalance >= 0
-        ? '\$${customer.netBalance.toStringAsFixed(2)}'
-        : '-\$${customer.netBalance.abs().toStringAsFixed(2)}';
+        ? customer.netBalance.toStringAsFixed(2)
+        : '-${customer.netBalance.abs().toStringAsFixed(2)}';
 
     showModalBottomSheet(
       context: context,
@@ -815,12 +807,12 @@ class _MobileCustomerDueAdvanceScreenState
                 _buildMobileDetailRow('Email:', customer.email, context),
                 _buildMobileDetailRow(
                   'Due Amount:',
-                  '\$${customer.presentDue.toStringAsFixed(2)}',
+                  customer.presentDue.toStringAsFixed(2),
                   context,
                 ),
                 _buildMobileDetailRow(
                   'Advance Amount:',
-                  '\$${customer.presentAdvance.toStringAsFixed(2)}',
+                  customer.presentAdvance.toStringAsFixed(2),
                   context,
                 ),
                 _buildMobileDetailRow('Net Balance:', netBalanceText, context),

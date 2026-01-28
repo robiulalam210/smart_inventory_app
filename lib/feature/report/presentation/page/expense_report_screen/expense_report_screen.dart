@@ -393,13 +393,13 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
             ),
             _buildSummaryCard(
               "Total Amount",
-              "\$${summary.totalAmount.toStringAsFixed(2)}",
+              summary.totalAmount.toStringAsFixed(2),
               Icons.attach_money,
               Colors.red,
             ),
             _buildSummaryCard(
               "Average Expense",
-              "\$${(summary.totalAmount / summary.totalCount).toStringAsFixed(2)}",
+              (summary.totalAmount / summary.totalCount).toStringAsFixed(2),
               Icons.trending_up,
               Colors.green,
             ),
@@ -662,7 +662,7 @@ class ExpenseReportDataTable extends StatelessWidget {
           ),
           const Spacer(),
           Text(
-            'Total Amount: \$${totalAmount.toStringAsFixed(2)}',
+            'Total Amount: ${totalAmount.toStringAsFixed(2)}',
             style: const TextStyle(
               fontWeight: FontWeight.bold,
               color: Colors.red,

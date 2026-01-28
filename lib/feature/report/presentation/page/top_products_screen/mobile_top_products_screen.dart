@@ -154,7 +154,7 @@ class _MobileTopProductsScreenState extends State<MobileTopProductsScreen> {
               children: [
                 _buildMobileSummaryCard(
                   "Total Sales",
-                  "\$${summary.totalSales.toStringAsFixed(2)}",
+                  summary.totalSales.toStringAsFixed(2),
                   Icons.attach_money,
                   Colors.blue,
                   isMobile: true,
@@ -162,7 +162,7 @@ class _MobileTopProductsScreenState extends State<MobileTopProductsScreen> {
                 const SizedBox(width: 8),
                 _buildMobileSummaryCard(
                   "Avg/Product",
-                  "\$${(summary.totalSales / summary.totalProducts).toStringAsFixed(2)}",
+                  (summary.totalSales / summary.totalProducts).toStringAsFixed(2),
                   Icons.analytics,
                   Colors.orange,
                   isMobile: true,
@@ -328,7 +328,7 @@ class _MobileTopProductsScreenState extends State<MobileTopProductsScreen> {
                 children: [
                   _buildMobileDetailItem(
                     'Price',
-                    '\$${product.sellingPrice.toStringAsFixed(2)}',
+                    product.sellingPrice.toStringAsFixed(2),
                     Colors.blue,
                   ),
                   _buildMobileDetailItem(
@@ -338,7 +338,7 @@ class _MobileTopProductsScreenState extends State<MobileTopProductsScreen> {
                   ),
                   _buildMobileDetailItem(
                     'Revenue',
-                    '\$${product.totalSoldPrice.toStringAsFixed(2)}',
+                    product.totalSoldPrice.toStringAsFixed(2),
                     Colors.purple,
                   ),
                 ],
@@ -454,7 +454,7 @@ class _MobileTopProductsScreenState extends State<MobileTopProductsScreen> {
                 // Product Details
                 _buildMobileDetailRow(
                   'Selling Price:',
-                  '\$${product.sellingPrice.toStringAsFixed(2)}',context
+                  product.sellingPrice.toStringAsFixed(2),context
                 ),
                 _buildMobileDetailRow(
                   'Quantity Sold:',
@@ -462,11 +462,11 @@ class _MobileTopProductsScreenState extends State<MobileTopProductsScreen> {
                 ),
                 _buildMobileDetailRow(
                   'Total Revenue:',
-                  '\$${totalRevenue.toStringAsFixed(2)}',context
+                  totalRevenue.toStringAsFixed(2),context
                 ),
                 _buildMobileDetailRow(
                   'Average per Sale:',
-                  '\$${avgSale.toStringAsFixed(2)}',context
+                  avgSale.toStringAsFixed(2),context
                 ),
 
                 // Performance Metrics

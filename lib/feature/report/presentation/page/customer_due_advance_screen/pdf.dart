@@ -231,19 +231,19 @@ pw.Widget _buildExecutiveSummary(CustomerDueAdvanceSummary summary,  List<Custom
             children: [
               _buildSummaryCard(
                 'Total Due Amount',
-                '\$${summary.totalDueAmount.toStringAsFixed(2)}',
+                summary.totalDueAmount.toStringAsFixed(2),
                 'Outstanding Receivables',
                 PdfColors.red,
               ),
               _buildSummaryCard(
                 'Total Advance Amount',
-                '\$${summary.totalAdvanceAmount.toStringAsFixed(2)}',
+                summary.totalAdvanceAmount.toStringAsFixed(2),
                 'Customer Prepayments',
                 PdfColors.green,
               ),
               _buildSummaryCard(
                 'Net Balance',
-                '\$${summary.netBalance.abs().toStringAsFixed(2)}',
+                summary.netBalance.abs().toStringAsFixed(2),
                 summary.overallStatus,
                 _getNetBalanceColor(summary.netBalance),
               ),
@@ -422,12 +422,12 @@ pw.Widget _buildBalanceOverview(List<CustomerDueAdvance> customers, CustomerDueA
                     ),
                     pw.SizedBox(height: 8),
                     pw.Text(
-                      'High Due (> \$500): ${balanceAnalysis['highDueCustomers']} customers',
+                      'High Due (> 500): ${balanceAnalysis['highDueCustomers']} customers',
                       style: const pw.TextStyle(fontSize: 8),
                     ),
                     pw.SizedBox(height: 4),
                     pw.Text(
-                      'Total High Due: \$${balanceAnalysis['highDueAmount'].toStringAsFixed(2)}',
+                      'Total High Due: ${balanceAnalysis['highDueAmount'].toStringAsFixed(2)}',
                       style: const pw.TextStyle(fontSize: 8),
                     ),
                     pw.SizedBox(height: 4),
@@ -564,17 +564,17 @@ pw.TableRow _buildTableRow(CustomerDueAdvance customer) {
       _buildDataCell(_formatPhone(customer.phone)),
       _buildDataCell(_truncateText(customer.email, 18)),
       _buildDataCell(
-        customer.presentDue > 0 ? '\$${customer.presentDue.toStringAsFixed(2)}' : '-',
+        customer.presentDue > 0 ? customer.presentDue.toStringAsFixed(2) : '-',
         alignment: pw.TextAlign.right,
         color: customer.presentDue > 0 ? PdfColors.red : PdfColors.grey,
       ),
       _buildDataCell(
-        customer.presentAdvance > 0 ? '\$${customer.presentAdvance.toStringAsFixed(2)}' : '-',
+        customer.presentAdvance > 0 ? customer.presentAdvance.toStringAsFixed(2) : '-',
         alignment: pw.TextAlign.right,
         color: customer.presentAdvance > 0 ? PdfColors.green : PdfColors.grey,
       ),
       _buildDataCell(
-        '\$${netBalance.abs().toStringAsFixed(2)}',
+        netBalance.abs().toStringAsFixed(2),
         alignment: pw.TextAlign.right,
         color: _getNetBalanceColor(netBalance),
       ),
@@ -645,17 +645,17 @@ pw.TableRow _buildTotalRow(List<CustomerDueAdvance> customers) {
       _buildDataCell('', color: PdfColors.brown800),
       _buildDataCell('', color: PdfColors.brown800),
       _buildDataCell(
-        '\$${totalDue.toStringAsFixed(2)}',
+        totalDue.toStringAsFixed(2),
         alignment: pw.TextAlign.right,
         color: PdfColors.brown800,
       ),
       _buildDataCell(
-        '\$${totalAdvance.toStringAsFixed(2)}',
+        totalAdvance.toStringAsFixed(2),
         alignment: pw.TextAlign.right,
         color: PdfColors.brown800,
       ),
       _buildDataCell(
-        '\$${netBalance.abs().toStringAsFixed(2)}',
+        netBalance.abs().toStringAsFixed(2),
         alignment: pw.TextAlign.right,
         color: _getNetBalanceColor(netBalance),
       ),
@@ -720,7 +720,7 @@ pw.Widget _buildRiskAnalysis(List<CustomerDueAdvance> customers, CustomerDueAdva
                   return pw.Padding(
                     padding: const pw.EdgeInsets.only(bottom: 4),
                     child: pw.Text(
-                      '• ${customer.customerName}: \$${customer.presentDue.toStringAsFixed(2)}',
+                      '• ${customer.customerName}: ${customer.presentDue.toStringAsFixed(2)}',
                       style: const pw.TextStyle(fontSize: 9),
                     ),
                   );
@@ -742,7 +742,7 @@ pw.Widget _buildRiskAnalysis(List<CustomerDueAdvance> customers, CustomerDueAdva
                   return pw.Padding(
                     padding: const pw.EdgeInsets.only(bottom: 4),
                     child: pw.Text(
-                      '• ${customer.customerName}: \$${customer.presentAdvance.toStringAsFixed(2)}',
+                      '• ${customer.customerName}: ${customer.presentAdvance.toStringAsFixed(2)}',
                       style: const pw.TextStyle(fontSize: 9),
                     ),
                   );
