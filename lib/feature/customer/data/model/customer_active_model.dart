@@ -51,7 +51,7 @@ class CustomerActiveModel {
 
   @override
   String toString() {
-    final specialLabel = (specialCustomer == true) ? "[Special]" : "[Regular]";
+    final specialLabel = (specialCustomer == true) ? "[*]" : "";
 
     final due = totalDue ?? 0;
     final advance = (toJson()['advance_balance'] ?? 0);

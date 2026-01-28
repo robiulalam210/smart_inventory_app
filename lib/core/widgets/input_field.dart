@@ -126,6 +126,7 @@ class _CustomInputFieldState extends State<CustomInputField> {
                 fontWeight: FontWeight.w300,
               ),
               isDense: true,
+              enabled: true,
               prefixIcon: widget.icon,
               suffixIcon: widget.suffixIcon,
               contentPadding:

@@ -8,7 +8,7 @@ import '../../../../../core/widgets/show_custom_toast.dart';
 class UnitCreate extends StatefulWidget {
   final String? id;
 
-  const UnitCreate({super.key, this.id,});
+  const UnitCreate({super.key, this.id});
 
   @override
   State<UnitCreate> createState() => _UnitCreateState();
@@ -17,15 +17,12 @@ class UnitCreate extends StatefulWidget {
 class _UnitCreateState extends State<UnitCreate> {
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
-
-
-
   void _showConfirmationDialog() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title:  Text('Confirm',style: AppTextStyle.titleMedium(context),),
+          title: Text('Confirm', style: AppTextStyle.titleMedium(context)),
           content: Text(
             widget.id == null
                 ? 'Are you sure you want to create this unit?'
@@ -55,13 +52,12 @@ class _UnitCreateState extends State<UnitCreate> {
   void _submitForm() {
     if (formKey.currentState!.validate()) {
       final Map<String, dynamic> body = {
-        "name":     context.read<UnitBloc>().nameController.text.trim(),
-        "code":     context.read<UnitBloc>().shortNameController.text.trim(),
+        "name": context.read<UnitBloc>().nameController.text.trim(),
+        "code": context.read<UnitBloc>().shortNameController.text.trim(),
       };
       if (widget.id != null &&
           context.read<UnitBloc>().selectedState.trim().isNotEmpty) {
-        body["is_active"] =
-        context.read<UnitBloc>().selectedState == "Active"
+        body["is_active"] = context.read<UnitBloc>().selectedState == "Active"
             ? true
             : false;
       }
@@ -70,15 +66,13 @@ class _UnitCreateState extends State<UnitCreate> {
         context.read<UnitBloc>().add(AddUnit(body: body));
       } else {
         // Update existing unit
-        context.read<UnitBloc>().add(
-          UpdateUnit(body: body, id: widget.id!),
-        );
+        context.read<UnitBloc>().add(UpdateUnit(body: body, id: widget.id!));
       }
     }
   }
 
   void _clearForm() {
-    context.read<UnitBloc>(). nameController.clear();
+    context.read<UnitBloc>().nameController.clear();
     formKey.currentState?.reset();
   }
 
@@ -103,7 +97,6 @@ class _UnitCreateState extends State<UnitCreate> {
             _clearForm();
           }
           // Navigator.pop(context, true); // Return success result
-
         } else if (state is UnitAddFailed) {
           showCustomToast(
             context: context,
@@ -115,7 +108,7 @@ class _UnitCreateState extends State<UnitCreate> {
           );
         }
       },
-      child:_buildDialogContent() ,
+      child: _buildDialogContent(),
     );
   }
 
@@ -144,11 +137,7 @@ class _UnitCreateState extends State<UnitCreate> {
                 ),
                 IconButton(
                   onPressed: () => Navigator.pop(context),
-                  icon: Icon(
-                    Icons.close,
-                    color: Colors.red,
-                    size: 20,
-                  ),
+                  icon: Icon(Icons.close, color: Colors.red, size: 20),
                   padding: EdgeInsets.zero,
                   constraints: BoxConstraints(),
                 ),
@@ -158,11 +147,10 @@ class _UnitCreateState extends State<UnitCreate> {
             SizedBox(height: 10),
 
             // Name Input Field
-            // Name Input Field
             CustomInputField(
               isRequiredLable: true,
               isRequired: true,
-              controller:context.read<UnitBloc>().  nameController,
+              controller: context.read<UnitBloc>().nameController,
               hintText: 'Enter unit name (e.g., Kilogram)',
               labelText: 'Unit Name',
               fillColor: Colors.grey[50],
@@ -187,7 +175,7 @@ class _UnitCreateState extends State<UnitCreate> {
             CustomInputField(
               isRequiredLable: true,
               isRequired: true,
-              controller: context.read<UnitBloc>(). shortNameController,
+              controller: context.read<UnitBloc>().shortNameController,
               hintText: 'Enter unit code (e.g., kg)',
               labelText: 'Unit Code',
               fillColor: Colors.grey[50],
@@ -210,9 +198,8 @@ class _UnitCreateState extends State<UnitCreate> {
               },
             ),
 
-
             SizedBox(height: 10),
-            if (widget.id !=null)  ...[
+            if (widget.id != null) ...[
               LayoutBuilder(
                 builder: (context, constraints) {
                   final isSmallScreen = constraints.maxWidth < 600;
@@ -223,11 +210,9 @@ class _UnitCreateState extends State<UnitCreate> {
                         : constraints.maxWidth * 0.5,
                     child: AppDropdown(
                       label: "Status",
-                      hint:  "Select Status"
-                         ,
+                      hint: "Select Status",
                       isLabel: false,
-                      value:
-                      context.read<UnitBloc>().selectedState.isEmpty
+                      value: context.read<UnitBloc>().selectedState.isEmpty
                           ? null
                           : context.read<UnitBloc>().selectedState,
                       itemList: ["Active", "Inactive"],
@@ -254,9 +239,9 @@ class _UnitCreateState extends State<UnitCreate> {
                   color: AppColors.primaryColor(context),
                   borderColor: AppColors.primaryColor(context),
                   textColor: AppColors.errorColor(context),
-                  name:  'Cancel',    onPressed: () => Navigator.pop(context),)
-
-                ,
+                  name: 'Cancel',
+                  onPressed: () => Navigator.pop(context),
+                ),
                 SizedBox(width: 10),
                 BlocBuilder<UnitBloc, UnitState>(
                   builder: (context, state) {
@@ -276,5 +261,4 @@ class _UnitCreateState extends State<UnitCreate> {
       ),
     );
   }
-
 }

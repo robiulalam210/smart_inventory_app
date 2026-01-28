@@ -15,6 +15,7 @@ import '../../../../profile/presentation/bloc/profile_bloc/profile_bloc.dart';
 import '../../../data/models/pos_sale_model.dart';
 import '../../widgets/pdf/generate_sales_preview.dart';
 import '../mobile_pos_sale_screen.dart';
+import '../qr_scanner_screen.dart';
 import '/core/core.dart';
 import '/feature/products/product/data/model/product_stock_model.dart';
 import '/feature/users_list/presentation/bloc/users/user_bloc.dart';
@@ -1317,9 +1318,9 @@ class _SalesScreenState extends State<MobileSalesScreen> {
                       keyboardType: const TextInputType.numberWithOptions(
                         decimal: true,
                       ),
+                      readOnly: false, // Ensure this is false!
                       validator: (value) {
-                        if (value!.isEmpty)
-                          return 'Please enter Payable Amount';
+                        if (value!.isEmpty) return 'Please enter Payable Amount';
                         final numericValue = double.tryParse(value);
                         if (numericValue == null) return 'Enter valid number';
                         if (numericValue < 0) return 'Cannot be negative';
@@ -1335,6 +1336,33 @@ class _SalesScreenState extends State<MobileSalesScreen> {
                         _updateChangeAmount();
                       }),
                     ),
+                    // CustomInputField(
+                    //   controller: bloc.payableAmount,
+                    //   hintText: (bloc.selectClintModel?.id == -1 && !_isChecked)
+                    //       ? 'Payable Amount (Auto-set to net total)'
+                    //       : 'Payable Amount',
+                    //   keyboardType: const TextInputType.numberWithOptions(
+                    //     decimal: true,
+                    //   ),
+                    //   validator: (value) {
+                    //     if (value!.isEmpty) {
+                    //       return 'Please enter Payable Amount';
+                    //     }
+                    //     final numericValue = double.tryParse(value);
+                    //     if (numericValue == null) return 'Enter valid number';
+                    //     if (numericValue < 0) return 'Cannot be negative';
+                    //
+                    //     if (bloc.selectClintModel?.id == -1) {
+                    //       final netTotal = calculateAllFinalTotal();
+                    //       if (numericValue != netTotal)
+                    //         return 'Must pay exact: ${netTotal.toStringAsFixed(2)}';
+                    //     }
+                    //     return null;
+                    //   },
+                    //   onChanged: (v) => setState(() {
+                    //     _updateChangeAmount();
+                    //   }),
+                    // ),
                     if (bloc.selectClintModel?.id == -1)
                       Padding(
                         padding: const EdgeInsets.only(top: 4, left: 4),
@@ -2119,166 +2147,220 @@ class _SalesScreenState extends State<MobileSalesScreen> {
       _fetchProduct(code.trim());
     }
   }
+  // Replace the entire build method with this fixed version:
 
   @override
   Widget build(BuildContext context) {
     final availableHeight =
         MediaQuery.of(context).size.height - kToolbarHeight - 24;
 
-    return RawKeyboardListener(
-      focusNode: _focusNode,
-      autofocus: true,
-      onKey: _handleKey,
-      child: Scaffold(
+    return Scaffold(
+      backgroundColor: AppColors.bottomNavBg(context),
+      appBar: AppBar(
         backgroundColor: AppColors.bottomNavBg(context),
-        appBar: AppBar(
-          backgroundColor: AppColors.bottomNavBg(context),
-          title: Text(
-            'Pos Sale',
-            style: AppTextStyle.titleMedium(
-              context,
-            ).copyWith(color: AppColors.text(context)),
+        title: Text(
+          'Pos Sale',
+          style: AppTextStyle.titleMedium(context)
+              .copyWith(color: AppColors.text(context)),
+        ),
+        actions: [
+          IconButton(
+            onPressed: _openProductBrowser,
+            icon: const Icon(Icons.search),
           ),
-          actions: [
-            IconButton(
-              onPressed: _openProductBrowser,
-              icon: const Icon(Icons.search),
-            ),
-            const SizedBox(width: 6),
-            // QR icon to open camera scanner
-            IconButton(
-              onPressed: _openQrScanner,
-              icon: const Icon(Icons.qr_code_scanner),
-              tooltip: 'Scan barcode/QR',
-            ),
-            const SizedBox(width: 6),
-          ],
-        ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: _openProductBrowser,
-          child: const Icon(Icons.add_shopping_cart),
-        ),
-        body: SafeArea(
-          child: BlocConsumer<CreatePosSaleBloc, CreatePosSaleState>(
-            listener: (context, state) {
-              if (state is CreatePosSaleLoading) {
-                appLoader(context, "Creating PosSale, please wait...");
-              } else if (state is CreatePosSaleSuccess) {
-                showCustomToast(
-                  context: context,
-                  title: 'Success!',
-                  description: "Sale created successfully!",
-                  icon: Icons.check_circle,
-                  primaryColor: Colors.green,
-                );
-                changeAmountController.clear();
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const MobilePosSaleScreen(),
+          const SizedBox(width: 6),
+          IconButton(
+            onPressed: _openQrScanner,
+            icon: const Icon(Icons.qr_code_scanner),
+            tooltip: 'Scan barcode/QR',
+          ),
+          const SizedBox(width: 6),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _openProductBrowser,
+        child: const Icon(Icons.add_shopping_cart),
+      ),
+      body: SafeArea(
+        child: BlocConsumer<CreatePosSaleBloc, CreatePosSaleState>(
+          listener: (context, state) {
+            if (state is CreatePosSaleLoading) {
+              appLoader(context, "Creating PosSale, please wait...");
+            } else if (state is CreatePosSaleSuccess) {
+              showCustomToast(
+                context: context,
+                title: 'Success!',
+                description: "Sale created successfully!",
+                icon: Icons.check_circle,
+                primaryColor: Colors.green,
+              );
+              changeAmountController.clear();
+              Navigator.pop(context);
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const MobilePosSaleScreen(),
+                ),
+              );
+              setState(() {});
+            } else if (state is CreatePosSaleFailed) {
+              Navigator.pop(context);
+              appAlertDialog(
+                context,
+                state.content,
+                title: state.title,
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text("Dismiss"),
                   ),
-                );
-                setState(() {});
-              } else if (state is CreatePosSaleFailed) {
-                Navigator.pop(context);
-                appAlertDialog(
-                  context,
-                  state.content,
-                  title: state.title,
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text("Dismiss"),
-                    ),
-                  ],
-                );
-              }
-            },
-            builder: (context, state) {
-              final bloc = context.read<CreatePosSaleBloc>();
+                ],
+              );
+            }
+          },
+          builder: (context, state) {
+            final bloc = context.read<CreatePosSaleBloc>();
 
-              return SingleChildScrollView(
-                padding: AppTextStyle.getResponsivePaddingBody(context),
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(minHeight: availableHeight),
-                  child: Form(
-                    key: formKey,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildTopFormSection(bloc),
-                        _buildProductListSection(bloc),
-                        _buildChargesSection(bloc),
-                        _buildSummaryAndPayment(bloc),
-                        const SizedBox(height: 12),
-                        _buildActionButtons(),
-                        const SizedBox(height: 40),
-                      ],
+            return GestureDetector(
+              // Allow tapping anywhere to dismiss keyboard
+              onTap: () {
+                FocusScope.of(context).unfocus();
+              },
+              child: RawKeyboardListener(
+                focusNode: _focusNode,
+                autofocus: true,
+                onKey: _handleKey,
+                child: SingleChildScrollView(
+                  padding: AppTextStyle.getResponsivePaddingBody(context),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(minHeight: availableHeight),
+                    child: Form(
+                      key: formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildTopFormSection(bloc),
+                          _buildProductListSection(bloc),
+                          _buildChargesSection(bloc),
+                          _buildSummaryAndPayment(bloc),
+                          const SizedBox(height: 12),
+                          _buildActionButtons(),
+                          const SizedBox(height: 40),
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              );
-            },
-          ),
+              ),
+            );
+          },
         ),
       ),
     );
   }
-}
-
-/// Simple fullscreen QR/Barcode scanner screen using mobile_scanner.
-/// Returns the first scanned rawValue when popped.
-class QrScannerScreen extends StatefulWidget {
-  const QrScannerScreen({super.key});
-
-  @override
-  State<QrScannerScreen> createState() => _QrScannerScreenState();
-}
-
-class _QrScannerScreenState extends State<QrScannerScreen> {
-  final MobileScannerController _controller = MobileScannerController(
-    detectionSpeed: DetectionSpeed.normal,
-    facing: CameraFacing.back,
-  );
-
-  bool _scanned = false;
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  void _onDetect(BarcodeCapture capture) {
-    if (_scanned) return;
-    final List<Barcode> barcodes = capture.barcodes;
-    if (barcodes.isEmpty) return;
-
-    final code = barcodes.first.rawValue ?? '';
-    if (code.isNotEmpty) {
-      _scanned = true;
-      Navigator.of(context).pop(code);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Scan Barcode / QR'),
-        backgroundColor: AppColors.bottomNavBg(context),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.flash_on),
-            onPressed: () => _controller.toggleTorch(),
-          ),
-          IconButton(
-            icon: const Icon(Icons.cameraswitch),
-            onPressed: () => _controller.switchCamera(),
-          ),
-        ],
-      ),
-      body: MobileScanner(controller: _controller, onDetect: _onDetect),
-    );
-  }
+  // @override
+  // Widget build(BuildContext context) {
+  //   final availableHeight =
+  //       MediaQuery.of(context).size.height - kToolbarHeight - 24;
+  //
+  //   return RawKeyboardListener(
+  //     focusNode: _focusNode,
+  //     autofocus: true,
+  //     onKey: _handleKey,
+  //     child: Scaffold(
+  //       backgroundColor: AppColors.bottomNavBg(context),
+  //       appBar: AppBar(
+  //         backgroundColor: AppColors.bottomNavBg(context),
+  //         title: Text(
+  //           'Pos Sale',
+  //           style: AppTextStyle.titleMedium(
+  //             context,
+  //           ).copyWith(color: AppColors.text(context)),
+  //         ),
+  //         actions: [
+  //           IconButton(
+  //             onPressed: _openProductBrowser,
+  //             icon: const Icon(Icons.search),
+  //           ),
+  //           const SizedBox(width: 6),
+  //           // QR icon to open camera scanner
+  //           IconButton(
+  //             onPressed: _openQrScanner,
+  //             icon: const Icon(Icons.qr_code_scanner),
+  //             tooltip: 'Scan barcode/QR',
+  //           ),
+  //           const SizedBox(width: 6),
+  //         ],
+  //       ),
+  //       floatingActionButton: FloatingActionButton(
+  //         onPressed: _openProductBrowser,
+  //         child: const Icon(Icons.add_shopping_cart),
+  //       ),
+  //       body: SafeArea(
+  //         child: BlocConsumer<CreatePosSaleBloc, CreatePosSaleState>(
+  //           listener: (context, state) {
+  //             if (state is CreatePosSaleLoading) {
+  //               appLoader(context, "Creating PosSale, please wait...");
+  //             } else if (state is CreatePosSaleSuccess) {
+  //               showCustomToast(
+  //                 context: context,
+  //                 title: 'Success!',
+  //                 description: "Sale created successfully!",
+  //                 icon: Icons.check_circle,
+  //                 primaryColor: Colors.green,
+  //               );
+  //               changeAmountController.clear();
+  //               Navigator.pop(context);
+  //               Navigator.pushReplacement(
+  //                 context,
+  //                 MaterialPageRoute(
+  //                   builder: (context) => const MobilePosSaleScreen(),
+  //                 ),
+  //               );
+  //               setState(() {});
+  //             } else if (state is CreatePosSaleFailed) {
+  //               Navigator.pop(context);
+  //               appAlertDialog(
+  //                 context,
+  //                 state.content,
+  //                 title: state.title,
+  //                 actions: [
+  //                   TextButton(
+  //                     onPressed: () => Navigator.pop(context),
+  //                     child: const Text("Dismiss"),
+  //                   ),
+  //                 ],
+  //               );
+  //             }
+  //           },
+  //           builder: (context, state) {
+  //             final bloc = context.read<CreatePosSaleBloc>();
+  //
+  //             return SingleChildScrollView(
+  //               padding: AppTextStyle.getResponsivePaddingBody(context),
+  //               child: ConstrainedBox(
+  //                 constraints: BoxConstraints(minHeight: availableHeight),
+  //                 child: Form(
+  //                   key: formKey,
+  //                   child: Column(
+  //                     crossAxisAlignment: CrossAxisAlignment.start,
+  //                     children: [
+  //                       _buildTopFormSection(bloc),
+  //                       _buildProductListSection(bloc),
+  //                       _buildChargesSection(bloc),
+  //                       _buildSummaryAndPayment(bloc),
+  //                       const SizedBox(height: 12),
+  //                       _buildActionButtons(),
+  //                       const SizedBox(height: 40),
+  //                     ],
+  //                   ),
+  //                 ),
+  //               ),
+  //             );
+  //           },
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
 }
