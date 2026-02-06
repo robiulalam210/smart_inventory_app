@@ -246,6 +246,66 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
   }
 
   // ==================== SALE MODE FUNCTIONS ====================
+  double getUniversalPosTotalPrice({required int index}) {
+    final product = products[index]["product"] as ProductModelStockModel?;
+    final saleMode = _selectedSaleModes[index];
+    if (product == null) return 0.0;
+
+    final qty = int.tryParse(getControllerText(index, "quantity")) ?? 1;
+
+    // Fallback/unit price
+    if (saleMode == null) {
+      final unitPrice = double.tryParse(product.sellingPrice?.toString() ?? "0") ?? 0.0;
+      products[index]["breakdown"] = "$qty × $unitPrice";
+      return unitPrice * qty;
+    }
+
+    final priceType = saleMode.priceType?.toLowerCase() ?? 'unit';
+    final conversion = double.tryParse(saleMode.conversionFactor?.toString() ?? "1") ?? 1.0;
+    final unitPrice = double.tryParse(saleMode.unitPrice?.toString() ?? product.sellingPrice?.toString() ?? "0") ?? 0.0;
+    final flatPrice = double.tryParse(saleMode.flatPrice?.toString() ?? "0") ?? 0.0;
+    final tiers = saleMode.tiers;
+
+    // 1️⃣ Dozen/Flat
+    if (priceType == 'flat' && conversion >= 1) {
+      int divisor = conversion.toInt();
+      int saleModeCount = qty ~/ divisor;
+      int leftQty = qty % divisor;
+      double total = (saleModeCount * flatPrice) + (leftQty * unitPrice);
+      products[index]["breakdown"] =
+      "$saleModeCount ${saleMode.saleModeName} × $flatPrice + $leftQty pcs × $unitPrice";
+      return total;
+    }
+
+    // 2️⃣ Tier/Bulk (even priceType!='tier'): always check tiers!
+    double baseQuantity = qty * conversion;
+    double price = unitPrice;
+    if (tiers != null && tiers.isNotEmpty) {
+      for (var tier in tiers) {
+        final min = double.tryParse(tier.minQuantity) ?? 0;
+        final max = tier.maxQuantity != null
+            ? double.tryParse(tier.maxQuantity ?? "0") ?? double.infinity
+            : double.infinity;
+        if (baseQuantity >= min && baseQuantity <= max) {
+          price = double.tryParse(tier.price) ?? price;
+          products[index]["breakdown"] = "$baseQuantity × $price (Tier: $min-$max)";
+          return baseQuantity * price;
+        }
+      }
+    }
+
+    // 3️⃣ Piece/Unit fallback
+    products[index]["breakdown"] = "$baseQuantity × $price";
+    return baseQuantity * price;
+  }
+
+  // Always call this after any saleMode or quantity change!
+  void updateTotal(int index) {
+    double total = getUniversalPosTotalPrice(index: index);
+    setControllerText(index, "total", total.toStringAsFixed(2));
+    products[index]["total"] = total;
+    setState(() {}); // <- critical for UI
+  }
 
   void _loadSaleModesForProduct(int index, ProductModelStockModel product) {
     if (_disposedProductIndexes.contains(index)) return;
@@ -382,236 +442,61 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
       );
     }
   }
-  void _onSaleModeChanged(int index, SaleMode? saleMode) {
-    if (_disposedProductIndexes.contains(index)) return;
-
-    setState(() {
-      _selectedSaleModes[index] = saleMode;
-    });
-
-    if (saleMode == null) {
-      // Reset to regular price
-      final product = products[index]["product"] as ProductModelStockModel?;
-      if (product != null) {
-        final sellingPrice = product.sellingPrice ?? 0.0;
-        setControllerText(index, "price", sellingPrice.toStringAsFixed(2));
-        updateTotal(index);
-      }
-      return;
-    }
-
-    // Apply sale mode pricing
-    _applySaleModePricing(index, saleMode);
-  }
 
 
   void _applySaleModePricing(int index, SaleMode saleMode) {
     if (_disposedProductIndexes.contains(index)) return;
 
     final quantityStr = getControllerText(index, "quantity");
-    final quantity = double.tryParse(quantityStr) ?? 1.0;
+    final qty = int.tryParse(quantityStr) ?? 1;
     final product = products[index]["product"] as ProductModelStockModel?;
 
     if (product == null) return;
 
-    log('🔍 APPLYING SALE MODE: ${saleMode.saleModeName}');
-    log('   - Price Type: ${saleMode.priceType}');
-    log('   - Conversion: 1 ${saleMode.saleModeName} = ${saleMode.conversionFactor} ${saleMode.baseUnitName}');
+    // 🟢 DOZEN SALE MODE AUTO-CALC LOGIC
+    final isDozen = saleMode.saleModeName?.toLowerCase().contains('dozen') ?? false;
+    final dozenSize = saleMode.conversionFactor != null
+        ? int.tryParse(saleMode.conversionFactor.toString()) ?? 12
+        : 12;
+    final flatPrice = double.tryParse(saleMode.flatPrice?.toString() ?? "0") ?? 0.0;
+    final unitPrice = double.tryParse(product.sellingPrice?.toString() ?? "0") ?? 0.0;
 
-    // ==================== CORRECT CONVERSION ====================
-    final conversionFactor = saleMode.conversionFactor ?? 1.0;
+    double total = 0;
+    int fullDozens = 0;
+    int leftPieces = 0;
 
-    // User inputs in sale mode unit (Dozon)
-    final saleModeQuantity = quantity; // Dojon
-    // Convert to base unit for tier checking
-    final baseQuantity = quantity * conversionFactor; // Pics
+    if (isDozen && saleMode.priceType?.toLowerCase() == 'flat') {
+      fullDozens = qty ~/ dozenSize;
+      leftPieces = qty % dozenSize;
+      total = (fullDozens * flatPrice) + (leftPieces * unitPrice);
 
-    log('   📐 User Input: $saleModeQuantity ${saleMode.saleModeName}');
-    log('   📐 Base Quantity: $baseQuantity ${saleMode.baseUnitName}');
-
-    // ==================== TIER PRICE CALCULATION ====================
-    double pricePerUnit = 0;
-    double discountAmount = 0;
-    SaleModeTier? applicableTier;
-    bool isTierPrice = false;
-
-    if (saleMode.priceType?.toLowerCase() == 'tier' &&
-        saleMode.tiers != null && saleMode.tiers!.isNotEmpty) {
-
-      log('🔢 CHECKING ${saleMode.tiers!.length} TIERS');
-      log('   Tier quantities are in: ${saleMode.baseUnitName}');
-
-      // 🔥 IMPORTANT: Check tiers in BASE UNIT (Pics)
-      for (var tier in saleMode.tiers!) {
-        final minQty = double.tryParse(tier.minQuantity) ?? 0;
-        final maxQtyStr = tier.maxQuantity;
-        final maxQty = (maxQtyStr != null && maxQtyStr.isNotEmpty)
-            ? double.tryParse(maxQtyStr) ?? double.infinity
-            : double.infinity;
-
-        log('   Tier: ${tier.minQuantity} - ${maxQty == double.infinity ? "∞" : tier.maxQuantity} ${saleMode.baseUnitName} @ ${tier.price}');
-        log('   Check: $baseQuantity ${saleMode.baseUnitName} >= $minQty && $baseQuantity <= $maxQty');
-
-        if (baseQuantity >= minQty && baseQuantity <= maxQty) {
-          applicableTier = tier;
-          isTierPrice = true;
-          pricePerUnit = double.tryParse(tier.price) ?? 0;
-
-          // 🔥 IMPORTANT: Tier price is in BASE UNIT per SALE MODE UNIT
-          // Example: Tier price 140 means 140 per Dojon (not per Pics)
-          log('   ✅ TIER MATCHED!');
-          log('   💰 Tier Price: $pricePerUnit per ${saleMode.saleModeName}');
-          break;
-        }
-      }
-
-      if (!isTierPrice) {
-        log('⚠️ No tier matched for $baseQuantity ${saleMode.baseUnitName}');
-
-        // Check minimum tier requirement in base unit
-        final firstTier = saleMode.tiers!.first;
-        final minTierQty = double.tryParse(firstTier.minQuantity) ?? 0;
-
-        if (baseQuantity < minTierQty) {
-          log('⚠️ Below minimum tier requirement');
-          log('   Required: $minTierQty ${saleMode.baseUnitName}');
-          log('   Current: $baseQuantity ${saleMode.baseUnitName}');
-          log('   In ${saleMode.saleModeName}: ${minTierQty / conversionFactor}');
-
-          showCustomToast(
-            context: context,
-            title: 'Minimum Quantity Required!',
-            description: "Minimum ${(minTierQty / conversionFactor).toStringAsFixed(2)} ${saleMode.saleModeName} "
-                "($minTierQty ${saleMode.baseUnitName}) required for tier pricing",
-            icon: Icons.warning,
-            primaryColor: Colors.orange,
-          );
-        }
-
-        // Use default price
-        pricePerUnit = _calculateBasePriceForTier(saleMode, product);
-      }
+      products[index]["breakdown"] =
+      "$fullDozens ডজন × $flatPrice৳ + $leftPieces পিস × $unitPrice৳";
+      log("🟢 Dozen breakdown: $fullDozens dozen, $leftPieces pcs, total: $total");
     } else {
-      // Not tier pricing
-      pricePerUnit = _calculateBasePrice(saleMode, product);
-      discountAmount = _calculateDiscount(saleMode, pricePerUnit);
+      // Other (unit/tier) old logic
+      total = qty * (saleMode.unitPrice ?? unitPrice);
+      products[index]["breakdown"] = null;
     }
 
-    double finalPrice = pricePerUnit - discountAmount;
-    if (finalPrice < 0) finalPrice = 0;
-
-    // ==================== SAVE TO STATE ====================
-    setControllerText(index, "price", finalPrice.toStringAsFixed(2));
-    products[index]["sale_mode_id"] = saleMode.saleModeId;
-    products[index]["sale_mode_name"] = saleMode.saleModeName;
-    products[index]["discount_amount"] = discountAmount * saleModeQuantity;
-    products[index]["final_price"] = finalPrice;
-    products[index]["current_tier"] = applicableTier;
-    products[index]["conversion_factor"] = conversionFactor;
-    products[index]["is_tier_price"] = isTierPrice;
-    products[index]["price_type"] = saleMode.priceType;
-    products[index]["sale_mode_quantity"] = saleModeQuantity;
-    products[index]["base_quantity"] = baseQuantity;
+    setControllerText(index, "price", total.toStringAsFixed(2));
+    products[index]["total"] = total;
 
     updateTotal(index);
 
-    // ==================== SHOW MESSAGE ====================
-    if (isTierPrice && applicableTier != null) {
+    // UI toast breakdown (optional, for user)
+    if (isDozen && saleMode.priceType?.toLowerCase() == 'flat') {
       showCustomToast(
         context: context,
-        title: 'Tier Price Applied!',
-        description: "${applicableTier.minQuantity}-${applicableTier.maxQuantity} ${saleMode.baseUnitName} = "
-            "$finalPrice per ${saleMode.saleModeName}",
-        icon: Icons.star,
+        title: 'Dozen Price Applied!',
+        description:
+        "$qty পিস → $fullDozens ডজন = ${fullDozens * flatPrice}৳ + $leftPieces পিস = ${leftPieces * unitPrice}৳ → মোট: ${total.toStringAsFixed(2)}৳",
         primaryColor: Colors.green,
       );
     }
   }
 
-// নতুন হেল্পার ফাংশন Tier এর জন্য
-  double _calculateBasePriceForTier(SaleMode saleMode, ProductModelStockModel product) {
-    final conversionFactor = saleMode.conversionFactor ?? 1.0;
-    final productPrice = product.sellingPrice ?? 0.0;
 
-    // Calculate price per sale mode unit
-    return productPrice * conversionFactor;
-  }
-  double _calculateBasePrice(SaleMode saleMode, ProductModelStockModel? product) {
-    double price = 0;
-
-    log('💰 CALCULATING BASE PRICE for ${saleMode.saleModeName}');
-    log('   - Price Type: ${saleMode.priceType}');
-    log('   - Unit Price: ${saleMode.unitPrice}');
-    log('   - Flat Price: ${saleMode.flatPrice}');
-    log('   - Product Selling Price: ${product?.sellingPrice}');
-    log('   - Conversion Factor: ${saleMode.conversionFactor}');
-
-    // First check sale mode specific prices
-    if (saleMode.priceType?.toLowerCase() == 'flat') {
-      if (saleMode.flatPrice != null && saleMode.flatPrice! > 0) {
-        price = saleMode.flatPrice!;
-        log('   ✅ Using sale mode flat price: $price');
-      } else if (saleMode.unitPrice != null && saleMode.unitPrice! > 0) {
-        price = saleMode.unitPrice!;
-        log('   ⚠️ Flat price is null, using unit price: $price');
-      }
-    } else if (saleMode.priceType?.toLowerCase() == 'unit') {
-      if (saleMode.unitPrice != null && saleMode.unitPrice! > 0) {
-        price = saleMode.unitPrice!;
-        log('   ✅ Using sale mode unit price: $price');
-      }
-    }
-
-    // If still 0, check product price
-    if (price == 0 && product != null) {
-      final productPrice = product.sellingPrice ?? 0.0;
-      final conversionFactor = saleMode.conversionFactor ?? 1.0;
-
-      log('   ⚠️ Sale mode price is 0, using product price: $productPrice');
-      log('   📐 Conversion Factor: $conversionFactor');
-
-      // 🔥 IMPORTANT FIX: Correct conversion logic
-      if (conversionFactor > 1) {
-        // Sale mode is LARGER unit (Dogon/Dozen = 12 Pics)
-        // Price should be HIGHER, not lower!
-        // Example: 1 Dozen = 12 Pics × 12 Taka = 144 Taka
-        price = productPrice * conversionFactor;
-        log('   🔥 MULTIPLY: $productPrice × $conversionFactor = $price');
-        log('   💡 1 ${saleMode.saleModeName} (${conversionFactor} ${saleMode.baseUnitName}) = $price Tk');
-      } else if (conversionFactor < 1) {
-        // Sale mode is SMALLER unit (Gram = 0.001 Kg)
-        // Price should be LOWER
-        price = productPrice * conversionFactor;
-        log('   🔥 MULTIPLY (smaller): $productPrice × $conversionFactor = $price');
-      } else {
-        // No conversion
-        price = productPrice;
-        log('   🔥 No conversion: $price');
-      }
-    }
-
-    log('   💰 Final Base Price: $price');
-    return price;
-  }
-
-  double _calculateDiscount(SaleMode saleMode, double pricePerUnit) {
-    double discount = 0;
-
-    if (saleMode.discountValue != null && saleMode.discountValue! > 0) {
-      if (saleMode.discountType?.toLowerCase() == 'percentage' ||
-          saleMode.discountType?.toLowerCase() == 'percent') {
-        discount = pricePerUnit * (saleMode.discountValue! / 100);
-        log(
-          '🎯 Applied percentage discount: ${saleMode.discountValue!}% = $discount',
-        );
-      } else {
-        discount = saleMode.discountValue!;
-        log('🎯 Applied fixed discount: $discount');
-      }
-    }
-
-    return discount;
-  }
 
   // NEW: Calculate base quantity for stock validation
   double _calculateBaseQuantity(int index, double saleQuantity) {
@@ -867,43 +752,8 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
     return finalTotal > 0 ? finalTotal : 0;
   }
 
-  void updateTotal(int index) {
-    if (_disposedProductIndexes.contains(index)) return;
 
-    final priceStr = getControllerText(index, "price");
-    final quantityStr = getControllerText(index, "quantity");
-    final saleMode = _selectedSaleModes[index];
-    final priceType = products[index]["price_type"] as String?;
 
-    double price = double.tryParse(priceStr) ?? 0;
-    double quantity = double.tryParse(quantityStr) ?? 1;
-    double total;
-
-    // Handle FLAT price differently
-    if (priceType?.toLowerCase() == 'flat' && saleMode != null) {
-      // For flat price, price is already the total for the quantity
-      // But we need to multiply by quantity if it's per sale mode unit
-      total = price * quantity;
-      log('🔄 FLAT PRICE Total Calculation:');
-      log('   - Flat Price: $price per ${saleMode.saleModeName}');
-      log('   - Quantity: $quantity ${saleMode.saleModeName}');
-      log('   - Total: $total');
-    } else {
-      // Normal unit price calculation
-      total = price * quantity;
-      log('🔄 UNIT PRICE Total Calculation: $price × $quantity = $total');
-    }
-
-    setControllerText(index, "total", total.toStringAsFixed(2));
-    products[index]["total"] = total;
-
-    // Auto-update payable amount for walk-in customer when money receipt is checked
-    if (_isWalkInCustomer && _isChecked) {
-      _updatePayableAmountForWalkIn();
-    }
-
-    setState(() {});
-  }
 
   void _updateAllTotals() {
     // Recalculate all totals and update UI
@@ -1167,7 +1017,701 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
 
   // ==================== UI BUILDERS ====================
 
-  @override
+  Widget _buildProductsSection(CreatePosSaleBloc bloc) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8),
+      decoration: BoxDecoration(
+        color: AppColors.bottomNavBg(context),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: AppColors.greyColor(context).withValues(alpha: 0.5),
+          width: 0.5,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Products',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.text(context),
+                ),
+              ),
+              InkWell(
+                onTap: addProduct,
+                child: Icon(
+                  Icons.add_circle_outline,
+                  color: AppColors.primaryColor(context),
+                ),
+              ),
+            ],
+          ),
+
+          gapH8,
+          ...products.asMap().entries.map((entry) {
+
+            final index = entry.key;
+            final productData = entry.value;
+            final product = productData["product"] as ProductModelStockModel?;
+            if (_disposedProductIndexes.contains(index)) return const SizedBox.shrink();
+
+
+
+            return Container(
+              margin: const EdgeInsets.only(bottom: 6),
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppColors.bottomNavBg(context),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.grey.shade300),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Header with remove button
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "Item ${index + 1}",
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.text(context),
+                        ),
+                      ),
+                      IconButton(
+                        icon: Icon(
+                          Icons.remove_circle_outline,
+                          color: AppColors.errorColor(context),
+                          size: 20,
+                        ),
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                        onPressed: () => removeProduct(index),
+                      ),
+                    ],
+                  ),
+
+                  // Category Dropdown
+                  BlocBuilder<CategoriesBloc, CategoriesState>(
+                    builder: (context, state) {
+                      final categoryList = categoriesBloc.list;
+                      final selectedCategory = categoriesBloc.selectedState;
+
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 6),
+                        child: AppDropdown(
+                          label: "Category",
+                          hint: "Select Category",
+                          isLabel: true,
+                          isSearch: true,
+                          value: selectedCategory,
+                          itemList: categoryList
+                              .map((e) => e.name ?? "")
+                              .toList(),
+                          onChanged: (newVal) {
+                            setState(() {
+                              categoriesBloc.selectedState = newVal.toString();
+                              final matchingCategory = categoryList.firstWhere(
+                                    (category) =>
+                                category.name.toString() ==
+                                    newVal.toString(),
+                                orElse: () => CategoryModel(),
+                              );
+                              categoriesBloc.selectedStateId =
+                                  matchingCategory.id?.toString() ?? "";
+                              _clearProductSelection(index);
+                            });
+                          },
+                        ),
+                      );
+                    },
+                  ),
+
+                  // Product Dropdown - FIXED: Added onClear callback
+                  Row(
+                    children: [
+                      Expanded(
+                        flex: 3,
+                        child: BlocBuilder<ProductsBloc, ProductsState>(
+                          builder: (context, state) {
+                            final selectedCategoryId =
+                                categoriesBloc.selectedStateId;
+                            final selectedProductIds = products
+                                .where((p) => p["product_id"] != null)
+                                .map<int>((p) => p["product_id"])
+                                .toList();
+
+                            final filteredProducts = context
+                                .read<ProductsBloc>()
+                                .productList
+                                .where((item) {
+                              final categoryMatch =
+                              selectedCategoryId.isEmpty
+                                  ? true
+                                  : item.category?.toString() ==
+                                  selectedCategoryId;
+                              final notDuplicate =
+                                  !selectedProductIds.contains(item.id) ||
+                                      item.id == productData["product_id"];
+                              return categoryMatch && notDuplicate;
+                            })
+                                .toList();
+
+                            return Container(
+                              margin: const EdgeInsets.only(bottom: 8),
+                              child: AppDropdown<ProductModelStockModel>(
+                                isRequired: true,
+                                isLabel: true,
+                                isSearch: true,
+                                onClear: (value) {
+                                  // Clear product selection
+                                  _clearProductSelection(index);
+                                },
+                                label: "Product",
+                                hint: selectedCategoryId.isEmpty
+                                    ? "Select Category First"
+                                    : "Select Product",
+                                value: product,
+                                itemList: filteredProducts,
+                                onChanged: (newVal) =>
+                                    onProductChanged(index, newVal),
+                                validator: (value) => value == null
+                                    ? 'Please select Product'
+                                    : null,
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      if (product != null) SizedBox(width: 8),
+                      if (product != null)
+                        Expanded(
+                          flex: 2,
+                          child: _buildSaleModeDropdown(index, product),
+                        ),
+                    ],
+                  ),
+                if (products[index]["breakdown"] != null)
+            Text(
+              products[index]["breakdown"],
+              style: TextStyle(fontSize: 11, color: Colors.grey[800]),
+            ),
+                  // Stock Info Display
+                  if (product != null && _selectedSaleModes[index] != null)
+                    Container(
+                      margin: const EdgeInsets.only(bottom: 8),
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: Colors.blue.shade50,
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(color: Colors.blue.shade100),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.info,
+                            size: 14,
+                            color: Colors.blue.shade700,
+                          ),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              "Stock: ${product.stockQty ?? 0} ${product.unitInfo?.name ?? 'units'} "
+                                  "(${_calculateBaseQuantity(index, 1).toStringAsFixed(3)} ${_selectedSaleModes[index]?.baseUnitName} per ${_selectedSaleModes[index]?.saleModeName})",
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: Colors.blue.shade800,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                  // Price and Quantity Row
+                  Row(
+                    children: [
+                      // Price Input
+                      Expanded(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 6,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Price *",
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: AppColors.text(context),
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+
+                              SizedBox(
+                                height: 32,
+                                child: TextFormField(
+                                  controller: getController(index, "price"),
+                                  keyboardType:
+                                  const TextInputType.numberWithOptions(
+                                    decimal: true,
+                                  ),
+                                  inputFormatters: [
+                                    FilteringTextInputFormatter.allow(
+                                      RegExp(r'^\d*\.?\d{0,2}$'),
+                                    ),
+                                  ],
+                                  decoration: InputDecoration(
+                                    hintText: "0.00",
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 10,
+                                      vertical: 0,
+                                    ),
+                                    hintStyle: AppTextStyle.body(context)
+                                        .copyWith(
+                                      color: AppColors.greyColor(context),
+                                    ),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(6),
+                                      borderSide: BorderSide(
+                                        color: AppColors.primaryColor(context),
+                                      ),
+                                    ),
+                                  ),
+                                  onChanged: (val) {
+                                    productData["price"] = val;
+                                    updateTotal(index);
+                                  },
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'Please enter price';
+                                    }
+                                    final price = double.tryParse(value);
+                                    if (price == null) {
+                                      return 'Enter valid price';
+                                    }
+                                    if (price <= 0) {
+                                      return 'Price must be greater than 0';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(width: 8),
+
+                      // Quantity Controls
+                      Expanded(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 6,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Quantity *",
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: AppColors.text(context),
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+
+                              Row(
+                                children: [
+                                  // ➖ Minus Button
+                                  Container(
+                                    width: 30,
+                                    height: 30,
+                                    decoration: BoxDecoration(
+                                      color: AppColors.primaryColor(
+                                        context,
+                                      ).withValues(alpha: 0.1),
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    child: IconButton(
+                                      padding: EdgeInsets.zero,
+                                      icon: const Icon(Icons.remove, size: 16),
+                                      onPressed: () {
+                                        int q =
+                                            int.tryParse(
+                                              getControllerText(
+                                                index,
+                                                "quantity",
+                                              ),
+                                            ) ??
+                                                1;
+
+                                        if (q > 1) {
+                                          q--;
+                                          setControllerText(
+                                            index,
+                                            "quantity",
+                                            q.toString(),
+                                          );
+                                          productData["quantity"] = q
+                                              .toString();
+
+                                          // Reapply sale mode pricing if selected
+                                          final selectedSaleMode =
+                                          _selectedSaleModes[index];
+                                          if (selectedSaleMode != null) {
+                                            _applySaleModePricing(
+                                              index,
+                                              selectedSaleMode,
+                                            );
+                                          } else {
+                                            updateTotal(index);
+                                          }
+                                        }
+                                      },
+                                    ),
+                                  ),
+
+                                  // ✍️ Quantity TextField
+                                  Expanded(
+                                    child: SizedBox(
+                                      height: 32,
+                                      child: TextFormField(
+                                        controller: getController(
+                                          index,
+                                          "quantity",
+                                        ),
+                                        keyboardType: TextInputType.number,
+                                        textAlign: TextAlign.center,
+                                        inputFormatters: [
+                                          FilteringTextInputFormatter
+                                              .digitsOnly,
+                                        ],
+                                        decoration: InputDecoration(
+                                          isDense: true,
+                                          hintStyle: AppTextStyle.body(context)
+                                              .copyWith(
+                                            color: AppColors.greyColor(
+                                              context,
+                                            ),
+                                          ),
+                                          border: OutlineInputBorder(),
+                                          contentPadding: EdgeInsets.symmetric(
+                                            horizontal: 6,
+                                            vertical: 6,
+                                          ),
+                                        ),
+                                        onChanged: (val) {
+                                          int q = int.tryParse(val) ?? 1;
+
+                                          // Check stock with unit conversion
+                                          final saleMode =
+                                          _selectedSaleModes[index];
+                                          if (saleMode != null &&
+                                              product != null) {
+                                            final conversionFactor =
+                                                saleMode.conversionFactor ??
+                                                    1.0;
+                                            final baseQuantity =
+                                                q * conversionFactor;
+                                            final stockQty =
+                                                product.stockQty ?? 0;
+
+                                            if (baseQuantity > stockQty) {
+                                              // Find maximum possible quantity
+                                              final maxPossible =
+                                              (stockQty / conversionFactor)
+                                                  .floor();
+                                              if (maxPossible > 0) {
+                                                q = maxPossible;
+                                                setControllerText(
+                                                  index,
+                                                  "quantity",
+                                                  q.toString(),
+                                                );
+                                              } else {
+                                                q = 0;
+                                                setControllerText(
+                                                  index,
+                                                  "quantity",
+                                                  "0",
+                                                );
+                                                showCustomToast(
+                                                  context: context,
+                                                  title: 'Stock Limit',
+                                                  description:
+                                                  "Not enough stock for this sale mode",
+                                                  icon: Icons.warning,
+                                                  primaryColor: Colors.orange,
+                                                );
+                                              }
+                                            }
+                                          } else {
+                                            // Normal stock check without sale mode
+                                            final stockQty =
+                                                product?.stockQty ?? 0;
+                                            if (stockQty > 0 && q > stockQty) {
+                                              q = stockQty;
+                                              setControllerText(
+                                                index,
+                                                "quantity",
+                                                q.toString(),
+                                              );
+                                            }
+                                          }
+
+                                          productData["quantity"] = q
+                                              .toString();
+
+                                          // Reapply sale mode pricing if selected
+                                          final selectedSaleMode =
+                                          _selectedSaleModes[index];
+                                          if (selectedSaleMode != null) {
+                                            _applySaleModePricing(
+                                              index,
+                                              selectedSaleMode,
+                                            );
+                                          } else {
+                                            updateTotal(index);
+                                          }
+                                        },
+                                        validator: (value) {
+                                          if (value == null || value.isEmpty) {
+                                            return 'Enter quantity';
+                                          }
+                                          final qty = int.tryParse(value);
+                                          if (qty == null) {
+                                            return 'Enter valid number';
+                                          }
+                                          if (qty <= 0) {
+                                            return 'Quantity must be > 0';
+                                          }
+
+                                          // Additional stock validation with unit conversion
+                                          if (product != null) {
+                                            final saleMode =
+                                            _selectedSaleModes[index];
+                                            final conversionFactor =
+                                                saleMode?.conversionFactor ??
+                                                    1.0;
+                                            final baseQuantity =
+                                                qty * conversionFactor;
+                                            final stockQty =
+                                                product.stockQty ?? 0;
+
+                                            if (baseQuantity > stockQty) {
+                                              return 'Insufficient stock (${baseQuantity.toStringAsFixed(3)} ${product.unitInfo?.name ?? 'units'} needed)';
+                                            }
+                                          }
+
+                                          return null;
+                                        },
+                                      ),
+                                    ),
+                                  ),
+
+                                  // ➕ Plus Button
+                                  Container(
+                                    width: 30,
+                                    height: 30,
+                                    decoration: BoxDecoration(
+                                      color: AppColors.primaryColor(
+                                        context,
+                                      ).withValues(alpha: 0.1),
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    child: IconButton(
+                                      padding: EdgeInsets.zero,
+                                      icon: const Icon(Icons.add, size: 16),
+                                      onPressed: () {
+                                        int q =
+                                            int.tryParse(
+                                              getControllerText(
+                                                index,
+                                                "quantity",
+                                              ),
+                                            ) ??
+                                                1;
+
+                                        final saleMode =
+                                        _selectedSaleModes[index];
+                                        if (saleMode != null &&
+                                            product != null) {
+                                          final conversionFactor =
+                                              saleMode.conversionFactor ?? 1.0;
+                                          final baseQuantity =
+                                              (q + 1) * conversionFactor;
+                                          final stockQty =
+                                              product.stockQty ?? 0;
+
+                                          if (baseQuantity <= stockQty) {
+                                            q++;
+                                            setControllerText(
+                                              index,
+                                              "quantity",
+                                              q.toString(),
+                                            );
+                                            productData["quantity"] = q
+                                                .toString();
+
+                                            // Reapply sale mode pricing if selected
+                                            _applySaleModePricing(
+                                              index,
+                                              saleMode,
+                                            );
+                                                                                    }
+                                        } else {
+                                          // Normal stock check without sale mode
+                                          final stockQty =
+                                              product?.stockQty ?? 0;
+                                          if (stockQty == 0 || q < stockQty) {
+                                            q++;
+                                            setControllerText(
+                                              index,
+                                              "quantity",
+                                              q.toString(),
+                                            );
+                                            productData["quantity"] = q
+                                                .toString();
+
+                                            // Reapply sale mode pricing if selected
+                                            final selectedSaleMode =
+                                            _selectedSaleModes[index];
+                                            if (selectedSaleMode != null) {
+                                              _applySaleModePricing(
+                                                index,
+                                                selectedSaleMode,
+                                              );
+                                            } else {
+                                              updateTotal(index);
+                                            }
+                                          }
+                                        }
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  // Total Display
+                  Container(
+                    margin: const EdgeInsets.only(top: 8),
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.green.withValues(alpha: 0.05),
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(
+                        color: Colors.green.withValues(alpha: 0.2),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Total:",
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey.shade800,
+                          ),
+                        ),
+                        Text(
+                          "৳${(double.tryParse(getControllerText(index, "total")) ?? 0).toStringAsFixed(2)}",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.green.shade700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }),
+        ],
+      ),
+    );
+  }
+
+
+  Widget _buildSaleModeDropdown(int index, ProductModelStockModel product) {
+    final isLoading = _isLoadingSaleModes[index] ?? false;
+    final availableModes = _availableSaleModes[index] ?? [];
+    final selectedMode = _selectedSaleModes[index];
+
+    if (isLoading) {
+      return Container(
+        margin: const EdgeInsets.only(bottom: 6),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.blue.shade50,
+          borderRadius: BorderRadius.circular(6),
+          border: Border.all(color: Colors.blue.shade100),
+        ),
+        child: Row(
+          children: [
+            SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryColor(context)),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Text("Loading sale modes...", style: TextStyle(fontSize: 14, color: Colors.blue.shade800)),
+          ],
+        ),
+      );
+    }
+
+    if (availableModes.isEmpty) {
+      return SizedBox.shrink();
+    }
+
+    // Dropdown & UI callback
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      child: AppDropdown<SaleMode>(
+          label: "Sale Mode",
+          hint: selectedMode?.saleModeName ?? "Select Sale Mode",
+          isLabel: true,
+          isSearch: false,
+          value: selectedMode,
+          itemList: availableModes,
+          onChanged: (newVal) {
+            setState(() {
+              _selectedSaleModes[index] = newVal;
+            });
+            updateTotal(index);
+          }
+      ),
+    );
+  }  @override
   Widget build(BuildContext context) {
     return AppScaffold(
       appBar: AppBar(
@@ -1309,6 +1853,7 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
     );
   }
 
+
   Widget _buildCustomerInfoSection(CreatePosSaleBloc bloc) {
     return Container(
       padding: const EdgeInsets.all(0.0),
@@ -1334,10 +1879,10 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
               // Fast View: Special গ্রাহক আগে, Regular পরে
               List<CustomerActiveModel> sortedCustomers = [
                 ...context.read<CustomerBloc>().activeCustomer.where(
-                  (c) => c.specialCustomer == true,
+                      (c) => c.specialCustomer == true,
                 ),
                 ...context.read<CustomerBloc>().activeCustomer.where(
-                  (c) => c.specialCustomer != true,
+                      (c) => c.specialCustomer != true,
                 ),
               ];
 
@@ -1378,718 +1923,11 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
                   });
                 },
                 validator: (value) =>
-                    value == null ? 'Please select Customer' : null,
+                value == null ? 'Please select Customer' : null,
               );
             },
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildProductsSection(CreatePosSaleBloc bloc) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8),
-      decoration: BoxDecoration(
-        color: AppColors.bottomNavBg(context),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: AppColors.greyColor(context).withValues(alpha: 0.5),
-          width: 0.5,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Products',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.text(context),
-                ),
-              ),
-              InkWell(
-                onTap: addProduct,
-                child: Icon(
-                  Icons.add_circle_outline,
-                  color: AppColors.primaryColor(context),
-                ),
-              ),
-            ],
-          ),
-
-          gapH8,
-          ...products.asMap().entries.map((entry) {
-            final index = entry.key;
-            final productData = entry.value;
-            final product = productData["product"] as ProductModelStockModel?;
-
-            // Skip if this product index is disposed
-            if (_disposedProductIndexes.contains(index)) {
-              return const SizedBox.shrink();
-            }
-
-            return Container(
-              margin: const EdgeInsets.only(bottom: 6),
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: AppColors.bottomNavBg(context),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.grey.shade300),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Header with remove button
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "Item ${index + 1}",
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.text(context),
-                        ),
-                      ),
-                      IconButton(
-                        icon: Icon(
-                          Icons.remove_circle_outline,
-                          color: AppColors.errorColor(context),
-                          size: 20,
-                        ),
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(),
-                        onPressed: () => removeProduct(index),
-                      ),
-                    ],
-                  ),
-
-                  // Category Dropdown
-                  BlocBuilder<CategoriesBloc, CategoriesState>(
-                    builder: (context, state) {
-                      final categoryList = categoriesBloc.list;
-                      final selectedCategory = categoriesBloc.selectedState;
-
-                      return Container(
-                        margin: const EdgeInsets.only(bottom: 6),
-                        child: AppDropdown(
-                          label: "Category",
-                          hint: "Select Category",
-                          isLabel: true,
-                          isSearch: true,
-                          value: selectedCategory,
-                          itemList: categoryList
-                              .map((e) => e.name ?? "")
-                              .toList(),
-                          onChanged: (newVal) {
-                            setState(() {
-                              categoriesBloc.selectedState = newVal.toString();
-                              final matchingCategory = categoryList.firstWhere(
-                                (category) =>
-                                    category.name.toString() ==
-                                    newVal.toString(),
-                                orElse: () => CategoryModel(),
-                              );
-                              categoriesBloc.selectedStateId =
-                                  matchingCategory.id?.toString() ?? "";
-                              _clearProductSelection(index);
-                            });
-                          },
-                        ),
-                      );
-                    },
-                  ),
-
-                  // Product Dropdown - FIXED: Added onClear callback
-                  Row(
-                    children: [
-                      Expanded(
-                        flex: 3,
-                        child: BlocBuilder<ProductsBloc, ProductsState>(
-                          builder: (context, state) {
-                            final selectedCategoryId =
-                                categoriesBloc.selectedStateId;
-                            final selectedProductIds = products
-                                .where((p) => p["product_id"] != null)
-                                .map<int>((p) => p["product_id"])
-                                .toList();
-
-                            final filteredProducts = context
-                                .read<ProductsBloc>()
-                                .productList
-                                .where((item) {
-                                  final categoryMatch =
-                                      selectedCategoryId.isEmpty
-                                      ? true
-                                      : item.category?.toString() ==
-                                            selectedCategoryId;
-                                  final notDuplicate =
-                                      !selectedProductIds.contains(item.id) ||
-                                      item.id == productData["product_id"];
-                                  return categoryMatch && notDuplicate;
-                                })
-                                .toList();
-
-                            return Container(
-                              margin: const EdgeInsets.only(bottom: 8),
-                              child: AppDropdown<ProductModelStockModel>(
-                                isRequired: true,
-                                isLabel: true,
-                                isSearch: true,
-                                onClear: (value) {
-                                  // Clear product selection
-                                  _clearProductSelection(index);
-                                },
-                                label: "Product",
-                                hint: selectedCategoryId.isEmpty
-                                    ? "Select Category First"
-                                    : "Select Product",
-                                value: product,
-                                itemList: filteredProducts,
-                                onChanged: (newVal) =>
-                                    onProductChanged(index, newVal),
-                                validator: (value) => value == null
-                                    ? 'Please select Product'
-                                    : null,
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                      if (product != null) SizedBox(width: 8),
-                      if (product != null)
-                        Expanded(
-                          flex: 2,
-                          child: _buildSaleModeDropdown(index, product),
-                        ),
-                    ],
-                  ),
-
-                  // Stock Info Display
-                  if (product != null && _selectedSaleModes[index] != null)
-                    Container(
-                      margin: const EdgeInsets.only(bottom: 8),
-                      padding: const EdgeInsets.all(6),
-                      decoration: BoxDecoration(
-                        color: Colors.blue.shade50,
-                        borderRadius: BorderRadius.circular(6),
-                        border: Border.all(color: Colors.blue.shade100),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.info,
-                            size: 14,
-                            color: Colors.blue.shade700,
-                          ),
-                          const SizedBox(width: 6),
-                          Expanded(
-                            child: Text(
-                              "Stock: ${product.stockQty ?? 0} ${product.unitInfo?.name ?? 'units'} "
-                              "(${_calculateBaseQuantity(index, 1).toStringAsFixed(3)} ${_selectedSaleModes[index]?.baseUnitName} per ${_selectedSaleModes[index]?.saleModeName})",
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: Colors.blue.shade800,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                  // Price and Quantity Row
-                  Row(
-                    children: [
-                      // Price Input
-                      Expanded(
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 6,
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                "Price *",
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: AppColors.text(context),
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-
-                              SizedBox(
-                                height: 32,
-                                child: TextFormField(
-                                  controller: getController(index, "price"),
-                                  keyboardType:
-                                      const TextInputType.numberWithOptions(
-                                        decimal: true,
-                                      ),
-                                  inputFormatters: [
-                                    FilteringTextInputFormatter.allow(
-                                      RegExp(r'^\d*\.?\d{0,2}$'),
-                                    ),
-                                  ],
-                                  decoration: InputDecoration(
-                                    hintText: "0.00",
-                                    contentPadding: const EdgeInsets.symmetric(
-                                      horizontal: 10,
-                                      vertical: 0,
-                                    ),
-                                    hintStyle: AppTextStyle.body(context)
-                                        .copyWith(
-                                          color: AppColors.greyColor(context),
-                                        ),
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(6),
-                                    ),
-                                    focusedBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(6),
-                                      borderSide: BorderSide(
-                                        color: AppColors.primaryColor(context),
-                                      ),
-                                    ),
-                                  ),
-                                  onChanged: (val) {
-                                    productData["price"] = val;
-                                    updateTotal(index);
-                                  },
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return 'Please enter price';
-                                    }
-                                    final price = double.tryParse(value);
-                                    if (price == null) {
-                                      return 'Enter valid price';
-                                    }
-                                    if (price <= 0) {
-                                      return 'Price must be greater than 0';
-                                    }
-                                    return null;
-                                  },
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(width: 8),
-
-                      // Quantity Controls
-                      Expanded(
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 6,
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                "Quantity *",
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: AppColors.text(context),
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-
-                              Row(
-                                children: [
-                                  // ➖ Minus Button
-                                  Container(
-                                    width: 30,
-                                    height: 30,
-                                    decoration: BoxDecoration(
-                                      color: AppColors.primaryColor(
-                                        context,
-                                      ).withValues(alpha: 0.1),
-                                      borderRadius: BorderRadius.circular(6),
-                                    ),
-                                    child: IconButton(
-                                      padding: EdgeInsets.zero,
-                                      icon: const Icon(Icons.remove, size: 16),
-                                      onPressed: () {
-                                        int q =
-                                            int.tryParse(
-                                              getControllerText(
-                                                index,
-                                                "quantity",
-                                              ),
-                                            ) ??
-                                            1;
-
-                                        if (q > 1) {
-                                          q--;
-                                          setControllerText(
-                                            index,
-                                            "quantity",
-                                            q.toString(),
-                                          );
-                                          productData["quantity"] = q
-                                              .toString();
-
-                                          // Reapply sale mode pricing if selected
-                                          final selectedSaleMode =
-                                              _selectedSaleModes[index];
-                                          if (selectedSaleMode != null) {
-                                            _applySaleModePricing(
-                                              index,
-                                              selectedSaleMode,
-                                            );
-                                          } else {
-                                            updateTotal(index);
-                                          }
-                                        }
-                                      },
-                                    ),
-                                  ),
-
-                                  // ✍️ Quantity TextField
-                                  Expanded(
-                                    child: SizedBox(
-                                      height: 32,
-                                      child: TextFormField(
-                                        controller: getController(
-                                          index,
-                                          "quantity",
-                                        ),
-                                        keyboardType: TextInputType.number,
-                                        textAlign: TextAlign.center,
-                                        inputFormatters: [
-                                          FilteringTextInputFormatter
-                                              .digitsOnly,
-                                        ],
-                                        decoration: InputDecoration(
-                                          isDense: true,
-                                          hintStyle: AppTextStyle.body(context)
-                                              .copyWith(
-                                                color: AppColors.greyColor(
-                                                  context,
-                                                ),
-                                              ),
-                                          border: OutlineInputBorder(),
-                                          contentPadding: EdgeInsets.symmetric(
-                                            horizontal: 6,
-                                            vertical: 6,
-                                          ),
-                                        ),
-                                        onChanged: (val) {
-                                          int q = int.tryParse(val) ?? 1;
-
-                                          // Check stock with unit conversion
-                                          final saleMode =
-                                              _selectedSaleModes[index];
-                                          if (saleMode != null &&
-                                              product != null) {
-                                            final conversionFactor =
-                                                saleMode.conversionFactor ??
-                                                1.0;
-                                            final baseQuantity =
-                                                q * conversionFactor;
-                                            final stockQty =
-                                                product.stockQty ?? 0;
-
-                                            if (baseQuantity > stockQty) {
-                                              // Find maximum possible quantity
-                                              final maxPossible =
-                                                  (stockQty / conversionFactor)
-                                                      .floor();
-                                              if (maxPossible > 0) {
-                                                q = maxPossible;
-                                                setControllerText(
-                                                  index,
-                                                  "quantity",
-                                                  q.toString(),
-                                                );
-                                              } else {
-                                                q = 0;
-                                                setControllerText(
-                                                  index,
-                                                  "quantity",
-                                                  "0",
-                                                );
-                                                showCustomToast(
-                                                  context: context,
-                                                  title: 'Stock Limit',
-                                                  description:
-                                                      "Not enough stock for this sale mode",
-                                                  icon: Icons.warning,
-                                                  primaryColor: Colors.orange,
-                                                );
-                                              }
-                                            }
-                                          } else {
-                                            // Normal stock check without sale mode
-                                            final stockQty =
-                                                product?.stockQty ?? 0;
-                                            if (stockQty > 0 && q > stockQty) {
-                                              q = stockQty;
-                                              setControllerText(
-                                                index,
-                                                "quantity",
-                                                q.toString(),
-                                              );
-                                            }
-                                          }
-
-                                          productData["quantity"] = q
-                                              .toString();
-
-                                          // Reapply sale mode pricing if selected
-                                          final selectedSaleMode =
-                                              _selectedSaleModes[index];
-                                          if (selectedSaleMode != null) {
-                                            _applySaleModePricing(
-                                              index,
-                                              selectedSaleMode,
-                                            );
-                                          } else {
-                                            updateTotal(index);
-                                          }
-                                        },
-                                        validator: (value) {
-                                          if (value == null || value.isEmpty) {
-                                            return 'Enter quantity';
-                                          }
-                                          final qty = int.tryParse(value);
-                                          if (qty == null) {
-                                            return 'Enter valid number';
-                                          }
-                                          if (qty <= 0) {
-                                            return 'Quantity must be > 0';
-                                          }
-
-                                          // Additional stock validation with unit conversion
-                                          if (product != null) {
-                                            final saleMode =
-                                                _selectedSaleModes[index];
-                                            final conversionFactor =
-                                                saleMode?.conversionFactor ??
-                                                1.0;
-                                            final baseQuantity =
-                                                qty * conversionFactor;
-                                            final stockQty =
-                                                product.stockQty ?? 0;
-
-                                            if (baseQuantity > stockQty) {
-                                              return 'Insufficient stock (${baseQuantity.toStringAsFixed(3)} ${product.unitInfo?.name ?? 'units'} needed)';
-                                            }
-                                          }
-
-                                          return null;
-                                        },
-                                      ),
-                                    ),
-                                  ),
-
-                                  // ➕ Plus Button
-                                  Container(
-                                    width: 30,
-                                    height: 30,
-                                    decoration: BoxDecoration(
-                                      color: AppColors.primaryColor(
-                                        context,
-                                      ).withValues(alpha: 0.1),
-                                      borderRadius: BorderRadius.circular(6),
-                                    ),
-                                    child: IconButton(
-                                      padding: EdgeInsets.zero,
-                                      icon: const Icon(Icons.add, size: 16),
-                                      onPressed: () {
-                                        int q =
-                                            int.tryParse(
-                                              getControllerText(
-                                                index,
-                                                "quantity",
-                                              ),
-                                            ) ??
-                                            1;
-
-                                        final saleMode =
-                                            _selectedSaleModes[index];
-                                        if (saleMode != null &&
-                                            product != null) {
-                                          final conversionFactor =
-                                              saleMode.conversionFactor ?? 1.0;
-                                          final baseQuantity =
-                                              (q + 1) * conversionFactor;
-                                          final stockQty =
-                                              product.stockQty ?? 0;
-
-                                          if (baseQuantity <= stockQty) {
-                                            q++;
-                                            setControllerText(
-                                              index,
-                                              "quantity",
-                                              q.toString(),
-                                            );
-                                            productData["quantity"] = q
-                                                .toString();
-
-                                            // Reapply sale mode pricing if selected
-                                            if (saleMode != null) {
-                                              _applySaleModePricing(
-                                                index,
-                                                saleMode,
-                                              );
-                                            } else {
-                                              updateTotal(index);
-                                            }
-                                          }
-                                        } else {
-                                          // Normal stock check without sale mode
-                                          final stockQty =
-                                              product?.stockQty ?? 0;
-                                          if (stockQty == 0 || q < stockQty) {
-                                            q++;
-                                            setControllerText(
-                                              index,
-                                              "quantity",
-                                              q.toString(),
-                                            );
-                                            productData["quantity"] = q
-                                                .toString();
-
-                                            // Reapply sale mode pricing if selected
-                                            final selectedSaleMode =
-                                                _selectedSaleModes[index];
-                                            if (selectedSaleMode != null) {
-                                              _applySaleModePricing(
-                                                index,
-                                                selectedSaleMode,
-                                              );
-                                            } else {
-                                              updateTotal(index);
-                                            }
-                                          }
-                                        }
-                                      },
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  // Total Display
-                  Container(
-                    margin: const EdgeInsets.only(top: 8),
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.green.withValues(alpha: 0.05),
-                      borderRadius: BorderRadius.circular(6),
-                      border: Border.all(
-                        color: Colors.green.withValues(alpha: 0.2),
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          "Total:",
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.grey.shade800,
-                          ),
-                        ),
-                        Text(
-                          "৳${(double.tryParse(getControllerText(index, "total")) ?? 0).toStringAsFixed(2)}",
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.green.shade700,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSaleModeDropdown(int index, ProductModelStockModel product) {
-    final isLoading = _isLoadingSaleModes[index] ?? false;
-    final availableModes = _availableSaleModes[index] ?? [];
-    final selectedMode = _selectedSaleModes[index];
-
-    // Debug log to see what's in the product
-    if (product.saleModes != null && product.saleModes!.isNotEmpty) {
-      log(
-        '🎯 Product ${product.name} has ${product.saleModes!.length} sale modes from API',
-      );
-      for (var mode in product.saleModes!) {
-        log(
-          '   - Mode: ${mode.saleModeName}, Sale Mode ID: ${mode.saleModeId}, ID: ${mode.id}',
-        );
-      }
-    }
-
-    if (isLoading) {
-      return Container(
-        margin: const EdgeInsets.only(bottom: 6),
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Colors.blue.shade50,
-          borderRadius: BorderRadius.circular(6),
-          border: Border.all(color: Colors.blue.shade100),
-        ),
-        child: Row(
-          children: [
-            SizedBox(
-              width: 20,
-              height: 20,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation<Color>(
-                  AppColors.primaryColor(context),
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Text(
-              "Loading sale modes...",
-              style: TextStyle(fontSize: 14, color: Colors.blue.shade800),
-            ),
-          ],
-        ),
-      );
-    }
-
-    if (availableModes.isEmpty) {
-      return SizedBox.shrink();
-    }
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      child: AppDropdown<SaleMode>(
-        label: "Sale Mode ",
-        hint: selectedMode?.saleModeName ?? "Select Sale Mode",
-        isLabel: true,
-        isSearch: false,
-        value: selectedMode,
-        itemList: availableModes,
-        onChanged: (newVal) => _onSaleModeChanged(index, newVal),
       ),
     );
   }
