@@ -2,6 +2,7 @@ import '/core/core.dart';
 
 import '../../data/model/account_model.dart';
 import '../bloc/account/account_bloc.dart';
+
 class MobileCreateAccountScreen extends StatefulWidget {
   const MobileCreateAccountScreen({
     super.key,
@@ -19,8 +20,7 @@ class MobileCreateAccountScreen extends StatefulWidget {
       _MobileCreateAccountScreenState();
 }
 
-class _MobileCreateAccountScreenState
-    extends State<MobileCreateAccountScreen> {
+class _MobileCreateAccountScreenState extends State<MobileCreateAccountScreen> {
   final ValueNotifier<String> selectedAccountType = ValueNotifier('');
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
@@ -58,8 +58,7 @@ class _MobileCreateAccountScreenState
         padding: const EdgeInsets.all(16),
         child: SingleChildScrollView(
           physics: const ClampingScrollPhysics(),
-          keyboardDismissBehavior:
-          ScrollViewKeyboardDismissBehavior.onDrag,
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           child: Form(
             key: formKey,
             autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -71,10 +70,8 @@ class _MobileCreateAccountScreenState
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      widget.id.isEmpty
-                          ? "Create Account"
-                          : "Update Account",
-                      style:  TextStyle(
+                      widget.id.isEmpty ? "Create Account" : "Update Account",
+                      style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                         color: AppColors.primaryColor(context),
@@ -87,7 +84,6 @@ class _MobileCreateAccountScreenState
                   ],
                 ),
 
-
                 /// ACCOUNT TYPE
                 ValueListenableBuilder<String>(
                   valueListenable: selectedAccountType,
@@ -97,38 +93,28 @@ class _MobileCreateAccountScreenState
                       hint: "Select account type",
                       value: type.isEmpty ? null : type,
                       isRequired: true,
-                      itemList: const [
-                        "Bank",
-                        "Cash",
-                        "Mobile banking"
-                      ],
-                      onChanged: (v) =>
-                      selectedAccountType.value = v!,
+                      itemList: const ["Bank", "Cash", "Mobile banking"],
+                      onChanged: (v) => selectedAccountType.value = v!,
                       validator: (v) =>
-                      v == null ? "Select account type" : null,
-
+                          v == null ? "Select account type" : null,
                     );
                   },
                 ),
 
-
                 /// ACCOUNT NAME
                 AppTextField(
-                  controller:
-                  accountBloc.accountNameController,
+                  controller: accountBloc.accountNameController,
                   hintText: "Account Name",
                   isRequired: true,
-                  validator: (v) =>
-                  v == null || v.trim().length < 2
+                  validator: (v) => v == null || v.trim().length < 2
                       ? "Enter valid account name"
-                      : null, keyboardType: TextInputType.text,
+                      : null,
+                  keyboardType: TextInputType.text,
                 ),
-
 
                 /// OPENING BALANCE
                 AppTextField(
-                  controller: accountBloc
-                      .accountOpeningBalanceController,
+                  controller: accountBloc.accountOpeningBalanceController,
                   hintText: "Opening Balance",
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
@@ -143,7 +129,6 @@ class _MobileCreateAccountScreenState
                   },
                 ),
 
-
                 /// ACCOUNT NUMBER
                 ValueListenableBuilder<String>(
                   valueListenable: selectedAccountType,
@@ -152,23 +137,21 @@ class _MobileCreateAccountScreenState
                       return const SizedBox.shrink();
                     }
 
-                    return AppTextField(keyboardType: TextInputType.number,
-                      controller:
-                      accountBloc.accountNumberController,
+                    return AppTextField(
+                      keyboardType: type == "Cash"?TextInputType.text:TextInputType.number,
+                      controller: accountBloc.accountNumberController,
                       hintText: type == "Bank"
                           ? "Bank Account Number"
                           : type == "Mobile banking"
                           ? "Mobile Account Number"
                           : "Cash Reference",
                       isRequired: true,
-                      validator: (v) =>
-                      v == null || v.length < 5
+                      validator: (v) => v == null || v.length < 5
                           ? "Enter valid number"
                           : null,
                     );
                   },
                 ),
-
 
                 /// BANK DETAILS
                 ValueListenableBuilder<String>(
@@ -180,9 +163,9 @@ class _MobileCreateAccountScreenState
 
                     return Column(
                       children: [
-                        AppTextField(keyboardType: TextInputType.text,
-                          controller:
-                          accountBloc.bankNameController,
+                        AppTextField(
+                          keyboardType: TextInputType.text,
+                          controller: accountBloc.bankNameController,
                           hintText: "Bank Name",
                           isRequired: true,
                           validator: (value) {
@@ -196,9 +179,9 @@ class _MobileCreateAccountScreenState
                           },
                         ),
                         const SizedBox(height: 10),
-                        AppTextField(keyboardType: TextInputType.text,
-                          controller:
-                          accountBloc.branchNameController,
+                        AppTextField(
+                          keyboardType: TextInputType.text,
+                          controller: accountBloc.branchNameController,
                           hintText: "Branch Name",
                           isRequired: true,
                           validator: (value) {
@@ -234,8 +217,7 @@ class _MobileCreateAccountScreenState
                       child: AppButton(
                         name: "Cancel",
                         color: Colors.grey,
-                        onPressed: () =>
-                            Navigator.pop(context),
+                        onPressed: () => Navigator.pop(context),
                       ),
                     ),
                   ],
@@ -254,24 +236,18 @@ class _MobileCreateAccountScreenState
     final body = {
       "name": accountBloc.accountNameController.text.trim(),
       "ac_type": selectedAccountType.value,
-      "opening_balance": accountBloc
-          .accountOpeningBalanceController.text
+      "opening_balance": accountBloc.accountOpeningBalanceController.text
           .trim(),
-      "ac_number":
-      accountBloc.accountNumberController.text.trim(),
+      "ac_number": accountBloc.accountNumberController.text.trim(),
       if (selectedAccountType.value == "Bank") ...{
-        "bank_name":
-        accountBloc.bankNameController.text.trim(),
-        "branch":
-        accountBloc.branchNameController.text.trim(),
-      }
+        "bank_name": accountBloc.bankNameController.text.trim(),
+        "branch": accountBloc.branchNameController.text.trim(),
+      },
     };
 
     widget.id.isEmpty
         ? accountBloc.add(AddAccount(body: body))
-        : accountBloc.add(
-      UpdateAccount(body: body, id: widget.id),
-    );
+        : accountBloc.add(UpdateAccount(body: body, id: widget.id));
 
     Navigator.pop(context);
   }
