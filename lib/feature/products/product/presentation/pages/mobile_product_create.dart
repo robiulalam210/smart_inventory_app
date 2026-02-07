@@ -209,19 +209,20 @@ class _ProductsFormState extends State<MobileProductCreate> {
                       ),
                       gapH8,
                       // Second Row: Groups, Brand, Source
-                      Wrap(
-                        runSpacing: 8,
-                        spacing: 0,
-                        children: [
-                          SizedBox(child: _buildGroupsDropdown()),
-                          const SizedBox(width: 5),
-                          SizedBox(child: _buildSourceDropdown()),
-                        ],
-                      ),
+
 
                       // Third Row: Product Name and Opening Stock
                       _buildProductNameField(),
+                      Row(
+                        children: [
+                          Expanded(child: _buildOpeningStockField()),
+                          const SizedBox(width: 5),
 
+                          Expanded(child: _buildPurchasePriceField()),
+                          const SizedBox(width: 5),
+                          Expanded(child: _buildSellingPriceField()),
+                        ],
+                      ),
                       // Seventh Row: Alert Quantity and Description
                       Row(
                         children: [
@@ -233,23 +234,24 @@ class _ProductsFormState extends State<MobileProductCreate> {
                       ),
 
                       // Fourth Row: Purchase Price and Selling Price
-                      Row(
-                        children: [
-                          Expanded(child: _buildOpeningStockField()),
-                          const SizedBox(width: 5),
 
-                          Expanded(child: _buildPurchasePriceField()),
-                          const SizedBox(width: 5),
-                          Expanded(child: _buildSellingPriceField()),
-                        ],
-                      ),
 
                       // Discount Section
                       _buildDiscountSection(),
+                      const SizedBox(height: 5),
 
+                      Wrap(
+                        runSpacing: 8,
+                        spacing: 0,
+                        children: [
+                          SizedBox(child: _buildGroupsDropdown()),
+                          const SizedBox(width: 5),
+                          SizedBox(child: _buildSourceDropdown()),
+                        ],
+                      ),
 
                       // Description Field
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 5),
                       _buildDescriptionField(),
 
                       const SizedBox(height: 10),
@@ -537,7 +539,7 @@ class _ProductsFormState extends State<MobileProductCreate> {
                   matchingCategory.id?.toString() ?? "";
             });
           },
-          validator: (value) => value == null ? 'Please select Category' : null,
+          // validator: (value) => value == null ? 'Please select Category' : null,
         );
       },
     );
@@ -552,7 +554,8 @@ class _ProductsFormState extends State<MobileProductCreate> {
         return AppDropdown(
           label: "Unit ",
           hint: "Select Unit",
-          isLabel: false,
+
+          isLabel: true,
           isNeedAll: false,
           isRequired: true,
           isSearch: true,
@@ -680,7 +683,7 @@ class _ProductsFormState extends State<MobileProductCreate> {
   Widget _buildPurchasePriceField() {
     return CustomInputField(
       isRequiredLable: true,
-      isRequired: false,
+      isRequired: true,
       controller: productsBloc.productPurchasePriceController,
       labelText: 'Purchase Price',
       inputFormatters: [
@@ -695,7 +698,7 @@ class _ProductsFormState extends State<MobileProductCreate> {
   Widget _buildSellingPriceField() {
     return CustomInputField(
       isRequiredLable: true,
-      isRequired: false,
+      isRequired: true,
       controller: productsBloc.productSellingPriceController,
       labelText: 'Selling Price',
       hintText: '0.00',
@@ -710,7 +713,7 @@ class _ProductsFormState extends State<MobileProductCreate> {
   Widget _buildOpeningStockField() {
     return CustomInputField(
       isRequiredLable: true,
-      isRequired: false,
+      isRequired: true,
       controller: productsBloc.productOpeningStockController,
       labelText: 'Opening Stock',
       hintText: '0',
@@ -723,9 +726,10 @@ class _ProductsFormState extends State<MobileProductCreate> {
   Widget _buildAlertQuantityField() {
     return CustomInputField(
       isRequiredLable: true,
-      isRequired: false,
+      isRequired: true,
       controller: productsBloc.productAlertQuantityController,
       labelText: 'Alert Quantity',
+
       hintText: '5',
       fillColor: const Color.fromARGB(255, 255, 255, 255),
       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
@@ -791,12 +795,12 @@ class _ProductsFormState extends State<MobileProductCreate> {
   void _submitProduct() {
     if (!formKey.currentState!.validate()) return;
 
-    if (categoriesBloc.selectedStateId.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Please select a category')));
-      return;
-    }
+    // if (categoriesBloc.selectedStateId.isEmpty) {
+    //   ScaffoldMessenger.of(
+    //     context,
+    //   ).showSnackBar(const SnackBar(content: Text('Please select a category')));
+    //   return;
+    // }
 
     if (unitBloc.selectedIdState.isEmpty) {
       ScaffoldMessenger.of(
@@ -806,12 +810,15 @@ class _ProductsFormState extends State<MobileProductCreate> {
     }
 
     Map<String, dynamic> body = {
-      "category": categoriesBloc.selectedStateId,
+      // "category": categoriesBloc.selectedStateId,
       "unit": unitBloc.selectedIdState,
       "name": productsBloc.productNameController.text,
     };
 
     // Add optional fields
+    if (categoriesBloc.selectedState.isNotEmpty) {
+      body["category"] = categoriesBloc.selectedStateId;
+    }
     if (sourceBloc.selectedIdState.isNotEmpty) {
       body["source"] = sourceBloc.selectedIdState;
     }
