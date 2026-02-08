@@ -878,7 +878,7 @@ class _DropdownBottomSheetState<T> extends State<_DropdownBottomSheet<T>> {
                           ),
                         ),
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 8),
+                            horizontal: 10, vertical: 8),
                         child: InkWell(
                           onTap: () => widget.onChanged(item),
                           child: Row(
