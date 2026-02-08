@@ -77,7 +77,7 @@ class _MobileRootScreenState extends State<MobileRootScreen> {
                   clipBehavior: Clip.none,
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(14),
+                      padding: const EdgeInsets.all(8),
                       margin: const EdgeInsets.only(bottom: 10, left: 10, right: 10),
                       decoration: BoxDecoration(
                         color: Colors.white,
@@ -152,9 +152,3 @@ class _NavItem {
   _NavItem({required this.icon, required this.index, required this.label});
 }
 
-// Dummy screen placeholders
-// class MobilePosSaleScreen extends StatelessWidget { @override Widget build(BuildContext context) => Center(child: Text("Sales Screen")); }
-// class MobilePurchaseScreen extends StatelessWidget { @override Widget build(BuildContext context) => Center(child: Text("Purchase Screen")); }
-// class DashBoardScreen extends StatelessWidget { @override Widget build(BuildContext context) => Center(child: Text("Dashboard Screen")); }
-// class MobileReportsTabScreen extends StatelessWidget { @override Widget build(BuildContext context) => Center(child: Text("Reports Screen")); }
-// class MobileProfileScreen extends StatelessWidget { @override Widget build(BuildContext context) => Center(child: Text("Profile Screen")); }

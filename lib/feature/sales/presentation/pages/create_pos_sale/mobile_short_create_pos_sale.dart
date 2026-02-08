@@ -310,13 +310,32 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
   }
 
   // Always call this after any saleMode or quantity change!
+
   void updateTotal(int index) {
-    double total = getUniversalPosTotalPrice(index: index);
+    final priceController = getController(index, "price");
+    final qty = int.tryParse(getControllerText(index, "quantity")) ?? 1;
+    double total;
+
+    // Use manually-entered price if given
+    if (priceController != null) {
+      final price = double.tryParse(priceController.text);
+      if (price != null && price > 0) {
+        total = price * qty;
+        products[index]["final_price"] = price; // use this in your backend payload
+        products[index]["breakdown"] = "$qty × $price (Custom Price)";
+        setControllerText(index, "total", total.toStringAsFixed(2));
+        products[index]["total"] = total;
+        setState(() {});
+        return;
+      }
+    }
+    // Fallback: use your existing sale mode/unit calculation
+    total = getUniversalPosTotalPrice(index: index);
+    products[index]["final_price"] = null; // clear custom price mark
     setControllerText(index, "total", total.toStringAsFixed(2));
     products[index]["total"] = total;
-    setState(() {}); // <- critical for UI
+    setState(() {});
   }
-
   void _loadSaleModesForProduct(int index, ProductModelStockModel product) {
     if (_disposedProductIndexes.contains(index)) return;
     if (_availableSaleModes.containsKey(index)) return;
@@ -506,17 +525,19 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
     products[index]["total"] = total;
 
     updateTotal(index);
+setState(() {
 
+});
     // UI toast breakdown (optional, for user)
-    if (isDozen && saleMode.priceType?.toLowerCase() == 'flat') {
-      showCustomToast(
-        context: context,
-        title: 'Dozen Price Applied!',
-        description:
-            "$qty পিস → $fullDozens ডজন = ${fullDozens * flatPrice}৳ + $leftPieces পিস = ${leftPieces * unitPrice}৳ → মোট: ${total.toStringAsFixed(2)}৳",
-        primaryColor: Colors.green,
-      );
-    }
+    // if (isDozen && saleMode.priceType?.toLowerCase() == 'flat') {
+    //   showCustomToast(
+    //     context: context,
+    //     title: 'Dozen Price Applied!',
+    //     description:
+    //         "$qty পিস → $fullDozens ডজন = ${fullDozens * flatPrice}৳ + $leftPieces পিস = ${leftPieces * unitPrice}৳ → মোট: ${total.toStringAsFixed(2)}৳",
+    //     primaryColor: Colors.green,
+    //   );
+    // }
   }
 
   // NEW: Calculate base quantity for stock validation

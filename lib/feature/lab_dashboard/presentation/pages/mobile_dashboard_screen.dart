@@ -1,12 +1,14 @@
 import 'package:flutter/cupertino.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:meherinMart/root.dart';
 
 import '../../../../core/configs/configs.dart';
 import '../../../../core/utilities/amount_counter.dart';
 import '../../../../core/widgets/app_scaffold.dart';
 import '../../../../core/shared/widgets/sideMenu/mobile_tab_sidebar.dart';
 
+import '../../../mobile_root.dart';
 import '../../../profile/presentation/pages/moble_profile_screen.dart';
 import '../../../profile/presentation/bloc/profile_bloc/profile_bloc.dart';
 import '../../../feature.dart';
@@ -49,7 +51,7 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
     final companyInfo = context.read<ProfileBloc>().permissionModel?.data?.companyInfo;
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
         gradient: LinearGradient(
@@ -306,8 +308,8 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
         actions: [
           IconButton(
             onPressed: () =>
-                AppRoutes.push(context, const MobileProfileScreen()),
-            icon: const Icon(Icons.person, size: 32),
+                AppRoutes.push(context,  MobileRootScreen(initialPageIndex: 4,)),
+            icon: const Icon(Icons.person, size: 30),
           ),
           gapW8,
         ],
@@ -322,7 +324,7 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
             },
             child: SingleChildScrollView(
               controller: scrollController,
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(8),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
