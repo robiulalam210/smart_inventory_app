@@ -97,27 +97,27 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(10),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Product Header Card
               _buildProductHeaderCard(),
-              const SizedBox(height: 20),
+              const SizedBox(height: 10),
 
               // Basic Information
               _buildSectionTitle("Basic Information"),
               _buildBasicInfoCard(),
-              const SizedBox(height: 20),
+              const SizedBox(height: 10),
 
               // Pricing Information
               _buildSectionTitle("Pricing & Stock"),
               _buildPricingStockCard(),
-              const SizedBox(height: 20),
+              const SizedBox(height: 10),
 
               // Sale Modes Section
               _buildSaleModesSection(),
-              const SizedBox(height: 20),
+              const SizedBox(height: 10),
 
               // Metadata
               _buildSectionTitle("Metadata"),
@@ -376,16 +376,16 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
 
   Widget _buildBasicInfoCard() {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.bottomNavBg(context),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: AppColors.greyColor(context).withOpacity(0.2),
+          color: AppColors.greyColor(context).withValues(alpha: 0.2),
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -469,16 +469,16 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
 
   Widget _buildPricingStockCard() {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.bottomNavBg(context),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: AppColors.greyColor(context).withOpacity(0.2),
+          color: AppColors.greyColor(context).withValues(alpha: 0.2),
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -732,22 +732,23 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
 
         if (saleModes.isEmpty)
           Container(
-            padding: const EdgeInsets.all(32),
+            alignment: Alignment.center,
+            padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.grey.withOpacity(0.05),
+              color: Colors.grey.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: Colors.grey.withOpacity(0.2),
+                color: Colors.grey.withValues(alpha: 0.2),
               ),
             ),
             child: Column(
               children: [
                 Icon(
                   Iconsax.money_2,
-                  size: 48,
-                  color: Colors.grey.withOpacity(0.5),
+                  size: 40,
+                  color: Colors.grey.withValues(alpha: 0.5),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 8),
                 Text(
                   "No Sale Modes Configured",
                   style: AppTextStyle.body(context).copyWith(
@@ -762,7 +763,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                   ),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 8),
                 AppButton(
                   name: "Add Sale Mode",
                   onPressed: () => _navigateToSaleModes(context),
@@ -792,14 +793,14 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.bottomNavBg(context),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: AppColors.greyColor(context).withOpacity(0.2),
+          color: AppColors.greyColor(context).withValues(alpha: 0.2),
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -896,14 +897,14 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.bottomNavBg(context),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: AppColors.greyColor(context).withOpacity(0.2),
+          color: AppColors.greyColor(context).withValues(alpha: 0.2),
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -918,12 +919,12 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
           const Divider(),
           _buildMetadataRow(
             label: "Created At",
-            value: _formatDate(_product.createdAt),
+            value: appWidgets.convertDateTimeDDMMYYYY(_product.createdAt),
           ),
           const Divider(),
           _buildMetadataRow(
             label: "Last Updated",
-            value: _formatDate(_product.updatedAt),
+            value: appWidgets.convertDateTimeDDMMYYYY(_product.updatedAt),
           ),
           if (_product.description?.isNotEmpty ?? false) ...[
             const Divider(),
@@ -944,7 +945,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     bool isMultiLine = false,
   }) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         crossAxisAlignment: isMultiLine ? CrossAxisAlignment.start : CrossAxisAlignment.center,
         children: [
@@ -973,8 +974,4 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     );
   }
 
-  String _formatDate(DateTime? date) {
-    if (date == null) return "N/A";
-    return "${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}";
-  }
 }

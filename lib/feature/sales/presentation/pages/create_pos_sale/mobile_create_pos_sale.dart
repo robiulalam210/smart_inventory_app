@@ -552,6 +552,8 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
               final isWalkInCustomer = selectedCustomer?.id == -1;
 
               return Stepper(
+                stepIconMargin: EdgeInsets.zero,
+
                 physics: const ClampingScrollPhysics(),
                 type: StepperType.vertical,
                 currentStep: currentStep,
@@ -575,7 +577,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                 },
                 controlsBuilder: (context, details) {
                   return Padding(
-                    padding: const EdgeInsets.only(top: 8.0),
+                    padding: const EdgeInsets.only(top: 4.0),
                     child: Row(
                       children: [
                         if (currentStep > 0)
@@ -1087,7 +1089,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
 
           return Container(
             margin: const EdgeInsets.only(bottom: 4),
-            padding: const EdgeInsets.all(8),
+            padding: const EdgeInsets.all(4),
             decoration: BoxDecoration(
               color: AppColors.bottomNavBg(context),
               borderRadius: BorderRadius.circular(8),
@@ -1216,7 +1218,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                     const SizedBox(width: 8),
                     Expanded(
                       flex: 2,
-                      child: Container(
+                      child: SizedBox(
                         height: 35,
 
                         child: Row(
@@ -1438,7 +1440,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                           children: [
                             Text(
                               "Final Price Per Unit:",
-                              style: const TextStyle(fontSize: 12),
+                              style: AppTextStyle.body(context),
                             ),
                             Text(
                               "৳${product["final_price"]?.toStringAsFixed(2) ?? "0.00"}",
@@ -1473,7 +1475,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                           children: [
                             Text(
                               "Final Price :",
-                              style: const TextStyle(fontSize: 12),
+                              style: AppTextStyle.body(context),
                             ),
                             Text(
                               "৳${totalFinalPrice.toStringAsFixed(2)}",
