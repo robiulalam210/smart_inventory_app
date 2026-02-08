@@ -89,7 +89,7 @@ class _ProductSaleModeListScreenState extends State<ProductSaleModeListScreen> {
             child: Column(
               children: [
                 _buildSearchField(),
-                const SizedBox(height: 12),
+                const SizedBox(height: 8),
                 _buildAvailableModesSection(),
                 // const SizedBox(height: 16),
                 _buildConfiguredModesList(),
@@ -141,9 +141,9 @@ class _ProductSaleModeListScreenState extends State<ProductSaleModeListScreen> {
           }
 
           return Container(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: Colors.blue[50],
+              color: AppColors.bottomNavBg(context),
               borderRadius: BorderRadius.circular(8),
               border: Border.all(color: AppColors.primaryColor(context)),
             ),
@@ -165,8 +165,8 @@ class _ProductSaleModeListScreenState extends State<ProductSaleModeListScreen> {
                 ),
                 const SizedBox(height: 8),
                 Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
+                  spacing: 6,
+                  runSpacing: 6,
                   children: availableModes.map((mode) {
                     final isConfigured = mode.configured == true;
                     final isActive = mode.isActive == true;

@@ -46,9 +46,9 @@ class _UnitScreenState extends State<MobileUnitScreen> {
         onPressed: () {
           context.read<UnitBloc>().nameController.clear();
           context.read<UnitBloc>().shortNameController.clear();
+
           showDialog(
             context: context,
-            barrierDismissible: false,
             builder: (context) {
               return Dialog(
                 shape: RoundedRectangleBorder(
@@ -56,18 +56,12 @@ class _UnitScreenState extends State<MobileUnitScreen> {
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(16),
-                  child: Padding(
-                    padding: EdgeInsets.only(
-                      bottom: MediaQuery.of(context).viewInsets.bottom,
-                    ),
-                    child: SingleChildScrollView(
-                      child: UnitCreate(),
-                    ),
-                  ),
+                  child: UnitCreate(),
                 ),
               );
             },
           );
+
 
 
         },

@@ -246,6 +246,76 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
   }
 
   // ==================== SALE MODE FUNCTIONS ====================
+  double getUniversalPosTotalPrice({required int index}) {
+    final product = products[index]["product"] as ProductModelStockModel?;
+    final saleMode = _selectedSaleModes[index];
+    if (product == null) return 0.0;
+
+    final qty = int.tryParse(getControllerText(index, "quantity")) ?? 1;
+
+    // Fallback/unit price
+    if (saleMode == null) {
+      final unitPrice =
+          double.tryParse(product.sellingPrice?.toString() ?? "0") ?? 0.0;
+      products[index]["breakdown"] = "$qty × $unitPrice";
+      return unitPrice * qty;
+    }
+
+    final priceType = saleMode.priceType?.toLowerCase() ?? 'unit';
+    final conversion =
+        double.tryParse(saleMode.conversionFactor?.toString() ?? "1") ?? 1.0;
+    final unitPrice =
+        double.tryParse(
+          saleMode.unitPrice?.toString() ??
+              product.sellingPrice?.toString() ??
+              "0",
+        ) ??
+        0.0;
+    final flatPrice =
+        double.tryParse(saleMode.flatPrice?.toString() ?? "0") ?? 0.0;
+    final tiers = saleMode.tiers;
+
+    // 1️⃣ Dozen/Flat
+    if (priceType == 'flat' && conversion >= 1) {
+      int divisor = conversion.toInt();
+      int saleModeCount = qty ~/ divisor;
+      int leftQty = qty % divisor;
+      double total = (saleModeCount * flatPrice) + (leftQty * unitPrice);
+      products[index]["breakdown"] =
+          "$saleModeCount ${saleMode.saleModeName} × $flatPrice + $leftQty pcs × $unitPrice";
+      return total;
+    }
+
+    // 2️⃣ Tier/Bulk (even priceType!='tier'): always check tiers!
+    double baseQuantity = qty * conversion;
+    double price = unitPrice;
+    if (tiers != null && tiers.isNotEmpty) {
+      for (var tier in tiers) {
+        final min = double.tryParse(tier.minQuantity) ?? 0;
+        final max = tier.maxQuantity != null
+            ? double.tryParse(tier.maxQuantity ?? "0") ?? double.infinity
+            : double.infinity;
+        if (baseQuantity >= min && baseQuantity <= max) {
+          price = double.tryParse(tier.price) ?? price;
+          products[index]["breakdown"] =
+              "$baseQuantity × $price (Tier: $min-$max)";
+          return baseQuantity * price;
+        }
+      }
+    }
+
+    // 3️⃣ Piece/Unit fallback
+    products[index]["breakdown"] = "$baseQuantity × $price";
+    return baseQuantity * price;
+  }
+
+  // Always call this after any saleMode or quantity change!
+  void updateTotal(int index) {
+    double total = getUniversalPosTotalPrice(index: index);
+    setControllerText(index, "total", total.toStringAsFixed(2));
+    products[index]["total"] = total;
+    setState(() {}); // <- critical for UI
+  }
 
   void _loadSaleModesForProduct(int index, ProductModelStockModel product) {
     if (_disposedProductIndexes.contains(index)) return;
@@ -283,19 +353,27 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
 
           // Check if this is a "Dozen" type
           if ((mode.saleModeName?.toLowerCase().contains('dozen') == true ||
-              mode.saleModeName?.toLowerCase().contains('ডজন') == true) &&
+                  mode.saleModeName?.toLowerCase().contains('ডজন') == true) &&
               mode.conversionFactor != null) {
             log('   │   ⚠️ DOZEN DETECTED!');
-            log('   │   Conversion: 1 ${mode.saleModeName} = ${mode.conversionFactor} ${mode.baseUnitName}');
-            log('   │   User enters ${mode.saleModeName}, convert to ${mode.baseUnitName}');
-            log('   │   Formula: baseQuantity = userInput × ${mode.conversionFactor}');
+            log(
+              '   │   Conversion: 1 ${mode.saleModeName} = ${mode.conversionFactor} ${mode.baseUnitName}',
+            );
+            log(
+              '   │   User enters ${mode.saleModeName}, convert to ${mode.baseUnitName}',
+            );
+            log(
+              '   │   Formula: baseQuantity = userInput × ${mode.conversionFactor}',
+            );
           }
 
           // Check tiers
           if (mode.tiers != null && mode.tiers!.isNotEmpty) {
             log('   │   Tiers (${mode.tiers!.length}):');
             for (var tier in mode.tiers!) {
-              log('   │     └─ ${tier.minQuantity} - ${tier.maxQuantity ?? "∞"} = ${tier.price}');
+              log(
+                '   │     └─ ${tier.minQuantity} - ${tier.maxQuantity ?? "∞"} = ${tier.price}',
+              );
               // Check tier units
               log('   │         Tier is in: ${mode.baseUnitName}');
             }
@@ -326,7 +404,6 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
 
           return aName.compareTo(bName);
         });
-
       } else {
         log('ℹ️ No pre-configured sale modes for product ${product.name}');
 
@@ -334,7 +411,8 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
         if (product.unitInfo != null) {
           log('   Creating default sale mode from product unit');
           final defaultMode = SaleMode(
-            id: -1, // Temporary ID
+            id: -1,
+            // Temporary ID
             saleModeId: -1,
             saleModeName: product.unitInfo!.name ?? 'Unit',
             baseUnitName: product.unitInfo!.name,
@@ -357,11 +435,12 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
           if (activeConfigs.length == 1) {
             _selectedSaleModes[index] = activeConfigs.first;
             _applySaleModePricing(index, activeConfigs.first);
-            log('✅ Auto-selected single sale mode: ${activeConfigs.first.saleModeName}');
+            log(
+              '✅ Auto-selected single sale mode: ${activeConfigs.first.saleModeName}',
+            );
           }
         });
       }
-
     } catch (e, stackTrace) {
       log('❌ ERROR loading sale modes for product ${product.name}: $e');
       log('Stack trace: $stackTrace');
@@ -382,235 +461,62 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
       );
     }
   }
-  void _onSaleModeChanged(int index, SaleMode? saleMode) {
-    if (_disposedProductIndexes.contains(index)) return;
-
-    setState(() {
-      _selectedSaleModes[index] = saleMode;
-    });
-
-    if (saleMode == null) {
-      // Reset to regular price
-      final product = products[index]["product"] as ProductModelStockModel?;
-      if (product != null) {
-        final sellingPrice = product.sellingPrice ?? 0.0;
-        setControllerText(index, "price", sellingPrice.toStringAsFixed(2));
-        updateTotal(index);
-      }
-      return;
-    }
-
-    // Apply sale mode pricing
-    _applySaleModePricing(index, saleMode);
-  }
-
 
   void _applySaleModePricing(int index, SaleMode saleMode) {
     if (_disposedProductIndexes.contains(index)) return;
 
     final quantityStr = getControllerText(index, "quantity");
-    final quantity = double.tryParse(quantityStr) ?? 1.0;
+    final qty = int.tryParse(quantityStr) ?? 1;
     final product = products[index]["product"] as ProductModelStockModel?;
 
     if (product == null) return;
 
-    log('🔍 APPLYING SALE MODE: ${saleMode.saleModeName}');
-    log('   - Price Type: ${saleMode.priceType}');
-    log('   - Conversion: 1 ${saleMode.saleModeName} = ${saleMode.conversionFactor} ${saleMode.baseUnitName}');
+    // 🟢 DOZEN SALE MODE AUTO-CALC LOGIC
+    final isDozen =
+        saleMode.saleModeName?.toLowerCase().contains('dozen') ?? false;
+    final dozenSize = saleMode.conversionFactor != null
+        ? int.tryParse(saleMode.conversionFactor.toString()) ?? 12
+        : 12;
+    final flatPrice =
+        double.tryParse(saleMode.flatPrice?.toString() ?? "0") ?? 0.0;
+    final unitPrice =
+        double.tryParse(product.sellingPrice?.toString() ?? "0") ?? 0.0;
 
-    // ==================== CORRECT CONVERSION ====================
-    final conversionFactor = saleMode.conversionFactor ?? 1.0;
+    double total = 0;
+    int fullDozens = 0;
+    int leftPieces = 0;
 
-    // User inputs in sale mode unit (Dozon)
-    final saleModeQuantity = quantity; // Dojon
-    // Convert to base unit for tier checking
-    final baseQuantity = quantity * conversionFactor; // Pics
+    if (isDozen && saleMode.priceType?.toLowerCase() == 'flat') {
+      fullDozens = qty ~/ dozenSize;
+      leftPieces = qty % dozenSize;
+      total = (fullDozens * flatPrice) + (leftPieces * unitPrice);
 
-    log('   📐 User Input: $saleModeQuantity ${saleMode.saleModeName}');
-    log('   📐 Base Quantity: $baseQuantity ${saleMode.baseUnitName}');
-
-    // ==================== TIER PRICE CALCULATION ====================
-    double pricePerUnit = 0;
-    double discountAmount = 0;
-    SaleModeTier? applicableTier;
-    bool isTierPrice = false;
-
-    if (saleMode.priceType?.toLowerCase() == 'tier' &&
-        saleMode.tiers != null && saleMode.tiers!.isNotEmpty) {
-
-      log('🔢 CHECKING ${saleMode.tiers!.length} TIERS');
-      log('   Tier quantities are in: ${saleMode.baseUnitName}');
-
-      // 🔥 IMPORTANT: Check tiers in BASE UNIT (Pics)
-      for (var tier in saleMode.tiers!) {
-        final minQty = double.tryParse(tier.minQuantity) ?? 0;
-        final maxQtyStr = tier.maxQuantity;
-        final maxQty = (maxQtyStr != null && maxQtyStr.isNotEmpty)
-            ? double.tryParse(maxQtyStr) ?? double.infinity
-            : double.infinity;
-
-        log('   Tier: ${tier.minQuantity} - ${maxQty == double.infinity ? "∞" : tier.maxQuantity} ${saleMode.baseUnitName} @ ${tier.price}');
-        log('   Check: $baseQuantity ${saleMode.baseUnitName} >= $minQty && $baseQuantity <= $maxQty');
-
-        if (baseQuantity >= minQty && baseQuantity <= maxQty) {
-          applicableTier = tier;
-          isTierPrice = true;
-          pricePerUnit = double.tryParse(tier.price) ?? 0;
-
-          // 🔥 IMPORTANT: Tier price is in BASE UNIT per SALE MODE UNIT
-          // Example: Tier price 140 means 140 per Dojon (not per Pics)
-          log('   ✅ TIER MATCHED!');
-          log('   💰 Tier Price: $pricePerUnit per ${saleMode.saleModeName}');
-          break;
-        }
-      }
-
-      if (!isTierPrice) {
-        log('⚠️ No tier matched for $baseQuantity ${saleMode.baseUnitName}');
-
-        // Check minimum tier requirement in base unit
-        final firstTier = saleMode.tiers!.first;
-        final minTierQty = double.tryParse(firstTier.minQuantity) ?? 0;
-
-        if (baseQuantity < minTierQty) {
-          log('⚠️ Below minimum tier requirement');
-          log('   Required: $minTierQty ${saleMode.baseUnitName}');
-          log('   Current: $baseQuantity ${saleMode.baseUnitName}');
-          log('   In ${saleMode.saleModeName}: ${minTierQty / conversionFactor}');
-
-          showCustomToast(
-            context: context,
-            title: 'Minimum Quantity Required!',
-            description: "Minimum ${(minTierQty / conversionFactor).toStringAsFixed(2)} ${saleMode.saleModeName} "
-                "($minTierQty ${saleMode.baseUnitName}) required for tier pricing",
-            icon: Icons.warning,
-            primaryColor: Colors.orange,
-          );
-        }
-
-        // Use default price
-        pricePerUnit = _calculateBasePriceForTier(saleMode, product);
-      }
+      products[index]["breakdown"] =
+          "$fullDozens ডজন × $flatPrice৳ + $leftPieces পিস × $unitPrice৳";
+      log(
+        "🟢 Dozen breakdown: $fullDozens dozen, $leftPieces pcs, total: $total",
+      );
     } else {
-      // Not tier pricing
-      pricePerUnit = _calculateBasePrice(saleMode, product);
-      discountAmount = _calculateDiscount(saleMode, pricePerUnit);
+      // Other (unit/tier) old logic
+      total = qty * (saleMode.unitPrice ?? unitPrice);
+      products[index]["breakdown"] = null;
     }
 
-    double finalPrice = pricePerUnit - discountAmount;
-    if (finalPrice < 0) finalPrice = 0;
-
-    // ==================== SAVE TO STATE ====================
-    setControllerText(index, "price", finalPrice.toStringAsFixed(2));
-    products[index]["sale_mode_id"] = saleMode.saleModeId;
-    products[index]["sale_mode_name"] = saleMode.saleModeName;
-    products[index]["discount_amount"] = discountAmount * saleModeQuantity;
-    products[index]["final_price"] = finalPrice;
-    products[index]["current_tier"] = applicableTier;
-    products[index]["conversion_factor"] = conversionFactor;
-    products[index]["is_tier_price"] = isTierPrice;
-    products[index]["price_type"] = saleMode.priceType;
-    products[index]["sale_mode_quantity"] = saleModeQuantity;
-    products[index]["base_quantity"] = baseQuantity;
+    setControllerText(index, "price", total.toStringAsFixed(2));
+    products[index]["total"] = total;
 
     updateTotal(index);
 
-    // ==================== SHOW MESSAGE ====================
-    if (isTierPrice && applicableTier != null) {
+    // UI toast breakdown (optional, for user)
+    if (isDozen && saleMode.priceType?.toLowerCase() == 'flat') {
       showCustomToast(
         context: context,
-        title: 'Tier Price Applied!',
-        description: "${applicableTier.minQuantity}-${applicableTier.maxQuantity} ${saleMode.baseUnitName} = "
-            "$finalPrice per ${saleMode.saleModeName}",
-        icon: Icons.star,
+        title: 'Dozen Price Applied!',
+        description:
+            "$qty পিস → $fullDozens ডজন = ${fullDozens * flatPrice}৳ + $leftPieces পিস = ${leftPieces * unitPrice}৳ → মোট: ${total.toStringAsFixed(2)}৳",
         primaryColor: Colors.green,
       );
     }
-  }
-
-// নতুন হেল্পার ফাংশন Tier এর জন্য
-  double _calculateBasePriceForTier(SaleMode saleMode, ProductModelStockModel product) {
-    final conversionFactor = saleMode.conversionFactor ?? 1.0;
-    final productPrice = product.sellingPrice ?? 0.0;
-
-    // Calculate price per sale mode unit
-    return productPrice * conversionFactor;
-  }
-  double _calculateBasePrice(SaleMode saleMode, ProductModelStockModel? product) {
-    double price = 0;
-
-    log('💰 CALCULATING BASE PRICE for ${saleMode.saleModeName}');
-    log('   - Price Type: ${saleMode.priceType}');
-    log('   - Unit Price: ${saleMode.unitPrice}');
-    log('   - Flat Price: ${saleMode.flatPrice}');
-    log('   - Product Selling Price: ${product?.sellingPrice}');
-    log('   - Conversion Factor: ${saleMode.conversionFactor}');
-
-    // First check sale mode specific prices
-    if (saleMode.priceType?.toLowerCase() == 'flat') {
-      if (saleMode.flatPrice != null && saleMode.flatPrice! > 0) {
-        price = saleMode.flatPrice!;
-        log('   ✅ Using sale mode flat price: $price');
-      } else if (saleMode.unitPrice != null && saleMode.unitPrice! > 0) {
-        price = saleMode.unitPrice!;
-        log('   ⚠️ Flat price is null, using unit price: $price');
-      }
-    } else if (saleMode.priceType?.toLowerCase() == 'unit') {
-      if (saleMode.unitPrice != null && saleMode.unitPrice! > 0) {
-        price = saleMode.unitPrice!;
-        log('   ✅ Using sale mode unit price: $price');
-      }
-    }
-
-    // If still 0, check product price
-    if (price == 0 && product != null) {
-      final productPrice = product.sellingPrice ?? 0.0;
-      final conversionFactor = saleMode.conversionFactor ?? 1.0;
-
-      log('   ⚠️ Sale mode price is 0, using product price: $productPrice');
-      log('   📐 Conversion Factor: $conversionFactor');
-
-      // 🔥 IMPORTANT FIX: Correct conversion logic
-      if (conversionFactor > 1) {
-        // Sale mode is LARGER unit (Dogon/Dozen = 12 Pics)
-        // Price should be HIGHER, not lower!
-        // Example: 1 Dozen = 12 Pics × 12 Taka = 144 Taka
-        price = productPrice * conversionFactor;
-        log('   🔥 MULTIPLY: $productPrice × $conversionFactor = $price');
-        log('   💡 1 ${saleMode.saleModeName} (${conversionFactor} ${saleMode.baseUnitName}) = $price Tk');
-      } else if (conversionFactor < 1) {
-        // Sale mode is SMALLER unit (Gram = 0.001 Kg)
-        // Price should be LOWER
-        price = productPrice * conversionFactor;
-        log('   🔥 MULTIPLY (smaller): $productPrice × $conversionFactor = $price');
-      } else {
-        // No conversion
-        price = productPrice;
-        log('   🔥 No conversion: $price');
-      }
-    }
-
-    log('   💰 Final Base Price: $price');
-    return price;
-  }
-
-  double _calculateDiscount(SaleMode saleMode, double pricePerUnit) {
-    double discount = 0;
-
-    if (saleMode.discountValue != null && saleMode.discountValue! > 0) {
-      if (saleMode.discountType?.toLowerCase() == 'percentage' ||
-          saleMode.discountType?.toLowerCase() == 'percent') {
-        discount = pricePerUnit * (saleMode.discountValue! / 100);
-        log(
-          '🎯 Applied percentage discount: ${saleMode.discountValue!}% = $discount',
-        );
-      } else {
-        discount = saleMode.discountValue!;
-        log('🎯 Applied fixed discount: $discount');
-      }
-    }
-
-    return discount;
   }
 
   // NEW: Calculate base quantity for stock validation
@@ -624,10 +530,10 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
   }
 
   bool _validateStockForProduct(
-      int index,
-      ProductModelStockModel product,
-      double quantity,
-      ) {
+    int index,
+    ProductModelStockModel product,
+    double quantity,
+  ) {
     if (_disposedProductIndexes.contains(index)) return true;
 
     final saleMode = _selectedSaleModes[index];
@@ -648,7 +554,7 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
           context: context,
           title: 'Stock Insufficient!',
           description:
-          "Not enough stock for ${product.name}\n"
+              "Not enough stock for ${product.name}\n"
               "Available: $availableStock ${product.unitInfo?.name ?? 'units'}\n"
               "Requested: $quantity ${product.unitInfo?.name ?? 'units'}",
           icon: Icons.error,
@@ -663,7 +569,8 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
 
     // With sale mode - need conversion
     final conversionFactor = saleMode.conversionFactor ?? 1.0;
-    final baseUnitName = saleMode.baseUnitName ?? product.unitInfo?.name ?? 'units';
+    final baseUnitName =
+        saleMode.baseUnitName ?? product.unitInfo?.name ?? 'units';
     final saleModeName = saleMode.saleModeName ?? 'units';
 
     log('   - Sale Mode: $saleModeName');
@@ -677,7 +584,9 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
       // User is entering in larger unit (dozen, kg)
       // Convert to smaller base unit (pieces, grams)
       baseQuantity = quantity * conversionFactor;
-      log('   - Convert: $quantity $saleModeName × $conversionFactor = $baseQuantity $baseUnitName');
+      log(
+        '   - Convert: $quantity $saleModeName × $conversionFactor = $baseQuantity $baseUnitName',
+      );
     } else if (conversionFactor < 1) {
       // User is entering in smaller unit (gram), convert to larger (kg)
       baseQuantity = quantity * conversionFactor;
@@ -713,7 +622,7 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
         context: context,
         title: 'Stock Insufficient!',
         description:
-        "Not enough stock for ${product.name}\n\n"
+            "Not enough stock for ${product.name}\n\n"
             "📊 Details:\n"
             "• Available: $availableStock $productUnitName\n"
             "• Requested: $quantity $saleModeName\n"
@@ -730,6 +639,7 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
     log('✅ STOCK OK: Sufficient');
     return true;
   }
+
   double calculateTotalForAllProducts() {
     double total = 0;
     for (int i = 0; i < products.length; i++) {
@@ -865,44 +775,6 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
 
     // Ensure non-negative
     return finalTotal > 0 ? finalTotal : 0;
-  }
-
-  void updateTotal(int index) {
-    if (_disposedProductIndexes.contains(index)) return;
-
-    final priceStr = getControllerText(index, "price");
-    final quantityStr = getControllerText(index, "quantity");
-    final saleMode = _selectedSaleModes[index];
-    final priceType = products[index]["price_type"] as String?;
-
-    double price = double.tryParse(priceStr) ?? 0;
-    double quantity = double.tryParse(quantityStr) ?? 1;
-    double total;
-
-    // Handle FLAT price differently
-    if (priceType?.toLowerCase() == 'flat' && saleMode != null) {
-      // For flat price, price is already the total for the quantity
-      // But we need to multiply by quantity if it's per sale mode unit
-      total = price * quantity;
-      log('🔄 FLAT PRICE Total Calculation:');
-      log('   - Flat Price: $price per ${saleMode.saleModeName}');
-      log('   - Quantity: $quantity ${saleMode.saleModeName}');
-      log('   - Total: $total');
-    } else {
-      // Normal unit price calculation
-      total = price * quantity;
-      log('🔄 UNIT PRICE Total Calculation: $price × $quantity = $total');
-    }
-
-    setControllerText(index, "total", total.toStringAsFixed(2));
-    products[index]["total"] = total;
-
-    // Auto-update payable amount for walk-in customer when money receipt is checked
-    if (_isWalkInCustomer && _isChecked) {
-      _updatePayableAmountForWalkIn();
-    }
-
-    setState(() {});
   }
 
   void _updateAllTotals() {
@@ -1167,226 +1039,6 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
 
   // ==================== UI BUILDERS ====================
 
-  @override
-  Widget build(BuildContext context) {
-    return AppScaffold(
-      appBar: AppBar(
-        backgroundColor: AppColors.bottomNavBg(context),
-        title: Text(
-          'Create Sale',
-          style: AppTextStyle.titleMedium(
-            context,
-          ).copyWith(color: AppColors.text(context)),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () {
-              // Reset form
-              context.read<CreatePosSaleBloc>().products.clear();
-              context.read<CreatePosSaleBloc>().addProduct();
-              _selectedSaleModes.clear();
-              _availableSaleModes.clear();
-              _isLoadingSaleModes.clear();
-              _disposedProductIndexes.clear();
-              _productStockInfo.clear();
-              setState(() {});
-            },
-          ),
-        ],
-      ),
-      body: SafeArea(
-        child: Container(
-          color: AppColors.bottomNavBg(context),
-          child: BlocConsumer<CreatePosSaleBloc, CreatePosSaleState>(
-            listener: (context, state) {
-              if (state is CreatePosSaleLoading) {
-                appLoader(context, "Creating Sale...");
-              } else if (state is CreatePosSaleSuccess) {
-                showCustomToast(
-                  context: context,
-                  title: 'Success!',
-                  description: "Sale created successfully!",
-                  icon: Icons.check_circle,
-                  primaryColor: Colors.green,
-                );
-                changeAmountController.clear();
-                Navigator.pop(context);
-                AppRoutes.pushReplacement(context, MobilePosSaleScreen());
-              } else if (state is CreatePosSaleFailed) {
-                Navigator.pop(context);
-
-                // Check if error is about insufficient stock
-                final errorMessage = state.content.toLowerCase();
-                if (errorMessage.contains('insufficient stock') ||
-                    errorMessage.contains('not enough stock')) {
-                  // Show stock-specific error
-                  showCustomToast(
-                    context: context,
-                    title: 'Stock Error',
-                    description: state.content,
-                    icon: Icons.error,
-                    primaryColor: Colors.red,
-                  );
-                } else {
-                  // Show generic error dialog
-                  appAlertDialog(
-                    context,
-                    state.content,
-                    title: state.title,
-                    actions: [
-                      TextButton(
-                        onPressed: () => AppRoutes.pop(context),
-                        child: const Text("Dismiss"),
-                      ),
-                    ],
-                  );
-                }
-              }
-            },
-            builder: (context, state) {
-              final bloc = context.read<CreatePosSaleBloc>();
-              final selectedCustomer = bloc.selectClintModel;
-              final isWalkInCustomer = selectedCustomer?.id == -1;
-
-              // Calculate final total for display
-              final netTotal = calculateAllFinalTotal();
-
-              return SingleChildScrollView(
-                controller: _scrollController,
-                child: Form(
-                  key: _formKey,
-                  child: Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Customer Information Section
-                        _buildCustomerInfoSection(bloc),
-                        const SizedBox(height: 8),
-
-                        // Products Section
-                        _buildProductsSection(bloc),
-                        const SizedBox(height: 8),
-
-                        // Charges Section
-                        _buildChargesSection(bloc),
-                        const SizedBox(height: 8),
-
-                        // Summary & Payment Section
-                        _buildSummarySection(bloc, isWalkInCustomer, netTotal),
-
-                        // Submit Button
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            AppButton(
-                              size: 100,
-                              isOutlined: true,
-                              onPressed: () {
-                                // Cancel button - go back or clear form
-                                AppRoutes.pop(context);
-                              },
-                              name: 'Cancel',
-                            ),
-                            AppButton(
-                              size: 100,
-                              onPressed: _validateAndSubmit,
-                              name: 'Create Sale',
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 20),
-                      ],
-                    ),
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCustomerInfoSection(CreatePosSaleBloc bloc) {
-    return Container(
-      padding: const EdgeInsets.all(0.0),
-      decoration: BoxDecoration(
-        color: AppColors.bottomNavBg(context),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Customer Information',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: AppColors.text(context),
-            ),
-          ),
-          const SizedBox(height: 6),
-
-          BlocBuilder<CustomerBloc, CustomerState>(
-            builder: (context, state) {
-              // Fast View: Special গ্রাহক আগে, Regular পরে
-              List<CustomerActiveModel> sortedCustomers = [
-                ...context.read<CustomerBloc>().activeCustomer.where(
-                  (c) => c.specialCustomer == true,
-                ),
-                ...context.read<CustomerBloc>().activeCustomer.where(
-                  (c) => c.specialCustomer != true,
-                ),
-              ];
-
-              return AppDropdown<CustomerActiveModel>(
-                label: "Customer *",
-                hint: bloc.selectClintModel?.name ?? "Select Customer",
-                isSearch: true,
-                isRequired: true,
-                value: bloc.selectClintModel,
-                itemList: [
-                  CustomerActiveModel(name: 'Walk-in-customer', id: -1),
-                  ...sortedCustomers,
-                ],
-                onChanged: (newVal) {
-                  setState(() {
-                    bloc.selectClintModel = newVal;
-                    bloc.customType = (newVal?.id == -1)
-                        ? "Walking Customer"
-                        : "Saved Customer";
-                    _isWalkInCustomer = newVal?.id == -1;
-
-                    if (newVal?.id == -1) {
-                      _isChecked = true;
-                      bloc.isChecked = true;
-
-                      Future.delayed(const Duration(milliseconds: 100), () {
-                        final netTotal = calculateAllFinalTotal();
-                        bloc.payableAmount.text = netTotal.toStringAsFixed(2);
-                        _updateChangeAmount();
-                      });
-                    } else {
-                      _isChecked = false;
-                      bloc.isChecked = false;
-
-                      bloc.payableAmount.clear();
-                      changeAmountController.clear();
-                    }
-                  });
-                },
-                validator: (value) =>
-                    value == null ? 'Please select Customer' : null,
-              );
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildProductsSection(CreatePosSaleBloc bloc) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8),
@@ -1427,11 +1079,8 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
             final index = entry.key;
             final productData = entry.value;
             final product = productData["product"] as ProductModelStockModel?;
-
-            // Skip if this product index is disposed
-            if (_disposedProductIndexes.contains(index)) {
+            if (_disposedProductIndexes.contains(index))
               return const SizedBox.shrink();
-            }
 
             return Container(
               margin: const EdgeInsets.only(bottom: 6),
@@ -1439,7 +1088,10 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
               decoration: BoxDecoration(
                 color: AppColors.bottomNavBg(context),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.grey.shade300),
+                border: Border.all(
+                  color: AppColors.greyColor(context).withValues(alpha: 0.5),
+                  width: 0.5,
+                ),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -1476,7 +1128,7 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
                       final selectedCategory = categoriesBloc.selectedState;
 
                       return Container(
-                        margin: const EdgeInsets.only(bottom: 6),
+                        margin: const EdgeInsets.only(bottom: 4),
                         child: AppDropdown(
                           label: "Category",
                           hint: "Select Category",
@@ -1569,11 +1221,18 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
                         ),
                     ],
                   ),
-
+                  if (products[index]["breakdown"] != null)
+                    Text(
+                      products[index]["breakdown"],
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: AppColors.greyColor(context),
+                      ),
+                    ),
                   // Stock Info Display
                   if (product != null && _selectedSaleModes[index] != null)
                     Container(
-                      margin: const EdgeInsets.only(bottom: 8),
+                      margin: const EdgeInsets.only(bottom: 6),
                       padding: const EdgeInsets.all(6),
                       decoration: BoxDecoration(
                         color: Colors.blue.shade50,
@@ -1938,14 +1597,10 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
                                                 .toString();
 
                                             // Reapply sale mode pricing if selected
-                                            if (saleMode != null) {
-                                              _applySaleModePricing(
-                                                index,
-                                                saleMode,
-                                              );
-                                            } else {
-                                              updateTotal(index);
-                                            }
+                                            _applySaleModePricing(
+                                              index,
+                                              saleMode,
+                                            );
                                           }
                                         } else {
                                           // Normal stock check without sale mode
@@ -2033,18 +1688,6 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
     final availableModes = _availableSaleModes[index] ?? [];
     final selectedMode = _selectedSaleModes[index];
 
-    // Debug log to see what's in the product
-    if (product.saleModes != null && product.saleModes!.isNotEmpty) {
-      log(
-        '🎯 Product ${product.name} has ${product.saleModes!.length} sale modes from API',
-      );
-      for (var mode in product.saleModes!) {
-        log(
-          '   - Mode: ${mode.saleModeName}, Sale Mode ID: ${mode.saleModeId}, ID: ${mode.id}',
-        );
-      }
-    }
-
     if (isLoading) {
       return Container(
         margin: const EdgeInsets.only(bottom: 6),
@@ -2080,16 +1723,243 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
       return SizedBox.shrink();
     }
 
+    // Dropdown & UI callback
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       child: AppDropdown<SaleMode>(
-        label: "Sale Mode ",
+        label: "Sale Mode",
         hint: selectedMode?.saleModeName ?? "Select Sale Mode",
         isLabel: true,
         isSearch: false,
         value: selectedMode,
         itemList: availableModes,
-        onChanged: (newVal) => _onSaleModeChanged(index, newVal),
+        onChanged: (newVal) {
+          setState(() {
+            _selectedSaleModes[index] = newVal;
+          });
+          updateTotal(index);
+        },
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AppScaffold(
+      appBar: AppBar(
+        backgroundColor: AppColors.bottomNavBg(context),
+        title: Text(
+          'Create Sale',
+          style: AppTextStyle.titleMedium(
+            context,
+          ).copyWith(color: AppColors.text(context)),
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: () {
+              // Reset form
+              context.read<CreatePosSaleBloc>().products.clear();
+              context.read<CreatePosSaleBloc>().addProduct();
+              _selectedSaleModes.clear();
+              _availableSaleModes.clear();
+              _isLoadingSaleModes.clear();
+              _disposedProductIndexes.clear();
+              _productStockInfo.clear();
+              setState(() {});
+            },
+          ),
+        ],
+      ),
+      body: SafeArea(
+        child: Container(
+          color: AppColors.bottomNavBg(context),
+          child: BlocConsumer<CreatePosSaleBloc, CreatePosSaleState>(
+            listener: (context, state) {
+              if (state is CreatePosSaleLoading) {
+                appLoader(context, "Creating Sale...");
+              } else if (state is CreatePosSaleSuccess) {
+                showCustomToast(
+                  context: context,
+                  title: 'Success!',
+                  description: "Sale created successfully!",
+                  icon: Icons.check_circle,
+                  primaryColor: Colors.green,
+                );
+                changeAmountController.clear();
+                Navigator.pop(context);
+                AppRoutes.pushReplacement(context, MobilePosSaleScreen());
+              } else if (state is CreatePosSaleFailed) {
+                Navigator.pop(context);
+
+                // Check if error is about insufficient stock
+                final errorMessage = state.content.toLowerCase();
+                if (errorMessage.contains('insufficient stock') ||
+                    errorMessage.contains('not enough stock')) {
+                  // Show stock-specific error
+                  showCustomToast(
+                    context: context,
+                    title: 'Stock Error',
+                    description: state.content,
+                    icon: Icons.error,
+                    primaryColor: Colors.red,
+                  );
+                } else {
+                  // Show generic error dialog
+                  appAlertDialog(
+                    context,
+                    state.content,
+                    title: state.title,
+                    actions: [
+                      TextButton(
+                        onPressed: () => AppRoutes.pop(context),
+                        child: const Text("Dismiss"),
+                      ),
+                    ],
+                  );
+                }
+              }
+            },
+            builder: (context, state) {
+              final bloc = context.read<CreatePosSaleBloc>();
+              final selectedCustomer = bloc.selectClintModel;
+              final isWalkInCustomer = selectedCustomer?.id == -1;
+
+              // Calculate final total for display
+              final netTotal = calculateAllFinalTotal();
+
+              return SingleChildScrollView(
+                controller: _scrollController,
+                child: Form(
+                  key: _formKey,
+                  child: Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Customer Information Section
+                        _buildCustomerInfoSection(bloc),
+                        const SizedBox(height: 8),
+
+                        // Products Section
+                        _buildProductsSection(bloc),
+                        const SizedBox(height: 8),
+
+                        // Charges Section
+                        _buildChargesSection(bloc),
+                        const SizedBox(height: 8),
+
+                        // Summary & Payment Section
+                        _buildSummarySection(bloc, isWalkInCustomer, netTotal),
+                        const SizedBox(height: 16),
+
+                        // Submit Button
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            AppButton(
+                              size: 100,
+                              isOutlined: true,
+                              onPressed: () {
+                                // Cancel button - go back or clear form
+                                AppRoutes.pop(context);
+                              },
+                              name: 'Cancel',
+                            ),
+                            AppButton(
+                              size: 100,
+                              onPressed: _validateAndSubmit,
+                              name: 'Create Sale',
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 20),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCustomerInfoSection(CreatePosSaleBloc bloc) {
+    return Container(
+      padding: const EdgeInsets.all(0.0),
+      decoration: BoxDecoration(
+        color: AppColors.bottomNavBg(context),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Customer Information',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: AppColors.text(context),
+            ),
+          ),
+          const SizedBox(height: 6),
+
+          BlocBuilder<CustomerBloc, CustomerState>(
+            builder: (context, state) {
+              // Fast View: Special গ্রাহক আগে, Regular পরে
+              List<CustomerActiveModel> sortedCustomers = [
+                ...context.read<CustomerBloc>().activeCustomer.where(
+                  (c) => c.specialCustomer == true,
+                ),
+                ...context.read<CustomerBloc>().activeCustomer.where(
+                  (c) => c.specialCustomer != true,
+                ),
+              ];
+
+              return AppDropdown<CustomerActiveModel>(
+                label: "Customer *",
+                hint: bloc.selectClintModel?.name ?? "Select Customer",
+                isSearch: true,
+                isRequired: true,
+                value: bloc.selectClintModel,
+                itemList: [
+                  CustomerActiveModel(name: 'Walk-in-customer', id: -1),
+                  ...sortedCustomers,
+                ],
+                onChanged: (newVal) {
+                  setState(() {
+                    bloc.selectClintModel = newVal;
+                    bloc.customType = (newVal?.id == -1)
+                        ? "Walking Customer"
+                        : "Saved Customer";
+                    _isWalkInCustomer = newVal?.id == -1;
+
+                    if (newVal?.id == -1) {
+                      _isChecked = true;
+                      bloc.isChecked = true;
+
+                      Future.delayed(const Duration(milliseconds: 100), () {
+                        final netTotal = calculateAllFinalTotal();
+                        bloc.payableAmount.text = netTotal.toStringAsFixed(2);
+                        _updateChangeAmount();
+                      });
+                    } else {
+                      _isChecked = false;
+                      bloc.isChecked = false;
+
+                      bloc.payableAmount.clear();
+                      changeAmountController.clear();
+                    }
+                  });
+                },
+                validator: (value) =>
+                    value == null ? 'Please select Customer' : null,
+              );
+            },
+          ),
+        ],
       ),
     );
   }
@@ -2177,13 +2047,10 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
       decoration: BoxDecoration(
         color: AppColors.bottomNavBg(context),
         borderRadius: BorderRadius.circular(8),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        border: Border.all(
+          color: AppColors.greyColor(context).withValues(alpha: 0.5),
+          width: 0.5,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -2262,13 +2129,10 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
       decoration: BoxDecoration(
         color: AppColors.bottomNavBg(context),
         borderRadius: BorderRadius.circular(8),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        border: Border.all(
+          color: AppColors.greyColor(context).withValues(alpha: 0.5),
+          width: 0.5,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
