@@ -14,6 +14,8 @@ import '../../../../feature/account_transfer/presentation/screen/mobile_account_
 import '../../../../feature/account_transfer/presentation/screen/mobile_account_transfer_screen.dart';
 import '../../../../feature/accounts/presentation/pages/mobile_account_screen.dart';
 import '../../../../feature/customer/presentation/pages/mobile_customer_screen.dart';
+import '../../../../feature/income/income_expense/presentation/page/income_expense_head_page.dart';
+import '../../../../feature/income/presentation/page/income_page_list.dart';
 import '../../../../feature/lab_dashboard/presentation/bloc/dashboard/dashboard_bloc.dart';
 import '../../../../feature/money_receipt/presentation/page/mobile_monery_receipt_create.dart';
 import '../../../../feature/money_receipt/presentation/page/mobile_money_receipt_list.dart';
@@ -241,7 +243,8 @@ class MobileTabSidebar extends StatelessWidget {
             MenuItem(title: "Category", index: 36),
             MenuItem(title: "Group", index: 37),
             MenuItem(title: "Sale Mode", index: 38),
-            MenuItem(title: "Profile", index: 39),
+            MenuItem(title: "Sales Head", index: 39),
+            MenuItem(title: "Profile", index: 40),
           ],
         ),
       );
@@ -253,9 +256,9 @@ class MobileTabSidebar extends StatelessWidget {
         MenuSection(
           title: "Transfer Balance",
           items: [
-            MenuItem(title: "Account Transfer From", index: 40),
-            MenuItem(title: "Account Transfer List", index: 41),
-            MenuItem(title: "Translation", index: 42),
+            MenuItem(title: "Account Transfer From", index: 41),
+            MenuItem(title: "Account Transfer List", index: 42),
+            MenuItem(title: "Translation", index: 43),
           ],
         ),
       );
@@ -764,10 +767,17 @@ class MobileTabSidebar extends StatelessWidget {
           _showPermissionDeniedDialog(context);
           return;
         }
+        AppRoutes.push(context, MobileIncomeListScreen());
+        // AppRoutes.push(context, MobileIncomeHeadScreen());
+        break;  case 40: // Profile
+        if (permissions?.administration?.view != true) {
+          _showPermissionDeniedDialog(context);
+          return;
+        }
         AppRoutes.push(context, MobileProfileScreen());
         break;
 
-      case 40: // Account Transfer From
+      case 41: // Account Transfer From
         if (permissions?.accounts?.view != true) {
           _showPermissionDeniedDialog(context);
           return;
@@ -775,7 +785,7 @@ class MobileTabSidebar extends StatelessWidget {
         AppRoutes.push(context, MobileAccountTransferForm());
         break;
 
-      case 41: // Account Transfer List
+      case 42: // Account Transfer List
         if (permissions?.accounts?.view != true) {
           _showPermissionDeniedDialog(context);
           return;
@@ -783,7 +793,7 @@ class MobileTabSidebar extends StatelessWidget {
         AppRoutes.push(context, MobileAccountTransferScreen());
         break;
 
-      case 42: // Translation
+      case 43: // Translation
         if (permissions?.accounts?.view != true) {
           _showPermissionDeniedDialog(context);
           return;

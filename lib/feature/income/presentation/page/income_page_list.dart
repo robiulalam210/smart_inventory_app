@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
 
 import '../../../../core/configs/configs.dart';
@@ -8,27 +10,25 @@ import '../../../../core/widgets/app_loader.dart';
 import '../../../../core/widgets/coustom_search_text_field.dart';
 import '../../../../core/widgets/date_range.dart';
 import '../../../products/product/presentation/widget/pagination.dart';
-import '../../expense_head/data/model/expense_head_model.dart';
-import '../../expense_head/presentation/bloc/expense_head/expense_head_bloc.dart';
-import '../../expense_sub_head/data/model/expense_sub_head_model.dart';
-import '../../expense_sub_head/presentation/bloc/expense_sub_head/expense_sub_head_bloc.dart';
-import '../bloc/expense_list/expense_bloc.dart';
-import '../widget/widget.dart';
-import 'mobile_expense_create.dart';
+import '../../income_expense/data/model/income_head_model.dart';
+import '../../income_expense/presentation/income_expense_bloc/income_expense_head_bloc.dart';
+import '../IncomeBloc/income_bloc.dart';
+import 'income_create_screen/income_create_screen.dart';
+import 'widget/income_table_card.dart';
 
-class MobileExpenseListScreen extends StatefulWidget {
-  const MobileExpenseListScreen({super.key});
+class MobileIncomeListScreen extends StatefulWidget {
+  const MobileIncomeListScreen({super.key});
 
   @override
-  State<MobileExpenseListScreen> createState() => _ExpenseListScreenState();
+  State<MobileIncomeListScreen> createState() => _IncomeListScreenState();
 }
 
-class _ExpenseListScreenState extends State<MobileExpenseListScreen> {
+class _IncomeListScreenState extends State<MobileIncomeListScreen> {
   DateRange? selectedDateRange;
   DateTime now = DateTime.now();
-  ExpenseHeadModel? _selectedExpenseHead;
-  ExpenseSubHeadModel? _selectedExpenseSubHead;
-  late ExpenseBloc dataBloc;
+  IncomeHeadModel? _selectedIncomeHead;
+  String? _selectedAccountId;
+  late IncomeBloc dataBloc;
   final TextEditingController _searchController = TextEditingController();
 
   @override
@@ -40,8 +40,7 @@ class _ExpenseListScreenState extends State<MobileExpenseListScreen> {
     );
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<ExpenseHeadBloc>().add(FetchExpenseHeadList(context));
-      context.read<ExpenseSubHeadBloc>().add(FetchSubExpenseHeadList(context));
+      context.read<IncomeHeadBloc>().add(FetchIncomeHeadList(context: context));
       _fetchApi(from: selectedDateRange?.start, to: selectedDateRange?.end);
     });
   }
@@ -49,14 +48,13 @@ class _ExpenseListScreenState extends State<MobileExpenseListScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    dataBloc = context.read<ExpenseBloc>();
+    dataBloc = context.read<IncomeBloc>();
     dataBloc.filterTextController;
   }
 
   @override
   void dispose() {
     _searchController.dispose();
-    // dataBloc.filterTextController.dispose();
     super.dispose();
   }
 
@@ -69,16 +67,16 @@ class _ExpenseListScreenState extends State<MobileExpenseListScreen> {
   }) {
     if (!mounted) return;
 
-    context.read<ExpenseBloc>().add(
-      FetchExpenseList(
-        context,
+    context.read<IncomeBloc>().add(
+      FetchIncomeList(
+        context: context,
         filterText: filterText,
         startDate: from,
         endDate: to,
         pageNumber: pageNumber,
         pageSize: pageSize,
-        headId: _selectedExpenseHead?.id?.toString(),
-        subHeadId: _selectedExpenseSubHead?.id?.toString(),
+        headId: _selectedIncomeHead?.id?.toString(),
+        accountId: _selectedAccountId,
       ),
     );
   }
@@ -91,8 +89,7 @@ class _ExpenseListScreenState extends State<MobileExpenseListScreen> {
         onPressed: () => _showCreateBottomSheet(context),
         child: Icon(Icons.add, color: AppColors.whiteColor(context)),
       ),
-
-      appBar: AppBar(title: Text("Expense List")),
+      appBar: AppBar(title: Text("Income List")),
       body: SafeArea(child: _buildContentArea()),
     );
   }
@@ -106,7 +103,7 @@ class _ExpenseListScreenState extends State<MobileExpenseListScreen> {
       xl: 10,
       child: Container(
         padding: AppTextStyle.getResponsivePaddingBody(context),
-        child: BlocConsumer<ExpenseBloc, ExpenseState>(
+        child: BlocConsumer<IncomeBloc, IncomeState>(
           listener: (context, state) {
             _handleBlocState(state);
           },
@@ -116,7 +113,7 @@ class _ExpenseListScreenState extends State<MobileExpenseListScreen> {
                 children: [
                   _buildMobileHeader(context),
                   const SizedBox(height: 8),
-                  SizedBox(child: _buildExpenseList(state)),
+                  SizedBox(child: _buildIncomeList(state)),
                 ],
               ),
             );
@@ -126,14 +123,14 @@ class _ExpenseListScreenState extends State<MobileExpenseListScreen> {
     );
   }
 
-  void _handleBlocState(ExpenseState state) {
-    if (state is ExpenseAddLoading) {
-      appLoader(context, "Creating Expense, please wait...");
-    } else if (state is ExpenseAddSuccess) {
+  void _handleBlocState(IncomeState state) {
+    if (state is IncomeAddLoading) {
+      appLoader(context, "Creating Income, please wait...");
+    } else if (state is IncomeAddSuccess) {
       Navigator.pop(context);
       Navigator.pop(context);
       _fetchApi();
-    } else if (state is ExpenseAddFailed) {
+    } else if (state is IncomeAddFailed) {
       if (context.mounted) {
         Navigator.pop(context);
         Navigator.pop(context);
@@ -149,12 +146,12 @@ class _ExpenseListScreenState extends State<MobileExpenseListScreen> {
           ],
         );
       }
-    } else if (state is ExpenseDeleteLoading) {
-      appLoader(context, "Deleting Expense, please wait...");
-    } else if (state is ExpenseDeleteSuccess) {
+    } else if (state is IncomeDeleteLoading) {
+      appLoader(context, "Deleting Income, please wait...");
+    } else if (state is IncomeDeleteSuccess) {
       Navigator.pop(context);
       _fetchApi();
-    } else if (state is ExpenseDeleteFailed) {
+    } else if (state is IncomeDeleteFailed) {
       if (context.mounted) {
         Navigator.pop(context);
         appAlertDialog(
@@ -189,7 +186,7 @@ class _ExpenseListScreenState extends State<MobileExpenseListScreen> {
                   dataBloc.filterTextController.clear();
                   _fetchApi();
                 },
-                hintText: "Expenses...",
+                hintText: "Incomes...",
               ),
             ),
             IconButton(
@@ -201,28 +198,18 @@ class _ExpenseListScreenState extends State<MobileExpenseListScreen> {
             ),
           ],
         ),
-
         // Filter Chips
         Wrap(
           spacing: 8,
           runSpacing: 8,
           children: [
-            if (_selectedExpenseHead != null)
+            if (_selectedIncomeHead != null)
               Chip(
-                label: Text(_selectedExpenseHead!.name ?? 'Head'),
+                label: Text(_selectedIncomeHead!.name ?? 'Head'),
                 onDeleted: () {
                   setState(() {
-                    _selectedExpenseHead = null;
-                    _selectedExpenseSubHead = null;
+                    _selectedIncomeHead = null;
                   });
-                  _fetchApi();
-                },
-              ),
-            if (_selectedExpenseSubHead != null)
-              Chip(
-                label: Text(_selectedExpenseSubHead!.name ?? 'Sub Head'),
-                onDeleted: () {
-                  setState(() => _selectedExpenseSubHead = null);
                   _fetchApi();
                 },
               ),
@@ -242,19 +229,19 @@ class _ExpenseListScreenState extends State<MobileExpenseListScreen> {
     );
   }
 
-  Widget _buildExpenseList(ExpenseState state) {
-    if (state is ExpenseListLoading) {
+  Widget _buildIncomeList(IncomeState state) {
+    if (state is IncomeListLoading) {
       return const Center(child: CircularProgressIndicator());
-    } else if (state is ExpenseListSuccess) {
+    } else if (state is IncomeListSuccess) {
       if (state.list.isEmpty) {
         return _buildEmptyState();
       } else {
         return Column(
           children: [
             SizedBox(
-              child: ExpenseTableCard(
-                expenses: state.list,
-                onExpenseTap: () {},
+              child: IncomeTableCard(
+                incomes: state.list,
+                onIncomeTap: () {},
               ),
             ),
             const SizedBox(height: 16),
@@ -271,7 +258,7 @@ class _ExpenseListScreenState extends State<MobileExpenseListScreen> {
           ],
         );
       }
-    } else if (state is ExpenseListFailed) {
+    } else if (state is IncomeListFailed) {
       return _buildErrorState(state);
     } else {
       return _buildEmptyState();
@@ -286,7 +273,7 @@ class _ExpenseListScreenState extends State<MobileExpenseListScreen> {
           Lottie.asset(AppImages.noData, width: 200, height: 200),
           const SizedBox(height: 16),
           const Text(
-            'No expenses found',
+            'No incomes found',
             style: TextStyle(fontSize: 16, color: Colors.grey),
           ),
           const SizedBox(height: 16),
@@ -296,7 +283,7 @@ class _ExpenseListScreenState extends State<MobileExpenseListScreen> {
     );
   }
 
-  Widget _buildErrorState(ExpenseListFailed state) {
+  Widget _buildErrorState(IncomeListFailed state) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -304,7 +291,7 @@ class _ExpenseListScreenState extends State<MobileExpenseListScreen> {
           const Icon(Icons.error_outline, size: 60, color: Colors.red),
           const SizedBox(height: 16),
           Text(
-            'Failed to load expenses',
+            'Failed to load incomes',
             style: const TextStyle(fontSize: 16),
             textAlign: TextAlign.center,
           ),
@@ -324,7 +311,7 @@ class _ExpenseListScreenState extends State<MobileExpenseListScreen> {
   void _showCreateBottomSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
-      isScrollControlled: true, // important
+      isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) {
         return DraggableScrollableSheet(
@@ -344,7 +331,7 @@ class _ExpenseListScreenState extends State<MobileExpenseListScreen> {
                 borderRadius: BorderRadius.vertical(
                   top: Radius.circular(AppSizes.radius),
                 ),
-                child: const MobileExpenseCreate(),
+                child:  MobileIncomeCreate(),
               ),
             );
           },
@@ -352,33 +339,6 @@ class _ExpenseListScreenState extends State<MobileExpenseListScreen> {
       },
     );
   }
-
-  // void _showCreateDialog(BuildContext context) {
-  //   showDialog(
-  //     context: context,
-  //     builder: (context) {
-  //       return Dialog(
-  //         insetPadding: const EdgeInsets.all(10),
-  //         shape: RoundedRectangleBorder(
-  //           borderRadius: BorderRadius.circular(AppSizes.radius),
-  //         ),
-  //         child: ClipRRect(
-  //           borderRadius: BorderRadius.circular(AppSizes.radius),
-  //           child: ConstrainedBox(
-  //             constraints: BoxConstraints(
-  //               maxWidth: Responsive.isMobile(context)
-  //                   ? AppSizes.width(context)
-  //                   : AppSizes.width(context) * 0.5,
-  //               maxHeight: AppSizes.height(context) * 0.8,
-  //               minHeight: AppSizes.height(context) * 0.6,
-  //             ),
-  //             child: const MobileExpenseCreate(),
-  //           ),
-  //         ),
-  //       );
-  //     },
-  //   );
-  // }
 
   void _showMobileFilterSheet(BuildContext context) {
     showModalBottomSheet(
@@ -400,7 +360,7 @@ class _ExpenseListScreenState extends State<MobileExpenseListScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        "Filter Expenses",
+                        "Filter Incomes",
                         style: TextStyle(
                           fontSize: 18,
                           color: AppColors.text(context),
@@ -415,32 +375,31 @@ class _ExpenseListScreenState extends State<MobileExpenseListScreen> {
                   ),
                   const SizedBox(height: 10),
 
-                  // Expense Head Filter
-                  BlocBuilder<ExpenseHeadBloc, ExpenseHeadState>(
+                  // Income Head Filter
+                  BlocBuilder<IncomeHeadBloc, IncomeHeadState>(
                     builder: (context, state) {
-                      if (state is ExpenseHeadListLoading) {
+                      if (state is IncomeHeadListLoading) {
                         return const Center(child: CircularProgressIndicator());
                       }
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            "Expense Head",
+                            "Income Head",
                             style: TextStyle(
                               fontWeight: FontWeight.w600,
                               fontSize: 14,
                               color: AppColors.text(context),
                             ),
                           ),
-                          AppDropdown<ExpenseHeadModel>(
-                            hint: "Select Expense Head",
+                          AppDropdown<IncomeHeadModel>(
+                            hint: "Select Income Head",
                             isNeedAll: true,
-                            value: _selectedExpenseHead,
-                            itemList: context.read<ExpenseHeadBloc>().list,
+                            value: _selectedIncomeHead,
+                            itemList: context.read<IncomeHeadBloc>().list,
                             onChanged: (value) {
                               setState(() {
-                                _selectedExpenseHead = value;
-                                _selectedExpenseSubHead = null;
+                                _selectedIncomeHead = value;
                               });
                             },
                             label: '',
@@ -459,7 +418,6 @@ class _ExpenseListScreenState extends State<MobileExpenseListScreen> {
                         "Date Range",
                         style: TextStyle(
                           color: AppColors.text(context),
-
                           fontWeight: FontWeight.w600,
                           fontSize: 14,
                         ),
@@ -483,8 +441,7 @@ class _ExpenseListScreenState extends State<MobileExpenseListScreen> {
                         child: OutlinedButton(
                           onPressed: () {
                             setState(() {
-                              _selectedExpenseHead = null;
-                              _selectedExpenseSubHead = null;
+                              _selectedIncomeHead = null;
                               selectedDateRange = null;
                             });
                             Navigator.pop(context);
