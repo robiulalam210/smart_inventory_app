@@ -1,6 +1,8 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:meherinMart/feature/products/price_tier/presentation/bloc/price_tier_bloc.dart';
 import '../feature/common/presentation/cubit/theme_cubit.dart';
+import '../feature/income/income_expense/presentation/income_expense_bloc/income_expense_head_bloc.dart';
+import '../feature/income/presentation/IncomeBloc/income_bloc.dart';
 import '../feature/products/sale_mode/presentation/bloc/product_sale_mode/product_sale_mode_bloc.dart';
 import '../feature/products/sale_mode/presentation/bloc/sale_mode_bloc.dart';
 import '../feature/splash/presentation/pages/mobile_splash_screen.dart';
@@ -117,6 +119,8 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (_) => BadStockListBloc()),
         BlocProvider(create: (_) => TransactionBloc()),
         BlocProvider(create: (_) => AccountTransferBloc()),
+        BlocProvider(create: (_) => IncomeHeadBloc()),
+        BlocProvider(create: (_) => IncomeBloc()),
       ],
 
       child: BlocBuilder<ThemeCubit, ThemeState>(

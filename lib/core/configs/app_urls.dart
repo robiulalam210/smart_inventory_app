@@ -1,6 +1,6 @@
 
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-final bool isLive = true; // Set to true for production environment
+final bool isLive = false; // Set to true for production environment
 
 
 class AppUrls {
@@ -55,6 +55,8 @@ class AppUrls {
 
 
 
+  static final String income          = '$baseUrl/income/incomes/';
+  static final String incomeHead          = '$baseUrl/income/income-heads/';
   static final String expenseHead          = '$baseUrl/expenses/expense-heads/';
   static final String expenseSubHead          = '$baseUrl/expenses/expense-subheads/';
   static final String expense          = '$baseUrl/expenses/expenses/';
