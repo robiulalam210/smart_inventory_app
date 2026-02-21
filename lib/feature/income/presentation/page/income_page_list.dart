@@ -128,7 +128,7 @@ class _IncomeListScreenState extends State<MobileIncomeListScreen> {
       appLoader(context, "Creating Income, please wait...");
     } else if (state is IncomeAddSuccess) {
       Navigator.pop(context);
-      Navigator.pop(context);
+      // Navigator.pop(context);
       _fetchApi();
     } else if (state is IncomeAddFailed) {
       if (context.mounted) {
@@ -315,23 +315,26 @@ class _IncomeListScreenState extends State<MobileIncomeListScreen> {
       backgroundColor: Colors.transparent,
       builder: (context) {
         return DraggableScrollableSheet(
-          expand: false,
-          initialChildSize: 0.8,
-          minChildSize: 0.6,
-          maxChildSize: 0.9,
+          initialChildSize: 0.6, // প্রথমে 60% of screen
+          minChildSize: 0.6,     // minimum 40%
+          maxChildSize: 0.9,     // maximum 90%
+          expand: false,         // content অনুযায়ী expand
           builder: (context, scrollController) {
-            return Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.vertical(
-                  top: Radius.circular(AppSizes.radius),
+            return SafeArea(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.vertical(
+                    top: Radius.circular(AppSizes.radius),
+                  ),
                 ),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.vertical(
-                  top: Radius.circular(AppSizes.radius),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.vertical(
+                    top: Radius.circular(AppSizes.radius),
+                  ),
+                  child: MobileIncomeCreate(),
                 ),
-                child:  MobileIncomeCreate(),
               ),
             );
           },
@@ -348,141 +351,122 @@ class _IncomeListScreenState extends State<MobileIncomeListScreen> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return Container(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "Filter Incomes",
-                        style: TextStyle(
-                          fontSize: 18,
-                          color: AppColors.text(context),
-                          fontWeight: FontWeight.bold,
+        return SafeArea(
+          child: StatefulBuilder(
+            builder: (context, setState) {
+              return Container(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Filter Incomes",
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: AppColors.text(context),
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-
-                  // Income Head Filter
-                  BlocBuilder<IncomeHeadBloc, IncomeHeadState>(
-                    builder: (context, state) {
-                      if (state is IncomeHeadListLoading) {
-                        return const Center(child: CircularProgressIndicator());
-                      }
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "Income Head",
-                            style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 14,
-                              color: AppColors.text(context),
+                        IconButton(
+                          icon: const Icon(Icons.close),
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+          
+                    // Income Head Filter
+                    BlocBuilder<IncomeHeadBloc, IncomeHeadState>(
+                      builder: (context, state) {
+                        if (state is IncomeHeadListLoading) {
+                          return const Center(child: CircularProgressIndicator());
+                        }
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Income Head",
+                              style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14,
+                                color: AppColors.text(context),
+                              ),
                             ),
+                            AppDropdown<IncomeHeadModel>(
+                              hint: "Select Income Head",
+                              isNeedAll: true,
+                              value: _selectedIncomeHead,
+                              itemList: context.read<IncomeHeadBloc>().list,
+                              onChanged: (value) {
+                                setState(() {
+                                  _selectedIncomeHead = value;
+                                });
+                              },
+                              label: '',
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 4),
+          
+                    // Date Range
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Date Range",
+                          style: TextStyle(
+                            color: AppColors.text(context),
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
                           ),
-                          AppDropdown<IncomeHeadModel>(
-                            hint: "Select Income Head",
-                            isNeedAll: true,
-                            value: _selectedIncomeHead,
-                            itemList: context.read<IncomeHeadBloc>().list,
-                            onChanged: (value) {
-                              setState(() {
-                                _selectedIncomeHead = value;
-                              });
-                            },
-                            label: '',
-                          ),
-                        ],
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 4),
-
-                  // Date Range
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Date Range",
-                        style: TextStyle(
-                          color: AppColors.text(context),
-                          fontWeight: FontWeight.w600,
-                          fontSize: 14,
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                      CustomDateRangeField(
-                        isLabel: false,
-                        selectedDateRange: selectedDateRange,
-                        onDateRangeSelected: (value) {
-                          setState(() => selectedDateRange = value);
-                        },
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-
-                  // Action Buttons
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton(
-                          onPressed: () {
-                            setState(() {
-                              _selectedIncomeHead = null;
-                              selectedDateRange = null;
-                            });
-                            Navigator.pop(context);
-                            _fetchApi();
+                        const SizedBox(height: 8),
+                        CustomDateRangeField(
+                          isLabel: false,
+                          selectedDateRange: selectedDateRange,
+                          onDateRangeSelected: (value) {
+                            setState(() => selectedDateRange = value);
                           },
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 4),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          child: const Text("Clear All"),
                         ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: () {
-                            Navigator.pop(context);
-                            _fetchApi();
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primaryColor(context),
-                            padding: const EdgeInsets.symmetric(vertical: 4),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          child: Text(
-                            "Apply Filters",
-                            style: AppTextStyle.body(context),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: MediaQuery.of(context).viewInsets.bottom),
-                ],
-              ),
-            );
-          },
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+          
+                    // Action Buttons
+                    Row(
+                      children: [
+                        Expanded(child: AppButton(
+                            isOutlined: true,
+                            name: "Clear All", onPressed: (){
+                          setState(() {
+                            _selectedIncomeHead = null;
+                            selectedDateRange = null;
+                          });
+                          Navigator.pop(context);
+                          _fetchApi();
+                        })),
+                        const SizedBox(width: 12),
+
+                        Expanded(child: AppButton(name:   "Apply Filters",onPressed: (){
+                          Navigator.pop(context);
+                          _fetchApi();
+                        })),
+
+
+                      ],
+                    ),
+                    SizedBox(height: MediaQuery.of(context).viewInsets.bottom),
+                  ],
+                ),
+              );
+            },
+          ),
         );
       },
     );

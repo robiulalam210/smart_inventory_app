@@ -328,23 +328,25 @@ class _ExpenseListScreenState extends State<MobileExpenseListScreen> {
       backgroundColor: Colors.transparent,
       builder: (context) {
         return DraggableScrollableSheet(
-          expand: false,
-          initialChildSize: 0.8,
-          minChildSize: 0.6,
-          maxChildSize: 0.9,
+          initialChildSize: 0.7, // প্রথমে 70% of screen
+          minChildSize: 0.4,     // minimum 40%
+          maxChildSize: 0.95,    // maximum 95%
+          expand: false,         // content অনুযায়ী expand
           builder: (context, scrollController) {
-            return Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.vertical(
-                  top: Radius.circular(AppSizes.radius),
+            return SafeArea(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.vertical(
+                    top: Radius.circular(AppSizes.radius),
+                  ),
                 ),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.vertical(
-                  top: Radius.circular(AppSizes.radius),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.vertical(
+                    top: Radius.circular(AppSizes.radius),
+                  ),
+                  child:  MobileExpenseCreate(scrollController: scrollController,),
                 ),
-                child: const MobileExpenseCreate(),
               ),
             );
           },
@@ -353,32 +355,6 @@ class _ExpenseListScreenState extends State<MobileExpenseListScreen> {
     );
   }
 
-  // void _showCreateDialog(BuildContext context) {
-  //   showDialog(
-  //     context: context,
-  //     builder: (context) {
-  //       return Dialog(
-  //         insetPadding: const EdgeInsets.all(10),
-  //         shape: RoundedRectangleBorder(
-  //           borderRadius: BorderRadius.circular(AppSizes.radius),
-  //         ),
-  //         child: ClipRRect(
-  //           borderRadius: BorderRadius.circular(AppSizes.radius),
-  //           child: ConstrainedBox(
-  //             constraints: BoxConstraints(
-  //               maxWidth: Responsive.isMobile(context)
-  //                   ? AppSizes.width(context)
-  //                   : AppSizes.width(context) * 0.5,
-  //               maxHeight: AppSizes.height(context) * 0.8,
-  //               minHeight: AppSizes.height(context) * 0.6,
-  //             ),
-  //             child: const MobileExpenseCreate(),
-  //           ),
-  //         ),
-  //       );
-  //     },
-  //   );
-  // }
 
   void _showMobileFilterSheet(BuildContext context) {
     showModalBottomSheet(

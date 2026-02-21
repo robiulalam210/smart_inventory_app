@@ -231,7 +231,7 @@ class IncomeTableCard extends StatelessWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: OutlinedButton.icon(
-                    onPressed: () => _showEditDialog(context, income, true),
+                    onPressed: () => _showEditBottomSheet(context, income),
                     icon: const Icon(Iconsax.edit, size: 16),
                     label: const Text('Edit'),
                     style: OutlinedButton.styleFrom(
@@ -532,6 +532,44 @@ class IncomeTableCard extends StatelessWidget {
       context.read<IncomeBloc>().add(DeleteIncome(id: income.id.toString()));
     }
   }
+  void _showEditBottomSheet(BuildContext context, IncomeModel income) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return DraggableScrollableSheet(
+          initialChildSize: 0.7, // প্রথমে 70% of screen
+          minChildSize: 0.4,     // minimum 40%
+          maxChildSize: 0.95,    // maximum 95%
+          expand: false,         // content অনুযায়ী expand
+          builder: (context, scrollController) {
+            return Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(
+                  top: Radius.circular(AppSizes.radius),
+                ),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.vertical(
+                  top: Radius.circular(AppSizes.radius),
+                ),
+                child: MobileIncomeCreate(
+                  incomeModel: income,
+                  scrollController: scrollController,
+                  // id: income.id.toString(),
+
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
 
   void _showEditDialog(BuildContext context, IncomeModel income, bool isMobile) {
     showDialog(
@@ -548,6 +586,7 @@ class IncomeTableCard extends StatelessWidget {
             child: MobileIncomeCreate(
               incomeModel: income,
               id: income.id.toString(),
+
               // accountId: income.account.toString(),
               // name: "Update",
             ),

@@ -8,7 +8,7 @@ class CustomInputField extends StatefulWidget {
     super.key,
     this.controller,
     required this.hintText,
-    required this.keyboardType,
+     this.keyboardType,
     this.labelText,
     this.suffixIcon,
     this.autofillHints,
@@ -32,7 +32,7 @@ class CustomInputField extends StatefulWidget {
   final List<TextInputFormatter>? inputFormatters;
   final String hintText;
   final String? labelText;
-  final TextInputType keyboardType;
+  final TextInputType? keyboardType;
   final TextInputAction? textInputAction;
   final String? autofillHints;
   final bool? obscureText;

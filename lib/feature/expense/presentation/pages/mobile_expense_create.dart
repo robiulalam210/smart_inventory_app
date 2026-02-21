@@ -22,7 +22,7 @@ class MobileExpenseCreate extends StatefulWidget {
   final ExpenseModel? expenseModel;
   final ExpenseHeadModel? selectedExpenseHead;
   final ExpenseSubHeadModel? selectedExpenseSubHead;
-
+  final ScrollController? scrollController; // 🔥 Add scrollController
   const MobileExpenseCreate({
     super.key,
     this.id,
@@ -31,6 +31,7 @@ class MobileExpenseCreate extends StatefulWidget {
     this.accountId,
     this.selectedExpenseHead,
     this.selectedExpenseSubHead,
+    this.scrollController,
   });
 
   @override
@@ -50,12 +51,13 @@ class _ExpenseCreateScreenState extends State<MobileExpenseCreate> {
     _selectedExpenseHead = widget.selectedExpenseHead;
     _selectedExpenseSubHead = widget.selectedExpenseSubHead;
 
-    if(widget.expenseModel!=null){
-      context.read<ExpenseBloc>().noteTextController.text=widget.expenseModel?.note??"";
-      context.read<ExpenseBloc>().amountTextController.text=widget.expenseModel?.account.toString()??"";
-      context.read<ExpenseBloc>().dateExpenseTextController.text=widget.expenseModel?.expenseDate.toString()??"";
-
-
+    if (widget.expenseModel != null) {
+      context.read<ExpenseBloc>().noteTextController.text =
+          widget.expenseModel?.note ?? "";
+      context.read<ExpenseBloc>().amountTextController.text =
+          widget.expenseModel?.account.toString() ?? "";
+      context.read<ExpenseBloc>().dateExpenseTextController.text =
+          widget.expenseModel?.expenseDate.toString() ?? "";
     }
 
     // Fetch expense heads
@@ -110,11 +112,13 @@ class _ExpenseCreateScreenState extends State<MobileExpenseCreate> {
 
   void _submitForm() {
     if (formKey.currentState!.validate()) {
-      if (_selectedExpenseHead == null) {
+      final accountId = context.read<ExpenseBloc>().selectedAccountId;
+
+      if (accountId.isEmpty) {
         showCustomToast(
           context: context,
           title: 'Error!',
-          description: 'Please select an expense head',
+          description: 'Please select an account.',
           type: ToastificationType.error,
           icon: Icons.error,
           primaryColor: Colors.redAccent,
@@ -136,18 +140,21 @@ class _ExpenseCreateScreenState extends State<MobileExpenseCreate> {
 
       // Get the mapped payment method
       final String backendPaymentMethod = mapPaymentMethodToBackend(
-          context.read<ExpenseBloc>().selectedPayment
+        context.read<ExpenseBloc>().selectedPayment,
       );
 
       final Map<String, dynamic> body = {
-        "account": context.read<ExpenseBloc>().selectedAccountId,
+        "account": accountId,
         "amount": context.read<ExpenseBloc>().amountTextController.text,
         "expense_date": context
             .read<ExpenseBloc>()
             .dateExpenseTextController
             .text,
-        "head": _selectedExpenseHead!.id.toString(),
+        // "head": _selectedExpenseHead!.id.toString(),
         "payment_method": backendPaymentMethod, // Use the mapped value
+        if (_selectedExpenseHead != null)
+          "head": _selectedExpenseHead!.id.toString(),
+
         if (_selectedExpenseSubHead != null)
           "subhead": _selectedExpenseSubHead!.id.toString(),
         if (context.read<ExpenseBloc>().noteTextController.text.isNotEmpty)
@@ -160,7 +167,6 @@ class _ExpenseCreateScreenState extends State<MobileExpenseCreate> {
         // Create new expense
         context.read<ExpenseBloc>().add(AddExpense(body: body));
       } else {
-
         final Map<String, dynamic> body = {
           "account": widget.accountId,
           "amount": context.read<ExpenseBloc>().amountTextController.text,
@@ -182,6 +188,7 @@ class _ExpenseCreateScreenState extends State<MobileExpenseCreate> {
       }
     }
   }
+
   void _onExpenseHeadChanged(ExpenseHeadModel? newHead) {
     setState(() {
       _selectedExpenseHead = newHead;
@@ -213,459 +220,362 @@ class _ExpenseCreateScreenState extends State<MobileExpenseCreate> {
   Widget _buildMainContent() {
     final expenseBloc = context.read<ExpenseBloc>();
 
-    return ResponsiveRow(
-      spacing: 0,
-      runSpacing: 0,
-      children: [
-        ResponsiveCol(
-          xs: 12,
-          sm: 12,
-          md: 12,
-          lg: 10,
-          xl: 10,
-          child: Container(
-            width: MediaQuery.of(context).size.width,
-            decoration: BoxDecoration(
-              shape: BoxShape.rectangle,
-              color: AppColors.bottomNavBg(context),
-              borderRadius: BorderRadius.circular(AppSizes.borderRadiusSize),
-            ),
-            padding: AppTextStyle.getResponsivePaddingBody(context),
-            child: SingleChildScrollView(
-              child: Form(
-                key: formKey,
-                child: BlocListener<ExpenseBloc, ExpenseState>(
-                  listener: (context, state) {
-                    if (state is ExpenseAddLoading) {
-                      appLoader(context, "Processing expense, please wait...");
-                    } else if (state is ExpenseAddSuccess) {
-                      Navigator.pop(context); // Close loader dialog
-                      // Navigator.of(context).pop(true); // Return success
-                    } else if (state is ExpenseAddFailed) {
-                      Navigator.pop(context); // Close loader dialog
-                      appAlertDialog(
-                        context,
-                        state.content,
-                        title: state.title,
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.of(context).pop(),
-                            child: const Text("Dismiss"),
-                          ),
-                        ],
-                      );
-                    }
-                  },
-                  child: Column(
-                    children: [
-                      SizedBox(height: 20,),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            widget.id == null
-                                ? 'Create Expense '
-                                : 'Update Expense',
-                            style:  TextStyle(
-                              fontSize: 16,
-                              color: AppColors.text(context),
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          GestureDetector(
-                            onTap: () => AppRoutes.pop(context),
-                            child: const Icon(
-                              Icons.close,
-                              color: Colors.red,
-                              size: 22,
-                            ),
-                          ),
-                        ],
+    return Container(
+      width: MediaQuery.of(context).size.width,
+      decoration: BoxDecoration(
+        shape: BoxShape.rectangle,
+        color: AppColors.bottomNavBg(context),
+        borderRadius: BorderRadius.circular(AppSizes.borderRadiusSize),
+      ),
+      padding: AppTextStyle.getResponsivePaddingBody(context),
+      child: SingleChildScrollView(
+        controller: widget.scrollController, // 🔥 Attach scrollController
+        child: Form(
+          key: formKey,
+          child: BlocListener<ExpenseBloc, ExpenseState>(
+            listener: (context, state) {
+              if (state is ExpenseAddLoading) {
+                appLoader(context, "Processing expense, please wait...");
+              } else if (state is ExpenseAddSuccess) {
+                Navigator.pop(context); // Close loader dialog
+                // Navigator.of(context).pop(true); // Return success
+              } else if (state is ExpenseAddFailed) {
+                Navigator.pop(context); // Close loader dialog
+                appAlertDialog(
+                  context,
+                  state.content,
+                  title: state.title,
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: const Text("Dismiss"),
+                    ),
+                  ],
+                );
+              }
+            },
+            child: Column(
+              children: [
+                SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      widget.id == null ? 'Create Expense ' : 'Update Expense',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: AppColors.text(context),
+                        fontWeight: FontWeight.bold,
                       ),
-
-                      SizedBox(height: AppSizes.height(context) * 0.03),
-
-                      Wrap(
-                        runSpacing: 5,
-                        spacing: 10,
-                        children: [
-                          // Expense Head Dropdown
-                          SizedBox(
-                            child:
-                                BlocBuilder<ExpenseHeadBloc, ExpenseHeadState>(
-                                  builder: (context, state) {
-                                    if (state is ExpenseHeadListLoading) {
-                                      return const Center(
-                                        child: CircularProgressIndicator(),
-                                      );
-                                    }
-
-                                    return AppDropdown<ExpenseHeadModel>(
-                                      label: "Expense Head",
-                                      hint:
-                                          _selectedExpenseHead?.name ??
-                                          "Select Expense Head",
-                                      isNeedAll: false,
-                                      isRequired: true,
-                                      value: _selectedExpenseHead,
-                                      itemList: context
-                                          .read<ExpenseHeadBloc>()
-                                          .list,
-                                      onChanged: _onExpenseHeadChanged,
-                                      validator: (value) {
-                                        return value == null
-                                            ? 'Please select Expense Head'
-                                            : null;
-                                      },
-
-                                    );
-                                  },
-                                ),
-                          ),
-                          gapW8,
-                          // Expense SubHead Dropdown
-                          SizedBox(
-                            child:
-                                BlocBuilder<
-                                  ExpenseSubHeadBloc,
-                                  ExpenseSubHeadState
-                                >(
-                                  builder: (context, state) {
-                                    final subHeads =
-                                        _selectedExpenseHead != null
-                                        ? (context
-                                                  .read<ExpenseSubHeadBloc>()
-                                                  .list)
-                                              .where(
-                                                (subHead) =>
-                                                    subHead.head ==
-                                                    _selectedExpenseHead!.id,
-                                              )
-                                              .toList()
-                                        : <ExpenseSubHeadModel>[];
-                                    /// 🔥 If empty → return SizedBox (not visible)
-                                    if (subHeads.isEmpty) {
-                                      return const SizedBox.shrink();
-                                    }
-                                    return AppDropdown<ExpenseSubHeadModel>(
-                                      label: "Expense Sub Head (Optional)",
-                                      hint:
-                                          _selectedExpenseSubHead?.name ??
-                                          "Select Expense Sub Head",
-                                      isNeedAll: false,
-                                      isRequired: false,
-                                      value: _selectedExpenseSubHead,
-                                      itemList: subHeads,
-                                      onChanged: _onExpenseSubHeadChanged,
-
-                                    );
-                                  },
-                                ),
-                          ),
-                        ],
+                    ),
+                    GestureDetector(
+                      onTap: () => AppRoutes.pop(context),
+                      child: const Icon(
+                        Icons.close,
+                        color: Colors.red,
+                        size: 22,
                       ),
-                      gapH8,
-                      // Amount Field
-                      Wrap(
-                        runSpacing: 5,
-                        spacing: 10,
-                        children: [
+                    ),
+                  ],
+                ),
 
-                          ValueListenableBuilder<String?>(
-                            valueListenable: expenseBloc.selectedPaymentMethodNotifier,
-                            builder: (context, selectedPaymentMethod, child) {
-                              if (!mounted) return Container();
-
-                              return AppDropdown<String>(
-                                label: "Payment Method",
-                                hint: selectedPaymentMethod ??
-                                    "Select Payment Method",
-                                isLabel: false,
-                                isRequired: true,
-                                isNeedAll: false,
-                                value: selectedPaymentMethod,
-                                itemList: expenseBloc.paymentMethod,
-                                onChanged: (newVal) {
-                                  expenseBloc.      selectedPaymentMethodNotifier.value =
-                                      newVal.toString();
-                                  // Clear selected account when payment method changes
-                                  expenseBloc.selectedAccountNotifier.value = null;
-                                  setState(() {});
-                                },
-                                validator: (value) {
-                                  return value == null
-                                      ? 'Please select a payment method'
-                                      : null;
-                                },
-                              );
-                            },
-                          ),
-
-
-                          gapW16,
-
-                  BlocBuilder<AccountBloc, AccountState>(
+                SizedBox(height: AppSizes.height(context) * 0.02),
+                SizedBox(
+                  child: BlocBuilder<ExpenseHeadBloc, ExpenseHeadState>(
                     builder: (context, state) {
-
-                      final selectedPayment =
-                          expenseBloc.selectedPaymentMethodNotifier.value;
-
-                      /// 🔥 If no payment selected → hide account dropdown
-                      if (selectedPayment == null || selectedPayment.isEmpty) {
-                        return const SizedBox.shrink();
-                      }
-
-                      if (state is AccountActiveListLoading) {
+                      if (state is ExpenseHeadListLoading) {
                         return const Center(child: CircularProgressIndicator());
                       }
 
-                      if (state is AccountActiveListSuccess) {
-
-
-
-
-                        final selectedPaymentMethod =expenseBloc. selectedPaymentMethodNotifier.value;
-
-                        // Debug: Print all accounts and payment method for troubleshooting
-                        debugPrint("=== ACCOUNT FILTERING DEBUG ===");
-                        debugPrint("Selected Payment Method: '$selectedPaymentMethod'");
-                        debugPrint("All Accounts:");
-                        for (var account in state.list) {
-                          debugPrint(
-                            " - ${account.name} | Type: '${account.acType}' | ID: ${account.id}",
-                          );
-                        }
-
-                        // Filter accounts based on selected payment method
-                        final List<AccountActiveModel> filteredList;
-                        if (selectedPaymentMethod != null && selectedPaymentMethod.isNotEmpty) {
-                          filteredList = state.list.where((item) {
-                            final itemType = item.acType?.toLowerCase().trim() ?? '';
-                            final paymentMethod = selectedPaymentMethod.toLowerCase().trim();
-
-                            // Map common payment method variations to account types
-                            final paymentMethodMap = {
-                              'bank': 'bank',
-                              'cash': 'cash',
-                              'mobile banking': 'mobile banking',
-                              'mobile': 'mobile banking',
-                              'other': 'other',
-                            };
-
-                            final mappedPaymentMethod =
-                                paymentMethodMap[paymentMethod] ?? paymentMethod;
-
-                            bool matches = itemType == mappedPaymentMethod;
-                            if (matches) {
-                              debugPrint(
-                                "MATCH FOUND: '${item.acType}' == '$selectedPaymentMethod'",
-                              );
-                            }
-
-                            return matches;
-                          }).toList();
-
-                          debugPrint("Filtered Accounts Count: ${filteredList.length}");
-                          debugPrint("Filtered Accounts:");
-                          for (var account in filteredList) {
-                            debugPrint(" - ${account.name} | Type: '${account.acType}'");
-                          }
-                        } else {
-                          filteredList = state.list;
-                        }
-
-                        debugPrint("==============================");
-
-                        // Auto-select first account if none is selected and list is available
-                        if (expenseBloc.accountModel == null && filteredList.isNotEmpty) {
-                          expenseBloc.accountModel = filteredList.first;
-                          expenseBloc.selectedAccountId = filteredList.first.id.toString();
-                          debugPrint("Auto-selected account: ${filteredList.first.name}");
-                        }
-
-                        // Clear selection if selected account is not in filtered list
-                        if (expenseBloc.accountModel != null &&
-                            !filteredList.any(
-                                  (account) => account.id == expenseBloc.accountModel!.id,
-                            )) {
-                          expenseBloc.accountModel = null;
-                          expenseBloc.selectedAccountId = "";
-                          debugPrint("Cleared account selection - not in filtered list");
-                        }
-
-                        return AppDropdown<AccountActiveModel>(
-                          label: "Account",
-                          hint: filteredList.isEmpty
-                              ? "No accounts available"
-                              : (expenseBloc.accountModel == null
-                              ? "Select Account"
-                              : "${expenseBloc.accountModel!.name}${expenseBloc.accountModel!.acNumber != null ? ' - ${expenseBloc.accountModel!.acNumber}' : ''}"),
-                          isLabel: false,
-                          isRequired: true,
-                          isNeedAll: false,
-                          value: expenseBloc.accountModel,
-                          itemList: filteredList,
-                          onChanged: (newVal) {
-                            setState(() {
-                              expenseBloc.accountModel = newVal;
-                              if (newVal != null) {
-                                expenseBloc.selectedAccountId = newVal.id.toString();
-                                debugPrint(
-                                  "Selected Account: ${newVal.name} (ID: ${newVal.id})",
-                                );
-                              } else {
-                                expenseBloc.selectedAccountId = "";
-                                debugPrint("Account selection cleared");
-                              }
-                            });
-                          },
-                          validator: (value) {
-                            if (selectedPaymentMethod != null && filteredList.isEmpty) {
-                              return 'No "$selectedPaymentMethod" accounts available';
-                            }
-                            return value == null ? 'Please select an account' : null;
-                          },
-                        );                      }
-
-                      if (state is AccountActiveListFailed) {
-                        return Text(
-                          'Failed to load accounts: ${state.content}',
-                        );
-                      }
-
-                      return const SizedBox.shrink();
-                    },
-                  )
-                        ],
-                      ),
-                      gapH8,
-                      // Payment Method (only for create)
-                      Wrap(
-                        children: [
-                          SizedBox(
-                            child: CustomInputField(
-                              isRequiredLable: true,
-                              isRequired: true,
-                              controller: expenseBloc.amountTextController,
-                              hintText: 'Amount',
-                              fillColor: const Color.fromARGB(
-                                255,
-                                255,
-                                255,
-                                255,
-                              ),
-                              keyboardType: TextInputType.number,
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Please enter amount';
-                                }
-                                if (double.tryParse(value) == null) {
-                                  return 'Please enter a valid number';
-                                }
-                                return null;
-                              },
-                              onChanged: (value) {
-                                return null;
-                              },
-                            ),
-                          ),
-                          gapW16,
-                          SizedBox(
-                            child: CustomInputField(
-                              isRequiredLable: true,
-                              isRequired: true,
-                              controller: expenseBloc.dateExpenseTextController,
-                              hintText: 'Expense Date',
-                              fillColor: const Color.fromARGB(
-                                255,
-                                255,
-                                255,
-                                255,
-                              ),
-                              readOnly: true,
-                              keyboardType: TextInputType.text,
-                              validator: (value) {
-                                return value == null || value.isEmpty
-                                    ? 'Please enter Expense Date'
-                                    : null;
-                              },
-                              onTap: () async {
-                                FocusScope.of(
-                                  context,
-                                ).requestFocus(FocusNode());
-                                DateTime? pickedDate = await showDatePicker(
-                                  context: context,
-                                  initialDate: DateTime.now(),
-                                  firstDate: DateTime(1900),
-                                  lastDate: DateTime.now(),
-                                );
-                                if (pickedDate != null) {
-                                  expenseBloc.dateExpenseTextController.text =
-                                      pickedDate.toLocal().toString().split(
-                                        ' ',
-                                      )[0];
-                                }
-                              },
-                              onChanged: (value) {
-                                return null;
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      // Account Dropdown (only for create)
-
-                      // Date Field
-
-                      // Note Field
-                      CustomInputField(
-                        isRequiredLable: true,
+                      return AppDropdown<ExpenseHeadModel>(
+                        label: "Expense Head",
+                        isLabel: true,
+                        hint:
+                            _selectedExpenseHead?.name ?? "Select Expense Head",
+                        isNeedAll: false,
                         isRequired: false,
-                        controller: expenseBloc.noteTextController,
-                        hintText: 'Note',
-                        fillColor: const Color.fromARGB(255, 255, 255, 255),
-                        keyboardType: TextInputType.text,
-                        onChanged: (value) {
-                          return null;
-                        },
-                      ),
-
-                      const SizedBox(height: 10),
-
-                      // Submit Button
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          AppButton(
-                            size: 120,
-                            name:  "Cancel",
-                            isOutlined: true,
-                            textColor: AppColors.errorColor(context),
-                            borderColor: AppColors.primaryColor(context),
-                            onPressed: (){
-                              AppRoutes.pop(context);
-                            },
-                          ),
-                          SizedBox(width: 10,),
-                          AppButton(
-                            size: 120,
-                            name: widget.name ?? "Create",
-                            onPressed: _showConfirmationDialog,
-                          ),
-                        ],
-                      ),
-
-                      SizedBox(height: 30,)
-                    ],
+                        value: _selectedExpenseHead,
+                        itemList: context.read<ExpenseHeadBloc>().list,
+                        onChanged: _onExpenseHeadChanged,
+                        // validator: (value) {
+                        //   return value == null
+                        //       ? 'Please select Expense Head'
+                        //       : null;
+                        // },
+                      );
+                    },
                   ),
                 ),
-              ),
+
+                gapH8,
+                // Expense SubHead Dropdown
+                SizedBox(
+                  child: BlocBuilder<ExpenseSubHeadBloc, ExpenseSubHeadState>(
+                    builder: (context, state) {
+                      final subHeads = _selectedExpenseHead != null
+                          ? (context.read<ExpenseSubHeadBloc>().list)
+                                .where(
+                                  (subHead) =>
+                                      subHead.head == _selectedExpenseHead!.id,
+                                )
+                                .toList()
+                          : <ExpenseSubHeadModel>[];
+
+                      /// 🔥 If empty → return SizedBox (not visible)
+                      if (subHeads.isEmpty) {
+                        return const SizedBox.shrink();
+                      }
+                      return AppDropdown<ExpenseSubHeadModel>(
+                        label: "Expense Sub Head (Optional)",
+                        hint:
+                            _selectedExpenseSubHead?.name ??
+                            "Select Expense Sub Head",
+                        isNeedAll: false,
+                        isLabel: true,
+
+                        isRequired: false,
+                        value: _selectedExpenseSubHead,
+                        itemList: subHeads,
+                        onChanged: _onExpenseSubHeadChanged,
+                      );
+                    },
+                  ),
+                ),
+
+                gapH8,
+                ValueListenableBuilder<String?>(
+                  valueListenable: expenseBloc.selectedPaymentMethodNotifier,
+                  builder: (context, selectedPaymentMethod, child) {
+                    if (!mounted) return Container();
+
+                    return AppDropdown<String>(
+                      label: "Payment Method",
+                      hint: selectedPaymentMethod ?? "Select Payment Method",
+                      isLabel: true,
+                      isRequired: true,
+                      isNeedAll: false,
+                      value: selectedPaymentMethod,
+                      itemList: expenseBloc.paymentMethod,
+                      onChanged: (newVal) {
+                        expenseBloc.selectedPaymentMethodNotifier.value = newVal
+                            .toString();
+                        // Clear selected account when payment method changes
+                        expenseBloc.selectedAccountNotifier.value = null;
+                        setState(() {});
+                      },
+                      validator: (value) {
+                        return value == null
+                            ? 'Please select a payment method'
+                            : null;
+                      },
+                    );
+                  },
+                ),
+
+                gapH8,
+
+                BlocBuilder<AccountBloc, AccountState>(
+                  builder: (context, state) {
+                    final expenseBloc = context.read<ExpenseBloc>();
+                    final selectedPayment = expenseBloc.selectedPaymentMethodNotifier.value;
+
+                    // Hide account dropdown if no payment method selected
+                    if (selectedPayment == null || selectedPayment.isEmpty) {
+                      return const SizedBox.shrink();
+                    }
+
+                    if (state is AccountActiveListLoading) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+
+                    if (state is AccountActiveListSuccess) {
+                      // Filter accounts based on selected payment method
+                      final paymentMethodMap = {
+                        'bank': 'bank',
+                        'cash': 'cash',
+                        'mobile banking': 'mobile banking',
+                        'mobile': 'mobile banking',
+                        'other': 'other',
+                      };
+
+                      final paymentMethod = selectedPayment.toLowerCase().trim();
+                      final mappedPaymentMethod = paymentMethodMap[paymentMethod] ?? paymentMethod;
+
+                      final filteredList = state.list.where((account) {
+                        final accountType = account.acType?.toLowerCase().trim() ?? '';
+                        return accountType == mappedPaymentMethod;
+                      }).toList();
+
+                      // Auto-select first account if none selected
+                      if (expenseBloc.accountModel == null && filteredList.isNotEmpty) {
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          if (!mounted) return;
+                          setState(() {
+                            expenseBloc.accountModel = filteredList.first;
+                            expenseBloc.selectedAccountId = filteredList.first.id.toString();
+                            debugPrint("Auto-selected account: ${filteredList.first.name}");
+                          });
+                        });
+                      }
+
+                      // Clear selection if selected account is not in filtered list
+                      if (expenseBloc.accountModel != null &&
+                          !filteredList.any((account) => account.id == expenseBloc.accountModel!.id)) {
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          if (!mounted) return;
+                          setState(() {
+                            expenseBloc.accountModel = null;
+                            expenseBloc.selectedAccountId = "";
+                            debugPrint("Cleared account selection - not in filtered list");
+                          });
+                        });
+                      }
+
+                      return AppDropdown<AccountActiveModel>(
+                        label: "Account",
+                        hint: filteredList.isEmpty
+                            ? "No accounts available"
+                            : (expenseBloc.accountModel == null
+                            ? "Select Account"
+                            : "${expenseBloc.accountModel!.name}${expenseBloc.accountModel!.acNumber != null ? ' - ${expenseBloc.accountModel!.acNumber}' : ''}"),
+                        isLabel: true,
+                        isRequired: true,
+                        isNeedAll: false,
+                        value: expenseBloc.accountModel,
+                        itemList: filteredList,
+                        onChanged: (newVal) {
+                          setState(() {
+                            expenseBloc.accountModel = newVal;
+                            if (newVal != null) {
+                              expenseBloc.selectedAccountId = newVal.id.toString();
+                              debugPrint("Selected Account: ${newVal.name} (ID: ${newVal.id})");
+                            } else {
+                              expenseBloc.selectedAccountId = "";
+                              debugPrint("Account selection cleared");
+                            }
+                          });
+                        },
+                        validator: (value) {
+                          if (selectedPayment != null && filteredList.isEmpty) {
+                            return 'No "$selectedPayment" accounts available';
+                          }
+                          return value == null ? 'Please select an account' : null;
+                        },
+                      );
+                    }
+
+                    if (state is AccountActiveListFailed) {
+                      return Text('Failed to load accounts: ${state.content}');
+                    }
+
+                    return const SizedBox.shrink();
+                  },
+                ),
+
+                // Amount Field
+                gapH8,
+                // Payment Method (only for create)
+                SizedBox(
+                  child: CustomInputField(
+                    isRequiredLable: true,
+                    isRequired: true,
+                    controller: expenseBloc.amountTextController,
+                    hintText: 'Amount',
+                    fillColor: const Color.fromARGB(255, 255, 255, 255),
+                    keyboardType: TextInputType.number,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter amount';
+                      }
+                      if (double.tryParse(value) == null) {
+                        return 'Please enter a valid number';
+                      }
+                      return null;
+                    },
+                    onChanged: (value) {
+                      return null;
+                    },
+                  ),
+                ),
+                // Note Field
+                CustomInputField(
+                  isRequiredLable: true,
+                  isRequired: false,
+                  controller: expenseBloc.noteTextController,
+                  hintText: 'Note',
+                  fillColor: const Color.fromARGB(255, 255, 255, 255),
+                  keyboardType: TextInputType.text,
+                  onChanged: (value) {
+                    return null;
+                  },
+                ),
+                SizedBox(
+                  child: CustomInputField(
+                    isRequiredLable: true,
+                    isRequired: false,
+                    controller: expenseBloc.dateExpenseTextController,
+                    hintText: 'Expense Date',
+                    fillColor: const Color.fromARGB(255, 255, 255, 255),
+                    readOnly: true,
+                    keyboardType: TextInputType.text,
+                    validator: (value) {
+                      return value == null || value.isEmpty
+                          ? 'Please enter Expense Date'
+                          : null;
+                    },
+                    onTap: () async {
+                      FocusScope.of(context).requestFocus(FocusNode());
+                      DateTime? pickedDate = await showDatePicker(
+                        context: context,
+                        initialDate: DateTime.now(),
+                        firstDate: DateTime(1900),
+                        lastDate: DateTime.now(),
+                      );
+                      if (pickedDate != null) {
+                        expenseBloc.dateExpenseTextController.text = pickedDate
+                            .toLocal()
+                            .toString()
+                            .split(' ')[0];
+                      }
+                    },
+                    onChanged: (value) {
+                      return null;
+                    },
+                  ),
+                ),
+
+                const SizedBox(height: 10),
+
+                // Submit Button
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    AppButton(
+                      size: 120,
+                      name: "Cancel",
+                      isOutlined: true,
+                      textColor: AppColors.errorColor(context),
+                      borderColor: AppColors.primaryColor(context),
+                      onPressed: () {
+                        AppRoutes.pop(context);
+                      },
+                    ),
+                    SizedBox(width: 10),
+                    AppButton(
+                      size: 120,
+                      name: widget.name ?? "Create",
+                      onPressed: _showConfirmationDialog,
+                    ),
+                  ],
+                ),
+
+                SizedBox(height: 30),
+              ],
             ),
           ),
         ),
-      ],
+      ),
     );
   }
 }
