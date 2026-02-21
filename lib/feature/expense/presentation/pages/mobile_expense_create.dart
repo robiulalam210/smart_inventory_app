@@ -1,3 +1,4 @@
+import '../../../accounts/data/model/account_active_model.dart';
 import '../../data/model/expense.dart';
 import '/feature/expense/expense_head/data/model/expense_head_model.dart';
 import '/feature/expense/expense_sub_head/data/model/expense_sub_head_model.dart';
@@ -342,7 +343,10 @@ class _ExpenseCreateScreenState extends State<MobileExpenseCreate> {
                                               )
                                               .toList()
                                         : <ExpenseSubHeadModel>[];
-
+                                    /// 🔥 If empty → return SizedBox (not visible)
+                                    if (subHeads.isEmpty) {
+                                      return const SizedBox.shrink();
+                                    }
                                     return AppDropdown<ExpenseSubHeadModel>(
                                       label: "Expense Sub Head (Optional)",
                                       hint:
@@ -366,107 +370,172 @@ class _ExpenseCreateScreenState extends State<MobileExpenseCreate> {
                         runSpacing: 5,
                         spacing: 10,
                         children: [
-                          SizedBox(
-                            child: widget.id == null
-                                ? AppDropdown<String>(
-                                    label: "Payment Method",
-                                    hint: expenseBloc.selectedPayment.isEmpty
-                                        ? "Select Payment Method"
-                                        : expenseBloc.selectedPayment,
-                                    isLabel: false,
-                                    isRequired: true,
-                                    isNeedAll: false,
-                                    value: expenseBloc.selectedPayment.isEmpty
-                                        ? null
-                                        : expenseBloc.selectedPayment,
-                                    itemList: expenseBloc.paymentMethod,
-                                    onChanged: (newVal) {
-                                      setState(() {
-                                        expenseBloc.selectedPayment = newVal
-                                            .toString();
-                                      });
-                                    },
-                                    validator: (value) {
-                                      return value == null
-                                          ? 'Please select a payment method'
-                                          : null;
-                                    },
 
-                                  )
-                                : Container(),
+                          ValueListenableBuilder<String?>(
+                            valueListenable: expenseBloc.selectedPaymentMethodNotifier,
+                            builder: (context, selectedPaymentMethod, child) {
+                              if (!mounted) return Container();
+
+                              return AppDropdown<String>(
+                                label: "Payment Method",
+                                hint: selectedPaymentMethod ??
+                                    "Select Payment Method",
+                                isLabel: false,
+                                isRequired: true,
+                                isNeedAll: false,
+                                value: selectedPaymentMethod,
+                                itemList: expenseBloc.paymentMethod,
+                                onChanged: (newVal) {
+                                  expenseBloc.      selectedPaymentMethodNotifier.value =
+                                      newVal.toString();
+                                  // Clear selected account when payment method changes
+                                  expenseBloc.selectedAccountNotifier.value = null;
+                                  setState(() {});
+                                },
+                                validator: (value) {
+                                  return value == null
+                                      ? 'Please select a payment method'
+                                      : null;
+                                },
+                              );
+                            },
                           ),
+
+
                           gapW16,
-                          SizedBox(
-                            child: widget.id == null
-                                ? BlocBuilder<AccountBloc, AccountState>(
-                                    builder: (context, state) {
-                                      if (state is AccountActiveListLoading ) {
-                                        return const Center(
-                                          child: CircularProgressIndicator(),
-                                        );
-                                      } else if (state is AccountActiveListSuccess) {
-                                        // Filter accounts based on selected payment method
-                                        final filteredList =
-                                            expenseBloc
-                                                .selectedPayment
-                                                .isNotEmpty
-                                            ? state.list.where((item) {
-                                                return item.acType
-                                                        ?.toLowerCase() ==
-                                                    expenseBloc.selectedPayment
-                                                        .toLowerCase();
-                                              }).toList()
-                                            : state.list;
 
-                                        return AppDropdown<dynamic>(
-                                          label: "Account",
-                                          hint: "Select Account",
-                                          isLabel: false,
-                                          isRequired: true,
-                                          isNeedAll: false,
-                                          value:
-                                              expenseBloc
-                                                  .selectedAccount
-                                                  .isEmpty
-                                              ? null
-                                              : expenseBloc.selectedAccount,
-                                          itemList: filteredList,
-                                          onChanged: (newVal) {
-                                            final selectedAccount = filteredList
-                                                .firstWhere(
-                                                  (acc) =>
-                                                      acc.toString() ==
-                                                      newVal.toString(),
-                                                );
+                  BlocBuilder<AccountBloc, AccountState>(
+                    builder: (context, state) {
 
-                                            setState(() {
-                                              expenseBloc.selectedAccount =
-                                                  newVal.toString();
-                                              expenseBloc.selectedAccountId =
-                                                  selectedAccount.id
-                                                      .toString();
-                                            });
-                                          },
-                                          validator: (value) {
-                                            return value == null
-                                                ? 'Please select an account'
-                                                : null;
-                                          },
+                      final selectedPayment =
+                          expenseBloc.selectedPaymentMethodNotifier.value;
 
-                                        );
-                                      } else if (state is AccountActiveListFailed) {
-                                        return Center(
-                                          child: Text(
-                                            'Failed to load accounts: ${state.content}',
-                                          ),
-                                        );
-                                      } else {
-                                        return Container();
-                                      }
-                                    },
-                                  )
-                                : Container(),
-                          ),
+                      /// 🔥 If no payment selected → hide account dropdown
+                      if (selectedPayment == null || selectedPayment.isEmpty) {
+                        return const SizedBox.shrink();
+                      }
+
+                      if (state is AccountActiveListLoading) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+
+                      if (state is AccountActiveListSuccess) {
+
+
+
+
+                        final selectedPaymentMethod =expenseBloc. selectedPaymentMethodNotifier.value;
+
+                        // Debug: Print all accounts and payment method for troubleshooting
+                        debugPrint("=== ACCOUNT FILTERING DEBUG ===");
+                        debugPrint("Selected Payment Method: '$selectedPaymentMethod'");
+                        debugPrint("All Accounts:");
+                        for (var account in state.list) {
+                          debugPrint(
+                            " - ${account.name} | Type: '${account.acType}' | ID: ${account.id}",
+                          );
+                        }
+
+                        // Filter accounts based on selected payment method
+                        final List<AccountActiveModel> filteredList;
+                        if (selectedPaymentMethod != null && selectedPaymentMethod.isNotEmpty) {
+                          filteredList = state.list.where((item) {
+                            final itemType = item.acType?.toLowerCase().trim() ?? '';
+                            final paymentMethod = selectedPaymentMethod.toLowerCase().trim();
+
+                            // Map common payment method variations to account types
+                            final paymentMethodMap = {
+                              'bank': 'bank',
+                              'cash': 'cash',
+                              'mobile banking': 'mobile banking',
+                              'mobile': 'mobile banking',
+                              'other': 'other',
+                            };
+
+                            final mappedPaymentMethod =
+                                paymentMethodMap[paymentMethod] ?? paymentMethod;
+
+                            bool matches = itemType == mappedPaymentMethod;
+                            if (matches) {
+                              debugPrint(
+                                "MATCH FOUND: '${item.acType}' == '$selectedPaymentMethod'",
+                              );
+                            }
+
+                            return matches;
+                          }).toList();
+
+                          debugPrint("Filtered Accounts Count: ${filteredList.length}");
+                          debugPrint("Filtered Accounts:");
+                          for (var account in filteredList) {
+                            debugPrint(" - ${account.name} | Type: '${account.acType}'");
+                          }
+                        } else {
+                          filteredList = state.list;
+                        }
+
+                        debugPrint("==============================");
+
+                        // Auto-select first account if none is selected and list is available
+                        if (expenseBloc.accountModel == null && filteredList.isNotEmpty) {
+                          expenseBloc.accountModel = filteredList.first;
+                          expenseBloc.selectedAccountId = filteredList.first.id.toString();
+                          debugPrint("Auto-selected account: ${filteredList.first.name}");
+                        }
+
+                        // Clear selection if selected account is not in filtered list
+                        if (expenseBloc.accountModel != null &&
+                            !filteredList.any(
+                                  (account) => account.id == expenseBloc.accountModel!.id,
+                            )) {
+                          expenseBloc.accountModel = null;
+                          expenseBloc.selectedAccountId = "";
+                          debugPrint("Cleared account selection - not in filtered list");
+                        }
+
+                        return AppDropdown<AccountActiveModel>(
+                          label: "Account",
+                          hint: filteredList.isEmpty
+                              ? "No accounts available"
+                              : (expenseBloc.accountModel == null
+                              ? "Select Account"
+                              : "${expenseBloc.accountModel!.name}${expenseBloc.accountModel!.acNumber != null ? ' - ${expenseBloc.accountModel!.acNumber}' : ''}"),
+                          isLabel: false,
+                          isRequired: true,
+                          isNeedAll: false,
+                          value: expenseBloc.accountModel,
+                          itemList: filteredList,
+                          onChanged: (newVal) {
+                            setState(() {
+                              expenseBloc.accountModel = newVal;
+                              if (newVal != null) {
+                                expenseBloc.selectedAccountId = newVal.id.toString();
+                                debugPrint(
+                                  "Selected Account: ${newVal.name} (ID: ${newVal.id})",
+                                );
+                              } else {
+                                expenseBloc.selectedAccountId = "";
+                                debugPrint("Account selection cleared");
+                              }
+                            });
+                          },
+                          validator: (value) {
+                            if (selectedPaymentMethod != null && filteredList.isEmpty) {
+                              return 'No "$selectedPaymentMethod" accounts available';
+                            }
+                            return value == null ? 'Please select an account' : null;
+                          },
+                        );                      }
+
+                      if (state is AccountActiveListFailed) {
+                        return Text(
+                          'Failed to load accounts: ${state.content}',
+                        );
+                      }
+
+                      return const SizedBox.shrink();
+                    },
+                  )
                         ],
                       ),
                       gapH8,

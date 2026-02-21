@@ -1,3 +1,4 @@
+import '../../../../accounts/data/model/account_active_model.dart';
 import '/feature/expense/data/model/expense.dart';
 import '../../../../../core/configs/configs.dart';
 import '../../../../../core/repositories/delete_response.dart';
@@ -21,7 +22,14 @@ class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
 
   List<String> paymentMethod = ["Bank", "Cash", "Mobile banking"];
   String selectedPayment = "";
+
+  ValueNotifier<String?> selectedPaymentMethodNotifier = ValueNotifier<String?>(
+    "Cash",
+  );
+  ValueNotifier<String?> selectedAccountNotifier = ValueNotifier<String?>(null);
   ExpenseHeadModel? selectedExpenseHead;
+  AccountActiveModel? accountModel;
+
   String selectedAccount = "";
   String selectedAccountId = "";
 

@@ -70,14 +70,12 @@ class _ExpenseHeadScreenState extends State<MobileExpenseHeadScreen> {
                 _handleBlocState(state);
               },
               builder: (context, state) {
-                return SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      _buildMobileHeader(context),
-                      const SizedBox(height: 8),
-                      _buildExpenseHeadList(state),
-                    ],
-                  ),
+                return Column(
+                  children: [
+                    _buildMobileHeader(context),
+                    const SizedBox(height: 8),
+                    _buildExpenseHeadList(state),
+                  ],
                 );
               },
             ),
@@ -115,49 +113,43 @@ class _ExpenseHeadScreenState extends State<MobileExpenseHeadScreen> {
   }
 
   Widget _buildMobileHeader(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        // Search Bar
-        Container(
-          decoration: BoxDecoration(
-            color:AppColors.bottomNavBg(context),
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withValues(alpha: 0.1),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
+    return  Container(
+      decoration: BoxDecoration(
+        color:AppColors.bottomNavBg(context),
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withValues(alpha: 0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
-          child: Row(
-            children: [
-              Expanded(
-                child: CustomSearchTextFormField(
-                  isRequiredLabel: false,
-                  controller: context
-                      .read<ExpenseHeadBloc>()
-                      .filterTextController,
-                  onChanged: (value) {
-                    _fetchApiData(filterText: value);
-                  },
-                  onClear: () {
-                    context
-                        .read<ExpenseHeadBloc>()
-                        .filterTextController
-                        .clear();
-                    _searchController.clear();
-                    _fetchApiData();
-                  },
-                  hintText: "Expense head...",
-                ),
-              ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: CustomSearchTextFormField(
+              isRequiredLabel: false,
+              controller: context
+                  .read<ExpenseHeadBloc>()
+                  .filterTextController,
+              onChanged: (value) {
+                _fetchApiData(filterText: value);
+              },
+              onClear: () {
+                context
+                    .read<ExpenseHeadBloc>()
+                    .filterTextController
+                    .clear();
+                _searchController.clear();
+                _fetchApiData();
+              },
+              hintText: "Expense head...",
+            ),
+          ),
 
-            ],
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -178,16 +170,14 @@ class _ExpenseHeadScreenState extends State<MobileExpenseHeadScreen> {
         );
       }
     } else if (state is ExpenseHeadListFailed) {
-      return Expanded(
-        child: Center(
-          child: Text(
-            'Failed to load: ${state.content}',
-            textAlign: TextAlign.center,
-          ),
+      return Center(
+        child: Text(
+          'Failed to load: ${state.content}',
+          textAlign: TextAlign.center,
         ),
       );
     } else {
-      return Expanded(child: Center(child: Lottie.asset(AppImages.noData)));
+      return SizedBox(child: Center(child: Lottie.asset(AppImages.noData)));
     }
   }
 
