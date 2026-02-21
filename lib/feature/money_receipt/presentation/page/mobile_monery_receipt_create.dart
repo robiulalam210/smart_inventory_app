@@ -417,23 +417,65 @@ class _MoneyReceiptListScreenState extends State<MobileMoneyReceiptForm> {
         const SizedBox(height: 12),
         if (isAdmin)
 
-          BlocBuilder<UserBloc, UserState>(
-          builder: (context, state) {
-            final userBloc = context.read<UserBloc>();
-            final userList = userBloc.list;
+    BlocListener<UserBloc, UserState>(
+      listener: (context, state) {
 
-            if (userList.isNotEmpty && moneyReceiptBloc.selectUserModel == null) {
-              moneyReceiptBloc.selectUserModel = userList.first;
-            }
+        /// AUTO SELECT WHEN API LOADED
+        if (state is UserListSuccess) {
+
+          final profileBloc = context.read<ProfileBloc>();
+          final currentUserId =
+              profileBloc.permissionModel?.data?.user?.id;
+
+          if (currentUserId == null) return;
+
+          if (moneyReceiptBloc.selectUserModel == null) {
+
+            final matchedUser = state.list.firstWhere(
+                  (e) => e.id == currentUserId,
+              orElse: () => state.list.first,
+            );
+
+            moneyReceiptBloc.selectUserModel = matchedUser;
+
+            setState(() {});
+          }
+        }
+      },
+
+      child: BlocBuilder<UserBloc, UserState>(
+        builder: (context, state) {
+
+          /// ================= LOADING =================
+          if (state is UserListLoading) {
+            return AppDropdown(
+              label: "Collected By",
+              hint: "Loading users...",
+              isRequired: true,
+              itemList: const [],
+              value: null,
+              onChanged: (_) {},
+            );
+          }
+
+          /// ================= ERROR =================
+          if (state is UserListFailed) {
+            return Text(state.content);
+          }
+
+          /// ================= SUCCESS =================
+          if (state is UserListSuccess) {
 
             return AppDropdown(
               label: "Collected By",
-              hint: moneyReceiptBloc.selectUserModel?.username?.toString() ?? "Select Collected By",
+              hint: moneyReceiptBloc
+                  .selectUserModel?.username ??
+                  "Select Collected By",
               isLabel: false,
               isRequired: true,
               isNeedAll: false,
               value: moneyReceiptBloc.selectUserModel,
-              itemList: userList,
+              itemList: state.list,
               onChanged: (newVal) {
                 setState(() {
                   moneyReceiptBloc.selectUserModel = newVal;
@@ -445,10 +487,14 @@ class _MoneyReceiptListScreenState extends State<MobileMoneyReceiptForm> {
                 }
                 return null;
               },
-
             );
-          },
-        ),
+          }
+
+          return const SizedBox();
+        },
+      ),
+    ),
+
         const SizedBox(height: 12),
         CustomInputField(
           isRequiredLable: true,

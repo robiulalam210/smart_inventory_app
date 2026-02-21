@@ -202,54 +202,68 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
   }
 
   Widget _buildDashboardCards(DashboardData data) {
-    return GridView.count(
+    return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      crossAxisCount: 5,
-      childAspectRatio: 1.1,
-      crossAxisSpacing: 4,
-      mainAxisSpacing: 4,
-      children: [
-        dashboardCardItem(
-          title: "Total Sales",
-          value: data.todayMetrics?.sales?.total?.toDouble() ?? 0,
-          icon: Icons.shopping_cart,
-          color: Colors.green,
-          isCurrency: true,
-        ),
-        dashboardCardItem(
-          title: "Purchases",
-          value: data.todayMetrics?.purchases?.total?.toDouble() ?? 0,
-          icon: Icons.inventory,
-          color: Colors.blue,
-          isCurrency: true,
-        ),
-        dashboardCardItem(
-          title: "Expenses",
-          value: data.todayMetrics?.expenses?.total?.toDouble() ?? 0,
-          icon: Icons.money_off,
-          color: Colors.red,
-          isCurrency: true,
-        ),
-        dashboardCardItem(
-          title: "Net Profit",
-          value: data.profitLoss?.netProfit?.toDouble() ?? 0,
-          icon: Icons.trending_up,
-          color: (data.profitLoss?.netProfit ?? 0) >= 0
-              ? Colors.green
-              : Colors.red,
-          isCurrency: true,
-        ),
-        dashboardCardItem(
-          title: "Stock Alerts",
-          value:
-              ((data.stockAlerts?.lowStock ?? 0) +
-                      (data.stockAlerts?.outOfStock ?? 0))
-                  .toDouble(),
-          icon: Icons.warning,
-          color: Colors.orange,
-        ),
-      ],
+      itemCount: 6,
+      gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+        maxCrossAxisExtent: 100, // each card max width
+        childAspectRatio: 1.1,
+        crossAxisSpacing: 8,
+        mainAxisSpacing: 8,
+      ),
+      itemBuilder: (context, index) {
+        final cards = [
+          dashboardCardItem(
+            title: "Total Sales",
+            value: data.todayMetrics?.sales?.total?.toDouble() ?? 0,
+            icon: Icons.shopping_cart,
+            color: Colors.green,
+            isCurrency: true,
+          ),
+          dashboardCardItem(
+            title: "Purchases",
+            value: data.todayMetrics?.purchases?.total?.toDouble() ?? 0,
+            icon: Icons.inventory,
+            color: Colors.blue,
+            isCurrency: true,
+          ),
+          dashboardCardItem(
+            title: "Expenses",
+            value: data.todayMetrics?.expenses?.total?.toDouble() ?? 0,
+            icon: Icons.money_off,
+            color: Colors.red,
+            isCurrency: true,
+          ),
+          dashboardCardItem(
+            title: "Net Profit",
+            value: data.profitLoss?.netProfit?.toDouble() ?? 0,
+            icon: Icons.trending_up,
+            color: (data.profitLoss?.netProfit ?? 0) >= 0
+                ? Colors.green
+                : Colors.red,
+            isCurrency: true,
+          ),
+          dashboardCardItem(
+            title: "Net Profit \nWith Incomes",
+            value: data.profitLoss?.netProfitWithIncomes?.toDouble() ?? 0,
+            icon: Icons.trending_up,
+            color: (data.profitLoss?.netProfitWithIncomes ?? 0) >= 0
+                ? Colors.green
+                : Colors.red,
+            isCurrency: true,
+          ),
+          dashboardCardItem(
+            title: "Stock Alerts",
+            value: ((data.stockAlerts?.lowStock ?? 0) +
+                (data.stockAlerts?.outOfStock ?? 0))
+                .toDouble(),
+            icon: Icons.warning,
+            color: Colors.orange,
+          ),
+        ];
+        return cards[index];
+      },
     );
   }
 

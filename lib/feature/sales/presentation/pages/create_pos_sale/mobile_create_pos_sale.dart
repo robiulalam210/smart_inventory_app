@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../../../../../core/widgets/app_scaffold.dart';
 import '../../../../profile/presentation/bloc/profile_bloc/profile_bloc.dart';
+import '../../../../users_list/data/model/user_model.dart';
 import '../mobile_pos_sale_screen.dart';
 import '/core/core.dart';
 import '/feature/products/product/data/model/product_stock_model.dart';
@@ -524,7 +525,6 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                   primaryColor: Colors.green,
                 );
 
-
                 changeAmountController.clear();
                 AppRoutes.pop(context);
 
@@ -994,25 +994,93 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
               ),
               gapH8,
               if (isAdmin)
-                BlocBuilder<UserBloc, UserState>(
-                  builder: (context, state) {
-                    return AppDropdown(
-                      label: "Sales By",
-                      hint: "Select Sales",
-                      isSearch: true,
-                      isNeedAll: false,
-                      isRequired: true,
-                      value: bloc.selectSalesModel,
-                      itemList: context.read<UserBloc>().list,
-                      onChanged: (newVal) {
-                        bloc.selectSalesModel = newVal;
+                BlocListener<UserBloc, UserState>(
+                  listener: (context, state) {
+                    /// AUTO SELECT WHEN API LOADED
+                    if (state is UserListSuccess) {
+                      final profileBloc = context.read<ProfileBloc>();
+                      final currentUserId =
+                          profileBloc.permissionModel?.data?.user?.id;
+
+                      if (currentUserId == null) return;
+
+                      if (bloc.selectSalesModel == null) {
+                        final matchedUser = state.list.firstWhere(
+                          (e) => e.id == currentUserId,
+                          orElse: () => state.list.first,
+                        );
+
+                        bloc.selectSalesModel = matchedUser;
+
                         setState(() {});
-                      },
-                      validator: (value) =>
-                          value == null ? 'Please select Sales' : null,
-                    );
+                      }
+                    }
                   },
+
+                  child: BlocBuilder<UserBloc, UserState>(
+                    builder: (context, state) {
+                      /// ================= LOADING =================
+                      if (state is UserListLoading) {
+                        return AppDropdown(
+                          label: "Collected By",
+                          hint: "Loading users...",
+                          isRequired: true,
+                          itemList: const [],
+                          value: null,
+                          onChanged: (_) {},
+                        );
+                      }
+
+                      /// ================= ERROR =================
+                      if (state is UserListFailed) {
+                        return Text(state.content);
+                      }
+
+                      /// ================= SUCCESS =================
+                      if (state is UserListSuccess) {
+                        return AppDropdown<UsersListModel>(
+                          label: "Sales By",
+                          hint:
+                              bloc.selectSalesModel?.username ?? "Select Sales",
+                          isLabel: false,
+                          isRequired: true,
+                          isNeedAll: false,
+                          value: bloc.selectSalesModel,
+                          itemList: state.list,
+                          onChanged: (newVal) {
+                            setState(() {
+                              bloc.selectSalesModel = newVal;
+                            });
+                          },
+                          validator: (value) =>
+                              value == null ? 'Please select Sales' : null,
+                        );
+                      }
+
+                      return const SizedBox();
+                    },
+                  ),
                 ),
+
+              // BlocBuilder<UserBloc, UserState>(
+              //   builder: (context, state) {
+              //     return AppDropdown(
+              //       label: "Sales By",
+              //       hint: "Select Sales",
+              //       isSearch: true,
+              //       isNeedAll: false,
+              //       isRequired: true,
+              //       value: bloc.selectSalesModel,
+              //       itemList: context.read<UserBloc>().list,
+              //       onChanged: (newVal) {
+              //         bloc.selectSalesModel = newVal;
+              //         setState(() {});
+              //       },
+              //       validator: (value) =>
+              //           value == null ? 'Please select Sales' : null,
+              //     );
+              //   },
+              // ),
               CustomInputField(
                 isRequired: true,
                 readOnly: true,
@@ -1033,7 +1101,6 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
     );
   }
 
-
   Widget _buildMobileProductListSection(CreatePosSaleBloc bloc) {
     return Form(
       key: _formKeyStep2,
@@ -1048,7 +1115,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
           final type = product["discount_type"]?.toString() ?? "fixed";
           final value = product["discount_value"] ?? 0;
           final total = product["ticket_total"] ?? 0.0;
-// Inside your product container (Auto Discount Section)
+          // Inside your product container (Auto Discount Section)
           final dynamic rawPrice = product["final_price"];
 
           final double finalPricePerUnit = rawPrice is String
@@ -1057,10 +1124,8 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
               ? rawPrice.toDouble()
               : (rawPrice as double? ?? 0.0);
 
-
-          final int quantity = int.tryParse(
-              controllers[index]!["quantity"]!.text) ??
-              1;
+          final int quantity =
+              int.tryParse(controllers[index]!["quantity"]!.text) ?? 1;
 
           final double totalFinalPrice = finalPricePerUnit * quantity;
           // Convert to double safely
@@ -1108,8 +1173,12 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                     ),
                     IconButton(
                       icon: Icon(
-                        index == 0 ? HugeIcons.strokeRoundedAddCircle : HugeIcons.strokeRoundedDelete02,
-                        color: index == 0 ? AppColors.primaryColor(context) : AppColors.errorColor(context),
+                        index == 0
+                            ? HugeIcons.strokeRoundedAddCircle
+                            : HugeIcons.strokeRoundedDelete02,
+                        color: index == 0
+                            ? AppColors.primaryColor(context)
+                            : AppColors.errorColor(context),
                       ),
                       onPressed: index == 0
                           ? addProduct
@@ -1126,8 +1195,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
 
                     return AppDropdown(
                       label: "Category",
-                      hint:  "Select Category"
-                          ,
+                      hint: "Select Category",
                       isRequired: false,
                       isNeedAll: true,
                       isLabel: true,
@@ -1205,14 +1273,13 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                     Expanded(
                       flex: 1,
                       child: TextFormField(
-
                         controller: controllers[index]!["price"],
                         readOnly: true,
-                        decoration:  InputDecoration(
+                        decoration: InputDecoration(
                           contentPadding: EdgeInsets.zero,
 
-
-                            labelText: "Original Price"),
+                          labelText: "Original Price",
+                        ),
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -1248,7 +1315,9 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                                 style: AppTextStyle.cardTitle(context),
                                 decoration: InputDecoration(
                                   isDense: true,
-                                  contentPadding: EdgeInsets.symmetric(vertical: 8),
+                                  contentPadding: EdgeInsets.symmetric(
+                                    vertical: 8,
+                                  ),
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(5),
                                     borderSide: BorderSide(
@@ -1275,7 +1344,8 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                                 onChanged: (value) {
                                   final productData = products[index];
                                   final product =
-                                  productData["product"] as ProductModelStockModel?;
+                                      productData["product"]
+                                          as ProductModelStockModel?;
 
                                   if (product == null) {
                                     controllers[index]!["quantity"]!.text = "1";
@@ -1286,25 +1356,31 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                                   if (qty < 1) qty = 1;
 
                                   final stockQty = product.stockQty ?? 0;
-                                  final openingStock = product.openingStock ?? 0;
-                                  final availableStock =
-                                  stockQty > 0 ? stockQty : openingStock;
+                                  final openingStock =
+                                      product.openingStock ?? 0;
+                                  final availableStock = stockQty > 0
+                                      ? stockQty
+                                      : openingStock;
 
-                                  if (availableStock > 0 && qty > availableStock) {
+                                  if (availableStock > 0 &&
+                                      qty > availableStock) {
                                     qty = availableStock;
                                     showCustomToast(
                                       context: context,
                                       title: 'Stock Limit!',
                                       description:
-                                      "Cannot exceed available stock: $availableStock",
+                                          "Cannot exceed available stock: $availableStock",
                                       icon: Icons.warning,
                                       primaryColor: Colors.orange,
                                     );
                                   }
 
-                                  controllers[index]!["quantity"]!.text = qty.toString();
+                                  controllers[index]!["quantity"]!.text = qty
+                                      .toString();
                                   controllers[index]!["quantity"]!.selection =
-                                      TextSelection.collapsed(offset: qty.toString().length);
+                                      TextSelection.collapsed(
+                                        offset: qty.toString().length,
+                                      );
 
                                   products[index]["quantity"] = qty.toString();
                                   updateTotal(index);
@@ -1389,7 +1465,9 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                     decoration: BoxDecoration(
                       color: Colors.green.withValues(alpha: 0.08),
                       borderRadius: BorderRadius.circular(6),
-                      border: Border.all(color: Colors.green.withValues(alpha: 0.3)),
+                      border: Border.all(
+                        color: Colors.green.withValues(alpha: 0.3),
+                      ),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1452,7 +1530,6 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                             ),
                           ],
                         ),
-
                       ],
                     ),
                   ),
@@ -1464,7 +1541,9 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                     decoration: BoxDecoration(
                       color: Colors.green.withValues(alpha: 0.08),
                       borderRadius: BorderRadius.circular(6),
-                      border: Border.all(color: Colors.green.withValues(alpha: 0.3)),
+                      border: Border.all(
+                        color: Colors.green.withValues(alpha: 0.3),
+                      ),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -2023,65 +2102,62 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
       setState(() {});
     }
   }
+
   void _submitForm() {
     final bloc = context.read<CreatePosSaleBloc>();
 
-    var transferProducts = products
-        .map(
-          (product) {
-        // Get the product model
-        final productModel = product["product"] as ProductModelStockModel?;
+    var transferProducts = products.map((product) {
+      // Get the product model
+      final productModel = product["product"] as ProductModelStockModel?;
 
-        // Determine the correct unit price
-        double unitPrice = 0.0;
+      // Determine the correct unit price
+      double unitPrice = 0.0;
 
-        if (productModel != null) {
-          // Check if auto-discount is applied
-          final bool hasAutoDiscount = product["discountApplied"] == true;
+      if (productModel != null) {
+        // Check if auto-discount is applied
+        final bool hasAutoDiscount = product["discountApplied"] == true;
 
-          if (hasAutoDiscount && productModel.finalPrice != null) {
-            // Use final price when auto-discount is applied
-            unitPrice = productModel.finalPrice!;
-          } else if (productModel.sellingPrice != null) {
-            // Use selling price when no auto-discount
-            unitPrice = productModel.sellingPrice!;
-          }
-        } else {
-          // Fallback to the price from controllers
-          final priceStr = product["price"]?.toString() ?? "0";
-          unitPrice = double.tryParse(priceStr) ?? 0.0;
+        if (hasAutoDiscount && productModel.finalPrice != null) {
+          // Use final price when auto-discount is applied
+          unitPrice = productModel.finalPrice!;
+        } else if (productModel.sellingPrice != null) {
+          // Use selling price when no auto-discount
+          unitPrice = productModel.sellingPrice!;
         }
+      } else {
+        // Fallback to the price from controllers
+        final priceStr = product["price"]?.toString() ?? "0";
+        unitPrice = double.tryParse(priceStr) ?? 0.0;
+      }
 
-        // Get discount value - check if auto-discount was applied
-        double discountValue = 0.0;
-        String discountType = "fixed";
+      // Get discount value - check if auto-discount was applied
+      double discountValue = 0.0;
+      String discountType = "fixed";
 
-        if (product["discountApplied"] == true) {
-          // For auto-discounted products, use the stored discount value
-          discountValue = product["discount_value"] is int
-              ? (product["discount_value"] as int).toDouble()
-              : product["discount_value"] is String
-              ? double.tryParse(product["discount_value"] as String) ?? 0.0
-              : product["discount_value"] as double? ?? 0.0;
+      if (product["discountApplied"] == true) {
+        // For auto-discounted products, use the stored discount value
+        discountValue = product["discount_value"] is int
+            ? (product["discount_value"] as int).toDouble()
+            : product["discount_value"] is String
+            ? double.tryParse(product["discount_value"] as String) ?? 0.0
+            : product["discount_value"] as double? ?? 0.0;
 
-          discountType = product["discount_type"]?.toString() ?? "fixed";
-        } else {
-          // For manually discounted products, get from controller
-          final discountStr = product["discount"]?.toString() ?? "0";
-          discountValue = double.tryParse(discountStr) ?? 0.0;
-          discountType = "fixed";
-        }
+        discountType = product["discount_type"]?.toString() ?? "fixed";
+      } else {
+        // For manually discounted products, get from controller
+        final discountStr = product["discount"]?.toString() ?? "0";
+        discountValue = double.tryParse(discountStr) ?? 0.0;
+        discountType = "fixed";
+      }
 
-        return {
-          "product_id": int.tryParse(product["product_id"].toString()),
-          "quantity": int.tryParse(product["quantity"].toString()),
-          "unit_price": unitPrice, // Use the correct unit price
-          "discount": discountValue,
-          "discount_type": discountType,
-        };
-      },
-    )
-        .toList();
+      return {
+        "product_id": int.tryParse(product["product_id"].toString()),
+        "quantity": int.tryParse(product["quantity"].toString()),
+        "unit_price": unitPrice, // Use the correct unit price
+        "discount": discountValue,
+        "discount_type": discountType,
+      };
+    }).toList();
 
     final selectedCustomer = bloc.selectClintModel;
     final isWalkInCustomer = selectedCustomer?.id == -1;
@@ -2141,6 +2217,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
     bloc.add(AddPosSale(body: body));
     log(body.toString());
   }
+
   // void _submitForm() {
   //   final bloc = context.read<CreatePosSaleBloc>();
   //

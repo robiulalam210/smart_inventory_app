@@ -12,6 +12,7 @@ import 'package:printing/printing.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
 import '../../../../profile/presentation/bloc/profile_bloc/profile_bloc.dart';
+import '../../../../users_list/data/model/user_model.dart';
 import '../../../data/models/pos_sale_model.dart';
 import '../../widgets/pdf/generate_sales_preview.dart';
 import '../mobile_pos_sale_screen.dart';
@@ -532,26 +533,74 @@ class _SalesScreenState extends State<MobileSalesScreen> {
 
         gapH8,
         if (isAdmin)
-          BlocBuilder<UserBloc, UserState>(
-            builder: (context, state) {
-              return AppDropdown(
-                label: "Sales By",
-                hint: "Select Sales",
-                isSearch: true,
-                isLabel: true,
-                isNeedAll: false,
-                isRequired: true,
-                value: bloc.selectSalesModel,
-                itemList: context.read<UserBloc>().list,
-                onChanged: (newVal) {
-                  bloc.selectSalesModel = newVal;
+          BlocListener<UserBloc, UserState>(
+            listener: (context, state) {
+              /// AUTO SELECT WHEN API LOADED
+              if (state is UserListSuccess) {
+                final profileBloc = context.read<ProfileBloc>();
+                final currentUserId =
+                    profileBloc.permissionModel?.data?.user?.id;
+
+                if (currentUserId == null) return;
+
+                if (bloc.selectSalesModel == null) {
+                  final matchedUser = state.list.firstWhere(
+                        (e) => e.id == currentUserId,
+                    orElse: () => state.list.first,
+                  );
+
+                  bloc.selectSalesModel = matchedUser;
+
                   setState(() {});
-                },
-                validator: (value) =>
-                    value == null ? 'Please select Sales' : null,
-              );
+                }
+              }
             },
+
+            child: BlocBuilder<UserBloc, UserState>(
+              builder: (context, state) {
+                /// ================= LOADING =================
+                if (state is UserListLoading) {
+                  return AppDropdown(
+                    label: "Collected By",
+                    hint: "Loading users...",
+                    isRequired: true,
+                    itemList: const [],
+                    value: null,
+                    onChanged: (_) {},
+                  );
+                }
+
+                /// ================= ERROR =================
+                if (state is UserListFailed) {
+                  return Text(state.content);
+                }
+
+                /// ================= SUCCESS =================
+                if (state is UserListSuccess) {
+                  return AppDropdown<UsersListModel>(
+                    label: "Sales By",
+                    hint:
+                    bloc.selectSalesModel?.username ?? "Select Sales",
+                    isLabel: false,
+                    isRequired: true,
+                    isNeedAll: false,
+                    value: bloc.selectSalesModel,
+                    itemList: state.list,
+                    onChanged: (newVal) {
+                      setState(() {
+                        bloc.selectSalesModel = newVal;
+                      });
+                    },
+                    validator: (value) =>
+                    value == null ? 'Please select Sales' : null,
+                  );
+                }
+
+                return const SizedBox();
+              },
+            ),
           ),
+
         gapH8,
         CustomInputField(
           isRequired: true,
@@ -2258,109 +2307,4 @@ class _SalesScreenState extends State<MobileSalesScreen> {
       ),
     );
   }
-  // @override
-  // Widget build(BuildContext context) {
-  //   final availableHeight =
-  //       MediaQuery.of(context).size.height - kToolbarHeight - 24;
-  //
-  //   return RawKeyboardListener(
-  //     focusNode: _focusNode,
-  //     autofocus: true,
-  //     onKey: _handleKey,
-  //     child: Scaffold(
-  //       backgroundColor: AppColors.bottomNavBg(context),
-  //       appBar: AppBar(
-  //         backgroundColor: AppColors.bottomNavBg(context),
-  //         title: Text(
-  //           'Pos Sale',
-  //           style: AppTextStyle.titleMedium(
-  //             context,
-  //           ).copyWith(color: AppColors.text(context)),
-  //         ),
-  //         actions: [
-  //           IconButton(
-  //             onPressed: _openProductBrowser,
-  //             icon: const Icon(Icons.search),
-  //           ),
-  //           const SizedBox(width: 6),
-  //           // QR icon to open camera scanner
-  //           IconButton(
-  //             onPressed: _openQrScanner,
-  //             icon: const Icon(Icons.qr_code_scanner),
-  //             tooltip: 'Scan barcode/QR',
-  //           ),
-  //           const SizedBox(width: 6),
-  //         ],
-  //       ),
-  //       floatingActionButton: FloatingActionButton(
-  //         onPressed: _openProductBrowser,
-  //         child: const Icon(Icons.add_shopping_cart),
-  //       ),
-  //       body: SafeArea(
-  //         child: BlocConsumer<CreatePosSaleBloc, CreatePosSaleState>(
-  //           listener: (context, state) {
-  //             if (state is CreatePosSaleLoading) {
-  //               appLoader(context, "Creating PosSale, please wait...");
-  //             } else if (state is CreatePosSaleSuccess) {
-  //               showCustomToast(
-  //                 context: context,
-  //                 title: 'Success!',
-  //                 description: "Sale created successfully!",
-  //                 icon: Icons.check_circle,
-  //                 primaryColor: Colors.green,
-  //               );
-  //               changeAmountController.clear();
-  //               Navigator.pop(context);
-  //               Navigator.pushReplacement(
-  //                 context,
-  //                 MaterialPageRoute(
-  //                   builder: (context) => const MobilePosSaleScreen(),
-  //                 ),
-  //               );
-  //               setState(() {});
-  //             } else if (state is CreatePosSaleFailed) {
-  //               Navigator.pop(context);
-  //               appAlertDialog(
-  //                 context,
-  //                 state.content,
-  //                 title: state.title,
-  //                 actions: [
-  //                   TextButton(
-  //                     onPressed: () => Navigator.pop(context),
-  //                     child: const Text("Dismiss"),
-  //                   ),
-  //                 ],
-  //               );
-  //             }
-  //           },
-  //           builder: (context, state) {
-  //             final bloc = context.read<CreatePosSaleBloc>();
-  //
-  //             return SingleChildScrollView(
-  //               padding: AppTextStyle.getResponsivePaddingBody(context),
-  //               child: ConstrainedBox(
-  //                 constraints: BoxConstraints(minHeight: availableHeight),
-  //                 child: Form(
-  //                   key: formKey,
-  //                   child: Column(
-  //                     crossAxisAlignment: CrossAxisAlignment.start,
-  //                     children: [
-  //                       _buildTopFormSection(bloc),
-  //                       _buildProductListSection(bloc),
-  //                       _buildChargesSection(bloc),
-  //                       _buildSummaryAndPayment(bloc),
-  //                       const SizedBox(height: 12),
-  //                       _buildActionButtons(),
-  //                       const SizedBox(height: 40),
-  //                     ],
-  //                   ),
-  //                 ),
-  //               ),
-  //             );
-  //           },
-  //         ),
-  //       ),
-  //     ),
-  //   );
-  // }
 }

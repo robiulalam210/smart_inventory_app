@@ -23,10 +23,10 @@ class IncomeHeadModel {
 
   factory IncomeHeadModel.fromJson(Map<String, dynamic> json) {
     return IncomeHeadModel(
-      id: json['id'] as int,
-      name: json['name'] as String?,
-      company: json['company'] as int?,
-      createdBy: json['created_by'] as int?,
+      id: json['id'] ,
+      name: json['name'] ,
+      company: json['company'] ,
+      createdBy: json['created_by'] ,
       dateCreated: json['date_created'] != null
           ? DateTime.parse(json['date_created'])
           : null,

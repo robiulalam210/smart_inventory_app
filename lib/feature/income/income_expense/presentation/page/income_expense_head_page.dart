@@ -63,12 +63,14 @@ class _IncomeHeadScreenState extends State<MobileIncomeHeadScreen> {
                   _handleBlocState(state);
                 },
                 builder: (context, state) {
-                  return Column(
-                    children: [
-                      _buildMobileHeader(context),
-                      const SizedBox(height: 8),
-                      _buildIncomeHeadList(state),
-                    ],
+                  return SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        _buildMobileHeader(context),
+                        const SizedBox(height: 8),
+                        _buildIncomeHeadList(state),
+                      ],
+                    ),
                   );
                 },
               ),
