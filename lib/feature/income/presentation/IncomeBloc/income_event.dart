@@ -37,6 +37,6 @@ class UpdateIncome extends IncomeEvent {
 }
 
 class DeleteIncome extends IncomeEvent {
-  final int id;
+  final String id;
   DeleteIncome({required this.id});
 }

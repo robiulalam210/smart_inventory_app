@@ -15,6 +15,12 @@ class IncomeHeadModel {
     this.isActive,
   });
 
+  @override
+  String toString() {
+    // TODO: implement toString
+    return name??'';
+  }
+
   factory IncomeHeadModel.fromJson(Map<String, dynamic> json) {
     return IncomeHeadModel(
       id: json['id'] as int,
