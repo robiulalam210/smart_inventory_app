@@ -5,6 +5,8 @@ import '../../../splash/presentation/bloc/connectivity_bloc/connectivity_state.d
 import '../../data/models/login_mod.dart';
 import '../../data/repositories/auth_service.dart';
 import '../../data/repositories/login_ser.dart';
+import '../../../../core/offline/offline_auth.dart';
+import '../../../../core/offline/offline_config.dart';
 import 'auth_event.dart';
 import 'auth_state.dart';
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
@@ -26,6 +28,16 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     try {
       // Check internet connectivity
       if (connectivityState is ConnectivityOffline) {
+        // Desktop: আগে এই কম্পিউটারে online login করা থাকলে offline login
+        if (OfflineConfig.enabled) {
+          final cached = await OfflineAuth.verify(event.username.trim(), event.password);
+          if (cached != null) {
+            emit(AuthAuthenticated(cached));
+            return;
+          }
+          emit(AuthError("Offline login হয়নি: এই কম্পিউটারে আগে online এ login করা নেই, অথবা password মেলেনি।"));
+          return;
+        }
         emit(AuthError("No internet connection. Please try again later."));
         return;
       }
@@ -61,7 +73,17 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
         // Save user locally and emit success
         await authService.saveUserLocally(event.password, response);
+        await OfflineAuth.remember(event.username.trim(), event.password, response);
         emit(AuthAuthenticated(response));
+      } else if (OfflineConfig.enabled &&
+          (response.message ?? '').toLowerCase().contains(RegExp('connect|timed out'))) {
+        // Wi-Fi আছে কিন্তু server পাওয়া যাচ্ছে না
+        final cached = await OfflineAuth.verify(event.username.trim(), event.password);
+        if (cached != null) {
+          emit(AuthAuthenticated(cached));
+        } else {
+          emit(AuthError(response.message ?? "Cannot connect to server"));
+        }
       } else {
         emit(AuthError(response.message ?? "Login failed. Check credentials."));
       }

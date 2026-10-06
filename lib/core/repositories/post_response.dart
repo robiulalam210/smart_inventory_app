@@ -6,6 +6,9 @@ import 'package:http/http.dart' as http;
 import 'dart:developer' as d;
 import '../configs/app_constants.dart';
 import '../database/login.dart';
+import '../offline/offline_gateway.dart';
+import '../offline/connectivity_monitor.dart';
+import '../offline/uuid_v4.dart';
 
 Future<Map<String, dynamic>> postResponse({
   required String url,
@@ -13,6 +16,16 @@ Future<Map<String, dynamic>> postResponse({
 }) async {
   Uri uriUrl = Uri.parse(url);
   logger.i("Uri : $uriUrl");
+
+  // প্রতিটা write এর একটা অনন্য id — একই request দুইবার গেলেও server একবারই save করে
+  final opId = uuidV4();
+  final gateway = OfflineGateway.instance;
+  if (gateway.isOffline) {
+    return gateway.canQueue(uriUrl)
+        ? gateway.queueWrite(uriUrl, payload, opId: opId)
+        : gateway.offlineBlocked();
+  }
+
   final token = await LocalDB.getLoginInfo();
 
   if (kDebugMode) {
@@ -24,7 +37,7 @@ Future<Map<String, dynamic>> postResponse({
     'Authorization': 'Bearer ${token?['token']}',
   };
 
-  logger.i("header : $header");
+  header.addAll(await gateway.extraHeaders(opId: opId));
   logger.i("payload : $payload");
   d.log(jsonEncode(payload));
 
@@ -40,7 +53,8 @@ Future<Map<String, dynamic>> postResponse({
     final Map<String, dynamic> responseData = jsonDecode(response.body);
 
     // Check if status code indicates success (200-299)
-    if (response.statusCode >= 201 && response.statusCode < 300) {
+    // FIX: আগে 200 কে error ধরা হত (যেমন add_payment 200 ফেরত দেয়)
+    if (response.statusCode >= 200 && response.statusCode < 300) {
       return {
         "status": true,
         "statusCode": response.statusCode,
@@ -59,6 +73,8 @@ Future<Map<String, dynamic>> postResponse({
     }
 
   } on TimeoutException {
+    // Server হয়তো পেয়েছে — একই opId দিয়ে queue করলে duplicate হবে না
+    if (gateway.canQueue(uriUrl)) return gateway.queueWrite(uriUrl, payload, opId: opId);
     return {
       "status": false,
       "statusCode": 408,
@@ -67,6 +83,10 @@ Future<Map<String, dynamic>> postResponse({
       "data": null
     };
   } on SocketException {
+    if (gateway.canQueue(uriUrl)) {
+      ConnectivityMonitor.instance.markOffline();
+      return gateway.queueWrite(uriUrl, payload, opId: opId);
+    }
     return {
       "status": false,
       "statusCode": 503,

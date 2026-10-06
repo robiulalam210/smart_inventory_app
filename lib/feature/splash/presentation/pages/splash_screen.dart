@@ -1,3 +1,4 @@
+import '../../../../core/offline/sync_widgets.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../profile/presentation/bloc/profile_bloc/profile_bloc.dart';
@@ -58,7 +59,7 @@ class _SplashScreenState extends State<SplashScreen>
           } else if (state is SplashNavigateToHome) {
             context.read<ProfileBloc>().add(FetchProfilePermission(context: context));
 
-            AppRoutes.pushAndRemoveUntil(context, const RootScreen());
+            AppRoutes.pushAndRemoveUntil(context, const OfflineSetupGate(child: RootScreen()));
           }
         },
         child: Container(

@@ -765,8 +765,24 @@ class _MoneyReceiptListScreenState extends State<MoneyReceiptForm> {
       return;
     }
 
+    // FIX: Specific বাছাই করে invoice না দিলে server error দিত
+    if (selectedPaymentToState.value == "Specific" && selectPosSaleModel.value == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select an invoice for specific payment')),
+      );
+      return;
+    }
+
+    final amountValue = double.tryParse(moneyBloc.amountController.text.replaceAll(',', '').trim());
+    if (amountValue == null || amountValue <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a valid amount greater than 0')),
+      );
+      return;
+    }
+
     Map<String, dynamic> body = {
-      "amount": moneyBloc.amountController.text.trim(),
+      "amount": amountValue,
       "customer_id": moneyBloc.selectCustomerModel!.id.toString(),
       "payment_date": appWidgets.convertDateTime(
         DateFormat(
@@ -776,7 +792,8 @@ class _MoneyReceiptListScreenState extends State<MoneyReceiptForm> {
       ),
       "payment_method": selectedPaymentMethodNotifier.value.toString(),
       "seller_id": moneyBloc.selectUserModel!.id.toString(),
-      "account": moneyBloc.selectedAccountId,
+      // FIX: selectedAccountId কখনো খালি/পুরনো থাকত, অথচ dropdown এ account দেখাত
+      "account": moneyBloc.accountModel?.id?.toString() ?? moneyBloc.selectedAccountId,
       "specific_invoice": selectedPaymentToState.value == "Specific",
       "payment_type": selectedPaymentToState.value == "Over All"
           ? "overall"

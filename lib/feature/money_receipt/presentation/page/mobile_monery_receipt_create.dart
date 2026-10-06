@@ -876,7 +876,8 @@ class _MoneyReceiptListScreenState extends State<MobileMoneyReceiptForm> {
       "seller_id": (isAdmin)
           ? moneyReceiptBloc.selectUserModel?.id.toString()
           : user?.id?.toString() ?? '',
-      "account": moneyReceiptBloc.selectedAccountId,
+      // FIX: selectedAccountId কখনো খালি/পুরনো থাকত, অথচ dropdown এ account দেখাত
+      "account": moneyReceiptBloc.accountModel?.id?.toString() ?? moneyReceiptBloc.selectedAccountId,
       "specific_invoice": selectedPaymentToState.value == "Specific",
       "payment_type": selectedPaymentToState.value == "Over All"
           ? "overall"

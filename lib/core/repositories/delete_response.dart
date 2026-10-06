@@ -5,17 +5,25 @@ import 'package:http/http.dart' as http;
 
 import '../configs/app_constants.dart';
 import '../database/login.dart';
+import '../offline/offline_gateway.dart';
+import '../offline/connectivity_monitor.dart';
+import '../offline/uuid_v4.dart';
 
 Future<Map<String, dynamic>> deleteResponse({
   required String url,
 }) async {
   Uri uriUrl = Uri.parse(url);
+  // Offline এ edit/delete করা যায় না (conflict ও হিসাবের গরমিল এড়াতে)
+  final gateway = OfflineGateway.instance;
+  if (gateway.isOffline) return gateway.offlineBlocked();
+  final opId = uuidV4();
   final token = await LocalDB.getLoginInfo();
 
   final Map<String, String> header = {
     "Content-Type": "application/json",
     'Authorization': 'Bearer ${token?['token']}',
   };
+  header.addAll(await gateway.extraHeaders(opId: opId));
 
   logger.i("deleteResponse uriUrl: $uriUrl");
 
@@ -59,6 +67,7 @@ Future<Map<String, dynamic>> deleteResponse({
       "data": null
     };
   } on SocketException {
+    if (gateway.enabled) ConnectivityMonitor.instance.markOffline();
     return {
       "status": false,
       "title": "Connection Failed",

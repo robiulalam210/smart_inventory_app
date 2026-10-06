@@ -4,6 +4,9 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:meherinMart/feature/auth/presentation/pages/mobile_login_scr.dart';
 import '/core/core.dart';
+import '../offline/offline_gateway.dart';
+import '../offline/connectivity_monitor.dart';
+import '../offline/uuid_v4.dart';
 
 import '../../feature/auth/presentation/pages/login_scr.dart';
 
@@ -11,6 +14,7 @@ Future<String> getResponse({
   required BuildContext context,
   required String url,
   Map<String, dynamic>? queryParams,
+  bool retried = false,
 }) async {
   // Build URI with query parameters
   Uri uriUrl;
@@ -19,6 +23,10 @@ Future<String> getResponse({
   } else {
     uriUrl = Uri.parse(url);
   }
+
+  // OFFLINE: desktop এ internet না থাকলে local database থেকে উত্তর
+  final gateway = OfflineGateway.instance;
+  if (gateway.isOffline) return gateway.offlineGet(uriUrl);
 
   final token = await LocalDB.getLoginInfo();
   if (kDebugMode) {
@@ -29,7 +37,7 @@ Future<String> getResponse({
     "Content-Type": "application/json",
     'Authorization': 'Bearer ${token?['token']}',
   };
-  logger.i("getResponse header: $header");
+  header.addAll(await gateway.extraHeaders());
 
   try {
     final response = await http
@@ -42,6 +50,11 @@ Future<String> getResponse({
 
     // 401 Unauthorized -> force logout
     if (response.statusCode == 401) {
+      // Desktop: token expire হলে আগে চুপচাপ নতুন token নিয়ে একবার চেষ্টা
+      if (gateway.enabled && !retried && await SessionKeeper.renew()) {
+        // ignore: use_build_context_synchronously
+        return getResponse(context: context, url: url, queryParams: queryParams, retried: true);
+      }
       await _handleTokenExpiration(context);
       return _buildErrorResponse("Unauthorized", "Your session has expired. Please log in again.");
     }
@@ -88,10 +101,16 @@ Future<String> getResponse({
     }
 
     // Successful response
+    await gateway.cacheGet(uriUrl, response.body);
     return response.body;
   } on TimeoutException {
+    if (gateway.enabled) return gateway.offlineGet(uriUrl);
     return _buildErrorResponse("Timeout", "The request timed out. Please try again later.");
   } on SocketException {
+    if (gateway.enabled) {
+      ConnectivityMonitor.instance.markOffline();
+      return gateway.offlineGet(uriUrl);
+    }
     return _buildErrorResponse("Connection Failed", "Unable to connect to the server. Please check your network connection and try again.");
   } catch (e) {
     logger.e("getResponse error: $e");

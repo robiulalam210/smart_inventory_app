@@ -4,6 +4,7 @@ import 'package:window_manager/window_manager.dart';
 import 'app/app.dart';
 import 'core/configs/configs.dart';
 import 'core/database/auth_db.dart';
+import 'core/offline/offline_gateway.dart';
 import 'feature/keyboard.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:screen_retriever/screen_retriever.dart';
@@ -72,6 +73,13 @@ void main() async {
           [DeviceOrientation.portraitUp]);
     }
   }
+  // Desktop: offline database + auto sync চালু (mobile এ কিছুই হয় না)
+  try {
+    await OfflineGateway.instance.init();
+  } catch (e) {
+    debugPrint('Offline layer init failed: $e');
+  }
+
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(statusBarIconBrightness: Brightness.light),
   );

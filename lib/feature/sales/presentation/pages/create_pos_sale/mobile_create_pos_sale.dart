@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'sale_payment_rules.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -2152,7 +2153,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
 
       return {
         "product_id": int.tryParse(product["product_id"].toString()),
-        "quantity": int.tryParse(product["quantity"].toString()),
+        "quantity": double.tryParse(product["quantity"].toString()) ?? 0, // FIX: 1.5 kg এর মতো দশমিক পরিমাণ
         "unit_price": unitPrice, // Use the correct unit price
         "discount": discountValue,
         "discount_type": discountType,
@@ -2214,6 +2215,27 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
       body['account_id'] = bloc.accountModel?.id.toString() ?? '';
     }
 
+    // FIX: টাকা গ্রহণের নিয়ম (সব screen এ এক) — দেখুন sale_payment_rules.dart
+    final paymentError = SalePaymentRules.apply(
+      body: body,
+      receivePayment: _isChecked,
+      receivedText: bloc.payableAmount.text,
+      paymentMethod: bloc.selectedPaymentMethod,
+      accountId: bloc.accountModel?.id,
+      grandTotal: calculateAllFinalTotal(),
+      isWalkIn: isWalkInCustomer,
+    );
+    if (paymentError != null) {
+      showCustomToast(
+        context: context,
+        title: 'Payment',
+        description: paymentError,
+        icon: Icons.error,
+        primaryColor: Colors.redAccent,
+      );
+      return;
+    }
+
     bloc.add(AddPosSale(body: body));
     log(body.toString());
   }
@@ -2225,7 +2247,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
   //       .map(
   //         (product) => {
   //           "product_id": int.tryParse(product["product_id"].toString()),
-  //           "quantity": int.tryParse(product["quantity"].toString()),
+  //           "quantity": double.tryParse(product["quantity"].toString()) ?? 0, // FIX: 1.5 kg এর মতো দশমিক পরিমাণ
   //           "unit_price": double.tryParse(product["price"].toString()),
   //           "discount": double.tryParse(product["discount"].toString()),
   //           "discount_type": product["discount_type"].toString(),
