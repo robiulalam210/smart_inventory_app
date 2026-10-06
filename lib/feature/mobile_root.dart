@@ -1,9 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hugeicons/hugeicons.dart';
 
 import '../core/widgets/app_scaffold.dart';
 import 'lab_dashboard/presentation/pages/mobile_dashboard_screen.dart';
+import 'profile/presentation/bloc/profile_bloc/profile_bloc.dart';
 import 'profile/presentation/pages/moble_profile_screen.dart';
 import 'purchase/presentation/page/mobile_purchase_screen.dart';
 import 'report/presentation/page/mobile_all_report_tab_screen.dart';
@@ -56,6 +58,25 @@ class _MobileRootScreenState extends State<MobileRootScreen> {
     super.dispose();
   }
 
+  /// Mirrors the drawer menu rules. While permissions are not loaded yet
+  /// (null) nothing is locked; the backend still enforces access.
+  bool _allowed(BuildContext context, int index) {
+    final p = context.read<ProfileBloc>().permissionModel?.data?.permissions;
+    if (p == null) return true;
+    switch (index) {
+      case 0:
+        return p.sales?.view == true;
+      case 1:
+        return p.purchases?.view == true;
+      case 2:
+        return p.dashboard?.view == true;
+      case 3:
+        return p.reports?.view == true;
+      default:
+        return true; // Profile
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -90,14 +111,18 @@ class _MobileRootScreenState extends State<MobileRootScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
                           // Left buttons
-                          _buildNavButton(navItems[0].icon, navItems[0].index, currentIndex),
-                          _buildNavButton(navItems[1].icon, navItems[1].index, currentIndex),
+                          _buildNavButton(navItems[0].icon, navItems[0].index, currentIndex,
+                              enabled: _allowed(context, navItems[0].index)),
+                          _buildNavButton(navItems[1].icon, navItems[1].index, currentIndex,
+                              enabled: _allowed(context, navItems[1].index)),
 
                           const SizedBox(width: 56), // space for center FAB
 
                           // Right buttons
-                          _buildNavButton(navItems[2].icon, navItems[2].index, currentIndex),
-                          _buildNavButton(navItems[3].icon, navItems[3].index, currentIndex),
+                          _buildNavButton(navItems[2].icon, navItems[2].index, currentIndex,
+                              enabled: _allowed(context, navItems[2].index)),
+                          _buildNavButton(navItems[3].icon, navItems[3].index, currentIndex,
+                              enabled: _allowed(context, navItems[3].index)),
                         ],
                       ),
                     ),
@@ -106,7 +131,9 @@ class _MobileRootScreenState extends State<MobileRootScreen> {
                     Positioned(
                       bottom: 30,
                       child: FloatingActionButton(
-                        onPressed: () => pageIndex.value = dashboardIndex!,
+                        onPressed: _allowed(context, dashboardIndex!)
+                            ? () => pageIndex.value = dashboardIndex!
+                            : null,
                         child: Icon(HugeIcons.strokeRoundedHome04),
                       ),
                     ),
@@ -120,10 +147,11 @@ class _MobileRootScreenState extends State<MobileRootScreen> {
     );
   }
 
-  Widget _buildNavButton(IconData icon, int index, int currentIndex) {
+  Widget _buildNavButton(IconData icon, int index, int currentIndex,
+      {bool enabled = true}) {
     final selected = index == currentIndex;
     return InkWell(
-      onTap: () => pageIndex.value = index,
+      onTap: enabled ? () => pageIndex.value = index : null,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -137,7 +165,12 @@ class _MobileRootScreenState extends State<MobileRootScreen> {
             ),
           ),
           const SizedBox(height: 4),
-          Icon(icon, color: selected ? Colors.blue : Colors.black38),
+          Icon(icon,
+              color: !enabled
+                  ? Colors.black12
+                  : selected
+                      ? Colors.blue
+                      : Colors.black38),
         ],
       ),
     );

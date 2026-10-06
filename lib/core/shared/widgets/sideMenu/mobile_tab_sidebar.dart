@@ -272,7 +272,7 @@ class MobileTabSidebar extends StatelessWidget {
           items: [
             MenuItem(title: "Account Transfer From", index: 42),
             MenuItem(title: "Account Transfer List", index: 43),
-            MenuItem(title: "Translation", index: 44),
+            MenuItem(title: "Transactions", index: 44),
           ],
         ),
       );
@@ -600,7 +600,7 @@ class MobileTabSidebar extends StatelessWidget {
         AppRoutes.push(context, MobileExpenseSubHeadScreen());
         break;
 
-      case 17: // Expense List
+      case 17: // Income List
         if (permissions?.expense?.view != true) {
           _showPermissionDeniedDialog(context);
           return;
@@ -608,7 +608,7 @@ class MobileTabSidebar extends StatelessWidget {
         AppRoutes.push(context, MobileIncomeListScreen());
         break;
 
-      case 18: // Expense Head
+      case 18: // Income Head
         if (permissions?.expense?.view != true) {
           _showPermissionDeniedDialog(context);
           return;
@@ -819,7 +819,7 @@ class MobileTabSidebar extends StatelessWidget {
         AppRoutes.push(context, MobileAccountTransferScreen());
         break;
 
-      case 44: // Translation
+      case 44: // Transactions
         if (permissions?.accounts?.view != true) {
           _showPermissionDeniedDialog(context);
           return;

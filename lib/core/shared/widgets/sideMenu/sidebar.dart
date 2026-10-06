@@ -1,3 +1,6 @@
+import '../../../../feature/income/presentation/page/income_page_list.dart';
+import '../../../../feature/income/income_expense/presentation/page/income_expense_head_page.dart';
+import '../../../../feature/products/sale_mode/presentation/pages/sale_mode_list_screen.dart';
 import '../../../../feature/lab_dashboard/presentation/bloc/dashboard/dashboard_bloc.dart';
 import '../../../../feature/profile/data/model/profile_perrmission_model.dart';
 import '../../../../feature/profile/presentation/bloc/profile_bloc/profile_bloc.dart';
@@ -124,15 +127,24 @@ class _SidebarState extends State<Sidebar> {
         MenuItem(title: "Category", index: 35, requiredPermission: (permissions) => permissions?.administration?.view == true),
         MenuItem(title: "Group", index: 36, requiredPermission: (permissions) => permissions?.administration?.view == true),
         MenuItem(title: "Profile", index: 37, requiredPermission: (permissions) => permissions?.administration?.view == true),
+        MenuItem(title: "Sale Mode", index: 43, requiredPermission: (permissions) => permissions?.administration?.view == true),
       ],
       requiredPermission: (permissions) => permissions?.administration?.view == true,
+    ),
+    MenuSection(
+      title: "Income",
+      items: [
+        MenuItem(title: "Income List", index: 41, requiredPermission: (permissions) => permissions?.accounts?.view == true),
+        MenuItem(title: "Income Head", index: 42, requiredPermission: (permissions) => permissions?.accounts?.view == true),
+      ],
+      requiredPermission: (permissions) => permissions?.accounts?.view == true,
     ),
     MenuSection(
       title: "Transfer Balance",
       items: [
         MenuItem(title: "Account Transfer From", index: 38, requiredPermission: (permissions) => permissions?.accounts?.view == true),
         MenuItem(title: "Account Transfer List", index: 39, requiredPermission: (permissions) => permissions?.accounts?.view == true),
-        MenuItem(title: "Translation", index: 40, requiredPermission: (permissions) => permissions?.accounts?.view == true),
+        MenuItem(title: "Transactions", index: 40, requiredPermission: (permissions) => permissions?.accounts?.view == true),
       ],
       requiredPermission: (permissions) => permissions?.accounts?.view == true,
     ),
@@ -483,6 +495,20 @@ class _SidebarState extends State<Sidebar> {
         !menuItem.requiredPermission!(permissions)) {
       // Show permission denied message
       _showPermissionDeniedDialog(context);
+      return;
+    }
+
+    // Full-page screens (no embedded desktop layout yet): open as a pushed route
+    if (index >= 41 && index <= 43) {
+      final Widget page = index == 41
+          ? const MobileIncomeListScreen()
+          : index == 42
+              ? const MobileIncomeHeadScreen()
+              : const SaleModeListScreen();
+      if (Responsive.isTablet(context) || Responsive.isMobile(context)) {
+        Navigator.pop(context);
+      }
+      AppRoutes.push(context, page);
       return;
     }
 

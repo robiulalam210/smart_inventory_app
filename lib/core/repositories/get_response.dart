@@ -179,7 +179,7 @@ Future<void> _handleTokenExpiration(BuildContext context) async {
     if (context.mounted) {
       showCustomToast(
         context: context,
-        title: 'Success!',
+        title: 'Session expired',
         description: 'Your session has expired. Please log in again.',
         icon: Icons.error,
         primaryColor: Colors.redAccent,

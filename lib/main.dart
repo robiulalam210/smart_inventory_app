@@ -35,8 +35,8 @@ void main() async {
     } else if (width <= 1920) {
 
       // For medium screens, use reasonable window size
-      windowSize = const Size(1150, 750);
-      minSize = const Size(1100, 700);
+      windowSize = const Size(1280, 800);
+      minSize = const Size(1200, 700);
       shouldMaximize = false;
     } else {
       // For large screens, use larger window but don't maximize
@@ -61,6 +61,16 @@ void main() async {
         await windowManager.maximize();
       }
     });
+  }
+  // Phones: lock to portrait so rotating never flips the app into the
+  // tablet/desktop layout. Tablets and desktops stay free to rotate.
+  if (Platform.isAndroid || Platform.isIOS) {
+    final view = WidgetsBinding.instance.platformDispatcher.views.first;
+    final shortestSide = view.physicalSize.shortestSide / view.devicePixelRatio;
+    if (shortestSide < 600) {
+      await SystemChrome.setPreferredOrientations(
+          [DeviceOrientation.portraitUp]);
+    }
   }
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(statusBarIconBrightness: Brightness.light),

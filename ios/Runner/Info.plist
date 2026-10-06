@@ -31,6 +31,10 @@
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
 	</dict>
+	<key>NSCameraUsageDescription</key>
+	<string>This app uses the camera to scan product barcodes/QR codes and to take profile photos.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>This app needs access to your photo library so you can choose a profile or product image.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>This app requires access to the microphone for speech input.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
