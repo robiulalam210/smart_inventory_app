@@ -3,16 +3,13 @@ import 'dart:math';
 
 import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
-import 'dart:typed_data';
 
 import '../../feature/auth/data/models/login_mod.dart';
 import '../../feature/auth/data/repositories/auth_service.dart';
 import 'local_store.dart';
 import 'offline_config.dart';
 import 'sync_engine.dart';
-import 'dart:convert';
-import 'dart:typed_data';
-import 'package:crypto/crypto.dart';
+
 /// Internet না থাকলেও desktop এ login।
 ///
 /// শর্ত: এই কম্পিউটারে ওই user আগে অন্তত একবার online এ login করেছে।
@@ -22,13 +19,13 @@ class OfflineAuth {
 
   static const int _rounds = 20000;
   static String _key(String username) => 'auth:${username.trim().toLowerCase()}';
+
   static String _hash(String salt, String password) {
-    Uint8List digest = utf8.encode('$salt:$password');
-
+    // FIX: utf8.encode এখন Uint8List দেয়; sha256 এর .bytes হলো List<int> — তাই type List<int>
+    List<int> digest = utf8.encode('$salt:$password');
     for (var i = 0; i < _rounds; i++) {
-      digest = Uint8List.fromList(sha256.convert(digest).bytes);
+      digest = sha256.convert(digest).bytes;
     }
-
     return base64.encode(digest);
   }
 

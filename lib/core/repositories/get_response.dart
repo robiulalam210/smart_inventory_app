@@ -6,7 +6,6 @@ import 'package:meherinMart/feature/auth/presentation/pages/mobile_login_scr.dar
 import '/core/core.dart';
 import '../offline/offline_gateway.dart';
 import '../offline/connectivity_monitor.dart';
-import '../offline/uuid_v4.dart';
 
 import '../../feature/auth/presentation/pages/login_scr.dart';
 

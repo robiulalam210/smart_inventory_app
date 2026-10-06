@@ -43,6 +43,9 @@ import '../../../../sales/presentation/pages/create_pos_sale/create_sales_pos.da
 import '../../../../supplier/presentation/pages/supplier_list_screen.dart';
 import '../../../../supplier/presentation/pages/supplier_payment_list_screen.dart';
 import '../../../../transactions/presentation/pages/transaction_screen.dart';
+import '../../../../income/presentation/page/income_page_list.dart';
+import '../../../../income/income_expense/presentation/page/income_expense_head_page.dart';
+import '../../../../products/sale_mode/presentation/pages/sale_mode_list_screen.dart';
 import '../../../../users_list/presentation/pages/users_screen.dart';
 import '../../../data/models/dashboard/dashboard_model.dart';
 import '../../pages/lab_dashboard_screen.dart';
@@ -111,6 +114,11 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     AppWrapper(child: AccountTransferForm()),
     AppWrapper(child: AccountTransferScreen()),
     AppWrapper(child: TransactionScreen()),
+
+    // index 41-43: আগে sidebar ছাড়া আলাদা page এ খুলত
+    AppWrapper(child: MobileIncomeListScreen()),   // 41 Income List
+    AppWrapper(child: MobileIncomeHeadScreen()),   // 42 Income Head
+    AppWrapper(child: SaleModeListScreen()),       // 43 Sale Mode
 
 
 

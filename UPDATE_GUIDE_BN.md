@@ -22,12 +22,27 @@
 App (mobile + desktop): ৫টা POS screen + নতুন `sale_payment_rules.dart`, ২টা money receipt screen,
 `post_response.dart` (200 status কে আগে error ধরা হত)।
 
+## ১.৫ Local PC তে চালানো (Windows)
+
+```powershell
+python -m venv venv
+.\venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py changepassword robi      # বা: python manage.py setup_erp --create-superuser --username ... --password "..."
+python manage.py runserver 0.0.0.0:8000
+```
+- Local এ `.env` লাগে না (DEBUG=True, SQLite, যেকোনো LAN IP থেকে access)।
+- Browser: `http://127.0.0.1:8000/health/` — mobile থেকে: `http://<PC-র IP>:8000/health/` (`ipconfig` এ IPv4)।
+- App এর `.env`: `TEST_BASE_URL=http://<PC-র IP>:8000`
+- Mobile থেকে না খুললে Windows Firewall এ port 8000 Private network এ allow করুন।
+
 ## ২. Server এ deploy (ক্রম মেনে)
 
 ```bash
 # ১. আগে database backup নিন
-# ২. code আপলোড করুন, তারপর:
-pip install django-cors-headers mysqlclient
+# ২. code আপলোড করুন, env.server.example → .env (মান ভরে), তারপর:
+pip install -r requirements.txt mysqlclient
 python manage.py migrate
 python manage.py check_money                 # শুধু রিপোর্ট, কিছু বদলায় না
 python manage.py check_money --fix-accounts  # রিপোর্ট দেখে নিশ্চিত হলে
@@ -96,3 +111,10 @@ python tools/tests/test_sync.py    # offline sync, duplicate, stock conflict, au
 - Flutter অংশ এই পরিবেশে compile করা যায়নি (Flutter SDK নেই) — `flutter analyze` চালিয়ে কোনো error থাকলে জানাবেন।
 - Offline এ account balance / customer due তাৎক্ষণিক বদলায় না, sync এর পরে ঠিক হয়।
 - পুরনো (allocation ছাড়া) "overall" receipt delete করা যায় না — কোন invoice এ কত বসেছিল তার রেকর্ড নেই।
+
+## ৯. পরের update এ যা যোগ হয়েছে
+- `settings.py`: local/server একই file, পার্থক্য শুধু `.env` এ (password আর code এ নেই)। `token_blacklist` যোগ।
+- `requirements.txt`: অপ্রয়োজনীয় Flask/FastAPI বাদ, `django-cors-headers` যোগ।
+- App: connectivity এখন google নয়, নিজের server এর `/health/` দেখে (local server এ ভুল "Offline" আর আসে না)।
+- App: Income List / Income Head / Sale Mode এখন sidebar সহ খোলে।
+- App: login এর পর focus/`_dependents` assertion error ঠিক।
