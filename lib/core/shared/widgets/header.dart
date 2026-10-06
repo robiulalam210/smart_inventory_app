@@ -4,6 +4,8 @@ import '../../../feature/feature.dart';
 import '../../../feature/splash/presentation/bloc/connectivity_bloc/connectivity_state.dart';
 import '../../configs/configs.dart';
 import '../../widgets/app_button.dart';
+import '../../offline/offline_config.dart';
+import '../../offline/sync_widgets.dart';
 
 class Header extends StatefulWidget {
   const Header({
@@ -21,7 +23,7 @@ class _HeaderState extends State<Header> {
   @override
   Widget build(BuildContext context) {
 
-    return Container(
+    return Column(mainAxisSize: MainAxisSize.min, children: [Container(
       padding: EdgeInsets.symmetric(
           horizontal: Responsive.isMobile(context)
               ? AppSizes.paddingInside / 2
@@ -57,7 +59,9 @@ class _HeaderState extends State<Header> {
 
             gapW8,
             // Connectivity status
-            if (!Responsive.isMobile(context))
+            if (OfflineConfig.enabled)
+              const SyncStatusChip()
+            else if (!Responsive.isMobile(context))
               BlocBuilder<ConnectivityBloc, ConnectivityState>(
                 builder: (context, state) {
                   String status;
@@ -94,6 +98,8 @@ class _HeaderState extends State<Header> {
                       ),
                       TextButton(
                         onPressed: () async {
+                          // Sync না হওয়া entry থাকলে আগে জানানো
+                          if (!await OfflineGuards.confirmLogout(context)) return;
                           await LocalDB.delLoginInfo();
                           if (mounted) {
                             AppRoutes.pushAndRemoveUntil(
@@ -115,7 +121,7 @@ class _HeaderState extends State<Header> {
           ],
         ),
       ),
-    );
+    ), const OfflineBanner()]);
   }
 
   Color getConnectivityColor(ConnectivityState state) {

@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'sale_payment_rules.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -966,7 +967,7 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
       return {
         "product_id": int.tryParse(product["product_id"].toString()),
         "quantity":
-            double.tryParse(product["quantity"].toString())?.toInt() ?? 1,
+            double.tryParse(product["quantity"].toString()) ?? 1, // FIX: .toInt() এ 0.5 kg → 0 হয়ে যেত
         "unit_price": double.tryParse(
           product["final_price"]?.toString() ?? "0",
         ),
@@ -1021,6 +1022,27 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
     if (_isChecked) {
       body['payment_method'] = bloc.selectedPaymentMethod;
       body['account_id'] = bloc.accountModel?.id.toString() ?? '';
+    }
+
+    // FIX: টাকা গ্রহণের নিয়ম (সব screen এ এক) — দেখুন sale_payment_rules.dart
+    final paymentError = SalePaymentRules.apply(
+      body: body,
+      receivePayment: _isChecked,
+      receivedText: bloc.payableAmount.text,
+      paymentMethod: bloc.selectedPaymentMethod,
+      accountId: bloc.accountModel?.id,
+      grandTotal: calculateAllFinalTotal(),
+      isWalkIn: isWalkInCustomer,
+    );
+    if (paymentError != null) {
+      showCustomToast(
+        context: context,
+        title: 'Payment',
+        description: paymentError,
+        icon: Icons.error,
+        primaryColor: Colors.redAccent,
+      );
+      return;
     }
 
     bloc.add(AddPosSale(body: body));

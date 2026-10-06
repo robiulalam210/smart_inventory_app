@@ -3,6 +3,7 @@ import 'dart:ui';
 import '../../../../core/core.dart';
 import '../../../../core/database/login_local_storage.dart';
 import '../../../../root.dart';
+import '../../../../core/offline/sync_widgets.dart';
 import '../../../feature.dart';
 import '../../../profile/presentation/bloc/profile_bloc/profile_bloc.dart';
 
@@ -231,7 +232,7 @@ class _LogInScreenState extends State<LogInScreen> {
                 );
                 context.read<ProfileBloc>().add(FetchProfilePermission(context: context));
 
-                AppRoutes.pushReplacement(context, RootScreen());
+                AppRoutes.pushReplacement(context, OfflineSetupGate(child: RootScreen()));
               } else if (state is AuthError) {
                 _dismissLoaderIfOpen();
                 appAlertDialog(

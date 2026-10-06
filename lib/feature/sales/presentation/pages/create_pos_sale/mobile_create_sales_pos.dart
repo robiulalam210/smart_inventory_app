@@ -1,4 +1,5 @@
 // NOTE: adjust imports paths to match your project structure
+import 'sale_payment_rules.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
@@ -2105,7 +2106,7 @@ class _SalesScreenState extends State<MobileSalesScreen> {
         .map((product) {
           return {
             "product_id": _toInt(product["product_id"]),
-            "quantity": _toInt(product["quantity"]),
+            "quantity": _toDouble(product["quantity"]), // FIX: দশমিক পরিমাণ বাদ পড়ত
             "unit_price": _toDouble(product["price"]),
             "discount": _toDouble(product["discount"]),
             // convert internal discount_type if necessary
@@ -2175,6 +2176,27 @@ class _SalesScreenState extends State<MobileSalesScreen> {
     if (_isChecked ) {
       body['payment_method'] = bloc.selectedPaymentMethod;
       body['account_id'] = bloc.accountModel?.id.toString() ?? '';
+    }
+
+    // FIX: টাকা গ্রহণের নিয়ম (সব screen এ এক) — দেখুন sale_payment_rules.dart
+    final paymentError = SalePaymentRules.apply(
+      body: body,
+      receivePayment: _isChecked,
+      receivedText: bloc.payableAmount.text,
+      paymentMethod: bloc.selectedPaymentMethod,
+      accountId: bloc.accountModel?.id,
+      grandTotal: calculateAllFinalTotal(),
+      isWalkIn: isWalkInCustomer,
+    );
+    if (paymentError != null) {
+      showCustomToast(
+        context: context,
+        title: 'Payment',
+        description: paymentError,
+        icon: Icons.error,
+        primaryColor: Colors.redAccent,
+      );
+      return;
     }
 
     bloc.add(AddPosSale(body: body));
