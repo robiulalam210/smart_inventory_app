@@ -124,6 +124,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
       color: AppColors.bottomNavBg(context),
       child: SafeArea(
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start, // FIX: content উপরে থাকবে (sidebar লম্বা হলে মাঝখানে নামত)
           children: [
             // Sidebar (if big screen)
             if (isBigScreen)

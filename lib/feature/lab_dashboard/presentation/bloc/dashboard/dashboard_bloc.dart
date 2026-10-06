@@ -116,9 +116,9 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     AppWrapper(child: TransactionScreen()),
 
     // index 41-43: আগে sidebar ছাড়া আলাদা page এ খুলত
-    AppWrapper(child: MobileIncomeListScreen()),   // 41 Income List
-    AppWrapper(child: MobileIncomeHeadScreen()),   // 42 Income Head
-    AppWrapper(child: SaleModeListScreen()),       // 43 Sale Mode
+    AppWrapper(child: EmbeddedFullPage(child: MobileIncomeListScreen())),   // 41 Income List
+    AppWrapper(child: EmbeddedFullPage(child: MobileIncomeHeadScreen())),   // 42 Income Head
+    AppWrapper(child: EmbeddedFullPage(child: SaleModeListScreen())),       // 43 Sale Mode
 
 
 
@@ -175,4 +175,19 @@ enum DateRangeFilter {
   last30Days,
   last365Days,
   all,
+}
+
+/// FIX: Root screen এর main area একটা SingleChildScrollView (অসীম উচ্চতা)। তার ভিতরে
+/// নিজস্ব Scaffold (FAB সহ) থাকা screen বসালে Scaffold এর মাপ ঠিক হয় না →
+/// "Cannot hit test a render box that has never been laid out" error।
+/// তাই এই screen গুলোকে window এর উচ্চতা অনুযায়ী নির্দিষ্ট মাপ দেওয়া হয়।
+class EmbeddedFullPage extends StatelessWidget {
+  final Widget child;
+  const EmbeddedFullPage({super.key, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    final h = MediaQuery.sizeOf(context).height - 90; // header + padding
+    return SizedBox(height: h < 400 ? 400 : h, child: child);
+  }
 }
