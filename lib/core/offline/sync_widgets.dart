@@ -168,10 +168,12 @@ class _SyncCenterDialogState extends State<SyncCenterDialog> {
     final pending = await store.opsByStatus(['pending', 'blocked', 'error']);
     final issues = await store.issues();
     await SyncEngine.instance.refreshCounts();
-    if (mounted) setState(() {
-      _pending = pending;
-      _issues = issues;
-    });
+    if (mounted) {
+      setState(() {
+        _pending = pending;
+        _issues = issues;
+      });
+    }
   }
 
   Future<void> _syncNow() async {
@@ -272,7 +274,7 @@ class _SyncCenterDialogState extends State<SyncCenterDialog> {
     return ListView.separated(
       padding: const EdgeInsets.all(12),
       itemCount: _pending.length,
-      separatorBuilder: (_, __) => const Divider(height: 1),
+      separatorBuilder: (_, _) => const Divider(height: 1),
       itemBuilder: (_, i) {
         final o = _pending[i];
         final status = '${o['status']}';
@@ -296,7 +298,7 @@ class _SyncCenterDialogState extends State<SyncCenterDialog> {
     return ListView.separated(
       padding: const EdgeInsets.all(12),
       itemCount: _issues.length,
-      separatorBuilder: (_, __) => const Divider(height: 1),
+      separatorBuilder: (_, _) => const Divider(height: 1),
       itemBuilder: (_, i) {
         final it = _issues[i];
         final opId = '${it['op_id']}';
@@ -500,21 +502,38 @@ class OfflineGuards {
 // 6) Setup gate — desktop এ setup না হয়ে থাকলে আগে setup screen, তারপর আসল screen
 //    (পুরনো installation update হলেও প্রথমবার নিজে থেকে setup হবে)
 // ===========================================================================
-class OfflineSetupGate extends StatelessWidget {
+class OfflineSetupGate extends StatefulWidget {
   final Widget child;
   const OfflineSetupGate({super.key, required this.child});
 
   @override
+  State<OfflineSetupGate> createState() => _OfflineSetupGateState();
+}
+
+class _OfflineSetupGateState extends State<OfflineSetupGate> {
+  // FIX: আগে build() এর ভিতরে প্রতিবার নতুন Future তৈরি হত। window resize বা যেকোনো
+  // rebuild এ FutureBuilder আবার "loading" এ যেত → RootScreen সরিয়ে আবার বসাত →
+  // Flutter এর focus/_dependents assertion error। এখন একবারই যাচাই হয়।
+  late final Future<bool> _setupDone;
+
+  @override
+  void initState() {
+    super.initState();
+    _setupDone = (OfflineConfig.enabled && LocalStore.instance.isOpen)
+        ? SyncEngine.instance.isSetupDone()
+        : Future.value(true);
+  }
+
+  @override
   Widget build(BuildContext context) {
-    if (!OfflineConfig.enabled || !LocalStore.instance.isOpen) return child;
     return FutureBuilder<bool>(
-      future: SyncEngine.instance.isSetupDone(),
+      future: _setupDone,
       builder: (context, snap) {
-        if (!snap.hasData) {
+        if (snap.connectionState != ConnectionState.done) {
           return const Scaffold(body: Center(child: CircularProgressIndicator()));
         }
-        if (snap.data == true) return child;
-        return FirstSetupScreen(next: () => child);
+        if (snap.data == false) return FirstSetupScreen(next: () => widget.child);
+        return widget.child;
       },
     );
   }

@@ -142,9 +142,10 @@ class MyApp extends StatelessWidget {
             darkTheme: AppTheme.dark(context),
             themeMode: themeState.themeMode,
             title: AppConstants.appName,
-            home: Responsive.isMobile(context)
-                ? MobileSplashScreen()
-                : SplashScreen(),
+            // FIX: আগে প্রতিটা rebuild এ (যেমন desktop window ছোট-বড় করলে) mobile/desktop
+            // splash বদলে যেতে পারত → পুরো navigator এর root বদলে focus assertion error।
+            // এখন app চালুর সময় একবারই ঠিক হয়।
+            home: _StartScreen.pick(context),
           );
         },
       ),
@@ -169,4 +170,10 @@ class MyApp extends StatelessWidget {
       // ),
     );
   }
+}
+
+class _StartScreen {
+  static Widget? _cached;
+  static Widget pick(BuildContext context) =>
+      _cached ??= Responsive.isMobile(context) ? MobileSplashScreen() : SplashScreen();
 }

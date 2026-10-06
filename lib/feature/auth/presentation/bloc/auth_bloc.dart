@@ -7,6 +7,7 @@ import '../../data/repositories/auth_service.dart';
 import '../../data/repositories/login_ser.dart';
 import '../../../../core/offline/offline_auth.dart';
 import '../../../../core/offline/offline_config.dart';
+import '../../../../core/offline/connectivity_monitor.dart';
 import 'auth_event.dart';
 import 'auth_state.dart';
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
@@ -26,8 +27,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     final connectivityState = connectivityBloc.state;
 
     try {
-      // Check internet connectivity
-      if (connectivityState is ConnectivityOffline) {
+      // FIX: Desktop এ "offline" ঠিক করা হয় আসল server এ পৌঁছানো যায় কিনা দেখে
+      // (google.com নয়) — local server বা internet ছাড়া LAN server এও online login হবে।
+      final bool isOffline = OfflineConfig.enabled
+          ? !(await ConnectivityMonitor.instance.probe())
+          : connectivityState is ConnectivityOffline;
+
+      if (isOffline) {
         // Desktop: আগে এই কম্পিউটারে online login করা থাকলে offline login
         if (OfflineConfig.enabled) {
           final cached = await OfflineAuth.verify(event.username.trim(), event.password);

@@ -1,6 +1,3 @@
-import '../../../../feature/income/presentation/page/income_page_list.dart';
-import '../../../../feature/income/income_expense/presentation/page/income_expense_head_page.dart';
-import '../../../../feature/products/sale_mode/presentation/pages/sale_mode_list_screen.dart';
 import '../../../../feature/lab_dashboard/presentation/bloc/dashboard/dashboard_bloc.dart';
 import '../../../../feature/profile/data/model/profile_perrmission_model.dart';
 import '../../../../feature/profile/presentation/bloc/profile_bloc/profile_bloc.dart';
@@ -498,20 +495,8 @@ class _SidebarState extends State<Sidebar> {
       return;
     }
 
-    // Full-page screens (no embedded desktop layout yet): open as a pushed route
-    if (index >= 41 && index <= 43) {
-      final Widget page = index == 41
-          ? const MobileIncomeListScreen()
-          : index == 42
-              ? const MobileIncomeHeadScreen()
-              : const SaleModeListScreen();
-      if (Responsive.isTablet(context) || Responsive.isMobile(context)) {
-        Navigator.pop(context);
-      }
-      AppRoutes.push(context, page);
-      return;
-    }
-
+    // FIX: Income List / Income Head / Sale Mode আগে আলাদা page হিসেবে খুলত (sidebar ছাড়া)।
+    // এখন অন্য সব screen এর মতো sidebar সহ main area তে খোলে (dashboard_bloc এর index 41-43)।
     bloc.add(ChangeDashboardScreen(index: index));
 
     // Handle special cases
