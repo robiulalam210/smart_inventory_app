@@ -1,6 +1,7 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../configs/configs.dart';
+import '../utilities/auto_foreground_sync.dart';
 
 class LocalDB {
   static const String _prefix = 'login_lab_box_';
@@ -54,6 +55,7 @@ class LocalDB {
 
   //! Clear login info
   static Future<void> delLoginInfo() async {
+    AutoTimerService().cancelTimer();
     final prefs = await SharedPreferences.getInstance();
     for (final key in prefs.getKeys()) {
       if (key.startsWith(_prefix)) {
