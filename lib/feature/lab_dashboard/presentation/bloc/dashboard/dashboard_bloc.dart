@@ -15,6 +15,7 @@ import '/feature/report/presentation/page/top_products_screen/top_products_scree
 import '/feature/sales/presentation/pages/pos_sale_screen.dart';
 
 import '../../../../../core/configs/configs.dart';
+import '../../../../../core/shared/widgets/sideMenu/sidebar.dart';
 import '../../../../../core/repositories/get_response.dart';
 import '../../../../../enery_screen.dart';
 import '../../../../account_transfer/presentation/screen/account_transfer_form.dart';
@@ -187,7 +188,41 @@ class EmbeddedFullPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final h = MediaQuery.sizeOf(context).height - 90; // header + padding
-    return SizedBox(height: h < 400 ? 400 : h, child: child);
+    final screenH = MediaQuery.sizeOf(context).height;
+    final h = screenH - 90; // header + padding
+    // বাকি সব screen এ big screen এ বাম পাশে Sidebar (12 column এর 2টা) থাকে।
+    // Embedded screen (Income List / Income Head / Sale Mode) এ সেটা ছিল না — এখানে যোগ করা হলো।
+    final isBigScreen =
+        Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
+
+    return SizedBox(
+      height: h < 400 ? 400 : h,
+      child: isBigScreen
+          ? LayoutBuilder(
+        builder: (context, constraints) {
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(
+                width: constraints.maxWidth / 12 * 2,
+                child: ClipRect(
+                  child: OverflowBox(
+                    alignment: Alignment.topLeft,
+                    minHeight: 0,
+                    maxHeight: screenH,
+                    child: Container(
+                      color: Colors.white,
+                      child: const Sidebar(),
+                    ),
+                  ),
+                ),
+              ),
+              Expanded(child: child),
+            ],
+          );
+        },
+      )
+          : child,
+    );
   }
 }
