@@ -1,5 +1,6 @@
 import '../../../../core/configs/configs.dart';
-import '../../../accounts/data/model/account_model.dart';
+import '../../data/model/account_model.dart';
+import 'package:meherinMart/core/widgets/table_scroll_controllers.dart';
 
 class AccountCard extends StatelessWidget {
   final List<AccountModel> accounts;
@@ -281,7 +282,7 @@ class AccountCard extends StatelessWidget {
                     ),
                     label: const Text('Edit'),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.blue,
+                      foregroundColor: AppColors.info,
                       side: BorderSide(color: Colors.blue.shade300),
                       padding: const EdgeInsets.symmetric(vertical: 10),
                       shape: RoundedRectangleBorder(
@@ -302,7 +303,7 @@ class AccountCard extends StatelessWidget {
                     ),
                     label: const Text('Delete'),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.red,
+                      foregroundColor: AppColors.danger,
                       side: BorderSide(color: Colors.red.shade300),
                       padding: const EdgeInsets.symmetric(vertical: 10),
                       shape: RoundedRectangleBorder(
@@ -371,8 +372,8 @@ class AccountCard extends StatelessWidget {
   }
 
   Widget _buildDesktopDataTable() {
-    final verticalScrollController = ScrollController();
-    final horizontalScrollController = ScrollController();
+    return TableScrollControllers(
+      builder: (context, verticalScrollController, horizontalScrollController) {
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -465,6 +466,8 @@ class AccountCard extends StatelessWidget {
             ),
           ),
         );
+      },
+    );
       },
     );
   }
@@ -646,7 +649,7 @@ class AccountCard extends StatelessWidget {
               icon: const Icon(
                 Iconsax.edit,
                 size: 18,
-                color: Colors.blue,
+                color: AppColors.info,
               ),
               onPressed: () => onEdit?.call(account),
               padding: const EdgeInsets.all(4),
@@ -843,8 +846,8 @@ class AccountCard extends StatelessWidget {
   // Helper methods
   Color _getBalanceColor(double? balance) {
     if (balance == null) return Colors.grey;
-    if (balance < 0) return Colors.red;
-    if (balance > 0) return Colors.green;
+    if (balance < 0) return AppColors.danger;
+    if (balance > 0) return AppColors.success;
     return Colors.grey;
   }
 
@@ -863,9 +866,9 @@ class AccountCard extends StatelessWidget {
   Color _getAccountTypeColor(String? accountType) {
     switch (accountType?.toLowerCase()) {
       case 'cash':
-        return Colors.green;
+        return AppColors.success;
       case 'bank':
-        return Colors.blue;
+        return AppColors.info;
       case 'mobile banking':
         return Colors.purple;
       default:

@@ -440,7 +440,7 @@ class AppDropdown<T> extends FormField<T> {
                 Text(label,
                     style: AppTextStyle.labelDropdownTextStyle(context)),
                 if (isRequired)
-                  const Text('*', style: TextStyle(color: Colors.red)),
+                  const Text('*', style: TextStyle(color: AppColors.danger)),
               ],
             ),
             const SizedBox(height: 4),
@@ -454,7 +454,7 @@ class AppDropdown<T> extends FormField<T> {
                 decoration: BoxDecoration(
                   border: Border.all(
                     color: state.hasError
-                        ? Colors.red
+                        ? AppColors.danger
                         : AppColors.greyColor(context),
                     width: 1,
                   ),

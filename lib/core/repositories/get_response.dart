@@ -2,12 +2,11 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
-import 'package:meherinMart/feature/auth/presentation/pages/mobile_login_scr.dart';
 import '/core/core.dart';
 import '../offline/offline_gateway.dart';
 import '../offline/connectivity_monitor.dart';
 
-import '../../feature/auth/presentation/pages/login_scr.dart';
+import '../configs/login_redirect.dart';
 
 Future<String> getResponse({
   required BuildContext context,
@@ -190,7 +189,6 @@ Tuple2<String, String>? _checkAuthenticationError({
 
 Future<void> _handleTokenExpiration(BuildContext context) async {
   await LocalDB.delLoginInfo();
-  final isMobile = Responsive.isMobile(context);
 
   // Use a post-frame callback to ensure the context is still valid
   WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -202,11 +200,8 @@ Future<void> _handleTokenExpiration(BuildContext context) async {
         icon: Icons.error,
         primaryColor: Colors.redAccent,
       );
-      if (isMobile) {
-        AppRoutes.pushAndRemoveUntil(context, const MobileLoginScr());
-      } else {
-        AppRoutes.pushAndRemoveUntil(context, const LogInScreen());
-      }
+      final builder = loginScreenBuilder; // main_desktop / main_mobile এ সেট করা
+      if (builder != null) AppRoutes.pushAndRemoveUntil(context, builder());
     }
   });
 }

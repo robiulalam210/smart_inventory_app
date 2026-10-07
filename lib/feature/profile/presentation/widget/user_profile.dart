@@ -1,4 +1,4 @@
-import '../../../../../core/core.dart';
+import '../../../../core/core.dart';
 
 Widget buildDoctorAvatar({
   required String? imageUrl,

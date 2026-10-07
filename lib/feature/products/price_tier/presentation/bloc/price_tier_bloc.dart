@@ -4,10 +4,10 @@ import 'package:equatable/equatable.dart';
 import '../../../../../core/configs/configs.dart';
 import '../../../../common/data/models/api_response_mod.dart';
 import '../../../../common/data/models/app_parse_json.dart';
-import '../../../../../../core/repositories/delete_response.dart';
-import '../../../../../../core/repositories/get_response.dart';
-import '../../../../../../core/repositories/post_response.dart';
-import '../../../../../../core/repositories/patch_response.dart';
+import '../../../../../core/repositories/delete_response.dart';
+import '../../../../../core/repositories/get_response.dart';
+import '../../../../../core/repositories/post_response.dart';
+import '../../../../../core/repositories/patch_response.dart';
 import '../../../sale_mode/data/avliable_sales_model.dart';
 import '../../data/model/price_tier_model.dart';
 

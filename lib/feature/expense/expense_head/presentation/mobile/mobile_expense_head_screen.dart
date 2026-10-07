@@ -1,0 +1,210 @@
+import '/core/core.dart';
+
+import '../../../../../core/widgets/coustom_search_text_field.dart';
+import '../bloc/expense_head/expense_head_bloc.dart';
+import '../widget/widget.dart';
+import '../shared/expense_head_create.dart';
+
+class MobileExpenseHeadScreen extends StatefulWidget {
+  const MobileExpenseHeadScreen({super.key});
+
+  @override
+  State<MobileExpenseHeadScreen> createState() => _ExpenseHeadScreenState();
+}
+
+class _ExpenseHeadScreenState extends State<MobileExpenseHeadScreen> {
+  late ExpenseHeadBloc dataBloc;
+  final TextEditingController _searchController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      dataBloc = context.read<ExpenseHeadBloc>();
+      _fetchApiData();
+    });
+  }
+
+  @override
+  void dispose() {
+    // _searchController.dispose();
+    // if (dataBloc.filterTextController != null) {
+    //   dataBloc.filterTextController!.dispose();
+    // }
+    super.dispose();
+  }
+
+  void _fetchApiData({String filterText = '', int pageNumber = 0}) {
+    if (!mounted) return;
+
+    context.read<ExpenseHeadBloc>().add(
+      FetchExpenseHeadList(
+        context,
+        filterText: filterText,
+        pageNumber: pageNumber,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: AppColors.primaryColor(context),
+        child: Icon(Icons.add),
+        onPressed: () => _showCreateDialog(context),
+      ),
+      appBar: AppBar(
+        title: Text("Expense Head", style: AppTextStyle.titleMedium(context)),
+      ),
+      body: SafeArea(child: SizedBox(
+        child: RefreshIndicator(
+          color: AppColors.primaryColor(context),
+          onRefresh: () async {
+            _fetchApiData();
+          },
+          child: Container(
+            padding: AppTextStyle.getResponsivePaddingBody(context),
+            child: BlocConsumer<ExpenseHeadBloc, ExpenseHeadState>(
+              listener: (context, state) {
+                _handleBlocState(state);
+              },
+              builder: (context, state) {
+                return Column(
+                  children: [
+                    _buildMobileHeader(context),
+                    const SizedBox(height: 8),
+                    _buildExpenseHeadList(state),
+                  ],
+                );
+              },
+            ),
+          ),
+        ),
+      ),),
+    );
+  }
+
+
+
+  void _handleBlocState(ExpenseHeadState state) {
+    if (state is ExpenseHeadAddLoading) {
+      appLoader(context, "Creating Expense Head, please wait...");
+    } else if (state is ExpenseHeadAddSuccess) {
+      Navigator.pop(context); // Close loader dialog
+      Navigator.pop(context); // Close loader dialog
+      _fetchApiData(); // Reload expense head list
+    } else if (state is ExpenseHeadAddFailed) {
+      if (context.mounted) {
+        Navigator.pop(context); // Close loader dialog
+        appAlertDialog(
+          context,
+          state.content,
+          title: state.title,
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Dismiss"),
+            ),
+          ],
+        );
+      }
+    }
+  }
+
+  Widget _buildMobileHeader(BuildContext context) {
+    return  Container(
+      decoration: BoxDecoration(
+        color:AppColors.bottomNavBg(context),
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withValues(alpha: 0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: CustomSearchTextFormField(
+              isRequiredLabel: false,
+              controller: context
+                  .read<ExpenseHeadBloc>()
+                  .filterTextController,
+              onChanged: (value) {
+                _fetchApiData(filterText: value);
+              },
+              onClear: () {
+                context
+                    .read<ExpenseHeadBloc>()
+                    .filterTextController
+                    .clear();
+                _searchController.clear();
+                _fetchApiData();
+              },
+              hintText: "Expense head...",
+            ),
+          ),
+
+        ],
+      ),
+    );
+  }
+
+  Widget _buildExpenseHeadList(ExpenseHeadState state) {
+    if (state is ExpenseHeadListLoading) {
+      return const SizedBox(height: 300, child: Center(child: CircularProgressIndicator()));
+    } else if (state is ExpenseHeadListSuccess) {
+      if (state.list.isEmpty) {
+        return SizedBox(height: 300, child: Center(child: Lottie.asset(AppImages.noData)));
+      } else {
+        return SizedBox(
+          child: ExpenseHeadTableCard(
+            expenseHeads: state.list,
+            onExpenseHeadTap: () {
+              // Handle expense head tap if needed
+            },
+          ),
+        );
+      }
+    } else if (state is ExpenseHeadListFailed) {
+      return Center(
+        child: Text(
+          'Failed to load: ${state.content}',
+          textAlign: TextAlign.center,
+        ),
+      );
+    } else {
+      return SizedBox(child: Center(child: Lottie.asset(AppImages.noData)));
+    }
+  }
+
+  void _showCreateDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          insetPadding: const EdgeInsets.all(20),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppSizes.radius),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(AppSizes.radius),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: Responsive.isMobile(context)
+                    ? AppSizes.width(context)
+                    : AppSizes.width(context) * 0.5,
+                maxHeight: AppSizes.height(context) * 0.7,
+              ),
+              child: const ExpenseHeadCreate(),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+}

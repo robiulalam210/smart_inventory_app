@@ -3,8 +3,9 @@ import 'package:printing/printing.dart';
 import '../../../../core/configs/configs.dart';
 import '../../../profile/presentation/bloc/profile_bloc/profile_bloc.dart';
 import '../../data/models/pos_sale_model.dart';
-import '../pages/sales_details_screen.dart';
+import '../shared/sales_details_screen.dart';
 import 'pdf/sales_invocei.dart';
+import 'package:meherinMart/core/widgets/table_scroll_controllers.dart';
 
 class PosSaleDataTableWidget extends StatelessWidget {
   final List<PosSaleModel> sales;
@@ -240,7 +241,7 @@ class PosSaleDataTableWidget extends StatelessWidget {
                           Text(
                             _formatCurrency(paidAmount),
                             style: const TextStyle(
-                              color: Colors.green,
+                              color: AppColors.success,
                               fontWeight: FontWeight.w700,
                               fontSize: 14,
                             ),
@@ -264,7 +265,7 @@ class PosSaleDataTableWidget extends StatelessWidget {
                           Text(
                             _formatCurrency(displayAmount),
                             style: TextStyle(
-                              color: isAdvance ? Colors.green : Colors.red,
+                              color: isAdvance ? AppColors.success : AppColors.danger,
                               fontWeight: FontWeight.w700,
                               fontSize: 14,
                             ),
@@ -301,7 +302,7 @@ class PosSaleDataTableWidget extends StatelessWidget {
                     icon: const Icon(Iconsax.eye, size: 16),
                     label: const Text('View'),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.blue,
+                      foregroundColor: AppColors.info,
                       side: BorderSide(color: Colors.blue.shade300),
                       padding: const EdgeInsets.symmetric(vertical: 10),
                       shape: RoundedRectangleBorder(
@@ -319,7 +320,7 @@ class PosSaleDataTableWidget extends StatelessWidget {
                     icon: const Icon(Iconsax.document_download, size: 16),
                     label: const Text('PDF'),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.green,
+                      foregroundColor: AppColors.success,
                       side: BorderSide(color: Colors.green.shade300),
                       padding: const EdgeInsets.symmetric(vertical: 10),
                       shape: RoundedRectangleBorder(
@@ -379,8 +380,8 @@ class PosSaleDataTableWidget extends StatelessWidget {
   }
 
   Widget _buildDesktopDataTable() {
-    final verticalScrollController = ScrollController();
-    final horizontalScrollController = ScrollController();
+    return TableScrollControllers(
+      builder: (context, verticalScrollController, horizontalScrollController) {
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -447,6 +448,8 @@ class PosSaleDataTableWidget extends StatelessWidget {
             ),
           ),
         );
+      },
+    );
       },
     );
   }
@@ -584,7 +587,7 @@ class PosSaleDataTableWidget extends StatelessWidget {
             style: TextStyle(
               fontSize: 10,
               fontWeight: FontWeight.w600,
-              color: isAdvance ? Colors.green : Colors.red,
+              color: isAdvance ? AppColors.success : AppColors.danger,
             ),
             textAlign: TextAlign.center,
           ),
@@ -656,11 +659,11 @@ class PosSaleDataTableWidget extends StatelessWidget {
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {
       case 'paid':
-        return Colors.green;
+        return AppColors.success;
       case 'partial':
-        return Colors.orange;
+        return AppColors.warning;
       case 'pending':
-        return Colors.red;
+        return AppColors.danger;
       default:
         return Colors.grey;
     }
@@ -718,7 +721,7 @@ class PosSaleDataTableWidget extends StatelessWidget {
             actions: [
               IconButton(
                 onPressed: () => AppRoutes.pop(context),
-                icon: const Icon(Icons.cancel, color: Colors.red),
+                icon: const Icon(Icons.cancel, color: AppColors.danger),
               ),
             ],
             build: (format) => generateSalesPdf(

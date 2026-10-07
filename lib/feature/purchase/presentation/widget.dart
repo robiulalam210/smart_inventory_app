@@ -1,11 +1,12 @@
 
 import '../../profile/presentation/bloc/profile_bloc/profile_bloc.dart';
-import '/feature/purchase/presentation/page/purchase_details.dart';
+import '/feature/purchase/presentation/shared/purchase_details.dart';
 import 'package:printing/printing.dart';
 
-import '../../../../core/configs/configs.dart';
+import '../../../core/configs/configs.dart';
 import '../data/model/purchase_sale_model.dart';
-import 'page/pdf/generate_purchase_pdf.dart';
+import 'shared/pdf/generate_purchase_pdf.dart';
+import 'package:meherinMart/core/widgets/table_scroll_controllers.dart';
 
 class PurchaseDataTableWidget extends StatelessWidget {
   final List<PurchaseModel> sales;
@@ -224,7 +225,7 @@ class PurchaseDataTableWidget extends StatelessWidget {
                           Text(
                             '৳${paidAmount.toStringAsFixed(2)}',
                             style: const TextStyle(
-                              color: Colors.green,
+                              color: AppColors.success,
                               fontWeight: FontWeight.w700,
                               fontSize: 14,
                             ),
@@ -248,7 +249,7 @@ class PurchaseDataTableWidget extends StatelessWidget {
                           Text(
                             '৳${dueAmount.toStringAsFixed(2)}',
                             style: TextStyle(
-                              color: dueAmount > 0 ? Colors.red :                             AppColors.text(context),
+                              color: dueAmount > 0 ? AppColors.danger :                             AppColors.text(context),
 
                               fontWeight: FontWeight.w700,
                               fontSize: 14,
@@ -295,7 +296,7 @@ class PurchaseDataTableWidget extends StatelessWidget {
                     ),
                     label: const Text('View'),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.blue,
+                      foregroundColor: AppColors.info,
                       side: BorderSide(color: Colors.blue.shade300),
                       padding: const EdgeInsets.symmetric(vertical: 10),
                       shape: RoundedRectangleBorder(
@@ -316,7 +317,7 @@ class PurchaseDataTableWidget extends StatelessWidget {
                     ),
                     label: const Text('PDF'),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.green,
+                      foregroundColor: AppColors.success,
                       side: BorderSide(color: Colors.green.shade300),
                       padding: const EdgeInsets.symmetric(vertical: 10),
                       shape: RoundedRectangleBorder(
@@ -380,8 +381,8 @@ class PurchaseDataTableWidget extends StatelessWidget {
   }
 
   Widget _buildDesktopDataTable() {
-    final verticalScrollController = ScrollController();
-    final horizontalScrollController = ScrollController();
+    return TableScrollControllers(
+      builder: (context, verticalScrollController, horizontalScrollController) {
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -445,6 +446,8 @@ class PurchaseDataTableWidget extends StatelessWidget {
             ),
           ),
         );
+      },
+    );
       },
     );
   }
@@ -564,7 +567,7 @@ class PurchaseDataTableWidget extends StatelessWidget {
 
   DataCell _buildDueCell(String amount, double width) {
     final due = double.tryParse(amount) ?? 0;
-    final color = due > 0 ? Colors.red : Colors.green;
+    final color = due > 0 ? AppColors.danger : AppColors.success;
 
     return DataCell(
       SizedBox(
@@ -614,11 +617,11 @@ class PurchaseDataTableWidget extends StatelessWidget {
   Color _getPaymentStatusColor(String status) {
     switch (status.toLowerCase()) {
       case 'paid':
-        return Colors.green;
+        return AppColors.success;
       case 'pending':
-        return Colors.orange;
+        return AppColors.warning;
       case 'partial':
-        return Colors.blue;
+        return AppColors.info;
       default:
         return Colors.grey;
     }

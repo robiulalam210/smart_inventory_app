@@ -99,8 +99,8 @@ class _IncomeListScreenState extends State<MobileIncomeListScreen> {
       xs: 12,
       sm: 12,
       md: 12,
-      lg: 10,
-      xl: 10,
+      lg: 12,
+      xl: 12,
       child: Container(
         padding: AppTextStyle.getResponsivePaddingBody(context),
         child: BlocConsumer<IncomeBloc, IncomeState>(
@@ -378,7 +378,7 @@ class _IncomeListScreenState extends State<MobileIncomeListScreen> {
                       ],
                     ),
                     const SizedBox(height: 10),
-          
+
                     // Income Head Filter
                     BlocBuilder<IncomeHeadBloc, IncomeHeadState>(
                       builder: (context, state) {
@@ -413,7 +413,7 @@ class _IncomeListScreenState extends State<MobileIncomeListScreen> {
                       },
                     ),
                     const SizedBox(height: 4),
-          
+
                     // Date Range
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -437,7 +437,7 @@ class _IncomeListScreenState extends State<MobileIncomeListScreen> {
                       ],
                     ),
                     const SizedBox(height: 20),
-          
+
                     // Action Buttons
                     Row(
                       children: [

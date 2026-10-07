@@ -4,6 +4,7 @@ import '../../../../../../core/configs/configs.dart';
 import '../../../../../../core/widgets/delete_dialog.dart';
 import '../../../data/model/purchase_return_model.dart';
 import '../../bloc/purchase_return/purchase_return_bloc.dart';
+import 'package:meherinMart/core/widgets/table_scroll_controllers.dart';
 
 class PurchaseReturnTableCard extends StatelessWidget {
   final List<PurchaseReturnModel> purchaseReturns;
@@ -25,8 +26,8 @@ class PurchaseReturnTableCard extends StatelessWidget {
     if (isMobile) return _buildMobileList(context);
 
     // Desktop / Tablet: existing DataTable layout
-    final verticalScrollController = ScrollController();
-    final horizontalScrollController = ScrollController();
+    return TableScrollControllers(
+      builder: (context, verticalScrollController, horizontalScrollController) {
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -123,6 +124,8 @@ class PurchaseReturnTableCard extends StatelessWidget {
         );
       },
     );
+      },
+    );
   }
 
   // MOBILE LIST VIEW
@@ -179,7 +182,7 @@ class PurchaseReturnTableCard extends StatelessWidget {
                       children: [
                         Text(
                           pr.returnAmount != null ? pr.returnAmount!.toString() : '0.00',
-                          style: const TextStyle(color: Colors.red, fontWeight: FontWeight.w700),
+                          style: const TextStyle(color: AppColors.danger, fontWeight: FontWeight.w700),
                         ),
                         const SizedBox(height: 6),
                         Container(
@@ -227,7 +230,7 @@ class PurchaseReturnTableCard extends StatelessWidget {
 
     actions.add(_mobileIconButton(
       icon: Icons.visibility,
-      color: Colors.green,
+      color: AppColors.success,
       tooltip: 'View',
       onPressed: () => _showViewDialog(context, pr),
     ));
@@ -238,21 +241,21 @@ class PurchaseReturnTableCard extends StatelessWidget {
       actions.add(const SizedBox(width: 8));
       actions.add(_mobileIconButton(
         icon: Icons.edit,
-        color: Colors.blue,
+        color: AppColors.info,
         tooltip: 'Edit',
         onPressed: () => _showEditDialog(context, pr),
       ));
       actions.add(const SizedBox(width: 8));
       actions.add(_mobileIconButton(
         icon: Icons.check,
-        color: Colors.green,
+        color: AppColors.success,
         tooltip: 'Approve',
         onPressed: () => _confirmApprove(context, pr),
       ));
       actions.add(const SizedBox(width: 8));
       actions.add(_mobileIconButton(
         icon: Icons.close,
-        color: Colors.red,
+        color: AppColors.danger,
         tooltip: 'Reject',
         onPressed: () => _confirmReject(context, pr),
       ));
@@ -260,7 +263,7 @@ class PurchaseReturnTableCard extends StatelessWidget {
       actions.add(const SizedBox(width: 8));
       actions.add(_mobileIconButton(
         icon: Icons.done,
-        color: Colors.green,
+        color: AppColors.success,
         tooltip: 'Complete',
         onPressed: () => _confirmComplete(context, pr),
       ));
@@ -270,7 +273,7 @@ class PurchaseReturnTableCard extends StatelessWidget {
       actions.add(const SizedBox(width: 8));
       actions.add(_mobileIconButton(
         icon: Icons.delete,
-        color: Colors.red,
+        color: AppColors.danger,
         tooltip: 'Delete',
         onPressed: () => _confirmDelete(context, pr),
       ));
@@ -353,20 +356,20 @@ class PurchaseReturnTableCard extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            _buildActionButton(icon: Icons.visibility, color: Colors.green, tooltip: 'View', onPressed: () => _showViewDialog(context, purchaseReturn)),
+            _buildActionButton(icon: Icons.visibility, color: AppColors.success, tooltip: 'View', onPressed: () => _showViewDialog(context, purchaseReturn)),
             if ((purchaseReturn.status ?? '').toLowerCase() == 'pending') ...[
-              _buildActionButton(icon: Icons.edit, color: Colors.blue, tooltip: 'Edit', onPressed: () => _showEditDialog(context, purchaseReturn)),
-              _buildActionButton(icon: Icons.check, color: Colors.green, tooltip: 'Approve', onPressed: () => _confirmApprove(context, purchaseReturn)),
-              _buildActionButton(icon: Icons.close, color: Colors.red, tooltip: 'Reject', onPressed: () => _confirmReject(context, purchaseReturn)),
+              _buildActionButton(icon: Icons.edit, color: AppColors.info, tooltip: 'Edit', onPressed: () => _showEditDialog(context, purchaseReturn)),
+              _buildActionButton(icon: Icons.check, color: AppColors.success, tooltip: 'Approve', onPressed: () => _confirmApprove(context, purchaseReturn)),
+              _buildActionButton(icon: Icons.close, color: AppColors.danger, tooltip: 'Reject', onPressed: () => _confirmReject(context, purchaseReturn)),
             ],
             if ((purchaseReturn.status ?? '').toLowerCase() == 'approved') ...[
               const SizedBox(width: 2),
-              _buildActionButton(icon: Icons.done, color: Colors.green, tooltip: 'Complete', onPressed: () => _confirmComplete(context, purchaseReturn)),
+              _buildActionButton(icon: Icons.done, color: AppColors.success, tooltip: 'Complete', onPressed: () => _confirmComplete(context, purchaseReturn)),
             ],
             if ((purchaseReturn.status ?? '').toLowerCase() == 'pending' ||
                 (purchaseReturn.status ?? '').toLowerCase() == 'rejected') ...[
               const SizedBox(width: 2),
-              _buildActionButton(icon: Icons.delete, color: Colors.red, tooltip: 'Delete', onPressed: () => _confirmDelete(context, purchaseReturn)),
+              _buildActionButton(icon: Icons.delete, color: AppColors.danger, tooltip: 'Delete', onPressed: () => _confirmDelete(context, purchaseReturn)),
             ],
           ],
         ),
@@ -388,13 +391,13 @@ class PurchaseReturnTableCard extends StatelessWidget {
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {
       case 'completed':
-        return Colors.green;
+        return AppColors.success;
       case 'approved':
-        return Colors.blue;
+        return AppColors.info;
       case 'pending':
-        return Colors.orange;
+        return AppColors.warning;
       case 'rejected':
-        return Colors.red;
+        return AppColors.danger;
       default:
         return Colors.grey;
     }
@@ -487,7 +490,7 @@ class PurchaseReturnTableCard extends StatelessWidget {
                           Expanded(child: Text(item.productName ?? 'Unknown Product', style: const TextStyle(fontWeight: FontWeight.w500))),
                           Text('Qty: ${item.quantity ?? 0}'),
                           const SizedBox(width: 16),
-                          Text(item.total?.toString() ?? "0.00", style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.red)),
+                          Text(item.total?.toString() ?? "0.00", style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.danger)),
                         ],
                       ),
                     )),

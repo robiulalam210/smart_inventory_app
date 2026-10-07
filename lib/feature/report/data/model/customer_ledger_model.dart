@@ -52,11 +52,11 @@ class CustomerLedgerTransaction {
   Color get typeColor {
     switch (type.toLowerCase()) {
       case 'sale':
-        return Colors.red;
+        return AppColors.danger;
       case 'payment':
-        return Colors.green;
+        return AppColors.success;
       case 'return':
-        return Colors.orange;
+        return AppColors.warning;
       default:
         return Colors.grey;
     }

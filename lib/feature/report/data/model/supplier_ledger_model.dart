@@ -55,9 +55,9 @@ class SupplierLedger {
 
   Color get typeColor {
     switch (type) {
-      case 'Opening': return Colors.orange;
-      case 'Purchase': return Colors.blue;
-      case 'Payment': return Colors.green;
+      case 'Opening': return AppColors.warning;
+      case 'Purchase': return AppColors.info;
+      case 'Payment': return AppColors.success;
       default: return Colors.grey;
     }
   }
@@ -109,7 +109,7 @@ class SupplierLedgerSummary {
   // Helper methods
   double get netMovement => totalDebit - totalCredit;
   String get balanceStatus => closingBalance > 0 ? 'Due' : 'Advance';
-  Color get balanceStatusColor => closingBalance > 0 ? Colors.red : Colors.green;
+  Color get balanceStatusColor => closingBalance > 0 ? AppColors.danger : AppColors.success;
 }
 
 class SupplierLedgerResponse {

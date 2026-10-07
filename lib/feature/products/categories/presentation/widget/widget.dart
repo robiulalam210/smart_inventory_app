@@ -4,7 +4,8 @@ import '../../../../../core/configs/configs.dart';
 import '../../../../../core/widgets/delete_dialog.dart';
 import '../../data/model/categories_model.dart';
 import '../bloc/categories/categories_bloc.dart';
-import '../pages/categories_create.dart';
+import '../shared/categories_create.dart';
+import 'package:meherinMart/core/widgets/table_scroll_controllers.dart';
 // categories_list_mobile.dart
 
 class CategoriesListMobile extends StatelessWidget {
@@ -123,12 +124,12 @@ class CategoriesListMobile extends StatelessWidget {
                     ),
                     decoration: BoxDecoration(
                       color: isActive
-                          ? Colors.green.withValues(alpha: 0.1)
+                          ? AppColors.success.withValues(alpha: 0.1)
                           : Colors.grey.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
                         color: isActive
-                            ? Colors.green.withValues(alpha: 0.3)
+                            ? AppColors.success.withValues(alpha: 0.3)
                             : Colors.grey.withValues(alpha: 0.3),
                         width: 1,
                       ),
@@ -139,7 +140,7 @@ class CategoriesListMobile extends StatelessWidget {
                         Icon(
                           isActive ? Icons.check_circle : Icons.circle,
                           size: 12,
-                          color: isActive ? Colors.green : Colors.grey,
+                          color: isActive ? AppColors.success : Colors.grey,
                         ),
                         const SizedBox(width: 4),
                         Text(
@@ -147,7 +148,7 @@ class CategoriesListMobile extends StatelessWidget {
                           style: GoogleFonts.inter(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
-                            color: isActive ? Colors.green : Colors.grey,
+                            color: isActive ? AppColors.success : Colors.grey,
                           ),
                         ),
                       ],
@@ -166,9 +167,9 @@ class CategoriesListMobile extends StatelessWidget {
                       icon: const Icon(Iconsax.edit, size: 16),
                       label: const Text('Edit'),
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.blue,
+                        foregroundColor: AppColors.info,
                         side: BorderSide(
-                          color: Colors.blue.withValues(alpha: 0.3),
+                          color: AppColors.info.withValues(alpha: 0.3),
                         ),
                         padding: const EdgeInsets.symmetric(vertical: 8),
                       ),
@@ -184,9 +185,9 @@ class CategoriesListMobile extends StatelessWidget {
                       ),
                       label: const Text('Delete'),
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.red,
+                        foregroundColor: AppColors.danger,
                         side: BorderSide(
-                          color: Colors.red.withValues(alpha: 0.3),
+                          color: AppColors.danger.withValues(alpha: 0.3),
                         ),
                         padding: const EdgeInsets.symmetric(vertical: 8),
                       ),
@@ -401,8 +402,8 @@ class CategoriesTableCard extends StatelessWidget {
       return _buildEmptyState();
     }
 
-    final verticalScrollController = ScrollController();
-    final horizontalScrollController = ScrollController();
+    return TableScrollControllers(
+      builder: (context, verticalScrollController, horizontalScrollController) {
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -505,6 +506,8 @@ class CategoriesTableCard extends StatelessWidget {
         );
       },
     );
+      },
+    );
   }
 
   List<DataColumn> _buildColumns(double columnWidth) {
@@ -575,14 +578,14 @@ class CategoriesTableCard extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
               color: isActive
-                  ? Colors.green.withValues(alpha: 0.1)
-                  : Colors.red.withValues(alpha: 0.1),
+                  ? AppColors.success.withValues(alpha: 0.1)
+                  : AppColors.danger.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
               isActive ? 'Active' : 'Inactive',
               style: TextStyle(
-                color: isActive ? Colors.green : Colors.red,
+                color: isActive ? AppColors.success : AppColors.danger,
                 fontWeight: FontWeight.w600,
                 fontSize: 11,
               ),
@@ -608,7 +611,7 @@ class CategoriesTableCard extends StatelessWidget {
             // Edit Button
             _buildActionButton(
               icon: Iconsax.edit,
-              color: Colors.blue,
+              color: AppColors.info,
               tooltip: 'Edit category',
               onPressed: () => _showEditDialog(context, category),
             ),
@@ -616,7 +619,7 @@ class CategoriesTableCard extends StatelessWidget {
             // Delete Button
             _buildActionButton(
               icon: HugeIcons.strokeRoundedDeleteThrow,
-              color: Colors.red,
+              color: AppColors.danger,
               tooltip: 'Delete category',
               onPressed: () => _confirmDelete(context, category),
             ),

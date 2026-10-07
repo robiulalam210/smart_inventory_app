@@ -1,0 +1,188 @@
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hugeicons/hugeicons.dart';
+
+import '../core/widgets/app_scaffold.dart';
+import '../feature/lab_dashboard/presentation/mobile/mobile_dashboard_screen.dart';
+import '../feature/profile/presentation/bloc/profile_bloc/profile_bloc.dart';
+import '../feature/profile/presentation/mobile/moble_profile_screen.dart';
+import '../feature/purchase/presentation/mobile/mobile_purchase_screen.dart';
+import '../feature/report/presentation/mobile/mobile_all_report_tab_screen.dart';
+import '../feature/sales/presentation/mobile/mobile_pos_sale_screen.dart';
+import 'package:meherinMart/core/configs/app_colors.dart';
+
+class MobileRootScreen extends StatefulWidget {
+  final int initialPageIndex;
+
+  const MobileRootScreen({super.key, this.initialPageIndex = 2});
+
+  @override
+  State<MobileRootScreen> createState() => _MobileRootScreenState();
+}
+
+class _MobileRootScreenState extends State<MobileRootScreen> {
+  final ValueNotifier<int> pageIndex = ValueNotifier<int>(0);
+  late final List<Widget> screens;
+  late final List<_NavItem> navItems;
+  int? dashboardIndex;
+
+  @override
+  void initState() {
+    super.initState();
+
+    pageIndex.value = widget.initialPageIndex;
+
+    // Build screens and nav items without any permissions
+    screens = [
+      MobilePosSaleScreen(),
+      MobilePurchaseScreen(),
+      DashBoardScreen(),
+      MobileReportsTabScreen(),
+      MobileProfileScreen(),
+    ];
+
+    navItems = [
+      _NavItem(icon: HugeIcons.strokeRoundedSaleTag02, index: 0, label: 'Sales'),
+      _NavItem(icon: HugeIcons.strokeRoundedInvoice04, index: 1, label: 'Purchase'),
+      // Dashboard is center FAB
+      _NavItem(icon: HugeIcons.strokeRoundedChartBarLine, index: 3, label: 'Reports'),
+      _NavItem(icon: HugeIcons.strokeRoundedUser, index: 4, label: 'Profile'),
+    ];
+
+    dashboardIndex = 2; // Dashboard is always center FAB
+  }
+
+  @override
+  void dispose() {
+    pageIndex.dispose();
+    super.dispose();
+  }
+
+  /// Mirrors the drawer menu rules. While permissions are not loaded yet
+  /// (null) nothing is locked; the backend still enforces access.
+  bool _allowed(BuildContext context, int index) {
+    final p = context.read<ProfileBloc>().permissionModel?.data?.permissions;
+    if (p == null) return true;
+    switch (index) {
+      case 0:
+        return p.sales?.view == true;
+      case 1:
+        return p.purchases?.view == true;
+      case 2:
+        return p.dashboard?.view == true;
+      case 3:
+        return p.reports?.view == true;
+      default:
+        return true; // Profile
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        AppScaffold(
+          body: ValueListenableBuilder<int>(
+            valueListenable: pageIndex,
+            builder: (context, currentIndex, child) {
+              return screens[currentIndex];
+            },
+          ),
+          isCenterFAB: true,
+          bottomNavigationBar: SafeArea(
+            child: ValueListenableBuilder<int>(
+              valueListenable: pageIndex,
+              builder: (context, currentIndex, child) {
+                return Stack(
+                  alignment: Alignment.bottomCenter,
+                  clipBehavior: Clip.none,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      margin: const EdgeInsets.only(bottom: 10, left: 10, right: 10),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(50),
+                        boxShadow: [
+                          BoxShadow(color: Colors.black12, blurRadius: 10),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          // Left buttons
+                          _buildNavButton(navItems[0].icon, navItems[0].index, currentIndex,
+                              enabled: _allowed(context, navItems[0].index)),
+                          _buildNavButton(navItems[1].icon, navItems[1].index, currentIndex,
+                              enabled: _allowed(context, navItems[1].index)),
+
+                          const SizedBox(width: 56), // space for center FAB
+
+                          // Right buttons
+                          _buildNavButton(navItems[2].icon, navItems[2].index, currentIndex,
+                              enabled: _allowed(context, navItems[2].index)),
+                          _buildNavButton(navItems[3].icon, navItems[3].index, currentIndex,
+                              enabled: _allowed(context, navItems[3].index)),
+                        ],
+                      ),
+                    ),
+
+                    // Center FAB
+                    Positioned(
+                      bottom: 30,
+                      child: FloatingActionButton(
+                        onPressed: _allowed(context, dashboardIndex!)
+                            ? () => pageIndex.value = dashboardIndex!
+                            : null,
+                        child: Icon(HugeIcons.strokeRoundedHome04),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildNavButton(IconData icon, int index, int currentIndex,
+      {bool enabled = true}) {
+    final selected = index == currentIndex;
+    return InkWell(
+      onTap: enabled ? () => pageIndex.value = index : null,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          AnimatedContainer(
+            height: 3,
+            width: selected ? 20 : 0,
+            duration: const Duration(milliseconds: 200),
+            decoration: BoxDecoration(
+              color: AppColors.info,
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
+          const SizedBox(height: 4),
+          Icon(icon,
+              color: !enabled
+                  ? Colors.black12
+                  : selected
+                      ? AppColors.info
+                      : Colors.black38),
+        ],
+      ),
+    );
+  }
+}
+
+class _NavItem {
+  final IconData icon;
+  final int index;
+  final String label;
+
+  _NavItem({required this.icon, required this.index, required this.label});
+}
+

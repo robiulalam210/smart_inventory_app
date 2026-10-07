@@ -410,7 +410,7 @@ void printSummary({
           actions: [
             IconButton(
               onPressed: () => AppRoutes.pop(context),
-              icon: const Icon(Icons.cancel, color: Colors.red),
+              icon: const Icon(Icons.cancel, color: AppColors.danger),
             ),
           ],
 

@@ -1,7 +1,8 @@
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/configs/configs.dart';
 import '../../data/model/user_model.dart';
-import '../pages/user_permission_screen.dart';
+import '../shared/user_permission_screen.dart';
+import 'package:meherinMart/core/widgets/table_scroll_controllers.dart';
 
 class UserTableCard extends StatelessWidget {
   final List<UsersListModel> users;
@@ -64,13 +65,13 @@ class UserTableCard extends StatelessWidget {
                 Align(
                   alignment: Alignment.centerRight,
                   child: IconButton(
-                    icon: const Icon(Icons.visibility, color: Colors.green),
+                    icon: const Icon(Icons.visibility, color: AppColors.success),
                     onPressed: () => _showViewDialog(context, user),
                   ),
                 ),    Align(
                   alignment: Alignment.centerRight,
                   child: IconButton(
-                    icon: const Icon(Icons.edit, color: Colors.green),
+                    icon: const Icon(Icons.edit, color: AppColors.success),
                     onPressed: () {
                       AppRoutes.push(context, UserPermissionScreen(userId: user.id.toString(), userName: user.fullName??"",
 
@@ -126,8 +127,8 @@ class UserTableCard extends StatelessWidget {
   // 💻 DESKTOP VIEW
   // =========================
   Widget _buildDesktopTable(BuildContext context) {
-    final verticalController = ScrollController();
-    final horizontalController = ScrollController();
+    return TableScrollControllers(
+      builder: (context, verticalController, horizontalController) {
 
     return Container(
       decoration: BoxDecoration(
@@ -200,7 +201,7 @@ class UserTableCard extends StatelessWidget {
                       DataCell(
                         IconButton(
                           icon: const Icon(Icons.visibility,
-                              size: 18, color: Colors.green),
+                              size: 18, color: AppColors.success),
                           onPressed: () =>
                               _showViewDialog(context, user),
                         ),
@@ -213,6 +214,8 @@ class UserTableCard extends StatelessWidget {
           ),
         ),
       ),
+    );
+      },
     );
   }
 
@@ -228,14 +231,14 @@ class UserTableCard extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: isActive
-            ? Colors.green.withValues(alpha: 0.1)
-            : Colors.red.withValues(alpha: 0.1),
+            ? AppColors.success.withValues(alpha: 0.1)
+            : AppColors.danger.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(6),
       ),
       child: Text(
         isActive ? 'Active' : 'Inactive',
         style: TextStyle(
-          color: isActive ? Colors.green : Colors.red,
+          color: isActive ? AppColors.success : AppColors.danger,
           fontSize: 11,
           fontWeight: FontWeight.w600,
         ),

@@ -103,7 +103,7 @@ class _CreatePurchaseReturnScreenState
           title: 'Info',
           description: 'No products found in selected invoice',
           icon: Icons.info,
-          primaryColor: Colors.blue,
+          primaryColor: AppColors.info,
         );
       }
       _updateReturnAmount();
@@ -172,7 +172,7 @@ class _CreatePurchaseReturnScreenState
               title: 'Success!',
               description: state.message,
               icon: Icons.check_circle,
-              primaryColor: Colors.green,
+              primaryColor: AppColors.success,
             );
             // Clear form and reset state
             _resetForm();
@@ -380,7 +380,7 @@ class _CreatePurchaseReturnScreenState
                           trailing: products.length > 1
                               ? IconButton(
                             icon: Icon(HugeIcons.strokeRoundedDelete02,
-                                color: Colors.red),
+                                color: AppColors.danger),
                             onPressed: () => _removeProduct(index),
                           )
                               : null,
@@ -685,7 +685,7 @@ class _CreatePurchaseReturnScreenState
         title: 'Validation Error',
         description: 'Please fix all errors in the form',
         icon: Icons.error,
-        primaryColor: Colors.red,
+        primaryColor: AppColors.danger,
       );
       return;
     }
@@ -696,7 +696,7 @@ class _CreatePurchaseReturnScreenState
         title: 'Warning!',
         description: "Please select products to return",
         icon: Icons.warning,
-        primaryColor: Colors.orange,
+        primaryColor: AppColors.warning,
       );
       return;
     }
@@ -707,7 +707,7 @@ class _CreatePurchaseReturnScreenState
         title: 'Warning!',
         description: "Please select a supplier",
         icon: Icons.warning,
-        primaryColor: Colors.orange,
+        primaryColor: AppColors.warning,
       );
       return;
     }
@@ -718,7 +718,7 @@ class _CreatePurchaseReturnScreenState
         title: 'Warning!',
         description: "Please select an invoice",
         icon: Icons.warning,
-        primaryColor: Colors.orange,
+        primaryColor: AppColors.warning,
       );
       return;
     }
@@ -729,7 +729,7 @@ class _CreatePurchaseReturnScreenState
         title: 'Warning!',
         description: "Please select a payment method",
         icon: Icons.warning,
-        primaryColor: Colors.orange,
+        primaryColor: AppColors.warning,
       );
       return;
     }
@@ -740,7 +740,7 @@ class _CreatePurchaseReturnScreenState
         title: 'Warning!',
         description: "Please select an account",
         icon: Icons.warning,
-        primaryColor: Colors.orange,
+        primaryColor: AppColors.warning,
       );
       return;
     }

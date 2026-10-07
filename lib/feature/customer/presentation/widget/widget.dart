@@ -3,8 +3,9 @@ import '../../../../core/configs/configs.dart';
 import '../../../../core/widgets/delete_dialog.dart';
 import '../../data/model/customer_model.dart';
 import '../bloc/customer/customer_bloc.dart';
-import '../pages/create_customer_screen.dart';
-import '../pages/mobile_create_customer_screen.dart';
+import '../shared/create_customer_screen.dart';
+import '../shared/mobile_create_customer_screen.dart';
+import 'package:meherinMart/core/widgets/table_scroll_controllers.dart';
 
 class CustomerTableCard extends StatelessWidget {
   final List<CustomerModel> customers;
@@ -59,11 +60,11 @@ class CustomerTableCard extends StatelessWidget {
     if (netDue > 0) {
       amount = netDue;
       label = "Due";
-      color = Colors.red;
+      color = AppColors.danger;
     } else if (remainingAdvance > 0) {
       amount = remainingAdvance;
       label = "Advance";
-      color = Colors.green;
+      color = AppColors.success;
     } else {
       amount = 0.0;
       label = "Paid";
@@ -148,13 +149,13 @@ class CustomerTableCard extends StatelessWidget {
                       ),
                       decoration: BoxDecoration(
                         color: (customer.isActive ?? false)
-                            ? Colors.green.withOpacity(0.1)
-                            : Colors.red.withOpacity(0.1),
+                            ? AppColors.success.withOpacity(0.1)
+                            : AppColors.danger.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
                           color: (customer.isActive ?? false)
-                              ? Colors.green
-                              : Colors.red,
+                              ? AppColors.success
+                              : AppColors.danger,
                           width: 1,
                         ),
                       ),
@@ -162,8 +163,8 @@ class CustomerTableCard extends StatelessWidget {
                         customer.isActive ?? false ? 'Active' : 'Inactive',
                         style: TextStyle(
                           color: (customer.isActive ?? false)
-                              ? Colors.green
-                              : Colors.red,
+                              ? AppColors.success
+                              : AppColors.danger,
                           fontWeight: FontWeight.w600,
                           fontSize: 12,
                         ),
@@ -357,7 +358,7 @@ class CustomerTableCard extends StatelessWidget {
                     ),
                     label: const Text('Edit'),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.blue,
+                      foregroundColor: AppColors.info,
                       side: BorderSide(color: Colors.blue.shade300),
                       padding: const EdgeInsets.symmetric(vertical: 10),
                       shape: RoundedRectangleBorder(
@@ -411,7 +412,7 @@ class CustomerTableCard extends StatelessWidget {
                     ),
                     label: const Text('Delete'),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.red,
+                      foregroundColor: AppColors.danger,
                       side: BorderSide(color: Colors.red.shade300),
                       padding: const EdgeInsets.symmetric(vertical: 10),
                       shape: RoundedRectangleBorder(
@@ -479,8 +480,8 @@ class CustomerTableCard extends StatelessWidget {
   }
 
   Widget _buildDesktopDataTable(BuildContext context) {
-    final verticalScrollController = ScrollController();
-    final horizontalScrollController = ScrollController();
+    return TableScrollControllers(
+      builder: (context, verticalScrollController, horizontalScrollController) {
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -556,6 +557,8 @@ class CustomerTableCard extends StatelessWidget {
             ),
           ),
         );
+      },
+    );
       },
     );
   }
@@ -703,17 +706,17 @@ class CustomerTableCard extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: isActive ? Colors.green.withValues(alpha: 0.1) : Colors.red.withValues(alpha: 0.1),
+              color: isActive ? AppColors.success.withValues(alpha: 0.1) : AppColors.danger.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(4),
               border: Border.all(
-                color: isActive ? Colors.green : Colors.red,
+                color: isActive ? AppColors.success : AppColors.danger,
                 width: 1,
               ),
             ),
             child: Text(
               isActive ? 'Active' : 'Inactive',
               style: TextStyle(
-                color: isActive ? Colors.green : Colors.red,
+                color: isActive ? AppColors.success : AppColors.danger,
                 fontWeight: FontWeight.w600,
                 fontSize: 10,
               ),
@@ -738,11 +741,11 @@ class CustomerTableCard extends StatelessWidget {
     if (netDue > 0) {
       amount = netDue;
       label = "Due";
-      color = Colors.red;
+      color = AppColors.danger;
     } else if (remainingAdvance > 0) {
       amount = remainingAdvance;
       label = "Advance";
-      color = Colors.green;
+      color = AppColors.success;
     } else {
       amount = 0.0;
       label = "Paid";
@@ -841,7 +844,7 @@ class CustomerTableCard extends StatelessWidget {
                 icon: const Icon(
                   Iconsax.edit,
                   size: 16,
-                  color: Colors.blue,
+                  color: AppColors.info,
                 ),
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(minWidth: 30, minHeight: 30),
@@ -877,7 +880,7 @@ class CustomerTableCard extends StatelessWidget {
                 icon: const Icon(
                   HugeIcons.strokeRoundedDeleteThrow,
                   size: 16,
-                  color: Colors.red,
+                  color: AppColors.danger,
                 ),
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(minWidth: 30, minHeight: 30),
@@ -934,7 +937,7 @@ class CustomerTableCard extends StatelessWidget {
               child: Text(
                 customer.specialCustomer ? 'Remove' : 'Mark Special',
                 style: TextStyle(
-                  color: customer.specialCustomer ? Colors.red : Colors.amber,
+                  color: customer.specialCustomer ? AppColors.danger : Colors.amber,
                 ),
               ),
             ),

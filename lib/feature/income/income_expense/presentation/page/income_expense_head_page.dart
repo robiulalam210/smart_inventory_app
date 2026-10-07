@@ -150,10 +150,16 @@ class _IncomeHeadScreenState extends State<MobileIncomeHeadScreen> {
 
   Widget _buildIncomeHeadList(IncomeHeadState state) {
     if (state is IncomeHeadListLoading) {
-      return const Expanded(child: Center(child: CircularProgressIndicator()));
+      return const SizedBox(
+        height: 300,
+        child: Center(child: CircularProgressIndicator()),
+      );
     } else if (state is IncomeHeadListSuccess) {
       if (state.list.isEmpty) {
-        return Expanded(child: Center(child: Lottie.asset(AppImages.noData)));
+        return SizedBox(
+          height: 300,
+          child: Center(child: Lottie.asset(AppImages.noData)),
+        );
       } else {
         return SizedBox(
           child: IncomeHeadTableCard(
@@ -165,7 +171,8 @@ class _IncomeHeadScreenState extends State<MobileIncomeHeadScreen> {
         );
       }
     } else if (state is IncomeHeadListFailed) {
-      return Expanded(
+      return SizedBox(
+        height: 300,
         child: Center(
           child: Text(
             'Failed to load: ${state.content}',
@@ -174,7 +181,10 @@ class _IncomeHeadScreenState extends State<MobileIncomeHeadScreen> {
         ),
       );
     } else {
-      return Expanded(child: Center(child: Lottie.asset(AppImages.noData)));
+      return SizedBox(
+        height: 300,
+        child: Center(child: Lottie.asset(AppImages.noData)),
+      );
     }
   }
 

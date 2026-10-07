@@ -37,7 +37,7 @@ class ExpenseReport {
   }
 
   // Helper methods for UI
-  Color get amountColor => Colors.red;
+  Color get amountColor => AppColors.danger;
   IconData get amountIcon => Icons.arrow_upward;
 }
 

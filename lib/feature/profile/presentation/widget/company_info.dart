@@ -53,7 +53,7 @@ class _CompanyProfileCardWithUploadState
         title: 'error'.tr(),
         description: 'image_upload_failed'.tr(),
         icon: Icons.error,
-        primaryColor: Colors.red,
+        primaryColor: AppColors.danger,
       );
     }
   }
@@ -74,7 +74,7 @@ class _CompanyProfileCardWithUploadState
         title: 'error'.tr(),
         description: 'auth_token_missing'.tr(),
         icon: Icons.error,
-        primaryColor: Colors.red,
+        primaryColor: AppColors.danger,
       );
       return;
     }
@@ -112,7 +112,7 @@ class _CompanyProfileCardWithUploadState
           title: 'success'.tr(),
           description: 'company_logo_updated'.tr(),
           icon: Icons.check_circle,
-          primaryColor: Colors.green,
+          primaryColor: AppColors.success,
         );
         widget.onUpdated?.call();
       } else {
@@ -124,7 +124,7 @@ class _CompanyProfileCardWithUploadState
           title: 'error'.tr(),
           description: msg ?? 'upload_failed'.tr(),
           icon: Icons.error,
-          primaryColor: Colors.red,
+          primaryColor: AppColors.danger,
         );
       }
     } on DioError catch (e) {
@@ -139,7 +139,7 @@ class _CompanyProfileCardWithUploadState
         title: 'error'.tr(),
         description: friendly,
         icon: Icons.error,
-        primaryColor: Colors.red,
+        primaryColor: AppColors.danger,
       );
     } catch (e, st) {
       debugPrint('Logo upload error: $e\n$st');
@@ -148,7 +148,7 @@ class _CompanyProfileCardWithUploadState
         title: 'error'.tr(),
         description: 'image_upload_failed'.tr(),
         icon: Icons.error,
-        primaryColor: Colors.red,
+        primaryColor: AppColors.danger,
       );
     } finally {
       setState(() {

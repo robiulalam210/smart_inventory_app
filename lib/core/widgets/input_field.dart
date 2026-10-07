@@ -89,7 +89,7 @@ class _CustomInputFieldState extends State<CustomInputField> {
               if (widget.isRequired)
                 const Text(
                   " *",
-                  style: TextStyle(color: Colors.red),
+                  style: TextStyle(color: AppColors.danger),
                 ),
             ],
           ),

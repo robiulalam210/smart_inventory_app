@@ -1,9 +1,10 @@
 import 'package:printing/printing.dart';
 import '/feature/supplier/data/model/supplier_payment/suppler_payment_model.dart';
-import '/feature/supplier/presentation/pages/supplier_payment_details.dart';
+import '/feature/supplier/presentation/shared/supplier_payment_details.dart';
 
 import '../../../../core/configs/configs.dart';
-import '../pages/pdf/generate_supplier_payment.dart';
+import '../shared/pdf/generate_supplier_payment.dart';
+import 'package:meherinMart/core/widgets/table_scroll_controllers.dart';
 
 class SupplierPaymentWidget extends StatelessWidget {
   final List<SupplierPaymentModel> suppliers;
@@ -243,19 +244,19 @@ class SupplierPaymentWidget extends StatelessWidget {
                             label: 'Amount',
                             value: '\$${_formatAmount(payment.amount)}',
                             icon: Iconsax.dollar_circle,
-                            color: Colors.green,
+                            color: AppColors.success,
                           ),
                           _buildPaymentDetailCard(
                             label: 'Method',
                             value: payment.paymentMethod ?? '-',
                             icon: Iconsax.card,
-                            color: Colors.blue,
+                            color: AppColors.info,
                           ),
                           _buildPaymentDetailCard(
                             label: 'Date',
                             value: formatDate(payment.paymentDate),
                             icon: Iconsax.calendar,
-                            color: Colors.orange,
+                            color: AppColors.warning,
                           ),
                           _buildPaymentDetailCard(
                             label: 'Prepared By',
@@ -302,7 +303,7 @@ class SupplierPaymentWidget extends StatelessWidget {
                     icon: const Icon(Icons.visibility, size: 16),
                     label: const Text('View'),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.blue,
+                      foregroundColor: AppColors.info,
                       side: BorderSide(color: Colors.blue.shade300),
                       padding: const EdgeInsets.symmetric(vertical: 10),
                       shape: RoundedRectangleBorder(
@@ -344,7 +345,7 @@ class SupplierPaymentWidget extends StatelessWidget {
                               actions: [
                                 IconButton(
                                   onPressed: () => AppRoutes.pop(context),
-                                  icon: const Icon(Icons.cancel, color: Colors.red),
+                                  icon: const Icon(Icons.cancel, color: AppColors.danger),
                                 ),
                               ],
 
@@ -372,7 +373,7 @@ class SupplierPaymentWidget extends StatelessWidget {
                     icon: const Icon(Icons.picture_as_pdf, size: 16),
                     label: const Text('PDF'),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.red,
+                      foregroundColor: AppColors.danger,
                       side: BorderSide(color: Colors.red.shade300),
                       padding: const EdgeInsets.symmetric(vertical: 10),
                       shape: RoundedRectangleBorder(
@@ -517,14 +518,14 @@ class SupplierPaymentWidget extends StatelessWidget {
       case 'completed':
       case 'paid':
       case 'success':
-        return (Colors.green.withValues(alpha: 0.2), Colors.green);
+        return (AppColors.success.withValues(alpha: 0.2), AppColors.success);
       case 'pending':
       case 'processing':
-        return (Colors.orange.withValues(alpha: 0.2), Colors.orange);
+        return (AppColors.warning.withValues(alpha: 0.2), AppColors.warning);
       case 'failed':
       case 'cancelled':
       case 'rejected':
-        return (Colors.red.withValues(alpha: 0.2), Colors.red);
+        return (AppColors.danger.withValues(alpha: 0.2), AppColors.danger);
       default:
         return (Colors.grey.withValues(alpha: 0.2), Colors.grey);
     }
@@ -532,8 +533,8 @@ class SupplierPaymentWidget extends StatelessWidget {
 
   // Keep your existing desktop DataTable code here
   Widget _buildDesktopDataTable() {
-    final verticalController = ScrollController();
-    final horizontalController = ScrollController();
+    return TableScrollControllers(
+      builder: (context, verticalController, horizontalController) {
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -608,6 +609,8 @@ class SupplierPaymentWidget extends StatelessWidget {
             ),
           ),
         );
+      },
+    );
       },
     );
   }
@@ -707,7 +710,7 @@ class SupplierPaymentWidget extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                     builder: (context) => Scaffold(
-                      backgroundColor: Colors.red,
+                      backgroundColor: AppColors.danger,
                       body: PdfPreview.builder(
                         useActions: true,
                         allowSharing: false,
@@ -727,7 +730,7 @@ class SupplierPaymentWidget extends StatelessWidget {
                         actions: [
                           IconButton(
                             onPressed: () => AppRoutes.pop(context),
-                            icon: const Icon(Icons.cancel, color: Colors.red),
+                            icon: const Icon(Icons.cancel, color: AppColors.danger),
                           ),
                         ],
                         pagesBuilder: (context, pages) {
@@ -805,7 +808,7 @@ class SupplierPaymentWidget extends StatelessWidget {
             style: const TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.bold,
-              color: Colors.green,
+              color: AppColors.success,
             ),
           ),
         ),

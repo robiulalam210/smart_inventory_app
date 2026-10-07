@@ -5,7 +5,6 @@ import '../feature/income/income_expense/presentation/income_expense_bloc/income
 import '../feature/income/presentation/IncomeBloc/income_bloc.dart';
 import '../feature/products/sale_mode/presentation/bloc/product_sale_mode/product_sale_mode_bloc.dart';
 import '../feature/products/sale_mode/presentation/bloc/sale_mode_bloc.dart';
-import '../feature/splash/presentation/pages/mobile_splash_screen.dart';
 import '/feature/account_transfer/presentation/bloc/account_transfer/account_transfer_bloc.dart';
 import '/feature/customer/presentation/bloc/customer/customer_bloc.dart';
 import '/feature/expense/expense_head/presentation/bloc/expense_head/expense_head_bloc.dart';
@@ -47,7 +46,9 @@ import '../feature/supplier/presentation/bloc/supplier_payment/supplier_payment_
 import '../feature/transactions/presentation/bloc/transactions/transaction_bloc.dart';
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  /// প্রথম স্ক্রিন — main_desktop.dart / main_mobile.dart থেকে দেওয়া হয়।
+  final Widget home;
+  const MyApp({super.key, required this.home});
 
   @override
   Widget build(BuildContext context) {
@@ -145,7 +146,7 @@ class MyApp extends StatelessWidget {
             // FIX: আগে প্রতিটা rebuild এ (যেমন desktop window ছোট-বড় করলে) mobile/desktop
             // splash বদলে যেতে পারত → পুরো navigator এর root বদলে focus assertion error।
             // এখন app চালুর সময় একবারই ঠিক হয়।
-            home: _StartScreen.pick(context),
+            home: home,
           );
         },
       ),
@@ -172,8 +173,3 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class _StartScreen {
-  static Widget? _cached;
-  static Widget pick(BuildContext context) =>
-      _cached ??= Responsive.isMobile(context) ? MobileSplashScreen() : SplashScreen();
-}

@@ -4,7 +4,8 @@ import '../../../../../core/widgets/delete_dialog.dart';
 import '../../../expense_head/data/model/expense_head_model.dart';
 import '../../data/model/expense_sub_head_model.dart';
 import '../bloc/expense_sub_head/expense_sub_head_bloc.dart';
-import '../pages/expense_sub_head_create.dart';
+import '../shared/expense_sub_head_create.dart';
+import 'package:meherinMart/core/widgets/table_scroll_controllers.dart';
 
 class ExpenseSubHeadTableCard extends StatelessWidget {
   final List<ExpenseSubHeadModel> expenseSubHeads;
@@ -77,8 +78,8 @@ class ExpenseSubHeadTableCard extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
               color: (_getExpenseSubHeadStatus(expenseSubHead)
-                  ? Colors.green.withValues(alpha: 0.05)
-                  : Colors.red.withValues(alpha: 0.05)),
+                  ? AppColors.success.withValues(alpha: 0.05)
+                  : AppColors.danger.withValues(alpha: 0.05)),
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(16),
                 topRight: Radius.circular(16),
@@ -136,13 +137,13 @@ class ExpenseSubHeadTableCard extends StatelessWidget {
                   ),
                   decoration: BoxDecoration(
                     color: _getExpenseSubHeadStatus(expenseSubHead)
-                        ? Colors.green.withValues(alpha: 0.2)
-                        : Colors.red.withValues(alpha: 0.2),
+                        ? AppColors.success.withValues(alpha: 0.2)
+                        : AppColors.danger.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(AppSizes.radius),
                     border: Border.all(
                       color: _getExpenseSubHeadStatus(expenseSubHead)
-                          ? Colors.green
-                          : Colors.red,
+                          ? AppColors.success
+                          : AppColors.danger,
                     ),
                   ),
                   child: Text(
@@ -151,8 +152,8 @@ class ExpenseSubHeadTableCard extends StatelessWidget {
                         : 'INACTIVE',
                     style: TextStyle(
                       color: _getExpenseSubHeadStatus(expenseSubHead)
-                          ? Colors.green
-                          : Colors.red,
+                          ? AppColors.success
+                          : AppColors.danger,
                       fontWeight: FontWeight.w600,
                       fontSize: 11,
                     ),
@@ -205,7 +206,7 @@ class ExpenseSubHeadTableCard extends StatelessWidget {
                     icon: const Icon(Iconsax.edit, size: 16),
                     label: const Text('Edit'),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.blue,
+                      foregroundColor: AppColors.info,
                       side: BorderSide(color: Colors.blue.shade300),
                       padding: const EdgeInsets.symmetric(vertical: 10),
                       shape: RoundedRectangleBorder(
@@ -225,7 +226,7 @@ class ExpenseSubHeadTableCard extends StatelessWidget {
                     ),
                     label: const Text('Delete'),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.red,
+                      foregroundColor: AppColors.danger,
                       side: BorderSide(color: Colors.red.shade300),
                       padding: const EdgeInsets.symmetric(vertical: 10),
                       shape: RoundedRectangleBorder(
@@ -307,8 +308,8 @@ class ExpenseSubHeadTableCard extends StatelessWidget {
       return _buildEmptyState();
     }
 
-    final verticalScrollController = ScrollController();
-    final horizontalScrollController = ScrollController();
+    return TableScrollControllers(
+      builder: (context, verticalScrollController, horizontalScrollController) {
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -413,6 +414,8 @@ class ExpenseSubHeadTableCard extends StatelessWidget {
         );
       },
     );
+      },
+    );
   }
 
   List<DataColumn> _buildColumns(double columnWidth) {
@@ -477,14 +480,14 @@ class ExpenseSubHeadTableCard extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
               color: isActive
-                  ? Colors.green.withValues(alpha: 0.1)
-                  : Colors.red.withValues(alpha: 0.1),
+                  ? AppColors.success.withValues(alpha: 0.1)
+                  : AppColors.danger.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
               isActive ? 'Active' : 'Inactive',
               style: TextStyle(
-                color: isActive ? Colors.green : Colors.red,
+                color: isActive ? AppColors.success : AppColors.danger,
                 fontWeight: FontWeight.w600,
                 fontSize: 11,
               ),
@@ -510,7 +513,7 @@ class ExpenseSubHeadTableCard extends StatelessWidget {
             // Edit Button
             _buildActionButton(
               icon: Iconsax.edit,
-              color: Colors.blue,
+              color: AppColors.info,
               tooltip: 'Edit expense sub head',
               onPressed: () => _showEditDialog(context, expenseSubHead),
             ),
@@ -518,7 +521,7 @@ class ExpenseSubHeadTableCard extends StatelessWidget {
             // Delete Button
             _buildActionButton(
               icon: HugeIcons.strokeRoundedDeleteThrow,
-              color: Colors.red,
+              color: AppColors.danger,
               tooltip: 'Delete expense sub head',
               onPressed: () => _confirmDelete(context, expenseSubHead),
             ),

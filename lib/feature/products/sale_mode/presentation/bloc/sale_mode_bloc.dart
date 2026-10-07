@@ -5,10 +5,10 @@ import '../../../../common/data/models/api_response_mod.dart';
 import '../../../../common/data/models/app_parse_json.dart';
 import '../../data/sale_mode_model.dart';
 
-import '../../../../../../core/repositories/delete_response.dart';
-import '../../../../../../core/repositories/get_response.dart';
-import '../../../../../../core/repositories/patch_response.dart';
-import '../../../../../../core/repositories/post_response.dart';
+import '../../../../../core/repositories/delete_response.dart';
+import '../../../../../core/repositories/get_response.dart';
+import '../../../../../core/repositories/patch_response.dart';
+import '../../../../../core/repositories/post_response.dart';
 
 part 'sale_mode_event.dart';
 part 'sale_mode_state.dart';
