@@ -2,6 +2,7 @@
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:printing/printing.dart';
+import '../../../../../core/shared/widgets/sideMenu/sidebar.dart';
 import '../../../../profile/presentation/bloc/profile_bloc/profile_bloc.dart';
 import '/core/core.dart';
 import '/core/widgets/date_range.dart';

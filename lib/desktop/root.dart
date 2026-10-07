@@ -55,6 +55,10 @@ class _RootScreenState extends State<RootScreen> {
             if (didPop) return;
           },
           child: BlocBuilder<DashboardBloc, DashboardState>(
+            // শুধু screen বদলালে rebuild — আগে dashboard data load এর
+            // Loading/Loaded state এও rebuild হতো, তখন index 0 ধরে
+            // অন্য screen থেকে হঠাৎ Dashboard এ চলে আসত
+            buildWhen: (prev, curr) => curr is DashboardScreenChanged,
             builder: (context, state) {
               int currentIndex = 0;
               if (state is DashboardScreenChanged) {

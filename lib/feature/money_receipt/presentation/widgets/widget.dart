@@ -5,7 +5,6 @@ import '../../../profile/presentation/bloc/profile_bloc/profile_bloc.dart';
 import '../../data/model/money_receipt_model/money_receipt_model.dart';
 import '../shared/money_receipt_details.dart';
 import '../shared/pdf/generate_money_receipt.dart';
-import 'package:meherinMart/core/widgets/table_scroll_controllers.dart';
 
 class MoneyReceiptDataTableWidget extends StatelessWidget {
   final List<MoneyreceiptModel> sales;

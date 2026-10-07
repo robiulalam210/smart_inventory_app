@@ -4,7 +4,6 @@ import '../../../../../core/widgets/delete_dialog.dart';
 import '../../data/model/product_model.dart';
 import '../shared/mobile_product_create.dart';
 import '../shared/product_details.dart';
-import 'package:meherinMart/core/widgets/table_scroll_controllers.dart';
 
 class ProductDataTableWidget extends StatelessWidget {
   final List<ProductModel> products;

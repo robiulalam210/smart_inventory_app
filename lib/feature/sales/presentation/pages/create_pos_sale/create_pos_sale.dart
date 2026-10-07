@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import '../../../../../core/shared/widgets/sideMenu/sidebar.dart';
 import 'sale_payment_rules.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:google_fonts/google_fonts.dart';

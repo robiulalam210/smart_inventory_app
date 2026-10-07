@@ -1,6 +1,5 @@
 import '../../../../core/configs/configs.dart';
 import '../../data/model/account_model.dart';
-import 'package:meherinMart/core/widgets/table_scroll_controllers.dart';
 
 class AccountCard extends StatelessWidget {
   final List<AccountModel> accounts;

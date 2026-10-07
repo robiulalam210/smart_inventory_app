@@ -215,20 +215,6 @@ class BrandTableCard extends StatelessWidget {
     );
   }
 
-  Widget _buildActionButton({
-    required IconData icon,
-    required Color color,
-    required String tooltip,
-    required VoidCallback onPressed,
-  }) {
-    return IconButton(
-      onPressed: onPressed,
-      icon: Icon(icon, size: 18, color: color),
-      tooltip: tooltip,
-      padding: EdgeInsets.zero,
-      constraints: const BoxConstraints(minWidth: 30, minHeight: 30),
-    );
-  }
 
   Future<void> _confirmDelete(BuildContext context, BrandModel brand) async {
     final shouldDelete = await showDeleteConfirmationDialog(context);

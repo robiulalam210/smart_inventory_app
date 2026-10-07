@@ -660,9 +660,6 @@ pw.Widget _buildActionRecommendations(List<LowStockProduct> products, LowStockSu
 // Footer
 
 // Helper functions
-String _formatDate(DateTime date) {
-  return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
-}
 
 
 String _truncateText(String text, int maxLength) {

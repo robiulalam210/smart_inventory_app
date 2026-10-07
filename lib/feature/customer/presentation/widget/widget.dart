@@ -5,7 +5,6 @@ import '../../data/model/customer_model.dart';
 import '../bloc/customer/customer_bloc.dart';
 import '../shared/create_customer_screen.dart';
 import '../shared/mobile_create_customer_screen.dart';
-import 'package:meherinMart/core/widgets/table_scroll_controllers.dart';
 
 class CustomerTableCard extends StatelessWidget {
   final List<CustomerModel> customers;

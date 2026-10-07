@@ -426,7 +426,7 @@ class AppDropdown<T> extends FormField<T> {
         state.didChange(null);
 
         if (onClear != null) {
-          onClear!(null);
+          onClear(null);
         }
 
         onChanged(null);

@@ -74,63 +74,100 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     );
   }
 
+  double _num(dynamic v) {
+    if (v == null) return 0;
+    if (v is num) return v.toDouble();
+    return double.tryParse(v.toString()) ?? 0;
+  }
+
+  String _money(dynamic v) => '৳${_num(v).toStringAsFixed(2)}';
+
+  void _refresh() {
+    context.read<ProductsBloc>().add(
+          FetchProductDetails(productId: widget.productId, context),
+        );
+  }
+
+  // ------------------------------------------------------------
+  // নতুন layout (desktop):
+  //   ১. উপরে hero — ছবি, নাম, SKU/status/category, ডানে দাম ও margin
+  //   ২. ৪টা KPI — Current stock, Opening, Alert level, Stock value
+  //   ৩. দুই column — বাঁয়ে Basic info + Sale modes, ডানে Pricing + Record
+  // আগে সব card একটার নিচে আরেকটা পুরো চওড়া হয়ে বসত, বড় পর্দায় অনেক ফাঁকা
+  // জায়গা থাকত, আর "Manage Sale Modes" FAB content ঢেকে দিত — এখন
+  // বাটনটা উপরের bar এ।
+  // ------------------------------------------------------------
   Widget _buildContent() {
     return AppScaffold(
-      appBar: AppBar(
-        title: Text(
-          "Product Details",
-          style: AppTextStyle.titleMedium(context),
-        ),
+      appBar: detailAppBar(
+        context,
+        title: _product.name ?? 'Product Details',
+        breadcrumb: const ['Products', 'Product Details'],
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () {
-              context.read<ProductsBloc>().add(
-                FetchProductDetails(
-                  productId: widget.productId,
-                 context,
-                ),
-              );
-            },
+            tooltip: 'Refresh',
+            icon: const Icon(Icons.refresh_rounded),
+            onPressed: _refresh,
+          ),
+          const SizedBox(width: 6),
+          PopoverButton(
+            label: 'Manage Sale Modes',
+            primary: true,
+            icon: Iconsax.money_change,
+            onPressed: () => _navigateToSaleModes(context),
           ),
         ],
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(10),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Product Header Card
-              _buildProductHeaderCard(),
-              const SizedBox(height: 10),
-
-              // Basic Information
-              _buildSectionTitle("Basic Information"),
-              _buildBasicInfoCard(),
-              const SizedBox(height: 10),
-
-              // Pricing Information
-              _buildSectionTitle("Pricing & Stock"),
-              _buildPricingStockCard(),
-              const SizedBox(height: 10),
-
-              // Sale Modes Section
-              _buildSaleModesSection(),
-              const SizedBox(height: 10),
-
-              // Metadata
-              _buildSectionTitle("Metadata"),
-              _buildMetadataCard(),
-            ],
-          ),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final bool wide = constraints.maxWidth >= 980;
+            return SingleChildScrollView(
+              padding: const EdgeInsets.all(20),
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 1280),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      _buildHero(),
+                      const SizedBox(height: 16),
+                      _buildStats(wide),
+                      const SizedBox(height: 16),
+                      if (wide)
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              flex: 3,
+                              child: Column(children: [
+                                _buildBasicInfoCard(),
+                                _buildSaleModesSection(),
+                              ]),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              flex: 2,
+                              child: Column(children: [
+                                _buildPricingCard(),
+                                _buildMetadataCard(),
+                              ]),
+                            ),
+                          ],
+                        )
+                      else ...[
+                        _buildBasicInfoCard(),
+                        _buildPricingCard(),
+                        _buildSaleModesSection(),
+                        _buildMetadataCard(),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
         ),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _navigateToSaleModes(context),
-        icon: const Icon(Iconsax.money_change),
-        label: const Text("Manage Sale Modes"),
-        backgroundColor: AppColors.primaryColor(context),
       ),
     );
   }
@@ -138,11 +175,10 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   // Loading screen
   Widget _buildLoadingScreen() {
     return AppScaffold(
-      appBar: AppBar(
-        title: Text(
-          "Product Details",
-          style: AppTextStyle.titleMedium(context),
-        ),
+      appBar: detailAppBar(
+        context,
+        title: 'Product Details',
+        breadcrumb: const ['Products'],
       ),
       body: Center(
         child: Column(
@@ -167,11 +203,10 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   // Error screen
   Widget _buildErrorScreen(String error) {
     return AppScaffold(
-      appBar: AppBar(
-        title: Text(
-          "Product Details",
-          style: AppTextStyle.titleMedium(context),
-        ),
+      appBar: detailAppBar(
+        context,
+        title: 'Product Details',
+        breadcrumb: const ['Products'],
       ),
       body: Center(
         child: Padding(
@@ -241,697 +276,392 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     );
   }
 
-  Widget _buildProductHeaderCard() {
+  // ---------------- hero ----------------
+  Widget _buildHero() {
+    final bool active = _product.isActive ?? false;
+    final double purchase = _num(_product.purchasePrice);
+    final double selling = _num(_product.sellingPrice);
+    final double margin =
+        selling > 0 ? ((selling - purchase) / selling) * 100 : 0;
+    final String? image =
+        _product.image is String ? _product.image as String : null;
+    final Color primary = AppColors.primaryColor(context);
+    final Color text = AppColors.text(context);
+
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: AppColors.primaryColor(context).withOpacity(0.05),
-        borderRadius: BorderRadius.circular(12),
+        color: AppColors.bottomNavBg(context),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: AppColors.primaryColor(context).withOpacity(0.1),
+          color: Theme.of(context).brightness == Brightness.dark
+              ? Colors.white.withValues(alpha: 0.08)
+              : AppColors.borderLight,
         ),
       ),
       child: Row(
         children: [
           Container(
-            width: 80,
-            height: 80,
+            width: 84,
+            height: 84,
             decoration: BoxDecoration(
-              color: AppColors.greyColor(context).withOpacity(0.1),
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(
-                color: AppColors.greyColor(context).withOpacity(0.3),
-              ),
+              color: primary.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(14),
             ),
-            child: _product.image != null
-                ? ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: Image.network(
-                _product.image.toString(),
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Icon(
-                    Iconsax.box,
-                    size: 40,
-                    color: AppColors.greyColor(context),
-                  );
-                },
-                loadingBuilder: (context, child, loadingProgress) {
-                  if (loadingProgress == null) return child;
-                  return Center(
-                    child: CircularProgressIndicator(
-                      value: loadingProgress.expectedTotalBytes != null
-                          ? loadingProgress.cumulativeBytesLoaded /
-                          loadingProgress.expectedTotalBytes!
-                          : null,
-                    ),
-                  );
-                },
-              ),
-            )
-                : Icon(
-              Iconsax.box,
-              size: 40,
-              color: AppColors.greyColor(context),
-            ),
+            clipBehavior: Clip.antiAlias,
+            child: (image != null && image.startsWith('http'))
+                ? Image.network(
+                    image,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) =>
+                        Icon(Iconsax.box, size: 34, color: primary),
+                  )
+                : Icon(Iconsax.box, size: 34, color: primary),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 18),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  _product.name ?? "Unnamed Product",
-                  style: AppTextStyle.titleLarge(context).copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                  _product.name ?? 'Unnamed product',
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  _product.sku ?? "No SKU",
-                  style: AppTextStyle.bodySmall(context).copyWith(
-                    color: AppColors.greyColor(context),
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w700,
+                    color: text,
                   ),
                 ),
                 const SizedBox(height: 8),
-                Row(
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 6,
                   children: [
-                    if (_product.isActive != null)
-                      _buildStatusBadge(_product.isActive!),
-                    const Spacer(),
-                    if (_product.finalPrice != null)
-                      Text(
-                        "৳${_product.finalPrice}",
-                        style: AppTextStyle.titleMedium(context).copyWith(
-                          color: AppColors.primaryColor(context),
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                    if ((_product.sku ?? '').isNotEmpty)
+                      DetailPill(_product.sku!,
+                          color: AppColors.greyColor(context),
+                          icon: Icons.qr_code_2_rounded),
+                    DetailPill(active ? 'Active' : 'Inactive',
+                        color: active ? AppColors.success : AppColors.danger,
+                        icon: active
+                            ? Icons.check_circle_outline
+                            : Icons.block_outlined),
+                    if ((_product.categoryInfo?.name ?? '').isNotEmpty)
+                      DetailPill(_product.categoryInfo!.name!,
+                          color: AppColors.info,
+                          icon: Icons.category_outlined),
+                    if (_product.discountApplied == true)
+                      DetailPill(
+                          'Discount ${_product.discountValue ?? ''}${_product.discountType == 'percentage' ? '%' : ''}',
+                          color: AppColors.warning,
+                          icon: Icons.local_offer_outlined),
                   ],
                 ),
               ],
             ),
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStatusBadge(bool isActive) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-      decoration: BoxDecoration(
-        color: isActive
-            ? AppColors.success.withOpacity(0.1)
-            : AppColors.danger.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: isActive ? AppColors.success : AppColors.danger,
-        ),
-      ),
-      child: Text(
-        isActive ? "Active" : "Inactive",
-        style: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-          color: isActive ? AppColors.success : AppColors.danger,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSectionTitle(String title) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Text(
-        title,
-        style: AppTextStyle.titleMedium(context).copyWith(
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildBasicInfoCard() {
-    return Container(
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: AppColors.bottomNavBg(context),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: AppColors.greyColor(context).withValues(alpha: 0.2),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          _buildInfoRow(
-            icon: Iconsax.category,
-            label: "Category",
-            value: _product.categoryInfo?.name ?? "Not set",
-          ),
-          const Divider(),
-          _buildInfoRow(
-            icon: Iconsax.ruler,
-            label: "Unit",
-            value: _product.unitInfo?.name ?? "Not set",
-          ),
-          const Divider(),
-          _buildInfoRow(
-            icon: Iconsax.building,
-            label: "Brand",
-            value: _product.brandInfo?.name ?? "Not set",
-          ),
-          const Divider(),
-          _buildInfoRow(
-            icon: Iconsax.people,
-            label: "Group",
-            value: _product.groupInfo?.name ?? "Not set",
-          ),
-          const Divider(),
-          _buildInfoRow(
-            icon: Iconsax.import,
-            label: "Source",
-            value: _product.sourceInfo?.name ?? "Not set",
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildInfoRow({
-    required IconData icon,
-    required String label,
-    required String value,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        children: [
-          Icon(
-            icon,
-            size: 20,
-            color: AppColors.primaryColor(context),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: AppTextStyle.bodySmall(context).copyWith(
-                    color: AppColors.greyColor(context),
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  value,
-                  style: AppTextStyle.body(context).copyWith(
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPricingStockCard() {
-    return Container(
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: AppColors.bottomNavBg(context),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: AppColors.greyColor(context).withValues(alpha: 0.2),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Row(
+          const SizedBox(width: 16),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Expanded(
-                child: _buildPriceCard(
-                  title: "Purchase Price",
-                  price: _product.purchasePrice?.toString() ?? "0.00",
-                  color: AppColors.info,
+              Text(
+                'Selling Price',
+                style: TextStyle(fontSize: 12, color: text.withValues(alpha: 0.55)),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                _money(selling),
+                style: TextStyle(
+                  fontSize: 26,
+                  fontWeight: FontWeight.w800,
+                  color: primary,
                 ),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _buildPriceCard(
-                  title: "Selling Price",
-                  price: _product.sellingPrice?.toString() ?? "0.00",
-                  color: AppColors.success,
+              const SizedBox(height: 4),
+              Text(
+                'Cost ${_money(purchase)}  ·  Margin ${margin.toStringAsFixed(1)}%',
+                style: TextStyle(
+                  fontSize: 12.5,
+                  color: margin >= 0 ? AppColors.success : AppColors.danger,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          if (_product.discountApplied ?? false)
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: AppColors.warning.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: AppColors.warning),
-              ),
-              child: Row(
-                children: [
-                  Icon(Iconsax.discount_shape, color: AppColors.warning),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "Discount Applied",
-                          style: TextStyle(
-                            color: AppColors.warning,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          "${_product.discountType ?? 'N/A'}: ${_product.discountValue ?? '0'}",
-                          style: TextStyle(color: Colors.orange.shade800),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Text(
-                    "Final: ৳${_product.finalPrice ?? _product.sellingPrice ?? '0.00'}",
-                    style: TextStyle(
-                      color: AppColors.warning,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          const SizedBox(height: 16),
-          _buildStockInfo(),
         ],
       ),
     );
   }
 
-  Widget _buildPriceCard({
-    required String title,
-    required String price,
-    required Color color,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.2)),
+  // ---------------- KPI ----------------
+  Widget _buildStats(bool wide) {
+    final int stock = _product.stockQty ?? 0;
+    final int alert = _product.alertQuantity ?? 0;
+    final int opening = _product.openingStock ?? 0;
+    final bool low = stock <= alert;
+    final double value = stock * _num(_product.purchasePrice);
+
+    final stats = [
+      DetailStat(
+        label: 'Current Stock',
+        value: '$stock',
+        icon: Iconsax.box,
+        color: low ? AppColors.danger : AppColors.success,
+        caption: low ? 'Low stock — restock soon' : 'In stock',
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      DetailStat(
+        label: 'Opening Stock',
+        value: '$opening',
+        icon: Iconsax.archive_1,
+        color: AppColors.info,
+      ),
+      DetailStat(
+        label: 'Alert Level',
+        value: '$alert',
+        icon: Iconsax.warning_2,
+        color: AppColors.warning,
+        caption: alert > 0 ? 'Warn when stock ≤ $alert' : null,
+      ),
+      DetailStat(
+        label: 'Stock Value (cost)',
+        value: _money(value),
+        icon: Iconsax.wallet_money,
+        color: AppColors.primaryColor(context),
+      ),
+    ];
+
+    if (wide) {
+      return Row(
         children: [
-          Text(
-            title,
-            style: AppTextStyle.bodySmall(context).copyWith(
-              color: color,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            "৳$price",
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: color,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStockInfo() {
-    final stockQty = _product.stockQty ?? 0;
-    final alertQty = _product.alertQuantity ?? 0;
-    final openingStock = _product.openingStock ?? 0;
-    final isLowStock = stockQty <= alertQty;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          "Stock Information",
-          style: AppTextStyle.bodyLarge(context).copyWith(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: _buildStockMetric(
-                label: "Current Stock",
-                value: "$stockQty",
-                color: AppColors.info,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildStockMetric(
-                label: "Opening Stock",
-                value: "$openingStock",
-                color: Colors.purple,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildStockMetric(
-                label: "Alert Level",
-                value: "$alertQty",
-                color: isLowStock ? AppColors.danger : AppColors.success,
-              ),
-            ),
+          for (int i = 0; i < stats.length; i++) ...[
+            if (i > 0) const SizedBox(width: 12),
+            Expanded(child: stats[i]),
           ],
-        ),
+        ],
+      );
+    }
+    return Column(
+      children: [
+        Row(children: [
+          Expanded(child: stats[0]),
+          const SizedBox(width: 12),
+          Expanded(child: stats[1]),
+        ]),
         const SizedBox(height: 12),
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: isLowStock ? AppColors.danger.withOpacity(0.1) : AppColors.success.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: isLowStock ? AppColors.danger : AppColors.success,
-            ),
-          ),
-          child: Row(
-            children: [
-              Icon(
-                isLowStock ? Iconsax.warning_2 : Iconsax.tick_circle,
-                color: isLowStock ? AppColors.danger : AppColors.success,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  isLowStock
-                      ? "Low Stock Alert! Current stock ($stockQty) is at or below alert level ($alertQty)"
-                      : "Stock is sufficient",
-                  style: TextStyle(
-                    color: isLowStock ? AppColors.danger : AppColors.success,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
+        Row(children: [
+          Expanded(child: stats[2]),
+          const SizedBox(width: 12),
+          Expanded(child: stats[3]),
+        ]),
       ],
     );
   }
 
-  Widget _buildStockMetric({
-    required String label,
-    required String value,
-    required Color color,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.2)),
-      ),
-      child: Column(
-        children: [
-          Text(
-            label,
-            style: AppTextStyle.bodySmall(context).copyWith(
-              color: color,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 4),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: color,
-            ),
-            textAlign: TextAlign.center,
-          ),
+  // ---------------- basic info ----------------
+  Widget _buildBasicInfoCard() {
+    return DetailSection(
+      title: 'Basic Information',
+      icon: Iconsax.info_circle,
+      child: DetailGrid(
+        items: [
+          DetailItem('Category', _product.categoryInfo?.name,
+              icon: Iconsax.category),
+          DetailItem('Unit', _product.unitInfo?.name, icon: Iconsax.ruler),
+          DetailItem('Brand', _product.brandInfo?.name, icon: Iconsax.tag),
+          DetailItem('Group', _product.groupInfo?.name,
+              icon: Iconsax.layer),
+          DetailItem('Source', _product.sourceInfo?.name,
+              icon: Iconsax.import),
+          DetailItem('Stock Status',
+              _product.stockStatusDisplay ?? _product.stockStatus,
+              icon: Iconsax.chart_2),
         ],
       ),
     );
   }
 
+  // ---------------- pricing ----------------
+  Widget _buildPricingCard() {
+    final double purchase = _num(_product.purchasePrice);
+    final double selling = _num(_product.sellingPrice);
+    final double profit = selling - purchase;
+    final bool hasDiscount = _product.discountApplied == true;
+
+    Widget row(String label, String value,
+        {Color? color, bool strong = false}) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 6),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: 13.5,
+                  color: AppColors.text(context).withValues(alpha: 0.7),
+                ),
+              ),
+            ),
+            Text(
+              value,
+              style: TextStyle(
+                fontSize: strong ? 16 : 14,
+                fontWeight: strong ? FontWeight.w700 : FontWeight.w600,
+                color: color ?? AppColors.text(context),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return DetailSection(
+      title: 'Pricing',
+      icon: Iconsax.money_4,
+      child: Column(
+        children: [
+          row('Purchase Price', _money(purchase)),
+          row('Selling Price', _money(selling),
+              color: AppColors.primaryColor(context)),
+          row('Profit per unit', _money(profit),
+              color: profit >= 0 ? AppColors.success : AppColors.danger),
+          if (hasDiscount) ...[
+            row(
+              'Discount',
+              '${_product.discountValue ?? '0'}${_product.discountType == 'percentage' ? ' %' : ' TK'}',
+              color: AppColors.warning,
+            ),
+            const Divider(height: 18),
+            row('Final Price', _money(_product.finalPrice ?? selling),
+                strong: true, color: AppColors.primaryColor(context)),
+          ],
+        ],
+      ),
+    );
+  }
+
+  // ---------------- sale modes ----------------
   Widget _buildSaleModesSection() {
     final saleModes = _product.saleModes ?? [];
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            _buildSectionTitle("Sale Modes"),
-            if (saleModes.isNotEmpty)
-              TextButton.icon(
-                onPressed: () => _navigateToSaleModes(context),
-                icon: Icon(
-                  Iconsax.eye,
-                  size: 16,
-                  color: AppColors.primaryColor(context),
-                ),
-                label: Text(
-                  "View All",
-                  style: TextStyle(
-                    color: AppColors.primaryColor(context),
-                  ),
-                ),
-              ),
-          ],
-        ),
-
-        if (saleModes.isEmpty)
-          Container(
-            alignment: Alignment.center,
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.grey.withValues(alpha: 0.05),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: Colors.grey.withValues(alpha: 0.2),
-              ),
+    return DetailSection(
+      title: 'Sale Modes',
+      icon: Iconsax.money_change,
+      trailing: saleModes.isEmpty
+          ? null
+          : TextButton(
+              onPressed: () => _navigateToSaleModes(context),
+              child: Text('View all (${saleModes.length})'),
             ),
-            child: Column(
+      child: saleModes.isEmpty
+          ? Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Column(
+                children: [
+                  Icon(Iconsax.money_2,
+                      size: 34, color: AppColors.greyColor(context)),
+                  const SizedBox(height: 8),
+                  Text(
+                    'No sale modes configured',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.text(context),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Add a sale mode (e.g. Dozen, Box) to sell this product in different units or tier prices.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      color: AppColors.text(context).withValues(alpha: 0.6),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  PopoverButton(
+                    label: 'Add Sale Mode',
+                    primary: true,
+                    icon: Icons.add_rounded,
+                    onPressed: () => _navigateToSaleModes(context),
+                  ),
+                ],
+              ),
+            )
+          : Column(
               children: [
-                Icon(
-                  Iconsax.money_2,
-                  size: 40,
-                  color: Colors.grey.withValues(alpha: 0.5),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  "No Sale Modes Configured",
-                  style: AppTextStyle.body(context).copyWith(
-                    color: Colors.grey,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  "Add sale modes to enable different pricing options",
-                  style: AppTextStyle.bodySmall(context).copyWith(
-                    color: Colors.grey,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 8),
-                AppButton(
-                  name: "Add Sale Mode",
-                  onPressed: () => _navigateToSaleModes(context),
-                ),
+                for (final m in saleModes.take(4)) _buildSaleModeTile(m),
               ],
             ),
-          )
-        else
-          ...saleModes.take(3).map((saleMode) => _buildSaleModeCard(saleMode)),
-
-        if (saleModes.length > 3)
-          Padding(
-            padding: const EdgeInsets.only(top: 8),
-            child: Text(
-              "+ ${saleModes.length - 3} more sale modes",
-              style: AppTextStyle.bodySmall(context).copyWith(
-                color: AppColors.greyColor(context),
-              ),
-            ),
-          ),
-      ],
     );
   }
 
-  Widget _buildSaleModeCard(SaleMode saleMode) {
+  Widget _buildSaleModeTile(SaleMode m) {
+    final bool active = m.isActive ?? false;
+    final tiers = m.tiers ?? [];
+    final Color text = AppColors.text(context);
+
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.bottomNavBg(context),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(10),
         border: Border.all(
-          color: AppColors.greyColor(context).withValues(alpha: 0.2),
+          color: Theme.of(context).brightness == Brightness.dark
+              ? Colors.white.withValues(alpha: 0.08)
+              : AppColors.borderLight,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.1),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Expanded(
                 child: Text(
-                  saleMode.saleModeName ?? "Unnamed Mode",
-                  style: AppTextStyle.body(context).copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                  m.saleModeName ?? 'Unnamed mode',
+                  style: TextStyle(
+                      fontSize: 14, fontWeight: FontWeight.w600, color: text),
                 ),
               ),
+              DetailPill((m.priceType ?? 'N/A').toUpperCase(),
+                  color: AppColors.info),
+              const SizedBox(width: 6),
+              DetailPill(active ? 'Active' : 'Inactive',
+                  color: active ? AppColors.success : AppColors.danger),
             ],
           ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              _buildSaleModeChip(
-                "Type: ${saleMode.priceType?.toUpperCase() ?? 'N/A'}",
-                color: AppColors.info,
-              ),
-              const SizedBox(width: 8),
-              _buildSaleModeChip(
-                saleMode.isActive ?? false ? "Active" : "Inactive",
-                color: (saleMode.isActive ?? false) ? AppColors.success : AppColors.danger,
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          if (saleMode.unitPrice != null)
+          if (m.unitPrice != null || m.conversionFactor != null) ...[
+            const SizedBox(height: 6),
             Text(
-              "Unit Price: ৳${saleMode.unitPrice}",
-              style: AppTextStyle.bodySmall(context).copyWith(
-                color: AppColors.primaryColor(context),
-                fontWeight: FontWeight.w500,
-              ),
+              [
+                if (m.unitPrice != null) 'Unit price ${_money(m.unitPrice)}',
+                if (m.conversionFactor != null)
+                  '1 = ${m.conversionFactor} ${m.baseUnitName ?? ''}',
+              ].join('   ·   '),
+              style: TextStyle(fontSize: 12.5, color: text.withValues(alpha: 0.65)),
             ),
-          if (saleMode.tiers?.isNotEmpty ?? false)
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          ],
+          if (tiers.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 6,
+              runSpacing: 6,
               children: [
-                const SizedBox(height: 4),
-                Text(
-                  "Tier Pricing:",
-                  style: AppTextStyle.bodySmall(context),
-                ),
-                ...saleMode.tiers!.map((tier) {
-                  final min = tier.minQuantity ?? "0";
-                  final max = tier.maxQuantity ?? "∞";
-                  return Padding(
-                    padding: const EdgeInsets.only(top: 2),
-                    child: Text(
-                      "• ${min}-${max}: ৳${tier.price}",
-                      style: AppTextStyle.bodySmall(context).copyWith(
-                        color: AppColors.greyColor(context),
-                      ),
+                for (final t in tiers)
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryColor(context)
+                          .withValues(alpha: 0.06),
+                      borderRadius: BorderRadius.circular(6),
                     ),
-                  );
-                }).toList(),
+                    child: Text(
+                      '${t.minQuantity ?? 0}–${t.maxQuantity ?? '∞'} : ${_money(t.price)}',
+                      style: TextStyle(fontSize: 12, color: text),
+                    ),
+                  ),
               ],
-            ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSaleModeChip(String text, {required Color color}) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.3)),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(
-          fontSize: 10,
-          color: color,
-          fontWeight: FontWeight.w500,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildMetadataCard() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.bottomNavBg(context),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: AppColors.greyColor(context).withValues(alpha: 0.2),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          _buildMetadataRow(
-            label: "Created By",
-            value: _product.createdByInfo?.username ?? "Unknown",
-          ),
-          const Divider(),
-          _buildMetadataRow(
-            label: "Created At",
-            value: appWidgets.convertDateTimeDDMMYYYY(_product.createdAt),
-          ),
-          const Divider(),
-          _buildMetadataRow(
-            label: "Last Updated",
-            value: appWidgets.convertDateTimeDDMMYYYY(_product.updatedAt),
-          ),
-          if (_product.description?.isNotEmpty ?? false) ...[
-            const Divider(),
-            _buildMetadataRow(
-              label: "Description",
-              value: _product.description ?? "",
-              isMultiLine: true,
             ),
           ],
         ],
@@ -939,39 +669,26 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     );
   }
 
-  Widget _buildMetadataRow({
-    required String label,
-    required String value,
-    bool isMultiLine = false,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        crossAxisAlignment: isMultiLine ? CrossAxisAlignment.start : CrossAxisAlignment.center,
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: AppTextStyle.bodySmall(context).copyWith(
-                    color: AppColors.greyColor(context),
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  value,
-                  style: AppTextStyle.body(context),
-                  maxLines: isMultiLine ? null : 1,
-                  overflow: isMultiLine ? null : TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-          ),
+  // ---------------- record ----------------
+  Widget _buildMetadataCard() {
+    return DetailSection(
+      title: 'Record',
+      icon: Iconsax.clock,
+      child: DetailGrid(
+        maxColumns: 2,
+        items: [
+          DetailItem('Created By', _product.createdByInfo?.username,
+              icon: Iconsax.user),
+          DetailItem('Created At',
+              appWidgets.convertDateTimeDDMMYYYY(_product.createdAt),
+              icon: Iconsax.calendar_1),
+          DetailItem('Last Updated',
+              appWidgets.convertDateTimeDDMMYYYY(_product.updatedAt),
+              icon: Iconsax.refresh),
+          DetailItem('Description', _product.description,
+              icon: Iconsax.document_text, fullWidth: true),
         ],
       ),
     );
   }
-
 }

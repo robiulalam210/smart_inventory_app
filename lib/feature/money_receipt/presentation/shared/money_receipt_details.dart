@@ -13,14 +13,16 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
-      appBar: AppBar(
-        title: Text('Money Receipt', style: AppTextStyle.titleMedium(context)),
-        centerTitle: false,
+      appBar: detailAppBar(
+        context,
+        title: 'Money Receipt ${receipt.mrNo ?? ''}',
+        breadcrumb: const ['Money Receipt', 'Details'],
         actions: [
-          IconButton(
-            icon: const Icon(Iconsax.document_download, size: 22),
+          PopoverButton(
+            label: 'Receipt PDF',
+            primary: true,
+            icon: Iconsax.document_download,
             onPressed: () => _generatePdf(context),
-            tooltip: 'Generate PDF',
           ),
         ],
       ),
@@ -107,37 +109,137 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
   }
 
   // ===================== DESKTOP VIEW (900px+) =====================
+  // ===================== DESKTOP VIEW =====================
+  // hero — MR নম্বর, status, গ্রাহক; ডানে প্রাপ্ত টাকা
+  // বাঁয়ে — Receipt information + Payment এর আগে/পরে পাশাপাশি
+  // ডানে  — যে invoice গুলোতে টাকা বসেছে
+  // (আগে "Payment Information" card এ একই তথ্য দ্বিতীয়বার দেখাত)
   Widget _buildDesktopView(BuildContext context ,) {
-    return Padding(
-      padding: const EdgeInsets.all(12),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Left Column - Header and Payment Info
-          Expanded(
-            flex: 2,
-            child: Column(
-              children: [
-                _buildDesktopHeaderCard(context ,),
-                const SizedBox(height: 16),
-                _buildDesktopPaymentInfoCard(context ,),
-              ],
-            ),
-          ),
-          const SizedBox(width: 16),
-          // Right Column - Summary and Affected Invoices
-          Expanded(
-            flex: 1,
-            child: Column(
-              children: [
-                _buildDesktopSummaryCard(context ,),
-                const SizedBox(height: 16),
-                _buildDesktopAffectedInvoicesCard(context ,),
-              ],
-            ),
-          ),
+    final summary = receipt.paymentSummary;
+    final before = summary?.beforePayment;
+    final after = summary?.afterPayment;
+    final invoices = summary?.affectedInvoices ?? [];
+    final String status = (summary?.status ?? '-').capitalize();
+    final double amount = detailNum(receipt.amount);
+    final double dueAfter = detailNum(after?.currentDue);
+    final String customer =
+        (receipt.customerName ?? '').trim().isEmpty ? 'Walk-in Customer' : receipt.customerName!;
+
+    return DetailPageBody(
+      hero: DetailHero(
+        icon: Iconsax.receipt_1,
+        title: receipt.mrNo ?? 'Money Receipt',
+        subtitle: '$customer  ·  ${_formatDate(receipt.paymentDate)}',
+        pills: [
+          DetailPill(status, color: _getStatusColor(status)),
+          if ((receipt.paymentMethod ?? '').isNotEmpty)
+            DetailPill(receipt.paymentMethod!,
+                color: AppColors.info, icon: Icons.payments_outlined),
+          if ((receipt.paymentType ?? '').isNotEmpty)
+            DetailPill(receipt.paymentType!.capitalize(),
+                color: AppColors.greyColor(context),
+                icon: Icons.tune_rounded),
         ],
+        amountLabel: 'Amount Received',
+        amount: '৳${amount.toStringAsFixed(2)}',
+        amountColor: AppColors.success,
+        amountCaption: dueAfter > 0
+            ? 'Remaining due ৳${dueAfter.toStringAsFixed(2)}'
+            : 'No due remaining',
+        amountCaptionColor: dueAfter > 0 ? AppColors.danger : AppColors.success,
       ),
+      left: [
+        DetailSection(
+          title: 'Receipt Information',
+          icon: Iconsax.info_circle,
+          child: DetailGrid(items: [
+            DetailItem('Customer', customer, icon: Iconsax.user),
+            DetailItem('Phone', receipt.customerPhone?.toString(),
+                icon: Iconsax.call),
+            DetailItem('Payment Date', _formatDate(receipt.paymentDate),
+                icon: Iconsax.calendar_1),
+            DetailItem('Collected By', receipt.sellerName,
+                icon: Iconsax.user_tick),
+            DetailItem('Payment Method', receipt.paymentMethod,
+                icon: Iconsax.wallet_2),
+            DetailItem('Invoice No',
+                receipt.saleInvoiceNo ?? summary?.invoiceNo,
+                icon: Iconsax.receipt_2),
+            if ((receipt.remark ?? '').isNotEmpty)
+              DetailItem('Remark', receipt.remark,
+                  icon: Iconsax.note_text, fullWidth: true),
+          ]),
+        ),
+        LayoutBuilder(builder: (context, c) {
+          final beforeCard = DetailSection(
+            title: 'Before Payment',
+            icon: Iconsax.clock,
+            child: DetailAmountList(rows: [
+              DetailAmount('Invoice Total', detailNum(before?.invoiceTotal)),
+              DetailAmount('Previous Paid', detailNum(before?.previousPaid),
+                  color: AppColors.success),
+              DetailAmount('Previous Due', detailNum(before?.previousDue),
+                  color: AppColors.danger),
+              DetailAmount('Total Due', detailNum(before?.totalDue),
+                  strong: true, dividerBefore: true),
+            ]),
+          );
+          final afterCard = DetailSection(
+            title: 'After Payment',
+            icon: Iconsax.tick_circle,
+            child: DetailAmountList(rows: [
+              DetailAmount('Payment Applied', detailNum(after?.paymentApplied),
+                  color: AppColors.success),
+              DetailAmount('Current Paid', detailNum(after?.currentPaid)),
+              DetailAmount('Current Due', detailNum(after?.currentDue),
+                  color: dueAfter > 0 ? AppColors.danger : null),
+              DetailAmount('Total Due', detailNum(after?.totalDue),
+                  strong: true, dividerBefore: true),
+            ]),
+          );
+          if (c.maxWidth < 560) {
+            return Column(children: [beforeCard, afterCard]);
+          }
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(child: beforeCard),
+              const SizedBox(width: 16),
+              Expanded(child: afterCard),
+            ],
+          );
+        }),
+      ],
+      right: [
+        DetailSection(
+          title: 'Affected Invoices',
+          icon: Iconsax.document_text,
+          child: invoices.isEmpty
+              ? Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Text(
+                    'This payment was not applied to any other invoice.',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: AppColors.text(context).withValues(alpha: 0.55),
+                    ),
+                  ),
+                )
+              : DetailAmountList(rows: [
+                  for (final inv in invoices)
+                    DetailAmount(inv.invoiceNo ?? '-',
+                        detailNum(inv.amountApplied),
+                        color: AppColors.success),
+                  DetailAmount(
+                    'Total Applied',
+                    invoices.fold(
+                        0.0, (s, inv) => s + detailNum(inv.amountApplied)),
+                    strong: true,
+                    dividerBefore: true,
+                  ),
+                ]),
+        ),
+      ],
     );
   }
 
@@ -949,325 +1051,6 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
             '৳${amount.toStringAsFixed(2)}',
             style:  TextStyle(
               fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: AppColors.primaryColor(context),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ===================== DESKTOP COMPONENTS (unchanged) =====================
-  Widget _buildDesktopHeaderCard(BuildContext context ,) {
-    return Card(
-      elevation: 3,
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Text(
-                    'Money Receipt: ${receipt.mrNo}',
-                    style:  TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.primaryColor(context),
-                    ),
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 8,
-                  ),
-                  decoration: BoxDecoration(
-                    color: _getStatusColor(receipt.paymentSummary?.status ?? '').withValues(alpha:0.1),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: _getStatusColor(receipt.paymentSummary?.status ?? '')),
-                  ),
-                  child: Text(
-                    (receipt.paymentSummary?.status ?? 'UNKNOWN').toUpperCase(),
-                    style: TextStyle(
-                      color: _getStatusColor(receipt.paymentSummary?.status ?? ''),
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 4),
-            _buildDesktopInfoGrid(),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDesktopInfoGrid() {
-    return GridView.count(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      crossAxisCount: 3,
-      crossAxisSpacing: 8,
-      mainAxisSpacing: 8,
-      childAspectRatio: 5,
-      children: [
-        _buildInfoItem('MR No', receipt.mrNo ?? '-'),
-        _buildInfoItem('Payment Date', _formatDate(receipt.paymentDate)),
-        _buildInfoItem('Customer', receipt.customerName ?? '-'),
-        _buildInfoItem('Seller', receipt.sellerName ?? '-'),
-        _buildInfoItem('Payment Method', receipt.paymentMethod ?? '-'),
-        _buildInfoItem('Payment Type', receipt.paymentType ?? '-'),
-        if (receipt.customerPhone != null)
-          _buildInfoItem('Phone', receipt.customerPhone.toString()),
-        if (receipt.saleInvoiceNo != null)
-          _buildInfoItem('Invoice No', receipt.saleInvoiceNo!),
-      ],
-    );
-  }
-
-  Widget _buildInfoItem(String label, String value) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w500,
-            color: Colors.grey,
-          ),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildDesktopPaymentInfoCard(BuildContext context ,) {
-    final amount = double.tryParse(receipt.amount ?? '0') ?? 0;
-
-    return Card(
-      elevation: 3,
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Payment Information',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 16),
-            _buildPaymentDetails(context ,amount),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPaymentDetails(BuildContext context ,double amount) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.green.shade50,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.green.shade200),
-      ),
-      child: Column(
-        children: [
-          _buildPaymentRow(context ,'Amount Received', '৳${amount.toStringAsFixed(2)}', isAmount: true),
-          const SizedBox(height: 8),
-          _buildPaymentRow(context ,'Payment Method', receipt.paymentMethod ?? '-'),
-          _buildPaymentRow(context ,'Payment Type', receipt.paymentType ?? '-'),
-          if (receipt.paymentDate != null)
-            _buildPaymentRow(context ,'Payment Date', _formatDate(receipt.paymentDate)),
-          if (receipt.remark != null && receipt.remark!.isNotEmpty)
-            _buildPaymentRow(context ,'Remarks', receipt.remark!),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPaymentRow(BuildContext context ,String label, String value, {bool isAmount = false}) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontWeight: FontWeight.w500,
-            color: Colors.grey.shade700,
-          ),
-        ),
-        Text(
-          value,
-          style: TextStyle(
-            fontWeight: isAmount ? FontWeight.bold : FontWeight.normal,
-            fontSize: isAmount ? 16 : 14,
-            color: isAmount ? AppColors.primaryColor(context) : Colors.black,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildDesktopSummaryCard(BuildContext context ,) {
-    final summary = receipt.paymentSummary;
-    final before = summary?.beforePayment;
-    final after = summary?.afterPayment;
-
-    return Card(
-      elevation: 3,
-      child: Padding(
-        padding: const EdgeInsets.all(10),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Payment Summary',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 4),
-            if (before != null) _buildSummarySection(context ,'Before Payment', before),
-            if (after != null) _buildSummarySection(context ,'After Payment', after),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSummarySection(BuildContext context ,String title, dynamic paymentData) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey.shade300),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style:  TextStyle(
-              fontWeight: FontWeight.bold,
-              color: AppColors.primaryColor(context),
-            ),
-          ),
-          const SizedBox(height: 4),
-          if (paymentData is BeforePayment) ...[
-            _buildSummaryRow('Total Due', paymentData.totalDue),
-            _buildSummaryRow('Invoice Total', paymentData.invoiceTotal),
-            _buildSummaryRow('Previous Paid', paymentData.previousPaid),
-            _buildSummaryRow('Previous Due', paymentData.previousDue),
-          ] else if (paymentData is AfterPayment) ...[
-            _buildSummaryRow('Total Due', paymentData.totalDue),
-            _buildSummaryRow('Payment Applied', paymentData.paymentApplied),
-            _buildSummaryRow('Current Paid', paymentData.currentPaid),
-            _buildSummaryRow('Current Due', paymentData.currentDue),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSummaryRow(String label, dynamic value) {
-    final amount = double.tryParse(value?.toString() ?? '0') ?? 0;
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: const TextStyle(fontSize: 12),
-          ),
-          Text(
-            '৳${amount.toStringAsFixed(2)}',
-            style: TextStyle(
-              fontWeight: FontWeight.w500,
-              color: amount < 0 ? AppColors.danger : Colors.black,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDesktopAffectedInvoicesCard(BuildContext context ,) {
-    final affectedInvoices = receipt.paymentSummary?.affectedInvoices ?? [];
-
-    return Card(
-      elevation: 3,
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Affected Invoices',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 4),
-            if (affectedInvoices.isEmpty)
-              const Center(
-                child: Text(
-                  'No affected invoices',
-                  style: TextStyle(color: Colors.grey),
-                ),
-              ),
-            if (affectedInvoices.isNotEmpty)
-              ...affectedInvoices.map((invoice) => _buildInvoiceRow(context ,invoice)),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildInvoiceRow(BuildContext context ,AffectedInvoice invoice) {
-    final amount = double.tryParse(invoice.amountApplied?.toString() ?? '0') ?? 0;
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey.shade300),
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Expanded(
-            child: Text(
-              invoice.invoiceNo ?? 'Unknown Invoice',
-              style: const TextStyle(fontWeight: FontWeight.w500),
-            ),
-          ),
-          Text(
-            '৳${amount.toStringAsFixed(2)}',
-            style:  TextStyle(
               fontWeight: FontWeight.bold,
               color: AppColors.primaryColor(context),
             ),
