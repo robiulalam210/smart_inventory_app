@@ -12,6 +12,7 @@ import 'package:meherinMart/feature/users_list/data/model/user_model.dart';
 import 'package:meherinMart/feature/users_list/presentation/bloc/users/user_bloc.dart';
 import 'package:meherinMart/feature/sales/presentation/bloc/possale/possale_bloc.dart';
 import 'package:meherinMart/feature/sales/presentation/widgets/widget.dart';
+import 'package:meherinMart/feature/sales/presentation/mobile/create_pos_sale/mobile_create_pos_sale.dart';
 
 class MobilePosSaleScreen extends StatefulWidget {
   const MobilePosSaleScreen({super.key, this.posSale});
@@ -166,7 +167,14 @@ class _PosSaleScreenState extends State<MobilePosSaleScreen> {
     return AppScaffold(
       appBar: AppBar(
         backgroundColor: AppColors.bottomNavBg(context),
-        title: Text("Sales List", style: AppTextStyle.titleMedium(context)),
+        title: Text("Sales", style: AppTextStyle.titleMedium(context)),
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        backgroundColor: AppColors.primaryColor(context),
+        foregroundColor: AppColors.onColor(AppColors.primaryColor(context)),
+        onPressed: () => AppRoutes.push(context, const MobileCreatePosSale()),
+        icon: const Icon(Icons.add_rounded),
+        label: const Text('New Sale'),
       ),
       body: SafeArea(
         child: ResponsiveCol(
@@ -183,6 +191,7 @@ class _PosSaleScreenState extends State<MobilePosSaleScreen> {
                     _buildMobileHeader(),
                     const SizedBox(height: 8),
                     SizedBox(child: _buildDataTable()),
+                    const SizedBox(height: 80),
                   ],
                 ),
               ),
@@ -208,7 +217,7 @@ class _PosSaleScreenState extends State<MobilePosSaleScreen> {
                   filterTextController.clear();
                   _fetchApi();
                 },
-                hintText: "sales...",
+                hintText: "Search invoice or customer...",
               ),
             ),
             IconButton(
@@ -231,7 +240,7 @@ class _PosSaleScreenState extends State<MobilePosSaleScreen> {
         // Filter Chips
         Wrap(
           spacing: 8,
-          runSpacing: 8,
+          runSpacing: 4,
           children: [
             if (selectedCustomerNotifier.value != null)
               Chip(
@@ -274,7 +283,33 @@ class _PosSaleScreenState extends State<MobilePosSaleScreen> {
           return const Center(child: CircularProgressIndicator());
         } else if (state is PosSaleListSuccess) {
           if (state.list.isEmpty) {
-            return Center(child: Lottie.asset(AppImages.noData));
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(height: 180, child: Lottie.asset(AppImages.noData)),
+                  const SizedBox(height: 8),
+                  Text(
+                    'No sales found',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.text(context),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Change the filters or tap New Sale to create one.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      color: AppColors.text(context).withValues(alpha: 0.6),
+                    ),
+                  ),
+                ],
+              ),
+            );
           }
           return Column(
             children: [
@@ -465,7 +500,11 @@ class _PosSaleScreenState extends State<MobilePosSaleScreen> {
                             ),
                             child: Text(
                               "Apply Filters",
-                              style: AppTextStyle.body(context).copyWith(color: AppColors.text(context)),
+                              style: AppTextStyle.body(context).copyWith(
+                                color: AppColors.onColor(
+                                  AppColors.primaryColor(context),
+                                ),
+                              ),
                             ),
                           ),
                         ),

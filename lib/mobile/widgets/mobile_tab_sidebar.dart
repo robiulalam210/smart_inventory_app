@@ -331,35 +331,76 @@ class MobileTabSidebar extends StatelessWidget {
 
             return Column(
               children: [
-                /// Drawer Header
-                DrawerHeader(
-                  margin: EdgeInsets.zero,
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: AppColors.bottomNavBg(context),
-                    borderRadius: const BorderRadius.only(
-                      bottomLeft: Radius.circular(8),
-                      bottomRight: Radius.circular(8),
+                /// Drawer Header — লোগো + কোম্পানির নাম
+                Builder(builder: (context) {
+                  final primary = AppColors.primaryColor(context);
+                  final onPrimary = AppColors.onColor(primary);
+                  final company = context
+                      .read<ProfileBloc>()
+                      .permissionModel
+                      ?.data
+                      ?.companyInfo
+                      ?.name;
+                  return Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.fromLTRB(16, 18, 16, 18),
+                    decoration: BoxDecoration(
+                      gradient: AppColors.primaryGradient(context),
                     ),
-                  ),
-                  child: Center(
-                    child: Image.asset(
-                      "assets/images/logo.png",
-                      fit: BoxFit.fill,
-                      height: 250,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Text(
-                          "Great Lab",
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.text(context),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 52,
+                          height: 52,
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(14),
                           ),
-                        );
-                      },
+                          child: Image.asset(
+                            "assets/images/logo.png",
+                            fit: BoxFit.contain,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Icon(
+                                Icons.storefront_rounded,
+                                color: primary,
+                                size: 28,
+                              );
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                (company == null || company.isEmpty)
+                                    ? AppConstants.appName
+                                    : company,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w800,
+                                  color: onPrimary,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                'Inventory & POS',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: onPrimary.withValues(alpha: 0.8),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                ),
+                  );
+                }),
 
                 const Divider(height: 1),
 
@@ -380,7 +421,7 @@ class MobileTabSidebar extends StatelessWidget {
                         if (section.items.length == 1) {
                           // Single item (no expansion)
                           final item = section.items.first;
-                          return MenuTile(
+                          return MobileMenuTile(
                             isSubmenu: true,
                             title: section.title,
                             isSelected: currentIndex == item.index,
@@ -394,7 +435,11 @@ class MobileTabSidebar extends StatelessWidget {
                           );
                         } else {
                           // Multiple items (with expansion)
-                          return ExpansionTile(
+                          return Theme(
+                            data: Theme.of(context).copyWith(
+                              dividerColor: Colors.transparent,
+                            ),
+                            child: ExpansionTile(
                             initiallyExpanded: section.items.any(
                               (item) => currentIndex == item.index,
                             ),
@@ -407,7 +452,7 @@ class MobileTabSidebar extends StatelessWidget {
                               ),
                             ),
                             children: section.items.map((item) {
-                              return MenuTile(
+                              return MobileMenuTile(
                                 isSubmenu: true,
                                 title: item.title,
                                 isSelected: currentIndex == item.index,
@@ -420,6 +465,7 @@ class MobileTabSidebar extends StatelessWidget {
                                 },
                               );
                             }).toList(),
+                            ),
                           );
                         }
                       }),
@@ -435,9 +481,16 @@ class MobileTabSidebar extends StatelessWidget {
                   ),
                   child: ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
-                      minimumSize: const Size.fromHeight(44),
-                      backgroundColor: Colors.redAccent,
-                      foregroundColor: Colors.white,
+                      minimumSize: const Size.fromHeight(46),
+                      elevation: 0,
+                      backgroundColor: AppColors.danger.withValues(alpha: 0.10),
+                      foregroundColor: AppColors.danger,
+                      side: BorderSide(
+                        color: AppColors.danger.withValues(alpha: 0.35),
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                     icon: const Icon(Icons.logout, size: 18),
                     label: const Text(

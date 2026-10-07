@@ -1,8 +1,6 @@
 
 import '../../../../../core/configs/configs.dart';
-import '../../../../../core/widgets/delete_dialog.dart';
 import '../../data/model/product_model.dart';
-import '../shared/mobile_product_create.dart';
 import '../shared/product_details.dart';
 
 class ProductDataTableWidget extends StatelessWidget {
@@ -30,265 +28,282 @@ class ProductDataTableWidget extends StatelessWidget {
   }
 
   Widget _buildMobileCardView(BuildContext context, bool isMobile) {
-    return ListView.builder(
+    return ListView.separated(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
+      padding: EdgeInsets.symmetric(horizontal: isMobile ? 2 : 8, vertical: 4),
       itemCount: products.length,
-      itemBuilder: (context, index) {
-        final product = products[index];
-        return _buildProductCard(product, index + 1, context, isMobile);
-      },
+      separatorBuilder: (_, __) => const SizedBox(height: 10),
+      itemBuilder: (context, index) =>
+          _buildProductCard(products[index], context),
     );
   }
 
-  Widget _buildProductCard(
-      ProductModel product,
-      int index,
-      BuildContext context,
-      bool isMobile,
-      ) {
-    return Container(
-      margin: EdgeInsets.symmetric(
-        horizontal: isMobile ? 8.0 : 16.0,
-        vertical: 8.0,
-      ),
-      decoration: BoxDecoration(
-        color: AppColors.bottomNavBg(context),
-        borderRadius: BorderRadius.circular(AppSizes.radius),
+  /// স্টক অবস্থা: শেষ → লাল, কম → অ্যাম্বার, ঠিক আছে → সবুজ।
+  ({String label, Color color}) _stockState(ProductModel p) {
+    final stock = p.stockQty ?? 0;
+    if (stock <= 0) return (label: 'Out of stock', color: AppColors.danger);
+    if (stock <= (p.alertQuantity ?? 0)) {
+      return (label: 'Low stock', color: AppColors.warning);
+    }
+    return (label: 'In stock', color: AppColors.success);
+  }
 
-        border: Border.all(
-          color: AppColors.greyColor(context).withValues(alpha: 0.5),
-          width: 0.5,
+  Widget _buildProductCard(ProductModel product, BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = AppColors.text(context);
+    final primary = AppColors.primaryColor(context);
+    final stockState = _stockState(product);
+    final active = product.isActive ?? false;
+    final name = (product.name ?? '').trim();
+    final sellPrice = AppTableMoney.parse(product.sellingPrice);
+    final buyPrice = AppTableMoney.parse(product.purchasePrice);
+
+    return Material(
+      color: AppColors.bottomNavBg(context),
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: () => AppRoutes.push(
+          context,
+          ProductDetailsScreen(productId: product.id.toString()),
         ),
-      ),      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Header with SL and Status
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 7),
-            decoration: BoxDecoration(
-              color: AppColors.primaryColor(context).withValues(alpha: 0.05),
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(16),
-                topRight: Radius.circular(16),
-              ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 5,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryColor(context),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    '#$index',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 12,
-                    ),
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: (product.isActive ?? false)
-                        ? AppColors.success.withValues(alpha: 0.1)
-                        : AppColors.danger.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: (product.isActive ?? false) ? AppColors.success : AppColors.danger,
-                      width: 1,
-                    ),
-                  ),
-                  child: Text(
-                    (product.isActive ?? false) ? 'Active' : 'Inactive',
-                    style: TextStyle(
-                      color: (product.isActive ?? false) ? AppColors.success : AppColors.danger,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 12,
-                    ),
-                  ),
-                ),
-              ],
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.08)
+                  : AppColors.borderLight,
             ),
           ),
-
-          // Product Details
-          Padding(
-            padding: const EdgeInsets.all(8),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Product Name
-                _buildDetailRow(
-                  context: context,
-                  icon: Iconsax.box,
-                  label: 'Product Name',
-                  value: product.name ?? 'N/A',
-                  isImportant: true,
-                ),
-                const SizedBox(height: 8),
-                Row(children: [
-                  Expanded(child:  _buildDetailRow(
-                    context: context,
-                    icon: Iconsax.tag,
-                    label: 'SKU',
-                    value: product.sku ?? 'N/A',
-                  ),),
-                  SizedBox(width: 8,),
-                  Expanded(child:   _buildDetailRow(
-                    context: context,
-                    icon: Iconsax.category,
-                    label: 'Category',
-                    value: product.categoryInfo?.name ?? 'N/A',
-                  ),),
-                ],),
-
-
-                // SKU
-
-                const SizedBox(height: 8),
-                Row(children: [
-                  Expanded(child:  _buildDetailRow(
-                    context: context,
-                    icon: Iconsax.building,
-                    label: 'Brand',
-                    value: product.brandInfo?.name ?? 'N/A',
-                  ),),
-                  SizedBox(width: 8,),
-                  Expanded(child: _buildDetailRow(
-                    context: context,
-                    icon: Iconsax.ruler,
-                    label: 'Unit',
-                    value: product.unitInfo?.name ?? 'N/A',
-                  ),),
-                ],),
-                // Category
-
-
-
-                // Unit
-
-              ],
-            ),
-          ),
-
-          // Action Buttons
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: AppColors.bottomNavBg(context),
-              borderRadius: const BorderRadius.only(
-                bottomLeft: Radius.circular(16),
-                bottomRight: Radius.circular(16),
-              ),
-              border: Border(
-                top: BorderSide(
-                  color: Colors.grey.shade200,
-                  width: 1,
-                ),
-              ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                // Edit Button
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () {
-                      showAppPopover(
-                        context: context,
-                        builder: (context) {
-                          return AppPopoverShell(
-                            insetPadding: const EdgeInsets.all(10),
-                            child: ConstrainedBox(
-                              constraints: BoxConstraints(
-                                // minWidth: isMobile
-                                //     ? double.infinity
-                                //     : AppSizes.width(context) * 0.7,
-                                // maxWidth: isMobile
-                                //     ? double.infinity
-                                //     : AppSizes.width(context) * 0.7,
-                                maxHeight: isMobile
-                                    ? AppSizes.height(context) * 0.7
-                                    : AppSizes.height(context) * 0.8,
-                              ),
-                              child: MobileProductCreate(
-                                productId: product.id.toString(),
-                                product: product,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // ── উপরের অংশ: অক্ষর-আইকন, নাম, SKU, মেনু ──
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 46,
+                    height: 46,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: primary.withValues(alpha: 0.10),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      name.isEmpty ? '?' : String.fromCharCode(name.runes.first).toUpperCase(),
+                      style: TextStyle(
+                        fontSize: 19,
+                        fontWeight: FontWeight.w800,
+                        color: primary,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          name.isEmpty ? 'N/A' : name,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 14.5,
+                            height: 1.25,
+                            fontWeight: FontWeight.w700,
+                            color: textColor,
+                          ),
+                        ),
+                        const SizedBox(height: 3),
+                        Row(
+                          children: [
+                            Icon(
+                              Iconsax.tag,
+                              size: 13,
+                              color: textColor.withValues(alpha: 0.5),
+                            ),
+                            const SizedBox(width: 4),
+                            Flexible(
+                              child: Text(
+                                product.sku ?? 'N/A',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: textColor.withValues(alpha: 0.6),
+                                ),
                               ),
                             ),
-                          );
-                        },
-                      );
-                    },
-                    icon: const Icon(
-                      Iconsax.edit,
-                      size: 16,
-                    ),
-                    label: const Text('Edit'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.info,
-                      side: BorderSide(color: Colors.blue.shade300),
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
+                  _buildMenu(context, product),
+                ],
+              ),
+
+              const SizedBox(height: 10),
+
+              // ── ট্যাগ: ক্যাটাগরি / ব্র্যান্ড / ইউনিট ──
+              Wrap(
+                spacing: 6,
+                runSpacing: 6,
+                children: [
+                  if ((product.categoryInfo?.name ?? '').isNotEmpty)
+                    _tag(context, Iconsax.category, product.categoryInfo!.name!),
+                  if ((product.brandInfo?.name ?? '').isNotEmpty)
+                    _tag(context, Iconsax.building, product.brandInfo!.name!),
+                  if ((product.unitInfo?.name ?? '').isNotEmpty)
+                    _tag(context, Iconsax.ruler, product.unitInfo!.name!),
+                ],
+              ),
+
+              const SizedBox(height: 12),
+
+              // ── নিচের অংশ: দাম / স্টক / অবস্থা ──
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? Colors.white.withValues(alpha: 0.04)
+                      : const Color(0xFFF8FAFC),
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                const SizedBox(width: 12),
-
-                // Delete Button
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () => _showDeleteConfirmation(context, product),
-                    icon: const Icon(
-                      HugeIcons.strokeRoundedDeleteThrow,
-                      size: 16,
-                    ),
-                    label: const Text('Delete'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.danger,
-                      side: BorderSide(color: Colors.red.shade300),
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: _metric(
+                        context,
+                        label: 'Sell Price',
+                        value: '৳ ${sellPrice.toStringAsFixed(2)}',
+                        valueColor: primary,
+                        sub: buyPrice > 0
+                            ? 'Cost ৳ ${buyPrice.toStringAsFixed(2)}'
+                            : null,
                       ),
                     ),
-                  ),
-                ),  const SizedBox(width: 12),
-
-                // Delete Button
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () {
-                      AppRoutes.push(context, ProductDetailsScreen(productId: product.id.toString(),));
-
-
-                    },
-                    icon: const Icon(
-                      Iconsax.eye,
-                      size: 16,
-                    ),
-                    label: const Text('View'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.warning,
-                      side: BorderSide(color: Colors.orange.shade300),
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                    _divider(context),
+                    Expanded(
+                      child: _metric(
+                        context,
+                        label: 'Stock',
+                        value: '${product.stockQty ?? 0}',
+                        valueColor: stockState.color,
+                        sub: stockState.label,
+                        subColor: stockState.color,
                       ),
                     ),
-                  ),
+                    _divider(context),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Status',
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: textColor.withValues(alpha: 0.55),
+                            ),
+                          ),
+                          const SizedBox(height: 5),
+                          AppStatusPill(
+                            active ? 'Active' : 'Inactive',
+                            color: active ? AppColors.success : AppColors.danger,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMenu(BuildContext context, ProductModel product) {
+    return PopupMenuButton<String>(
+      tooltip: 'Actions',
+      padding: EdgeInsets.zero,
+      icon: Icon(
+        Icons.more_vert_rounded,
+        color: AppColors.text(context).withValues(alpha: 0.6),
+      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      onSelected: (v) {
+        switch (v) {
+          case 'view':
+            AppRoutes.push(
+              context,
+              ProductDetailsScreen(productId: product.id.toString()),
+            );
+            break;
+          case 'edit':
+            onEdit?.call(product);
+            break;
+          case 'delete':
+            _showDeleteConfirmation(context, product);
+            break;
+        }
+      },
+      itemBuilder: (_) => [
+        _menuItem('view', Iconsax.eye, 'View details', AppColors.info),
+        if (onEdit != null)
+          _menuItem('edit', Iconsax.edit, 'Edit', AppColors.warning),
+        _menuItem('delete', Iconsax.trash, 'Delete', AppColors.danger),
+      ],
+    );
+  }
+
+  PopupMenuItem<String> _menuItem(
+    String value,
+    IconData icon,
+    String label,
+    Color color,
+  ) {
+    return PopupMenuItem<String>(
+      value: value,
+      child: Row(
+        children: [
+          Icon(icon, size: 18, color: color),
+          const SizedBox(width: 10),
+          Text(label),
+        ],
+      ),
+    );
+  }
+
+  Widget _tag(BuildContext context, IconData icon, String text) {
+    final c = AppColors.text(context);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: c.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 12, color: c.withValues(alpha: 0.6)),
+          const SizedBox(width: 5),
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 130),
+            child: Text(
+              text,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 11.5,
+                fontWeight: FontWeight.w500,
+                color: c.withValues(alpha: 0.75),
+              ),
             ),
           ),
         ],
@@ -296,51 +311,59 @@ class ProductDataTableWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildDetailRow({
-    required BuildContext context,
-    required IconData icon,
+  Widget _metric(
+    BuildContext context, {
     required String label,
     required String value,
-    bool isImportant = false,
+    required Color valueColor,
+    String? sub,
+    Color? subColor,
   }) {
-    return Row(
+    final c = AppColors.text(context);
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(
-          icon,
-          size: 16,
-          color: AppColors.text(context),
+        Text(
+          label,
+          style: TextStyle(fontSize: 11, color: c.withValues(alpha: 0.55)),
         ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.text(context),
-                  fontSize: 12,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                value,
-                style: TextStyle(
-                  fontWeight: isImportant ? FontWeight.w700 : FontWeight.w500,
-                  color: isImportant ? AppColors.text(context) :AppColors.primaryColor(context),
-                  fontSize: isImportant ? 14 : 13,
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
+        const SizedBox(height: 3),
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.centerLeft,
+          child: Text(
+            value,
+            maxLines: 1,
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w800,
+              color: valueColor,
+            ),
           ),
         ),
+        if (sub != null) ...[
+          const SizedBox(height: 1),
+          Text(
+            sub,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 10.5,
+              fontWeight: FontWeight.w500,
+              color: subColor ?? c.withValues(alpha: 0.5),
+            ),
+          ),
+        ],
       ],
     );
   }
+
+  Widget _divider(BuildContext context) => Container(
+        width: 1,
+        height: 34,
+        margin: const EdgeInsets.symmetric(horizontal: 10),
+        color: AppColors.text(context).withValues(alpha: 0.08),
+      );
 
   // Desktop টেবিল — AppDataTable
   // দাম আর stock যোগ করা হয়েছে — product list এ সবচেয়ে বেশি এগুলোই দেখা হয়।
@@ -400,10 +423,12 @@ class ProductDataTableWidget extends StatelessWidget {
     );
   }
 
-  Future<void> _showDeleteConfirmation(BuildContext context, ProductModel product) async {
-    final shouldDelete = await showDeleteConfirmationDialog(context);
-    if (!shouldDelete) return;
-
+  /// নিশ্চিতকরণ dialog দুই screen এর (desktop/mobile) onDelete এ আগে থেকেই আছে;
+  /// তাই এখানে আবার না দেখিয়ে সরাসরি callback ডাকা হয় (আগে দুবার জিজ্ঞেস করত)।
+  Future<void> _showDeleteConfirmation(
+    BuildContext context,
+    ProductModel product,
+  ) async {
     onDelete?.call(product);
   }
 }

@@ -26,359 +26,292 @@ class PurchaseDataTableWidget extends StatelessWidget {
   }
 
   Widget _buildMobileCardView(BuildContext context, bool isMobile) {
-    return ListView.builder(
+    return ListView.separated(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
+      padding: EdgeInsets.symmetric(horizontal: isMobile ? 2 : 8, vertical: 4),
       itemCount: sales.length,
-      itemBuilder: (context, index) {
-        final purchase = sales[index];
-        return _buildPurchaseCard(purchase, index + 1, context, isMobile);
-      },
+      separatorBuilder: (_, __) => const SizedBox(height: 10),
+      itemBuilder: (context, index) =>
+          _buildPurchaseCard(sales[index], context),
     );
   }
 
-  Widget _buildPurchaseCard(
-      PurchaseModel purchase,
-      int index,
-      BuildContext context,
-      bool isMobile,
-      ) {
-    final dueAmount = purchase.dueAmount ?? 0;
-    final paidAmount = purchase.paidAmount ?? 0;
-    final totalAmount = purchase.total ?? 0;
+  Widget _buildPurchaseCard(PurchaseModel purchase, BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = AppColors.text(context);
+    final primary = AppColors.primaryColor(context);
 
-    return Container(
-      margin: EdgeInsets.symmetric(
-        horizontal: isMobile ? 8.0 : 16.0,
-        vertical: 8.0,
-      ),
-      decoration: BoxDecoration(
-        color: AppColors.bottomNavBg(context),
-        borderRadius: BorderRadius.circular(AppSizes.radius),
+    final total = AppTableMoney.parse(purchase.total);
+    final paid = AppTableMoney.parse(purchase.paidAmount);
+    final due = AppTableMoney.parse(purchase.dueAmount);
+    final status = (purchase.paymentStatus ?? '-');
+    final statusColor = _getPaymentStatusColor(status);
+    final supplier = (purchase.supplierName ?? '').trim();
+    final method = (purchase.paymentMethod ?? '').trim();
+    final divider = isDark
+        ? Colors.white.withValues(alpha: 0.08)
+        : AppColors.borderLight;
 
-        border: Border.all(
-          color: AppColors.greyColor(context).withValues(alpha: 0.5),
-          width: 0.5,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Header with Invoice No and Status
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              color: AppColors.primaryColor(context).withValues(alpha: 0.05),
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(16),
-                topRight: Radius.circular(16),
-              ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
+    String money(double v) => '৳${v.toStringAsFixed(2)}';
+
+    return Material(
+      color: AppColors.bottomNavBg(context),
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: () => _viewPurchaseDetails(context, purchase),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: divider),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // ── ইনভয়েস নং, তারিখ, অবস্থা ──
+                    Row(
+                      children: [
+                        Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: AppColors.info.withValues(alpha: 0.10),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(
+                            Iconsax.box,
+                            size: 20,
+                            color: AppColors.info,
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                purchase.invoiceNo ?? '-',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 14.5,
+                                  fontWeight: FontWeight.w800,
+                                  color: primary,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                _formatDate(purchase.purchaseDate.toString()),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: textColor.withValues(alpha: 0.6),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        AppStatusPill(status.capitalize(), color: statusColor),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+
+                    // ── সাপ্লায়ার ও পেমেন্ট মাধ্যম ──
+                    Row(
+                      children: [
+                        Icon(
+                          Iconsax.shop,
+                          size: 15,
+                          color: textColor.withValues(alpha: 0.55),
+                        ),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            supplier.isEmpty ? '-' : supplier,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 13.5,
+                              fontWeight: FontWeight.w600,
+                              color: textColor,
+                            ),
+                          ),
+                        ),
+                        if (method.isNotEmpty) ...[
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 3,
+                            ),
+                            decoration: BoxDecoration(
+                              color: textColor.withValues(alpha: 0.06),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              method,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w500,
+                                color: textColor.withValues(alpha: 0.7),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+
+                    // ── টাকার সারসংক্ষেপ ──
                     Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 4,
+                        horizontal: 12,
+                        vertical: 10,
                       ),
                       decoration: BoxDecoration(
-                        color: AppColors.primaryColor(context),
-                        borderRadius: BorderRadius.circular(20),
+                        color: isDark
+                            ? Colors.white.withValues(alpha: 0.04)
+                            : const Color(0xFFF8FAFC),
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      child: Text(
-                        '#$index',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    SizedBox(
-                      child: Text(
-                        purchase.invoiceNo ?? '-',
-                        style:  TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 14,            color: AppColors.text(context),
-
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        maxLines: 1,
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: _amount(
+                              context,
+                              'Total',
+                              money(total),
+                              textColor,
+                            ),
+                          ),
+                          _vDivider(context),
+                          Expanded(
+                            child: _amount(
+                              context,
+                              'Paid',
+                              money(paid),
+                              AppColors.success,
+                            ),
+                          ),
+                          _vDivider(context),
+                          Expanded(
+                            child: _amount(
+                              context,
+                              'Due',
+                              money(due),
+                              due > 0
+                                  ? AppColors.danger
+                                  : textColor.withValues(alpha: 0.5),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
                 ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: _getPaymentStatusColor(purchase.paymentStatus??"").withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: _getPaymentStatusColor(purchase.paymentStatus??""),
-                      width: 1,
-                    ),
-                  ),
-                  child: Text(
-                    purchase.paymentStatus ?? '-',
-                    style: TextStyle(
-                      color: _getPaymentStatusColor(purchase.paymentStatus.toString()),
-                      fontWeight: FontWeight.w600,
+              ),
 
-                      fontSize: 12,
-                    ),
-                  ),
+              // ── অ্যাকশন ──
+              Container(
+                decoration: BoxDecoration(
+                  border: Border(top: BorderSide(color: divider)),
                 ),
-              ],
-            ),
-          ),
-
-          // Purchase Details
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Date
-
-                Row(children: [
-                  Expanded(
-                    child: _buildDetailRow(
-                        icon: Iconsax.calendar,
-                        label: 'Date',
-                        value: _formatDate(purchase.purchaseDate.toString()),
-                        context: context
-                    ),
-                  ),
-
-                  // Supplier
-                  Expanded(
-                    child: _buildDetailRow(
-                        icon: Iconsax.user,
-                        label: 'Supplier',
-                        value: purchase.supplierName ?? '-',
-                        context: context
-                    ),
-                  ),
-
-                  if (purchase.paymentMethod?.isNotEmpty == true)
+                child: Row(
+                  children: [
                     Expanded(
-                      child: _buildDetailRow(
-                          icon: Iconsax.wallet,
-                          label: 'Payment Method',
-                          value: purchase.paymentMethod ?? '-',context: context
+                      child: TextButton.icon(
+                        onPressed: () => _viewPurchaseDetails(context, purchase),
+                        icon: const Icon(Iconsax.eye, size: 17),
+                        label: const Text('Details'),
+                        style: TextButton.styleFrom(
+                          foregroundColor: AppColors.info,
+                          padding: const EdgeInsets.symmetric(vertical: 11),
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.only(
+                              bottomLeft: Radius.circular(16),
+                            ),
+                          ),
+                        ),
                       ),
                     ),
-                ],),
-
-                const SizedBox(height: 8),
-
-                // Financial Summary
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: AppColors.bottomNavBg(context),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.grey.shade200),
-                  ),
-                  child: Column(
-                    children: [
-                      // Total
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Total:',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.text(context),
-                              fontSize: 13,
+                    Container(
+                      width: 1,
+                      height: 22,
+                      color: textColor.withValues(alpha: 0.1),
+                    ),
+                    Expanded(
+                      child: TextButton.icon(
+                        onPressed: () => _generatePdf(context, purchase),
+                        icon: const Icon(Iconsax.document_download, size: 17),
+                        label: const Text('Invoice PDF'),
+                        style: TextButton.styleFrom(
+                          foregroundColor: AppColors.success,
+                          padding: const EdgeInsets.symmetric(vertical: 11),
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.only(
+                              bottomRight: Radius.circular(16),
                             ),
                           ),
-                          Text(
-                            '৳${totalAmount.toStringAsFixed(2)}',
-                            style:  TextStyle(
-                              fontWeight: FontWeight.w700,            color: AppColors.text(context),
-
-                              fontSize: 14,
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
-                      const SizedBox(height: 6),
-
-                      // Paid
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Paid:',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.text(context),
-                              fontSize: 13,
-                            ),
-                          ),
-                          Text(
-                            '৳${paidAmount.toStringAsFixed(2)}',
-                            style: const TextStyle(
-                              color: AppColors.success,
-                              fontWeight: FontWeight.w700,
-                              fontSize: 14,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-
-                      // Due
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Due:',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.text(context),
-                              fontSize: 13,
-                            ),
-                          ),
-                          Text(
-                            '৳${dueAmount.toStringAsFixed(2)}',
-                            style: TextStyle(
-                              color: dueAmount > 0 ? AppColors.danger :                             AppColors.text(context),
-
-                              fontWeight: FontWeight.w700,
-                              fontSize: 14,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-
-                // Payment Method
-
-              ],
-            ),
-          ),
-
-          // Action Buttons
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-            decoration: BoxDecoration(
-              color: AppColors.bottomNavBg(context),
-              borderRadius: const BorderRadius.only(
-                bottomLeft: Radius.circular(16),
-                bottomRight: Radius.circular(16),
-              ),
-              border: Border(
-                top: BorderSide(
-                  color: Colors.grey.shade200,
-                  width: 1,
+                    ),
+                  ],
                 ),
               ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                // View Button
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () => _viewPurchaseDetails(context, purchase),
-                    icon: const Icon(
-                      Iconsax.eye,
-                      size: 16,
-                    ),
-                    label: const Text('View'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.info,
-                      side: BorderSide(color: Colors.blue.shade300),
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-
-                // PDF Button
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () => _generatePdf(context, purchase),
-                    icon: const Icon(
-                      Iconsax.document_download,
-                      size: 16,
-                    ),
-                    label: const Text('PDF'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.success,
-                      side: BorderSide(color: Colors.green.shade300),
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
 
-  Widget _buildDetailRow({
-    required IconData icon,
-    required String label,
-    required String value,
-    required BuildContext context,
-  }) {
-    return Row(
+  Widget _amount(
+    BuildContext context,
+    String label,
+    String value,
+    Color valueColor,
+  ) {
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.start,
       children: [
-        Icon(
-          icon,
-          size: 16,
-          color: AppColors.text(context),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 11,
+            color: AppColors.text(context).withValues(alpha: 0.55),
+          ),
         ),
-        const SizedBox(width: 3),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.text(context),
-                  fontSize: 13,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                value,
-                style:  TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,            color: AppColors.text(context),
-
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
+        const SizedBox(height: 3),
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.centerLeft,
+          child: Text(
+            value,
+            maxLines: 1,
+            style: TextStyle(
+              fontSize: 14.5,
+              fontWeight: FontWeight.w800,
+              color: valueColor,
+            ),
           ),
         ),
       ],
     );
   }
+
+  Widget _vDivider(BuildContext context) => Container(
+        width: 1,
+        height: 32,
+        margin: const EdgeInsets.symmetric(horizontal: 10),
+        color: AppColors.text(context).withValues(alpha: 0.08),
+      );
 
   // Desktop টেবিল — AppDataTable
   Widget _buildDesktopDataTable() {
