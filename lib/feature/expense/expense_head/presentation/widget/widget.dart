@@ -5,7 +5,6 @@ import '../../../../../core/widgets/delete_dialog.dart';
 import '../../data/model/expense_head_model.dart';
 import '../bloc/expense_head/expense_head_bloc.dart';
 import '../shared/expense_head_create.dart';
-import 'package:meherinMart/core/widgets/table_scroll_controllers.dart';
 
 class ExpenseHeadTableCard extends StatelessWidget {
   final List<ExpenseHeadModel> expenseHeads;

@@ -2,7 +2,6 @@ import 'package:google_fonts/google_fonts.dart';
 import '/core/configs/configs.dart';
 
 import '../../../data/model/account_transfer_model.dart';
-import 'package:meherinMart/core/widgets/table_scroll_controllers.dart';
 
 
 

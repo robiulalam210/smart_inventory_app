@@ -311,11 +311,6 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
       }
 
       // Only parse model if status == true
-      final jsonString = jsonEncode(res);
-      ApiResponse response = appParseJson(
-        jsonString,
-            (data) => CustomerModel.fromJson(data),
-      );
 
       clearData();
       emit(CustomerAddSuccess());

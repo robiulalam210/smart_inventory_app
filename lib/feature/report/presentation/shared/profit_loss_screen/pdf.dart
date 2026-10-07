@@ -103,48 +103,6 @@ Future<Uint8List> generateProfitLossReportPdf(
 }
 
 // Header with Report Info
-pw.Widget _buildHeader(ProfitLossResponse report) {
-  return pw.Container(
-    padding: const pw.EdgeInsets.all(8),
-    margin: const pw.EdgeInsets.all(8),
-    child: pw.Row(
-      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-      children: [
-        pw.Column(
-          crossAxisAlignment: pw.CrossAxisAlignment.start,
-          children: [
-            pw.Text(
-              'PROFIT & LOSS STATEMENT',
-              style: pw.TextStyle(
-                fontSize: 16,
-                fontWeight: pw.FontWeight.bold,
-                color: PdfColors.green800,
-              ),
-            ),
-            pw.SizedBox(height: 4),
-            pw.Text(
-              'Financial Performance Overview',
-              style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey600),
-            ),
-          ],
-        ),
-        pw.Column(
-          crossAxisAlignment: pw.CrossAxisAlignment.end,
-          children: [
-            pw.Text(
-              'Generated: ${_formatDateTime(DateTime.now())}',
-              style: const pw.TextStyle(fontSize: 9),
-            ),
-            pw.Text(
-              'Period: ${_formatDateRange(report.summary.dateRange)}',
-              style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey600),
-            ),
-          ],
-        ),
-      ],
-    ),
-  );
-}
 
 // Report Title
 pw.Widget _buildReportTitle() {
@@ -796,33 +754,13 @@ pw.Widget _buildAnalysisRow(
 }
 
 // Footer
-pw.Widget _buildFooter(pw.Context context) {
-  return pw.Container(
-    alignment: pw.Alignment.center,
-    margin: const pw.EdgeInsets.only(top: 20),
-    child: pw.Column(
-      children: [
-        pw.Divider(color: PdfColors.grey300),
-        pw.SizedBox(height: 8),
-        pw.Text(
-          'Page ${context.pageNumber} of ${context.pagesCount} • '
-              'Generated on ${_formatDateTime(DateTime.now())} • '
-              'Confidential Financial Document',
-          style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey600),
-        ),
-      ],
-    ),
-  );
-}
 
 // Helper functions
 String _formatDate(DateTime date) {
   return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
 }
 
-String _formatDateTime(DateTime date) {
-  return '${_formatDate(date)} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
-}
+
 
 String _formatDateRange(Map<String, dynamic> dateRange) {
   final start = dateRange['start'] != null ? DateTime.parse(dateRange['start']) : null;

@@ -326,7 +326,7 @@ class _HeaderRow extends StatelessWidget {
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         // একই column এ আবার ক্লিক = উল্টো ক্রম
-        onTap: () => onSort!(key!, active ? !sortAscending : true),
+        onTap: () => onSort!(key, active ? !sortAscending : true),
         child: content,
       ),
     );

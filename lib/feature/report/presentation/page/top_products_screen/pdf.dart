@@ -68,9 +68,9 @@ Future<Uint8List> generateTopProductsReportPdf(
                 border: pw.Border.all(color: PdfColors.grey400),
                 borderRadius: pw.BorderRadius.circular(8),
               ),
-              child: logoBytes != null && logoBytes!.isNotEmpty
+              child: logoBytes != null && logoBytes.isNotEmpty
                   ? pw.Image(
-                pw.MemoryImage(logoBytes!),
+                pw.MemoryImage(logoBytes),
                 fit: pw.BoxFit.cover,
               )
                   : pw.Center(
@@ -687,24 +687,6 @@ pw.Widget _buildSalesAnalysis(List<TopProductModel> products, TopProductsSummary
 }
 
 // Footer
-pw.Widget _buildFooter(pw.Context context) {
-  return pw.Container(
-    alignment: pw.Alignment.center,
-    margin: const pw.EdgeInsets.only(top: 20),
-    child: pw.Column(
-      children: [
-        pw.Divider(color: PdfColors.grey300),
-        pw.SizedBox(height: 8),
-        pw.Text(
-          'Page ${context.pageNumber} of ${context.pagesCount} • '
-              'Generated on ${_formatDateTime(DateTime.now())} • '
-              'Sales Performance Document',
-          style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey600),
-        ),
-      ],
-    ),
-  );
-}
 
 // Helper functions
 String _formatDate(DateTime date) {

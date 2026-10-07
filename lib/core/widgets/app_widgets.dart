@@ -5,6 +5,7 @@ export 'app_popover.dart';
 export 'app_popover_route.dart';
 export 'app_data_table.dart';
 export 'app_validators.dart';
+export 'app_detail_kit.dart';
 
 class AppWidgets {
   String formatStringDDMMYY(dynamic date) {

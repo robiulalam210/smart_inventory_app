@@ -10,527 +10,177 @@ class PurchaseDetailsScreen extends StatelessWidget {
 
   const PurchaseDetailsScreen({super.key, required this.purchase});
 
-  @override
-  Widget build(BuildContext context) {
-    final isDesktop = MediaQuery.of(context).size.width > 768;
-
-    return AppScaffold(
-      appBar: AppBar(
-        title: Text(
-          'Purchase Details - ${purchase.invoiceNo}',
-          style: AppTextStyle.titleMedium(context),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Iconsax.document_download),
-            onPressed: () => _generatePdf(context),
-            tooltip: 'Generate PDF',
-          ),
-        ],
-      ),
-      body: isDesktop ? _buildDesktopView(context) : _buildMobileView(context),
-    );
-  }
-
-  Widget _buildDesktopView(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(24),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Left Column - Header and Items
-          Expanded(
-            flex: 2,
-            child: Column(
-              children: [
-                _buildHeaderCard(context),
-                const SizedBox(height: 16),
-                _buildItemsCard(context),
-              ],
-            ),
-          ),
-          const SizedBox(width: 16),
-          // Right Column - Summary and Payment
-          Expanded(
-            flex: 1,
-            child: Column(
-              children: [
-                _buildSummaryCard(context),
-                const SizedBox(height: 16),
-                _buildPaymentCard(context),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMobileView(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(8),
-      child: Column(
-        children: [
-          _buildHeaderCard(context),
-          const SizedBox(height: 8),
-          _buildItemsCard(context),
-          const SizedBox(height: 8),
-          _buildSummaryCard(context),
-          const SizedBox(height: 8),
-          _buildPaymentCard(context),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildHeaderCard(BuildContext context) {
-    return Card(
-      elevation: 0,
-      color: AppColors.bottomNavBg(context),
-
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Text(
-                    'Purchase Invoice: ${purchase.invoiceNo}',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.primaryColor(context),
-                    ),
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  decoration: BoxDecoration(
-                    color: _getStatusColor(
-                      purchase.paymentStatus ?? '',
-                    ).withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: _getStatusColor(purchase.paymentStatus ?? ''),
-                    ),
-                  ),
-                  child: Text(
-                    (purchase.paymentStatus ?? 'UNKNOWN').toUpperCase(),
-                    style: TextStyle(
-                      color: _getStatusColor(purchase.paymentStatus ?? ''),
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            _buildDesktopInfoGrid(context),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDesktopInfoGrid(BuildContext context) {
-    return GridView.count(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      crossAxisCount: 2,
-      crossAxisSpacing: 16,
-      mainAxisSpacing: 12,
-      childAspectRatio: 3,
-      children: [
-        _buildInfoItem(
-          'Purchase Date',
-          AppWidgets().convertDateTimeDDMMYYYY(purchase.purchaseDate),
-          context,
-        ),
-        _buildInfoItem('Invoice No', purchase.invoiceNo ?? '-', context),
-        _buildInfoItem('Supplier', purchase.supplierName ?? '-', context),
-        _buildInfoItem(
-          'Payment Method',
-          purchase.paymentMethod ?? '-',
-          context,
-        ),
-        if (purchase.accountName != null)
-          _buildInfoItem('Account', purchase.accountName!, context),
-        if (purchase.remark != null && purchase.remark != '')
-          _buildInfoItem('Remarks', purchase.remark.toString(), context),
-      ],
-    );
-  }
-
-  Widget _buildInfoItem(String label, String value, BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w500,
-            color: AppColors.text(context),
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: AppColors.text(context),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildItemsCard(BuildContext context) {
-    return Card(
-      elevation: 0,
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Purchase Items',
-              style: TextStyle(
-                fontSize: 18,
-                color: AppColors.text(context),
-
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            if (purchase.items == null || purchase.items!.isEmpty)
-              const Center(
-                child: Text(
-                  'No items found',
-                  style: TextStyle(color: Colors.grey),
-                ),
-              ),
-            if (purchase.items != null && purchase.items!.isNotEmpty)
-              _buildItemsTable(context),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildItemsTable(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey.shade300),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Table(
-        columnWidths: const {
-          0: FlexColumnWidth(3),
-          1: FlexColumnWidth(1.5),
-          2: FlexColumnWidth(1.9),
-          3: FlexColumnWidth(1.5),
-          4: FlexColumnWidth(1.6),
-        },
-        border: TableBorder.symmetric(
-          inside: BorderSide(color: Colors.grey.shade300),
-        ),
-        children: [
-          // Header row
-          TableRow(
-            decoration: BoxDecoration(
-              color: AppColors.primaryColor(context).withValues(alpha: 0.1),
-            ),
-            children: [
-              _buildTableHeaderCell(context, 'Product'),
-              _buildTableHeaderCell(context, 'Qty'),
-              _buildTableHeaderCell(context, 'Price'),
-              _buildTableHeaderCell(context, 'Discount'),
-              _buildTableHeaderCell(context, 'Total'),
-            ],
-          ),
-          // Data rows
-          ...purchase.items!.map((item) => _buildTableRow(item, context)),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTableHeaderCell(BuildContext context, String text) {
-    return Padding(
-      padding: const EdgeInsets.all(12),
-      child: Text(
-        text,
-        style: TextStyle(
-          fontWeight: FontWeight.bold,
-          color: AppColors.primaryColor(context),
-        ),
-        textAlign: TextAlign.center,
-      ),
-    );
-  }
-
-  TableRow _buildTableRow(PurchaseItem item, BuildContext context) {
-    final price = item.price is String
-        ? double.tryParse(item.price!) ?? 0.0
-        : (item.price ?? 0.0);
-    final total = item.productTotal is String
-        ? double.tryParse(item.productTotal!) ?? 0.0
-        : (item.productTotal ?? 0.0);
-
-    return TableRow(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(6),
-          child: Text(
-            item.productName ?? 'Unknown Product',
-            style: TextStyle(
-              fontWeight: FontWeight.w500,
-              color: AppColors.text(context),
-            ),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(6),
-          child: Text(
-            item.qty?.toString() ?? '0',
-            textAlign: TextAlign.center,
-            style: AppTextStyle.body(context),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(6),
-          child: Text(
-            '৳${price.toString()}',
-            textAlign: TextAlign.center,
-            style: AppTextStyle.body(context),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(6),
-          child: Text(
-            item.discount != null && item.discount != "0"
-                ? '${item.discount}${item.discountType == 'percent' ? '%' : '৳'}'
-                : '-',
-            textAlign: TextAlign.center,
-            style: AppTextStyle.body(context),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(4),
-          child: Text(
-            '৳${total.toString()}',
-            textAlign: TextAlign.center,
-            style: AppTextStyle.body(context),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSummaryCard(BuildContext context) {
-    final total = double.tryParse(purchase.total.toString()) ?? 0.0;
-    final grandTotal = double.tryParse(purchase.grandTotal.toString()) ?? 0.0;
-    final subTotal = double.tryParse(purchase.subTotal.toString()) ?? 0.0;
-
-    return Card(
-      elevation: 0,
-      color: AppColors.bottomNavBg(context),
-      child: Padding(
-        padding: const EdgeInsets.all(10),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-             Text(
-              'Purchase Summary',
-              style: TextStyle(fontSize: 16,
-
-                  color: AppColors.text(context),
-
-                  fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            _buildDesktopSummaryList(context, subTotal, total, grandTotal),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDesktopSummaryList(
-    BuildContext context,
-    double subTotal,
-    double total,
-    double grandTotal,
-  ) {
-    return Column(
-      children: [
-        if (subTotal > 0) _buildSummaryItem(context, 'Sub Total', subTotal),
-        if (purchase.overallDiscount != null && purchase.overallDiscount != "0")
-          _buildSummaryItem(
-            context,
-            'Discount ${purchase.overallDiscountType == 'percent' ? '(${purchase.overallDiscount}%)' : ''}',
-            -double.parse(purchase.overallDiscount ?? '0'),
-            isNegative: true,
-          ),
-        if (purchase.overallDeliveryCharge != null &&
-            purchase.overallDeliveryCharge != "0")
-          _buildSummaryItem(
-            context,
-            'Delivery Charge',
-            double.parse(purchase.overallDeliveryCharge ?? '0'),
-          ),
-        if (purchase.overallServiceCharge != null &&
-            purchase.overallServiceCharge != "0")
-          _buildSummaryItem(
-            context,
-            'Service Charge',
-            double.parse(purchase.overallServiceCharge ?? '0'),
-          ),
-        if (purchase.vat != null && purchase.vat != "0")
-          _buildSummaryItem(
-            context,
-            'VAT ${purchase.vatType == 'percent' ? '(${purchase.vat}%)' : ''}',
-            double.parse(purchase.vat ?? '0'),
-          ),
-        const Divider(),
-        if (total > 0)
-          _buildSummaryItem(context, 'Total', total, isTotal: true),
-        _buildSummaryItem(
-          context,
-          'Grand Total',
-          grandTotal,
-          isGrandTotal: true,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSummaryItem(
-    BuildContext context,
-    String label,
-    double amount, {
-    bool isNegative = false,
-    bool isTotal = false,
-    bool isGrandTotal = false,
-  }) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 4),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Expanded(
-            child: Text(
-              label,
-              style: TextStyle(
-                fontWeight: isTotal || isGrandTotal
-                    ? FontWeight.w600
-                    : FontWeight.normal,
-                color: isGrandTotal
-                    ? AppColors.primaryColor(context)
-                    : AppColors.text(context),
-                fontSize: isGrandTotal ? 15 : 14,
-              ),
-            ),
-          ),
-          Text(
-            '${isNegative ? '-' : ''}৳${amount.toStringAsFixed(2)}',
-            style: TextStyle(
-              fontWeight: isTotal || isGrandTotal
-                  ? FontWeight.bold
-                  : FontWeight.normal,
-              color: isGrandTotal
-                  ? AppColors.primaryColor(context)
-                  : AppColors.text(context),
-              fontSize: isGrandTotal ? 16 : 14,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPaymentCard(BuildContext context) {
-    final paid = double.tryParse(purchase.paidAmount.toString()) ?? 0.0;
-    final due = double.tryParse(purchase.dueAmount.toString()) ?? 0.0;
-    final change = double.tryParse(purchase.changeAmount.toString()) ?? 0.0;
-
-    return Card(
-      elevation: 0,
-      color: AppColors.bottomNavBg(context),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-             Text(
-              'Payment Summary',
-              style: TextStyle(fontSize: 18,
-                  color: AppColors.primaryColor(context),
-                  fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            _buildPaymentItem(context,'Paid Amount', paid),
-            _buildPaymentItem(context,'Due Amount', due, isDue: due > 0),
-            if (change > 0)
-              _buildPaymentItem(context,'Change Amount', change, isChange: true),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPaymentItem(
-      BuildContext  context,
-    String label,
-    double amount, {
-    bool isDue = false,
-    bool isChange = false,
-  }) {
-    Color color = AppColors.text(context);
-    if (isDue) color = AppColors.danger;
-    if (isChange) color = AppColors.success;
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label, style:  TextStyle(fontWeight: FontWeight.w500,color: AppColors.text(context))),
-          Text(
-            '৳${amount.toStringAsFixed(2)}',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: color,
-              fontSize: 15,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Color _getStatusColor(String status) {
+  Color _statusColor(String status) {
     switch (status.toLowerCase()) {
       case 'paid':
         return AppColors.success;
-      case 'pending':
-        return AppColors.warning;
       case 'partial':
-        return AppColors.info;
-      case 'cancelled':
+        return AppColors.warning;
+      case 'pending':
+      case 'due':
         return AppColors.danger;
       default:
         return Colors.grey;
     }
+  }
+
+  /// percent হলে sub total এর উপর হিসাব করে টাকায় — আগে "10%"
+  /// discount কে ৳10 হিসেবে দেখাত
+  double _charge(String? value, String? type, double base) {
+    final v = detailNum(value);
+    final isPercent = type == 'percent' || type == 'percentage';
+    return isPercent ? base * v / 100 : v;
+  }
+
+  String _label(String name, String? value, String? type) {
+    final isPercent = type == 'percent' || type == 'percentage';
+    return isPercent && detailNum(value) > 0
+        ? '$name (${detailQty(detailNum(value))}%)'
+        : name;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final double grand = detailNum(purchase.grandTotal);
+    final double paid = detailNum(purchase.paidAmount);
+    final double due = detailNum(purchase.dueAmount);
+    final double change = detailNum(purchase.changeAmount);
+    final String status = (purchase.paymentStatus ?? '-').capitalize();
+
+    final items = purchase.items ?? [];
+    final double itemsTotal =
+        items.fold(0.0, (s, it) => s + detailNum(it.productTotal));
+    final double sub = detailNum(purchase.subTotal) > 0
+        ? detailNum(purchase.subTotal)
+        : itemsTotal;
+
+    final lines = items.map((it) {
+      final d = detailNum(it.discount);
+      return DetailLine(
+        name: it.productName ?? 'Unknown product',
+        qty: '${it.qty ?? 0}',
+        unitPrice: detailNum(it.price),
+        discount: d > 0
+            ? (it.discountType == 'percent' || it.discountType == 'percentage'
+                ? '${detailQty(d)}%'
+                : '৳${d.toStringAsFixed(2)}')
+            : null,
+        total: detailNum(it.productTotal),
+      );
+    }).toList();
+
+    return AppScaffold(
+      appBar: detailAppBar(
+        context,
+        title: 'Purchase ${purchase.invoiceNo ?? ''}',
+        breadcrumb: const ['Purchase', 'Purchase List', 'Details'],
+        actions: [
+          PopoverButton(
+            label: 'Purchase PDF',
+            primary: true,
+            icon: Iconsax.document_download,
+            onPressed: () => _generatePdf(context),
+          ),
+        ],
+      ),
+      body: DetailPageBody(
+        hero: DetailHero(
+          icon: Iconsax.shopping_bag,
+          title: purchase.invoiceNo ?? 'Purchase',
+          subtitle:
+              '${purchase.supplierName ?? '-'}  ·  ${AppWidgets().convertDateTimeDDMMYYYY(purchase.purchaseDate)}',
+          pills: [
+            DetailPill(status, color: _statusColor(status)),
+            if ((purchase.paymentMethod ?? '').isNotEmpty)
+              DetailPill(purchase.paymentMethod!,
+                  color: AppColors.info, icon: Icons.payments_outlined),
+            DetailPill('${lines.length} item${lines.length == 1 ? '' : 's'}',
+                color: AppColors.greyColor(context),
+                icon: Icons.inventory_2_outlined),
+          ],
+          amountLabel: 'Grand Total',
+          amount: '৳${grand.toStringAsFixed(2)}',
+          amountCaption:
+              due > 0 ? 'Due ৳${due.toStringAsFixed(2)}' : 'Fully paid',
+          amountCaptionColor: due > 0 ? AppColors.danger : AppColors.success,
+        ),
+        left: [
+          DetailSection(
+            title: 'Purchase Information',
+            icon: Iconsax.info_circle,
+            child: DetailGrid(items: [
+              DetailItem('Supplier', purchase.supplierName,
+                  icon: Iconsax.truck),
+              DetailItem('Purchase Date',
+                  AppWidgets().convertDateTimeDDMMYYYY(purchase.purchaseDate),
+                  icon: Iconsax.calendar_1),
+              DetailItem('Invoice No', purchase.invoiceNo,
+                  icon: Iconsax.receipt_2),
+              DetailItem('Payment Method', purchase.paymentMethod,
+                  icon: Iconsax.wallet_2),
+              DetailItem('Account', purchase.accountName, icon: Iconsax.bank),
+              if ((purchase.remark?.toString() ?? '').isNotEmpty)
+                DetailItem('Remark', purchase.remark?.toString(),
+                    icon: Iconsax.note_text, fullWidth: true),
+            ]),
+          ),
+          DetailSection(
+            title: 'Items',
+            icon: Iconsax.box,
+            padding: const EdgeInsets.all(12),
+            child: DetailItemsTable(rows: lines, emptyText: 'No items found'),
+          ),
+        ],
+        right: [
+          DetailSection(
+            title: 'Amount Summary',
+            icon: Iconsax.calculator,
+            child: DetailAmountList(rows: [
+              DetailAmount('Sub Total', sub),
+              DetailAmount(
+                  _label('Discount', purchase.overallDiscount,
+                      purchase.overallDiscountType),
+                  _charge(purchase.overallDiscount,
+                      purchase.overallDiscountType, sub),
+                  negative: true,
+                  hideIfZero: true),
+              DetailAmount(
+                  _label('VAT', purchase.vat, purchase.vatType),
+                  _charge(purchase.vat, purchase.vatType, sub),
+                  hideIfZero: true),
+              DetailAmount(
+                  _label('Service Charge', purchase.overallServiceCharge,
+                      purchase.overallServiceChargeType),
+                  _charge(purchase.overallServiceCharge,
+                      purchase.overallServiceChargeType, sub),
+                  hideIfZero: true),
+              DetailAmount(
+                  _label('Delivery Charge', purchase.overallDeliveryCharge,
+                      purchase.overallDeliveryChargeType),
+                  _charge(purchase.overallDeliveryCharge,
+                      purchase.overallDeliveryChargeType, sub),
+                  hideIfZero: true),
+              DetailAmount('Grand Total', grand,
+                  strong: true,
+                  dividerBefore: true,
+                  color: AppColors.primaryColor(context)),
+            ]),
+          ),
+          DetailSection(
+            title: 'Payment',
+            icon: Iconsax.money_send,
+            child: DetailAmountList(rows: [
+              DetailAmount('Paid', paid, color: AppColors.success),
+              DetailAmount('Change', change, hideIfZero: true),
+              DetailAmount('Due', due,
+                  strong: true,
+                  dividerBefore: true,
+                  color: due > 0 ? AppColors.danger : AppColors.success),
+            ]),
+          ),
+        ],
+      ),
+    );
   }
 
   void _generatePdf(BuildContext context) {

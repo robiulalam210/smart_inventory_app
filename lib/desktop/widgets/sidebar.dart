@@ -12,7 +12,7 @@ class Sidebar extends StatefulWidget {
 
 class _SidebarState extends State<Sidebar> {
   // Define full menu structure with permission checks
-  final List<MenuSection> _fullMenuSections = [
+  static final List<MenuSection> _fullMenuSections = [
     MenuSection(
       title: "My Dashboard",
       items: [
@@ -138,7 +138,7 @@ class _SidebarState extends State<Sidebar> {
     MenuSection(
       title: "Transfer Balance",
       items: [
-        MenuItem(title: "Account Transfer From", index: 38, requiredPermission: (permissions) => permissions?.accounts?.view == true),
+        MenuItem(title: "Account Transfer Form", index: 38, requiredPermission: (permissions) => permissions?.accounts?.view == true),
         MenuItem(title: "Account Transfer List", index: 39, requiredPermission: (permissions) => permissions?.accounts?.view == true),
         MenuItem(title: "Transactions", index: 40, requiredPermission: (permissions) => permissions?.accounts?.view == true),
       ],
@@ -198,7 +198,7 @@ class _SidebarState extends State<Sidebar> {
       builder: (context, constraints) {
         final double height = constraints.maxHeight.isFinite
             ? constraints.maxHeight
-            : MediaQuery.sizeOf(context).height - 56;
+            : MediaQuery.sizeOf(context).height - 64;
         return Container(
           height: height,
           decoration: BoxDecoration(
@@ -208,29 +208,6 @@ class _SidebarState extends State<Sidebar> {
           child: child,
         );
       },
-    );
-  }
-
-  Widget _logo(BuildContext context) {
-    return Container(
-      height: 76,
-      alignment: Alignment.center,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: _sidebarBorder(context))),
-      ),
-      child: Image.asset(
-        "assets/images/logo.png",
-        fit: BoxFit.contain,
-        errorBuilder: (context, error, stackTrace) => Text(
-          AppConstants.appName,
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: AppColors.primaryColor(context),
-          ),
-        ),
-      ),
     );
   }
 
@@ -286,7 +263,6 @@ class _SidebarState extends State<Sidebar> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  _logo(context),
                   Expanded(
                     child: ListView(
                       padding: const EdgeInsets.fromLTRB(10, 10, 10, 16),
@@ -394,7 +370,6 @@ class _SidebarState extends State<Sidebar> {
       Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _logo(context),
           const SizedBox(height: 12),
           for (int i = 0; i < 8; i++)
             Container(
@@ -689,4 +664,47 @@ class _SidebarTileState extends State<_SidebarTile> {
       ),
     );
   }
+}
+
+
+// ============================================================
+// PAGE INFO — কোন index এ কোন page, কোন group এর
+// ------------------------------------------------------------
+// উপরের Header এই তথ্য দিয়ে "Sales › Sale List" breadcrumb আর page এর
+// নাম দেখায়। menu এর তালিকা একটাই (_fullMenuSections) — sidebar আর
+// header দুজনেই সেখান থেকে পড়ে, তাই নাম কখনো অমিল হবে না।
+// ============================================================
+
+class SidebarPageInfo {
+  const SidebarPageInfo({
+    required this.title,
+    required this.section,
+    required this.icon,
+  });
+
+  final String title;
+
+  /// group এর নাম — একক page হলে null (যেমন Products)
+  final String? section;
+  final IconData icon;
+}
+
+SidebarPageInfo sidebarPageInfo(int index) {
+  for (final section in _SidebarState._fullMenuSections) {
+    for (final item in section.items) {
+      if (item.index != index) continue;
+      final icon =
+          _SidebarState._sectionIcons[section.title] ?? Icons.circle_outlined;
+      if (section.items.length == 1) {
+        return SidebarPageInfo(title: section.title, section: null, icon: icon);
+      }
+      return SidebarPageInfo(
+          title: item.title, section: section.title, icon: icon);
+    }
+  }
+  return const SidebarPageInfo(
+    title: 'My Dashboard',
+    section: null,
+    icon: Icons.space_dashboard_outlined,
+  );
 }

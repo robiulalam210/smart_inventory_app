@@ -1,13 +1,11 @@
 // money_receipt_pdf.dart
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
-import 'package:printing/printing.dart';
 
 import '../../../../../core/configs/configs.dart';
 import '../../../../../core/utilities/load_image_bytes.dart';
 import '../../../../profile/data/model/profile_perrmission_model.dart';
 import '../../../data/model/money_receipt_model/money_receipt_model.dart';
-import 'package:http/http.dart'as http;
 
 
 Future<Uint8List> generateMoneyReceiptPdf(MoneyreceiptModel receipt, CompanyInfo? company,) async {

@@ -17,7 +17,6 @@ import '../../../../../core/configs/app_routes.dart';
 import '../../../../../core/widgets/app_button.dart';
 import '../../../../../responsive.dart';
 import '../../../data/model/profit_loss_report_model.dart';
-import 'package:meherinMart/core/widgets/table_scroll_controllers.dart';
 
 class ProfitLossScreen extends StatefulWidget {
   const ProfitLossScreen({super.key});

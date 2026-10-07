@@ -1,3 +1,4 @@
+import '../../../../../core/shared/widgets/sideMenu/sidebar.dart';
 import '/core/core.dart';
 
 import '../../../../../core/widgets/coustom_search_text_field.dart';
