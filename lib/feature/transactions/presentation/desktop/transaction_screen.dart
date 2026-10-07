@@ -180,7 +180,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
     return Column(
       children: [
         Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.end,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             // 🔍 Search Field

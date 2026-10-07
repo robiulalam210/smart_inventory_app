@@ -371,315 +371,58 @@ class AccountCard extends StatelessWidget {
     );
   }
 
+  // Desktop টেবিল — AppDataTable (নাম বাঁয়ে, টাকা ডানে, action মাঝে)
   Widget _buildDesktopDataTable() {
-    return TableScrollControllers(
-      builder: (context, verticalScrollController, horizontalScrollController) {
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        const numColumns = 7;
-        const columnSpacing = 10.0;
-        const horizontalMargin = 12.0;
-        const minColumnWidth = 120.0;
-
-        final totalTableWidth = (constraints.maxWidth - 75) +
-            (columnSpacing * (numColumns - 1)) +
-            (horizontalMargin * 2);
-
-        return Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(AppSizes.radius),
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withValues(alpha: 0.1),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: ClipRRect( borderRadius: BorderRadius.circular(AppSizes.radius),
-            child: Scrollbar(
-              controller: verticalScrollController,
-              thumbVisibility: true,
-              child: SingleChildScrollView(
-                controller: verticalScrollController,
-                scrollDirection: Axis.vertical,
-                child: Scrollbar(
-                  controller: horizontalScrollController,
-                  thumbVisibility: true,
-                  child: SingleChildScrollView(
-                    controller: horizontalScrollController,
-                    scrollDirection: Axis.horizontal,
-                    child: Container(
-                      constraints: BoxConstraints(
-                        minWidth: totalTableWidth,
-                        minHeight: 200,
-                      ),
-                      child: DataTable(
-                        dataRowMinHeight: 50,
-                        dataRowMaxHeight: 60,
-                        columnSpacing: columnSpacing,
-                        horizontalMargin: horizontalMargin,
-                        dividerThickness: 0.5,
-                        headingRowHeight: 50,
-                        headingTextStyle: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                        ),
-                        headingRowColor: WidgetStateProperty.all(
-                          AppColors.primaryColor(context),
-                        ),
-                        dataTextStyle: const TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w500,
-                        ),
-                        columns: _buildColumns(minColumnWidth),
-                        rows: accounts.asMap().entries.map((entry) {
-                          final account = entry.value;
-                          return DataRow(
-                            color: WidgetStateProperty.resolveWith<Color?>(
-                                  (Set<WidgetState> states) {
-                                if (entry.key.isEven) {
-                                  return Colors.grey.withValues(alpha: 0.03);
-                                }
-                                return null;
-                              },
-                            ),
-                            cells: [
-                              _buildDataCell(account.acNo ?? "N/A", minColumnWidth * 1.2, TextAlign.center),
-                              _buildDataCell(account.name ?? "N/A", minColumnWidth * 1.2, TextAlign.center),
-                              _buildDataCell(account.acType ?? "N/A", minColumnWidth, TextAlign.center),
-                              _buildDataCell(account.acNumber ?? "-", minColumnWidth, TextAlign.center),
-                              _buildBankCell(account.bankName, account.branch, minColumnWidth * 1.3),
-                              _buildBalanceCell(account.balance, minColumnWidth),
-                              _buildActionsCell(context,account, minColumnWidth * 0.8),
-                            ],
-                          );
-                        }).toList(),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-      },
-    );
-  }
-
-  List<DataColumn> _buildColumns(double columnWidth) {
-    return [
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth * 0.6,
-          child: const Text(
-            'No.',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.white),
-          ),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth * 1.2,
-          child: const Text(
-            'Account Name',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.white),
-          ),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text(
-            'Type',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.white),
-          ),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text(
-            'Account No.',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.white),
-          ),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth * 1.3,
-          child: const Text(
-            'Bank/Branch',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.white),
-          ),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text(
-            'Balance',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.white),
-          ),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth * 0.8,
-          child: const Text(
-            'Actions',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.white),
-          ),
-        ),
-      ),
+    const columns = [
+      AppTableColumn.center('SL', flex: 1, minWidth: 52),
+      AppTableColumn('Account Name', flex: 3, minWidth: 160),
+      AppTableColumn('Type', flex: 2, minWidth: 100),
+      AppTableColumn('Account No.', flex: 2, minWidth: 120),
+      AppTableColumn('Bank / Branch', flex: 3, minWidth: 150),
+      AppTableColumn.numeric('Balance', flex: 2, minWidth: 120),
+      AppTableColumn.center('Actions', flex: 2, minWidth: 96),
     ];
-  }
 
-  DataCell _buildDataCell(String text, double width, TextAlign align) {
-    return DataCell(
-      Container(
-        width: width,
-        padding: const EdgeInsets.symmetric(horizontal: 4),
-        child: Text(
-          text,
-          style: const TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w500,
-            color: Colors.black87,
-          ),
-          textAlign: align,
-          overflow: TextOverflow.ellipsis,
-          maxLines: 2,
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildBankCell(String? bankName, String? branch, double width) {
-    final hasBankInfo = bankName != null && bankName.isNotEmpty && bankName != "-";
-    final hasBranch = branch != null && branch.isNotEmpty && branch != "-";
-
-    String displayText;
-    if (hasBankInfo && hasBranch) {
-      displayText = '$bankName\n$branch';
-    } else if (hasBankInfo) {
-      displayText = bankName;
-    } else {
-      displayText = '-';
-    }
-
-    return DataCell(
-      Container(
-        width: width,
-        padding: const EdgeInsets.symmetric(horizontal: 4),
-        child: Text(
-          displayText,
-          style: TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w500,
-            color: hasBankInfo ? Colors.black87 : Colors.grey,
-          ),
-          textAlign: TextAlign.center,
-          overflow: TextOverflow.ellipsis,
-          maxLines: 2,
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildBalanceCell(double? balanceValue, double width) {
-    final color = _getBalanceColor(balanceValue);
-    final prefix = _getBalancePrefix(balanceValue);
-    final amount = _getBalanceAmount(balanceValue);
-
-    return DataCell(
-      Container(
-        width: width,
-        padding: const EdgeInsets.symmetric(horizontal: 4),
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(6),
-              border: Border.all(
-                color: color.withValues(alpha: 0.3),
-                width: 1,
-              ),
-            ),
-            constraints: const BoxConstraints(minWidth: 80),
-            child: Text(
-              '$prefix৳$amount',
-              style: TextStyle(
-                color: color,
-                fontWeight: FontWeight.w600,
-                fontSize: 11,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildActionsCell(BuildContext context,AccountModel account, double width) {
-    return DataCell(
-      Container(
-        width: width,
-        padding: const EdgeInsets.symmetric(horizontal: 4),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Edit Button
-            IconButton(
-              icon: const Icon(
-                Iconsax.edit,
-                size: 18,
-                color: AppColors.info,
-              ),
-              onPressed: () => onEdit?.call(account),
-              padding: const EdgeInsets.all(4),
-              constraints: const BoxConstraints(),
-              tooltip: 'Edit Account',
-            ),
-
-            // Delete Button
-            IconButton(
-              icon: Icon(
-                HugeIcons.strokeRoundedDeleteThrow,
-                size: 18,
-                color: Colors.red.shade600,
-              ),
-              onPressed: () => _showDeleteConfirmation(context, account, false),
-              padding: const EdgeInsets.all(4),
-              constraints: const BoxConstraints(),
-              tooltip: 'Delete Account',
-            ),
-          ],
-        ),
-      ),
+    return AppDataTable(
+      columns: columns,
+      rowCount: accounts.length,
+      cellBuilder: (context, row, col) {
+        final a = accounts[row];
+        switch (col) {
+          case 0:
+            return AppTableText('${row + 1}',
+                align: AppCellAlign.center, muted: true);
+          case 1:
+            return AppTableText(a.name ?? '-', bold: true, subtitle: a.acNo);
+          case 2:
+            return AppStatusPill(a.acType ?? '-',
+                color: _getAccountTypeColor(a.acType));
+          case 3:
+            return AppTableText(a.acNumber ?? '-');
+          case 4:
+            return AppTableText(a.bankName ?? '-', subtitle: a.branch);
+          case 5:
+            return AppTableText(
+              '${_getBalancePrefix(a.balance)}৳${_getBalanceAmount(a.balance)}',
+              align: AppCellAlign.end,
+              bold: true,
+              color: _getBalanceColor(a.balance),
+            );
+          default:
+            return AppTableEditDelete(
+              onEdit: onEdit == null ? null : () => onEdit!(a),
+              onDelete: () => _showDeleteConfirmation(context, a, false),
+            );
+        }
+      },
     );
   }
 
   void _showDeleteConfirmation(BuildContext context, AccountModel account, bool isMobile) {
-    showDialog(
+    showAppPopover(
       context: context,
       builder: (BuildContext context) {
-        return Dialog(
+        return AppPopoverShell(
           insetPadding: const EdgeInsets.all(20),
           child: ConstrainedBox(
             constraints: BoxConstraints(

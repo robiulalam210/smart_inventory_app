@@ -1,5 +1,7 @@
 // lib/feature/report/presentation/screens/low_stock_screen.dart
 import 'package:flutter/material.dart';
+import 'package:meherinMart/core/widgets/app_data_table.dart';
+import 'package:meherinMart/core/widgets/app_popover_route.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hugeicons/hugeicons.dart';
@@ -401,9 +403,9 @@ class _LowStockScreenState extends State<LowStockScreen> {
     final criticalItems = products.where((p) => p.totalStockQuantity == 0).length;
     final lowStockItems = products.where((p) => p.totalStockQuantity > 0 && p.totalStockQuantity <= p.alertQuantity).length;
 
-    showDialog(
+    showAppPopover(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (context) => AppPopoverCard(
         title: const Row(
           children: [
             Icon(Icons.notification_important, color: AppColors.danger),
@@ -488,370 +490,68 @@ class LowStockTableCard extends StatelessWidget {
   });
 
   @override
+  // Desktop টেবিল — AppDataTable
   Widget build(BuildContext context) {
-    return TableScrollControllers(
-      builder: (context, verticalScrollController, horizontalScrollController) {
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final totalWidth = constraints.maxWidth;
-        const numColumns = 9; // #, Product Name, Category, Brand, Current Stock, Alert Level, Status, Below Level, Actions
-        const minColumnWidth = 120.0;
-
-        final dynamicColumnWidth =
-        (totalWidth / numColumns).clamp(minColumnWidth, double.infinity);
-
-        return Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            border: Border.all(
-                color: AppColors.greyColor(context).withValues(alpha: 0.5),width: 0.5
-            ),
-            color: AppColors.bottomNavBg(context),
-            borderRadius: BorderRadius.circular(8),
-
-          ),
-          child: Scrollbar(
-            controller: verticalScrollController,
-            thumbVisibility: true,
-            child: SingleChildScrollView(
-              controller: verticalScrollController,
-              scrollDirection: Axis.vertical,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: Scrollbar(
-                  controller: horizontalScrollController,
-                  thumbVisibility: true,
-                  child: SingleChildScrollView(
-                    controller: horizontalScrollController,
-                    scrollDirection: Axis.horizontal,
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 5),
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(minWidth: totalWidth),
-                        child: DataTable(
-                          dataRowMinHeight: 40,
-                          dataRowMaxHeight: 40,
-                          columnSpacing: 8,
-                          horizontalMargin: 12,
-                          dividerThickness: 0.5,
-                          headingRowHeight: 40,
-                          headingTextStyle: TextStyle(
-                            color: Colors.white,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                            fontFamily: GoogleFonts.inter().fontFamily,
-                          ),
-                          headingRowColor: WidgetStateProperty.all(
-                            AppColors.danger, // Red header for low stock alert
-                          ),
-                          dataTextStyle: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w500,
-                            fontFamily: GoogleFonts.inter().fontFamily,
-                          ),
-                          columns: _buildColumns(dynamicColumnWidth),
-                          rows: products.asMap().entries.map((entry) {
-                            final product = entry.value;
-                            return DataRow(
-                              onSelectChanged: onProductTap != null
-                                  ? (_) => onProductTap!()
-                                  : null,
-                              cells: [
-                                _buildIndexCell(entry.key + 1, dynamicColumnWidth * 0.6),
-                                _buildProductNameCell(product, dynamicColumnWidth),
-                                _buildCategoryCell(product.category, dynamicColumnWidth),
-                                _buildBrandCell(product.brand, dynamicColumnWidth),
-                                _buildStockCell(product, dynamicColumnWidth),
-                                _buildAlertLevelCell(product.alertQuantity, dynamicColumnWidth),
-                                _buildStatusCell(product, dynamicColumnWidth),
-                                _buildBelowLevelCell(product, dynamicColumnWidth),
-                                _buildActionCell(product, context, dynamicColumnWidth),
-                              ],
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-      },
-    );
-  }
-
-  List<DataColumn> _buildColumns(double columnWidth) {
-    return [
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth * 0.6,
-          child: const Text('#', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Product Name', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Category', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Brand', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Current Stock', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Alert Level', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Status', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Below Level', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Actions', textAlign: TextAlign.center),
-        ),
-      ),
+    const columns = [
+      AppTableColumn.center('SL', flex: 1, minWidth: 52),
+      AppTableColumn('Product', flex: 4, minWidth: 170),
+      AppTableColumn('Category', flex: 2, minWidth: 110),
+      AppTableColumn.numeric('In Stock', flex: 1, minWidth: 90),
+      AppTableColumn.numeric('Alert Level', flex: 1, minWidth: 100),
+      AppTableColumn.numeric('Short By', flex: 1, minWidth: 90),
+      AppTableColumn.center('Status', flex: 2, minWidth: 110),
+      AppTableColumn.center('Actions', flex: 2, minWidth: 96),
     ];
-  }
 
-  DataCell _buildIndexCell(int index, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Center(
-          child: Text(
-            index.toString(),
-            style: const TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.w600,
-              color: Colors.black87,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildProductNameCell(LowStockProduct product, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Tooltip(
-          message: product.productName,
-          child: Text(
-            product.productName,
-            style: const TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.w500,
-              color: Colors.black87,
-            ),
-            textAlign: TextAlign.center,
-            overflow: TextOverflow.ellipsis,
-            maxLines: 2,
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildCategoryCell(String category, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Text(
-          category,
-          style: const TextStyle(
-            fontSize: 10,
-            fontWeight: FontWeight.w500,
-            color: Colors.black87,
-          ),
-          textAlign: TextAlign.center,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildBrandCell(String brand, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Text(
-          brand,
-          style: const TextStyle(
-            fontSize: 10,
-            fontWeight: FontWeight.w500,
-            color: Colors.black87,
-          ),
-          textAlign: TextAlign.center,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildStockCell(LowStockProduct product, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: product.statusColor.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(4),
-              border: Border.all(color: product.statusColor),
-            ),
-            child: Text(
-              product.totalStockQuantity.toString(),
-              style: TextStyle(
-                color: product.statusColor,
-                fontWeight: FontWeight.w600,
-                fontSize: 10,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildAlertLevelCell(int alertQuantity, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: AppColors.info.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Text(
-              alertQuantity.toString(),
-              style: const TextStyle(
-                color: AppColors.info,
-                fontWeight: FontWeight.w600,
-                fontSize: 10,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildStatusCell(LowStockProduct product, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: product.statusColor.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Text(
-              product.stockStatus,
-              style: TextStyle(
-                color: product.statusColor,
-                fontWeight: FontWeight.w600,
-                fontSize: 9,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildBelowLevelCell(LowStockProduct product, double width) {
-    final belowLevel = product.alertQuantity - product.totalStockQuantity;
-
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: AppColors.warning.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Text(
-              belowLevel > 0 ? belowLevel.toString() : '0',
-              style: const TextStyle(
-                color: AppColors.warning,
-                fontWeight: FontWeight.w600,
-                fontSize: 10,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildActionCell(LowStockProduct product, BuildContext context, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // View Details Button
-            _buildActionButton(
-              icon: HugeIcons.strokeRoundedView,
-              color: AppColors.info,
-              tooltip: 'View product details',
-              onPressed: () => _showProductDetails(context, product),
-            ),
-
-            // Restock Button
-            _buildActionButton(
-              icon: Iconsax.shopping_cart,
-              color: product.totalStockQuantity == 0 ? AppColors.danger : AppColors.warning,
-              tooltip: 'Create purchase order',
-              onPressed: () => _navigateToRestock(context, product),
-            ),
-          ],
-        ),
-      ),
+    return AppDataTable(
+      columns: columns,
+      rowCount: products.length,
+      onRowTap: onProductTap == null ? null : (_) => onProductTap!(),
+      cellBuilder: (context, row, col) {
+        final p = products[row];
+        switch (col) {
+          case 0:
+            return AppTableText('${row + 1}',
+                align: AppCellAlign.center, muted: true);
+          case 1:
+            return AppTableText(p.productName, bold: true, subtitle: p.brand);
+          case 2:
+            return AppTableText(p.category, muted: true);
+          case 3:
+            return AppTableText('${p.totalStockQuantity}',
+                align: AppCellAlign.end, bold: true, color: p.statusColor);
+          case 4:
+            return AppTableText('${p.alertQuantity}',
+                align: AppCellAlign.end, muted: true);
+          case 5:
+            final short = p.alertQuantity - p.totalStockQuantity;
+            return AppTableText(short > 0 ? '$short' : '-',
+                align: AppCellAlign.end,
+                color: short > 0 ? AppColors.danger : null);
+          case 6:
+            return AppStatusPill(p.stockStatus, color: p.statusColor);
+          default:
+            return Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                AppTableAction(
+                  icon: Icons.visibility_outlined,
+                  tooltip: 'Product details',
+                  color: AppColors.info,
+                  onPressed: () => _showProductDetails(context, p),
+                ),
+                AppTableAction(
+                  icon: Icons.add_shopping_cart_rounded,
+                  tooltip: 'Create purchase',
+                  color: p.totalStockQuantity == 0
+                      ? AppColors.danger
+                      : AppColors.warning,
+                  onPressed: () => _navigateToRestock(context, p),
+                ),
+              ],
+            );
+        }
+      },
     );
   }
 
@@ -871,10 +571,10 @@ class LowStockTableCard extends StatelessWidget {
   }
 
   void _showProductDetails(BuildContext context, LowStockProduct product) {
-    showDialog(
+    showAppPopover(
       context: context,
       builder: (context) {
-        return Dialog(
+        return AppPopoverShell(
           child: Container(
             width: MediaQuery.of(context).size.width * 0.40,
             padding: const EdgeInsets.all(20),

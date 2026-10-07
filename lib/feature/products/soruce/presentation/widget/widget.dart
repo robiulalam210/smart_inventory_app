@@ -217,10 +217,10 @@ class MobileSourceTableCard extends StatelessWidget {
     sourceBloc.nameController.text = source.name ?? "";
     sourceBloc.selectedState = source.isActive == true ? "Active" : "Inactive";
 
-    showDialog(
+    showAppPopover(
       context: context,
       builder: (context) {
-        return Dialog(
+        return AppPopoverShell(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
@@ -301,213 +301,42 @@ class SourceTableCard extends StatelessWidget {
   });
 
   @override
+  // Desktop টেবিল — AppDataTable (SL ছোট, নাম চওড়া, status/action মাঝে)
   Widget build(BuildContext context) {
     if (sources.isEmpty) {
       return _buildEmptyState();
     }
 
-    return TableScrollControllers(
-      builder: (context, verticalScrollController, horizontalScrollController) {
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final totalWidth = constraints.maxWidth;
-        const numColumns = 4; // No., Source Name, Status, Actions
-        const minColumnWidth = 100.0;
-
-        final dynamicColumnWidth =
-        (totalWidth / numColumns).clamp(minColumnWidth, double.infinity);
-
-        return Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withValues(alpha: 0.1),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Scrollbar(
-            controller: verticalScrollController,
-            thumbVisibility: true,
-            child: SingleChildScrollView(
-              controller: verticalScrollController,
-              scrollDirection: Axis.vertical,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: Scrollbar(
-                  controller: horizontalScrollController,
-                  thumbVisibility: true,
-                  child: SingleChildScrollView(
-                    controller: horizontalScrollController,
-                    scrollDirection: Axis.horizontal,
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 5),
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(minWidth: totalWidth),
-                        child: DataTable(
-                          dataRowMinHeight: 40,
-                          dataRowMaxHeight: 40,
-                          columnSpacing: 8,
-                          horizontalMargin: 12,
-                          dividerThickness: 0.5,
-                          headingRowHeight: 40,
-                          headingTextStyle: TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            fontFamily: GoogleFonts.inter().fontFamily,
-                          ),
-                          headingRowColor: WidgetStateProperty.all(
-                            AppColors.primaryColor(context),
-                          ),
-                          dataTextStyle: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w500,
-                            fontFamily: GoogleFonts.inter().fontFamily,
-                          ),
-                          columns: _buildColumns(dynamicColumnWidth),
-                          rows: sources.asMap().entries.map((entry) {
-                            final source = entry.value;
-                            return DataRow(
-                              cells: [
-                                _buildDataCell('${entry.key + 1}', dynamicColumnWidth * 0.6),
-                                _buildDataCell(source.name?.capitalize() ?? "N/A", dynamicColumnWidth),
-                                _buildStatusCell(_getSourceStatus(source), dynamicColumnWidth),
-                                _buildActionCell(source, context, dynamicColumnWidth),
-                              ],
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-      },
-    );
-  }
-
-  List<DataColumn> _buildColumns(double columnWidth) {
-    return [
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth * 0.6,
-          child: const Text('No.', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Source Name', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Status', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Actions', textAlign: TextAlign.center),
-        ),
-      ),
+    const columns = [
+      AppTableColumn.center('SL', flex: 1, minWidth: 60),
+      AppTableColumn('Source Name', flex: 5, minWidth: 200),
+      AppTableColumn.center('Status', flex: 2, minWidth: 110),
+      AppTableColumn.center('Actions', flex: 2, minWidth: 110),
     ];
-  }
 
-  DataCell _buildDataCell(String text, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Text(
-          text,
-          style: const TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w500,
-            color: Colors.black87,
-          ),
-          textAlign: TextAlign.center,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ),
+    return AppDataTable(
+      columns: columns,
+      rowCount: sources.length,
+      cellBuilder: (context, row, col) {
+        final source = sources[row];
+        switch (col) {
+          case 0:
+            return AppTableText('${row + 1}', align: AppCellAlign.center, muted: true);
+          case 1:
+            return AppTableText(source.name?.capitalize() ?? '-', bold: true);
+          case 2:
+            return AppStatusPill((_getSourceStatus(source)) ? 'Active' : 'Inactive', color: (_getSourceStatus(source)) ? AppColors.success : AppColors.danger);
+          default:
+            return AppTableEditDelete(
+              onEdit: () => _showEditDialog(context, source),
+              onDelete: () => _confirmDelete(context, source),
+            );
+        }
+      },
     );
   }
 
-  bool _getSourceStatus(SourceModel source) {
-    // Handle different possible status representations
-    if (source.isActive != null) {
-      if (source.isActive is bool) {
-        return source.isActive as bool;
-      }
-    }
-
-    // Fallback to isActive if available
-    return source.isActive ?? false;
-  }
-
-  DataCell _buildStatusCell(bool isActive, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: isActive ? AppColors.success.withValues(alpha: 0.1) : AppColors.danger.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Text(
-              isActive ? 'Active' : 'Inactive',
-              style: TextStyle(
-                color: isActive ? AppColors.success : AppColors.danger,
-                fontWeight: FontWeight.w600,
-                fontSize: 11,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildActionCell(SourceModel source, BuildContext context, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Edit Button
-            _buildActionButton(
-              icon: Iconsax.edit,
-              color: AppColors.info,
-              tooltip: 'Edit source',
-              onPressed: () => _showEditDialog(context, source),
-            ),
-
-            // Delete Button
-            _buildActionButton(
-              icon: HugeIcons.strokeRoundedDeleteThrow,
-              color: AppColors.danger,
-              tooltip: 'Delete source',
-              onPressed: () => _confirmDelete(context, source),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  bool _getSourceStatus(SourceModel source) => source.isActive ?? false;
 
   Widget _buildActionButton({
     required IconData icon,
@@ -538,10 +367,10 @@ class SourceTableCard extends StatelessWidget {
     final sourceBloc = context.read<SourceBloc>();
     sourceBloc.nameController.text = source.name ?? "";
     sourceBloc.selectedState = source.isActive == true ? "Active" : "Inactive";
-    showDialog(
+    showAppPopover(
       context: context,
       builder: (context) {
-        return Dialog(
+        return AppPopoverShell(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),

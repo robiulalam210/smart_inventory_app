@@ -379,281 +379,109 @@ class PosSaleDataTableWidget extends StatelessWidget {
     );
   }
 
+  // ------------------------------------------------------------
+  // DESKTOP TABLE — AppDataTable
+  // ------------------------------------------------------------
+  // আগে: ১১টা column সমান চওড়া, সব লেখা center আর 10px, DataTable এর
+  // margin এর কারণে টেবিল পর্দা ছাড়িয়ে যেত (Receipt No কেটে যেত)।
+  // এখন: নাম বাঁয়ে, টাকা ডানে (দশমিক এক লাইনে), status/action মাঝে।
+  // row এ ক্লিক করলে details খোলে।
+  // ------------------------------------------------------------
+
+  static const List<AppTableColumn> _columns = [
+    AppTableColumn.center('SL', flex: 1, minWidth: 52),
+    AppTableColumn('Receipt No', flex: 2, minWidth: 110),
+    AppTableColumn('Sale Date', flex: 2, minWidth: 100),
+    AppTableColumn('Customer', flex: 3, minWidth: 150),
+    AppTableColumn('Sales By', flex: 2, minWidth: 110),
+    AppTableColumn('Created By', flex: 2, minWidth: 110),
+    AppTableColumn.numeric('Grand Total', flex: 2, minWidth: 110),
+    AppTableColumn.numeric('Paid', flex: 2, minWidth: 100),
+    AppTableColumn.numeric('Due / Advance', flex: 2, minWidth: 120),
+    AppTableColumn.center('Status', flex: 2, minWidth: 100),
+    AppTableColumn.center('Actions', flex: 2, minWidth: 96),
+  ];
+
   Widget _buildDesktopDataTable() {
-    return TableScrollControllers(
-      builder: (context, verticalScrollController, horizontalScrollController) {
+    return AppDataTable(
+      columns: _columns,
+      rowCount: sales.length,
+      onRowTap: null,
+      cellBuilder: (context, row, col) {
+        final sale = sales[row];
+        final double due = _toDouble(sale.dueAmount);
+        final double paid = _toDouble(sale.paidAmount);
+        final double payable = _toDouble(sale.payableAmount);
+        final bool isAdvance = due < 0;
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final totalWidth = constraints.maxWidth;
-        const numColumns = 11;
-        const minColumnWidth = 100.0;
-
-        final dynamicColumnWidth = (totalWidth / numColumns).clamp(
-          minColumnWidth,
-          double.infinity,
-        );
-
-        return Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(AppSizes.radius),
-            color: Colors.white,
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(AppSizes.radius),
-            child: Scrollbar(
-              controller: verticalScrollController,
-              thumbVisibility: true,
-              child: SingleChildScrollView(
-                controller: verticalScrollController,
-                scrollDirection: Axis.vertical,
-                child: Scrollbar(
-                  controller: horizontalScrollController,
-                  thumbVisibility: true,
-                  child: SingleChildScrollView(
-                    controller: horizontalScrollController,
-                    scrollDirection: Axis.horizontal,
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(minWidth: totalWidth),
-                      child: DataTable(
-                        dataRowMinHeight: 30,
-                        columnSpacing: 0,
-                        headingTextStyle: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        headingRowColor: WidgetStateProperty.all(
-                          AppColors.primaryColor(context),
-                        ),
-                        headingRowHeight: 40,
-                        columns: _buildColumns(dynamicColumnWidth),
-                        rows: sales
-                            .asMap()
-                            .entries
-                            .map(
-                              (entry) => _buildDataRow(
-                                context,
-                                entry.key + 1,
-                                entry.value,
-                                dynamicColumnWidth,
-                              ),
-                            )
-                            .toList(),
-                      ),
-                    ),
-                  ),
+        switch (col) {
+          case 0:
+            return AppTableText('${row + 1}',
+                align: AppCellAlign.center, muted: true);
+          case 1:
+            return AppTableText(sale.invoiceNo?.toString() ?? '-',
+                bold: true, color: AppColors.primaryColor(context));
+          case 2:
+            return AppTableText(_formatDate(sale.saleDate));
+          case 3:
+            return AppTableText(_text(sale.customerName));
+          case 4:
+            return AppTableText(_text(sale.saleByName));
+          case 5:
+            return AppTableText(_text(sale.createdByName), muted: true);
+          case 6:
+            return AppTableText(_formatCurrency(payable),
+                align: AppCellAlign.end, bold: true);
+          case 7:
+            return AppTableText(_formatCurrency(paid),
+                align: AppCellAlign.end, color: AppColors.success);
+          case 8:
+            return AppTableText(
+              (isAdvance ? '+ ' : '') + _formatCurrency(due.abs()),
+              align: AppCellAlign.end,
+              bold: due != 0,
+              color: due == 0
+                  ? AppColors.text(context).withValues(alpha: 0.5)
+                  : isAdvance
+                      ? AppColors.success
+                      : AppColors.danger,
+            );
+          case 9:
+            final status = _getPaymentStatus(paid, payable);
+            return AppStatusPill(status, color: _getStatusColor(status));
+          default:
+            return Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                AppTableAction(
+                  icon: Iconsax.eye,
+                  tooltip: 'View details',
+                  color: AppColors.info,
+                  onPressed: () => _viewSaleDetails(context, sale),
                 ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
+                const SizedBox(width: 4),
+                AppTableAction(
+                  icon: Iconsax.document_download,
+                  tooltip: 'Invoice PDF',
+                  color: AppColors.success,
+                  onPressed: () => _generatePdf(context, sale),
+                ),
+              ],
+            );
+        }
       },
     );
   }
 
-  List<DataColumn> _buildColumns(double columnWidth) {
-    const labels = [
-      "SL",
-      "Receipt No",
-      "Sale Date",
-      "Customer Name",
-      "Sales By",
-      "Created By",
-      "Grand Total",
-      "Paid Amount",
-      "Due/Advance",
-      "Status",
-      "Actions",
-    ];
-
-    return labels
-        .map(
-          (label) => DataColumn(
-            label: SizedBox(
-              width: columnWidth,
-              child: Padding(
-                padding: const EdgeInsets.all(4),
-                child: Text(
-                  label,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        )
-        .toList();
+  double _toDouble(dynamic v) {
+    if (v == null) return 0.0;
+    if (v is num) return v.toDouble();
+    return double.tryParse(v.toString()) ?? 0.0;
   }
 
-  DataRow _buildDataRow(
-    BuildContext context,
-    int index,
-    PosSaleModel sale,
-    double columnWidth,
-  ) {
-    final dueAmount = sale.dueAmount is String
-        ? double.tryParse(sale.dueAmount!) ?? 0.0
-        : (sale.dueAmount ?? 0.0).toDouble();
-
-    final paidAmount = sale.paidAmount is String
-        ? double.tryParse(sale.paidAmount!) ?? 0.0
-        : (sale.paidAmount ?? 0.0).toDouble();
-
-    final payableAmount = sale.payableAmount is String
-        ? double.tryParse(sale.payableAmount!) ?? 0.0
-        : (sale.payableAmount ?? 0.0).toDouble();
-
-    final isAdvance = dueAmount < 0;
-    final displayAmount = isAdvance ? dueAmount.abs() : dueAmount;
-    final status = _getPaymentStatus(paidAmount, payableAmount);
-
-    return DataRow(
-      cells: [
-        _buildDataCell(index.toString(), columnWidth, TextAlign.center),
-        _buildDataCell(
-          sale.invoiceNo.toString(),
-          columnWidth,
-          TextAlign.center,
-        ),
-        _buildDataCell(
-          _formatDate(sale.saleDate),
-          columnWidth,
-          TextAlign.center,
-        ),
-        _buildDataCell(
-          sale.customerName.toString(),
-          columnWidth,
-          TextAlign.center,
-        ),
-        _buildDataCell(
-          sale.saleByName.toString(),
-          columnWidth,
-          TextAlign.center,
-        ),
-        _buildDataCell(
-          sale.createdByName.toString(),
-          columnWidth,
-          TextAlign.center,
-        ),
-        _buildDataCell(
-          _formatCurrency(payableAmount),
-          columnWidth,
-          TextAlign.center,
-        ),
-        _buildDataCell(
-          _formatCurrency(paidAmount),
-          columnWidth,
-          TextAlign.center,
-        ),
-        _buildDueAdvanceCell(displayAmount, isAdvance, columnWidth),
-        _buildStatusCell(status, columnWidth),
-        _buildActionsCell(context, sale, columnWidth),
-      ],
-    );
-  }
-
-  DataCell _buildDataCell(String text, double width, TextAlign align) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Text(
-          text,
-          style: const TextStyle(
-            fontSize: 10,
-            fontWeight: FontWeight.w500,
-            color: Colors.black,
-          ),
-          textAlign: align,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildDueAdvanceCell(double amount, bool isAdvance, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Center(
-          child: Text(
-            _formatCurrency(amount),
-            style: TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.w600,
-              color: isAdvance ? AppColors.success : AppColors.danger,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildStatusCell(String status, double width) {
-    final color = _getStatusColor(status);
-
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: color),
-            ),
-            child: Text(
-              status,
-              style: TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.w600,
-                color: color,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildActionsCell(
-    BuildContext context,
-    PosSaleModel sale,
-    double width,
-  ) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            IconButton(
-              icon: const Icon(Icons.visibility, size: 16),
-              onPressed: () => _viewSaleDetails(context, sale),
-              padding: const EdgeInsets.all(4),
-              constraints: const BoxConstraints(),
-              tooltip: 'View Details',
-            ),
-            IconButton(
-              icon: const Icon(Icons.picture_as_pdf, size: 16),
-              onPressed: () => _generatePdf(context, sale),
-              padding: const EdgeInsets.all(4),
-              constraints: const BoxConstraints(),
-              tooltip: 'Generate PDF',
-            ),
-          ],
-        ),
-      ),
-    );
+  String _text(dynamic v) {
+    final s = v?.toString() ?? '';
+    return (s.isEmpty || s == 'null') ? '-' : s;
   }
 
   Color _getStatusColor(String status) {
@@ -675,7 +503,8 @@ class PosSaleDataTableWidget extends StatelessWidget {
 
   String _formatDate(DateTime? date) {
     if (date == null) return 'N/A';
-    return '${date.day}/${date.month}/${date.year}';
+    String two(int n) => n.toString().padLeft(2, '0');
+    return '${two(date.day)}/${two(date.month)}/${date.year}';
   }
 
   String _getPaymentStatus(double paidAmount, double payableAmount) {

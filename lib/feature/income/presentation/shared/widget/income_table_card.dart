@@ -324,7 +324,7 @@ class IncomeTableCard extends StatelessWidget {
     }
   }
   void _showEditBottomSheet(BuildContext context, IncomeModel income) {
-    showModalBottomSheet(
+    showAppPopoverSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
@@ -363,10 +363,10 @@ class IncomeTableCard extends StatelessWidget {
 
 
   void _showEditDialog(BuildContext context, IncomeModel income, bool isMobile) {
-    showDialog(
+    showAppPopover(
       context: context,
       builder: (context) {
-        return Dialog(
+        return AppPopoverShell(
           insetPadding: const EdgeInsets.all(20),
           child: ConstrainedBox(
             constraints: BoxConstraints(
@@ -388,10 +388,10 @@ class IncomeTableCard extends StatelessWidget {
   }
 
   void _showViewDialog(BuildContext context, IncomeModel income, bool isMobile) {
-    showDialog(
+    showAppPopover(
       context: context,
       builder: (context) {
-        return Dialog(
+        return AppPopoverShell(
           insetPadding: const EdgeInsets.all(20),
           child: ConstrainedBox(
             constraints: BoxConstraints(
@@ -469,7 +469,7 @@ class IncomeTableCard extends StatelessWidget {
 
 
 // ───────────────────────── Desktop table (নতুন ডিজাইন) ─────────────────────────
-class _IncomeDesktopTable extends StatefulWidget {
+class _IncomeDesktopTable extends StatelessWidget {
   final List<IncomeModel> incomes;
   final void Function(IncomeModel) onEdit;
   final void Function(IncomeModel) onView;
@@ -482,229 +482,51 @@ class _IncomeDesktopTable extends StatefulWidget {
     required this.onDelete,
   });
 
-  @override
-  State<_IncomeDesktopTable> createState() => _IncomeDesktopTableState();
-}
-
-class _IncomeDesktopTableState extends State<_IncomeDesktopTable> {
-  // ScrollController আগে build এর ভেতরে প্রতি rebuild এ নতুন হতো (scroll হারাত + leak)।
-  final ScrollController _hScroll = ScrollController();
-
-  static const _green = Color(0xFF16A34A);
-  static const _weights = [0.6, 1.2, 1.3, 1.1, 1.1, 1.2, 1.8, 1.3];
-  static const _minTableWidth = 1000.0;
-  static const _margin = 16.0;
-  static const _spacing = 12.0;
-
-  @override
-  void dispose() {
-    _hScroll.dispose();
-    super.dispose();
-  }
-
-  String _money(double v) {
-    final parts = v.toStringAsFixed(2).split('.');
-    final whole = parts[0].replaceAllMapped(
-      RegExp(r'\B(?=(\d{3})+(?!\d))'),
-      (m) => ',',
-    );
-    return '৳$whole.${parts[1]}';
-  }
+  static const _columns = [
+    AppTableColumn.center('SL', flex: 1, minWidth: 52),
+    AppTableColumn('Invoice No.', flex: 2, minWidth: 120),
+    AppTableColumn('Income Head', flex: 3, minWidth: 150),
+    AppTableColumn('Account', flex: 2, minWidth: 120),
+    AppTableColumn('Date', flex: 2, minWidth: 100),
+    AppTableColumn.numeric('Amount', flex: 2, minWidth: 120),
+    AppTableColumn('Note', flex: 3, minWidth: 140),
+    AppTableColumn.center('Actions', flex: 2, minWidth: 120),
+  ];
 
   @override
   Widget build(BuildContext context) {
-    final primary = AppColors.primaryColor(context);
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final available =
-            constraints.maxWidth.isFinite ? constraints.maxWidth : _minTableWidth;
-        final tableWidth = available < _minTableWidth ? _minTableWidth : available;
-        final usable =
-            tableWidth - _margin * 2 - _spacing * (_weights.length - 1);
-        final sum = _weights.reduce((a, b) => a + b);
-        double w(int i) => usable * _weights[i] / sum;
-
-        Widget head(String t, int i, {Alignment a = Alignment.centerLeft}) =>
-            SizedBox(width: w(i), child: Align(alignment: a, child: Text(t)));
-
-        return Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: Colors.grey.withValues(alpha: 0.18)),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.04),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(14),
-            child: Scrollbar(
-              controller: _hScroll,
-              thumbVisibility: tableWidth > available,
-              child: SingleChildScrollView(
-                controller: _hScroll,
-                scrollDirection: Axis.horizontal,
-                child: SizedBox(
-                  width: tableWidth,
-                  child: DataTable(
-                    horizontalMargin: _margin,
-                    columnSpacing: _spacing,
-                    dataRowMinHeight: 52,
-                    dataRowMaxHeight: 52,
-                    headingRowHeight: 46,
-                    dividerThickness: 0.6,
-                    headingRowColor:
-                        WidgetStateProperty.all(primary.withValues(alpha: 0.10)),
-                    headingTextStyle: TextStyle(
-                      color: AppColors.text(context),
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 0.2,
-                    ),
-                    dataTextStyle: TextStyle(
-                      color: AppColors.text(context),
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                    ),
-                    columns: [
-                      DataColumn(label: head('No.', 0, a: Alignment.center)),
-                      DataColumn(label: head('Invoice No.', 1)),
-                      DataColumn(label: head('Income Head', 2)),
-                      DataColumn(label: head('Account', 3)),
-                      DataColumn(label: head('Date', 4, a: Alignment.center)),
-                      DataColumn(label: head('Amount', 5, a: Alignment.center)),
-                      DataColumn(label: head('Note', 6)),
-                      DataColumn(label: head('Actions', 7, a: Alignment.center)),
-                    ],
-                    rows: [
-                      for (var k = 0; k < widget.incomes.length; k++)
-                        _row(context, k, widget.incomes[k], w, primary),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
+    return AppDataTable(
+      columns: _columns,
+      rowCount: incomes.length,
+      cellBuilder: (context, row, col) {
+        final income = incomes[row];
+        switch (col) {
+          case 0:
+            return AppTableText('${row + 1}',
+                align: AppCellAlign.center, muted: true);
+          case 1:
+            return AppTableText(income.invoiceNumber ?? '-',
+                bold: true, color: AppColors.primaryColor(context));
+          case 2:
+            return AppTableText(income.headName ?? '-');
+          case 3:
+            return AppTableText(income.accountName ?? '-', muted: true);
+          case 4:
+            return AppTableText(AppWidgets().convertDateTimeDDMMYYYY(
+                DateTime.tryParse(income.incomeDate ?? '')));
+          case 5:
+            return AppTableMoney(AppTableMoney.parse(income.amount),
+                bold: true, color: AppColors.success);
+          case 6:
+            return AppTableText(income.note ?? '-', muted: true);
+          default:
+            return AppTableEditDelete(
+              onView: () => onView(income),
+              onEdit: () => onEdit(income),
+              onDelete: () => onDelete(income),
+            );
+        }
       },
-    );
-  }
-
-  DataRow _row(BuildContext context, int k, IncomeModel income,
-      double Function(int) w, Color primary) {
-    final amount = double.tryParse(income.amount ?? '') ?? 0;
-    final note = (income.note ?? '').trim();
-    final date = AppWidgets()
-        .convertDateTimeDDMMYYYY(DateTime.tryParse(income.incomeDate ?? ''));
-
-    Widget cell(int i, Widget child) => SizedBox(width: w(i), child: child);
-    Widget text(String t) => Text(t, maxLines: 1, overflow: TextOverflow.ellipsis);
-
-    return DataRow(
-      color: WidgetStateProperty.all(
-        k.isOdd ? Colors.grey.withValues(alpha: 0.045) : Colors.transparent,
-      ),
-      cells: [
-        DataCell(cell(0, Center(child: text('${k + 1}')))),
-        DataCell(cell(
-          1,
-          Text(
-            income.invoiceNumber?.isNotEmpty == true ? income.invoiceNumber! : 'N/A',
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(fontWeight: FontWeight.w700),
-          ),
-        )),
-        DataCell(cell(
-          2,
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                color: primary.withValues(alpha: 0.10),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Text(
-                income.headName?.isNotEmpty == true ? income.headName! : 'N/A',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: primary,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ),
-        )),
-        DataCell(cell(3, text(income.accountName ?? 'N/A'))),
-        DataCell(cell(4, Center(child: text(date)))),
-        DataCell(cell(
-          5,
-          Center(
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-              decoration: BoxDecoration(
-                color: (amount > 0 ? _green : Colors.grey).withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Text(
-                _money(amount),
-                style: TextStyle(
-                  color: amount > 0 ? _green : Colors.grey,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 12,
-                ),
-              ),
-            ),
-          ),
-        )),
-        DataCell(cell(
-          6,
-          note.isEmpty
-              ? Text('—', style: TextStyle(color: Colors.grey.shade500))
-              : Tooltip(message: note, child: text(note)),
-        )),
-        DataCell(cell(
-          7,
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _action(Iconsax.edit, 'Edit', AppColors.info, () => widget.onEdit(income)),
-              const SizedBox(width: 6),
-              _action(HugeIcons.strokeRoundedView, 'View', _green,
-                  () => widget.onView(income)),
-              const SizedBox(width: 6),
-              _action(HugeIcons.strokeRoundedDeleteThrow, 'Delete', AppColors.danger,
-                  () => widget.onDelete(income)),
-            ],
-          ),
-        )),
-      ],
-    );
-  }
-
-  Widget _action(IconData icon, String tip, Color color, VoidCallback onTap) {
-    return Tooltip(
-      message: tip,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(8),
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.all(7),
-          decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.10),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Icon(icon, size: 17, color: color),
-        ),
-      ),
     );
   }
 }

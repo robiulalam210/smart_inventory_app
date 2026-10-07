@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:meherinMart/core/widgets/app_popover_route.dart';
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
 
 import '../configs/app_colors.dart';
@@ -188,18 +189,20 @@ class _CustomDateRangeFieldState extends State<CustomDateRangeField> {
   Future<DateRange?> _showPicker(BuildContext context) {
     DateRange? tempRange = selectedDateRange;
 
-    return showModalBottomSheet<DateRange>(
+    // Desktop: date field এর ঠিক নিচে anchored popover
+    return showAppPopoverSheet<DateRange>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
+      mode: PopoverAnchorMode.anchored,
+      width: 440,
       builder: (_) {
         return ClipRRect(
-          borderRadius:
-          const BorderRadius.vertical(top: Radius.circular(20)),
+          borderRadius: BorderRadius.circular(14),
           child: Container(
-            color: Colors.white,
-            height:
-            MediaQuery.of(context).size.height * 0.85,
+            color: AppColors.bottomNavBg(context),
+            height: (MediaQuery.of(context).size.height * 0.7)
+                .clamp(420.0, 620.0),
             child: Column(
               children: [
                 const SizedBox(height: 12),

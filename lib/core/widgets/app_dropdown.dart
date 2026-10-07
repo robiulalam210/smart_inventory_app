@@ -36,7 +36,7 @@
 //       void showDropdown() {
 //         FocusScope.of(context).unfocus();
 //         Future.delayed(const Duration(milliseconds: 50), () {
-//           showModalBottomSheet(
+//           showAppPopoverSheet(
 //             context: context,
 //             isScrollControlled: true,
 //             backgroundColor: Colors.transparent,
@@ -397,11 +397,13 @@ class AppDropdown<T> extends FormField<T> {
       void showDropdown() {
         FocusScope.of(context).unfocus();
         Future.delayed(const Duration(milliseconds: 50), () {
-          showModalBottomSheet(
+          if (!context.mounted) return;
+          // Desktop: field এর ঠিক নিচে anchored popover — আগে পর্দার
+          // নিচ থেকে bottom sheet উঠত, বড় monitor এ চোখ অনেক দূরে যেত
+          showAppPopover(
             context: context,
-            isScrollControlled: true,
-            backgroundColor: Colors.transparent,
-            useSafeArea: true,
+            mode: PopoverAnchorMode.anchored,
+            matchAnchorWidth: true,
             builder: (sheetContext) {
               return _DropdownBottomSheet<T>(
                 items: items,
@@ -614,6 +616,7 @@ class _DropdownBottomSheetState<T> extends State<_DropdownBottomSheet<T>> {
       _speech = null;
     }
     searchController.dispose();
+    _listController.dispose();
     super.dispose();
   }
 
@@ -693,215 +696,220 @@ class _DropdownBottomSheetState<T> extends State<_DropdownBottomSheet<T>> {
     return false;
   }
 
+  // ---------------- keyboard navigation ----------------
+  // ↑ / ↓ দিয়ে item বদল, Enter এ select — desktop এ mouse ছাড়াই
+  // দ্রুত customer / seller বেছে নেওয়া যায়
+  int _highlight = -1;
+  final ScrollController _listController = ScrollController();
+  static const double _itemExtent = 40;
+
+  void _move(int delta) {
+    if (filteredItems.isEmpty) return;
+    setState(() {
+      _highlight = (_highlight + delta).clamp(0, filteredItems.length - 1);
+    });
+    if (_listController.hasClients) {
+      final double target = _highlight * _itemExtent;
+      final double viewport = _listController.position.viewportDimension;
+      final double offset = _listController.offset;
+      if (target < offset) {
+        _listController.jumpTo(target);
+      } else if (target + _itemExtent > offset + viewport) {
+        _listController.jumpTo(target + _itemExtent - viewport);
+      }
+    }
+  }
+
+  void _selectHighlighted() {
+    if (filteredItems.isEmpty) return;
+    final int index = _highlight < 0 ? 0 : _highlight;
+    widget.onChanged(filteredItems[index]);
+  }
+
   @override
   Widget build(BuildContext context) {
-    return DraggableScrollableSheet(
-      initialChildSize: 0.6,
-      minChildSize: 0.4,
-      maxChildSize: 0.9,
-      builder: (context, scrollController) {
-        return SafeArea(
-          child: Container(
-            constraints: const BoxConstraints(minHeight: 200),
-            decoration: BoxDecoration(
-              color: AppColors.bottomNavBg(context),
-              borderRadius:
-              const BorderRadius.vertical(top: Radius.circular(20)),
-            ),
-            child: Column(
-              children: [
-                // Header
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    border: Border(
-                      bottom: BorderSide(color: Colors.grey.shade300),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text('Select',
-                          style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.primaryColor(context))),
-                      IconButton(
-                          icon: Icon(Icons.close, color: AppColors.grey),
-                          onPressed: () => Navigator.pop(context)),
-                    ],
-                  ),
-                ),
+    final Color border = Theme.of(context).brightness == Brightness.dark
+        ? Colors.white.withValues(alpha: 0.10)
+        : AppColors.borderLight;
+    final double listHeight =
+        (filteredItems.length * _itemExtent + 8).clamp(_itemExtent + 8, 320.0);
 
-                // Optional search with speech button
-                if (widget.isSearch)
-                  Padding(
-                    padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+    return AppPopoverShell(
+      showDragHandle: false,
+      child: CallbackShortcuts(
+        bindings: {
+          const SingleActivator(LogicalKeyboardKey.arrowDown): () => _move(1),
+          const SingleActivator(LogicalKeyboardKey.arrowUp): () => _move(-1),
+          const SingleActivator(LogicalKeyboardKey.enter): _selectHighlighted,
+          const SingleActivator(LogicalKeyboardKey.numpadEnter):
+              _selectHighlighted,
+        },
+        child: Focus(
+          autofocus: !widget.isSearch,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (widget.isSearch)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(8, 8, 8, 6),
+                  child: SizedBox(
+                    height: 38,
                     child: TextField(
                       controller: searchController,
-                      autofocus: false,
+                      autofocus: true,
+                      style: const TextStyle(fontSize: 14),
+                      textInputAction: TextInputAction.done,
+                      onSubmitted: (_) => _selectHighlighted(),
                       decoration: InputDecoration(
+                        isDense: true,
                         hintText: 'Search ${widget.hint}',
-                        prefixIcon: const Icon(Icons.search),
-                        suffixIcon: Padding(
-                          padding: const EdgeInsets.only(right: 4.0),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              // Clear button when there is text
-                              if (searchController.text.isNotEmpty)
-                                GestureDetector(
-                                  onTap: () {
-                                    searchController.clear();
-                                    _filterItems('');
-                                    // rebuild to hide clear icon
-                                    setState(() {});
-                                  },
-                                  child: const Padding(
-                                    padding: EdgeInsets.symmetric(horizontal: 8.0),
-                                    child: Icon(Icons.clear),
-                                  ),
-                                ),
-                              // Mic button (enabled only when plugin initialized & available)
-                              GestureDetector(
-                                onTap: (_platformLikelySupportsSpeech &&
-                                    _speechAvailable)
-                                    ? _toggleListening
-                                    : null,
-                                child: Tooltip(
-                                  message: _platformLikelySupportsSpeech
-                                      ? (_speechAvailable
-                                      ? (_isListening
-                                      ? 'Stop listening'
-                                      : 'Start voice search')
-                                      : 'Microphone not available (grant permission or platform unsupported)')
-                                      : 'Voice search not supported on this platform',
-                                  child: Padding(
-                                    padding:
-                                    const EdgeInsets.symmetric(horizontal: 8),
-                                    child: Icon(
-                                      _isListening ? Icons.mic : Icons.mic_none,
-                                      color: (_platformLikelySupportsSpeech &&
-                                          _speechAvailable)
-                                          ? AppColors.primaryColor(context)
-                                          : AppColors.greyColor(context),
-                                    ),
-                                  ),
-                                ),
+                        hintStyle: TextStyle(
+                            fontSize: 13, color: AppColors.greyColor(context)),
+                        prefixIcon: const Icon(Icons.search, size: 18),
+                        prefixIconConstraints:
+                            const BoxConstraints(minWidth: 36, minHeight: 36),
+                        suffixIcon: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (searchController.text.isNotEmpty)
+                              IconButton(
+                                tooltip: 'Clear',
+                                visualDensity: VisualDensity.compact,
+                                icon: const Icon(Icons.close, size: 16),
+                                onPressed: () {
+                                  searchController.clear();
+                                  _filterItems('');
+                                  setState(() => _highlight = -1);
+                                },
                               ),
-                            ],
-                          ),
+                            if (_platformLikelySupportsSpeech &&
+                                _speechAvailable)
+                              IconButton(
+                                tooltip: _isListening
+                                    ? 'Stop listening'
+                                    : 'Start voice search',
+                                visualDensity: VisualDensity.compact,
+                                icon: Icon(
+                                  _isListening ? Icons.mic : Icons.mic_none,
+                                  size: 18,
+                                  color: AppColors.primaryColor(context),
+                                ),
+                                onPressed: _toggleListening,
+                              ),
+                          ],
                         ),
+                        contentPadding: const EdgeInsets.symmetric(
+                            vertical: 8, horizontal: 10),
                         border: OutlineInputBorder(
-                          borderRadius:
-                          BorderRadius.circular(AppSizes.radiusSmall),
-                          borderSide: BorderSide(
-                              color: AppColors.greyColor(context).withValues(
-                                  alpha: 0.5),
-                              width: 0.5),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius:
-                          BorderRadius.circular(AppSizes.radiusSmall),
-                          borderSide: BorderSide(
-                              color: AppColors.primaryColor(context), width: 0.5),
-                        ),
-                        errorBorder: OutlineInputBorder(
-                          borderRadius:
-                          BorderRadius.circular(AppSizes.radiusSmall),
-                          borderSide: BorderSide(
-                              color: AppColors.errorColor(context), width: 0.5),
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: border),
                         ),
                         enabledBorder: OutlineInputBorder(
-                          borderRadius:
-                          BorderRadius.circular(AppSizes.radiusSmall),
-                          borderSide: BorderSide(
-                              color: AppColors.greyColor(context).withValues(
-                                  alpha: 0.5),
-                              width: 0.5),
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: border),
                         ),
-                        contentPadding:
-                        const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(
+                              color: AppColors.primaryColor(context),
+                              width: 1.2),
+                        ),
                       ),
                       onChanged: (v) {
                         _filterItems(v);
-                        // Keep UI updated for clear button
-                        setState(() {});
+                        // টাইপ করলে প্রথম মিলটা highlight — Enter চাপলেই select
+                        setState(() =>
+                            _highlight = filteredItems.isEmpty ? -1 : 0);
                       },
                     ),
                   ),
+                ),
+              if (widget.isSearch) Divider(height: 1, color: border),
+              if (filteredItems.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.search_off,
+                          size: 28, color: AppColors.greyColor(context)),
+                      const SizedBox(height: 6),
+                      Text('No items found',
+                          style: TextStyle(
+                              fontSize: 13,
+                              color: AppColors.greyColor(context))),
+                    ],
+                  ),
+                )
+              else
+                SizedBox(
+                  height: listHeight,
+                  child: Scrollbar(
+                    controller: _listController,
+                    thumbVisibility: filteredItems.length * _itemExtent > 320,
+                    child: ListView.builder(
+                      controller: _listController,
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      itemExtent: _itemExtent,
+                      itemCount: filteredItems.length,
+                      itemBuilder: (context, index) {
+                        final item = filteredItems[index];
+                        final bool isSelected = item == widget.selectedValue;
+                        final bool isHighlighted = index == _highlight;
+                        final Color primary = AppColors.primaryColor(context);
 
-                // Item list
-                Expanded(
-                  child: filteredItems.isEmpty
-                      ? Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.search_off,
-                              size: 64,
-                              color: AppColors.greyColor(context)),
-                          const SizedBox(height: 16),
-                          Text('No items found',
-                              style: TextStyle(
-                                  fontSize: 16,
-                                  color: AppColors.greyColor(context))),
-                        ],
-                      ),
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 6),
+                          child: Material(
+                            color: isSelected
+                                ? primary.withValues(alpha: 0.10)
+                                : isHighlighted
+                                    ? primary.withValues(alpha: 0.06)
+                                    : Colors.transparent,
+                            borderRadius: BorderRadius.circular(6),
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(6),
+                              hoverColor: primary.withValues(alpha: 0.06),
+                              onTap: () => widget.onChanged(item),
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 10),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        widget.itemLabel(item),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          color: isSelected
+                                              ? primary
+                                              : AppColors.text(context),
+                                          fontWeight: isSelected
+                                              ? FontWeight.w600
+                                              : FontWeight.w400,
+                                        ),
+                                      ),
+                                    ),
+                                    if (isSelected)
+                                      Icon(Icons.check_rounded,
+                                          size: 18, color: primary),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      },
                     ),
-                  )
-                      : ListView.builder(
-                    controller: scrollController,
-                    padding: const EdgeInsets.all(8),
-                    itemCount: filteredItems.length,
-                    itemBuilder: (context, index) {
-                      final item = filteredItems[index];
-                      final isSelected = item == widget.selectedValue;
-
-                      return Container(
-                        margin: const EdgeInsets.symmetric(
-                            vertical: 4, horizontal: 8),
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? AppColors.primaryColor(context)
-                              .withValues(alpha: 0.1)
-                              : AppColors.bottomNavBg(context),
-                          borderRadius:
-                          BorderRadius.circular(AppSizes.radius),
-                          border: Border.all(
-                            color: AppColors.greyColor(context)
-                                .withValues(alpha: 0.5),
-                            width: 0.5,
-                          ),
-                        ),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 8),
-                        child: InkWell(
-                          onTap: () => widget.onChanged(item),
-                          child: Row(
-                            children: [
-                              if (isSelected)
-                                Icon(Icons.check_circle,
-                                    color: AppColors.primaryColor(context)),
-                              if (isSelected) const SizedBox(width: 10),
-                              Text(widget.itemLabel(item),
-                                  style: AppTextStyle.body(context).copyWith(
-                                      fontWeight: FontWeight.w500)),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
                   ),
                 ),
-              ],
-            ),
+            ],
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 }

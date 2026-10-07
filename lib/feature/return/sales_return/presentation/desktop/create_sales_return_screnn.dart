@@ -459,6 +459,7 @@ mainAxisAlignment: MainAxisAlignment.start,                  children: [
                   hintText: '0.00',
                   fillColor: Colors.white,
                   keyboardType: TextInputType.number,
+                  validator: AppValidators.number('Return charge'),
                   onChanged: (value) {
                     _calculateTotals();
                   },

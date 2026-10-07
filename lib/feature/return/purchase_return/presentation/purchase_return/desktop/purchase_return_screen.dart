@@ -209,7 +209,7 @@ class _PurchaseReturnScreenState extends State<PurchaseReturnScreen> {
       elevation: 0,
       color: AppColors.bottomNavBg(context),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.end,
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           // 🔍 Search Field
@@ -303,7 +303,7 @@ class _PurchaseReturnScreenState extends State<PurchaseReturnScreen> {
           AppButton(
             name: "Create Purchase Return",
             onPressed: () {
-              showModalBottomSheet(
+              showAppPopoverSheet(
                 context: context,
                 isScrollControlled: true, // Important for full height
                 backgroundColor: Colors.transparent,

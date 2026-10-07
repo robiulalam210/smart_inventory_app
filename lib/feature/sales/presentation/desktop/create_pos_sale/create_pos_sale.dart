@@ -504,20 +504,53 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildTopFormSection(bloc),
-                const SizedBox(height: 0),
-                _buildProductListSection(bloc),
-                const SizedBox(height: 8),
-                _buildChargesSection(bloc),
-                const SizedBox(height: 8),
-                _buildSummarySection(bloc,isWalkInCustomer),
-                const SizedBox(height: 8),
+                // প্রতিটা অংশ আলাদা card এ — POS screen এর সাথে মিল রেখে
+                _card(child: _buildTopFormSection(bloc)),
+                _card(title: 'Items', child: _buildProductListSection(bloc)),
+                _card(title: 'Adjustments', child: _buildChargesSection(bloc)),
+                _card(
+                  title: 'Summary & Payment',
+                  child: _buildSummarySection(bloc, isWalkInCustomer),
+                ),
                 _buildActionButtons(),
                 const SizedBox(height: 20),
               ],
             ),
           );
         },
+      ),
+    );
+  }
+
+  Widget _card({String? title, required Widget child}) {
+    final border = Theme.of(context).brightness == Brightness.dark
+        ? Colors.white.withValues(alpha: 0.10)
+        : AppColors.borderLight;
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.bottomNavBg(context),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (title != null) ...[
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: AppColors.text(context),
+              ),
+            ),
+            const SizedBox(height: 12),
+          ],
+          child,
+        ],
       ),
     );
   }
@@ -547,6 +580,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                       label: "Customer",
                       hint: bloc.selectClintModel?.name ?? "Select Customer",
                       isSearch: true,
+                      isLabel: true,
                       isNeedAll: false,
                       isRequired: true,
                       value: bloc.selectClintModel,
@@ -587,6 +621,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                         hint:
                         bloc.selectSalesModel?.username ?? "Select Sales",
                         isSearch: true,
+                        isLabel: true,
                         isNeedAll: false,
                         isRequired: true,
                         value: bloc.selectSalesModel,
@@ -610,7 +645,8 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                 child: CustomInputField(
                   isRequired: true,
                   readOnly: true,
-                  isRequiredLable: false,
+                  isRequiredLable: true,
+                  labelText: 'Sale Date',
                   controller: bloc.dateEditingController,
                   hintText: 'Sale Date',
                   keyboardType: TextInputType.datetime,
@@ -1158,6 +1194,11 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
                   ),
+                  // ঋণাত্মক নয়, % হলে ১০০ এর বেশি নয়
+                  validator: AppValidators.number(
+                    label,
+                    max: selectedType == 'percent' ? 100 : null,
+                  ),
                   onChanged: (value) {
                     _updateChangeAmount();
                     setState(() {});
@@ -1433,38 +1474,154 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
   }
 
   Widget _buildActionButtons() {
-    return Center(
-      child: Wrap(
-        spacing: 12,
-        runSpacing: 12,
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          ElevatedButton(
-            onPressed: () async {
-              // Preview functionality
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xff800000),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            child: const Text('Preview', style: TextStyle(color: Colors.white)),
-          ),
-          ElevatedButton(
+          // আগে Preview বাটন কিছুই করত না — এখন sale এর সারাংশ popover এ
+          PopoverButton(label: 'Preview', onPressed: _showPreview),
+          const SizedBox(width: 10),
+          PopoverButton(
+            label: 'Submit Sale',
+            primary: true,
+            icon: Icons.check_rounded,
             onPressed: _submitForm,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primaryColor(context),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            child: const Text('Submit', style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
     );
+  }
+
+  List<int> get _filledRows => [
+        for (int i = 0; i < products.length; i++)
+          if (products[i]["product_id"] != null) i,
+      ];
+
+  void _showPreview() {
+    final bloc = context.read<CreatePosSaleBloc>();
+    final rows = _filledRows;
+    showAppPopover<void>(
+      context: context,
+      mode: PopoverAnchorMode.aligned,
+      builder: (ctx) => AppPopoverCard(
+        width: 500,
+        icon: const Icon(Icons.receipt_long_outlined),
+        title: const Text('Sale Preview'),
+        content: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              '${bloc.selectClintModel?.name ?? 'No customer selected'}'
+              '  ·  ${bloc.dateEditingController.text}',
+              style: TextStyle(
+                fontSize: 13,
+                color: AppColors.text(context).withValues(alpha: 0.7),
+              ),
+            ),
+            const SizedBox(height: 12),
+            if (rows.isEmpty) const Text('No items added.'),
+            for (final i in rows)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        (products[i]["product"] is ProductModelStockModel)
+                            ? (products[i]["product"] as ProductModelStockModel)
+                                    .name ??
+                                '-'
+                            : '-',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    Text('${products[i]["quantity"]} × ${products[i]["price"]}',
+                        style: const TextStyle(fontSize: 12.5)),
+                  ],
+                ),
+              ),
+            const Divider(height: 20),
+            Row(
+              children: [
+                const Expanded(
+                  child: Text('Net Total',
+                      style: TextStyle(fontWeight: FontWeight.w700)),
+                ),
+                Text(
+                  '৳ ${calculateAllFinalTotal().toStringAsFixed(2)}',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.primaryColor(context),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+        actions: [
+          PopoverButton(label: 'Close', onPressed: () => Navigator.of(ctx).pop()),
+          PopoverButton(
+            label: 'Submit Sale',
+            primary: true,
+            onPressed: rows.isEmpty
+                ? null
+                : () {
+                    Navigator.of(ctx).pop();
+                    _submitForm();
+                  },
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Submit এর আগে item যাচাই — প্রথম সমস্যাটা জানিয়ে false ফেরত দেয়
+  bool _validateSaleItems() {
+    final rows = _filledRows;
+    String? problem;
+    if (rows.isEmpty) {
+      problem = 'Add at least one product before submitting.';
+    } else {
+      for (int n = 0; n < rows.length && problem == null; n++) {
+        final row = products[rows[n]];
+        final qty = double.tryParse(row["quantity"].toString()) ?? 0;
+        final price = double.tryParse(row["price"].toString()) ?? 0;
+        final disc = double.tryParse(row["discount"].toString()) ?? 0;
+        final p = row["product"];
+        final stock = (p is ProductModelStockModel && p.stockQty != null)
+            ? p.stockQty!.toDouble()
+            : double.infinity;
+        final isPercent =
+            _normalizeDiscountType(row["discount_type"]) == 'percent';
+        if (qty <= 0) {
+          problem = 'Item ${n + 1}: quantity must be at least 1';
+        } else if (qty > stock) {
+          problem =
+              'Item ${n + 1}: only ${stock.toStringAsFixed(0)} in stock';
+        } else if (price <= 0) {
+          problem = 'Item ${n + 1}: price is zero';
+        } else if (disc < 0 || (isPercent && disc > 100)) {
+          problem = 'Item ${n + 1}: invalid discount';
+        } else if (!isPercent && disc > price * qty) {
+          problem = 'Item ${n + 1}: discount is more than the item total';
+        }
+      }
+    }
+    if (problem != null) {
+      showCustomToast(
+        context: context,
+        title: 'Check items',
+        description: problem,
+        icon: Icons.error_outline,
+        primaryColor: AppColors.danger,
+      );
+      return false;
+    }
+    return true;
   }
 
   void _selectDate() async {
@@ -1485,10 +1642,13 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
   }
 
   void _submitForm() {
-    if (formKey.currentState!.validate()) {
+    if (formKey.currentState!.validate() && _validateSaleItems()) {
       final bloc = context.read<CreatePosSaleBloc>();
 
-      var transferProducts = products.map((product) {
+      // খালি row (product বাছা হয়নি) server এ পাঠানো হয় না
+      var transferProducts = products
+          .where((product) => product["product_id"] != null)
+          .map((product) {
         // convert internal discount_type ('percent'|'fixed') to backend expected value ('percentage' or 'fixed')
         final internalType = _normalizeDiscountType(product["discount_type"]);
         final backendType = internalType == 'percent' ? 'percentage' : 'fixed';

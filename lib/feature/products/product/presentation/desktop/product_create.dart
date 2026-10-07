@@ -564,7 +564,10 @@ gapH8,
       labelText: 'Product Name ',
       fillColor: const Color.fromARGB(255, 255, 255, 255),
       keyboardType: TextInputType.text,
-      validator: (value) => value!.isEmpty ? 'Please enter Product Name' : null,
+      validator: AppValidators.combine([
+        AppValidators.required('Product name'),
+        AppValidators.length('Product name', min: 2, max: 150),
+      ]),
     );
   }
 
@@ -580,13 +583,14 @@ gapH8,
       keyboardType: TextInputType.number,
       hintText: '0.00',
       fillColor: const Color.fromARGB(255, 255, 255, 255),
+      validator: AppValidators.number('Purchase price'),
     );
   }
 
   Widget _buildSellingPriceField() {
     return CustomInputField(
       isRequiredLable: true,
-      isRequired: false,
+      isRequired: true,
       controller: productsBloc.productSellingPriceController,
       labelText: 'Selling Price',
       hintText: '0.00',
@@ -595,6 +599,8 @@ gapH8,
         FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
       ],
       keyboardType: TextInputType.number,
+      // POS এ ০ দামের product বিক্রি করা যায় না — তাই এখানেই আটকানো
+      validator: AppValidators.amount('Selling price'),
     );
   }
 
@@ -608,6 +614,7 @@ gapH8,
       fillColor: const Color.fromARGB(255, 255, 255, 255),
       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
       keyboardType: TextInputType.number,
+      validator: AppValidators.integer('Opening stock'),
     );
   }
 
@@ -621,6 +628,7 @@ gapH8,
       fillColor: const Color.fromARGB(255, 255, 255, 255),
       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
       keyboardType: TextInputType.number,
+      validator: AppValidators.integer('Alert quantity'),
     );
   }
 
@@ -691,7 +699,21 @@ gapH8,
         FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
       ],
       keyboardType: TextInputType.number,
-      // prefixIcon: const Icon(Icons.discount, size: 20),
+      // discount চালু থাকলে মান লাগবে; % হলে ১০০ এর বেশি নয়,
+      // TK হলে selling price এর বেশি নয়
+      validator: (v) {
+        if (!productsBloc.isDiscountApplied) return null;
+        final isPercent = productsBloc.selectedDiscountType == 'percentage';
+        final selling =
+            double.tryParse(productsBloc.productSellingPriceController.text) ??
+                0;
+        return AppValidators.number(
+          'Discount',
+          required: true,
+          allowZero: false,
+          max: isPercent ? 100 : (selling > 0 ? selling : null),
+        )(v);
+      },
     );
   }
 

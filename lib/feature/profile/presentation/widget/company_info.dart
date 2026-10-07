@@ -159,7 +159,7 @@ class _CompanyProfileCardWithUploadState
   }
 
   Future<void> _showImagePickerOptions({required bool allowCompanyLogo}) async {
-    await showModalBottomSheet(
+    await showAppPopoverSheet(
       context: context,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(18)),

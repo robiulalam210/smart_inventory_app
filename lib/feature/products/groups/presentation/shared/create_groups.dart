@@ -40,10 +40,10 @@ class _GroupsCreateState extends State<GroupsCreate> {
   }
 
   void _showConfirmationDialog() {
-    showDialog(
+    showAppPopover(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
+        return AppPopoverCard(
           title: const Text('Confirm'),
           content: Text(
             widget.id == null

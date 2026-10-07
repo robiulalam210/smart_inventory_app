@@ -249,15 +249,18 @@ _fetchApi();
                                     controller: transferBloc.amountController,
                                     hintText: 'Amount',
                                     keyboardType: TextInputType.number,
+                                    // From account এর balance এর বেশি
+                                    // টাকা পাঠানো যায় না
                                     validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Please enter amount';
-                                      }
-                                      final amount = double.tryParse(value);
-                                      if (amount == null || amount <= 0) {
-                                        return 'Please enter a valid amount';
-                                      }
-                                      return null;
+                                      final from = transferBloc.fromAccountModel;
+                                      final balance = double.tryParse(
+                                          from?.balance?.toString() ?? '');
+                                      return AppValidators.amount(
+                                        'Amount',
+                                        max: (balance != null && balance > 0)
+                                            ? balance
+                                            : null,
+                                      )(value);
                                     },
                                     onChanged: (value) {
                                       setState(() {});
@@ -646,9 +649,9 @@ _fetchApi();
   }
 
   void _showSuccessDialog(String title, String message) {
-    showDialog(
+    showAppPopover(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (context) => AppPopoverCard(
         title: Text(title),
         content: Text(message),
         actions: [

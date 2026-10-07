@@ -309,7 +309,7 @@ class MobileAccountTransferCard extends StatelessWidget {
   }
 
   void _showTransferDetails(BuildContext context, AccountTransferModel transfer) {
-    showModalBottomSheet(
+    showAppPopoverSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: AppColors.bottomNavBg(context),
@@ -515,453 +515,93 @@ class AccountTransferCard extends StatelessWidget {
   });
 
   @override
+  // Desktop টেবিল — AppDataTable
   Widget build(BuildContext context) {
     if (transfers.isEmpty) {
       return _buildEmptyState();
     }
 
-    return TableScrollControllers(
-      builder: (context, verticalScrollController, horizontalScrollController) {
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        const numColumns = 9; // Added columns for actions
-        const columnSpacing = 10.0;
-        const horizontalMargin = 12.0;
-        const minColumnWidth = 120.0;
-
-        return Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withValues(alpha: 0.1),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Scrollbar(
-            controller: verticalScrollController,
-            thumbVisibility: true,
-            child: SingleChildScrollView(
-              controller: verticalScrollController,
-              scrollDirection: Axis.vertical,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: Scrollbar(
-                  controller: horizontalScrollController,
-                  thumbVisibility: true,
-                  child: SingleChildScrollView(
-                    controller: horizontalScrollController,
-                    scrollDirection: Axis.horizontal,
-                    child: Container(
-                      constraints: BoxConstraints(
-                        minWidth: minColumnWidth * numColumns + (columnSpacing * (numColumns - 1)) + (horizontalMargin * 2),
-                        minHeight: 200,
-                      ),
-                      child: DataTable(
-                        dataRowMinHeight: 50,
-                        dataRowMaxHeight: 60,
-                        columnSpacing: columnSpacing,
-                        horizontalMargin: horizontalMargin,
-                        dividerThickness: 0.5,
-                        headingRowHeight: 50,
-                        headingTextStyle: TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                          fontFamily: GoogleFonts.inter().fontFamily,
-                        ),
-                        headingRowColor: WidgetStateProperty.all(
-                          AppColors.primaryColor(context),
-                        ),
-                        dataTextStyle: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w500,
-                          fontFamily: GoogleFonts.inter().fontFamily,
-                        ),
-                        columns: _buildColumns(minColumnWidth),
-                        rows: transfers.asMap().entries.map((entry) {
-                          final transfer = entry.value;
-                          return DataRow(
-                            color: WidgetStateProperty.resolveWith<Color?>(
-                                  (Set<WidgetState> states) {
-                                if (entry.key.isEven) {
-                                  return Colors.grey.withValues(alpha: 0.03);
-                                }
-                                return null;
-                              },
-                            ),
-                            onSelectChanged: onTransferTap != null
-                                ? (_) => onTransferTap!()
-                                : null,
-                            cells: [
-                              _buildDataCell(transfer.transferNo ?? "N/A", minColumnWidth * 0.8),
-                              _buildDataCell(_formatDate(transfer.transferDate), minColumnWidth),
-                              _buildDataCell(transfer.fromAccount?.name ?? "N/A", minColumnWidth * 1.2),
-                              _buildDataCell(transfer.toAccount?.name ?? "N/A", minColumnWidth * 1.2),
-                              _buildAmountCell(transfer.amount, minColumnWidth),
-                              _buildStatusCell(transfer.status, minColumnWidth),
-                              _buildTypeCell(transfer.transferType, minColumnWidth),
-                              _buildReversalCell(transfer.isReversal, minColumnWidth * 0.6),
-                              _buildActionsCell(context, transfer, minColumnWidth * 1.0),
-                            ],
-                          );
-                        }).toList(),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-      },
-    );
-  }
-
-  List<DataColumn> _buildColumns(double columnWidth) {
-    return [
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth * 0.8,
-          child: const Text(
-            'Transfer No',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.white),
-          ),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text(
-            'Date',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.white),
-          ),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth * 1.2,
-          child: const Text(
-            'From Account',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.white),
-          ),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth * 1.2,
-          child: const Text(
-            'To Account',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.white),
-          ),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text(
-            'Amount',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.white),
-          ),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text(
-            'Status',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.white),
-          ),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text(
-            'Type',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.white),
-          ),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth * 0.6,
-          child: const Text(
-            'Reversal',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.white),
-          ),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth * 1.0,
-          child: const Text(
-            'Actions',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.white),
-          ),
-        ),
-      ),
+    const columns = [
+      AppTableColumn('Transfer No', flex: 2, minWidth: 110),
+      AppTableColumn('Date', flex: 2, minWidth: 100),
+      AppTableColumn('From', flex: 3, minWidth: 140),
+      AppTableColumn('To', flex: 3, minWidth: 140),
+      AppTableColumn.numeric('Amount', flex: 2, minWidth: 110),
+      AppTableColumn.center('Status', flex: 2, minWidth: 104),
+      AppTableColumn.center('Type', flex: 2, minWidth: 100),
+      AppTableColumn.center('Actions', flex: 2, minWidth: 130),
     ];
-  }
 
-  DataCell _buildDataCell(String text, double width) {
-    return DataCell(
-      Container(
-        width: width,
-        padding: const EdgeInsets.symmetric(horizontal: 4),
-        child: Text(
-          text,
-          style: const TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w500,
-            color: Colors.black87,
-          ),
-          textAlign: TextAlign.center,
-          overflow: TextOverflow.ellipsis,
-          maxLines: 2,
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildAmountCell(String? amount, double width) {
-    final amountValue = double.tryParse(amount ?? '0') ?? 0;
-    final isNegative = amountValue < 0;
-    final color = isNegative ? AppColors.danger : AppColors.success;
-
-    return DataCell(
-      Container(
-        width: width,
-        padding: const EdgeInsets.symmetric(horizontal: 4),
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(6),
-              border: Border.all(
-                color: color.withValues(alpha: 0.3),
-                width: 1,
-              ),
-            ),
-            constraints: const BoxConstraints(
-              minWidth: 80,
-            ),
-            child: Text(
-              amountValue.abs().toStringAsFixed(2),
-              style: GoogleFonts.inter(
-                color: color,
-                fontWeight: FontWeight.w600,
-                fontSize: 11,
-              ),
-              textAlign: TextAlign.center,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildStatusCell(String? status, double width) {
-    final statusText = status?.toUpperCase() ?? 'UNKNOWN';
-    final color = _getStatusColor(status);
-
-    return DataCell(
-      Container(
-        width: width,
-        padding: const EdgeInsets.symmetric(horizontal: 4),
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: color.withValues(alpha: 0.3),
-                width: 1,
-              ),
-            ),
-            constraints: const BoxConstraints(
-              minWidth: 80,
-            ),
-            child: Text(
-              statusText,
-              style: GoogleFonts.inter(
-                color: color,
-                fontWeight: FontWeight.w600,
-                fontSize: 10,
-              ),
-              textAlign: TextAlign.center,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildTypeCell(String? type, double width) {
-    final typeText = type?.replaceAll('_', ' ').toUpperCase() ?? 'UNKNOWN';
-    final color = _getTypeColor(type);
-
-    return DataCell(
-      Container(
-        width: width,
-        padding: const EdgeInsets.symmetric(horizontal: 4),
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: color.withValues(alpha: 0.3),
-                width: 1,
-              ),
-            ),
-            constraints: const BoxConstraints(
-              minWidth: 80,
-            ),
-            child: Text(
-              typeText,
-              style: GoogleFonts.inter(
-                color: color,
-                fontWeight: FontWeight.w600,
-                fontSize: 10,
-              ),
-              textAlign: TextAlign.center,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildReversalCell(bool? isReversal, double width) {
-    final isRev = isReversal ?? false;
-    final color = isRev ? AppColors.warning : Colors.grey;
-
-    return DataCell(
-      Container(
-        width: width,
-        padding: const EdgeInsets.symmetric(horizontal: 4),
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: color.withValues(alpha: 0.3),
-                width: 1,
-              ),
-            ),
-            child: Icon(
-              isRev ? Icons.refresh : Icons.arrow_forward,
-              size: 14,
-              color: color,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildActionsCell(BuildContext context, AccountTransferModel transfer, double width) {
-    final status = transfer.status?.toLowerCase();
-    final isReversal = transfer.isReversal ?? false;
-
-    return DataCell(
-      Container(
-        width: width,
-        padding: const EdgeInsets.symmetric(horizontal: 4),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Execute Button (only for pending transfers)
-            if (status == 'pending' && !isReversal)
-              IconButton(
-                icon: const Icon(
-                  Icons.play_arrow,
-                  size: 16,
-                  color: AppColors.success,
+    return AppDataTable(
+      columns: columns,
+      rowCount: transfers.length,
+      onRowTap: onTransferTap == null ? null : (_) => onTransferTap!(),
+      cellBuilder: (context, row, col) {
+        final t = transfers[row];
+        final status = t.status?.toLowerCase();
+        final isReversal = t.isReversal ?? false;
+        switch (col) {
+          case 0:
+            return AppTableText(t.transferNo ?? '-',
+                bold: true,
+                color: AppColors.primaryColor(context),
+                subtitle: isReversal ? 'Reversal' : null);
+          case 1:
+            return AppTableText(_formatDate(t.transferDate));
+          case 2:
+            return AppTableText(t.fromAccount?.name ?? '-');
+          case 3:
+            return AppTableText(t.toAccount?.name ?? '-');
+          case 4:
+            return AppTableMoney(AppTableMoney.parse(t.amount), bold: true);
+          case 5:
+            return AppStatusPill((t.status ?? '-').capitalize(),
+                color: _getStatusColor(t.status));
+          case 6:
+            return AppStatusPill((t.transferType ?? '-').capitalize(),
+                color: _getTypeColor(t.transferType));
+          default:
+            return Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (status == 'pending' && !isReversal)
+                  AppTableAction(
+                    icon: Icons.play_arrow_rounded,
+                    tooltip: 'Execute transfer',
+                    color: AppColors.success,
+                    onPressed: () => onExecute?.call(t),
+                  ),
+                if (status == 'completed' && !isReversal)
+                  AppTableAction(
+                    icon: Icons.undo_rounded,
+                    tooltip: 'Reverse transfer',
+                    color: AppColors.warning,
+                    onPressed: () => onReverse?.call(t),
+                  ),
+                if (status == 'pending')
+                  AppTableAction(
+                    icon: Icons.cancel_outlined,
+                    tooltip: 'Cancel transfer',
+                    color: AppColors.danger,
+                    onPressed: () => onCancel?.call(t),
+                  ),
+                AppTableAction(
+                  icon: Icons.visibility_outlined,
+                  tooltip: 'View details',
+                  color: AppColors.info,
+                  onPressed: () => _showTransferDetails(context, t),
                 ),
-                onPressed: () => onExecute?.call(transfer),
-                padding: const EdgeInsets.all(4),
-                constraints: const BoxConstraints(),
-                tooltip: 'Execute Transfer',
-              ),
-
-            // Reverse Button (only for completed transfers that are not reversals)
-            if (status == 'completed' && !isReversal)
-              IconButton(
-                icon: const Icon(
-                  Icons.refresh,
-                  size: 16,
-                  color: AppColors.warning,
-                ),
-                onPressed: () => onReverse?.call(transfer),
-                padding: const EdgeInsets.all(4),
-                constraints: const BoxConstraints(),
-                tooltip: 'Reverse Transfer',
-              ),
-
-            // Cancel Button (only for pending transfers)
-            if (status == 'pending')
-              IconButton(
-                icon: const Icon(
-                  Icons.cancel,
-                  size: 16,
-                  color: AppColors.danger,
-                ),
-                onPressed: () => onCancel?.call(transfer),
-                padding: const EdgeInsets.all(4),
-                constraints: const BoxConstraints(),
-                tooltip: 'Cancel Transfer',
-              ),
-
-            // View Details Button (always visible)
-            IconButton(
-              icon: const Icon(
-                Icons.visibility,
-                size: 16,
-                color: AppColors.info,
-              ),
-              onPressed: () {
-                _showTransferDetails(context, transfer);
-              },
-              padding: const EdgeInsets.all(4),
-              constraints: const BoxConstraints(),
-              tooltip: 'View Details',
-            ),
-          ],
-        ),
-      ),
+              ],
+            );
+        }
+      },
     );
   }
 
   void _showTransferDetails(BuildContext context, AccountTransferModel transfer) {
-    showDialog(
+    showAppPopover(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (context) => AppPopoverCard(
         title: Row(
           children: [
             Icon(

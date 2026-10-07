@@ -157,10 +157,10 @@ class _ExpenseHeadScreenState extends State<ExpenseSubHeadScreen> {
                           size: 200,
                           onPressed: () {
                             context.read<ExpenseSubHeadBloc>().clearData();
-                            showDialog(
+                            showAppPopover(
                               context: context,
                               builder: (context) {
-                                return Dialog(
+                                return AppPopoverShell(
                                   child: SizedBox(
                                     width: AppSizes.width(context) * 0.50,
                                     child: const ExpenseSubCreateScreen(),

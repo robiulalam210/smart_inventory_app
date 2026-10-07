@@ -185,6 +185,7 @@ class _MobileIncomeCreateState extends State<MobileIncomeCreate> {
                   });
                 },
                 isRequired: true,
+                validator: AppValidators.select<String>('a payment method'),
               ),
 
               const SizedBox(height: 4),
@@ -239,11 +240,11 @@ class _MobileIncomeCreateState extends State<MobileIncomeCreate> {
 
                 keyboardType: TextInputType.number,
                 isRequired: true,
-                validator: (val) {
-                  if (val == null || val.isEmpty) return "Please enter amount";
-                  if (double.tryParse(val) == null) return "Please enter valid number";
-                  return null;
-                },
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
+                ],
+                // ০ বা ঋণাত্মক আয় রেকর্ড করার মানে নেই
+                validator: AppValidators.amount('Amount'),
               ),
 
               // Note
@@ -270,6 +271,7 @@ class _MobileIncomeCreateState extends State<MobileIncomeCreate> {
                   }
                 },
                 isRequired: true,
+                validator: AppValidators.required('Income date'),
               ),
 
 

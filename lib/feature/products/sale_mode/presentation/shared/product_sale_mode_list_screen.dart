@@ -423,9 +423,9 @@ class _ProductSaleModeListScreenState extends State<ProductSaleModeListScreen> {
   }
 
   void _showEditDialog(BuildContext context, ProductSaleModeModel mode) {
-    showDialog(
+    showAppPopover(
       context: context,
-      builder: (context) => Dialog(
+      builder: (context) => AppPopoverShell(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppSizes.radius),
         ),
@@ -447,9 +447,9 @@ class _ProductSaleModeListScreenState extends State<ProductSaleModeListScreen> {
 
 
   void _showDeleteDialog(BuildContext context, ProductSaleModeModel mode) {
-    showDialog(
+    showAppPopover(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (context) => AppPopoverCard(
         title: const Text('Delete Sale Mode'),
         content: Text(
           'Are you sure you want to delete "${mode.saleModeName}"?',
@@ -475,9 +475,9 @@ class _ProductSaleModeListScreenState extends State<ProductSaleModeListScreen> {
   }
 
   void _showBulkConfigDialog(BuildContext context) {
-    showDialog(
+    showAppPopover(
       context: context,
-      builder: (context) => Dialog(
+      builder: (context) => AppPopoverShell(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppSizes.radius),
         ),

@@ -180,7 +180,7 @@ class _SalesReturnScreenState extends State<SalesReturnScreen> {
 
   Widget _buildFilterRow() {
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.end,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         // Search Field
@@ -249,10 +249,10 @@ class _SalesReturnScreenState extends State<SalesReturnScreen> {
         AppButton(
           name: "Create Sales Return",
           onPressed: () {
-            showDialog(
+            showAppPopover(
               context: context,
               builder: (context) {
-                return Dialog(
+                return AppPopoverShell(
                   insetPadding: const EdgeInsets.all(20),
                   child: SizedBox(
                     width: AppSizes.width(context) * 0.70,

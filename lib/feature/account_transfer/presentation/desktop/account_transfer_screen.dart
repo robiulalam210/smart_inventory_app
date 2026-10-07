@@ -333,9 +333,9 @@ class _AccountTransferScreenState extends State<AccountTransferScreen> {
   void _showReverseDialog(BuildContext context, AccountTransferModel transfer) {
     TextEditingController reasonController = TextEditingController();
 
-    showDialog(
+    showAppPopover(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (context) => AppPopoverCard(
         title: Row(
           children: [
             const Icon(Icons.refresh, color: AppColors.warning),
@@ -471,9 +471,9 @@ class _AccountTransferScreenState extends State<AccountTransferScreen> {
   void _showCancelDialog(BuildContext context, AccountTransferModel transfer) {
     TextEditingController reasonController = TextEditingController();
 
-    showDialog(
+    showAppPopover(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (context) => AppPopoverCard(
         title: Row(
           children: [
             const Icon(Icons.cancel, color: AppColors.danger),
@@ -616,7 +616,7 @@ class _AccountTransferScreenState extends State<AccountTransferScreen> {
 
   Widget _buildFilterRow() {
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.end,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         // 🔍 Search Field
@@ -678,10 +678,10 @@ class _AccountTransferScreenState extends State<AccountTransferScreen> {
         AppButton(
           name: "Create Transfer",
           onPressed: () {
-            showDialog(
+            showAppPopover(
               context: context,
               builder: (context) {
-                return Dialog(
+                return AppPopoverShell(
                   child: SizedBox(
                     width: AppSizes.width(context) * 0.60,
                     height: 550,

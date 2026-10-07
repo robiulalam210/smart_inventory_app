@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:meherinMart/core/widgets/app_popover_route.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lottie/lottie.dart';
 import '../../../../../core/configs/app_colors.dart';
@@ -249,10 +250,10 @@ class _BrandScreenState extends State<BrandScreen> {
     );
   }
   void _showCreateDialog(BuildContext context) {
-    showDialog(
+    showAppPopover(
       context: context,
       builder: (context) {
-        return Dialog(
+        return AppPopoverShell(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),

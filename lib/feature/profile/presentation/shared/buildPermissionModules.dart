@@ -88,7 +88,7 @@ List<PermissionAction> _crudActions(dynamic module) {
 
 
 void showPermissionsDialog(BuildContext context) {
-  showDialog(
+  showAppPopover(
     context: context,
     builder: (context) {
       return BlocBuilder<ProfileBloc, ProfileState>(
@@ -106,7 +106,7 @@ void showPermissionsDialog(BuildContext context) {
 Widget _buildPermissionsDialog(ProfilePermissionModel permissionData,BuildContext context) {
   final modules = buildPermissionModules(permissionData);
 
-  return AlertDialog(
+  return AppPopoverCard(
     backgroundColor: AppColors.bottomNavBg(context),
     title: Text('module_permissions'.tr()),
     content: SingleChildScrollView(

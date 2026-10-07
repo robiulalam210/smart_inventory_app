@@ -980,10 +980,10 @@ class _ProductsScreenState extends State<ProductsScreen> {
   }
 
   void _showCreateProductDialog(BuildContext context) {
-    showDialog(
+    showAppPopover(
       context: context,
       builder: (context) {
-        return Dialog(
+        return AppPopoverShell(
           insetPadding: const EdgeInsets.all(20),
           child: ConstrainedBox(
             constraints: BoxConstraints(
@@ -1006,10 +1006,10 @@ class _ProductsScreenState extends State<ProductsScreen> {
     ProductModel product,
     bool isMobile,
   ) {
-    showDialog(
+    showAppPopover(
       context: context,
       builder: (context) {
-        return Dialog(
+        return AppPopoverShell(
           insetPadding: const EdgeInsets.all(20),
           child: ConstrainedBox(
             constraints: BoxConstraints(

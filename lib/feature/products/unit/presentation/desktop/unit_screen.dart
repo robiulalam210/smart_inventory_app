@@ -166,10 +166,10 @@ class _UnitScreenState extends State<UnitScreen> {
                       onPressed: () {
                         context.read<UnitBloc>().nameController.clear();
                         context.read<UnitBloc>().shortNameController.clear();
-                        showDialog(
+                        showAppPopover(
                           context: context,
                           builder: (context) {
-                            return Dialog(
+                            return AppPopoverShell(
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(AppSizes.radius),
                               ),

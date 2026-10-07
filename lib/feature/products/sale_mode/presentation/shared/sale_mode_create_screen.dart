@@ -70,10 +70,10 @@ class _SaleModeCreateScreenState extends State<SaleModeCreateScreen> {
   }
 
   void _showConfirmationDialog() {
-    showDialog(
+    showAppPopover(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
+        return AppPopoverCard(
           title: const Text('Confirm'),
           content: Text(
             widget.id == null

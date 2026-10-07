@@ -203,10 +203,10 @@ class ProductDataTableWidget extends StatelessWidget {
                 Expanded(
                   child: OutlinedButton.icon(
                     onPressed: () {
-                      showDialog(
+                      showAppPopover(
                         context: context,
                         builder: (context) {
-                          return Dialog(
+                          return AppPopoverShell(
                             insetPadding: const EdgeInsets.all(10),
                             child: ConstrainedBox(
                               constraints: BoxConstraints(
@@ -343,239 +343,61 @@ class ProductDataTableWidget extends StatelessWidget {
     );
   }
 
+  // Desktop টেবিল — AppDataTable
+  // দাম আর stock যোগ করা হয়েছে — product list এ সবচেয়ে বেশি এগুলোই দেখা হয়।
+  // stock alert quantity এর নিচে নামলে লাল।
   Widget _buildDesktopDataTable() {
-    return TableScrollControllers(
-      builder: (context, verticalScrollController, horizontalScrollController) {
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final totalWidth = constraints.maxWidth;
-        const numColumns = 8;
-        const minColumnWidth = 100;
-
-        final dynamicColumnWidth = (totalWidth / numColumns)
-            .clamp(minColumnWidth, double.infinity)
-            .toDouble();
-
-        return Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            color: Colors.white,
-          ),
-          child: ClipRRect( borderRadius: BorderRadius.circular(AppSizes.radius),
-            child: Scrollbar(
-              controller: verticalScrollController,
-              thumbVisibility: true,
-              child: SingleChildScrollView(
-                controller: verticalScrollController,
-                scrollDirection: Axis.vertical,
-                child: Scrollbar(
-                  controller: horizontalScrollController,
-                  thumbVisibility: true,
-                  child: SingleChildScrollView(
-                    controller: horizontalScrollController,
-                    scrollDirection: Axis.horizontal,
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(minWidth: totalWidth),
-                      child: DataTable(
-                        dataRowMinHeight: 40,
-                        headingRowHeight: 40,
-                        columnSpacing: 0,
-                        headingTextStyle: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        headingRowColor: WidgetStateProperty.all(
-                          AppColors.primaryColor(context),
-                        ),
-                        dataRowColor: WidgetStateProperty.resolveWith<Color?>(
-                              (Set<WidgetState> states) {
-                            return Colors.white;
-                          },
-                        ),
-                        columns: _buildColumns(dynamicColumnWidth),
-                        rows: products
-                            .asMap()
-                            .entries
-                            .map((entry) => _buildDataRow(context,
-                          entry.key + 1,
-                          entry.value,
-                          dynamicColumnWidth,
-                        ))
-                            .toList(),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-      },
-    );
-  }
-
-  List<DataColumn> _buildColumns(double columnWidth) {
-    const columnLabels = [
-      'SL',
-      'Name',
-      'SKU',
-      'Category',
-      'Brand',
-      'Unit',
-      'Status',
-      'Actions',
+    const columns = [
+      AppTableColumn.center('SL', flex: 1, minWidth: 52),
+      AppTableColumn('Product', flex: 4, minWidth: 180),
+      AppTableColumn('Category', flex: 2, minWidth: 110),
+      AppTableColumn('Brand', flex: 2, minWidth: 100),
+      AppTableColumn('Unit', flex: 1, minWidth: 70),
+      AppTableColumn.numeric('Sell Price', flex: 2, minWidth: 100),
+      AppTableColumn.numeric('Stock', flex: 1, minWidth: 80),
+      AppTableColumn.center('Status', flex: 2, minWidth: 96),
+      AppTableColumn.center('Actions', flex: 2, minWidth: 120),
     ];
 
-    return columnLabels
-        .map(
-          (label) => DataColumn(
-        label: Container(
-          width: label == 'SL'
-              ? columnWidth * 0.6
-              : label == 'Name'
-              ? columnWidth * 1.2
-              : label == 'Actions'
-              ? columnWidth * 0.8
-              : columnWidth,
-          alignment: Alignment.center,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
-            child: Text(
-              label,
-              style: const TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w700,
-              ),
-              maxLines: 2,
-              softWrap: true,
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ),
-      ),
-    )
-        .toList();
-  }
-
-  DataRow _buildDataRow(BuildContext context,int index, ProductModel product, double columnWidth) {
-    return DataRow(
-      cells: [
-        _buildDataCell(index.toString(), columnWidth * 0.6, TextAlign.center),
-        _buildDataCell(product.name ?? 'N/A', columnWidth * 1.2, TextAlign.center),
-        _buildDataCell(product.sku ?? 'N/A', columnWidth, TextAlign.center),
-        _buildDataCell(
-          product.categoryInfo?.name ?? 'N/A',
-          columnWidth,
-          TextAlign.center,
-        ),
-        _buildDataCell(
-          product.brandInfo?.name ?? 'N/A',
-          columnWidth,
-          TextAlign.center,
-        ),
-        _buildDataCell(
-          product.unitInfo?.name ?? 'N/A',
-          columnWidth,
-          TextAlign.center,
-        ),
-        _buildStatusCell(product.isActive ?? false, columnWidth),
-        _buildActionsCell(context,product, columnWidth * 0.8),
-      ],
-    );
-  }
-
-  DataCell _buildDataCell(String text, double columnWidth, TextAlign align) {
-    return DataCell(
-      SizedBox(
-        width: columnWidth,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
-          child: Text(
-            text,
-            style: const TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.normal,
-              color: Colors.black,
-            ),
-            textAlign: align,
-            maxLines: 3,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildStatusCell(bool isActive, double columnWidth) {
-    final status = isActive ? 'Active' : 'Inactive';
-    final color = isActive ? AppColors.success : AppColors.danger;
-
-    return DataCell(
-      SizedBox(
-        width: columnWidth,
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: color),
-            ),
-            child: Text(
-              status,
-              style: TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.w600,
-                color: color,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildActionsCell(BuildContext context,ProductModel product, double columnWidth) {
-    return DataCell(
-      SizedBox(
-        width: columnWidth,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              IconButton(
-                icon: Icon(
-                  Iconsax.edit,
-                  size: 20,
-                  color: Colors.blue.shade600,
-                ),
-                onPressed: () => onEdit?.call(product),
-                padding: const EdgeInsets.all(4),
-                constraints: const BoxConstraints(),
-                tooltip: 'Edit Product',
-              ),
-              IconButton(
-                icon: Icon(
-                  HugeIcons.strokeRoundedDeleteThrow,
-                  size: 20,
-                  color: Colors.red.shade600,
-                ),
-                onPressed: () => _showDeleteConfirmation(context, product),
-                padding: const EdgeInsets.all(4),
-                constraints: const BoxConstraints(),
-                tooltip: 'Delete Product',
-              ),
-            ],
-          ),
-        ),
-      ),
+    return AppDataTable(
+      columns: columns,
+      rowCount: products.length,
+      cellBuilder: (context, row, col) {
+        final p = products[row];
+        switch (col) {
+          case 0:
+            return AppTableText('${row + 1}',
+                align: AppCellAlign.center, muted: true);
+          case 1:
+            return AppTableText(p.name ?? '-', bold: true, subtitle: p.sku);
+          case 2:
+            return AppTableText(p.categoryInfo?.name ?? '-');
+          case 3:
+            return AppTableText(p.brandInfo?.name ?? '-', muted: true);
+          case 4:
+            return AppTableText(p.unitInfo?.name ?? '-', muted: true);
+          case 5:
+            return AppTableMoney(AppTableMoney.parse(p.sellingPrice));
+          case 6:
+            final stock = p.stockQty ?? 0;
+            final low = stock <= (p.alertQuantity ?? 0);
+            return AppTableText('$stock',
+                align: AppCellAlign.end,
+                bold: true,
+                color: low ? AppColors.danger : null);
+          case 7:
+            final active = p.isActive ?? false;
+            return AppStatusPill(active ? 'Active' : 'Inactive',
+                color: active ? AppColors.success : AppColors.danger);
+          default:
+            return AppTableEditDelete(
+              onView: () => AppRoutes.push(
+                  context, ProductDetailsScreen(productId: p.id.toString())),
+              onEdit: onEdit == null ? null : () => onEdit!(p),
+              onDelete: () => _showDeleteConfirmation(context, p),
+            );
+        }
+      },
     );
   }
 

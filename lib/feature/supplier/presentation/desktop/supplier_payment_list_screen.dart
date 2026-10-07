@@ -131,7 +131,7 @@ class _SupplierPaymentScreenState extends State<SupplierPaymentScreen> {
 
           // Desktop layout
             Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.end,
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 SizedBox(
@@ -167,10 +167,10 @@ class _SupplierPaymentScreenState extends State<SupplierPaymentScreen> {
                 AppButton(
                   name: "Create Payment",
                   onPressed: () {
-                    showDialog(
+                    showAppPopover(
                       context: context,
                       builder: (context) {
-                        return Dialog(
+                        return AppPopoverShell(
                           child: SizedBox(
                             width: AppSizes.width(context) * 0.50,
                             child: const SupplierPaymentForm(),

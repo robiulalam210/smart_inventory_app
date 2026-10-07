@@ -28,90 +28,95 @@ class SalesReturnTableCard extends StatelessWidget {
       return _buildMobileList(context);
     }
 
-    // Existing desktop/table layout
-    return TableScrollControllers(
-      builder: (context, verticalScrollController, horizontalScrollController) {
+    // Desktop: AppDataTable
+    const columns = [
+      AppTableColumn.center('SL', flex: 1, minWidth: 52),
+      AppTableColumn('Receipt No', flex: 2, minWidth: 110),
+      AppTableColumn('Customer', flex: 3, minWidth: 150),
+      AppTableColumn('Return Date', flex: 2, minWidth: 104),
+      AppTableColumn.numeric('Amount', flex: 2, minWidth: 110),
+      AppTableColumn('Method', flex: 2, minWidth: 100),
+      AppTableColumn('Reason', flex: 3, minWidth: 140),
+      AppTableColumn.numeric('Items', flex: 1, minWidth: 70),
+      AppTableColumn.center('Status', flex: 2, minWidth: 104),
+      AppTableColumn.center('Actions', flex: 3, minWidth: 140),
+    ];
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final totalWidth = constraints.maxWidth;
-        const numColumns = 11;
-        const minColumnWidth = 100.0;
-
-        final dynamicColumnWidth = (totalWidth / numColumns).clamp(
-          minColumnWidth,
-          double.infinity,
-        );
-
-        return Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withValues(alpha: 0.1),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Scrollbar(
-            controller: verticalScrollController,
-            thumbVisibility: true,
-            child: SingleChildScrollView(
-              controller: verticalScrollController,
-              scrollDirection: Axis.vertical,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: Scrollbar(
-                  controller: horizontalScrollController,
-                  thumbVisibility: true,
-                  child: SingleChildScrollView(
-                    controller: horizontalScrollController,
-                    scrollDirection: Axis.horizontal,
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 5),
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(minWidth: totalWidth),
-                        child: DataTable(
-                          dataRowMinHeight: 40,
-                          dataRowMaxHeight: 40,
-                          columnSpacing: 8,
-                          horizontalMargin: 12,
-                          dividerThickness: 0.5,
-                          headingRowHeight: 40,
-                          headingTextStyle: TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            fontFamily: GoogleFonts.inter().fontFamily,
-                          ),
-                          headingRowColor: WidgetStateProperty.all(
-                            AppColors.primaryColor(context),
-                          ),
-                          dataTextStyle: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w500,
-                            fontFamily: GoogleFonts.inter().fontFamily,
-                          ),
-                          rows: _buildTableRows(context, dynamicColumnWidth),
-                          columns: _buildColumns(dynamicColumnWidth),
-                        ),
-                      ),
-                    ),
-                  ),
+    return AppDataTable(
+      columns: columns,
+      rowCount: salesReturns.length,
+      onRowTap: onSalesReturnTap == null ? null : (_) => onSalesReturnTap!(),
+      cellBuilder: (context, row, col) {
+        final r = salesReturns[row];
+        switch (col) {
+          case 0:
+            return AppTableText('${row + 1}',
+                align: AppCellAlign.center, muted: true);
+          case 1:
+            return AppTableText(r.receiptNo ?? '-',
+                bold: true, color: AppColors.primaryColor(context));
+          case 2:
+            return AppTableText(r.customerName ?? '-');
+          case 3:
+            return AppTableText(_formatDate(r.returnDate));
+          case 4:
+            return AppTableMoney(AppTableMoney.parse(r.returnAmount),
+                bold: true);
+          case 5:
+            return AppTableText(r.paymentMethod ?? '-', muted: true);
+          case 6:
+            return AppTableText(r.reason ?? '-', muted: true);
+          case 7:
+            return AppTableText('${r.items?.length ?? 0}',
+                align: AppCellAlign.end);
+          case 8:
+            return AppStatusPill((r.status ?? '-').capitalize(),
+                color: _getStatusColor(r.status ?? ''));
+          default:
+            return Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                AppTableAction(
+                  icon: Icons.visibility_outlined,
+                  tooltip: 'View details',
+                  color: AppColors.info,
+                  onPressed: () => _showViewDialog(context, r),
                 ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
+                if (r.status == 'pending') ...[
+                  AppTableAction(
+                    icon: Icons.check_circle_outline,
+                    tooltip: 'Approve return',
+                    color: AppColors.success,
+                    onPressed: () => _confirmApprove(context, r),
+                  ),
+                  AppTableAction(
+                    icon: Icons.block_outlined,
+                    tooltip: 'Reject return',
+                    color: AppColors.warning,
+                    onPressed: () => _confirmReject(context, r),
+                  ),
+                ],
+                if (r.status == 'approved')
+                  AppTableAction(
+                    icon: Icons.done_all_rounded,
+                    tooltip: 'Mark as completed',
+                    color: AppColors.success,
+                    onPressed: () => _confirmComplete(context, r),
+                  ),
+                if (r.status == 'pending' || r.status == 'rejected')
+                  AppTableAction(
+                    icon: Icons.delete_outline_rounded,
+                    tooltip: 'Delete return',
+                    color: AppColors.danger,
+                    onPressed: () => _confirmDelete(context, r),
+                  ),
+              ],
+            );
+        }
       },
     );
   }
 
-  // MOBILE VIEW
   Widget _buildMobileList(BuildContext context) {
     return ListView.separated(
       shrinkWrap: true,
@@ -384,291 +389,6 @@ class SalesReturnTableCard extends StatelessWidget {
   }
 
   // ----- EXISTING TABLE BUILDERS -----
-  List<DataColumn> _buildColumns(double columnWidth) {
-    return [
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth * 0.6,
-          child: const Text('#', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Receipt No', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Customer', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Return Date', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Return Amount', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Status', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Payment Method', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth * 1.2,
-          child: const Text('Reason', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth * 0.8,
-          child: const Text('Items', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth * 1.5,
-          child: const Text('Actions', textAlign: TextAlign.center),
-        ),
-      ),
-    ];
-  }
-
-  List<DataRow> _buildTableRows(BuildContext context, double columnWidth) {
-    return salesReturns.asMap().entries.map((entry) {
-      final index = entry.key;
-      final salesReturn = entry.value;
-
-      return DataRow(
-        color: WidgetStateProperty.resolveWith<Color>((
-          Set<WidgetState> states,
-        ) {
-          return index % 2 == 0
-              ? Colors.grey.withValues(alpha: 0.03)
-              : Colors.transparent;
-        }),
-        onSelectChanged: onSalesReturnTap != null
-            ? (_) => onSalesReturnTap!()
-            : null,
-        cells: [
-          _buildDataCell('${index + 1}', columnWidth * 0.6),
-          _buildDataCell(salesReturn.receiptNo ?? 'N/A', columnWidth),
-          _buildDataCell(salesReturn.customerName ?? 'N/A', columnWidth),
-          _buildDataCell(_formatDate(salesReturn.returnDate), columnWidth),
-          _buildAmountCell(
-            double.tryParse(salesReturn.returnAmount.toString()),
-            columnWidth,
-          ),
-          _buildStatusCell(salesReturn.status, columnWidth),
-          _buildDataCell(salesReturn.paymentMethod ?? 'N/A', columnWidth),
-          _buildReasonCell(salesReturn.reason, columnWidth * 1.2),
-          _buildItemsCell(salesReturn.items, columnWidth * 0.8),
-          _buildActionCell(salesReturn, context, columnWidth * 1.5),
-        ],
-      );
-    }).toList();
-  }
-
-  DataCell _buildDataCell(String text, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Text(
-          text,
-          style: const TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w500,
-            color: Colors.black87,
-          ),
-          textAlign: TextAlign.center,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildAmountCell(double? amount, double width) {
-    final amountText = amount != null ? amount.toStringAsFixed(2) : 'N/A';
-
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: AppColors.danger.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Text(
-              amountText,
-              style: const TextStyle(
-                color: AppColors.danger,
-                fontWeight: FontWeight.w600,
-                fontSize: 11,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildStatusCell(String? status, double width) {
-    final statusText = status ?? 'N/A';
-    final statusColor = _getStatusColor(statusText);
-
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: statusColor.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Text(
-              statusText.toUpperCase(),
-              style: TextStyle(
-                color: statusColor,
-                fontWeight: FontWeight.w600,
-                fontSize: 10,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildReasonCell(String? reason, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Text(
-          reason ?? 'No reason provided',
-          style: const TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w500,
-            color: Colors.black87,
-          ),
-          textAlign: TextAlign.center,
-          overflow: TextOverflow.ellipsis,
-          maxLines: 2,
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildItemsCell(List<SalesReturnItem>? items, double width) {
-    final itemsCount = items?.length ?? 0;
-
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: AppColors.info.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Text(
-              itemsCount.toString(),
-              style: const TextStyle(
-                color: AppColors.info,
-                fontWeight: FontWeight.w600,
-                fontSize: 11,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildActionCell(
-    SalesReturnModel salesReturn,
-    BuildContext context,
-    double width,
-  ) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Status-based actions
-            if (salesReturn.status == 'pending') ...[
-              _buildActionButton(
-                icon: Icons.check,
-                color: AppColors.success,
-                tooltip: 'Approve return',
-                onPressed: () => _confirmApprove(context, salesReturn),
-              ),
-              const SizedBox(width: 4),
-              _buildActionButton(
-                icon: Icons.close,
-                color: AppColors.danger,
-                tooltip: 'Reject return',
-                onPressed: () => _confirmReject(context, salesReturn),
-              ),
-              const SizedBox(width: 4),
-            ],
-
-            if (salesReturn.status == 'approved') ...[
-              _buildActionButton(
-                icon: Icons.done_all,
-                color: AppColors.info,
-                tooltip: 'Mark as completed',
-                onPressed: () => _confirmComplete(context, salesReturn),
-              ),
-              const SizedBox(width: 4),
-            ],
-
-            // View Button
-            _buildActionButton(
-              icon: Icons.visibility,
-              color: AppColors.success,
-              tooltip: 'View details',
-              onPressed: () => _showViewDialog(context, salesReturn),
-            ),
-            const SizedBox(width: 4),
-
-            // Delete Button (only for pending/rejected)
-            if (salesReturn.status == 'pending' ||
-                salesReturn.status == 'rejected')
-              _buildActionButton(
-                icon: Icons.delete,
-                color: AppColors.danger,
-                tooltip: 'Delete return',
-                onPressed: () => _confirmDelete(context, salesReturn),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget _buildActionButton({
     required IconData icon,
     required Color color,
@@ -720,9 +440,9 @@ class SalesReturnTableCard extends StatelessWidget {
     BuildContext context,
     SalesReturnModel salesReturn,
   ) async {
-    final confirmed = await showDialog<bool>(
+    final confirmed = await showAppPopover<bool>(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (context) => AppPopoverCard(
         backgroundColor: AppColors.bottomNavBg(context),
         title: Text(
           'Approve Sales Return',
@@ -760,9 +480,9 @@ class SalesReturnTableCard extends StatelessWidget {
     BuildContext context,
     SalesReturnModel salesReturn,
   ) async {
-    final confirmed = await showDialog<bool>(
+    final confirmed = await showAppPopover<bool>(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (context) => AppPopoverCard(
         backgroundColor: AppColors.bottomNavBg(context),
         title:  Text('Reject Sales Return',style: AppTextStyle.titleMedium(context),),
         content: Text(
@@ -796,9 +516,9 @@ class SalesReturnTableCard extends StatelessWidget {
     BuildContext context,
     SalesReturnModel salesReturn,
   ) async {
-    final confirmed = await showDialog<bool>(
+    final confirmed = await showAppPopover<bool>(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (context) => AppPopoverCard(
         title: const Text('Complete Sales Return'),
         content: Text(
           'Are you sure you want to mark sales return ${salesReturn.receiptNo ?? ''} as completed?',
@@ -824,10 +544,10 @@ class SalesReturnTableCard extends StatelessWidget {
   }
 
   void _showViewDialog(BuildContext context, SalesReturnModel salesReturn) {
-    showDialog(
+    showAppPopover(
       context: context,
       builder: (context) {
-        return Dialog(
+        return AppPopoverShell(
           backgroundColor: AppColors.bottomNavBg(context),
           insetPadding: const EdgeInsets.all(20),
           child: Container(

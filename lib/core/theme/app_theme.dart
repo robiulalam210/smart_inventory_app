@@ -200,6 +200,21 @@ class AppTheme {
           fontSize: 12,
         ),
         dividerThickness: 0.6,
+        // সব desktop টেবিলের জন্য একই নিয়ম:
+        // horizontalMargin 0 — প্রায় সব টেবিল column width = মোট প্রস্থ /
+        // column সংখ্যা ধরে হিসাব করে। default 24px margin দুই পাশে যোগ
+        // হয়ে টেবিল পর্দার চেয়ে ৪৮px চওড়া হয়ে যেত — ফলে অকারণ horizontal
+        // scrollbar আসত আর প্রথম column ("Receipt No") কেটে যেত
+        // (row height theme এ দেওয়া হয়নি — কিছু টেবিল নিজেই
+        // dataRowMaxHeight ছোট দেয়, theme এর min বড় হলে assertion ভাঙত)
+        horizontalMargin: 0,
+        dataTextStyle: TextStyle(color: text, fontSize: 13),
+        // mouse নিলে row হালকা highlight — কোন row এ কাজ হচ্ছে বোঝা যায়
+        dataRowColor: WidgetStateProperty.resolveWith(
+          (s) => s.contains(WidgetState.hovered)
+              ? primary.withValues(alpha: 0.05)
+              : null,
+        ),
       ),
       checkboxTheme: CheckboxThemeData(
         fillColor: WidgetStateProperty.resolveWith(

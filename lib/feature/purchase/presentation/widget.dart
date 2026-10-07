@@ -380,237 +380,75 @@ class PurchaseDataTableWidget extends StatelessWidget {
     );
   }
 
+  // Desktop টেবিল — AppDataTable
   Widget _buildDesktopDataTable() {
-    return TableScrollControllers(
-      builder: (context, verticalScrollController, horizontalScrollController) {
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final totalWidth = constraints.maxWidth - 50;
-        const numColumns = 10;
-        const minColumnWidth = 100.0;
-
-        final dynamicColumnWidth =
-        (totalWidth / numColumns).clamp(minColumnWidth, double.infinity);
-
-        return Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(AppSizes.radius),
-            color: Colors.white,
-          ),
-          child:ClipRRect( borderRadius: BorderRadius.circular(AppSizes.radius),
-            child: Scrollbar(
-              controller: verticalScrollController,
-              thumbVisibility: true,
-              child: SingleChildScrollView(
-                controller: verticalScrollController,
-                scrollDirection: Axis.vertical,
-                child: Scrollbar(
-                  controller: horizontalScrollController,
-                  thumbVisibility: true,
-                  child: SingleChildScrollView(
-                    controller: horizontalScrollController,
-                    scrollDirection: Axis.horizontal,
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(minWidth: totalWidth),
-                      child: DataTable(
-                        dataRowMinHeight: 40,
-                        headingRowHeight: 40,
-                        columnSpacing: 0,
-                        headingTextStyle: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        headingRowColor: WidgetStateProperty.all(
-                          AppColors.primaryColor(context),
-                        ),
-                        columns: _buildColumns(dynamicColumnWidth),
-                        rows: sales
-                            .asMap()
-                            .entries
-                            .map(
-                              (entry) => _buildDataRow(
-                            context,
-                            entry.key + 1,
-                            entry.value,
-                            dynamicColumnWidth,
-                          ),
-                        )
-                            .toList(),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-      },
-    );
-  }
-
-  List<DataColumn> _buildColumns(double columnWidth) {
-    const labels = [
-      "SL",
-      "Invoice No",
-      "Date",
-      "Supplier",
-      "Gross Total",
-      "Payment Status",
-      "Paid",
-      "Due",
-      "Payment Method",
-      "Actions",
+    const columns = [
+      AppTableColumn.center('SL', flex: 1, minWidth: 52),
+      AppTableColumn('Invoice No', flex: 2, minWidth: 110),
+      AppTableColumn('Date', flex: 2, minWidth: 100),
+      AppTableColumn('Supplier', flex: 3, minWidth: 150),
+      AppTableColumn.numeric('Gross Total', flex: 2, minWidth: 110),
+      AppTableColumn.numeric('Paid', flex: 2, minWidth: 100),
+      AppTableColumn.numeric('Due', flex: 2, minWidth: 100),
+      AppTableColumn('Method', flex: 2, minWidth: 100),
+      AppTableColumn.center('Status', flex: 2, minWidth: 100),
+      AppTableColumn.center('Actions', flex: 2, minWidth: 96),
     ];
 
-    return labels
-        .map(
-          (label) => DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: Padding(
-            padding: const EdgeInsets.all(0),
-            child: Text(
-              label,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w700,
-                color: Colors.white,
-              ),
-            ),
-          ),
-        ),
-      ),
-    )
-        .toList();
-  }
-
-  DataRow _buildDataRow(
-      BuildContext context,
-      int index,
-      PurchaseModel sale,
-      double columnWidth,
-      ) {
-    return DataRow(
-      cells: [
-        _buildDataCell(index.toString(), columnWidth, TextAlign.center),
-        _buildDataCell(sale.invoiceNo ?? '-', columnWidth, TextAlign.center),
-        _buildDataCell(
-          _formatDate(sale.purchaseDate.toString()),
-          columnWidth,
-          TextAlign.center,
-        ),
-        _buildDataCell(sale.supplierName ?? '-', columnWidth, TextAlign.center),
-        _buildDataCell(sale.total?.toString() ?? '0.00', columnWidth, TextAlign.center),
-        _buildPaymentStatusCell(sale.paymentStatus ?? '-', columnWidth),
-        _buildDataCell(sale.paidAmount?.toString() ?? '0.00', columnWidth, TextAlign.center),
-        _buildDueCell(sale.dueAmount?.toString() ?? '0.00', columnWidth),
-        _buildDataCell(sale.paymentMethod ?? '-', columnWidth, TextAlign.center),
-        _buildActionsCell(context, sale, columnWidth),
-      ],
-    );
-  }
-
-  DataCell _buildDataCell(String text, double width, TextAlign align) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 2),
-          child: Text(
-            text,
-            style: const TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.w500,
-              color: Colors.black,
-            ),
-            textAlign: align,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildPaymentStatusCell(String status, double width) {
-    final color = _getPaymentStatusColor(status);
-
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: color),
-            ),
-            child: Text(
-              status,
-              style: TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.w600,
-                color: color,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildDueCell(String amount, double width) {
-    final due = double.tryParse(amount) ?? 0;
-    final color = due > 0 ? AppColors.danger : AppColors.success;
-
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Center(
-          child: Text(
-            amount,
-            style: TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.w600,
-              color: color,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildActionsCell(BuildContext context, PurchaseModel purchase, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            IconButton(
-              icon:  Icon(Iconsax.eye, size: 16),
-              onPressed: () => _viewPurchaseDetails(context, purchase),
-              padding: const EdgeInsets.all(4),
-              constraints: const BoxConstraints(),
-              tooltip: 'View Details',
-            ),
-            IconButton(
-              icon: const Icon(Iconsax.document_download, size: 16),
-              onPressed: () => _generatePdf(context, purchase),
-              padding: const EdgeInsets.all(4),
-              constraints: const BoxConstraints(),
-              tooltip: 'Generate PDF',
-            ),
-          ],
-        ),
-      ),
+    return AppDataTable(
+      columns: columns,
+      rowCount: sales.length,
+      cellBuilder: (context, row, col) {
+        final p = sales[row];
+        switch (col) {
+          case 0:
+            return AppTableText('${row + 1}',
+                align: AppCellAlign.center, muted: true);
+          case 1:
+            return AppTableText(p.invoiceNo ?? '-',
+                bold: true, color: AppColors.primaryColor(context));
+          case 2:
+            return AppTableText(_formatDate(p.purchaseDate.toString()));
+          case 3:
+            return AppTableText(p.supplierName ?? '-');
+          case 4:
+            return AppTableMoney(AppTableMoney.parse(p.total), bold: true);
+          case 5:
+            return AppTableMoney(AppTableMoney.parse(p.paidAmount),
+                color: AppColors.success);
+          case 6:
+            final due = AppTableMoney.parse(p.dueAmount);
+            return AppTableMoney(due,
+                bold: due > 0,
+                color: due > 0
+                    ? AppColors.danger
+                    : AppColors.text(context).withValues(alpha: 0.5));
+          case 7:
+            return AppTableText(p.paymentMethod ?? '-', muted: true);
+          case 8:
+            final status = p.paymentStatus ?? '-';
+            return AppStatusPill(status.capitalize(),
+                color: _getPaymentStatusColor(status));
+          default:
+            return Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                AppTableAction(
+                  icon: Iconsax.eye,
+                  tooltip: 'View details',
+                  color: AppColors.info,
+                  onPressed: () => _viewPurchaseDetails(context, p),
+                ),
+                AppTableAction(
+                  icon: Iconsax.document_download,
+                  tooltip: 'Purchase PDF',
+                  color: AppColors.success,
+                  onPressed: () => _generatePdf(context, p),
+                ),
+              ],
+            );
+        }
+      },
     );
   }
 
@@ -630,7 +468,8 @@ class PurchaseDataTableWidget extends StatelessWidget {
   String _formatDate(String dateString) {
     try {
       final date = DateTime.parse(dateString);
-      return '${date.day}/${date.month}/${date.year}';
+      String two(int n) => n.toString().padLeft(2, '0');
+      return '${two(date.day)}/${two(date.month)}/${date.year}';
     } catch (e) {
       return dateString;
     }

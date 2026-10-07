@@ -257,11 +257,11 @@ class CategoriesListMobile extends StatelessWidget {
         ? "Active"
         : "Inactive";
 
-    showDialog(
+    showAppPopover(
       context: context,
       barrierDismissible: false,
       builder: (context) {
-        return Dialog(
+        return AppPopoverShell(
           insetPadding: const EdgeInsets.all(0),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
@@ -337,10 +337,10 @@ class CategoriesListMobile extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: () {
                   // Navigate to create category
-                  showDialog(
+                  showAppPopover(
                     context: context,
                     builder: (context) {
-                      return Dialog(
+                      return AppPopoverShell(
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                         ),
@@ -397,237 +397,42 @@ class CategoriesTableCard extends StatelessWidget {
   });
 
   @override
+  // Desktop টেবিল — AppDataTable (SL ছোট, নাম চওড়া, status/action মাঝে)
   Widget build(BuildContext context) {
     if (categories.isEmpty) {
       return _buildEmptyState();
     }
 
-    return TableScrollControllers(
-      builder: (context, verticalScrollController, horizontalScrollController) {
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final totalWidth = constraints.maxWidth;
-        const numColumns = 4; // No., Category Name, Status, Actions
-        const minColumnWidth = 100.0;
-
-        final dynamicColumnWidth = (totalWidth / numColumns).clamp(
-          minColumnWidth,
-          double.infinity,
-        );
-
-        return Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withValues(alpha: 0.1),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Scrollbar(
-            controller: verticalScrollController,
-            thumbVisibility: true,
-            child: SingleChildScrollView(
-              controller: verticalScrollController,
-              scrollDirection: Axis.vertical,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: Scrollbar(
-                  controller: horizontalScrollController,
-                  thumbVisibility: true,
-                  child: SingleChildScrollView(
-                    controller: horizontalScrollController,
-                    scrollDirection: Axis.horizontal,
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 5),
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(minWidth: totalWidth),
-                        child: DataTable(
-                          dataRowMinHeight: 40,
-                          dataRowMaxHeight: 40,
-                          columnSpacing: 8,
-                          horizontalMargin: 12,
-                          dividerThickness: 0.5,
-                          headingRowHeight: 40,
-                          headingTextStyle: TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            fontFamily: GoogleFonts.inter().fontFamily,
-                          ),
-                          headingRowColor: WidgetStateProperty.all(
-                            AppColors.primaryColor(context),
-                          ),
-                          dataTextStyle: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w500,
-                            fontFamily: GoogleFonts.inter().fontFamily,
-                          ),
-                          columns: _buildColumns(dynamicColumnWidth),
-                          rows: categories.asMap().entries.map((entry) {
-                            final category = entry.value;
-                            return DataRow(
-                              onSelectChanged: onCategoryTap != null
-                                  ? (_) => onCategoryTap!()
-                                  : null,
-                              cells: [
-                                _buildDataCell(
-                                  '${entry.key + 1}',
-                                  dynamicColumnWidth * 0.6,
-                                ),
-                                _buildDataCell(
-                                  category.name?.capitalize() ?? "N/A",
-                                  dynamicColumnWidth,
-                                ),
-                                _buildStatusCell(
-                                  _getCategoryStatus(category),
-                                  dynamicColumnWidth,
-                                ),
-                                _buildActionCell(
-                                  category,
-                                  context,
-                                  dynamicColumnWidth,
-                                ),
-                              ],
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-      },
-    );
-  }
-
-  List<DataColumn> _buildColumns(double columnWidth) {
-    return [
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth * 0.6,
-          child: const Text('No.', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Category Name', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Status', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Actions', textAlign: TextAlign.center),
-        ),
-      ),
+    const columns = [
+      AppTableColumn.center('SL', flex: 1, minWidth: 60),
+      AppTableColumn('Category Name', flex: 5, minWidth: 200),
+      AppTableColumn.center('Status', flex: 2, minWidth: 110),
+      AppTableColumn.center('Actions', flex: 2, minWidth: 110),
     ];
-  }
 
-  DataCell _buildDataCell(String text, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Text(
-          text,
-          style: const TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w500,
-            color: Colors.black87,
-          ),
-          textAlign: TextAlign.center,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ),
+    return AppDataTable(
+      columns: columns,
+      rowCount: categories.length,
+      cellBuilder: (context, row, col) {
+        final category = categories[row];
+        switch (col) {
+          case 0:
+            return AppTableText('${row + 1}', align: AppCellAlign.center, muted: true);
+          case 1:
+            return AppTableText(category.name?.capitalize() ?? '-', bold: true);
+          case 2:
+            return AppStatusPill((_getCategoryStatus(category)) ? 'Active' : 'Inactive', color: (_getCategoryStatus(category)) ? AppColors.success : AppColors.danger);
+          default:
+            return AppTableEditDelete(
+              onEdit: () => _showEditDialog(context, category),
+              onDelete: () => _confirmDelete(context, category),
+            );
+        }
+      },
     );
   }
 
-  bool _getCategoryStatus(CategoryModel category) {
-    // Handle different possible status representations
-    if (category.isActive != null) {
-      if (category.isActive is bool) {
-        return category.isActive as bool;
-      }
-    }
-
-    // Fallback to isActive if available
-    return category.isActive ?? false;
-  }
-
-  DataCell _buildStatusCell(bool isActive, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: isActive
-                  ? AppColors.success.withValues(alpha: 0.1)
-                  : AppColors.danger.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Text(
-              isActive ? 'Active' : 'Inactive',
-              style: TextStyle(
-                color: isActive ? AppColors.success : AppColors.danger,
-                fontWeight: FontWeight.w600,
-                fontSize: 11,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildActionCell(
-    CategoryModel category,
-    BuildContext context,
-    double width,
-  ) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Edit Button
-            _buildActionButton(
-              icon: Iconsax.edit,
-              color: AppColors.info,
-              tooltip: 'Edit category',
-              onPressed: () => _showEditDialog(context, category),
-            ),
-
-            // Delete Button
-            _buildActionButton(
-              icon: HugeIcons.strokeRoundedDeleteThrow,
-              color: AppColors.danger,
-              tooltip: 'Delete category',
-              onPressed: () => _confirmDelete(context, category),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  bool _getCategoryStatus(CategoryModel category) => category.isActive ?? false;
 
   Widget _buildActionButton({
     required IconData icon,
@@ -664,10 +469,10 @@ class CategoriesTableCard extends StatelessWidget {
         ? "Active"
         : "Inactive";
 
-    showDialog(
+    showAppPopover(
       context: context,
       builder: (context) {
-        return Dialog(
+        return AppPopoverShell(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),

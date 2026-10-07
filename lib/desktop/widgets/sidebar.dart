@@ -2,7 +2,6 @@ import '../../feature/lab_dashboard/presentation/bloc/dashboard/dashboard_bloc.d
 import '../../feature/profile/data/model/profile_perrmission_model.dart';
 import '../../feature/profile/presentation/bloc/profile_bloc/profile_bloc.dart';
 import '../../core/configs/configs.dart';
-import '../../core/shared/widgets/sideMenu/menu_tile.dart';
 
 class Sidebar extends StatefulWidget {
   const Sidebar({super.key});
@@ -147,12 +146,100 @@ class _SidebarState extends State<Sidebar> {
     ),
   ];
 
+  // ------------------------------------------------------------
+  // UI state
+  // ------------------------------------------------------------
+  // একবারে একটাই group খোলা থাকে (accordion) — আগে ExpansionTile
+  // ছিল, একসাথে অনেকগুলো খুলে menu অনেক লম্বা হয়ে যেত, আর খোলা group
+  // এর উপরে-নিচে অদ্ভুত divider লাইন আসত।
+  String? _expanded;
+  int? _lastIndex;
+
+  static const Map<String, IconData> _sectionIcons = {
+    'My Dashboard': Icons.space_dashboard_outlined,
+    'Sales': Icons.point_of_sale_outlined,
+    'Money Receipt': Icons.receipt_long_outlined,
+    'Purchase': Icons.shopping_bag_outlined,
+    'Products': Icons.inventory_2_outlined,
+    'Accounts': Icons.account_balance_wallet_outlined,
+    'Customers': Icons.people_alt_outlined,
+    'Supplier': Icons.local_shipping_outlined,
+    'Expense': Icons.payments_outlined,
+    'Return': Icons.assignment_return_outlined,
+    'Reports': Icons.bar_chart_rounded,
+    'Administration': Icons.admin_panel_settings_outlined,
+    'Income': Icons.trending_up_rounded,
+    'Transfer Balance': Icons.swap_horiz_rounded,
+  };
+
+  /// current screen যে group এর, সেটা খুলে রাখা
+  void _syncExpanded(int currentIndex, List<MenuSection> sections) {
+    if (_lastIndex == currentIndex) return;
+    _lastIndex = currentIndex;
+    for (final section in sections) {
+      if (section.items.length > 1 &&
+          section.items.any((it) => it.index == currentIndex)) {
+        _expanded = section.title;
+        return;
+      }
+    }
+  }
+
+  Color _sidebarBorder(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.dark
+          ? Colors.white.withValues(alpha: 0.08)
+          : AppColors.borderLight;
+
+  /// sidebar এর বাইরের খোলস — পর্দার পুরো উচ্চতা জুড়ে, ডানে পাতলা border।
+  /// আগে Drawer widget ব্যবহার হতো (নিজস্ব রং, গোল কোণা, shadow) আর
+  /// উচ্চতা ছিল "পর্দা − 100" — তাই নিচে ফাঁকা থাকত বা শেষের item কেটে যেত।
+  Widget _shell(BuildContext context, Widget child) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final double height = constraints.maxHeight.isFinite
+            ? constraints.maxHeight
+            : MediaQuery.sizeOf(context).height - 56;
+        return Container(
+          height: height,
+          decoration: BoxDecoration(
+            color: AppColors.bottomNavBg(context),
+            border: Border(right: BorderSide(color: _sidebarBorder(context))),
+          ),
+          child: child,
+        );
+      },
+    );
+  }
+
+  Widget _logo(BuildContext context) {
+    return Container(
+      height: 76,
+      alignment: Alignment.center,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        border: Border(bottom: BorderSide(color: _sidebarBorder(context))),
+      ),
+      child: Image.asset(
+        "assets/images/logo.png",
+        fit: BoxFit.contain,
+        errorBuilder: (context, error, stackTrace) => Text(
+          AppConstants.appName,
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: AppColors.primaryColor(context),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<DashboardBloc, DashboardState>(
       builder: (context, dashboardState) {
         final bloc = context.read<DashboardBloc>();
-        int currentIndex = 0;
+        int currentIndex = _lastIndex ?? 0;
 
         if (dashboardState is DashboardScreenChanged) {
           currentIndex = dashboardState.index;
@@ -160,133 +247,62 @@ class _SidebarState extends State<Sidebar> {
 
         return BlocBuilder<ProfileBloc, ProfileState>(
           builder: (context, profileState) {
-            // Get permissions from ProfileBloc
             final permissions = profileState is ProfilePermissionSuccess
                 ? profileState.permissionData.data?.permissions
                 : null;
 
-            // Show loading state
+            if (profileState is ProfilePermissionFailed) {
+              return _buildErrorState(context);
+            }
             if (profileState is ProfilePermissionLoading || permissions == null) {
               return _buildSkeletonLoading(context, currentIndex, bloc);
             }
 
-            // Show error state
-            if (profileState is ProfilePermissionFailed) {
-              return _buildErrorState(context);
+            // permission অনুযায়ী section ও item ছাঁটাই
+            final sections = <MenuSection>[];
+            for (final section in _fullMenuSections) {
+              if (section.requiredPermission(permissions) != true) continue;
+              final items = section.items
+                  .where((item) =>
+                      item.requiredPermission == null ||
+                      item.requiredPermission!(permissions) == true)
+                  .toList();
+              if (items.isEmpty) continue;
+              sections.add(MenuSection(
+                title: section.title,
+                items: items,
+                requiredPermission: section.requiredPermission,
+              ));
             }
 
-            // Filter menu sections based on permissions
-            final filteredMenuSections = _fullMenuSections.where((section) {
-              return section.requiredPermission(permissions) == true;
-            }).toList();
-
-            // If no sections available after filtering
-            if (filteredMenuSections.isEmpty) {
+            if (sections.isEmpty) {
               return _buildNoAccessState(context);
             }
 
-            return ConstrainedBox(
-              constraints: BoxConstraints(
-                maxHeight: MediaQuery.of(context).size.height,
-                maxWidth: MediaQuery.of(context).size.width * 0.30,
-              ),
-              child: Drawer(
-                child: SafeArea(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      gapH16,
-                      SizedBox(
-                        height: MediaQuery.of(context).size.height - 100,
-                        child: ListView(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: AppSizes.paddingInside,
+            _syncExpanded(currentIndex, sections);
+
+            return _shell(
+              context,
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _logo(context),
+                  Expanded(
+                    child: ListView(
+                      padding: const EdgeInsets.fromLTRB(10, 10, 10, 16),
+                      children: [
+                        for (final section in sections)
+                          _buildSection(
+                            context,
+                            section,
+                            currentIndex,
+                            onSelect: (index) => _handleMenuSelection(
+                                bloc, index, context, permissions),
                           ),
-                          children: [
-                            /// Drawer Header
-                            DrawerHeader(
-                              margin: EdgeInsets.zero,
-                              padding: const EdgeInsets.all(0),
-                              decoration: BoxDecoration(
-                                borderRadius: const BorderRadius.only(
-                                  bottomLeft: Radius.circular(8),
-                                  bottomRight: Radius.circular(8),
-                                ),
-                              ),
-                              child: Center(
-                                child: Image.asset(
-                                  "assets/images/logo.png",
-                                  fit: BoxFit.fill,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return Text(
-                                      "Great Lab",
-                                      style: TextStyle(
-                                        fontSize: 24,
-                                        fontWeight: FontWeight.bold,
-                                        color: Theme.of(context).primaryColor,
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ),
-                            ),
-
-                            const Divider(height: 1),
-
-                            // Build filtered menu sections dynamically
-                            ...filteredMenuSections.map((section) {
-                              // Filter items within section based on individual permissions
-                              final filteredItems = section.items.where((item) {
-                                return item.requiredPermission == null ||
-                                    item.requiredPermission!(permissions) == true;
-                              }).toList();
-
-                              // Skip section if no items after filtering
-                              if (filteredItems.isEmpty) {
-                                return const SizedBox.shrink();
-                              }
-
-                              if (filteredItems.length == 1) {
-                                // Single item (no expansion)
-                                final item = filteredItems.first;
-                                return MenuTile(
-                                  isSubmenu: true,
-                                  title: section.title,
-                                  isSelected: currentIndex == item.index,
-                                  onPressed: () {
-                                    _handleMenuSelection(bloc, item.index, context, permissions);
-                                  },
-                                );
-                              } else {
-                                // Multiple items (with expansion)
-                                return ExpansionTile(
-                                  initiallyExpanded: filteredItems.any((item) => currentIndex == item.index),
-                                  title: Text(
-                                    section.title,
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.w600,
-                                      color: Theme.of(context).textTheme.bodyMedium!.color,
-                                    ),
-                                  ),
-                                  children: filteredItems.map((item) {
-                                    return MenuTile(
-                                      isSubmenu: true,
-                                      title: item.title,
-                                      isSelected: currentIndex == item.index,
-                                      onPressed: () {
-                                        _handleMenuSelection(bloc, item.index, context, permissions);
-                                      },
-                                    );
-                                  }).toList(),
-                                );
-                              }
-                            }),
-                          ],
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
+                ],
               ),
             );
           },
@@ -295,87 +311,110 @@ class _SidebarState extends State<Sidebar> {
     );
   }
 
-  Widget _buildSkeletonLoading(BuildContext context, int currentIndex, DashboardBloc bloc) {
-    return ConstrainedBox(
-      constraints: BoxConstraints(
-        maxHeight: MediaQuery.of(context).size.height,
-        maxWidth: MediaQuery.of(context).size.width * 0.30,
-      ),
-      child: Drawer(
-        child: SafeArea(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              gapH16,
-              SizedBox(
-                height: MediaQuery.of(context).size.height - 100,
-                child: ListView(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSizes.paddingInside,
-                  ),
-                  children: [
-                    // Skeleton header
-                    DrawerHeader(
-                      margin: EdgeInsets.zero,
-                      padding: const EdgeInsets.all(0),
-                      child: Center(
-                        child: Container(
-                          width: 120,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            color: Colors.grey[300],
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const Divider(height: 1),
+  Widget _buildSection(
+    BuildContext context,
+    MenuSection section,
+    int currentIndex, {
+    required ValueChanged<int> onSelect,
+  }) {
+    final IconData icon = _sectionIcons[section.title] ?? Icons.circle_outlined;
 
-                    // Skeleton menu items
-                    for (int i = 0; i < 5; i++)
-                      Container(
-                        margin: const EdgeInsets.symmetric(vertical: 4),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 40,
-                              height: 40,
-                              margin: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: Colors.grey[300],
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                            ),
-                            Expanded(
-                              child: Container(
-                                height: 20,
-                                margin: const EdgeInsets.only(right: 16),
-                                decoration: BoxDecoration(
-                                  color: Colors.grey[200],
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-            ],
+    // এক item এর section — সরাসরি link
+    if (section.items.length == 1) {
+      final item = section.items.first;
+      return _SidebarTile(
+        icon: icon,
+        title: section.title,
+        selected: currentIndex == item.index,
+        onTap: () => onSelect(item.index),
+      );
+    }
+
+    final bool open = _expanded == section.title;
+    final bool hasActive = section.items.any((it) => it.index == currentIndex);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _SidebarTile(
+          icon: icon,
+          title: section.title,
+          // group এর ভিতরের কোনো screen চালু থাকলে group এর লেখা রঙিন,
+          // কিন্তু পটভূমি নয় — পটভূমি শুধু আসল চালু item এর
+          highlightText: hasActive,
+          trailing: AnimatedRotation(
+            turns: open ? 0.5 : 0,
+            duration: const Duration(milliseconds: 180),
+            child: Icon(
+              Icons.keyboard_arrow_down_rounded,
+              size: 20,
+              color: AppColors.text(context).withValues(alpha: 0.5),
+            ),
           ),
+          onTap: () => setState(() {
+            _expanded = open ? null : section.title;
+          }),
         ),
+        AnimatedSize(
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOutCubic,
+          alignment: Alignment.topCenter,
+          child: open
+              ? Container(
+                  // বাঁয়ে পাতলা guide line — কোন item কোন group এর বোঝা যায়
+                  margin: const EdgeInsets.only(left: 22, top: 2, bottom: 4),
+                  padding: const EdgeInsets.only(left: 10),
+                  decoration: BoxDecoration(
+                    border: Border(
+                      left: BorderSide(color: _sidebarBorder(context), width: 1.5),
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      for (final item in section.items)
+                        _SidebarTile(
+                          title: item.title,
+                          dense: true,
+                          selected: currentIndex == item.index,
+                          onTap: () => onSelect(item.index),
+                        ),
+                    ],
+                  ),
+                )
+              : const SizedBox(width: double.infinity),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSkeletonLoading(BuildContext context, int currentIndex, DashboardBloc bloc) {
+    return _shell(
+      context,
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _logo(context),
+          const SizedBox(height: 12),
+          for (int i = 0; i < 8; i++)
+            Container(
+              height: 36,
+              margin: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+              decoration: BoxDecoration(
+                color: Colors.grey.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+        ],
       ),
     );
   }
 
   Widget _buildErrorState(BuildContext context) {
-    return ConstrainedBox(
-      constraints: BoxConstraints(
-        maxHeight: MediaQuery.of(context).size.height,
-        maxWidth: MediaQuery.of(context).size.width * 0.30,
-      ),
-      child: Drawer(
+    return _shell(
+      context,
+      Material(
+        color: Colors.transparent,
         child: SafeArea(
           child: Center(
             child: Padding(
@@ -416,19 +455,17 @@ class _SidebarState extends State<Sidebar> {
   }
 
   Widget _buildNoAccessState(BuildContext context) {
-    return ConstrainedBox(
-      constraints: BoxConstraints(
-        maxHeight: MediaQuery.of(context).size.height,
-        maxWidth: MediaQuery.of(context).size.width * 0.30,
-      ),
-      child: Drawer(
+    return _shell(
+      context,
+      Material(
+        color: Colors.transparent,
         child: SafeArea(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               gapH16,
               SizedBox(
-                height: MediaQuery.of(context).size.height - 100,
+                height: MediaQuery.of(context).size.height - 140,
                 child: Center(
                   child: Padding(
                     padding: const EdgeInsets.all(20),
@@ -523,10 +560,10 @@ class _SidebarState extends State<Sidebar> {
   }
 
   void _showPermissionDeniedDialog(BuildContext context) {
-    showDialog(
+    showAppPopover(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
+        return AppPopoverCard(
           title: const Text("Access Denied"),
           content: const Text("You don't have permission to access this feature."),
           actions: [
@@ -564,4 +601,92 @@ class MenuItem {
     required this.index,
     this.requiredPermission,
   });
+}
+
+/// sidebar এর একটা সারি — hover এ হালকা রং, চালু থাকলে primary রঙের
+/// পটভূমি আর বাঁয়ে ছোট accent দাগ
+class _SidebarTile extends StatefulWidget {
+  const _SidebarTile({
+    required this.title,
+    required this.onTap,
+    this.icon,
+    this.selected = false,
+    this.highlightText = false,
+    this.dense = false,
+    this.trailing,
+  });
+
+  final String title;
+  final VoidCallback onTap;
+  final IconData? icon;
+  final bool selected;
+  final bool highlightText;
+  final bool dense;
+  final Widget? trailing;
+
+  @override
+  State<_SidebarTile> createState() => _SidebarTileState();
+}
+
+class _SidebarTileState extends State<_SidebarTile> {
+  bool _hover = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final Color primary = AppColors.primaryColor(context);
+    final Color text = AppColors.text(context);
+    final bool active = widget.selected;
+    final Color fg = active || widget.highlightText
+        ? primary
+        : text.withValues(alpha: widget.dense ? 0.72 : 0.85);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 1.5),
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        onEnter: (_) => setState(() => _hover = true),
+        onExit: (_) => setState(() => _hover = false),
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: widget.onTap,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 120),
+            height: widget.dense ? 36 : 42,
+            padding: EdgeInsets.only(left: widget.dense ? 10 : 12, right: 8),
+            decoration: BoxDecoration(
+              color: active
+                  ? primary.withValues(alpha: 0.10)
+                  : _hover
+                      ? text.withValues(alpha: 0.04)
+                      : Colors.transparent,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              children: [
+                if (widget.icon != null) ...[
+                  Icon(widget.icon, size: 19, color: fg),
+                  const SizedBox(width: 12),
+                ],
+                Expanded(
+                  child: Text(
+                    widget.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: widget.dense ? 13 : 14,
+                      fontWeight: active || widget.highlightText
+                          ? FontWeight.w600
+                          : FontWeight.w500,
+                      color: fg,
+                    ),
+                  ),
+                ),
+                if (widget.trailing != null) widget.trailing!,
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }

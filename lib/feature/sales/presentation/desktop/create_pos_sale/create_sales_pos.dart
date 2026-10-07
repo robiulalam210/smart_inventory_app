@@ -2,6 +2,7 @@ import 'package:meherinMart/desktop/widgets/sidebar.dart';
 // NOTE: adjust imports paths to match your project structure
 import '../../shared/create_pos_sale/sale_payment_rules.dart';
 import 'dart:developer';
+import 'dart:ui' show FontFeature;
 
 import 'package:flutter/cupertino.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -401,576 +402,691 @@ class _SalesScreenState extends State<SalesScreen> {
   }
 
   // ---------------- UI builders ----------------
+  //
+  // Layout নীতি (desktop):
+  //   • প্রতিটা অংশ (Customer, Items, Adjustments, Summary) আলাদা card এ —
+  //     চোখ বুঝতে পারে কোথায় কী
+  //   • Items টেবিলের header আর row একই column মাপ ব্যবহার করে
+  //     (_lineRow), তাই "Quantity" লেখা ঠিক quantity box এর উপরে থাকে
+  //   • সংখ্যা সবসময় ডানে align — দশমিক এক লাইনে মেলে
+  //   • ভুল মান (stock এর বেশি qty, 100% এর বেশি discount) সাথে সাথে লাল
+  //     border + নিচে কারণ লেখা — Submit চাপার আগেই user জানে
+
+  static const double _wIdx = 28;
+  static const double _wQty = 128;
+  static const double _wDisc = 150;
+  static const double _wAct = 40;
+  static const double _fieldH = 34;
+
+  Color get _borderColor => Theme.of(context).brightness == Brightness.dark
+      ? Colors.white.withValues(alpha: 0.10)
+      : AppColors.borderLight;
+
+  /// সব অংশের জন্য একই card
+  Widget _section({String? title, Widget? trailing, required Widget child}) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.bottomNavBg(context),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: _borderColor),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (title != null) ...[
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.text(context),
+                    ),
+                  ),
+                ),
+                if (trailing != null) trailing,
+              ],
+            ),
+            const SizedBox(height: 12),
+          ],
+          child,
+        ],
+      ),
+    );
+  }
+
+  Widget _fieldLabel(String text, {bool required = false}) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Row(
+        children: [
+          Text(text, style: AppTextStyle.labelDropdownTextStyle(context)),
+          if (required)
+            const Text(' *', style: TextStyle(color: AppColors.danger)),
+        ],
+      ),
+    );
+  }
+
+  InputDecoration _boxDecoration({String? hint, bool error = false}) {
+    OutlineInputBorder b(Color c, [double w = 1]) => OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(color: c, width: w),
+        );
+    return InputDecoration(
+      isDense: true,
+      hintText: hint,
+      hintStyle: TextStyle(
+          fontSize: 13, color: AppColors.text(context).withValues(alpha: 0.4)),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
+      filled: true,
+      fillColor: AppColors.bottomNavBg(context),
+      enabledBorder: b(error ? AppColors.danger : AppColors.border),
+      focusedBorder:
+          b(error ? AppColors.danger : AppColors.primaryColor(context), 1.4),
+      errorBorder: b(AppColors.danger),
+      focusedErrorBorder: b(AppColors.danger, 1.4),
+      border: b(AppColors.border),
+      errorStyle: const TextStyle(fontSize: 11, height: 1.1),
+    );
+  }
+
+  /// শুধু দেখানোর জন্য (read-only) মান — ডানে align
+  Widget _valueBox(String text, {bool strong = false}) {
+    return Container(
+      height: _fieldH,
+      alignment: Alignment.centerRight,
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      decoration: BoxDecoration(
+        color: Theme.of(context).brightness == Brightness.dark
+            ? Colors.white.withValues(alpha: 0.03)
+            : const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: _borderColor),
+      ),
+      child: Text(
+        text,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: TextStyle(
+          fontSize: 13,
+          fontWeight: strong ? FontWeight.w600 : FontWeight.w400,
+          color: AppColors.text(context),
+          fontFeatures: const [FontFeature.tabularFigures()],
+        ),
+      ),
+    );
+  }
+
+  /// TK / % ছোট toggle — Cupertino segmented control এর বদলে, যেটা
+  /// desktop এ বড় আর অন্য field এর সাথে উচ্চতা মিলত না
+  Widget _typeToggle(String value, ValueChanged<String>? onChanged) {
+    Widget seg(String key, String label) {
+      final bool selected = value == key;
+      final Color primary = AppColors.primaryColor(context);
+      return Expanded(
+        child: InkWell(
+          onTap: onChanged == null ? null : () => onChanged(key),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 120),
+            alignment: Alignment.center,
+            color: selected ? primary : Colors.transparent,
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: selected
+                    ? AppColors.onColor(primary)
+                    : AppColors.text(context).withValues(alpha: 0.7),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Container(
+      width: 64,
+      height: _fieldH,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: AppColors.border),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Material(
+        color: Colors.transparent,
+        child: Row(children: [seg('fixed', 'TK'), seg('percent', '%')]),
+      ),
+    );
+  }
+
+  // ---------------- Customer / Seller / Date ----------------
 
   Widget _buildTopFormSection(CreatePosSaleBloc bloc) {
     final user = context.read<ProfileBloc>().permissionModel?.data?.user;
     final isAdmin = user?.role == "SUPER_ADMIN" || user?.role == "ADMIN";
-    return ResponsiveRow(
-      spacing: 2,
-      runSpacing: 2,
+
+    return _section(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            flex: 3,
+            child: BlocBuilder<CustomerBloc, CustomerState>(
+              builder: (context, state) {
+                return AppDropdown(
+                  label: "Customer",
+                  hint: bloc.selectClintModel?.name ?? "Select Customer",
+                  isSearch: true,
+                  isLabel: true,
+                  isNeedAll: false,
+                  isRequired: true,
+                  value: bloc.selectClintModel,
+                  itemList:
+                      [CustomerActiveModel(name: 'Walk-in-customer', id: -1)] +
+                          context.read<CustomerBloc>().activeCustomer,
+                  onChanged: (newVal) {
+                    bloc.selectClintModel = newVal;
+                    bloc.customType = (newVal?.id == -1)
+                        ? "Walking Customer"
+                        : "Saved Customer";
+                    // Walk-in customer এর বাকি রাখা যায় না — তাই টাকা
+                    // গ্রহণ (money receipt) স্বয়ংক্রিয়ভাবে চালু
+                    if (newVal?.id == -1) {
+                      _isChecked = true;
+                      bloc.isChecked = true;
+                    }
+                    setState(() {});
+                  },
+                  validator: (value) =>
+                      value == null ? 'Please select a customer' : null,
+                );
+              },
+            ),
+          ),
+          if (isAdmin) ...[
+            const SizedBox(width: 12),
+            Expanded(
+              flex: 3,
+              child: BlocBuilder<UserBloc, UserState>(
+                builder: (context, state) {
+                  return AppDropdown(
+                    label: "Sales By",
+                    hint: bloc.selectSalesModel?.username ?? "Select Seller",
+                    isSearch: true,
+                    isLabel: true,
+                    isNeedAll: false,
+                    isRequired: true,
+                    value: bloc.selectSalesModel,
+                    itemList: context.read<UserBloc>().list,
+                    onChanged: (newVal) {
+                      bloc.selectSalesModel = newVal;
+                      setState(() {});
+                    },
+                    validator: (value) =>
+                        value == null ? 'Please select a seller' : null,
+                  );
+                },
+              ),
+            ),
+          ],
+          const SizedBox(width: 12),
+          SizedBox(
+            width: 180,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _fieldLabel('Sale Date', required: true),
+                TextFormField(
+                  controller: bloc.dateEditingController,
+                  readOnly: true,
+                  onTap: _selectDate,
+                  style: TextStyle(fontSize: 14, color: AppColors.text(context)),
+                  decoration: _boxDecoration(hint: 'dd-mm-yyyy').copyWith(
+                    suffixIcon: const Icon(Icons.calendar_today_outlined,
+                        size: 16),
+                    suffixIconConstraints:
+                        const BoxConstraints(minWidth: 34, minHeight: 20),
+                  ),
+                  validator: (value) => (value == null || value.trim().isEmpty)
+                      ? 'Please select a date'
+                      : null,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ---------------- Line items ----------------
+
+  /// header আর প্রতিটা row এই একই column মাপে বসে
+  Widget _lineRow(List<Widget> c, {CrossAxisAlignment cross = CrossAxisAlignment.center}) {
+    const gap = SizedBox(width: 8);
+    return Row(
+      crossAxisAlignment: cross,
       children: [
-        ResponsiveCol(
-          xs: 12,
-          sm: 3,
-          md: 3,
-          lg: 3,
-          xl: 3,
-          child: BlocBuilder<CustomerBloc, CustomerState>(
-            builder: (context, state) {
-              return AppDropdown(
-                label: "Customer",
-                hint: bloc.selectClintModel?.name ?? "Select Customer",
-                isSearch: true,
-                isNeedAll: false,
-                isRequired: true,
-                value: bloc.selectClintModel,
-                itemList:
-                [CustomerActiveModel(name: 'Walk-in-customer', id: -1)] +
-                    context.read<CustomerBloc>().activeCustomer,
-                onChanged: (newVal) {
-                  bloc.selectClintModel = newVal;
-                  bloc.customType = (newVal?.id == -1)
-                      ? "Walking Customer"
-                      : "Saved Customer";
-                  if(  newVal?.id == -1){
-                    _isChecked=true;
-                  }
-                  setState(() {});
-                },
-                validator: (value) =>
-                value == null ? 'Please select Customer' : null,
-
-              );
-            },
-          ),
-        ),
-        if (isAdmin)
-
-          ResponsiveCol(
-          xs: 12,
-          sm: 3,
-          md: 3,
-          lg: 3,
-          xl: 3,
-          child: BlocBuilder<UserBloc, UserState>(
-            builder: (context, state) {
-              return AppDropdown(
-                label: "Sales By",
-                hint: bloc.selectSalesModel?.username ?? "Select Sales",
-                isSearch: true,
-                isNeedAll: false,
-                isRequired: true,
-                value: bloc.selectSalesModel,
-                itemList: context.read<UserBloc>().list,
-                onChanged: (newVal) {
-                  bloc.selectSalesModel = newVal;
-                  setState(() {});
-                },
-                validator: (value) =>
-                value == null ? 'Please select Sales' : null,
-
-              );
-            },
-          ),
-        ),
-        ResponsiveCol(
-          xs: 12,
-          sm: 2,
-          md: 2,
-          lg: 2,
-          xl: 2,
-          child: CustomInputField(
-            isRequired: true,
-            readOnly: true,
-            isRequiredLable: false,
-            controller: bloc.dateEditingController,
-            hintText: 'Sale Date',
-            keyboardType: TextInputType.datetime,
-            autofillHints: AutofillHints.name,
-            fillColor: AppColors.whiteColor(context),
-            validator: (value) => value!.isEmpty ? 'Please enter date' : null,
-            onTap: _selectDate,
-          ),
-        ),
-        ResponsiveCol(
-          xs: 12,
-          sm: 3,
-          md: 3,
-          lg: 3,
-          xl: 3,
-          child: const SizedBox(),
-        ),
+        SizedBox(width: _wIdx, child: c[0]),
+        gap,
+        Expanded(flex: 4, child: c[1]),
+        gap,
+        SizedBox(width: _wQty, child: c[2]),
+        gap,
+        Expanded(flex: 2, child: c[3]),
+        gap,
+        SizedBox(width: _wDisc, child: c[4]),
+        gap,
+        Expanded(flex: 2, child: c[5]),
+        gap,
+        Expanded(flex: 2, child: c[6]),
+        gap,
+        SizedBox(width: _wAct, child: c[7]),
       ],
     );
   }
 
-  Widget _buildProductListSection(CreatePosSaleBloc bloc) {
-    return Column(
-      children: [
-        // Header row
-        Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(8),
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
-          child: ResponsiveRow(
-            spacing: 6,
-            runSpacing: 6,
-            children: [
-              ResponsiveCol(
-                xs: 12,
-                sm: 2,
-                md: 2,
-                lg: 3,
-                xl: 3,
-                child: Text(
-                  'Product Name',
-                  style: AppTextStyle.cardLevelHead(context),
-                ),
-              ),
-              ResponsiveCol(
-                xs: 12,
-                sm: 2.3,
-                md: 2.3,
-                lg: 2.3,
-                xl: 2.3,
-                child: Text(
-                  'Quantity',
-                  style: AppTextStyle.cardLevelHead(context),
-                ),
-              ),
-              ResponsiveCol(
-                xs: 12,
-                sm: 1.3,
-                md: 1.3,
-                lg: 1.5,
-                xl: 1.5,
-                child: Text(
-                  'Price',
-                  style: AppTextStyle.cardLevelHead(context),
-                ),
-              ),
-              ResponsiveCol(
-                xs: 12,
-                sm: 2,
-                md: 2,
-                lg: 1.5,
-                xl: 1.5,
-                child: Text(
-                  'Discount',
-                  style: AppTextStyle.cardLevelHead(context),
-                ),
-              ),
-              ResponsiveCol(
-                xs: 12,
-                sm: 1.5,
-                md: 1.5,
-                lg: 1.5,
-                xl: 1.5,
-                child: Text(
-                  'Sub Total',
-                  style: AppTextStyle.cardLevelHead(context),
-                ),
-              ),
-              ResponsiveCol(
-                xs: 12,
-                sm: 1.5,
-                md: 1.5,
-                lg: 1.5,
-                xl: 1.5,
-                child: Text(
-                  'Net Price',
-                  style: AppTextStyle.cardLevelHead(context),
-                ),
-              ),
-              ResponsiveCol(
-                xs: 12,
-                sm: 0.6,
-                md: 0.6,
-                lg: 0.8,
-                xl: 0.8,
-                child: Text(
-                  'Delete',
-                  style: AppTextStyle.cardLevelHead(context),
-                ),
-              ),
-            ],
-          ),
+  Widget _headCell(String text, {TextAlign align = TextAlign.left}) => Text(
+        text,
+        textAlign: align,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.2,
+          color: AppColors.text(context).withValues(alpha: 0.6),
         ),
+      );
 
-        const SizedBox(height: 4),
+  /// row এর product এর stock (না জানা থাকলে অসীম — তখন সীমা নেই)
+  double _stockOf(int index) {
+    final p = products[index]["product"];
+    if (p is ProductModelStockModel && p.stockQty != null) {
+      return p.stockQty!.toDouble();
+    }
+    return double.infinity;
+  }
 
-        // Product rows
-        ...products.asMap().entries.map((entry) {
-          final index = entry.key;
-          final product = entry.value;
-          final discountApplied = product["discountApplied"] == true;
+  /// row এর সমস্যা — null মানে ঠিক আছে
+  String? _rowIssue(int index) {
+    final row = products[index];
+    if (row["product_id"] == null) return null;
 
-          return Container(
-            padding: const EdgeInsets.all(6),
-            margin: const EdgeInsets.only(bottom: 4),
+    final qty = _toDouble(row["quantity"]);
+    final stock = _stockOf(index);
+    if (qty <= 0) return 'Quantity must be at least 1';
+    if (qty > stock) return 'Only ${stock.toStringAsFixed(0)} in stock';
+
+    final ticket = _toDouble(row["ticket_total"]);
+    final disc = double.tryParse(controllers[index]?["discount"]?.text ?? '') ?? 0;
+    if (disc < 0) return 'Discount cannot be negative';
+    if (row["discount_type"] == 'percent' && disc > 100) {
+      return 'Discount cannot exceed 100%';
+    }
+    if (row["discount_type"] != 'percent' && disc > ticket && ticket > 0) {
+      return 'Discount is more than the item total';
+    }
+    if (_toDouble(row["price"]) <= 0) return 'Price is zero for this product';
+    return null;
+  }
+
+  void _setQuantity(int index, int qty) {
+    final stock = _stockOf(index);
+    if (qty > stock) {
+      showCustomToast(
+        context: context,
+        title: 'Stock limit',
+        description: 'Only ${stock.toStringAsFixed(0)} available in stock',
+        icon: Icons.inventory_2_outlined,
+        primaryColor: AppColors.warning,
+      );
+      qty = stock.toInt();
+    }
+    if (qty < 1) qty = 1;
+    controllers[index]!["quantity"]!.text = qty.toString();
+    products[index]["quantity"] = qty;
+    updateTotal(index);
+  }
+
+  Widget _buildProductListSection(CreatePosSaleBloc bloc) {
+    final filled = <int>[
+      for (int i = 0; i < products.length; i++)
+        if (products[i]["product_id"] != null) i,
+    ];
+
+    return _section(
+      title: 'Items',
+      trailing: filled.isEmpty
+          ? null
+          : Text(
+              '${filled.length} item${filled.length == 1 ? '' : 's'}',
+              style: TextStyle(
+                fontSize: 12,
+                color: AppColors.text(context).withValues(alpha: 0.6),
+              ),
+            ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.primaryColor(context).withValues(alpha: 0.06),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: ResponsiveRow(
-              spacing: 6,
-              runSpacing: 6,
+            child: _lineRow([
+              _headCell('#'),
+              _headCell('Product'),
+              _headCell('Quantity', align: TextAlign.center),
+              _headCell('Unit Price', align: TextAlign.right),
+              _headCell('Discount', align: TextAlign.center),
+              _headCell('Sub Total', align: TextAlign.right),
+              _headCell('Net Price', align: TextAlign.right),
+              const SizedBox.shrink(),
+            ]),
+          ),
+          if (filled.isEmpty)
+            Container(
+              margin: const EdgeInsets.only(top: 8),
+              padding: const EdgeInsets.symmetric(vertical: 28),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: _borderColor),
+              ),
+              child: Column(
+                children: [
+                  Icon(Icons.qr_code_scanner_rounded,
+                      size: 32, color: AppColors.greyColor(context)),
+                  const SizedBox(height: 8),
+                  Text(
+                    'No items yet',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.text(context),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Click a product on the right, or scan a barcode',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: AppColors.text(context).withValues(alpha: 0.6),
+                    ),
+                  ),
+                ],
+              ),
+            )
+          else
+            for (int n = 0; n < filled.length; n++)
+              _buildLineItem(filled[n], n + 1),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLineItem(int index, int serial) {
+    final product = products[index];
+    final bool locked = product["discountApplied"] == true;
+    final String? issue = _rowIssue(index);
+    final double stock = _stockOf(index);
+    final double qty = _toDouble(product["quantity"]);
+    final bool qtyError = qty <= 0 || qty > stock;
+    final double ticket = _toDouble(product["ticket_total"]);
+    final double discVal =
+        double.tryParse(controllers[index]?["discount"]?.text ?? '') ?? 0;
+    final bool discError = discVal < 0 ||
+        (product["discount_type"] == 'percent'
+            ? discVal > 100
+            : (ticket > 0 && discVal > ticket));
+
+    final p = product["product"];
+    final String name = (p is ProductModelStockModel ? p.name : null) ??
+        product["product"]?.toString() ??
+        '';
+    final String? sku = p is ProductModelStockModel ? p.sku : null;
+
+    return Container(
+      margin: const EdgeInsets.only(top: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: issue != null
+              ? AppColors.danger.withValues(alpha: 0.5)
+              : _borderColor,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _lineRow([
+            // #
+            Text(
+              '$serial',
+              style: TextStyle(
+                fontSize: 12,
+                color: AppColors.text(context).withValues(alpha: 0.5),
+              ),
+            ),
+
+            // Product
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                // Product Name
-                ResponsiveCol(
-                  xs: 12,
-                  sm: 2,
-                  md: 2,
-                  lg: 3,
-                  xl: 3,
-                  child: BlocBuilder<ProductsBloc, ProductsState>(
-                    builder: (context, state) {
-                      final allProducts = context.read<ProductsBloc>().productList;
-
-                      ProductModelStockModel? selectedItem;
-                      if (product["product_id"] != null) {
-                        selectedItem = allProducts.firstWhere(
-                              (p) => p.id == _toInt(product["product_id"]),
-                          orElse: () {
-                            return allProducts.isNotEmpty
-                                ? allProducts.first
-                                : ProductModelStockModel(
-                              id: 0,
-                              name: 'Unknown',
-                              stockQty: 0,
-                            );
-                          },
-                        );
-                      }
-
-                      final title =
-                          selectedItem?.name ?? product["product"]?.toString() ?? '';
-                      return Text(
-                        title,
-                        style: AppTextStyle.cardLevelText(context),
-                      );
-                    },
+                Text(
+                  name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.text(context),
                   ),
                 ),
+                const SizedBox(height: 2),
+                Text(
+                  [
+                    if (stock.isFinite) 'Stock: ${stock.toStringAsFixed(0)}',
+                    if (sku != null && sku.isNotEmpty) sku,
+                    if (locked) 'Fixed discount',
+                  ].join('  ·  '),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    color: AppColors.text(context).withValues(alpha: 0.55),
+                  ),
+                ),
+              ],
+            ),
 
-                // Quantity
-                ResponsiveCol(
-                  xs: 12,
-                  sm: 2.3,
-                  md: 2.3,
-                  lg: 2.3,
-                  xl: 2.3,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      SizedBox(
-                        height: 32,
-                        width: 30,
-                        child: OutlinedButton(
-                          style: OutlinedButton.styleFrom(
-                            padding: EdgeInsets.zero,
-                            side: BorderSide(color: AppColors.text(context)),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                          ),
-                          onPressed: () {
-                            int currentQuantity = int.tryParse(
-                              controllers[index]?["quantity"]?.text ?? "0",
-                            ) ??
-                                0;
-                            if (currentQuantity > 1) {
-                              controllers[index]!["quantity"]!.text =
-                                  (currentQuantity - 1).toString();
-                              products[index]["quantity"] = _toInt(
-                                controllers[index]!["quantity"]!.text,
-                              );
+            // Quantity  [-] [ 1 ] [+]
+            Row(
+              children: [
+                _qtyButton(
+                  Icons.remove_rounded,
+                  enabled: !locked && qty > 1,
+                  onTap: () => _setQuantity(index, qty.toInt() - 1),
+                ),
+                const SizedBox(width: 4),
+                Expanded(
+                  child: SizedBox(
+                    height: _fieldH,
+                    child: TextFormField(
+                      controller: controllers[index]?["quantity"],
+                      readOnly: locked,
+                      textAlign: TextAlign.center,
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      style: TextStyle(
+                          fontSize: 13, color: AppColors.text(context)),
+                      decoration:
+                          _boxDecoration(hint: '0', error: qtyError).copyWith(
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 4, vertical: 9),
+                      ),
+                      // আগে প্রতি keystroke এ text আবার লিখে দেওয়া হতো —
+                      // cursor শেষে লাফাত আর field খালি করা যেত না
+                      onChanged: locked
+                          ? null
+                          : (value) {
+                              products[index]["quantity"] =
+                                  int.tryParse(value) ?? 0;
                               updateTotal(index);
-                            }
-                          },
-                          child: const Icon(Icons.remove, size: 18),
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      SizedBox(
-                        height: 32,
-                        width: 55,
-                        child: TextFormField(
-                          controller: controllers[index]?["quantity"],
-                          style: AppTextStyle.cardLevelText(context),
-                          keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true,
-                          ),
-                          readOnly: discountApplied,
-                          textAlign: TextAlign.center,
-                          decoration: InputDecoration(
-                            contentPadding: const EdgeInsets.symmetric(
-                              vertical: 0,
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            hintText: "0",
-                          ),
-                          onChanged: discountApplied
-                              ? null
-                              : (value) {
-                            // allow decimal input but convert to int for storage
-                            final parsed = double.tryParse(value) ?? 0.0;
-                            products[index]["quantity"] = parsed.toInt();
-                            controllers[index]!["quantity"]!.text = parsed.toInt().toString();
-                            updateTotal(index);
-                          },
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      SizedBox(
-                        height: 32,
-                        width: 30,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            padding: EdgeInsets.zero,
-                            backgroundColor: AppColors.primaryColor(context),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            elevation: 0,
-                          ),
-                          onPressed: () {
-                            int currentQuantity = int.tryParse(
-                              controllers[index]?["quantity"]?.text ?? "0",
-                            ) ??
-                                0;
-                            controllers[index]!["quantity"]!.text =
-                                (currentQuantity + 1).toString();
-                            products[index]["quantity"] = _toInt(
-                              controllers[index]!["quantity"]!.text,
-                            );
-                            updateTotal(index);
-                          },
-                          child: const Icon(
-                            Icons.add,
-                            size: 18,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                // Price
-                ResponsiveCol(
-                  xs: 12,
-                  sm: 1.3,
-                  md: 1.3,
-                  lg: 1.5,
-                  xl: 1.5,
-                  child: Container(
-                    height: 32,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(6),
-                      border: Border.all(color: AppColors.text(context)),
-                    ),
-                    child: Text(
-                      controllers[index]?["price"]?.text ?? '0',
-                      style: AppTextStyle.cardLevelText(context),
+                            },
                     ),
                   ),
                 ),
+                const SizedBox(width: 4),
+                _qtyButton(
+                  Icons.add_rounded,
+                  primary: true,
+                  enabled: !locked && qty < stock,
+                  onTap: () => _setQuantity(index, qty.toInt() + 1),
+                ),
+              ],
+            ),
 
-                // Discount + Segment control
-                ResponsiveCol(
-                  xs: 12,
-                  sm: 2,
-                  md: 2,
-                  lg: 1.5,
-                  xl: 1.5,
-                  child: Row(
-                    children: [
-                      Flexible(
-                        child: CupertinoSegmentedControl<String>(
-                          padding: EdgeInsets.zero,
-                          children: {
-                            'fixed': Container(
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 6,
-                                horizontal: 2,
-                              ),
-                              child: Text(
-                                'Tk',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: product["discount_type"] == 'fixed'
-                                      ? Colors.white
-                                      : Colors.black,
-                                ),
-                              ),
-                            ),
-                            'percent': Container(
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 6,
-                                horizontal: 2,
-                              ),
-                              child: Text(
-                                '%',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: product["discount_type"] == 'percent'
-                                      ? Colors.white
-                                      : Colors.black,
-                                ),
-                              ),
-                            ),
-                          },
-                          onValueChanged: discountApplied
-                              ? (_) {}
-                              : (value) {
-                            setState(() {
-                              product["discount_type"] = value;
+            // Unit price
+            _valueBox(_toDouble(product["price"]).toStringAsFixed(2)),
+
+            // Discount  [TK|%] [ 0 ]
+            Row(
+              children: [
+                _typeToggle(
+                  product["discount_type"]?.toString() ?? 'fixed',
+                  locked
+                      ? null
+                      : (value) {
+                          setState(() {
+                            product["discount_type"] = value;
+                            updateTotal(index);
+                          });
+                        },
+                ),
+                const SizedBox(width: 4),
+                Expanded(
+                  child: SizedBox(
+                    height: _fieldH,
+                    child: TextFormField(
+                      controller: controllers[index]?["discount"],
+                      readOnly: locked,
+                      textAlign: TextAlign.right,
+                      keyboardType:
+                          const TextInputType.numberWithOptions(decimal: true),
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
+                      ],
+                      style: TextStyle(
+                          fontSize: 13, color: AppColors.text(context)),
+                      decoration: _boxDecoration(hint: '0', error: discError)
+                          .copyWith(
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 9),
+                      ),
+                      onChanged: locked
+                          ? null
+                          : (value) {
+                              product["discount"] = double.tryParse(value) ?? 0.0;
                               updateTotal(index);
-                            });
-                          },
-                          groupValue: product["discount_type"],
-                          unselectedColor: Colors.grey[200],
-                          selectedColor: AppColors.primaryColor(context),
-                          borderColor: AppColors.primaryColor(context),
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      SizedBox(
-                        height: 32,
-                        width: 50,
-                        child: TextFormField(
-                          controller: controllers[index]?["discount"],
-                          style: AppTextStyle.cardLevelText(context),
-                          keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true,
-                          ),
-                          readOnly: discountApplied,
-                          textAlign: TextAlign.center,
-                          decoration: InputDecoration(
-                            contentPadding: const EdgeInsets.symmetric(
-                              vertical: 0,
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            hintText: "0",
-                          ),
-                          onChanged: discountApplied
-                              ? null
-                              : (value) {
-                            product["discount"] = double.tryParse(value) ?? 0.0;
-                            updateTotal(index);
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                // Subtotal
-                ResponsiveCol(
-                  xs: 12,
-                  sm: 1.5,
-                  md: 1.5,
-                  lg: 1.5,
-                  xl: 1.5,
-                  child: Container(
-                    height: 32,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(6),
-                      border: Border.all(color: AppColors.text(context)),
-                    ),
-                    child: Text(
-                      controllers[index]?["ticket_total"]?.text ?? '0',
-                      style: AppTextStyle.cardLevelText(context),
-                    ),
-                  ),
-                ),
-
-                // Net Price
-                ResponsiveCol(
-                  xs: 12,
-                  sm: 1.5,
-                  md: 1.5,
-                  lg: 1.5,
-                  xl: 1.5,
-                  child: Container(
-                    height: 32,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(6),
-                      border: Border.all(color: AppColors.text(context)),
-                    ),
-                    child: Text(
-                      controllers[index]?["total"]?.text ?? '0',
-                      style: AppTextStyle.cardLevelText(context),
-                    ),
-                  ),
-                ),
-
-                // Delete button
-                ResponsiveCol(
-                  xs: 12,
-                  sm: 0.6,
-                  md: 0.6,
-                  lg: 0.8,
-                  xl: 0.8,
-                  child: Align(
-                    alignment: Alignment.center,
-                    child: GestureDetector(
-                      onTap: () {
-                        if (product == products.last) {
-                          context.read<CreatePosSaleBloc>().addProduct();
-                        } else {
-                          context.read<CreatePosSaleBloc>().removeProduct(
-                            index,
-                          );
-                        }
-                        setState(() {});
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.all(6),
-                        decoration: BoxDecoration(
-                          color: product == products.last
-                              ? AppColors.success.withValues(alpha: 0.08)
-                              : AppColors.danger.withValues(alpha: 0.08),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: product == products.last
-                                ? AppColors.success
-                                : AppColors.danger,
-                          ),
-                        ),
-                        child: Icon(
-                          product == products.last ? Icons.add : Icons.delete,
-                          color: product == products.last
-                              ? AppColors.success
-                              : AppColors.danger,
-                          size: 18,
-                        ),
-                      ),
+                            },
                     ),
                   ),
                 ),
               ],
             ),
-          );
-        }),
 
-      ],
+            // Sub total / Net
+            _valueBox(controllers[index]?["ticket_total"]?.text ?? '0.00'),
+            _valueBox(controllers[index]?["total"]?.text ?? '0.00',
+                strong: true),
+
+            // Remove
+            Center(
+              child: Tooltip(
+                message: 'Remove item',
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(8),
+                  hoverColor: AppColors.danger.withValues(alpha: 0.08),
+                  onTap: () {
+                    final b = context.read<CreatePosSaleBloc>();
+                    b.removeProduct(index);
+                    // সবসময় অন্তত একটা খালি row থাকে — product card
+                    // ক্লিক করলে সেটাতেই product বসে
+                    if (b.products.isEmpty) b.addProduct();
+                    setState(() {});
+                  },
+                  child: const Padding(
+                    padding: EdgeInsets.all(7),
+                    child: Icon(Icons.delete_outline_rounded,
+                        size: 19, color: AppColors.danger),
+                  ),
+                ),
+              ),
+            ),
+          ]),
+          if (issue != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 6, left: _wIdx + 8),
+              child: Row(
+                children: [
+                  const Icon(Icons.error_outline_rounded,
+                      size: 14, color: AppColors.danger),
+                  const SizedBox(width: 4),
+                  Text(
+                    issue,
+                    style: const TextStyle(
+                        fontSize: 11.5, color: AppColors.danger),
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _qtyButton(
+    IconData icon, {
+    required VoidCallback onTap,
+    bool primary = false,
+    bool enabled = true,
+  }) {
+    final Color c = AppColors.primaryColor(context);
+    return SizedBox(
+      width: 28,
+      height: _fieldH,
+      child: Material(
+        color: primary
+            ? (enabled ? c : c.withValues(alpha: 0.35))
+            : Colors.transparent,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+          side: primary ? BorderSide.none : BorderSide(color: AppColors.border),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: enabled ? onTap : null,
+          child: Icon(
+            icon,
+            size: 16,
+            color: primary
+                ? AppColors.onColor(c)
+                : AppColors.text(context)
+                    .withValues(alpha: enabled ? 0.8 : 0.3),
+          ),
+        ),
+      ),
     );
   }
 
@@ -1069,355 +1185,664 @@ class _SalesScreenState extends State<SalesScreen> {
     updateTotal(index);
   }
 
-  // Charges section (kept)
-  Widget _buildChargesSection(CreatePosSaleBloc bloc) {
-    Widget chargeField(
-        String label,
-        String selectedType,
-        TextEditingController controller,
-        Function(String) onTypeChanged,
-        ) {
-      return ResponsiveCol(
-        xs: 12,
-        sm: 2.5,
-        md: 2.5,
-        lg: 1.5,
-        xl: 1.5,
-        child: Column(
+  // ---------------- Totals (এক জায়গায় হিসাব) ----------------
+  // আগে summary, submit আর walk-in check — তিন জায়গায় আলাদা করে একই
+  // হিসাব লেখা ছিল। এখন একটাই function, তাই কোথাও গরমিল হবে না।
+
+  ({
+    double productTotal,
+    double specificDiscount,
+    double subTotal,
+    double overallDiscount,
+    double vat,
+    double service,
+    double delivery,
+    double net,
+  }) _computeTotals() {
+    final bloc = context.read<CreatePosSaleBloc>();
+    final rows = products.where((e) => e["product_id"] != null);
+
+    final double productTotal =
+        rows.fold(0.0, (p, e) => p + _toDouble(e["ticket_total"]));
+    final double specificDiscount = rows.fold(0.0, (p, e) {
+      final disc = _toDouble(e["discount"]);
+      final ticket = _toDouble(e["ticket_total"]);
+      final amount =
+          (e["discount_type"] == 'percent') ? ticket * (disc / 100.0) : disc;
+      return p + amount.clamp(0.0, ticket);
+    });
+    final double subTotal = rows.fold(0.0, (p, e) => p + _toDouble(e["total"]));
+
+    double pick(TextEditingController c, String type) {
+      final v = double.tryParse(c.text) ?? 0.0;
+      return type == 'percent' ? subTotal * (v / 100.0) : v;
+    }
+
+    final double overallDiscount =
+        pick(bloc.discountOverAllController, selectedOverallDiscountType);
+    final double vat = pick(bloc.vatOverAllController, selectedOverallVatType);
+    final double service = pick(
+        bloc.serviceChargeOverAllController, selectedOverallServiceChargeType);
+    final double delivery =
+        pick(bloc.deliveryChargeOverAllController, selectedOverallDeliveryType);
+
+    return (
+      productTotal: productTotal,
+      specificDiscount: specificDiscount,
+      subTotal: subTotal,
+      overallDiscount: overallDiscount,
+      vat: vat,
+      service: service,
+      delivery: delivery,
+      net: (subTotal - overallDiscount) + vat + service + delivery,
+    );
+  }
+
+  // ---------------- Adjustments (Discount / Vat / Service / Delivery) ----------------
+
+  String? _adjustmentValidator(String? v, String type, {bool isDiscount = false}) {
+    final text = (v ?? '').trim();
+    if (text.isEmpty) return null;
+    final value = double.tryParse(text);
+    if (value == null) return 'Enter a valid number';
+    if (value < 0) return 'Cannot be negative';
+    if (type == 'percent' && value > 100) return 'Max 100%';
+    if (isDiscount && type != 'percent') {
+      final sub = _computeTotals().subTotal;
+      if (value > sub) return 'More than sub total';
+    }
+    return null;
+  }
+
+  Widget _adjustmentField(
+    String label,
+    String selectedType,
+    TextEditingController controller,
+    ValueChanged<String> onTypeChanged, {
+    bool isDiscount = false,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _fieldLabel(label),
+        Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(label, style: AppTextStyle.cardLevelText(context)),
-            const SizedBox(height: 4),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                // Segmented control (fixed width)
-                SizedBox(
-                  width: 50,
-                  height: 38,
-                  child: CupertinoSegmentedControl<String>(
-                    padding: EdgeInsets.zero,
-                    children: {
-                      'fixed': Center(
-                        child: Text(
-                          'TK',
-                          style: TextStyle(
-                            fontFamily: GoogleFonts.playfairDisplay().fontFamily,
-                            color:
-                            selectedType == 'fixed' ? Colors.white : Colors.black,
-                          ),
-                        ),
-                      ),
-                      'percent': Center(
-                        child: Text(
-                          '%',
-                          style: TextStyle(
-                            fontFamily: GoogleFonts.playfairDisplay().fontFamily,
-                            color:
-                            selectedType == 'percent' ? Colors.white : Colors.black,
-                          ),
-                        ),
-                      ),
-                    },
-                    groupValue: selectedType,
-                    onValueChanged: onTypeChanged,
-                    unselectedColor: Colors.grey[300],
-                    selectedColor: AppColors.primaryColor(context),
-                    borderColor: AppColors.primaryColor(context),
-                  ),
-                ),
-
-                const SizedBox(width: 6),
-
-                // ✅ FIX: Expanded gives bounded width
-                Expanded(
-                  child: SizedBox(
-                    height: 38,
-                    child: CustomInputFieldPayRoll(
-                      isRequiredLevle: false,
-                      controller: controller,
-                      hintText: label,
-                      fillColor: Colors.white,
-                      keyboardType:
-                      const TextInputType.numberWithOptions(decimal: true),
-                      onChanged: (_) => setState(() {}),
-                      autofillHints: '',
-                      levelText: '',
-                    ),
-                  ),
-                ),
-              ],
+            _typeToggle(selectedType, (v) {
+              onTypeChanged(v);
+              // type বদলালে validation আবার চালানো — 50 TK ঠিক, কিন্তু 150% নয়
+              formKey.currentState?.validate();
+            }),
+            const SizedBox(width: 6),
+            Expanded(
+              child: TextFormField(
+                controller: controller,
+                textAlign: TextAlign.right,
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
+                ],
+                autovalidateMode: AutovalidateMode.onUserInteraction,
+                style: TextStyle(fontSize: 13, color: AppColors.text(context)),
+                decoration: _boxDecoration(hint: '0.00'),
+                validator: (v) =>
+                    _adjustmentValidator(v, selectedType, isDiscount: isDiscount),
+                onChanged: (_) => setState(() {}),
+              ),
             ),
           ],
         ),
-      );
-    }
-
-    return ResponsiveRow(
-      spacing: 6,
-      runSpacing: 6,
-      children: [
-        chargeField(
-          "Discount",
-          selectedOverallDiscountType,
-          context.read<CreatePosSaleBloc>().discountOverAllController,
-              (value) {
-            setState(() {
-              selectedOverallDiscountType = value;
-              context.read<CreatePosSaleBloc>().selectedOverallDiscountType = value;
-            });
-          },
-        ),
-        chargeField("Vat", selectedOverallVatType, context.read<CreatePosSaleBloc>().vatOverAllController, (
-            value,
-            ) {
-          setState(() {
-            selectedOverallVatType = value;
-            context.read<CreatePosSaleBloc>().selectedOverallVatType = value;
-          });
-        }),
-        chargeField(
-          "Service Charge",
-          selectedOverallServiceChargeType,
-          context.read<CreatePosSaleBloc>().serviceChargeOverAllController,
-              (value) {
-            setState(() {
-              selectedOverallServiceChargeType = value;
-              context.read<CreatePosSaleBloc>().selectedOverallServiceChargeType = value;
-            });
-          },
-        ),
-        chargeField(
-          "Delivery Charge",
-          selectedOverallDeliveryType,
-          context.read<CreatePosSaleBloc>().deliveryChargeOverAllController,
-              (value) {
-            setState(() {
-              selectedOverallDeliveryType = value;
-              context.read<CreatePosSaleBloc>().selectedOverallDeliveryType = value;
-            });
-          },
-        ),
       ],
     );
   }
 
-  Widget _buildSummaryAndPayment(CreatePosSaleBloc bloc) {
-    double productTotal = products.fold(
-      0.0,
-          (p, e) => p + _toDouble(e["ticket_total"]),
+  Widget _buildChargesSection(CreatePosSaleBloc bloc) {
+    final items = <Widget>[
+      _adjustmentField(
+        'Discount',
+        selectedOverallDiscountType,
+        bloc.discountOverAllController,
+        (value) => setState(() {
+          selectedOverallDiscountType = value;
+          bloc.selectedOverallDiscountType = value;
+        }),
+        isDiscount: true,
+      ),
+      _adjustmentField(
+        'VAT',
+        selectedOverallVatType,
+        bloc.vatOverAllController,
+        (value) => setState(() {
+          selectedOverallVatType = value;
+          bloc.selectedOverallVatType = value;
+        }),
+      ),
+      _adjustmentField(
+        'Service Charge',
+        selectedOverallServiceChargeType,
+        bloc.serviceChargeOverAllController,
+        (value) => setState(() {
+          selectedOverallServiceChargeType = value;
+          bloc.selectedOverallServiceChargeType = value;
+        }),
+      ),
+      _adjustmentField(
+        'Delivery Charge',
+        selectedOverallDeliveryType,
+        bloc.deliveryChargeOverAllController,
+        (value) => setState(() {
+          selectedOverallDeliveryType = value;
+          bloc.selectedOverallDeliveryType = value;
+        }),
+      ),
+    ];
+
+    return _section(
+      title: 'Adjustments',
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          for (int i = 0; i < items.length; i++) ...[
+            if (i > 0) const SizedBox(width: 12),
+            Expanded(child: items[i]),
+          ],
+        ],
+      ),
     );
-    double specificDiscount = products.fold(0.0, (p, e) {
-      final disc = _toDouble(e["discount"]);
-      final ticket = _toDouble(e["ticket_total"]);
-      return p +
-          ((e["discount_type"] == 'percent') ? (ticket * (disc / 100.0)) : disc);
-    });
-    double subTotal = products.fold(0.0, (p, e) => p + _toDouble(e["total"]));
-    double overallDiscount =
-        double.tryParse(bloc.discountOverAllController.text) ?? 0.0;
-    if (selectedOverallDiscountType == 'percent') {
-      overallDiscount = subTotal * (overallDiscount / 100.0);
-    }
-    double vat = double.tryParse(bloc.vatOverAllController.text) ?? 0.0;
-    if (selectedOverallVatType == 'percent') vat = subTotal * (vat / 100.0);
-    double serviceCharge =
-        double.tryParse(bloc.serviceChargeOverAllController.text) ?? 0.0;
-    if (selectedOverallServiceChargeType == 'percent') {
-      serviceCharge = subTotal * (serviceCharge / 100.0);
-    }
-    double deliveryCharge =
-        double.tryParse(bloc.deliveryChargeOverAllController.text) ?? 0.0;
-    if (selectedOverallDeliveryType == 'percent') {
-      deliveryCharge = subTotal * (deliveryCharge / 100.0);
-    }
-    double netTotal = (subTotal - overallDiscount) + vat + serviceCharge + deliveryCharge;
+  }
 
-    return ResponsiveRow(
-      spacing: 6,
-      runSpacing: 6,
-      children: [
-        ResponsiveCol(
-          xs: 12,
-          sm: 5,
-          md: 5,
-          lg: 5,
-          xl: 5,
-          child: Container(
-            padding: const EdgeInsets.all(4),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
-              color: Colors.white,
-            ),
-            child: Column(
-              children: [
-                _buildSummaryRow("Product Total", productTotal),
-                _buildSummaryRow("Specific Discount (-)", specificDiscount),
-                _buildSummaryRow("Sub Total", subTotal),
-                _buildSummaryRow("Discount (-)", overallDiscount),
-                _buildSummaryRow("Vat (+)", vat),
-                _buildSummaryRow("Service Charge (+)", serviceCharge),
-                _buildSummaryRow("Delivery Charge (+)", deliveryCharge),
-                _buildSummaryRow("Net Total", netTotal),
-              ],
-            ),
+  // ---------------- Summary + Payment ----------------
+
+  Widget _buildSummaryAndPayment(CreatePosSaleBloc bloc) {
+    final t = _computeTotals();
+
+    final summary = _section(
+      title: 'Summary',
+      child: Column(
+        children: [
+          _buildSummaryRow('Product Total', t.productTotal),
+          _buildSummaryRow('Item Discount', -t.specificDiscount, muted: true),
+          _buildSummaryRow('Sub Total', t.subTotal),
+          _buildSummaryRow('Discount', -t.overallDiscount, muted: true),
+          _buildSummaryRow('VAT', t.vat, muted: true),
+          _buildSummaryRow('Service Charge', t.service, muted: true),
+          _buildSummaryRow('Delivery Charge', t.delivery, muted: true),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Divider(height: 1, color: _borderColor),
           ),
-        ),
-        ResponsiveCol(
-          xs: 12,
-          sm: 5,
-          md: 5,
-          lg: 5,
-          xl: 5,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          Row(
             children: [
-              CheckboxListTile(
-                title: Text(
-                  "With Money Receipt",
-                  style: AppTextStyle.headerTitle(context),
+              Expanded(
+                child: Text(
+                  'Net Total',
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.text(context),
+                  ),
                 ),
-                value: _isChecked,
-                onChanged: (bool? newValue) {
-                  setState(() {
-                    _isChecked = newValue ?? false;
-                    context.read<CreatePosSaleBloc>().isChecked = _isChecked;
-                  });
-                },
-                controlAffinity: ListTileControlAffinity.leading,
               ),
-              if (_isChecked) ...[
-                const SizedBox(height: 0),
-                Row(
-                  children: [
-                    Expanded(
-                      child: AppDropdown(
-                        label: "Payment Method",
-                        hint: context.read<CreatePosSaleBloc>().selectedPaymentMethod.isEmpty
-                            ? "Select Payment Method"
-                            : context.read<CreatePosSaleBloc>().selectedPaymentMethod,
-                        isLabel: false,
-                        isRequired: true,
-                        isNeedAll: false,
-                        value: context.read<CreatePosSaleBloc>().selectedPaymentMethod.isEmpty
-                            ? null
-                            : context.read<CreatePosSaleBloc>().selectedPaymentMethod,
-                        itemList: [] + context.read<CreatePosSaleBloc>().paymentMethod,
-                        onChanged: (newVal) {
-                          context.read<CreatePosSaleBloc>().selectedPaymentMethod = newVal.toString();
-                          setState(() {});
-                        },
-                        validator: (value) => value == null ? 'Please select a payment method' : null,
-
-                      ),
-                    ),
-                    const SizedBox(width: 5),
-                    Expanded(
-                      child: BlocBuilder<AccountBloc, AccountState>(
-                        builder: (context, state) {
-                          if (state is AccountActiveListLoading) {
-                            return const Center(child: CircularProgressIndicator());
-                          } else if (state is AccountActiveListSuccess) {
-                            final bloc = context.read<CreatePosSaleBloc>();
-                            final filteredList = bloc.selectedPaymentMethod.isNotEmpty
-                                ? state.list
-                                .where((item) => item.acType?.toLowerCase() == bloc.selectedPaymentMethod.toLowerCase())
-                                .toList()
-                                : state.list;
-                            final selectedAccount = bloc.accountModel ?? (filteredList.isNotEmpty ? filteredList.first : null);
-                            bloc.accountModel = selectedAccount;
-                            return AppDropdown<AccountActiveModel>(
-                              label: "Account",
-                              hint: bloc.accountModel == null ? "Select Account" : bloc.accountModel!.name.toString(),
-                              isLabel: false,
-                              isRequired: true,
-                              isNeedAll: false,
-                              value: selectedAccount,
-                              itemList: filteredList,
-                              onChanged: (newVal) {
-                                bloc.accountModel = newVal;
-                                setState(() {});
-                              },
-                              validator: (value) => value == null ? 'Please select an account' : null,
-                            );
-                          } else {
-                            return Container();
-                          }
-                        },
-                      ),
-                    ),
-                  ],
+              Text(
+                '৳ ${t.net.toStringAsFixed(2)}',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.primaryColor(context),
+                  fontFeatures: const [FontFeature.tabularFigures()],
                 ),
-                const SizedBox(height: 0),
-                Row(
-                  children: [
-                    Expanded(
-                      child: AppTextField(
-                        controller: changeAmountController,
-                        hintText: 'Change Amount',
-                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                        readOnly: true,
-                      ),
-                    ),
-                    const SizedBox(width: 5),
-                    Expanded(
-                      child: AppTextField(
-                        controller: context.read<CreatePosSaleBloc>().payableAmount,
-                        hintText: 'Payable Amount',
-                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                        onChanged: (v) => setState(() {
-                          _updateChangeAmount();
-
-                        }),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-              const SizedBox(height: 0),
-              CustomInputField(
-                isRequiredLable: true,
-                controller: context.read<CreatePosSaleBloc>().remarkController,
-                hintText: 'Remark',
-                fillColor: Colors.white,
-                validator: (value) => value!.isEmpty ? 'Please enter Remark' : null,
-                onChanged: (value) => setState(() {}),
-                keyboardType: TextInputType.text,
               ),
             ],
           ),
-        ),
+        ],
+      ),
+    );
+
+    final payment = _section(
+      title: 'Payment',
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            'Receive payment now',
+            style: TextStyle(fontSize: 13, color: AppColors.text(context)),
+          ),
+          const SizedBox(width: 6),
+          Switch(
+            value: _isChecked,
+            onChanged: (bool v) {
+              final isWalkIn = bloc.selectClintModel?.id == -1;
+              if (!v && isWalkIn) {
+                showCustomToast(
+                  context: context,
+                  title: 'Walk-in customer',
+                  description: 'Full payment is required for walk-in customers.',
+                  icon: Icons.info_outline,
+                  primaryColor: AppColors.warning,
+                );
+                return;
+              }
+              setState(() {
+                _isChecked = v;
+                bloc.isChecked = v;
+              });
+            },
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (_isChecked) ...[
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: AppDropdown(
+                    label: "Payment Method",
+                    hint: bloc.selectedPaymentMethod.isEmpty
+                        ? "Select Payment Method"
+                        : bloc.selectedPaymentMethod,
+                    isLabel: true,
+                    isRequired: true,
+                    isNeedAll: false,
+                    value: bloc.selectedPaymentMethod.isEmpty
+                        ? null
+                        : bloc.selectedPaymentMethod,
+                    itemList: [] + bloc.paymentMethod,
+                    onChanged: (newVal) {
+                      bloc.selectedPaymentMethod = newVal?.toString() ?? '';
+                      // method বদলালে আগের account আর মেলে না
+                      bloc.accountModel = null;
+                      setState(() {});
+                    },
+                    validator: (value) => (_isChecked && value == null)
+                        ? 'Please select a payment method'
+                        : null,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: BlocBuilder<AccountBloc, AccountState>(
+                    builder: (context, state) {
+                      if (state is AccountActiveListLoading) {
+                        return const Padding(
+                          padding: EdgeInsets.only(top: 24),
+                          child: LinearProgressIndicator(minHeight: 2),
+                        );
+                      } else if (state is AccountActiveListSuccess) {
+                        final filteredList = bloc.selectedPaymentMethod.isNotEmpty
+                            ? state.list
+                                .where((item) =>
+                                    item.acType?.toLowerCase() ==
+                                    bloc.selectedPaymentMethod.toLowerCase())
+                                .toList()
+                            : state.list;
+                        final selectedAccount = bloc.accountModel ??
+                            (filteredList.isNotEmpty ? filteredList.first : null);
+                        bloc.accountModel = selectedAccount;
+                        return AppDropdown<AccountActiveModel>(
+                          label: "Account",
+                          hint: bloc.accountModel == null
+                              ? "Select Account"
+                              : bloc.accountModel!.name.toString(),
+                          isLabel: true,
+                          isRequired: true,
+                          isNeedAll: false,
+                          value: selectedAccount,
+                          itemList: filteredList,
+                          onChanged: (newVal) {
+                            bloc.accountModel = newVal;
+                            setState(() {});
+                          },
+                          validator: (value) => (_isChecked && value == null)
+                              ? 'Please select an account'
+                              : null,
+                        );
+                      }
+                      return const SizedBox.shrink();
+                    },
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _fieldLabel('Received Amount', required: true),
+                      TextFormField(
+                        controller: bloc.payableAmount,
+                        textAlign: TextAlign.right,
+                        keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true),
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(
+                              RegExp(r'^\d*\.?\d{0,2}')),
+                        ],
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
+                        style: TextStyle(
+                            fontSize: 14, color: AppColors.text(context)),
+                        decoration: _boxDecoration(hint: '0.00').copyWith(
+                          suffixIcon: Tooltip(
+                            message: 'Fill net total',
+                            child: InkWell(
+                              onTap: () {
+                                bloc.payableAmount.text =
+                                    t.net.toStringAsFixed(2);
+                                _updateChangeAmount();
+                              },
+                              child: const Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 8),
+                                child: Icon(Icons.done_all_rounded, size: 16),
+                              ),
+                            ),
+                          ),
+                          suffixIconConstraints:
+                              const BoxConstraints(minWidth: 32, minHeight: 20),
+                        ),
+                        validator: (v) {
+                          if (!_isChecked) return null;
+                          final value = double.tryParse((v ?? '').trim());
+                          if (value == null || value <= 0) {
+                            return 'Enter the amount received';
+                          }
+                          if (bloc.selectClintModel?.id == -1 &&
+                              value + 0.001 < t.net) {
+                            return 'Walk-in: full payment required';
+                          }
+                          return null;
+                        },
+                        onChanged: (_) => _updateChangeAmount(),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _fieldLabel(_receivedDelta(bloc, t.net) >= 0
+                          ? 'Change to return'
+                          : 'Due'),
+                      _valueBox(
+                        _receivedDelta(bloc, t.net).abs().toStringAsFixed(2),
+                        strong: true,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+          ] else
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Text(
+                'The full amount (৳ ${t.net.toStringAsFixed(2)}) will be recorded as due.',
+                style: TextStyle(
+                  fontSize: 12.5,
+                  color: AppColors.text(context).withValues(alpha: 0.65),
+                ),
+              ),
+            ),
+          _fieldLabel('Remark', required: true),
+          TextFormField(
+            controller: bloc.remarkController,
+            style: TextStyle(fontSize: 14, color: AppColors.text(context)),
+            maxLines: 2,
+            minLines: 1,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
+            decoration: _boxDecoration(hint: 'Note for this sale'),
+            validator: (v) => (v == null || v.trim().isEmpty)
+                ? 'Please enter a remark'
+                : null,
+          ),
+        ],
+      ),
+    );
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(flex: 5, child: payment),
+        const SizedBox(width: 12),
+        Expanded(flex: 4, child: summary),
       ],
     );
   }
 
-  Widget _buildSummaryRow(String label, double value) {
+  /// received − net : ধনাত্মক = ফেরত দিতে হবে, ঋণাত্মক = বাকি
+  double _receivedDelta(CreatePosSaleBloc bloc, double net) {
+    final received = double.tryParse(bloc.payableAmount.text.trim()) ?? 0;
+    return received - net;
+  }
+
+  Widget _buildSummaryRow(String label, double value, {bool muted = false}) {
+    final Color c = AppColors.text(context);
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2.0),
+      padding: const EdgeInsets.symmetric(vertical: 3),
       child: Row(
         children: [
-          Expanded(flex: 4, child: Text(label, style: AppTextStyle.cardLevelHead(context))),
-          Expanded(flex: 2, child: Text(value.toStringAsFixed(2), style: AppTextStyle.cardLevelText(context))),
+          Expanded(
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 13,
+                color: muted ? c.withValues(alpha: 0.65) : c,
+                fontWeight: muted ? FontWeight.w400 : FontWeight.w500,
+              ),
+            ),
+          ),
+          Text(
+            value < 0
+                ? '− ${value.abs().toStringAsFixed(2)}'
+                : value.toStringAsFixed(2),
+            style: TextStyle(
+              fontSize: 13,
+              color: muted ? c.withValues(alpha: 0.75) : c,
+              fontWeight: muted ? FontWeight.w400 : FontWeight.w600,
+              fontFeatures: const [FontFeature.tabularFigures()],
+            ),
+          ),
         ],
       ),
     );
   }
 
   Widget _buildActionButtons() {
-    return Row(
-      children: [
-        const SizedBox(width: 10),
-        AppButton(
-          name: 'Preview',
-          onPressed: () {},
-          color: const Color(0xff800000),
-        ),
-        const SizedBox(width: 10),
-        AppButton(name: 'Submit', onPressed: _submitForm),
-        const SizedBox(width: 5),
-      ],
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          Builder(
+            builder: (btnContext) => PopoverButton(
+              label: 'Preview',
+              onPressed: () => _showPreview(btnContext),
+            ),
+          ),
+          const SizedBox(width: 10),
+          PopoverButton(
+            label: 'Submit Sale',
+            primary: true,
+            icon: Icons.check_rounded,
+            onPressed: _submitForm,
+          ),
+        ],
+      ),
     );
+  }
+
+  /// Submit এর আগে পুরো sale একবার দেখে নেওয়া — popover এ, তাই screen
+  /// ছাড়তে হয় না। সমস্যা থাকলে এখানেই দেখা যায়।
+  void _showPreview(BuildContext anchorContext) {
+    final bloc = context.read<CreatePosSaleBloc>();
+    final t = _computeTotals();
+    final rows = [
+      for (int i = 0; i < products.length; i++)
+        if (products[i]["product_id"] != null) i,
+    ];
+
+    String nameOf(int i) {
+      final p = products[i]["product"];
+      return (p is ProductModelStockModel ? p.name : null) ?? '-';
+    }
+
+    showAppPopover<void>(
+      context: anchorContext,
+      mode: PopoverAnchorMode.aligned,
+      builder: (ctx) => AppPopoverCard(
+        width: 520,
+        icon: const Icon(Icons.receipt_long_outlined),
+        title: const Text('Sale Preview'),
+        content: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              '${bloc.selectClintModel?.name ?? 'No customer selected'}'
+              '  ·  ${bloc.dateEditingController.text}',
+              style: TextStyle(
+                fontSize: 13,
+                color: AppColors.text(context).withValues(alpha: 0.7),
+              ),
+            ),
+            const SizedBox(height: 12),
+            if (rows.isEmpty)
+              const Text('No items added.')
+            else
+              for (final i in rows)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          nameOf(i),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      SizedBox(
+                        width: 90,
+                        child: Text(
+                          '${products[i]["quantity"]} × ${_toDouble(products[i]["price"]).toStringAsFixed(2)}',
+                          textAlign: TextAlign.right,
+                          style: const TextStyle(fontSize: 12.5),
+                        ),
+                      ),
+                      SizedBox(
+                        width: 90,
+                        child: Text(
+                          _toDouble(products[i]["total"]).toStringAsFixed(2),
+                          textAlign: TextAlign.right,
+                          style: const TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+            const Divider(height: 20),
+            _buildSummaryRow('Sub Total', t.subTotal),
+            if (t.overallDiscount != 0)
+              _buildSummaryRow('Discount', -t.overallDiscount, muted: true),
+            if (t.vat != 0) _buildSummaryRow('VAT', t.vat, muted: true),
+            if (t.service != 0)
+              _buildSummaryRow('Service Charge', t.service, muted: true),
+            if (t.delivery != 0)
+              _buildSummaryRow('Delivery Charge', t.delivery, muted: true),
+            const SizedBox(height: 6),
+            Row(
+              children: [
+                const Expanded(
+                  child: Text('Net Total',
+                      style: TextStyle(fontWeight: FontWeight.w700)),
+                ),
+                Text(
+                  '৳ ${t.net.toStringAsFixed(2)}',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.primaryColor(context),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+        actions: [
+          PopoverButton(
+            label: 'Close',
+            onPressed: () => Navigator.of(ctx).pop(),
+          ),
+          PopoverButton(
+            label: 'Submit Sale',
+            primary: true,
+            icon: Icons.check_rounded,
+            onPressed: rows.isEmpty
+                ? null
+                : () {
+                    Navigator.of(ctx).pop();
+                    _submitForm();
+                  },
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Submit এর আগে item গুলো যাচাই — প্রথম সমস্যাটা জানিয়ে false ফেরত দেয়
+  bool _validateItems() {
+    final rows = [
+      for (int i = 0; i < products.length; i++)
+        if (products[i]["product_id"] != null) i,
+    ];
+
+    if (rows.isEmpty) {
+      showCustomToast(
+        context: context,
+        title: 'No items',
+        description: 'Add at least one product before submitting.',
+        icon: Icons.shopping_cart_outlined,
+        primaryColor: AppColors.warning,
+      );
+      return false;
+    }
+
+    for (int n = 0; n < rows.length; n++) {
+      final issue = _rowIssue(rows[n]);
+      if (issue != null) {
+        showCustomToast(
+          context: context,
+          title: 'Item ${n + 1}',
+          description: issue,
+          icon: Icons.error_outline,
+          primaryColor: AppColors.danger,
+        );
+        setState(() {}); // row এ লাল border দেখানো
+        return false;
+      }
+    }
+
+    if (_computeTotals().net < 0) {
+      showCustomToast(
+        context: context,
+        title: 'Invalid total',
+        description: 'Discount is larger than the sale amount.',
+        icon: Icons.error_outline,
+        primaryColor: AppColors.danger,
+      );
+      return false;
+    }
+    return true;
   }
 
   // Product browser -------------------------------------------------------
@@ -1543,6 +1968,16 @@ class _SalesScreenState extends State<SalesScreen> {
     return InkWell(
       onTap: () {
         final bloc = context.read<CreatePosSaleBloc>();
+
+        // একই product আবার ক্লিক করলে নতুন row নয় — quantity +1
+        // (আগে "already added" warning দিত, cashier কে হাতে qty বাড়াতে হতো)
+        final existing =
+            bloc.products.indexWhere((row) => row["product_id"] == p.id);
+        if (existing >= 0) {
+          _setQuantity(existing, _toDouble(bloc.products[existing]["quantity"]).toInt() + 1);
+          setState(() {});
+          return;
+        }
 
         // If products list is empty for some reason, add an empty row first.
         if (bloc.products.isEmpty) {
@@ -1717,10 +2152,24 @@ class _SalesScreenState extends State<SalesScreen> {
 
   // Submit form
   void _submitForm() {
-    if (!formKey.currentState!.validate()) return;
+    final formOk = formKey.currentState!.validate();
+    if (!formOk) {
+      showCustomToast(
+        context: context,
+        title: 'Check the form',
+        description: 'Some required fields are missing or invalid.',
+        icon: Icons.error_outline,
+        primaryColor: AppColors.danger,
+      );
+      return;
+    }
+    if (!_validateItems()) return;
     final bloc = context.read<CreatePosSaleBloc>();
 
-    var transferProducts = products.map((product) {
+    // খালি row (product বাছা হয়নি) server এ পাঠানো হয় না
+    var transferProducts = products
+        .where((product) => product["product_id"] != null)
+        .map((product) {
       return {
         "product_id": _toInt(product["product_id"]),
         "quantity": _toDouble(product["quantity"]), // FIX: দশমিক পরিমাণ বাদ পড়ত
@@ -1761,19 +2210,9 @@ class _SalesScreenState extends State<SalesScreen> {
     if (!isWalkInCustomer) body['customer_id'] = selectedCustomer?.id.toString() ?? '';
 
     if (isWalkInCustomer) {
-      final subTotal = products.fold(0.0, (p, e) => p + _toDouble(e["total"]));
-      double overallDiscount = double.tryParse(bloc.discountOverAllController.text) ?? 0.0;
-      if (selectedOverallDiscountType == 'percent') overallDiscount = subTotal * (overallDiscount / 100.0);
-      double vat = double.tryParse(bloc.vatOverAllController.text) ?? 0.0;
-      if (selectedOverallVatType == 'percent') vat = subTotal * (vat / 100.0);
-      double serviceVal = double.tryParse(bloc.serviceChargeOverAllController.text) ?? 0.0;
-      if (selectedOverallServiceChargeType == 'percent') serviceVal = subTotal * (serviceVal / 100.0);
-      double delivery = double.tryParse(bloc.deliveryChargeOverAllController.text) ?? 0.0;
-      if (selectedOverallDeliveryType == 'percent') delivery = subTotal * (delivery / 100.0);
-
-      final netTotal = (subTotal - overallDiscount) + vat + serviceVal + delivery;
+      final netTotal = _computeTotals().net;
       final paidAmount = double.tryParse(bloc.payableAmount.text.trim()) ?? 0;
-      if (paidAmount < netTotal) {
+      if (paidAmount + 0.001 < netTotal) {
         showCustomToast(
           context: context,
           title: 'Warning!',
@@ -1900,7 +2339,7 @@ class _SalesScreenState extends State<SalesScreen> {
                               child: Form(
                                 key: formKey,
                                 child: Padding(
-                                  padding: const EdgeInsets.all(6.0),
+                                  padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
                                   child: Column(
                                     mainAxisAlignment: MainAxisAlignment.start,
                                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -1908,9 +2347,7 @@ class _SalesScreenState extends State<SalesScreen> {
                                       _buildTopFormSection(bloc),
                                       _buildProductListSection(bloc),
                                       _buildChargesSection(bloc),
-                                      const SizedBox(height: 4),
                                       _buildSummaryAndPayment(bloc),
-                                      gapH8,
                                       _buildActionButtons(),
                                     ],
                                   ),

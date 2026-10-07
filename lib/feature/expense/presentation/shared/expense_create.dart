@@ -77,10 +77,10 @@ class _ExpenseCreateScreenState extends State<ExpenseCreateScreen> {
   }
 
   void _showConfirmationDialog() {
-    showDialog(
+    showAppPopover(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
+        return AppPopoverCard(
           title: Text(widget.id == null ? 'Create Expense' : 'Update Expense'),
           content: Text(
             widget.id == null

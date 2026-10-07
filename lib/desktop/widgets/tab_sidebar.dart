@@ -456,10 +456,10 @@ class TabSidebar extends StatelessWidget {
   }
 
   void _showPermissionDeniedDialog(BuildContext context) {
-    showDialog(
+    showAppPopover(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
+        return AppPopoverCard(
           title: const Text("Access Denied"),
           content: const Text("You don't have permission to access this feature."),
           actions: [
@@ -474,10 +474,10 @@ class TabSidebar extends StatelessWidget {
   }
 
   void _handleLogout(BuildContext context) {
-    showDialog(
+    showAppPopover(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
+        return AppPopoverCard(
           title: const Text("Logout"),
           content: const Text("Are you sure you want to logout?"),
           actions: [

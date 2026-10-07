@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:meherinMart/core/widgets/app_popover_route.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lottie/lottie.dart';
 import 'package:meherinMart/core/configs/app_sizes.dart';
@@ -278,10 +279,10 @@ class _GroupsScreenState extends State<GroupsScreen> {
   }
 
   void _showCreateDialog(BuildContext context) {
-    showDialog(
+    showAppPopover(
       context: context,
       builder: (context) {
-        return Dialog(
+        return AppPopoverShell(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppSizes.radius),
           ),

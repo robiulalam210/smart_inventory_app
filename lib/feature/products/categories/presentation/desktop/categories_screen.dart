@@ -162,10 +162,10 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                       name: "Create Category",
                       onPressed: () {
                         context.read<CategoriesBloc>().nameController.clear();
-                        showDialog(
+                        showAppPopover(
                           context: context,
                           builder: (context) {
-                            return Dialog(
+                            return AppPopoverShell(
                               insetPadding: const EdgeInsets.all(16),
                               child: CategoriesCreate(),
                             );
@@ -211,10 +211,10 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                         name: "Create Category",
                         onPressed: () {
                           context.read<CategoriesBloc>().nameController.clear();
-                          showDialog(
+                          showAppPopover(
                             context: context,
                             builder: (context) {
-                              return Dialog(
+                              return AppPopoverShell(
                                 child: SizedBox(
                                   width: MediaQuery.of(context).size.width * 0.5,
                                   child: CategoriesCreate(),

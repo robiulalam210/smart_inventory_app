@@ -319,7 +319,7 @@ class _IncomeListScreenState extends State<MobileIncomeListScreen> {
   }
 
   void _showCreateBottomSheet(BuildContext context) {
-    showModalBottomSheet(
+    showAppPopoverSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
@@ -354,7 +354,7 @@ class _IncomeListScreenState extends State<MobileIncomeListScreen> {
   }
 
   void _showMobileFilterSheet(BuildContext context) {
-    showModalBottomSheet(
+    showAppPopoverSheet(
       context: context,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(

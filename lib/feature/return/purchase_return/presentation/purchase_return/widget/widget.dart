@@ -25,105 +25,90 @@ class PurchaseReturnTableCard extends StatelessWidget {
 
     if (isMobile) return _buildMobileList(context);
 
-    // Desktop / Tablet: existing DataTable layout
-    return TableScrollControllers(
-      builder: (context, verticalScrollController, horizontalScrollController) {
+    // Desktop / Tablet: AppDataTable
+    const columns = [
+      AppTableColumn('Return No', flex: 2, minWidth: 110),
+      AppTableColumn('Supplier', flex: 3, minWidth: 150),
+      AppTableColumn('Date', flex: 2, minWidth: 100),
+      AppTableColumn.numeric('Amount', flex: 2, minWidth: 110),
+      AppTableColumn('Reason', flex: 3, minWidth: 140),
+      AppTableColumn.center('Status', flex: 2, minWidth: 104),
+      AppTableColumn.center('Actions', flex: 3, minWidth: 150),
+    ];
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final totalWidth = constraints.maxWidth;
-        const numColumns = 7;
-        const minColumnWidth = 120.0;
-
-        final dynamicColumnWidth =
-        (totalWidth / numColumns).clamp(minColumnWidth, double.infinity);
-
-        return Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withValues(alpha: 0.1),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Scrollbar(
-            controller: verticalScrollController,
-            thumbVisibility: true,
-            child: SingleChildScrollView(
-              controller: verticalScrollController,
-              scrollDirection: Axis.vertical,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: Scrollbar(
-                  controller: horizontalScrollController,
-                  thumbVisibility: true,
-                  child: SingleChildScrollView(
-                    controller: horizontalScrollController,
-                    scrollDirection: Axis.horizontal,
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 5),
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(minWidth: totalWidth),
-                        child: DataTable(
-                          dataRowMinHeight: 40,
-                          dataRowMaxHeight: 40,
-                          columnSpacing: 8,
-                          horizontalMargin: 12,
-                          dividerThickness: 0.5,
-                          headingRowHeight: 40,
-                          headingTextStyle: TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            fontFamily: GoogleFonts.inter().fontFamily,
-                          ),
-                          headingRowColor: WidgetStateProperty.all(AppColors.primaryColor(context)),
-                          dataTextStyle: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w500,
-                            fontFamily: GoogleFonts.inter().fontFamily,
-                          ),
-                          columns: _buildColumns(dynamicColumnWidth),
-                          rows: purchaseReturns.asMap().entries.map((entry) {
-                            final purchaseReturn = entry.value;
-                            return DataRow(
-                              onSelectChanged: onPurchaseReturnTap != null
-                                  ? (_) => onPurchaseReturnTap!()
-                                  : null,
-                              cells: [
-                                _buildDataCell(purchaseReturn.invoiceNo ?? 'N/A', dynamicColumnWidth),
-                                _buildDataCell(purchaseReturn.supplier ?? 'N/A', dynamicColumnWidth),
-                                _buildDataCell(
-                                  purchaseReturn.returnDate != null
-                                      ? _formatDateSafe(purchaseReturn.returnDate!)
-                                      : 'N/A',
-                                  dynamicColumnWidth,
-                                ),
-                                _buildDataCell(
-                                  purchaseReturn.returnAmount?.toString() ?? "0.00",
-                                  dynamicColumnWidth,
-                                ),
-                                _buildReasonCell(purchaseReturn.reason, dynamicColumnWidth),
-                                _buildStatusCell(purchaseReturn.status, dynamicColumnWidth),
-                                _buildActionCell(purchaseReturn, context, dynamicColumnWidth),
-                              ],
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                    ),
-                  ),
+    return AppDataTable(
+      columns: columns,
+      rowCount: purchaseReturns.length,
+      onRowTap:
+          onPurchaseReturnTap == null ? null : (_) => onPurchaseReturnTap!(),
+      cellBuilder: (context, row, col) {
+        final pr = purchaseReturns[row];
+        final status = (pr.status ?? '').toLowerCase();
+        switch (col) {
+          case 0:
+            return AppTableText(pr.invoiceNo ?? '-',
+                bold: true, color: AppColors.primaryColor(context));
+          case 1:
+            return AppTableText(pr.supplier ?? '-');
+          case 2:
+            return AppTableText(pr.returnDate != null
+                ? _formatDateSafe(pr.returnDate!)
+                : '-');
+          case 3:
+            return AppTableMoney(AppTableMoney.parse(pr.returnAmount),
+                bold: true);
+          case 4:
+            return AppTableText(pr.reason ?? '-', muted: true);
+          case 5:
+            return AppStatusPill((pr.status ?? '-').capitalize(),
+                color: _getStatusColor(pr.status ?? ''));
+          default:
+            return Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                AppTableAction(
+                  icon: Icons.visibility_outlined,
+                  tooltip: 'View',
+                  color: AppColors.info,
+                  onPressed: () => _showViewDialog(context, pr),
                 ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
+                if (status == 'pending') ...[
+                  AppTableAction(
+                    icon: Icons.edit_outlined,
+                    tooltip: 'Edit',
+                    color: AppColors.info,
+                    onPressed: () => _showEditDialog(context, pr),
+                  ),
+                  AppTableAction(
+                    icon: Icons.check_circle_outline,
+                    tooltip: 'Approve',
+                    color: AppColors.success,
+                    onPressed: () => _confirmApprove(context, pr),
+                  ),
+                  AppTableAction(
+                    icon: Icons.block_outlined,
+                    tooltip: 'Reject',
+                    color: AppColors.warning,
+                    onPressed: () => _confirmReject(context, pr),
+                  ),
+                ],
+                if (status == 'approved')
+                  AppTableAction(
+                    icon: Icons.done_all_rounded,
+                    tooltip: 'Complete',
+                    color: AppColors.success,
+                    onPressed: () => _confirmComplete(context, pr),
+                  ),
+                if (status == 'pending' || status == 'rejected')
+                  AppTableAction(
+                    icon: Icons.delete_outline_rounded,
+                    tooltip: 'Delete',
+                    color: AppColors.danger,
+                    onPressed: () => _confirmDelete(context, pr),
+                  ),
+              ],
+            );
+        }
       },
     );
   }
@@ -298,85 +283,6 @@ class PurchaseReturnTableCard extends StatelessWidget {
   }
 
   // ----- TABLE HELPERS -----
-  List<DataColumn> _buildColumns(double columnWidth) {
-    return [
-      DataColumn(label: SizedBox(width: columnWidth, child: const Text('Return No', textAlign: TextAlign.center))),
-      DataColumn(label: SizedBox(width: columnWidth, child: const Text('Supplier', textAlign: TextAlign.center))),
-      DataColumn(label: SizedBox(width: columnWidth, child: const Text('Date', textAlign: TextAlign.center))),
-      DataColumn(label: SizedBox(width: columnWidth, child: const Text('Total Amount', textAlign: TextAlign.center))),
-      DataColumn(label: SizedBox(width: columnWidth, child: const Text('Reason', textAlign: TextAlign.center))),
-      DataColumn(label: SizedBox(width: columnWidth, child: const Text('Status', textAlign: TextAlign.center))),
-      DataColumn(label: SizedBox(width: columnWidth * 1.2, child: const Text('Actions', textAlign: TextAlign.center))),
-    ];
-  }
-
-  DataCell _buildDataCell(String text, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Text(text, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: Colors.black87), textAlign: TextAlign.center, overflow: TextOverflow.ellipsis),
-      ),
-    );
-  }
-
-  DataCell _buildReasonCell(String? reason, double width) {
-    return DataCell(
-      Tooltip(
-        message: reason ?? 'No reason provided',
-        child: SizedBox(
-          width: width,
-          child: Text(reason ?? 'N/A', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: Colors.black87), textAlign: TextAlign.center, overflow: TextOverflow.ellipsis, maxLines: 2),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildStatusCell(String? status, double width) {
-    final statusText = status ?? 'Pending';
-    final statusColor = _getStatusColor(statusText);
-
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(color: statusColor.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(4)),
-            child: Text(statusText.toUpperCase(), style: TextStyle(color: statusColor, fontWeight: FontWeight.w600, fontSize: 10)),
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildActionCell(PurchaseReturnModel purchaseReturn, BuildContext context, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _buildActionButton(icon: Icons.visibility, color: AppColors.success, tooltip: 'View', onPressed: () => _showViewDialog(context, purchaseReturn)),
-            if ((purchaseReturn.status ?? '').toLowerCase() == 'pending') ...[
-              _buildActionButton(icon: Icons.edit, color: AppColors.info, tooltip: 'Edit', onPressed: () => _showEditDialog(context, purchaseReturn)),
-              _buildActionButton(icon: Icons.check, color: AppColors.success, tooltip: 'Approve', onPressed: () => _confirmApprove(context, purchaseReturn)),
-              _buildActionButton(icon: Icons.close, color: AppColors.danger, tooltip: 'Reject', onPressed: () => _confirmReject(context, purchaseReturn)),
-            ],
-            if ((purchaseReturn.status ?? '').toLowerCase() == 'approved') ...[
-              const SizedBox(width: 2),
-              _buildActionButton(icon: Icons.done, color: AppColors.success, tooltip: 'Complete', onPressed: () => _confirmComplete(context, purchaseReturn)),
-            ],
-            if ((purchaseReturn.status ?? '').toLowerCase() == 'pending' ||
-                (purchaseReturn.status ?? '').toLowerCase() == 'rejected') ...[
-              const SizedBox(width: 2),
-              _buildActionButton(icon: Icons.delete, color: AppColors.danger, tooltip: 'Delete', onPressed: () => _confirmDelete(context, purchaseReturn)),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget _buildActionButton({required IconData icon, required Color color, required String tooltip, required VoidCallback onPressed}) {
     return IconButton(
       onPressed: onPressed,
@@ -442,9 +348,9 @@ class PurchaseReturnTableCard extends StatelessWidget {
   }
 
   Future<bool> _showConfirmationDialog(BuildContext context, {required String title, required String content}) async {
-    final res = await showDialog<bool>(
+    final res = await showAppPopover<bool>(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (context) => AppPopoverCard(
         title: Text(title),
         content: Text(content),
         actions: [
@@ -457,10 +363,10 @@ class PurchaseReturnTableCard extends StatelessWidget {
   }
 
   void _showViewDialog(BuildContext context, PurchaseReturnModel pr) {
-    showDialog(
+    showAppPopover(
       context: context,
       builder: (context) {
-        return Dialog(
+        return AppPopoverShell(
           child: Container(
             width: AppSizes.width(context) * 0.50,
             padding: const EdgeInsets.all(20),
@@ -507,10 +413,10 @@ class PurchaseReturnTableCard extends StatelessWidget {
   }
 
   void _showEditDialog(BuildContext context, PurchaseReturnModel pr) {
-    showDialog(
+    showAppPopover(
       context: context,
       builder: (context) {
-        return Dialog(
+        return AppPopoverShell(
           child: Container(
             width: AppSizes.width(context) * 0.60,
             padding: const EdgeInsets.all(20),

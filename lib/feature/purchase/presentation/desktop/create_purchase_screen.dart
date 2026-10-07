@@ -787,6 +787,14 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
                   ),
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                  // % হলে ১০০ এর বেশি নয়, ঋণাত্মক নয়
+                  validator: (v) => AppValidators.number(
+                    'Discount',
+                    max: products[index]["discount_type"] == 'percentage'
+                        ? 100
+                        : null,
+                  )(v),
                   decoration: InputDecoration(
                     fillColor: AppColors.whiteColor(context),
                     filled: true,
@@ -1126,6 +1134,10 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
                   ),
+                  validator: AppValidators.number(
+                    label.trim(),
+                    max: selectedType == 'percentage' ? 100 : null,
+                  ),
                   onChanged: (value) {
                     if (label.contains('Discount')) calculateDiscountTotal();
                     if (label.contains('Service')) {
@@ -1397,6 +1409,7 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
                   ),
+                  validator: AppValidators.number('Paid amount'),
                   onChanged: (value) {
                     _updatePaymentCalculations();
                   },

@@ -531,316 +531,124 @@ class SupplierPaymentWidget extends StatelessWidget {
     }
   }
 
-  // Keep your existing desktop DataTable code here
+  // Desktop টেবিল — AppDataTable
+  // (আগে টাকার আগে ভুল করে "\$" চিহ্ন দেখাত — এখন ৳)
   Widget _buildDesktopDataTable() {
-    return TableScrollControllers(
-      builder: (context, verticalController, horizontalController) {
+    const columns = [
+      AppTableColumn.center('SL', flex: 1, minWidth: 52),
+      AppTableColumn('Payment No', flex: 2, minWidth: 110),
+      AppTableColumn('Supplier', flex: 3, minWidth: 160),
+      AppTableColumn.numeric('Amount', flex: 2, minWidth: 110),
+      AppTableColumn('Method', flex: 2, minWidth: 100),
+      AppTableColumn('Date', flex: 2, minWidth: 100),
+      AppTableColumn('Prepared By', flex: 2, minWidth: 110),
+      AppTableColumn.center('Status', flex: 2, minWidth: 100),
+      AppTableColumn.center('Actions', flex: 2, minWidth: 96),
+    ];
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final totalWidth = constraints.maxWidth;
-        const numColumns = 10;
-        const minColumnWidth = 100.0;
-
-        final dynamicColumnWidth = (totalWidth / numColumns).clamp(
-          minColumnWidth,
-          double.infinity,
-        );
-
-        return Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withValues(alpha: 0.1),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Scrollbar(
-            controller: verticalController,
-            thumbVisibility: true,
-            child: SingleChildScrollView(
-              controller: verticalController,
-              child: Scrollbar(
-                controller: horizontalController,
-                thumbVisibility: true,
-                child: SingleChildScrollView(
-                  controller: horizontalController,
-                  scrollDirection: Axis.horizontal,
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(minWidth: totalWidth),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: DataTable(
-                        columns: _buildColumns(context, dynamicColumnWidth),
-                        rows: suppliers
-                            .asMap()
-                            .entries
-                            .map(
-                              (e) => _buildRow(
-                                context,
-                                e.key + 1,
-                                e.value,
-                                dynamicColumnWidth,
-                              ),
-                            )
-                            .toList(),
-                        headingRowColor: WidgetStateProperty.all(
-                          AppColors.primaryColor(context),
-                        ),
-                        headingRowHeight: 40,
-                        headingTextStyle: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                        ),
-                        dataRowMinHeight: 35,
-                        columnSpacing: 0,
-                        horizontalMargin: 0,
-                        dataTextStyle: const TextStyle(fontSize: 11),
-                      ),
+    return AppDataTable(
+      columns: columns,
+      rowCount: suppliers.length,
+      cellBuilder: (context, row, col) {
+        final pay = suppliers[row];
+        switch (col) {
+          case 0:
+            return AppTableText('${row + 1}',
+                align: AppCellAlign.center, muted: true);
+          case 1:
+            return AppTableText(pay.spNo ?? '-',
+                bold: true, color: AppColors.primaryColor(context));
+          case 2:
+            return AppTableText(pay.supplierName ?? '-',
+                subtitle: pay.supplierPhone);
+          case 3:
+            return AppTableMoney(AppTableMoney.parse(pay.amount),
+                bold: true, color: AppColors.success);
+          case 4:
+            return AppTableText(pay.paymentMethod ?? '-');
+          case 5:
+            final d = pay.paymentDate;
+            return AppTableText(d == null
+                ? '-'
+                : '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}/${d.year}');
+          case 6:
+            return AppTableText(pay.preparedByName ?? '-', muted: true);
+          case 7:
+            final status = pay.paymentSummary?.status ?? 'Unknown';
+            return AppStatusPill(_formatStatusText(status),
+                color: _getStatusColors(status).$2);
+          default:
+            return Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                AppTableAction(
+                  icon: Icons.visibility_outlined,
+                  tooltip: 'View details',
+                  color: AppColors.info,
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          SupplierPaymentDetailsScreen(payment: pay),
                     ),
                   ),
                 ),
-              ),
-            ),
-          ),
-        );
+                AppTableAction(
+                  icon: Icons.picture_as_pdf_outlined,
+                  tooltip: 'Payment PDF',
+                  color: AppColors.success,
+                  onPressed: () => _openPdf(context, pay),
+                ),
+              ],
+            );
+        }
       },
     );
-      },
-    );
   }
 
-  List<DataColumn> _buildColumns(BuildContext context, double columnWidth) {
-    return [
-      _buildDataColumn("SL", columnWidth * 0.6),
-      _buildDataColumn("Payment No", columnWidth * 0.8),
-      _buildDataColumn("Supplier Name", columnWidth * 1.2),
-      _buildDataColumn("Phone", columnWidth * 0.9),
-      _buildDataColumn("Amount", columnWidth),
-      _buildDataColumn("Payment Method", columnWidth),
-      _buildDataColumn("Payment Date", columnWidth),
-      _buildDataColumn("Prepared By", columnWidth),
-      _buildDataColumn("Status", columnWidth * 0.8),
-      _buildDataColumn("Actions", columnWidth * 0.8),
-    ];
-  }
-
-  DataColumn _buildDataColumn(String label, double width) {
-    return DataColumn(
-      label: SizedBox(
-        width: width,
-        child: Text(
-          label,
-          textAlign: TextAlign.center,
-          style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            fontSize: 11,
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataRow _buildRow(
-    BuildContext context,
-    int index,
-    SupplierPaymentModel supplier,
-    double columnWidth,
-  ) {
-    String formatDate(DateTime? date) {
-      if (date == null) return '-';
-      return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
-    }
-
-    String getStatus(PaymentSummary? summary) {
-      if (summary == null) return 'Unknown';
-      return summary.status ?? 'Unknown';
-    }
-
-    return DataRow(
-      cells: [
-        _buildIndexCell(index, columnWidth * 0.6),
-        _buildDataCell(supplier.spNo ?? '-', columnWidth * 0.8),
-        _buildDataCell(supplier.supplierName ?? '-', columnWidth * 1.2),
-        _buildDataCell(supplier.supplierPhone ?? '-', columnWidth * 0.9),
-        _buildAmountCell(supplier.amount, columnWidth),
-        _buildDataCell(supplier.paymentMethod ?? '-', columnWidth),
-        _buildDataCell(formatDate(supplier.paymentDate), columnWidth),
-        _buildDataCell(supplier.preparedByName ?? '-', columnWidth),
-        _buildStatusCell(getStatus(supplier.paymentSummary), columnWidth * 0.8),
-        _buildActionsCell(context, supplier, columnWidth * 0.8),
-      ],
-    );
-  }
-
-  DataCell _buildActionsCell(
-    BuildContext context,
-    SupplierPaymentModel sale,
-    double width,
-  ) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            IconButton(
-              icon: const Icon(Icons.visibility, size: 16),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) =>
-                        SupplierPaymentDetailsScreen(payment: sale),
-                  ),
-                );
-              },
-              tooltip: 'View Details',
+  void _openPdf(BuildContext context, SupplierPaymentModel sale) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => Scaffold(
+          backgroundColor: AppColors.danger,
+          body: PdfPreview.builder(
+            useActions: true,
+            allowSharing: false,
+            canDebug: false,
+            canChangeOrientation: false,
+            canChangePageFormat: false,
+            dynamicLayout: true,
+            build: (format) => generateSupplierPaymentPdf(sale),
+            pdfPreviewPageDecoration: BoxDecoration(
+              color: AppColors.white,
             ),
-            IconButton(
-              icon: const Icon(Icons.picture_as_pdf, size: 16),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => Scaffold(
-                      backgroundColor: AppColors.danger,
-                      body: PdfPreview.builder(
-                        useActions: true,
-                        allowSharing: false,
-                        canDebug: false,
-                        canChangeOrientation: false,
-                        canChangePageFormat: false,
-                        dynamicLayout: true,
-                        build: (format) => generateSupplierPaymentPdf(sale),
-                        pdfPreviewPageDecoration: BoxDecoration(
-                          color: AppColors.white,
-                        ),
-                        actionBarTheme: PdfActionBarTheme(
-                          backgroundColor: AppColors.primaryColor(context),
-                          iconColor: Colors.white,
-                          textStyle: const TextStyle(color: Colors.white),
-                        ),
-                        actions: [
-                          IconButton(
-                            onPressed: () => AppRoutes.pop(context),
-                            icon: const Icon(Icons.cancel, color: AppColors.danger),
-                          ),
-                        ],
-                        pagesBuilder: (context, pages) {
-                          debugPrint('Rendering ${pages.length} pages');
-                          return PageView.builder(
-                            itemCount: pages.length,
-                            scrollDirection: Axis.vertical,
-                            itemBuilder: (context, index) {
-                              final page = pages[index];
-                              return Container(
-                                color: Colors.grey,
-                                alignment: Alignment.center,
-                                padding: const EdgeInsets.all(8.0),
-                                child: Image(
-                                  image: page.image,
-                                  fit: BoxFit.contain,
-                                ),
-                              );
-                            },
-                          );
-                        },
-                      ),
-                    ),
-                  ),
-                );
-              },
-              tooltip: 'Generate PDF',
+            actionBarTheme: PdfActionBarTheme(
+              backgroundColor: AppColors.primaryColor(context),
+              iconColor: Colors.white,
+              textStyle: const TextStyle(color: Colors.white),
             ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildIndexCell(int index, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Center(
-          child: Text(
-            index.toString(),
-            textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500),
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildDataCell(String text, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Text(
-          text,
-          textAlign: TextAlign.center,
-          style: const TextStyle(fontSize: 11),
-          overflow: TextOverflow.ellipsis,
-          maxLines: 2,
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildAmountCell(dynamic amount, double width) {
-    final formattedAmount = _formatAmount(amount);
-
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Center(
-          child: Text(
-            '\$$formattedAmount',
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.bold,
-              color: AppColors.success,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildStatusCell(String status, double width) {
-    final (color, textColor) = _getStatusColors(status);
-
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: color,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: color.withValues(alpha: 0.3)),
-            ),
-            constraints: const BoxConstraints(minWidth: 70),
-            child: Text(
-              _formatStatusText(status),
-              style: TextStyle(
-                color: textColor,
-                fontSize: 10,
-                fontWeight: FontWeight.bold,
+            actions: [
+              IconButton(
+                onPressed: () => AppRoutes.pop(context),
+                icon: const Icon(Icons.cancel, color: AppColors.danger),
               ),
-              textAlign: TextAlign.center,
-              overflow: TextOverflow.ellipsis,
-            ),
+            ],
+            pagesBuilder: (context, pages) {
+              return PageView.builder(
+                itemCount: pages.length,
+                scrollDirection: Axis.vertical,
+                itemBuilder: (context, index) {
+                  final page = pages[index];
+                  return Container(
+                    color: Colors.grey,
+                    alignment: Alignment.center,
+                    padding: const EdgeInsets.all(8.0),
+                    child: Image(image: page.image, fit: BoxFit.contain),
+                  );
+                },
+              );
+            },
           ),
         ),
       ),

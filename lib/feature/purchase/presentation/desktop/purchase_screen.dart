@@ -214,7 +214,7 @@ class _PurchaseScreenState extends State<PurchaseScreen> {
     return Column(
       children: [
         Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.end,
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
             // 🔍 Search Field

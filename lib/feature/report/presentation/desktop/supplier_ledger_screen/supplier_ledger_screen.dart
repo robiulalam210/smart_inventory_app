@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:meherinMart/core/widgets/app_data_table.dart';
+import 'package:meherinMart/core/widgets/app_popover_route.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -135,7 +137,7 @@ class _SupplierLedgerScreenState extends State<SupplierLedgerScreen> {
 
   Widget _buildFilterRow() {
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.end,
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
         // 📅 Date Range Picker
@@ -538,447 +540,76 @@ class SupplierLedgerTableCard extends StatelessWidget {
   });
 
   @override
+  // Desktop টেবিল — AppDataTable
   Widget build(BuildContext context) {
-    return TableScrollControllers(
-      builder: (context, verticalScrollController, horizontalScrollController) {
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final totalWidth = constraints.maxWidth;
-        const numColumns = 11; // #, Date, Voucher No, Type, Particular, Details, Method, Debit, Credit, Balance, Actions
-        const minColumnWidth = 100.0;
-
-        final dynamicColumnWidth =
-        (totalWidth / numColumns).clamp(minColumnWidth, double.infinity);
-
-        return Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withValues(alpha: 0.1),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Scrollbar(
-            controller: verticalScrollController,
-            thumbVisibility: true,
-            child: SingleChildScrollView(
-              controller: verticalScrollController,
-              scrollDirection: Axis.vertical,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: Scrollbar(
-                  controller: horizontalScrollController,
-                  thumbVisibility: true,
-                  child: SingleChildScrollView(
-                    controller: horizontalScrollController,
-                    scrollDirection: Axis.horizontal,
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 5),
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(minWidth: totalWidth),
-                        child: DataTable(
-                          dataRowMinHeight: 40,
-                          dataRowMaxHeight: 40,
-                          columnSpacing: 8,
-                          horizontalMargin: 12,
-                          dividerThickness: 0.5,
-                          headingRowHeight: 40,
-                          headingTextStyle: TextStyle(
-                            color: Colors.white,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                            fontFamily: GoogleFonts.inter().fontFamily,
-                          ),
-                          headingRowColor: WidgetStateProperty.all(
-                            AppColors.primaryColor(context),
-                          ),
-                          dataTextStyle: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w500,
-                            fontFamily: GoogleFonts.inter().fontFamily,
-                          ),
-                          columns: _buildColumns(dynamicColumnWidth),
-                          rows: ledgers.asMap().entries.map((entry) {
-                            final ledger = entry.value;
-                            return DataRow(
-                              onSelectChanged: onLedgerTap != null
-                                  ? (_) => onLedgerTap!()
-                                  : null,
-                              cells: [
-                                _buildIndexCell(entry.key + 1, dynamicColumnWidth * 0.6),
-                                _buildDateCell(ledger.date, dynamicColumnWidth),
-                                _buildVoucherCell(ledger.voucherNo, dynamicColumnWidth),
-                                _buildTypeCell(ledger, dynamicColumnWidth),
-                                _buildParticularCell(ledger.particular, dynamicColumnWidth),
-                                _buildDetailsCell(ledger.details, dynamicColumnWidth),
-                                _buildMethodCell(ledger.method, dynamicColumnWidth),
-                                _buildDebitCell(ledger.debit, dynamicColumnWidth),
-                                _buildCreditCell(ledger.credit, dynamicColumnWidth),
-                                _buildBalanceCell(ledger.due, dynamicColumnWidth),
-                                _buildActionCell(ledger, context, dynamicColumnWidth),
-                              ],
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-      },
-    );
-  }
-
-  List<DataColumn> _buildColumns(double columnWidth) {
-    return [
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth * 0.6,
-          child: const Text('#', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Date', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Voucher No', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Type', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Particular', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth * 1.2,
-          child: const Text('Details', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Method', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Debit', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Credit', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Balance', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Actions', textAlign: TextAlign.center),
-        ),
-      ),
+    const columns = [
+      AppTableColumn.center('SL', flex: 1, minWidth: 52),
+      AppTableColumn('Date', flex: 2, minWidth: 100),
+      AppTableColumn('Voucher', flex: 2, minWidth: 110),
+      AppTableColumn.center('Type', flex: 2, minWidth: 110),
+      AppTableColumn('Particular', flex: 3, minWidth: 150),
+      AppTableColumn('Method', flex: 2, minWidth: 90),
+      AppTableColumn.numeric('Debit', flex: 2, minWidth: 100),
+      AppTableColumn.numeric('Credit', flex: 2, minWidth: 100),
+      AppTableColumn.numeric('Balance', flex: 2, minWidth: 110),
+      AppTableColumn.center('Actions', flex: 1, minWidth: 90),
     ];
-  }
 
-  DataCell _buildIndexCell(int index, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Center(
-          child: Text(
-            index.toString(),
-            style: const TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.w600,
-              color: Colors.black87,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildDateCell(DateTime date, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Text(
-          _formatDate(date),
-          style: const TextStyle(
-            fontSize: 10,
-            fontWeight: FontWeight.w500,
-            color: Colors.black87,
-          ),
-          textAlign: TextAlign.center,
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildVoucherCell(String voucherNo, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Text(
-          voucherNo,
-          style: const TextStyle(
-            fontSize: 10,
-            fontWeight: FontWeight.w600,
-            color: Colors.black87,
-          ),
-          textAlign: TextAlign.center,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildTypeCell(SupplierLedger ledger, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-            decoration: BoxDecoration(
-              color: ledger.typeColor.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Row(
+    return AppDataTable(
+      columns: columns,
+      rowCount: ledgers.length,
+      onRowTap: onLedgerTap == null ? null : (_) => onLedgerTap!(),
+      cellBuilder: (context, row, col) {
+        final l = ledgers[row];
+        final muted = AppColors.text(context).withValues(alpha: 0.4);
+        switch (col) {
+          case 0:
+            return AppTableText('${row + 1}',
+                align: AppCellAlign.center, muted: true);
+          case 1:
+            return AppTableText(_formatDate(l.date));
+          case 2:
+            return AppTableText(l.voucherNo,
+                bold: true, color: AppColors.primaryColor(context));
+          case 3:
+            return AppStatusPill(l.type, color: l.typeColor);
+          case 4:
+            return AppTableText(l.particular, subtitle: l.details);
+          case 5:
+            return AppTableText(l.method, muted: true);
+          case 6:
+            return l.debit > 0
+                ? AppTableMoney(l.debit, color: AppColors.danger)
+                : AppTableText('-', align: AppCellAlign.end, color: muted);
+          case 7:
+            return l.credit > 0
+                ? AppTableMoney(l.credit, color: AppColors.success)
+                : AppTableText('-', align: AppCellAlign.end, color: muted);
+          case 8:
+            return AppTableMoney(l.due.abs(),
+                bold: true,
+                color: l.due > 0 ? AppColors.danger : AppColors.success);
+          default:
+            return Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(ledger.typeIcon, size: 12, color: ledger.typeColor),
-                const SizedBox(width: 4),
-                Text(
-                  ledger.type,
-                  style: TextStyle(
-                    color: ledger.typeColor,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 9,
-                  ),
+                AppTableAction(
+                  icon: Icons.visibility_outlined,
+                  tooltip: 'Details',
+                  color: AppColors.info,
+                  onPressed: () => _showTransactionDetails(context, l),
                 ),
+                if (l.due > 0)
+                  AppTableAction(
+                    icon: Icons.payments_outlined,
+                    tooltip: 'Make payment',
+                    color: AppColors.warning,
+                    onPressed: () => _makePayment(context, l),
+                  ),
               ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildParticularCell(String particular, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Text(
-          particular,
-          style: const TextStyle(
-            fontSize: 10,
-            fontWeight: FontWeight.w500,
-            color: Colors.black87,
-          ),
-          textAlign: TextAlign.center,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildDetailsCell(String details, double width) {
-    return DataCell(
-      Tooltip(
-        message: details,
-        child: SizedBox(
-          width: width,
-          child: Text(
-            details.length > 30 ? '${details.substring(0, 30)}...' : details,
-            style: const TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.w500,
-              color: Colors.black87,
-            ),
-            textAlign: TextAlign.center,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildMethodCell(String method, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Text(
-          method,
-          style: const TextStyle(
-            fontSize: 10,
-            fontWeight: FontWeight.w500,
-            color: Colors.black87,
-          ),
-          textAlign: TextAlign.center,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildDebitCell(double debit, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Center(
-          child: debit > 0
-              ? Container(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-            decoration: BoxDecoration(
-              color: AppColors.danger.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Text(
-              debit.toStringAsFixed(2),
-              style: const TextStyle(
-                color: AppColors.danger,
-                fontWeight: FontWeight.w600,
-                fontSize: 10,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          )
-              : const Text(
-            '-',
-            style: TextStyle(
-              fontSize: 10,
-              color: Colors.grey,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildCreditCell(double credit, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Center(
-          child: credit > 0
-              ? Container(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-            decoration: BoxDecoration(
-              color: AppColors.success.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Text(
-              credit.toStringAsFixed(2),
-              style: const TextStyle(
-                color: AppColors.success,
-                fontWeight: FontWeight.w600,
-                fontSize: 10,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          )
-              : const Text(
-            '-',
-            style: TextStyle(
-              fontSize: 10,
-              color: Colors.grey,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildBalanceCell(double balance, double width) {
-    final isPositive = balance > 0;
-
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-            decoration: BoxDecoration(
-              color: isPositive ? AppColors.danger.withValues(alpha: 0.1) : AppColors.success.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(4),
-              border: Border.all(
-                color: isPositive ? AppColors.danger : AppColors.success,
-              ),
-            ),
-            child: Text(
-              balance.abs().toStringAsFixed(2),
-              style: TextStyle(
-                color: isPositive ? AppColors.danger : AppColors.success,
-                fontWeight: FontWeight.w600,
-                fontSize: 10,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildActionCell(SupplierLedger ledger, BuildContext context, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // View Details Button
-            _buildActionButton(
-              icon: HugeIcons.strokeRoundedView,
-              color: AppColors.info,
-              tooltip: 'View transaction details',
-              onPressed: () => _showTransactionDetails(context, ledger),
-            ),
-
-            // Payment Button (if balance is positive/owed)
-            if (ledger.due > 0)
-              _buildActionButton(
-                icon: Iconsax.money_send,
-                color: AppColors.warning,
-                tooltip: 'Make payment',
-                onPressed: () => _makePayment(context, ledger),
-              ),
-          ],
-        ),
-      ),
+            );
+        }
+      },
     );
   }
 
@@ -998,10 +629,10 @@ class SupplierLedgerTableCard extends StatelessWidget {
   }
 
   void _showTransactionDetails(BuildContext context, SupplierLedger ledger) {
-    showDialog(
+    showAppPopover(
       context: context,
       builder: (context) {
-        return Dialog(
+        return AppPopoverShell(
           child: Container(
             width: MediaQuery.of(context).size.width * 0.40,
             padding: const EdgeInsets.all(20),

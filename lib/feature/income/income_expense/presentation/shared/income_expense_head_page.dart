@@ -195,10 +195,10 @@ class _IncomeHeadScreenState extends State<MobileIncomeHeadScreen> {
   }
 
   void _showCreateDialog(BuildContext context) {
-    showDialog(
+    showAppPopover(
       context: context,
       builder: (context) {
-        return Dialog(
+        return AppPopoverShell(
           insetPadding: const EdgeInsets.all(20),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppSizes.radius),

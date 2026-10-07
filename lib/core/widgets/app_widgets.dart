@@ -1,4 +1,11 @@
 import 'package:intl/intl.dart';
+
+// Desktop popover system — showDialog / BottomSheet এর বদলে
+export 'app_popover.dart';
+export 'app_popover_route.dart';
+export 'app_data_table.dart';
+export 'app_validators.dart';
+
 class AppWidgets {
   String formatStringDDMMYY(dynamic date) {
     if (date == null) return 'N/A';
