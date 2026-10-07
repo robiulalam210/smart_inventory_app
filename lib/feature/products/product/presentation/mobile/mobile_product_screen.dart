@@ -102,13 +102,14 @@ class _ProductsScreenState extends State<MobileProductScreen> {
   Widget build(BuildContext context) {
     return AppScaffold(
       appBar: AppBar(
-        title: Text("Product", style: AppTextStyle.titleMedium(context)),
+        title: Text("Products", style: AppTextStyle.titleMedium(context)),
       ),
-      floatingActionButton: FloatingActionButton(
-
+      floatingActionButton: FloatingActionButton.extended(
         backgroundColor: AppColors.primaryColor(context),
+        foregroundColor: AppColors.onColor(AppColors.primaryColor(context)),
         onPressed: () => _showCreateProductBottomSheet(context),
-        child:  Icon(Icons.add,color: AppColors.whiteColor(context),),
+        icon: const Icon(Icons.add_rounded),
+        label: const Text('Add Product'),
       ),
       body: SafeArea(
         child: ResponsiveCol(
@@ -135,6 +136,7 @@ class _ProductsScreenState extends State<MobileProductScreen> {
                         _buildMobileHeader(),
                         const SizedBox(height: 8),
                         SizedBox(child: _buildProductList(state)),
+                        const SizedBox(height: 72),
                       ],
                     ),
                   );
@@ -188,14 +190,12 @@ class _ProductsScreenState extends State<MobileProductScreen> {
         Container(
           decoration: BoxDecoration(
             color: AppColors.bottomNavBg(context),
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withValues(alpha: 0.1),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.white.withValues(alpha: 0.08)
+                  : AppColors.borderLight,
+            ),
           ),
           child: Row(
             children: [
@@ -289,8 +289,32 @@ class _ProductsScreenState extends State<MobileProductScreen> {
       );
     } else if (state is ProductsListSuccess) {
       if (state.list.isEmpty) {
-        return Center(
-          child: Lottie.asset(AppImages.noData),
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(height: 180, child: Lottie.asset(AppImages.noData)),
+              const SizedBox(height: 8),
+              Text(
+                'No products found',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.text(context),
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Try a different search, or tap + to add a product.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 12.5,
+                  color: AppColors.text(context).withValues(alpha: 0.6),
+                ),
+              ),
+            ],
+          ),
         );
       } else {
         return Column(
@@ -374,9 +398,9 @@ class _ProductsScreenState extends State<MobileProductScreen> {
           ),
           child: Container(
             height: height,
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+            decoration: BoxDecoration(
+              color: AppColors.bottomNavBg(context),
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
             ),
             child: const MobileProductCreate(),
           ),
@@ -402,9 +426,9 @@ class _ProductsScreenState extends State<MobileProductScreen> {
           ),
           child: Container(
             height: height,
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+            decoration: BoxDecoration(
+              color: AppColors.bottomNavBg(context),
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
             ),
             child: MobileProductCreate(
               productId: product.id.toString(),

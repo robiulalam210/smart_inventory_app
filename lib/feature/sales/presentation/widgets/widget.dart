@@ -25,359 +25,285 @@ class PosSaleDataTableWidget extends StatelessWidget {
   }
 
   Widget _buildMobileCardView(BuildContext context, bool isMobile) {
-    return ListView.builder(
+    return ListView.separated(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
+      padding: EdgeInsets.symmetric(horizontal: isMobile ? 2 : 8, vertical: 4),
       itemCount: sales.length,
-      itemBuilder: (context, index) {
-        final sale = sales[index];
-        return _buildSaleCard(sale, index + 1, context, isMobile);
-      },
+      separatorBuilder: (_, __) => const SizedBox(height: 10),
+      itemBuilder: (context, index) => _buildSaleCard(sales[index], context),
     );
   }
 
-  Widget _buildSaleCard(
-    PosSaleModel sale,
-    int index,
-    BuildContext context,
-    bool isMobile,
-  ) {
-    final dueAmount = sale.dueAmount is String
-        ? double.tryParse(sale.dueAmount!) ?? 0.0
-        : (sale.dueAmount ?? 0.0).toDouble();
+  Widget _buildSaleCard(PosSaleModel sale, BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = AppColors.text(context);
+    final primary = AppColors.primaryColor(context);
 
-    final paidAmount = sale.paidAmount is String
-        ? double.tryParse(sale.paidAmount!) ?? 0.0
-        : (sale.paidAmount ?? 0.0).toDouble();
-
-    final payableAmount = sale.payableAmount is String
-        ? double.tryParse(sale.payableAmount!) ?? 0.0
-        : (sale.payableAmount ?? 0.0).toDouble();
-
-    final isAdvance = dueAmount < 0;
-    final displayAmount = isAdvance ? dueAmount.abs() : dueAmount;
-    final status = _getPaymentStatus(paidAmount, payableAmount);
+    final due = _toDouble(sale.dueAmount);
+    final paid = _toDouble(sale.paidAmount);
+    final payable = _toDouble(sale.payableAmount);
+    final isAdvance = due < 0;
+    final status = _getPaymentStatus(paid, payable);
     final statusColor = _getStatusColor(status);
+    final dueColor = due == 0
+        ? textColor.withValues(alpha: 0.5)
+        : isAdvance
+            ? AppColors.success
+            : AppColors.danger;
 
-    return Container(
-      margin: EdgeInsets.symmetric(
-        horizontal: isMobile ? 0.0 : 8.0,
-        vertical: 8.0,
-      ),
-      decoration: BoxDecoration(
-        color: AppColors.bottomNavBg(context),
-        borderRadius: BorderRadius.circular(AppSizes.radius),
-
-        border: Border.all(
-          color: AppColors.greyColor(context).withValues(alpha: 0.5),
-          width: 0.5,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Header with Receipt No and Status
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: BoxDecoration(
-              color: AppColors.primaryColor(context).withValues(alpha: 0.05),
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(16),
-                topRight: Radius.circular(16),
-              ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.primaryColor(context),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text(
-                        '#$index',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    SizedBox(
-                      child: Text(
-                        sale.invoiceNo.toString(),
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 14,
-                          color: AppColors.text(context),
-
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        maxLines: 1,
-                      ),
-                    ),
-                  ],
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: statusColor.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: statusColor, width: 1),
-                  ),
-                  child: Text(
-                    status,
-                    style: TextStyle(
-                      color: statusColor,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 12,
-                    ),
-                  ),
-                ),
-              ],
+    return Material(
+      color: AppColors.bottomNavBg(context),
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: () => _viewSaleDetails(context, sale),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.08)
+                  : AppColors.borderLight,
             ),
           ),
-
-          // Sale Details
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    // Date
-                    Expanded(
-                      child: _buildDetailRow(
-                        icon: Iconsax.calendar,
-                        label: 'Date',
-                        value: _formatDate(sale.saleDate),
-                        context: context,
-                      ),
-                    ),
-
-                    const SizedBox(width: 8),
-
-                    // Customer
-                    Expanded(
-                      child: _buildDetailRow(
-                        icon: Iconsax.user,
-                        label: 'Customer',
-                        value: sale.customerName.toString(),
-                        context: context,
-                      ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 4),
-
-                // Sales By
-                _buildDetailRow(
-                  icon: Iconsax.profile_2user,
-                  label: 'Sales By',
-                  value: sale.saleByName.toString(),
-                  context: context,
-                ),
-                const SizedBox(height: 8),
-
-                // Financial Summary
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: AppColors.bottomNavBg(context),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.grey.shade200),
-                  ),
-                  child: Column(
-                    children: [
-                      // Grand Total
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Total:',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.text(context),
-                              fontSize: 13,
-                            ),
-                          ),
-                          Text(
-                            _formatCurrency(payableAmount),
-                            style: TextStyle(
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.text(context),
-
-                              fontSize: 14,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-
-                      // Paid Amount
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Paid:',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.text(context),
-                              fontSize: 13,
-                            ),
-                          ),
-                          Text(
-                            _formatCurrency(paidAmount),
-                            style: const TextStyle(
-                              color: AppColors.success,
-                              fontWeight: FontWeight.w700,
-                              fontSize: 14,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-
-                      // Due/Advance
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            isAdvance ? 'Advance:' : 'Due:',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.text(context),
-                              fontSize: 13,
-                            ),
-                          ),
-                          Text(
-                            _formatCurrency(displayAmount),
-                            style: TextStyle(
-                              color: isAdvance ? AppColors.success : AppColors.danger,
-                              fontWeight: FontWeight.w700,
-                              fontSize: 14,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // Action Buttons
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            decoration: BoxDecoration(
-              color: AppColors.bottomNavBg(context),
-              borderRadius: const BorderRadius.only(
-                bottomLeft: Radius.circular(16),
-                bottomRight: Radius.circular(16),
-              ),
-              border: Border(
-                top: BorderSide(color: Colors.grey.shade200, width: 1),
-              ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                // View Button
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () => _viewSaleDetails(context, sale),
-                    icon: const Icon(Iconsax.eye, size: 16),
-                    label: const Text('View'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.info,
-                      side: BorderSide(color: Colors.blue.shade300),
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-
-                // PDF Button
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () => _generatePdf(context, sale),
-                    icon: const Icon(Iconsax.document_download, size: 16),
-                    label: const Text('PDF'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.success,
-                      side: BorderSide(color: Colors.green.shade300),
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDetailRow({
-    required IconData icon,
-    required String label,
-    required String value,
-    required BuildContext context,
-  }) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Icon(icon, size: 16, color: AppColors.text(context)),
-        const SizedBox(width: 8),
-        Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                label,
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.text(context),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // ── ইনভয়েস নং, তারিখ, অবস্থা ──
+                    Row(
+                      children: [
+                        Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: primary.withValues(alpha: 0.10),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Icon(Iconsax.receipt_2, size: 20, color: primary),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                _text(sale.invoiceNo),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 14.5,
+                                  fontWeight: FontWeight.w800,
+                                  color: primary,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                _formatDate(sale.saleDate),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: textColor.withValues(alpha: 0.6),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        AppStatusPill(status, color: statusColor),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
 
-                  fontSize: 13,
+                    // ── কাস্টমার ও সেলসম্যান ──
+                    Row(
+                      children: [
+                        Icon(
+                          Iconsax.user,
+                          size: 15,
+                          color: textColor.withValues(alpha: 0.55),
+                        ),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            _text(sale.customerName),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 13.5,
+                              fontWeight: FontWeight.w600,
+                              color: textColor,
+                            ),
+                          ),
+                        ),
+                        if (_text(sale.saleByName) != '-') ...[
+                          const SizedBox(width: 8),
+                          Flexible(
+                            child: Text(
+                              'by ${_text(sale.saleByName)}',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 11.5,
+                                color: textColor.withValues(alpha: 0.55),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+
+                    // ── টাকার সারসংক্ষেপ ──
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 10,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? Colors.white.withValues(alpha: 0.04)
+                            : const Color(0xFFF8FAFC),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: _amount(
+                              context,
+                              'Total',
+                              _formatCurrency(payable),
+                              textColor,
+                            ),
+                          ),
+                          _vDivider(context),
+                          Expanded(
+                            child: _amount(
+                              context,
+                              'Paid',
+                              _formatCurrency(paid),
+                              AppColors.success,
+                            ),
+                          ),
+                          _vDivider(context),
+                          Expanded(
+                            child: _amount(
+                              context,
+                              isAdvance ? 'Advance' : 'Due',
+                              _formatCurrency(due.abs()),
+                              dueColor,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 2),
-              Text(
-                value,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.text(context),
+
+              // ── অ্যাকশন ──
+              Container(
+                decoration: BoxDecoration(
+                  border: Border(
+                    top: BorderSide(
+                      color: isDark
+                          ? Colors.white.withValues(alpha: 0.08)
+                          : AppColors.borderLight,
+                    ),
+                  ),
                 ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextButton.icon(
+                        onPressed: () => _viewSaleDetails(context, sale),
+                        icon: const Icon(Iconsax.eye, size: 17),
+                        label: const Text('Details'),
+                        style: TextButton.styleFrom(
+                          foregroundColor: AppColors.info,
+                          padding: const EdgeInsets.symmetric(vertical: 11),
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.only(
+                              bottomLeft: Radius.circular(16),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Container(
+                      width: 1,
+                      height: 22,
+                      color: textColor.withValues(alpha: 0.1),
+                    ),
+                    Expanded(
+                      child: TextButton.icon(
+                        onPressed: () => _generatePdf(context, sale),
+                        icon: const Icon(Iconsax.document_download, size: 17),
+                        label: const Text('Invoice PDF'),
+                        style: TextButton.styleFrom(
+                          foregroundColor: AppColors.success,
+                          padding: const EdgeInsets.symmetric(vertical: 11),
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.only(
+                              bottomRight: Radius.circular(16),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _amount(
+    BuildContext context,
+    String label,
+    String value,
+    Color valueColor,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 11,
+            color: AppColors.text(context).withValues(alpha: 0.55),
+          ),
+        ),
+        const SizedBox(height: 3),
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.centerLeft,
+          child: Text(
+            value,
+            maxLines: 1,
+            style: TextStyle(
+              fontSize: 14.5,
+              fontWeight: FontWeight.w800,
+              color: valueColor,
+            ),
           ),
         ),
       ],
     );
   }
+
+  Widget _vDivider(BuildContext context) => Container(
+        width: 1,
+        height: 32,
+        margin: const EdgeInsets.symmetric(horizontal: 10),
+        color: AppColors.text(context).withValues(alpha: 0.08),
+      );
 
   // ------------------------------------------------------------
   // DESKTOP TABLE — AppDataTable

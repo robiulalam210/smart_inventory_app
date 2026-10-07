@@ -75,16 +75,18 @@ class _CustomerScreenState extends State<MobileCustomerScreen> {
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton.extended(
         backgroundColor: AppColors.primaryColor(context),
+        foregroundColor: AppColors.onColor(AppColors.primaryColor(context)),
         onPressed: () => _showCreateCustomerDialog(context),
-        child: Icon(Icons.add, color: AppColors.whiteColor(context)),
+        icon: const Icon(Icons.person_add_alt_1_rounded),
+        label: const Text('Add Customer'),
       ),
       appBar: AppBar(
-        title: Text("Customer", style: AppTextStyle.titleMedium(context)),
+        title: Text("Customers", style: AppTextStyle.titleMedium(context)),
         actions: [
           IconButton(
-            icon: const Icon(Icons.filter_alt),
+            icon: const Icon(Icons.tune_rounded),
             onPressed: () => _showMobileFilterSheet(context),
           ),
         ],
@@ -113,10 +115,11 @@ class _CustomerScreenState extends State<MobileCustomerScreen> {
               child: Column(
                 children: [
                   _buildMobileHeader(),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 8),
                   SizedBox(
                     child: _buildCustomerList(state),
                   ),
+                  const SizedBox(height: 80),
                 ],
               ),
             );
@@ -294,14 +297,39 @@ class _CustomerScreenState extends State<MobileCustomerScreen> {
       return const Center(child: CircularProgressIndicator());
     } else if (state is CustomerSuccess) {
       if (state.list.isEmpty) {
-        return Center(child: Lottie.asset(AppImages.noData));
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(height: 180, child: Lottie.asset(AppImages.noData)),
+              const SizedBox(height: 8),
+              Text(
+                'No customers found',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.text(context),
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Try a different search, or tap Add Customer.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 12.5,
+                  color: AppColors.text(context).withValues(alpha: 0.6),
+                ),
+              ),
+            ],
+          ),
+        );
       } else {
         return Column(
           children: [
             CustomerTableCard(
               customers: state.list,
               onCustomerTap: (v) {
-                print(v);
                 _showCustomerOptions(context, v);
               },
             ),
@@ -782,7 +810,7 @@ class _CustomerScreenState extends State<MobileCustomerScreen> {
                             child: Text(
                               "Apply Filters",
                               style: AppTextStyle.body(context).copyWith(
-                                color: AppColors.whiteColor(context),
+                                color: AppColors.onColor(AppColors.primaryColor(context)),
                               ),
                             ),
                           ),

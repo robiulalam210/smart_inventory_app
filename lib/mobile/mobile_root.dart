@@ -1,8 +1,8 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hugeicons/hugeicons.dart';
 
+import '../core/configs/app_colors.dart';
 import '../core/widgets/app_scaffold.dart';
 import '../feature/lab_dashboard/presentation/mobile/mobile_dashboard_screen.dart';
 import '../feature/profile/presentation/bloc/profile_bloc/profile_bloc.dart';
@@ -10,8 +10,9 @@ import '../feature/profile/presentation/mobile/moble_profile_screen.dart';
 import '../feature/purchase/presentation/mobile/mobile_purchase_screen.dart';
 import '../feature/report/presentation/mobile/mobile_all_report_tab_screen.dart';
 import '../feature/sales/presentation/mobile/mobile_pos_sale_screen.dart';
-import 'package:meherinMart/core/configs/app_colors.dart';
 
+/// মোবাইলের মূল শেল — নিচে ৫টি ট্যাবসহ নেভিগেশন বার।
+/// ট্যাবের ক্রম: Sales · Purchase · Home · Reports · Profile
 class MobileRootScreen extends StatefulWidget {
   final int initialPageIndex;
 
@@ -24,16 +25,19 @@ class MobileRootScreen extends StatefulWidget {
 class _MobileRootScreenState extends State<MobileRootScreen> {
   final ValueNotifier<int> pageIndex = ValueNotifier<int>(0);
   late final List<Widget> screens;
-  late final List<_NavItem> navItems;
-  int? dashboardIndex;
+
+  static const List<_NavItem> _items = [
+    _NavItem(HugeIcons.strokeRoundedSaleTag02, 'Sales'),
+    _NavItem(HugeIcons.strokeRoundedInvoice04, 'Purchase'),
+    _NavItem(HugeIcons.strokeRoundedHome04, 'Home'),
+    _NavItem(HugeIcons.strokeRoundedChartBarLine, 'Reports'),
+    _NavItem(HugeIcons.strokeRoundedUser, 'Profile'),
+  ];
 
   @override
   void initState() {
     super.initState();
-
     pageIndex.value = widget.initialPageIndex;
-
-    // Build screens and nav items without any permissions
     screens = [
       MobilePosSaleScreen(),
       MobilePurchaseScreen(),
@@ -41,16 +45,6 @@ class _MobileRootScreenState extends State<MobileRootScreen> {
       MobileReportsTabScreen(),
       MobileProfileScreen(),
     ];
-
-    navItems = [
-      _NavItem(icon: HugeIcons.strokeRoundedSaleTag02, index: 0, label: 'Sales'),
-      _NavItem(icon: HugeIcons.strokeRoundedInvoice04, index: 1, label: 'Purchase'),
-      // Dashboard is center FAB
-      _NavItem(icon: HugeIcons.strokeRoundedChartBarLine, index: 3, label: 'Reports'),
-      _NavItem(icon: HugeIcons.strokeRoundedUser, index: 4, label: 'Profile'),
-    ];
-
-    dashboardIndex = 2; // Dashboard is always center FAB
   }
 
   @override
@@ -59,8 +53,8 @@ class _MobileRootScreenState extends State<MobileRootScreen> {
     super.dispose();
   }
 
-  /// Mirrors the drawer menu rules. While permissions are not loaded yet
-  /// (null) nothing is locked; the backend still enforces access.
+  /// Permission এখনো লোড না হলে (null) কিছুই lock হয় না;
+  /// backend নিজেই access যাচাই করে।
   bool _allowed(BuildContext context, int index) {
     final p = context.read<ProfileBloc>().permissionModel?.data?.permissions;
     if (p == null) return true;
@@ -80,99 +74,123 @@ class _MobileRootScreenState extends State<MobileRootScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        AppScaffold(
-          body: ValueListenableBuilder<int>(
-            valueListenable: pageIndex,
-            builder: (context, currentIndex, child) {
-              return screens[currentIndex];
-            },
-          ),
-          isCenterFAB: true,
-          bottomNavigationBar: SafeArea(
-            child: ValueListenableBuilder<int>(
-              valueListenable: pageIndex,
-              builder: (context, currentIndex, child) {
-                return Stack(
-                  alignment: Alignment.bottomCenter,
-                  clipBehavior: Clip.none,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      margin: const EdgeInsets.only(bottom: 10, left: 10, right: 10),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(50),
-                        boxShadow: [
-                          BoxShadow(color: Colors.black12, blurRadius: 10),
-                        ],
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          // Left buttons
-                          _buildNavButton(navItems[0].icon, navItems[0].index, currentIndex,
-                              enabled: _allowed(context, navItems[0].index)),
-                          _buildNavButton(navItems[1].icon, navItems[1].index, currentIndex,
-                              enabled: _allowed(context, navItems[1].index)),
-
-                          const SizedBox(width: 56), // space for center FAB
-
-                          // Right buttons
-                          _buildNavButton(navItems[2].icon, navItems[2].index, currentIndex,
-                              enabled: _allowed(context, navItems[2].index)),
-                          _buildNavButton(navItems[3].icon, navItems[3].index, currentIndex,
-                              enabled: _allowed(context, navItems[3].index)),
-                        ],
-                      ),
-                    ),
-
-                    // Center FAB
-                    Positioned(
-                      bottom: 30,
-                      child: FloatingActionButton(
-                        onPressed: _allowed(context, dashboardIndex!)
-                            ? () => pageIndex.value = dashboardIndex!
-                            : null,
-                        child: Icon(HugeIcons.strokeRoundedHome04),
-                      ),
-                    ),
-                  ],
-                );
-              },
-            ),
-          ),
-        ),
-      ],
+    return AppScaffold(
+      body: ValueListenableBuilder<int>(
+        valueListenable: pageIndex,
+        builder: (context, currentIndex, _) => screens[currentIndex],
+      ),
+      bottomNavigationBar: ValueListenableBuilder<int>(
+        valueListenable: pageIndex,
+        builder: (context, currentIndex, _) =>
+            _buildBottomBar(context, currentIndex),
+      ),
     );
   }
 
-  Widget _buildNavButton(IconData icon, int index, int currentIndex,
-      {bool enabled = true}) {
-    final selected = index == currentIndex;
-    return InkWell(
-      onTap: enabled ? () => pageIndex.value = index : null,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          AnimatedContainer(
-            height: 3,
-            width: selected ? 20 : 0,
-            duration: const Duration(milliseconds: 200),
-            decoration: BoxDecoration(
-              color: AppColors.info,
-              borderRadius: BorderRadius.circular(4),
-            ),
+  Widget _buildBottomBar(BuildContext context, int currentIndex) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = AppColors.primaryColor(context);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.bottomNavBg(context),
+        border: Border(
+          top: BorderSide(
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.08)
+                : AppColors.borderLight,
           ),
-          const SizedBox(height: 4),
-          Icon(icon,
-              color: !enabled
-                  ? Colors.black12
-                  : selected
-                      ? AppColors.info
-                      : Colors.black38),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.05),
+            blurRadius: 16,
+            offset: const Offset(0, -4),
+          ),
         ],
+      ),
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(8, 8, 8, 6),
+          child: Row(
+            children: List.generate(_items.length, (i) {
+              return Expanded(
+                child: _NavButton(
+                  item: _items[i],
+                  selected: i == currentIndex,
+                  enabled: _allowed(context, i),
+                  primary: primary,
+                  onTap: () => pageIndex.value = i,
+                ),
+              );
+            }),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _NavButton extends StatelessWidget {
+  final _NavItem item;
+  final bool selected;
+  final bool enabled;
+  final Color primary;
+  final VoidCallback onTap;
+
+  const _NavButton({
+    required this.item,
+    required this.selected,
+    required this.enabled,
+    required this.primary,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final base = AppColors.text(context);
+    final Color color = !enabled
+        ? base.withValues(alpha: 0.2)
+        : selected
+            ? primary
+            : base.withValues(alpha: 0.55);
+
+    return InkWell(
+      onTap: enabled ? onTap : null,
+      borderRadius: BorderRadius.circular(14),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 2),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 220),
+              curve: Curves.easeOut,
+              width: selected ? 52 : 36,
+              height: 30,
+              decoration: BoxDecoration(
+                color: selected
+                    ? primary.withValues(alpha: 0.14)
+                    : Colors.transparent,
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: Icon(item.icon, size: 22, color: color),
+            ),
+            const SizedBox(height: 3),
+            Text(
+              item.label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 11,
+                height: 1.1,
+                fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                color: color,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -180,9 +198,7 @@ class _MobileRootScreenState extends State<MobileRootScreen> {
 
 class _NavItem {
   final IconData icon;
-  final int index;
   final String label;
 
-  _NavItem({required this.icon, required this.index, required this.label});
+  const _NavItem(this.icon, this.label);
 }
-

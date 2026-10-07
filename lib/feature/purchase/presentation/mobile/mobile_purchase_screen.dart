@@ -16,6 +16,7 @@ import '../../../users_list/presentation/bloc/users/user_bloc.dart';
 import '../bloc/create_purchase/create_purchase_bloc.dart';
 import '../bloc/purchase_bloc.dart';
 import '../widget.dart';
+import 'mobile_create_purchase_screen.dart';
 
 class MobilePurchaseScreen extends StatefulWidget {
   const MobilePurchaseScreen({super.key, this.posSale});
@@ -125,14 +126,23 @@ class _PurchaseScreenState extends State<MobilePurchaseScreen> {
   Widget build(BuildContext context) {
 
     return AppScaffold(
-       appBar: AppBar(title: Text("Purchase",style: AppTextStyle.titleMedium(context),),),
+      appBar: AppBar(
+        title: Text("Purchase", style: AppTextStyle.titleMedium(context)),
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        backgroundColor: AppColors.primaryColor(context),
+        foregroundColor: AppColors.onColor(AppColors.primaryColor(context)),
+        onPressed: () =>
+            AppRoutes.push(context, const MobileCreatePurchaseScreen()),
+        icon: const Icon(Icons.add_rounded),
+        label: const Text('New Purchase'),
+      ),
       body:  RefreshIndicator(
         color: AppColors.primaryColor(context),
         onRefresh: () async {
           _fetchApi();
         },
-        child: Container(        color: AppColors.bottomNavBg(context),
-
+        child: Container(
 
           padding: AppTextStyle.getResponsivePaddingBody(context),
           child: MultiBlocListener(
@@ -172,6 +182,7 @@ class _PurchaseScreenState extends State<MobilePurchaseScreen> {
                   SizedBox(
                     child: _buildPurchaseList(),
                   ),
+                  const SizedBox(height: 80),
                 ],
               ),
             ),
@@ -195,14 +206,12 @@ class _PurchaseScreenState extends State<MobilePurchaseScreen> {
         Container(
           decoration: BoxDecoration(
             color: AppColors.bottomNavBg(context),
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withValues(alpha: 0.1),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.white.withValues(alpha: 0.08)
+                  : AppColors.borderLight,
+            ),
           ),
           child: Row(
             children: [
@@ -216,7 +225,7 @@ class _PurchaseScreenState extends State<MobilePurchaseScreen> {
                       filterTextController.clear();
                       _fetchApi();
                     },
-                    hintText: "purchases...",
+                    hintText: "Search invoice or supplier...",
                   ),
                 ),
               ),
@@ -287,7 +296,33 @@ class _PurchaseScreenState extends State<MobilePurchaseScreen> {
           return const Center(child: CircularProgressIndicator());
         } else if (state is PurchaseListSuccess) {
           if (state.list.isEmpty) {
-            return Center(child: Lottie.asset(AppImages.noData));
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(height: 180, child: Lottie.asset(AppImages.noData)),
+                  const SizedBox(height: 8),
+                  Text(
+                    'No purchases found',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.text(context),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Change the filters or tap New Purchase to add one.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      color: AppColors.text(context).withValues(alpha: 0.6),
+                    ),
+                  ),
+                ],
+              ),
+            );
           } else {
             return Column(
               children: [
@@ -483,7 +518,11 @@ gapH16,
                           ),
                           child:  Text("Apply Filters",style: AppTextStyle.body(
                             context,
-                          ).copyWith(color: AppColors.whiteColor(context)),),
+                          ).copyWith(
+                            color: AppColors.onColor(
+                              AppColors.primaryColor(context),
+                            ),
+                          ),),
                         ),
                       ),
                     ],
