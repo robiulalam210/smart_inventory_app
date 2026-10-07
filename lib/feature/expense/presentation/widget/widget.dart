@@ -6,7 +6,8 @@ import '../../data/model/expense.dart';
 import '../../expense_head/data/model/expense_head_model.dart';
 import '../../expense_sub_head/data/model/expense_sub_head_model.dart';
 import '../bloc/expense_list/expense_bloc.dart';
-import '../pages/expense_create.dart';
+import '../shared/expense_create.dart';
+import 'package:meherinMart/core/widgets/table_scroll_controllers.dart';
 
 class ExpenseTableCard extends StatelessWidget {
   final List<ExpenseModel> expenses;
@@ -133,17 +134,17 @@ class ExpenseTableCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: Colors.red.withValues(alpha: 0.1),
+                    color: AppColors.danger.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: Colors.red,
+                      color: AppColors.danger,
                       width: 1,
                     ),
                   ),
                   child: Text(
                     '৳${amountValue.toStringAsFixed(2)}',
                     style: const TextStyle(
-                      color: Colors.red,
+                      color: AppColors.danger,
                       fontWeight: FontWeight.w700,
                       fontSize: 12,
                     ),
@@ -265,7 +266,7 @@ class ExpenseTableCard extends StatelessWidget {
                     ),
                     label: const Text('View'),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.green,
+                      foregroundColor: AppColors.success,
                       side: BorderSide(color: Colors.green.shade300),
                       padding: const EdgeInsets.symmetric(vertical: 10),
                       shape: RoundedRectangleBorder(
@@ -286,7 +287,7 @@ class ExpenseTableCard extends StatelessWidget {
                     ),
                     label: const Text('Edit'),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.blue,
+                      foregroundColor: AppColors.info,
                       side: BorderSide(color: Colors.blue.shade300),
                       padding: const EdgeInsets.symmetric(vertical: 10),
                       shape: RoundedRectangleBorder(
@@ -307,7 +308,7 @@ class ExpenseTableCard extends StatelessWidget {
                     ),
                     label: const Text('Delete'),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.red,
+                      foregroundColor: AppColors.danger,
                       side: BorderSide(color: Colors.red.shade300),
                       padding: const EdgeInsets.symmetric(vertical: 10),
                       shape: RoundedRectangleBorder(
@@ -371,8 +372,8 @@ class ExpenseTableCard extends StatelessWidget {
   }
 
   Widget _buildDesktopDataTable() {
-    final verticalScrollController = ScrollController();
-    final horizontalScrollController = ScrollController();
+    return TableScrollControllers(
+      builder: (context, verticalScrollController, horizontalScrollController) {
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -446,6 +447,8 @@ class ExpenseTableCard extends StatelessWidget {
             ),
           ),
         );
+      },
+    );
       },
     );
   }
@@ -554,7 +557,7 @@ class ExpenseTableCard extends StatelessWidget {
 
   DataCell _buildAmountCell(String? amount, double width) {
     final amountValue = double.tryParse(amount ?? '0');
-    final color = amountValue != null && amountValue > 0 ? Colors.red : Colors.grey;
+    final color = amountValue != null && amountValue > 0 ? AppColors.danger : Colors.grey;
 
     return DataCell(
       SizedBox(
@@ -590,7 +593,7 @@ class ExpenseTableCard extends StatelessWidget {
           children: [
             IconButton(
               onPressed: () => _showEditDialog(context, expense, false),
-              icon: const Icon(Icons.edit, size: 18, color: Colors.blue),
+              icon: const Icon(Icons.edit, size: 18, color: AppColors.info),
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
             ),
@@ -599,7 +602,7 @@ class ExpenseTableCard extends StatelessWidget {
               icon: const Icon(
                 HugeIcons.strokeRoundedView,
                 size: 18,
-                color: Colors.green,
+                color: AppColors.success,
               ),
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
@@ -609,7 +612,7 @@ class ExpenseTableCard extends StatelessWidget {
               icon: const Icon(
                 HugeIcons.strokeRoundedDeleteThrow,
                 size: 18,
-                color: Colors.red,
+                color: AppColors.danger,
               ),
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(minWidth: 32, minHeight: 32),

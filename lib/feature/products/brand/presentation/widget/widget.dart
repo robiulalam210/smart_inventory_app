@@ -9,7 +9,7 @@ import '../../../../../core/widgets/delete_dialog.dart';
 import '../../../../../responsive.dart';
 import '../../data/model/brand_model.dart';
 import '../bloc/brand/brand_bloc.dart';
-import '../pages/create_brand/create_brand_setup.dart';
+import '../shared/create_brand/create_brand_setup.dart';
 
 class BrandTableCard extends StatelessWidget {
   final List<BrandModel> brands;
@@ -222,8 +222,8 @@ class BrandTableCard extends StatelessWidget {
                   icon: const Icon(Iconsax.edit, size: 16),
                   label: const Text('Edit'),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.blue,
-                    side: BorderSide(color: Colors.blue.withValues(alpha: 0.3)),
+                    foregroundColor: AppColors.info,
+                    side: BorderSide(color: AppColors.info.withValues(alpha: 0.3)),
                     padding: const EdgeInsets.symmetric(vertical: 8),
                   ),
                 ),
@@ -238,8 +238,8 @@ class BrandTableCard extends StatelessWidget {
                   ),
                   label: const Text('Delete'),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.red,
-                    side: BorderSide(color: Colors.red.withValues(alpha: 0.3)),
+                    foregroundColor: AppColors.danger,
+                    side: BorderSide(color: AppColors.danger.withValues(alpha: 0.3)),
                     padding: const EdgeInsets.symmetric(vertical: 8),
                   ),
                 ),
@@ -256,8 +256,8 @@ class BrandTableCard extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
         color: isActive
-            ? Colors.green.withValues(alpha: 0.1)
-            : Colors.red.withValues(alpha: 0.1),
+            ? AppColors.success.withValues(alpha: 0.1)
+            : AppColors.danger.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
@@ -266,13 +266,13 @@ class BrandTableCard extends StatelessWidget {
           Icon(
             isActive ? Icons.check_circle : Icons.cancel,
             size: 14,
-            color: isActive ? Colors.green : Colors.red,
+            color: isActive ? AppColors.success : AppColors.danger,
           ),
           const SizedBox(width: 4),
           Text(
             isActive ? 'Active' : 'Inactive',
             style: TextStyle(
-              color: isActive ? Colors.green : Colors.red,
+              color: isActive ? AppColors.success : AppColors.danger,
               fontWeight: FontWeight.w600,
               fontSize: 12,
             ),
@@ -338,14 +338,14 @@ class BrandTableCard extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
               color: isActive
-                  ? Colors.green.withValues(alpha: 0.1)
-                  : Colors.red.withValues(alpha: 0.1),
+                  ? AppColors.success.withValues(alpha: 0.1)
+                  : AppColors.danger.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
               isActive ? 'Active' : 'Inactive',
               style: TextStyle(
-                color: isActive ? Colors.green : Colors.red,
+                color: isActive ? AppColors.success : AppColors.danger,
                 fontWeight: FontWeight.w600,
                 fontSize: 11,
               ),
@@ -371,7 +371,7 @@ class BrandTableCard extends StatelessWidget {
             // Edit Button
             _buildActionButton(
               icon: Iconsax.edit,
-              color: Colors.blue,
+              color: AppColors.info,
               tooltip: 'Edit brand',
               onPressed: () => _showEditDialog(context, brand),
             ),
@@ -379,7 +379,7 @@ class BrandTableCard extends StatelessWidget {
             // Delete Button
             _buildActionButton(
               icon: HugeIcons.strokeRoundedDeleteThrow,
-              color: Colors.red,
+              color: AppColors.danger,
               tooltip: 'Delete brand',
               onPressed: () => _confirmDelete(context, brand),
             ),

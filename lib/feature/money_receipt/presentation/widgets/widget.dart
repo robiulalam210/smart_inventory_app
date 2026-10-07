@@ -3,8 +3,9 @@ import 'package:printing/printing.dart';
 import '../../../../core/configs/configs.dart';
 import '../../../profile/presentation/bloc/profile_bloc/profile_bloc.dart';
 import '../../data/model/money_receipt_model/money_receipt_model.dart';
-import '../page/money_receipt_details.dart';
-import '../page/pdf/generate_money_receipt.dart';
+import '../shared/money_receipt_details.dart';
+import '../shared/pdf/generate_money_receipt.dart';
+import 'package:meherinMart/core/widgets/table_scroll_controllers.dart';
 
 class MoneyReceiptDataTableWidget extends StatelessWidget {
   final List<MoneyreceiptModel> sales;
@@ -290,7 +291,7 @@ class MoneyReceiptDataTableWidget extends StatelessWidget {
                     ),
                     label: const Text('View'),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.blue,
+                      foregroundColor: AppColors.info,
                       side: BorderSide(color: Colors.blue.shade300),
                       padding: const EdgeInsets.symmetric(vertical: 10),
                       shape: RoundedRectangleBorder(
@@ -311,7 +312,7 @@ class MoneyReceiptDataTableWidget extends StatelessWidget {
                     ),
                     label: const Text('PDF'),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.green,
+                      foregroundColor: AppColors.success,
                       side: BorderSide(color: Colors.green.shade300),
                       padding: const EdgeInsets.symmetric(vertical: 10),
                       shape: RoundedRectangleBorder(
@@ -374,8 +375,8 @@ class MoneyReceiptDataTableWidget extends StatelessWidget {
   }
 
   Widget _buildDesktopDataTable() {
-    final verticalController = ScrollController();
-    final horizontalController = ScrollController();
+    return TableScrollControllers(
+      builder: (context, verticalController, horizontalController) {
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -439,6 +440,8 @@ class MoneyReceiptDataTableWidget extends StatelessWidget {
             ),
           ),
         );
+      },
+    );
       },
     );
   }
@@ -611,12 +614,12 @@ class MoneyReceiptDataTableWidget extends StatelessWidget {
       case 'completed':
       case 'success':
       case 'paid':
-        return Colors.green;
+        return AppColors.success;
       case 'pending':
-        return Colors.orange;
+        return AppColors.warning;
       case 'failed':
       case 'cancelled':
-        return Colors.red;
+        return AppColors.danger;
       default:
         return Colors.black;
     }

@@ -4,7 +4,8 @@ import '../../../../../core/configs/configs.dart';
 import '../../../../../core/widgets/delete_dialog.dart';
 import '../../data/model/unit_model.dart';
 import '../bloc/unit/unti_bloc.dart';
-import '../pages/unit_create.dart';
+import '../shared/unit_create.dart';
+import 'package:meherinMart/core/widgets/table_scroll_controllers.dart';
 
 
 class MobileUnitTableCard extends StatelessWidget {
@@ -103,7 +104,7 @@ class MobileUnitTableCard extends StatelessWidget {
                     context,
                     'Edit',
                     Iconsax.edit,
-                    Colors.blue,
+                    AppColors.info,
                         () => _showEditDialog(context, unit),
                   ),
 
@@ -112,7 +113,7 @@ class MobileUnitTableCard extends StatelessWidget {
                     context,
                     'Delete',
                     HugeIcons.strokeRoundedDeleteThrow,
-                    Colors.red,
+                    AppColors.danger,
                         () => _confirmDelete(context, unit),
                   ),
                 ],
@@ -161,16 +162,16 @@ class MobileUnitTableCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: isActive ? Colors.green.withValues(alpha: 0.1) : Colors.red.withValues(alpha: 0.1),
+        color: isActive ? AppColors.success.withValues(alpha: 0.1) : AppColors.danger.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isActive ? Colors.green.withValues(alpha: 0.3) : Colors.red.withValues(alpha: 0.3),
+          color: isActive ? AppColors.success.withValues(alpha: 0.3) : AppColors.danger.withValues(alpha: 0.3),
         ),
       ),
       child: Text(
         isActive ? 'Active' : 'Inactive',
         style: TextStyle(
-          color: isActive ? Colors.green : Colors.red,
+          color: isActive ? AppColors.success : AppColors.danger,
           fontWeight: FontWeight.w600,
           fontSize: 10,
         ),
@@ -315,8 +316,8 @@ class UnitTableCard extends StatelessWidget {
       return _buildEmptyState();
     }
 
-    final verticalScrollController = ScrollController();
-    final horizontalScrollController = ScrollController();
+    return TableScrollControllers(
+      builder: (context, verticalScrollController, horizontalScrollController) {
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -405,6 +406,8 @@ class UnitTableCard extends StatelessWidget {
         );
       },
     );
+      },
+    );
   }
 
   List<DataColumn> _buildColumns(double columnWidth) {
@@ -467,13 +470,13 @@ class UnitTableCard extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: isActive ? Colors.green.withValues(alpha: 0.1) : Colors.red.withValues(alpha: 0.1),
+              color: isActive ? AppColors.success.withValues(alpha: 0.1) : AppColors.danger.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
               isActive ? 'Active' : 'Inactive',
               style: TextStyle(
-                color: isActive ? Colors.green : Colors.red,
+                color: isActive ? AppColors.success : AppColors.danger,
                 fontWeight: FontWeight.w600,
                 fontSize: 11,
               ),
@@ -495,7 +498,7 @@ class UnitTableCard extends StatelessWidget {
             // Edit Button
             _buildActionButton(
               icon: Iconsax.edit,
-              color: Colors.blue,
+              color: AppColors.info,
               tooltip: 'Edit unit',
               onPressed: () => _showEditDialog(context, unit),
             ),
@@ -503,7 +506,7 @@ class UnitTableCard extends StatelessWidget {
             // Delete Button
             _buildActionButton(
               icon: HugeIcons.strokeRoundedDeleteThrow,
-              color: Colors.red,
+              color: AppColors.danger,
               tooltip: 'Delete unit',
               onPressed: () => _confirmDelete(context, unit),
             ),

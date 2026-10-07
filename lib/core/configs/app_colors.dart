@@ -2,25 +2,43 @@
 import 'configs.dart';
 
  class AppColors {
-   static const Color error = Color(0xffE53935);
+   static const Color error = Color(0xffDC2626);
    static const Color grey = Color.fromARGB(255, 159, 159, 159);
-   static const Color lightGrey = Color.fromARGB(255, 231, 231, 231);
+   static const Color lightGrey = Color(0xFFE2E8F0);
    static const Color white = Color(0xffffffff);
    static const Color black = Colors.black;
 
    // Light theme defaults
-   static const Color lightBg = Color(0xFFEFF9FF);
-   static const Color lightBgBottomNav = Color(0xFFF6FCFF);
-   static const Color lightText = Color(0xff000000);
+   static const Color lightBg = Color(0xFFF4F6FA); // হালকা cool-grey (আগে নীলচে ছিল)
+   static const Color lightBgBottomNav = Color(0xFFFFFFFF);
+   static const Color lightText = Color(0xFF0F172A); // খাঁটি কালোর বদলে slate-900
 
    // Dark theme defaults
-   static const Color darkBg = Color(0xFF14171C);
-   static const Color darkBgBottomNav = Color(0xFF191A22);
-   static const Color darkText = Color(0xFFF2F2F2);
+   static const Color darkBg = Color(0xFF0B1220);
+   static const Color darkBgBottomNav = Color(0xFF111A2E);
+   static const Color darkText = Color(0xFFE5E7EB);
 
-   // Default fallback for brand color (can be replaced by ThemeCubit)
+ 
+  // ───────── Semantic রঙ (সব স্ক্রিনে একই অর্থে ব্যবহার করুন) ─────────
+  static const Color success = Color(0xFF16A34A); // আয়, পরিশোধিত, সফল
+  static const Color danger = Color(0xFFDC2626); // ডিলিট, বকেয়া, ত্রুটি
+  static const Color warning = Color(0xFFF59E0B); // সতর্কতা, পেন্ডিং
+  static const Color info = Color(0xFF2563EB); // তথ্য, লিংক, এডিট
+  static const Color borderLight = Color(0xFFE2E8F0);
+  static const Color slate700 = Color(0xFF334155);
+  static const Color slate500 = Color(0xFF64748B);
+
+  /// [bg] রঙের উপর পড়ার মতো লেখার রঙ (সাদা অথবা গাঢ়) — contrast নিশ্চিত করে।
+  static Color onColor(Color bg) =>
+      ThemeData.estimateBrightnessForColor(bg) == Brightness.dark
+          ? Colors.white
+          : const Color(0xFF0F172A);
+
+  // Default fallback for brand color (can be replaced by ThemeCubit)
    // static const Color defaultPrimary = Color(0xff60DAFF);
-   static const Color defaultPrimary = Color(0xff60DAFF);
+   static const Color defaultPrimary = Color(0xff2563EB); // Royal Blue — সাদা লেখার সাথে ভালো contrast
+  /// পুরোনো default (ফ্যাকাশে সায়ান)। যাদের সেভ করা আছে তাদের নতুন default এ নেওয়া হয়।
+  static const int legacyDefaultPrimaryValue = 0xff60DAFF;
 
    /// Get current theme primary color, falling back if Cubit not present.
    static Color primaryColor(BuildContext context) {
@@ -108,20 +126,20 @@ import 'configs.dart';
 
   static const Color matteBlack = Color(0xff28282B);
   // static const Color seed = Colors.redAccent;
-  static const Color link = Colors.blue;
-  static const Color blue = Colors.blueAccent;
-  static const Color subText = Colors.blueGrey;
+  static const Color link = Color(0xFF2563EB);
+  static const Color blue = Color(0xFF2563EB);
+  static const Color subText = Color(0xFF64748B);
   static const Color disable = Colors.grey;
-  static const Color green = Colors.greenAccent;
-  static const Color orange = Colors.orangeAccent;
-  static Color border = Colors.grey.shade400;
-  static const Color red = Colors.red;
-  static const Color redAccent = Colors.redAccent;
+  static const Color green = Color(0xFF16A34A);
+  static const Color orange = Color(0xFFF59E0B);
+  static const Color border = Color(0xFFCBD5E1);
+  static const Color red = Color(0xFFDC2626);
+  static const Color redAccent = Color(0xFFEF4444);
   static const Color pay = Colors.deepOrange;
 
   // static const Color              = Color(0xFF6ab129);
   static const Color primaryColorBg             = Color(0xFFCEE2CE);
-  static const Color bg               = Color(0xffEFF9FF);
+  static const Color bg               = Color(0xffF4F6FA);
   static const Color lightGreen               = Color(0xFFFCFCFC);
   static const Color black50Color               = Color(0xFF353535);
   static const Color white50Color               = Color(0xFF9E9E9E);
@@ -132,13 +150,13 @@ import 'configs.dart';
   static Color surfaceVariant(BuildContext context) => Theme.of(context).colorScheme.surface; // use surfaceVariant instead of surfaceContainerHighest if needed
 
 
-  static const Color redColor             = Colors.redAccent;
+  static const Color redColor             = Color(0xFFEF4444);
   // static const Color blueGrey         = Colors.blueGrey;
   // static const Color warning          = Colors.amber;
   static Color focusColor(BuildContext context)    => Theme.of(context).focusColor;
   // static Color disabledColor(context) => Theme.of(context).disabledColor;
 
-  static const Color seed = Color(0xff18B4E9);
+  static const Color seed = Color(0xff2563EB);
 
   // static const Color seed = Color(0xFFFF2D55);
   static const Color selected = Color(0xff004ca8);

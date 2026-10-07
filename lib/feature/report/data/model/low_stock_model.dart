@@ -47,9 +47,9 @@ class LowStockProduct {
   }
 
   Color get statusColor {
-    if (totalStockQuantity == 0) return Colors.red;
-    if (totalStockQuantity <= alertQuantity) return Colors.orange;
-    return Colors.green;
+    if (totalStockQuantity == 0) return AppColors.danger;
+    if (totalStockQuantity <= alertQuantity) return AppColors.warning;
+    return AppColors.success;
   }
 
   // Calculate how much below alert level

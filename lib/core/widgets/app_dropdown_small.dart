@@ -40,7 +40,7 @@ class AppDropdownSmall<T> extends FormField<T> {
                 if (isRequired)
                   const Text(
                     " *",
-                    style: TextStyle(color: Colors.red),
+                    style: TextStyle(color: AppColors.danger),
                   ),
               ],
             ),
@@ -151,7 +151,7 @@ class AppDropdownNONUI<T> extends StatelessWidget {
               if (isRequired)
                 const Text(
                   " *",
-                  style: TextStyle(color: Colors.red),
+                  style: TextStyle(color: AppColors.danger),
                 ),
             ],
           ),

@@ -9,7 +9,7 @@ import '../../../../../core/repositories/get_response.dart';
 import '../../../../../core/repositories/post_response.dart';
 import '../../../../common/data/models/api_response_mod.dart';
 import '../../../../common/data/models/app_parse_json.dart';
-import '../../../../profile/presentation/pages/buildPermissionModules.dart' hide PermissionAction;
+import '../../../../profile/presentation/shared/buildPermissionModules.dart' hide PermissionAction;
 import '../../../data/model/user_model.dart';
 
 part 'user_event.dart';

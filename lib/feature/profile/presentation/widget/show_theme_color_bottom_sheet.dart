@@ -4,30 +4,22 @@ import '../../../../core/configs/configs.dart';
 import '../../../../core/database/auth_db.dart';
 import '../../../common/presentation/cubit/theme_cubit.dart';
 
+// সব রঙ সাদা লেখার সাথে পড়ার মতো গাঢ়। (আগে White/Yellow/Lime ছিল — প্রাইমারি করলে বাটন ও হেডার অদৃশ্য হতো)
 final List<Map<String, dynamic>> colors = const [
-  {'color': Color(0xff60DAFF), 'name': 'Default'},
-  {'color': Color(0xff69B128), 'name': 'Default 2'},
-  {'color': Colors.red, 'name': 'Red'},
-  {'color': Colors.pink, 'name': 'Pink'},
-  {'color': Colors.purple, 'name': 'Purple'},
-  {'color': Colors.deepPurple, 'name': 'Deep Purple'},
-  {'color': Colors.indigo, 'name': 'Indigo'},
-  {'color': Colors.blue, 'name': 'Blue'},
-  {'color': Colors.lightBlue, 'name': 'Light Blue'},
-  {'color': Colors.cyan, 'name': 'Cyan'},
-  {'color': Colors.teal, 'name': 'Teal'},
-  {'color': Colors.green, 'name': 'Green'},
-  {'color': Colors.lightGreen, 'name': 'Light Green'},
-  {'color': Colors.lime, 'name': 'Lime'},
-  {'color': Colors.yellow, 'name': 'Yellow'},
-  {'color': Colors.amber, 'name': 'Amber'},
-  {'color': Colors.orange, 'name': 'Orange'},
-  {'color': Colors.deepOrange, 'name': 'Deep Orange'},
-  {'color': Colors.brown, 'name': 'Brown'},
-  {'color': Colors.grey, 'name': 'Grey'},
-  {'color': Colors.blueGrey, 'name': 'Blue Grey'},
-  {'color': Colors.black, 'name': 'Black'},
-  {'color': Colors.white, 'name': 'White'},
+  {'color': Color(0xff2563EB), 'name': 'Royal Blue'},
+  {'color': Color(0xff4F46E5), 'name': 'Indigo'},
+  {'color': Color(0xff7C3AED), 'name': 'Violet'},
+  {'color': Color(0xff0891B2), 'name': 'Cyan'},
+  {'color': Color(0xff0D9488), 'name': 'Teal'},
+  {'color': Color(0xff059669), 'name': 'Emerald'},
+  {'color': Color(0xff16A34A), 'name': 'Green'},
+  {'color': Color(0xffD97706), 'name': 'Amber'},
+  {'color': Color(0xffEA580C), 'name': 'Orange'},
+  {'color': Color(0xffDC2626), 'name': 'Red'},
+  {'color': Color(0xffE11D48), 'name': 'Rose'},
+  {'color': Color(0xffDB2777), 'name': 'Pink'},
+  {'color': Color(0xff92400E), 'name': 'Brown'},
+  {'color': Color(0xff475569), 'name': 'Slate'},
 ];
 
 void showThemeColorBottomSheet(

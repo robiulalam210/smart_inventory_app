@@ -2,8 +2,9 @@
 import '../../../../../core/configs/configs.dart';
 import '../../../../../core/widgets/delete_dialog.dart';
 import '../../data/model/product_model.dart';
-import '../pages/mobile_product_create.dart';
-import '../pages/product_details.dart';
+import '../shared/mobile_product_create.dart';
+import '../shared/product_details.dart';
+import 'package:meherinMart/core/widgets/table_scroll_controllers.dart';
 
 class ProductDataTableWidget extends StatelessWidget {
   final List<ProductModel> products;
@@ -98,18 +99,18 @@ class ProductDataTableWidget extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
                     color: (product.isActive ?? false)
-                        ? Colors.green.withValues(alpha: 0.1)
-                        : Colors.red.withValues(alpha: 0.1),
+                        ? AppColors.success.withValues(alpha: 0.1)
+                        : AppColors.danger.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: (product.isActive ?? false) ? Colors.green : Colors.red,
+                      color: (product.isActive ?? false) ? AppColors.success : AppColors.danger,
                       width: 1,
                     ),
                   ),
                   child: Text(
                     (product.isActive ?? false) ? 'Active' : 'Inactive',
                     style: TextStyle(
-                      color: (product.isActive ?? false) ? Colors.green : Colors.red,
+                      color: (product.isActive ?? false) ? AppColors.success : AppColors.danger,
                       fontWeight: FontWeight.w600,
                       fontSize: 12,
                     ),
@@ -234,7 +235,7 @@ class ProductDataTableWidget extends StatelessWidget {
                     ),
                     label: const Text('Edit'),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.blue,
+                      foregroundColor: AppColors.info,
                       side: BorderSide(color: Colors.blue.shade300),
                       padding: const EdgeInsets.symmetric(vertical: 10),
                       shape: RoundedRectangleBorder(
@@ -255,7 +256,7 @@ class ProductDataTableWidget extends StatelessWidget {
                     ),
                     label: const Text('Delete'),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.red,
+                      foregroundColor: AppColors.danger,
                       side: BorderSide(color: Colors.red.shade300),
                       padding: const EdgeInsets.symmetric(vertical: 10),
                       shape: RoundedRectangleBorder(
@@ -279,7 +280,7 @@ class ProductDataTableWidget extends StatelessWidget {
                     ),
                     label: const Text('View'),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.orange,
+                      foregroundColor: AppColors.warning,
                       side: BorderSide(color: Colors.orange.shade300),
                       padding: const EdgeInsets.symmetric(vertical: 10),
                       shape: RoundedRectangleBorder(
@@ -343,8 +344,8 @@ class ProductDataTableWidget extends StatelessWidget {
   }
 
   Widget _buildDesktopDataTable() {
-    final verticalScrollController = ScrollController();
-    final horizontalScrollController = ScrollController();
+    return TableScrollControllers(
+      builder: (context, verticalScrollController, horizontalScrollController) {
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -411,6 +412,8 @@ class ProductDataTableWidget extends StatelessWidget {
             ),
           ),
         );
+      },
+    );
       },
     );
   }
@@ -509,7 +512,7 @@ class ProductDataTableWidget extends StatelessWidget {
 
   DataCell _buildStatusCell(bool isActive, double columnWidth) {
     final status = isActive ? 'Active' : 'Inactive';
-    final color = isActive ? Colors.green : Colors.red;
+    final color = isActive ? AppColors.success : AppColors.danger;
 
     return DataCell(
       SizedBox(

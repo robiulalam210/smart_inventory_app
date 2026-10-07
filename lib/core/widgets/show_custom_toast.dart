@@ -8,7 +8,7 @@ void showCustomToast({
   ToastificationStyle style = ToastificationStyle.flat,
   Duration duration = const Duration(seconds: 2),
   IconData icon = Icons.info,
-  Color primaryColor = Colors.blue,
+  Color primaryColor = AppColors.info,
 }) {
   toastification.show(
     context: context,

@@ -7,6 +7,7 @@ import 'local_store.dart';
 import 'offline_config.dart';
 import 'stock_alerts.dart';
 import 'sync_engine.dart';
+import 'package:meherinMart/core/configs/app_colors.dart';
 
 String _ago(DateTime? t) {
   if (t == null) return 'কখনো না';
@@ -281,7 +282,7 @@ class _SyncCenterDialogState extends State<SyncCenterDialog> {
         return ListTile(
           dense: true,
           leading: Icon(status == 'pending' ? Icons.schedule : Icons.hourglass_bottom,
-              color: status == 'pending' ? Colors.blueGrey : Colors.orange),
+              color: status == 'pending' ? Colors.blueGrey : AppColors.warning),
           title: Text('${o['title'] ?? o['entity']}'),
           subtitle: Text([
             _time(o['client_created_at'] as String?),

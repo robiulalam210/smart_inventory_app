@@ -18,22 +18,21 @@ class ThemeCubit extends Cubit<ThemeState> {
 
   Future<void> loadFromStorage() async {
     try {
-
       final modeStr = await AuthLocalDB.getThemeMode();
       if (modeStr != null && modeStr.isNotEmpty) {
         ThemeMode mode = ThemeMode.system;
         if (modeStr == 'light') mode = ThemeMode.light;
         if (modeStr == 'dark') mode = ThemeMode.dark;
         emit(state.copyWith(themeMode: mode));
+      }
 
-
-        final colorStr = await AuthLocalDB.getPrimaryColor();
-        if (colorStr != null && colorStr.isNotEmpty) {
-          final val = int.tryParse(colorStr);
-          if (val != null) {
-            final color = Color(val);
-            emit(state.copyWith(primaryColor: color));
-          }
+      // রঙ আলাদাভাবে লোড হয় (আগে theme mode সেভ না থাকলে রঙও লোড হতো না)
+      final colorStr = await AuthLocalDB.getPrimaryColor();
+      if (colorStr != null && colorStr.isNotEmpty) {
+        final val = int.tryParse(colorStr);
+        // পুরোনো ফ্যাকাশে সায়ান default সেভ করা থাকলে নতুন default ব্যবহার হবে
+        if (val != null && (val & 0xFFFFFF) != (AppColors.legacyDefaultPrimaryValue & 0xFFFFFF)) {
+          emit(state.copyWith(primaryColor: Color(val)));
         }
       }
 
@@ -80,7 +79,12 @@ class ThemeCubit extends Cubit<ThemeState> {
         brightness = WidgetsBinding.instance.platformDispatcher.platformBrightness;
         break;
     }
-    final iconBrightness = brightness == Brightness.dark ? Brightness.light : Brightness.dark;
+    // আইকনের রং status bar এর (primary) রঙের উপর নির্ভর করে — আগে theme mode দিয়ে ঠিক হতো,
+    // তাই গাঢ় রঙে কালো আইকন পড়া যেত না।
+    final iconBrightness =
+        ThemeData.estimateBrightnessForColor(color) == Brightness.dark
+            ? Brightness.light
+            : Brightness.dark;
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
       statusBarColor: color,
       systemNavigationBarColor: color,

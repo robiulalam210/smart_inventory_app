@@ -89,9 +89,9 @@ class _CustomDateRangeFieldState extends State<CustomDateRangeField> {
 
 
     theme: const CalendarTheme(
-                selectedColor: Colors.blue,
+                selectedColor: AppColors.info,
                 inRangeColor: Color(0xFFD9EDFA),
-                inRangeTextStyle: TextStyle(color: Colors.blue),
+                inRangeTextStyle: TextStyle(color: AppColors.info),
                 selectedTextStyle: TextStyle(color: Colors.white),
                 todayTextStyle: TextStyle(fontWeight: FontWeight.bold),
                 disabledTextStyle: TextStyle(color: Colors.grey),
@@ -103,7 +103,7 @@ class _CustomDateRangeFieldState extends State<CustomDateRangeField> {
                 radius: 10,
                 tileSize: 32,
                 quickDateRangeBackgroundColor: Colors.white,
-                selectedQuickDateRangeColor: Colors.blue,
+                selectedQuickDateRangeColor: AppColors.info,
               ),
             ),
           ),

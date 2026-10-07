@@ -48,8 +48,8 @@ class SupplierDueAdvance {
   }
 
   Color get balanceStatusColor {
-    if (netBalance > 0) return Colors.green;
-    if (netBalance < 0) return Colors.red;
+    if (netBalance > 0) return AppColors.success;
+    if (netBalance < 0) return AppColors.danger;
     return Colors.grey;
   }
 
@@ -93,9 +93,9 @@ class SupplierDueAdvanceSummary {
   }
 
   Color get overallStatusColor {
-    if (netBalance > 0) return Colors.green;
-    if (netBalance < 0) return Colors.red;
-    return Colors.blue;
+    if (netBalance > 0) return AppColors.success;
+    if (netBalance < 0) return AppColors.danger;
+    return AppColors.info;
   }
 }
 

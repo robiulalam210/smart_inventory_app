@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import '../models/api_response_mod.dart';
+import 'api_response_mod.dart';
 ApiResponse<T> appParseJson<T>(
     String jsonString,
     T Function(dynamic data) fromJsonT,

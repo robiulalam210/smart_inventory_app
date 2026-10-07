@@ -1,4 +1,5 @@
 // NOTE: adjust imports paths to match your project structure
+import '../../../../../core/shared/widgets/sideMenu/sidebar.dart';
 import 'sale_payment_rules.dart';
 import 'dart:developer';
 

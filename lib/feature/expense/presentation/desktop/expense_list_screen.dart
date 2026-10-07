@@ -1,0 +1,427 @@
+import 'dart:async';
+import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
+
+import '../../../../core/configs/configs.dart';
+import '../../../../desktop/widgets/sidebar.dart';
+import '../../../../core/widgets/app_alert_dialog.dart';
+import '../../../../core/widgets/app_button.dart';
+import '../../../../core/widgets/app_dropdown.dart';
+import '../../../../core/widgets/app_loader.dart';
+import '../../../../core/widgets/coustom_search_text_field.dart';
+import '../../../../core/widgets/date_range.dart';
+import '../../../products/product/presentation/widget/pagination.dart';
+import '../../expense_head/data/model/expense_head_model.dart';
+import '../../expense_head/presentation/bloc/expense_head/expense_head_bloc.dart';
+import '../../expense_sub_head/data/model/expense_sub_head_model.dart';
+import '../../expense_sub_head/presentation/bloc/expense_sub_head/expense_sub_head_bloc.dart';
+import '../bloc/expense_list/expense_bloc.dart';
+import '../widget/widget.dart';
+import '../shared/expense_create.dart';
+
+class ExpenseListScreen extends StatefulWidget {
+  const ExpenseListScreen({super.key});
+
+  @override
+  State<ExpenseListScreen> createState() => _ExpenseListScreenState();
+}
+
+class _ExpenseListScreenState extends State<ExpenseListScreen> {
+  DateRange? selectedDateRange;
+  DateTime now = DateTime.now();
+  ExpenseHeadModel? _selectedExpenseHead;
+  ExpenseSubHeadModel? _selectedExpenseSubHead;
+  late ExpenseBloc dataBloc;
+  final TextEditingController _searchController = TextEditingController();
+  int _pageSize = 10;
+  Timer? _debounce;
+
+  @override
+  void initState() {
+    super.initState();
+    selectedDateRange = DateRange(
+      DateTime(now.year, now.month - 1, now.day),
+      DateTime(now.year, now.month, now.day),
+    );
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<ExpenseHeadBloc>().add(FetchExpenseHeadList(context));
+      context.read<ExpenseSubHeadBloc>().add(FetchSubExpenseHeadList(context));
+      _fetchApi(from: selectedDateRange?.start, to: selectedDateRange?.end);
+    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    dataBloc = context.read<ExpenseBloc>();
+  }
+
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    _searchController.dispose();
+    // dataBloc.filterTextController.dispose();
+    super.dispose();
+  }
+
+  void _onExpenseHeadChanged(ExpenseHeadModel? value) {
+    setState(() {
+      _selectedExpenseHead = value;
+      _selectedExpenseSubHead = null;
+    });
+    _fetchApi();
+  }
+
+  void _onExpenseSubHeadChanged(ExpenseSubHeadModel? value) {
+    setState(() {
+      _selectedExpenseSubHead = value;
+    });
+    _fetchApi();
+  }
+
+  /// সব filter (search, date, head, sub-head) ও page size ধরে রাখে — তাই page/head বদলালে
+  /// filter হারায় না। (আগে প্রতিবার search + date range + page size reset হয়ে যেত।)
+  void _fetchApi({
+    String? filterText,
+    DateTime? from,
+    DateTime? to,
+    int pageNumber = 1,
+    int? pageSize,
+  }) {
+    if (!mounted) return;
+    if (pageSize != null) _pageSize = pageSize;
+
+    context.read<ExpenseBloc>().add(
+      FetchExpenseList(
+        context,
+        filterText: (filterText ?? dataBloc.filterTextController.text).trim(),
+        startDate: from ?? selectedDateRange?.start,
+        endDate: to ?? selectedDateRange?.end,
+        pageNumber: pageNumber,
+        pageSize: _pageSize,
+        headId: _selectedExpenseHead?.id?.toString(),
+        subHeadId: _selectedExpenseSubHead?.id?.toString(),
+      ),
+    );
+  }
+
+  void _clearFilters() {
+    setState(() {
+      selectedDateRange = DateRange(
+        DateTime(now.year, now.month - 1, now.day),
+        DateTime(now.year, now.month, now.day),
+      );
+      _selectedExpenseHead = null;
+      _selectedExpenseSubHead = null;
+    });
+    dataBloc.filterTextController.clear();
+    _searchController.clear();
+    _fetchApi();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isBigScreen =
+        Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
+    return Container(
+      color: AppColors.bottomNavBg(context),
+      child: SafeArea(
+        child: ResponsiveRow(
+          spacing: 0,
+          runSpacing: 0,
+          children: [
+            if (isBigScreen) _buildSidebar(),
+            _buildContentArea(isBigScreen),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSidebar() {
+    return ResponsiveCol(
+      xs: 0,
+      sm: 1,
+      md: 1,
+      lg: 2,
+      xl: 2,
+      child: Container(
+        decoration: const BoxDecoration(color: Colors.white),
+        child: const Sidebar(),
+      ),
+    );
+  }
+
+  Widget _buildContentArea(bool isBigScreen) {
+    return ResponsiveCol(
+      xs: 12,
+      sm: 12,
+      md: 12,
+      lg: 10,
+      xl: 10,
+      child: Container(
+        padding: AppTextStyle.getResponsivePaddingBody(context),
+        child: BlocConsumer<ExpenseBloc, ExpenseState>(
+          listener: (context, state) {
+            _handleBlocState(state);
+          },
+          builder: (context, state) {
+            return Column(
+              children: [
+                _buildDesktopHeader(context),
+
+                SizedBox(child: _buildExpenseList(state)),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  void _handleBlocState(ExpenseState state) {
+    if (state is ExpenseAddLoading) {
+      appLoader(context, "Creating Expense, please wait...");
+    } else if (state is ExpenseAddSuccess) {
+      Navigator.pop(context);
+      _fetchApi();
+    } else if (state is ExpenseAddFailed) {
+      if (context.mounted) {
+        Navigator.pop(context);
+        appAlertDialog(
+          context,
+          state.content,
+          title: state.title,
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text("Dismiss"),
+            ),
+          ],
+        );
+      }
+    } else if (state is ExpenseDeleteLoading) {
+      appLoader(context, "Deleting Expense, please wait...");
+    } else if (state is ExpenseDeleteSuccess) {
+      Navigator.pop(context);
+      _fetchApi();
+    } else if (state is ExpenseDeleteFailed) {
+      if (context.mounted) {
+        Navigator.pop(context);
+        appAlertDialog(
+          context,
+          state.content,
+          title: state.title,
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text("Dismiss"),
+            ),
+          ],
+        );
+      }
+    }
+  }
+
+  Widget _buildDesktopHeader(BuildContext context) {
+    return Column(
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: CustomSearchTextFormField(
+                controller: dataBloc.filterTextController,
+                onChanged: (value) {
+                  _debounce?.cancel();
+                  _debounce = Timer(const Duration(milliseconds: 400), () {
+                    _fetchApi(filterText: value);
+                  });
+                },
+                onClear: () {
+                  dataBloc.filterTextController.clear();
+                  _fetchApi();
+                },
+                hintText: "by description, etc.",
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: BlocBuilder<ExpenseHeadBloc, ExpenseHeadState>(
+                builder: (context, state) {
+                  return AppDropdown<ExpenseHeadModel>(
+                    label: "Expense Head",
+                    hint: _selectedExpenseHead?.name ?? "Select Expense Head",
+                    isNeedAll: true,
+                    isRequired: false,
+                    value: _selectedExpenseHead,
+                    itemList: context.read<ExpenseHeadBloc>().list,
+                    onChanged: _onExpenseHeadChanged,
+                    validator: (value) => null,
+                  );
+                },
+              ),
+            ),
+            const SizedBox(width: 16),
+            SizedBox(
+              width: 260,
+              child: CustomDateRangeField(
+                isLabel: false,
+                selectedDateRange: selectedDateRange,
+                onDateRangeSelected: (value) {
+                  setState(() => selectedDateRange = value);
+                  if (value != null) {
+                    _fetchApi(from: value.start, to: value.end);
+                  } else {
+                    _fetchApi();
+                  }
+                },
+              ),
+            ),
+            const SizedBox(width: 16),
+            TextButton(
+              onPressed: _clearFilters,
+              child: Text(
+                'Clear All',
+                style: TextStyle(color: AppColors.danger, fontSize: 14),
+              ),
+            ),
+            const SizedBox(width: 16),
+            AppButton(
+              name: "Create Expense",
+              onPressed: () => _showCreateDialog(context),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        BlocBuilder<ExpenseSubHeadBloc, ExpenseSubHeadState>(
+          builder: (context, state) {
+            if (_selectedExpenseHead == null) return const SizedBox();
+
+            return Row(
+              children: [
+                Expanded(
+                  child: AppDropdown<ExpenseSubHeadModel>(
+                    label: "Expense Sub Head",
+                    hint: _selectedExpenseSubHead?.name ?? "Select Sub Head",
+                    isNeedAll: true,
+                    isRequired: false,
+                    value: _selectedExpenseSubHead,
+                    itemList: context
+                        .read<ExpenseSubHeadBloc>()
+                        .list
+                        .where(
+                          (subHead) => subHead.id == _selectedExpenseHead?.id,
+                        )
+                        .toList(),
+                    onChanged: _onExpenseSubHeadChanged,
+                    validator: (value) => null,
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildExpenseList(ExpenseState state) {
+    if (state is ExpenseListLoading) {
+      return const Center(child: CircularProgressIndicator());
+    } else if (state is ExpenseListSuccess) {
+      if (state.list.isEmpty) {
+        return _buildEmptyState();
+      } else {
+        return Column(
+          children: [
+            SizedBox(
+              child: ExpenseTableCard(
+                expenses: state.list,
+                onExpenseTap: () {},
+              ),
+            ),
+            const SizedBox(height: 16),
+            PaginationBar(
+              count: state.count,
+              totalPages: state.totalPages,
+              currentPage: state.currentPage,
+              pageSize: state.pageSize,
+              from: state.from,
+              to: state.to,
+              onPageChanged: (page) => _fetchApi(pageNumber: page),
+              onPageSizeChanged: (newSize) => _fetchApi(pageSize: newSize),
+            ),
+          ],
+        );
+      }
+    } else if (state is ExpenseListFailed) {
+      return _buildErrorState(state);
+    } else {
+      return _buildEmptyState();
+    }
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Lottie.asset(AppImages.noData, width: 200, height: 200),
+          const SizedBox(height: 16),
+          const Text(
+            'No expenses found',
+            style: TextStyle(fontSize: 16, color: Colors.grey),
+          ),
+          const SizedBox(height: 16),
+          AppButton(name: "Refresh", onPressed: () => _fetchApi()),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildErrorState(ExpenseListFailed state) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.error_outline, size: 60, color: AppColors.danger),
+          const SizedBox(height: 16),
+          Text(
+            'Failed to load expenses',
+            style: const TextStyle(fontSize: 16),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            state.content,
+            style: const TextStyle(fontSize: 14, color: Colors.grey),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 16),
+          AppButton(name: "Retry", onPressed: () => _fetchApi()),
+        ],
+      ),
+    );
+  }
+
+  void _showCreateDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          insetPadding: const EdgeInsets.all(10),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: Responsive.isMobile(context)
+                  ? AppSizes.width(context)
+                  : AppSizes.width(context) * 0.5,
+              maxHeight: AppSizes.height(context) * 0.8,
+              minHeight: AppSizes.height(context) * 0.6,
+            ),
+            child: const ExpenseCreateScreen(),
+          ),
+        );
+      },
+    );
+  }
+}

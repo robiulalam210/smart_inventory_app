@@ -7,7 +7,7 @@ import 'package:http/http.dart' as http;
 
 import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
-import 'package:meherinMart/feature/auth/presentation/pages/mobile_login_scr.dart';
+import 'package:meherinMart/core/configs/login_redirect.dart';
 
 import '../../../../core/configs/app_routes.dart';
 import '../../../../core/configs/app_urls.dart';
@@ -69,7 +69,7 @@ class ApiClient {
 // await AuthLocalDB.clear();
 
 
-      AppRoutes.pushAndRemoveUntil(context, MobileLoginScr());
+      AppRoutes.pushAndRemoveUntil(context, loginScreenBuilder!());
 // cc.read<AuthBloc>().add(
 //   LogoutRequested(),
 // );
@@ -86,7 +86,7 @@ class ApiClient {
       // AuthLocalDB.clear();
       AppRoutes.pushAndRemoveUntil(
         cc,
-        MobileLoginScr(),
+        loginScreenBuilder!(),
 
       );
       throw ServerException("Server error. Please login again.");

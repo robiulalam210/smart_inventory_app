@@ -18,13 +18,13 @@ class MenuTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      tileColor: isSelected ? Colors.blue.withValues(alpha: 0.1) : null, // Background color for selected item
+      tileColor: isSelected ? AppColors.info.withValues(alpha: 0.1) : null, // Background color for selected item
       title: Text(
         title,
         style: TextStyle(
           fontWeight: FontWeight.w600,
           color: isSelected
-              ? Colors.blue // Text color for selected item
+              ? AppColors.info // Text color for selected item
               :  AppColors.text(context),
         ),
       ),

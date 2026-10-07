@@ -56,7 +56,6 @@ class IncomeBloc extends Bloc<IncomeEvent, IncomeState> {
         context: event.context,
         queryParams: queryParams,
       );
-      print("RAW API RESPONSE: $res");
 
       // Use dynamic to support both Map and List response types!
       final ApiResponse<dynamic> response = appParseJson<dynamic>(
@@ -64,9 +63,6 @@ class IncomeBloc extends Bloc<IncomeEvent, IncomeState> {
             (data) => data,
       );
 
-      print("DECODED RESPONSE STATUS: ${response.success}");
-      print("DECODED RESPONSE MESSAGE: ${response.message}");
-      print("DECODED RESPONSE DATA: ${response.data}");
 
       if (response.success == false || response.data == null) {
         emit(IncomeListFailed(
@@ -96,23 +92,40 @@ class IncomeBloc extends Bloc<IncomeEvent, IncomeState> {
         }
       }
       // Defensive printouts
-      print("PARSED RESULTS: $results");
-      print("PARSED PAGINATION: $pagination");
 
-      // Parse out page stuff safely if available
-      int count = _safeParseInt(pagination['count'], 0);
-      int currentPage = _safeParseInt(pagination['current_page'], event.pageNumber);
-      int pageSize = _safeParseInt(pagination['page_size'], event.pageSize);
-      int totalPages = _safeParseInt(pagination['total_pages'], (count / (pageSize != 0 ? pageSize : 1)).ceil());
-      final from = ((currentPage - 1) * pageSize) + 1;
-      final to = from + (results.isNotEmpty ? results.length - 1 : 0);
+      List<IncomeModel> incomes = results
+          .whereType<Map>()
+          .map((x) => IncomeModel.fromJson(Map<String, dynamic>.from(x)))
+          .toList();
 
-      List<IncomeModel> incomes = [];
-      if (results is List) {
-        incomes = results.where((x) => x is Map)
-            .map((x) => IncomeModel.fromJson(Map<String, dynamic>.from(x)))
-            .toList();
+      int pageSize = event.pageSize <= 0 ? 10 : event.pageSize;
+      int count;
+      int currentPage;
+      int totalPages;
+
+      if (pagination.isNotEmpty) {
+        // সার্ভার নিজেই pagination করেছে
+        count = _safeParseInt(
+            pagination['count'] ?? pagination['total'] ?? pagination['total_items'],
+            incomes.length);
+        currentPage = _safeParseInt(pagination['current_page'], event.pageNumber);
+        pageSize = _safeParseInt(pagination['page_size'], pageSize);
+        if (pageSize <= 0) pageSize = event.pageSize <= 0 ? 10 : event.pageSize;
+        totalPages =
+            _safeParseInt(pagination['total_pages'], (count / pageSize).ceil());
+      } else {
+        // সার্ভার pagination/filter ছাড়া পুরো list দিলে এখানে filter + pagination করা হয়
+        // (আগে count=0 হয়ে "Showing 1 to 7 of 0" দেখাত এবং date filter কাজ করত না)
+        incomes = _applyLocalFilters(incomes, event);
+        count = incomes.length;
+        totalPages = count == 0 ? 1 : (count / pageSize).ceil();
+        currentPage = event.pageNumber.clamp(1, totalPages).toInt();
+        incomes =
+            incomes.skip((currentPage - 1) * pageSize).take(pageSize).toList();
       }
+      if (totalPages < 1) totalPages = 1;
+      final from = incomes.isEmpty ? 0 : ((currentPage - 1) * pageSize) + 1;
+      final to = incomes.isEmpty ? 0 : from + incomes.length - 1;
 
       emit(IncomeListSuccess(
         list: incomes,
@@ -121,11 +134,44 @@ class IncomeBloc extends Bloc<IncomeEvent, IncomeState> {
         count: count,
         pageSize: pageSize,
         from: from,
-        to: to.toInt(),
+        to: to,
       ));
     } catch (error) {
       emit(IncomeListFailed(title: "Error", content: error.toString()));
     }
+  }
+
+  List<IncomeModel> _applyLocalFilters(
+      List<IncomeModel> list, FetchIncomeList e) {
+    DateTime? day(DateTime? d) =>
+        d == null ? null : DateTime(d.year, d.month, d.day);
+    final start = day(e.startDate);
+    final end = day(e.endDate);
+    final q = e.filterText.trim().toLowerCase();
+    return list.where((i) {
+      if (start != null || end != null) {
+        final d = day(DateTime.tryParse(i.incomeDate ?? ''));
+        if (d == null) return false;
+        if (start != null && d.isBefore(start)) return false;
+        if (end != null && d.isAfter(end)) return false;
+      }
+      if (e.headId != null && e.headId!.isNotEmpty && i.head?.toString() != e.headId) {
+        return false;
+      }
+      if (e.accountId != null &&
+          e.accountId!.isNotEmpty &&
+          i.account?.toString() != e.accountId) {
+        return false;
+      }
+      if (q.isNotEmpty) {
+        final hay = [i.invoiceNumber, i.headName, i.accountName, i.note, i.amount]
+            .whereType<String>()
+            .join(' ')
+            .toLowerCase();
+        if (!hay.contains(q)) return false;
+      }
+      return true;
+    }).toList();
   }
 
 // Helper for int parsing as in your original code

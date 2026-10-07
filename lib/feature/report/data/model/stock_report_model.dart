@@ -58,10 +58,10 @@ class StockProduct {
   }
 
   Color get stockStatusColor {
-    if (currentStock == 0) return Colors.red;
-    if (currentStock <= 10) return Colors.orange;
-    if (currentStock <= 25) return Colors.blue;
-    return Colors.green;
+    if (currentStock == 0) return AppColors.danger;
+    if (currentStock <= 10) return AppColors.warning;
+    if (currentStock <= 25) return AppColors.info;
+    return AppColors.success;
   }
 
   // Profitability indicator
@@ -73,10 +73,10 @@ class StockProduct {
   }
 
   Color get profitabilityColor {
-    if (profitMargin > 50) return Colors.green;
-    if (profitMargin > 20) return Colors.blue;
-    if (profitMargin > 0) return Colors.orange;
-    return Colors.red;
+    if (profitMargin > 50) return AppColors.success;
+    if (profitMargin > 20) return AppColors.info;
+    if (profitMargin > 0) return AppColors.warning;
+    return AppColors.danger;
   }
 }
 

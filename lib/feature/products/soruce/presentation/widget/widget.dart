@@ -4,7 +4,8 @@ import '../../../../../core/configs/configs.dart';
 import '../../../../../core/widgets/delete_dialog.dart';
 import '../../data/model/source_model.dart';
 import '../bloc/source/source_bloc.dart';
-import '../pages/soruce_create.dart';
+import '../shared/soruce_create.dart';
+import 'package:meherinMart/core/widgets/table_scroll_controllers.dart';
 
 class MobileSourceTableCard extends StatelessWidget {
   final List<SourceModel> sources;
@@ -101,7 +102,7 @@ class MobileSourceTableCard extends StatelessWidget {
                     context,
                     'Edit',
                     Iconsax.edit,
-                    Colors.blue,
+                    AppColors.info,
                         () => _showEditDialog(context, source),
                   ),
 
@@ -110,7 +111,7 @@ class MobileSourceTableCard extends StatelessWidget {
                     context,
                     'Delete',
                     HugeIcons.strokeRoundedDeleteThrow,
-                    Colors.red,
+                    AppColors.danger,
                         () => _confirmDelete(context, source),
                   ),
                 ],
@@ -127,10 +128,10 @@ class MobileSourceTableCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: isActive ? Colors.green.withValues(alpha: 0.1) : Colors.red.withValues(alpha: 0.1),
+        color: isActive ? AppColors.success.withValues(alpha: 0.1) : AppColors.danger.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isActive ? Colors.green.withValues(alpha: 0.3) : Colors.red.withValues(alpha: 0.3),
+          color: isActive ? AppColors.success.withValues(alpha: 0.3) : AppColors.danger.withValues(alpha: 0.3),
         ),
       ),
       child: Row(
@@ -139,13 +140,13 @@ class MobileSourceTableCard extends StatelessWidget {
           Icon(
             isActive ? Icons.check_circle : Icons.cancel,
             size: 12,
-            color: isActive ? Colors.green : Colors.red,
+            color: isActive ? AppColors.success : AppColors.danger,
           ),
           const SizedBox(width: 4),
           Text(
             isActive ? 'Active' : 'Inactive',
             style: TextStyle(
-              color: isActive ? Colors.green : Colors.red,
+              color: isActive ? AppColors.success : AppColors.danger,
               fontWeight: FontWeight.w600,
               fontSize: 10,
             ),
@@ -305,8 +306,8 @@ class SourceTableCard extends StatelessWidget {
       return _buildEmptyState();
     }
 
-    final verticalScrollController = ScrollController();
-    final horizontalScrollController = ScrollController();
+    return TableScrollControllers(
+      builder: (context, verticalScrollController, horizontalScrollController) {
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -391,6 +392,8 @@ class SourceTableCard extends StatelessWidget {
         );
       },
     );
+      },
+    );
   }
 
   List<DataColumn> _buildColumns(double columnWidth) {
@@ -460,13 +463,13 @@ class SourceTableCard extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: isActive ? Colors.green.withValues(alpha: 0.1) : Colors.red.withValues(alpha: 0.1),
+              color: isActive ? AppColors.success.withValues(alpha: 0.1) : AppColors.danger.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
               isActive ? 'Active' : 'Inactive',
               style: TextStyle(
-                color: isActive ? Colors.green : Colors.red,
+                color: isActive ? AppColors.success : AppColors.danger,
                 fontWeight: FontWeight.w600,
                 fontSize: 11,
               ),
@@ -488,7 +491,7 @@ class SourceTableCard extends StatelessWidget {
             // Edit Button
             _buildActionButton(
               icon: Iconsax.edit,
-              color: Colors.blue,
+              color: AppColors.info,
               tooltip: 'Edit source',
               onPressed: () => _showEditDialog(context, source),
             ),
@@ -496,7 +499,7 @@ class SourceTableCard extends StatelessWidget {
             // Delete Button
             _buildActionButton(
               icon: HugeIcons.strokeRoundedDeleteThrow,
-              color: Colors.red,
+              color: AppColors.danger,
               tooltip: 'Delete source',
               onPressed: () => _confirmDelete(context, source),
             ),

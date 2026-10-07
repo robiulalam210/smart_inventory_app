@@ -1,0 +1,885 @@
+// lib/feature/report/presentation/screens/profit_loss_screen.dart
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:printing/printing.dart';
+import '../../../../profile/presentation/bloc/profile_bloc/profile_bloc.dart';
+import '/core/configs/app_colors.dart';
+import '/core/configs/app_text.dart';
+import '/desktop/widgets/sidebar.dart';
+import '/core/widgets/date_range.dart';
+import '/feature/report/presentation/bloc/profit_loss_bloc/profit_loss_bloc.dart';
+import '/feature/report/presentation/shared/profit_loss_screen/pdf.dart';
+
+import '../../../../../core/configs/app_routes.dart';
+import '../../../../../core/widgets/app_button.dart';
+import '../../../../../responsive.dart';
+import '../../../data/model/profit_loss_report_model.dart';
+import 'package:meherinMart/core/widgets/table_scroll_controllers.dart';
+
+class ProfitLossScreen extends StatefulWidget {
+  const ProfitLossScreen({super.key});
+
+  @override
+  State<ProfitLossScreen> createState() => _ProfitLossScreenState();
+}
+
+class _ProfitLossScreenState extends State<ProfitLossScreen> {
+  DateRange? selectedDateRange;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchProfitLossReport();
+  }
+
+  void _fetchProfitLossReport({
+    DateTime? from,
+    DateTime? to,
+  }) {
+    context.read<ProfitLossBloc>().add(FetchProfitLossReport(
+      context: context,
+      from: from,
+      to: to,
+    ));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isBigScreen = Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
+
+    return Container(
+      color: AppColors.bottomNavBg(context),
+      child: SafeArea(
+        child: ResponsiveRow(
+          children: [
+            if (isBigScreen) _buildSidebar(),
+            _buildContentArea(isBigScreen),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSidebar() => ResponsiveCol(
+    xs: 0,
+    sm: 1,
+    md: 1,
+    lg: 2,
+    xl: 2,
+    child: Container(color: Colors.white, child: const Sidebar()),
+  );
+
+  Widget _buildContentArea(bool isBigScreen) {
+    return ResponsiveCol(
+      xs: 12,
+      lg: 10,
+      child: RefreshIndicator(
+        onRefresh: () async => _fetchProfitLossReport(),
+        child: Container(
+          padding: AppTextStyle.getResponsivePaddingBody(context),
+          child: Column(
+            children: [
+
+              _buildProfitLossCards(),
+              const SizedBox(height: 8),
+              SizedBox(child: _buildReportContent()),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+
+
+  Widget _buildProfitLossCards() {
+    return BlocBuilder<ProfitLossBloc, ProfitLossState>(
+      builder: (context, state) {
+        if (state is! ProfitLossSuccess) return const SizedBox();
+
+        final summary = state.response.summary;
+
+        return Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            _buildProfitLossCard(
+              "Total Sales",
+              summary.totalSales.toStringAsFixed(2),
+              Icons.trending_up,
+              AppColors.info,
+            ),
+            _buildProfitLossCard(
+              "Total Purchases",
+              summary.totalPurchase.toStringAsFixed(2),
+              Icons.shopping_cart,
+              AppColors.warning,
+            ),
+            _buildProfitLossCard(
+              "Total Expenses",
+              summary.totalExpenses.toStringAsFixed(2),
+              Icons.money_off,
+              AppColors.danger,
+            ),
+            _buildProfitLossCard(
+              "Gross Profit",
+              summary.grossProfit.toStringAsFixed(2),
+              Icons.attach_money,
+              AppColors.success,
+              isProfit: true,
+            ),
+            _buildProfitLossCard(
+              "Net Profit",
+              summary.netProfit.toStringAsFixed(2),
+              Icons.account_balance_wallet,
+              summary.netProfit >= 0 ? AppColors.success : AppColors.danger,
+              isProfit: true,
+            ),       SizedBox(
+              width: 260,
+              child: CustomDateRangeField(
+                isLabel: false,
+                selectedDateRange: selectedDateRange,
+                onDateRangeSelected: (value) {
+                  setState(() => selectedDateRange = value);
+                  if (value != null) {
+                    _fetchProfitLossReport(from: value.start, to: value.end);
+                  }
+                },
+              ),
+            ),
+            const SizedBox(width: 4),
+            AppButton(
+                size: 100,
+                name: "Pdf", onPressed: (){
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => Scaffold(
+                    backgroundColor: AppColors.danger,
+                    body: PdfPreview.builder(
+                      useActions: true,
+                      allowSharing: false,
+                      canDebug: false,
+                      canChangeOrientation: false,
+                      canChangePageFormat: false,
+                      dynamicLayout: true,
+                      build: (format) => generateProfitLossReportPdf(
+                        state.response, context.read<ProfileBloc>().permissionModel?.data?.companyInfo
+
+                      ),
+                      pdfPreviewPageDecoration:
+                      BoxDecoration(color: AppColors.white),
+                      actionBarTheme: PdfActionBarTheme(
+                        backgroundColor: AppColors.primaryColor(context),
+                        iconColor: Colors.white,
+                        textStyle: const TextStyle(color: Colors.white),
+                      ),
+                      actions: [
+                        IconButton(
+                          onPressed: () => AppRoutes.pop(context),
+                          icon: const Icon(Icons.cancel, color: AppColors.danger),
+                        ),
+                      ],
+                      pagesBuilder: (context, pages) {
+                        debugPrint('Rendering ${pages.length} pages');
+                        return PageView.builder(
+                          itemCount: pages.length,
+                          scrollDirection: Axis.vertical,
+                          itemBuilder: (context, index) {
+                            final page = pages[index];
+                            return Container(
+                              color: Colors.grey,
+                              alignment: Alignment.center,
+                              padding: const EdgeInsets.all(8.0),
+                              child: Image(image: page.image, fit: BoxFit.contain),
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              );
+
+            }),
+            const SizedBox(width: 4),
+            AppButton(
+              name: "Clear",size: 80,
+              onPressed: () {
+                setState(() => selectedDateRange = null);
+                context.read<ProfitLossBloc>().add(ClearProfitLossFilters());
+                _fetchProfitLossReport();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildProfitLossCard(String title, String value, IconData icon, Color color, {bool isProfit = false}) {
+    return Container(
+      width: 150,
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8),
+
+
+        color: AppColors.bottomNavBg(context),
+        border: isProfit ? Border.all(color: color.withValues(alpha: 0.3), width: 1) :  Border.all(
+            color: AppColors.greyColor(context).withValues(alpha: 0.5),width: 0.5
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: color, size: 32),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: isProfit ? color :AppColors.text(context),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildReportContent() {
+    return BlocBuilder<ProfitLossBloc, ProfitLossState>(
+      builder: (context, state) {
+        if (state is ProfitLossLoading) {
+          return const Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(height: 16),
+                Text("Loading profit & loss report..."),
+              ],
+            ),
+          );
+        } else if (state is ProfitLossSuccess) {
+          final summary = state.response.summary;
+
+          return SingleChildScrollView(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                // Expense Breakdown Section
+                Column(children: [
+                  if (summary.expenseBreakdown.isNotEmpty) ...[
+                    _buildSectionTitle("Expense Breakdown"),
+                    const SizedBox(height: 8),
+                    SizedBox(
+
+                        width: 500,
+                        child: ExpenseBreakdownTableCard(expenses: summary.expenseBreakdown)),
+                    const SizedBox(height: 8),
+                  ] else ...[
+                    _buildEmptyState("No expense breakdown available"),
+                  ],
+                ],),
+                SizedBox(width: 10,),
+
+                // Profit & Loss Summary Section
+               Column(children: [
+                 _buildSectionTitle("Profit & Loss Summary"),
+                 const SizedBox(height: 8),
+                 SizedBox(
+                     width: 300,
+                     child: ProfitLossSummaryCard(summary: summary)),
+               ],)
+
+                // Export/Print Section
+                // const SizedBox(height: 8),
+                // _buildExportSection(),
+              ],
+            ),
+          );
+        } else if (state is ProfitLossFailed) {
+          return _buildErrorState(state.content);
+        }
+        return _buildEmptyState("No data available");
+      },
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Text(
+      title,
+      style: AppTextStyle.cardTitle(context).copyWith(
+        fontSize: 18,
+        fontWeight: FontWeight.bold,
+      ),
+    );
+  }
+
+
+  Widget _buildEmptyState(String message) {
+    return Container(
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withValues(alpha: 0.1),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.bar_chart_outlined,
+            size: 48,
+            color: Colors.grey.withValues(alpha: 0.5),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            message,
+            style: GoogleFonts.inter(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildErrorState(String error) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.error_outline, size: 60, color: AppColors.danger),
+          const SizedBox(height: 16),
+          Text(
+            "Error Loading Profit & Loss Report",
+            style: GoogleFonts.inter(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            error,
+            style: const TextStyle(fontSize: 14, color: AppColors.danger),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: _fetchProfitLossReport,
+            child: const Text("Retry"),
+          ),
+        ],
+      ),
+    );
+  }
+
+}
+
+class ExpenseBreakdownTableCard extends StatelessWidget {
+  final List<ExpenseBreakdown> expenses;
+
+  const ExpenseBreakdownTableCard({super.key, required this.expenses});
+
+  @override
+  Widget build(BuildContext context) {
+    return TableScrollControllers(
+      builder: (context, verticalScrollController, horizontalScrollController) {
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final totalWidth = constraints.maxWidth;
+        const numColumns = 3; // Head, Subhead, Amount
+        const minColumnWidth = 150.0;
+
+        final dynamicColumnWidth =
+        (totalWidth / numColumns).clamp(minColumnWidth, double.infinity);
+
+        return Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8),
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withValues(alpha: 0.1),
+                blurRadius: 4,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Scrollbar(
+            controller: verticalScrollController,
+            thumbVisibility: true,
+            child: SingleChildScrollView(
+              controller: verticalScrollController,
+              scrollDirection: Axis.vertical,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Scrollbar(
+                  controller: horizontalScrollController,
+                  thumbVisibility: true,
+                  child: SingleChildScrollView(
+                    controller: horizontalScrollController,
+                    scrollDirection: Axis.horizontal,
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 5),
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(minWidth: totalWidth),
+                        child: DataTable(
+                          dataRowMinHeight: 40,
+                          dataRowMaxHeight: 40,
+                          columnSpacing: 8,
+                          horizontalMargin: 12,
+                          dividerThickness: 0.5,
+                          headingRowHeight: 40,
+                          headingTextStyle: TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            fontFamily: GoogleFonts.inter().fontFamily,
+                          ),
+                          headingRowColor: WidgetStateProperty.all(
+                            AppColors.primaryColor(context),
+                          ),
+                          dataTextStyle: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w500,
+                            fontFamily: GoogleFonts.inter().fontFamily,
+                          ),
+                          columns: _buildColumns(dynamicColumnWidth),
+                          rows: expenses.asMap().entries.map((entry) {
+                            final expense = entry.value;
+                            return DataRow(
+                              cells: [
+                                _buildDataCell(expense.head, dynamicColumnWidth),
+                                _buildDataCell(expense.subhead, dynamicColumnWidth),
+                                _buildAmountCell(expense.total, dynamicColumnWidth),
+                              ],
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+      },
+    );
+  }
+
+  List<DataColumn> _buildColumns(double columnWidth) {
+    return [
+      DataColumn(
+        label: SizedBox(
+          width: columnWidth,
+          child: const Text('Expense Head', textAlign: TextAlign.center),
+        ),
+      ),
+      DataColumn(
+        label: SizedBox(
+          width: columnWidth,
+          child: const Text('Subhead', textAlign: TextAlign.center),
+        ),
+      ),
+      DataColumn(
+        label: SizedBox(
+          width: columnWidth,
+          child: const Text('Amount', textAlign: TextAlign.center),
+        ),
+      ),
+    ];
+  }
+
+  DataCell _buildDataCell(String text, double width) {
+    return DataCell(
+      SizedBox(
+        width: width,
+        child: Text(
+          text,
+          style: const TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w500,
+            color: Colors.black87,
+          ),
+          textAlign: TextAlign.center,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ),
+    );
+  }
+
+  DataCell _buildAmountCell(double amount, double width) {
+    return DataCell(
+      SizedBox(
+        width: width,
+        child: Center(
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: AppColors.danger.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Text(
+              amount.toStringAsFixed(2),
+              style: const TextStyle(
+                color: AppColors.danger,
+                fontWeight: FontWeight.w600,
+                fontSize: 11,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class ProfitLossSummaryCard extends StatelessWidget {
+  final ProfitLossSummary summary;
+
+  const ProfitLossSummaryCard({super.key, required this.summary});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 6),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.bottomNavBg(context),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: AppColors.greyColor(context).withValues(alpha: 0.5),
+          width: 0.5,
+        ),
+      ),
+      child: Column(
+        children: [
+          _buildSummaryRow(context,"Total Revenue", summary.totalSales, isRevenue: true),
+          _buildSummaryRow(context,"Cost of Goods Sold", summary.totalPurchase, isExpense: true),
+          _buildDivider(),
+          _buildSummaryRow(context,"Gross Profit", summary.grossProfit, isProfit: true),
+          _buildSummaryRow(context,"Operating Expenses", summary.totalExpenses, isExpense: true),
+          _buildDivider(),
+          _buildSummaryRow(context,
+              "NET PROFIT/LOSS",
+              summary.netProfit,
+              isNet: true,
+              isPositive: summary.netProfit >= 0
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSummaryRow(BuildContext context,String label, double amount, {
+    bool isRevenue = false,
+    bool isExpense = false,
+    bool isProfit = false,
+    bool isNet = false,
+    bool isPositive = true
+  }) {
+
+    final isNegative = amount < 0;
+
+    Color getAmountColor() {
+      if (isNet) return isPositive ? AppColors.success : AppColors.danger;
+      if (isProfit) return AppColors.success;
+      if (isExpense) return AppColors.danger;
+      if (isRevenue) return AppColors.info;
+      return AppColors.text(context);
+    }
+
+    String getFormattedAmount() {
+      if (isNet && isNegative) return '-${amount.abs().toStringAsFixed(2)}';
+      return amount.toStringAsFixed(2);
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+            flex: 2,
+            child: Text(
+              label,
+              style: TextStyle(
+                fontWeight: isNet ? FontWeight.bold : FontWeight.w600,
+                fontSize: isNet ? 14 : 14,
+                color: isNet ? getAmountColor() :AppColors.text(context),
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 1,
+            child: Text(
+              getFormattedAmount(),
+              style: TextStyle(
+                fontWeight: isNet ? FontWeight.bold : FontWeight.w600,
+                fontSize: isNet ? 16 : 14,
+                color: getAmountColor(),
+              ),
+              textAlign: TextAlign.right,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDivider() {
+    return const Divider(
+      color: Colors.grey,
+      thickness: 1,
+      height: 10,
+    );
+  }
+}
+
+
+// ----------------- EXPENSE BREAKDOWN LIST -----------------
+class ExpenseBreakdownList extends StatelessWidget {
+  final List<ExpenseBreakdown> expenses;
+
+  const ExpenseBreakdownList({super.key, required this.expenses});
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: expenses.length,
+      itemBuilder: (context, index) {
+        final expense = expenses[index];
+        return Container(
+          margin: const EdgeInsets.only(bottom: 6),
+          decoration: BoxDecoration(
+            color: AppColors.bottomNavBg(context),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: AppColors.greyColor(context).withValues(alpha: 0.5),
+              width: 0.5,
+            ),
+          ),          child: ListTile(
+            leading: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppColors.danger.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(Icons.money_off, color: AppColors.danger),
+            ),
+            title: Text(
+              expense.head,
+              style:  TextStyle(
+                fontWeight: FontWeight.w600,
+                color: AppColors.text(context),
+                fontSize: 14,
+              ),
+            ),
+            subtitle: Text(
+              expense.subhead,
+              style: TextStyle(
+                fontSize: 12,
+                color: AppColors.text(context),
+              ),
+            ),
+            trailing: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  expense.total.toStringAsFixed(2),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    color: AppColors.danger,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Expense',
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: AppColors.text(context),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+// ----------------- PROFIT & LOSS SUMMARY CARD -----------------
+// class ProfitLossSummaryCard extends StatelessWidget {
+//   final ProfitLossSummary summary;
+//   final bool isMobile;
+//
+//   const ProfitLossSummaryCard({
+//     super.key,
+//     required this.summary,
+//     this.isMobile = false,
+//   });
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return Card(
+//       child: Padding(
+//         padding: const EdgeInsets.all(16.0),
+//         child: Column(
+//           crossAxisAlignment: CrossAxisAlignment.stretch,
+//           children: [
+//             _buildSummarySection(
+//               title: "REVENUE",
+//               items: [
+//                 _buildSummaryItem("Total Sales", summary.totalSales, isPositive: true),
+//               ],
+//               color: Colors.blue,
+//             ),
+//             _buildSummarySection(
+//               title: "COST OF GOODS SOLD",
+//               items: [
+//                 _buildSummaryItem("Total Purchases", summary.totalPurchase, isPositive: false),
+//               ],
+//               color: Colors.orange,
+//             ),
+//             _buildSummarySection(
+//               title: "GROSS PROFIT",
+//               items: [
+//                 _buildSummaryItem("Gross Profit", summary.grossProfit, isPositive: summary.grossProfit >= 0),
+//               ],
+//               color: Colors.green,
+//               isHighlighted: true,
+//             ),
+//             _buildSummarySection(
+//               title: "OPERATING EXPENSES",
+//               items: [
+//                 _buildSummaryItem("Total Expenses", summary.totalExpenses, isPositive: false),
+//               ],
+//               color: Colors.red,
+//             ),
+//             _buildSummarySection(
+//               title: "NET PROFIT/LOSS",
+//               items: [
+//                 _buildSummaryItem("Net Profit/Loss", summary.netProfit, isPositive: summary.netProfit >= 0),
+//               ],
+//               color: summary.netProfit >= 0 ? Colors.green : Colors.red,
+//               isHighlighted: true,
+//               isNetProfit: true,
+//             ),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+//
+//   Widget _buildSummarySection({
+//     required String title,
+//     required List<Widget> items,
+//     required Color color,
+//     bool isHighlighted = false,
+//     bool isNetProfit = false,
+//   }) {
+//     return Container(
+//       margin: const EdgeInsets.only(bottom: 12),
+//       padding: const EdgeInsets.all(12),
+//       decoration: BoxDecoration(
+//         color: isHighlighted ? color.withOpacity(0.1) : Colors.transparent,
+//         borderRadius: BorderRadius.circular(8),
+//         border: Border.all(
+//           color: color.withOpacity(0.2),
+//           width: isHighlighted ? 2 : 1,
+//         ),
+//       ),
+//       child: Column(
+//         crossAxisAlignment: CrossAxisAlignment.stretch,
+//         children: [
+//           Text(
+//             title,
+//             style: TextStyle(
+//               fontSize: isMobile ? 12 : 14,
+//               fontWeight: FontWeight.bold,
+//               color: color,
+//             ),
+//           ),
+//           const SizedBox(height: 8),
+//           ...items,
+//           if (isNetProfit) ...[
+//             const SizedBox(height: 8),
+//             Divider(color: color.withOpacity(0.3), thickness: 2),
+//           ]
+//         ],
+//       ),
+//     );
+//   }
+//
+//   Widget _buildSummaryItem(String label, double amount, {bool isPositive = true}) {
+//     final amountColor = isPositive ? Colors.green : Colors.red;
+//     final prefix = isPositive ? '' : '-';
+//     final formattedAmount = amount.abs().toStringAsFixed(2);
+//
+//     return Padding(
+//       padding: const EdgeInsets.symmetric(vertical: 4),
+//       child: Row(
+//         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//         children: [
+//           Expanded(
+//             child: Text(
+//               label,
+//               style: TextStyle(
+//                 fontSize: isMobile ? 14 : 16,
+//                 color: Colors.black87,
+//               ),
+//             ),
+//           ),
+//           Text(
+//             '$prefix$formattedAmount',
+//             style: TextStyle(
+//               fontSize: isMobile ? 14 : 16,
+//               fontWeight: FontWeight.bold,
+//               color: amountColor,
+//             ),
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+// }

@@ -1,5 +1,6 @@
 import '/feature/supplier/data/model/supplier_list_model.dart';
 import '../../../../core/configs/configs.dart';
+import 'package:meherinMart/core/widgets/table_scroll_controllers.dart';
 
 class SupplierDataTableWidget extends StatelessWidget {
   final List<SupplierListModel> suppliers;
@@ -275,21 +276,21 @@ class SupplierDataTableWidget extends StatelessWidget {
                             label: 'Purchases',
                             value: '৳${supplier.totalPurchases.toString()}',
                             icon: Iconsax.shopping_cart,
-                            color: Colors.blue,
+                            color: AppColors.info,
                           ),
                           _buildFinancialCard(
                             context: context,
                             label: 'Paid',
                             value: '৳${supplier.totalPaid.toString()}',
                             icon: Iconsax.wallet_check,
-                            color: Colors.green,
+                            color: AppColors.success,
                           ),
                           _buildFinancialCard(
                             context: context,
                             label: 'Due',
                             value: '৳${supplier.totalDue.toString()}',
                             icon: Iconsax.wallet_minus,
-                            color: Colors.orange,
+                            color: AppColors.warning,
                           ),
                           _buildFinancialCard(
                             context: context,
@@ -337,7 +338,7 @@ class SupplierDataTableWidget extends StatelessWidget {
                     ),
                     label: const Text('Edit'),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.blue,
+                      foregroundColor: AppColors.info,
                       side: BorderSide(color: Colors.blue.shade300),
                       padding: const EdgeInsets.symmetric(vertical: 10),
                       shape: RoundedRectangleBorder(
@@ -356,7 +357,7 @@ class SupplierDataTableWidget extends StatelessWidget {
                     ),
                     label: const Text('Delete'),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.red,
+                      foregroundColor: AppColors.danger,
                       side: BorderSide(color: Colors.red.shade300),
                       padding: const EdgeInsets.symmetric(vertical: 10),
                       shape: RoundedRectangleBorder(
@@ -481,11 +482,11 @@ class SupplierDataTableWidget extends StatelessWidget {
     IconData icon;
 
     if (balance > 0) {
-      color = Colors.green;
+      color = AppColors.success;
       text = '+৳${balance.toStringAsFixed(2)}';
       icon = Iconsax.arrow_up_3;
     } else if (balance < 0) {
-      color = Colors.red;
+      color = AppColors.danger;
       text = '৳${balance.toStringAsFixed(2)}';
       icon = Iconsax.arrow_down_2;
     } else {
@@ -525,14 +526,14 @@ class SupplierDataTableWidget extends StatelessWidget {
 
   Color getAdvanceBalanceColor(String? advanceBalance) {
     final balance = double.tryParse(advanceBalance ?? '0') ?? 0;
-    if (balance > 0) return Colors.green;
-    if (balance < 0) return Colors.red;
+    if (balance > 0) return AppColors.success;
+    if (balance < 0) return AppColors.danger;
     return Colors.grey;
   }
 
   Widget _buildDesktopDataTable(BuildContext context) {
-    final verticalController = ScrollController();
-    final horizontalController = ScrollController();
+    return TableScrollControllers(
+      builder: (context, verticalController, horizontalController) {
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -603,6 +604,8 @@ class SupplierDataTableWidget extends StatelessWidget {
         );
       },
     );
+      },
+    );
   }
 
   List<DataColumn> _buildColumns(double columnWidth) {
@@ -655,9 +658,9 @@ class SupplierDataTableWidget extends StatelessWidget {
         _buildDataCell(supplier.phone ?? '-', TextAlign.left),
         _buildDataCell(supplier.email?.toString() ?? '-', TextAlign.left),
         _buildDataCell(supplier.address ?? '-', TextAlign.left, maxLines: 2),
-        _buildFinancialCell('৳${supplier.totalPurchases}', Colors.blue, TextAlign.right),
-        _buildFinancialCell('৳${supplier.totalPaid}', Colors.green, TextAlign.right),
-        _buildFinancialCell('৳${supplier.totalDue}', Colors.orange, TextAlign.right),
+        _buildFinancialCell('৳${supplier.totalPurchases}', AppColors.info, TextAlign.right),
+        _buildFinancialCell('৳${supplier.totalPaid}', AppColors.success, TextAlign.right),
+        _buildFinancialCell('৳${supplier.totalDue}', AppColors.warning, TextAlign.right),
         DataCell(
           Align(
             alignment: Alignment.center,
@@ -694,7 +697,7 @@ class SupplierDataTableWidget extends StatelessWidget {
               children: [
                 IconButton(
                   icon: const Icon(Iconsax.edit, size: 18),
-                  color: Colors.blue,
+                  color: AppColors.info,
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(
                     minWidth: 32,
@@ -705,7 +708,7 @@ class SupplierDataTableWidget extends StatelessWidget {
                 const SizedBox(width: 4),
                 IconButton(
                   icon: const Icon(HugeIcons.strokeRoundedDeleteThrow, size: 18),
-                  color: Colors.red,
+                  color: AppColors.danger,
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(
                     minWidth: 32,
@@ -775,11 +778,11 @@ class SupplierDataTableWidget extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
             color: isActive
-                ? Colors.green.withOpacity(0.1)
-                : Colors.red.withOpacity(0.1),
+                ? AppColors.success.withOpacity(0.1)
+                : AppColors.danger.withOpacity(0.1),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: isActive ? Colors.green : Colors.red,
+              color: isActive ? AppColors.success : AppColors.danger,
               width: 1,
             ),
           ),
@@ -787,7 +790,7 @@ class SupplierDataTableWidget extends StatelessWidget {
             isActive ? 'Active' : 'Inactive',
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: isActive ? Colors.green : Colors.red,
+              color: isActive ? AppColors.success : AppColors.danger,
               fontWeight: FontWeight.w600,
               fontSize: 11,
             ),

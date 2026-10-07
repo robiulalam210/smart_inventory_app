@@ -162,7 +162,7 @@ class TransactionCard extends StatelessWidget {
 
   Widget _buildMobileTransactionCard(TransactionsModel transaction, int index,BuildContext context) {
     final isCredit = transaction.transactionType?.toLowerCase() == 'credit';
-    final amountColor = isCredit ? Colors.green : Colors.red;
+    final amountColor = isCredit ? AppColors.success : AppColors.danger;
     final prefix = isCredit ? '+' : '-';
     final amount = double.tryParse(transaction.amount ?? "0") ?? 0;
 
@@ -283,11 +283,11 @@ class TransactionCard extends StatelessWidget {
     Color getStatusColor() {
       switch (status?.toLowerCase()) {
         case 'completed':
-          return Colors.green;
+          return AppColors.success;
         case 'pending':
-          return Colors.orange;
+          return AppColors.warning;
         case 'failed':
-          return Colors.red;
+          return AppColors.danger;
         case 'reversed':
           return Colors.purple;
         default:
@@ -316,7 +316,7 @@ class TransactionCard extends StatelessWidget {
 
   Widget _buildTypeChip(String? type) {
     final isCredit = type?.toLowerCase() == 'credit';
-    final color = isCredit ? Colors.green : Colors.red;
+    final color = isCredit ? AppColors.success : AppColors.danger;
     final icon = isCredit ? Icons.arrow_upward : Icons.arrow_downward;
 
     return Container(
@@ -454,7 +454,7 @@ class TransactionCard extends StatelessWidget {
 
   DataCell _buildTypeCell(String? type, double width) {
     final isCredit = type?.toLowerCase() == 'credit';
-    final color = isCredit ? Colors.green : Colors.red;
+    final color = isCredit ? AppColors.success : AppColors.danger;
     final icon = isCredit ? Icons.arrow_upward : Icons.arrow_downward;
 
     return DataCell(
@@ -495,7 +495,7 @@ class TransactionCard extends StatelessWidget {
 
   DataCell _buildAmountCell(double? amount, String? type, double width) {
     final isCredit = type?.toLowerCase() == 'credit';
-    final color = isCredit ? Colors.green : Colors.red;
+    final color = isCredit ? AppColors.success : AppColors.danger;
     final prefix = isCredit ? '+' : '-';
 
     return DataCell(
@@ -543,11 +543,11 @@ class TransactionCard extends StatelessWidget {
     Color getStatusColor() {
       switch (status?.toLowerCase()) {
         case 'completed':
-          return Colors.green;
+          return AppColors.success;
         case 'pending':
-          return Colors.orange;
+          return AppColors.warning;
         case 'failed':
-          return Colors.red;
+          return AppColors.danger;
         case 'reversed':
           return Colors.purple;
         default:

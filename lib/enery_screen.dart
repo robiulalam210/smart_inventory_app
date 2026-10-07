@@ -22,7 +22,7 @@ class AppWrapper extends StatelessWidget {
           description: "Internet connected. Syncing data...",
           type: ToastificationType.success,
           icon: Icons.check_circle,
-          primaryColor: Colors.green,
+          primaryColor: AppColors.success,
         );
 
         // context

@@ -4,7 +4,8 @@ import '../../../../../core/configs/configs.dart';
 import '../../../../../core/widgets/delete_dialog.dart';
 import '../../data/model/expense_head_model.dart';
 import '../bloc/expense_head/expense_head_bloc.dart';
-import '../pages/expense_head_create.dart';
+import '../shared/expense_head_create.dart';
+import 'package:meherinMart/core/widgets/table_scroll_controllers.dart';
 
 class ExpenseHeadTableCard extends StatelessWidget {
   final List<ExpenseHeadModel> expenseHeads;
@@ -38,8 +39,8 @@ class ExpenseHeadTableCard extends StatelessWidget {
       return _buildEmptyState();
     }
 
-    final verticalScrollController = ScrollController();
-    final horizontalScrollController = ScrollController();
+    return TableScrollControllers(
+      builder: (context, verticalScrollController, horizontalScrollController) {
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -140,6 +141,8 @@ class ExpenseHeadTableCard extends StatelessWidget {
         );
       },
     );
+      },
+    );
   }
 
   bool _getExpenseSubHeadStatus(ExpenseHeadModel expenseSubHead) {
@@ -210,14 +213,14 @@ class ExpenseHeadTableCard extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
               color: isActive
-                  ? Colors.green.withValues(alpha: 0.1)
-                  : Colors.red.withValues(alpha: 0.1),
+                  ? AppColors.success.withValues(alpha: 0.1)
+                  : AppColors.danger.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
               isActive ? 'Active' : 'Inactive',
               style: TextStyle(
-                color: isActive ? Colors.green : Colors.red,
+                color: isActive ? AppColors.success : AppColors.danger,
                 fontWeight: FontWeight.w600,
                 fontSize: 11,
               ),
@@ -243,7 +246,7 @@ class ExpenseHeadTableCard extends StatelessWidget {
             // Edit Button
             _buildActionButton(
               icon: Iconsax.edit,
-              color: Colors.blue,
+              color: AppColors.info,
               tooltip: 'Edit expense sub head',
               onPressed: () => _showEditDialog(context, expenseSubHead),
             ),
@@ -251,7 +254,7 @@ class ExpenseHeadTableCard extends StatelessWidget {
             // Delete Button
             _buildActionButton(
               icon: HugeIcons.strokeRoundedDeleteThrow,
-              color: Colors.red,
+              color: AppColors.danger,
               tooltip: 'Delete expense sub head',
               onPressed: () => _confirmDelete(context, expenseSubHead),
             ),
@@ -365,18 +368,18 @@ class ExpenseHeadTableCard extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
                     color: isActive
-                        ? Colors.green.withValues(alpha: 0.1)
-                        : Colors.red.withValues(alpha: 0.1),
+                        ? AppColors.success.withValues(alpha: 0.1)
+                        : AppColors.danger.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: isActive ? Colors.green : Colors.red,
+                      color: isActive ? AppColors.success : AppColors.danger,
                       width: 1,
                     ),
                   ),
                   child: Text(
                     isActive ? 'Active' : 'Inactive',
                     style: TextStyle(
-                      color: isActive ? Colors.green : Colors.red,
+                      color: isActive ? AppColors.success : AppColors.danger,
                       fontWeight: FontWeight.w600,
                       fontSize: 12,
                     ),
@@ -416,7 +419,7 @@ class ExpenseHeadTableCard extends StatelessWidget {
                     ),
                     label: const Text('Edit'),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.blue,
+                      foregroundColor: AppColors.info,
                       side: BorderSide(color: Colors.blue.shade300),
                       padding: const EdgeInsets.symmetric(vertical: 10),
                       shape: RoundedRectangleBorder(
@@ -435,7 +438,7 @@ class ExpenseHeadTableCard extends StatelessWidget {
                     ),
                     label: const Text('Delete'),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.red,
+                      foregroundColor: AppColors.danger,
                       side: BorderSide(color: Colors.red.shade300),
                       padding: const EdgeInsets.symmetric(vertical: 10),
                       shape: RoundedRectangleBorder(

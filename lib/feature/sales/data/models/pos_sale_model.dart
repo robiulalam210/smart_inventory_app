@@ -118,9 +118,9 @@ class PosSaleModel {
   Color get statusColor {
     final status = paymentStatus?.toLowerCase() ?? paymentStatusText.toLowerCase();
     switch (status) {
-      case 'paid': return Colors.green;
-      case 'partial': return Colors.orange;
-      case 'pending': return Colors.red;
+      case 'paid': return AppColors.success;
+      case 'partial': return AppColors.warning;
+      case 'pending': return AppColors.danger;
       default: return Colors.grey;
     }
   }

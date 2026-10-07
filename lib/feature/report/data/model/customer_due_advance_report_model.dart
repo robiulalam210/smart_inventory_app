@@ -49,8 +49,8 @@ class CustomerDueAdvance {
   }
 
   Color get balanceStatusColor {
-    if (presentDue > 0) return Colors.red;
-    if (presentAdvance > 0) return Colors.green;
+    if (presentDue > 0) return AppColors.danger;
+    if (presentAdvance > 0) return AppColors.success;
     return Colors.grey;
   }
 
@@ -97,9 +97,9 @@ class CustomerDueAdvanceSummary {
   }
 
   Color get overallStatusColor {
-    if (netBalance > 0) return Colors.green;
-    if (netBalance < 0) return Colors.red;
-    return Colors.blue;
+    if (netBalance > 0) return AppColors.success;
+    if (netBalance < 0) return AppColors.danger;
+    return AppColors.info;
   }
 }
 
