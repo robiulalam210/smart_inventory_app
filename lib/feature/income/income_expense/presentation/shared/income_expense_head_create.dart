@@ -38,10 +38,10 @@ class _IncomeHeadCreateState extends State<IncomeHeadCreate> {
   // }
 
   void _showConfirmationDialog() {
-    showDialog(
+    showAppPopover(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
+        return AppPopoverCard(
           title: Text('Confirm', style: AppTextStyle.titleMedium(context)),
           content: Text(
             widget.id == null

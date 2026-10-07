@@ -120,9 +120,9 @@ class _UserPermissionScreenState extends State<UserPermissionScreen> {
   }
 
   void _resetPermissions() {
-    showDialog(
+    showAppPopover(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (context) => AppPopoverCard(
         title: const Text('Reset Permissions'),
         content: const Text('Are you sure you want to reset all permissions to role defaults?'),
         actions: [

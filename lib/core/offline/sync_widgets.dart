@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:meherinMart/core/widgets/app_popover_route.dart';
 
 import 'package:flutter/material.dart';
 
@@ -143,7 +144,7 @@ class SyncCenterDialog extends StatefulWidget {
   final int initialTab;
   const SyncCenterDialog({super.key, this.initialTab = 0});
 
-  static Future<void> show(BuildContext context, {int initialTab = 0}) => showDialog(
+  static Future<void> show(BuildContext context, {int initialTab = 0}) => showAppPopover(
         context: context,
         builder: (_) => SyncCenterDialog(initialTab: initialTab),
       );
@@ -197,7 +198,7 @@ class _SyncCenterDialogState extends State<SyncCenterDialog> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Dialog(
+    return AppPopoverShell(
       insetPadding: const EdgeInsets.all(24),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: ConstrainedBox(
@@ -323,9 +324,9 @@ class _SyncCenterDialogState extends State<SyncCenterDialog> {
             TextButton(
               style: TextButton.styleFrom(foregroundColor: const Color(0xFFD64545)),
               onPressed: () async {
-                final ok = await showDialog<bool>(
+                final ok = await showAppPopover<bool>(
                   context: context,
-                  builder: (c) => AlertDialog(
+                  builder: (c) => AppPopoverCard(
                     title: const Text('Entry বাতিল করবেন?'),
                     content: const Text('এই offline entry টি server এ উঠবে না। কে বাতিল করেছে তা audit log এ থাকবে।'),
                     actions: [
@@ -477,9 +478,9 @@ class OfflineGuards {
     final pending = await SyncEngine.instance.pendingCount();
     if (pending == 0) return true;
     if (!context.mounted) return false;
-    final ok = await showDialog<bool>(
+    final ok = await showAppPopover<bool>(
       context: context,
-      builder: (c) => AlertDialog(
+      builder: (c) => AppPopoverCard(
         title: const Text('কিছু entry এখনো sync হয়নি'),
         content: Text('$pending টি entry এখনো server এ যায়নি। Logout করলেও এগুলো এই কম্পিউটারে নিরাপদে থাকবে, '
             'এবং একই company র কেউ login করলে internet পেলেই চলে যাবে।'),

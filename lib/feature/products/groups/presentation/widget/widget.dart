@@ -22,100 +22,34 @@ class GroupsTableCard extends StatelessWidget {
         : _buildDesktopTable();
   }
 
+  // Desktop টেবিল — AppDataTable (SL ছোট, নাম চওড়া, status/action মাঝে)
   Widget _buildDesktopTable() {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final totalWidth = constraints.maxWidth;
-        const numColumns = 4;
-        const minColumnWidth = 100.0;
 
-        final dynamicColumnWidth = (totalWidth / numColumns).clamp(
-          minColumnWidth,
-          double.infinity,
-        );
+    const columns = [
+      AppTableColumn.center('SL', flex: 1, minWidth: 60),
+      AppTableColumn('Group Name', flex: 5, minWidth: 200),
+      AppTableColumn.center('Status', flex: 2, minWidth: 110),
+      AppTableColumn.center('Actions', flex: 2, minWidth: 110),
+    ];
 
-        return Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            color: AppColors.bottomNavBg(context),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withValues(alpha: 0.1),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Scrollbar(
-            thumbVisibility: true,
-            child: SingleChildScrollView(
-              scrollDirection: Axis.vertical,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: Scrollbar(
-                  thumbVisibility: true,
-                  scrollbarOrientation: ScrollbarOrientation.bottom,
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 5),
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(minWidth: totalWidth),
-                        child: DataTable(
-                          dataRowMinHeight: 40,
-                          dataRowMaxHeight: 40,
-                          columnSpacing: 8,
-                          horizontalMargin: 12,
-                          dividerThickness: 0.5,
-                          headingRowHeight: 40,
-                          headingTextStyle: TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            fontFamily: GoogleFonts.inter().fontFamily,
-                          ),
-                          headingRowColor: WidgetStateProperty.all(
-                            AppColors.primaryColor(context),
-                          ),
-                          dataTextStyle: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w500,
-                            fontFamily: GoogleFonts.inter().fontFamily,
-                          ),
-                          columns: _buildColumns(dynamicColumnWidth),
-                          rows: groups.asMap().entries.map((entry) {
-                            final group = entry.value;
-                            return DataRow(
-                              cells: [
-                                _buildDataCell(
-                                  '${entry.key + 1}',
-                                  dynamicColumnWidth * 0.6,
-                                ),
-                                _buildDataCell(
-                                  group.name?.capitalize() ?? "N/A",
-                                  dynamicColumnWidth,
-                                ),
-                                _buildStatusCell(
-                                  _getGroupStatus(group),
-                                  dynamicColumnWidth,
-                                ),
-                                _buildActionCell(
-                                  group,
-                                  context,
-                                  dynamicColumnWidth,
-                                ),
-                              ],
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
+    return AppDataTable(
+      columns: columns,
+      rowCount: groups.length,
+      cellBuilder: (context, row, col) {
+        final group = groups[row];
+        switch (col) {
+          case 0:
+            return AppTableText('${row + 1}', align: AppCellAlign.center, muted: true);
+          case 1:
+            return AppTableText(group.name?.capitalize() ?? '-', bold: true);
+          case 2:
+            return AppStatusPill((_getGroupStatus(group)) ? 'Active' : 'Inactive', color: (_getGroupStatus(group)) ? AppColors.success : AppColors.danger);
+          default:
+            return AppTableEditDelete(
+              onEdit: () => _showEditDialog(context, group),
+              onDelete: () => _confirmDelete(context, group),
+            );
+        }
       },
     );
   }
@@ -268,121 +202,7 @@ class GroupsTableCard extends StatelessWidget {
     );
   }
 
-  List<DataColumn> _buildColumns(double columnWidth) {
-    return [
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth * 0.6,
-          child: const Text('No.', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Group Name', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Status', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Actions', textAlign: TextAlign.center),
-        ),
-      ),
-    ];
-  }
-
-  DataCell _buildDataCell(String text, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Text(
-          text,
-          style: const TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w500,
-            color: Colors.black87,
-          ),
-          textAlign: TextAlign.center,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ),
-    );
-  }
-
-  bool _getGroupStatus(GroupsModel group) {
-    if (group.isActive != null) {
-      if (group.isActive is bool) {
-        return group.isActive as bool;
-      }
-    }
-    return group.isActive ?? false;
-  }
-
-  DataCell _buildStatusCell(bool isActive, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: isActive
-                  ? AppColors.success.withValues(alpha: 0.1)
-                  : AppColors.danger.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Text(
-              isActive ? 'Active' : 'Inactive',
-              style: TextStyle(
-                color: isActive ? AppColors.success : AppColors.danger,
-                fontWeight: FontWeight.w600,
-                fontSize: 11,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildActionCell(
-    GroupsModel group,
-    BuildContext context,
-    double width,
-  ) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Edit Button
-            _buildActionButton(
-              icon: Iconsax.edit,
-              color: AppColors.info,
-              tooltip: 'Edit group',
-              onPressed: () => _showEditDialog(context, group),
-            ),
-
-            // Delete Button
-            _buildActionButton(
-              icon: HugeIcons.strokeRoundedDeleteThrow,
-              color: AppColors.danger,
-              tooltip: 'Delete group',
-              onPressed: () => _confirmDelete(context, group),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  bool _getGroupStatus(GroupsModel group) => group.isActive ?? false;
 
   Widget _buildActionButton({
     required IconData icon,
@@ -411,10 +231,10 @@ class GroupsTableCard extends StatelessWidget {
     groupsBloc.nameController.text = group.name ?? "";
     groupsBloc.selectedState = group.isActive == true ? "Active" : "Inactive";
 
-    showDialog(
+    showAppPopover(
       context: context,
       builder: (context) {
-        return Dialog(
+        return AppPopoverShell(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),

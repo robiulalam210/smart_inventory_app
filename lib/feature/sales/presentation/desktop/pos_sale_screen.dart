@@ -49,7 +49,7 @@ class _PosSaleScreenState extends State<PosSaleScreen> {
       context.read<CustomerBloc>().add(FetchCustomerActiveList(context));
       context.read<ProductsBloc>().add(FetchProductsStockList(context));
 
-      _fetchApi();
+      _applyFilters();
     });
   }
 
@@ -86,6 +86,19 @@ class _PosSaleScreenState extends State<PosSaleScreen> {
     );
   }
 
+  /// সব filter একসাথে — আগে customer বাছলে search / seller / date
+  /// হারিয়ে যেত, কারণ প্রতিটা filter আলাদা করে শুধু নিজের মান পাঠাত
+  void _applyFilters({int pageNumber = 1}) {
+    _fetchApi(
+      pageNumber: pageNumber,
+      filterText: filterTextController.text.trim(),
+      customer: selectedCustomerNotifier.value ?? '',
+      seller: selectedSellerNotifier.value ?? '',
+      from: selectedDateRange?.start,
+      to: selectedDateRange?.end,
+    );
+  }
+
   void _fetchProductList({required int pageNumber, required int pageSize}) {
     _fetchApi(
       pageNumber: pageNumber,
@@ -112,7 +125,7 @@ class _PosSaleScreenState extends State<PosSaleScreen> {
     context.read<PosSaleBloc>().selectCustomerModel = null;
     context.read<PosSaleBloc>().selectUserModel = null;
 
-    _fetchApi();
+    _applyFilters();
   }
 
   @override
@@ -147,7 +160,7 @@ class _PosSaleScreenState extends State<PosSaleScreen> {
       xs: 12,
       lg: 10,
       child: RefreshIndicator(
-        onRefresh: () async => _fetchApi(),
+        onRefresh: () async => _applyFilters(),
         color: AppColors.primaryColor(context),
         child: Container(
           padding: AppTextStyle.getResponsivePaddingBody(context),
@@ -159,7 +172,7 @@ class _PosSaleScreenState extends State<PosSaleScreen> {
                     appLoader(context, "Creating POS Sale...");
                   } else if (state is CreatePosSaleSuccess) {
                     Navigator.pop(context);
-                    _fetchApi();
+                    _applyFilters();
                   } else if (state is CreatePosSaleFailed) {
                     if (context.mounted) {
                       Navigator.pop(context);
@@ -181,10 +194,11 @@ class _PosSaleScreenState extends State<PosSaleScreen> {
             ],
             child: Column(
               children: [
-                if (isBigScreen)
+                if (isBigScreen) ...[
                   _buildDesktopHeader(),
-
-                SizedBox(child: _buildDataTable()),
+                  const SizedBox(height: 14),
+                ],
+                _buildDataTable(),
               ],
             ),
           ),
@@ -196,24 +210,26 @@ class _PosSaleScreenState extends State<PosSaleScreen> {
   Widget _buildDesktopHeader() {
     return Column(
       children: [
+        // crossAxisAlignment.end — dropdown গুলোর উপরে label আছে, search
+        // এ নেই। start দিলে search field উপরে উঠে থাকত আর বাকিগুলো নিচে —
+        // end দিলে সব field এর নিচের কিনারা এক লাইনে মেলে
         Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             // 🔍 Search Field
             Expanded(
               flex: 2,
               child: CustomSearchTextFormField(
                 controller: filterTextController,
-                onChanged: (value) => _fetchApi(filterText: value),
+                onChanged: (_) => _applyFilters(),
                 onClear: () {
                   filterTextController.clear();
-                  _fetchApi();
+                  _applyFilters();
                 },
                 hintText: "InvoiceNo, Name, or Phone",
               ),
             ),
-            const SizedBox(width: 5),
+            const SizedBox(width: 10),
 
             // 👤 Customer Dropdown
             Expanded(
@@ -241,7 +257,7 @@ class _PosSaleScreenState extends State<PosSaleScreen> {
                               newVal;
                           selectedCustomerNotifier.value = newVal?.id
                               .toString();
-                          _fetchApi(customer: newVal?.id.toString() ?? '');
+                          _applyFilters();
                         },
                         validator: (value) => null,
 
@@ -251,7 +267,7 @@ class _PosSaleScreenState extends State<PosSaleScreen> {
                 },
               ),
             ),
-            const SizedBox(width: 5),
+            const SizedBox(width: 10),
 
             // 🧑‍💼 Seller Dropdown
             Expanded(
@@ -276,7 +292,7 @@ class _PosSaleScreenState extends State<PosSaleScreen> {
                         onChanged: (newVal) {
                           context.read<PosSaleBloc>().selectUserModel = newVal;
                           selectedSellerNotifier.value = newVal?.id.toString();
-                          _fetchApi(seller: newVal?.id.toString() ?? '');
+                          _applyFilters();
                         },
                         validator: (value) => null,
                       );
@@ -285,7 +301,7 @@ class _PosSaleScreenState extends State<PosSaleScreen> {
                 },
               ),
             ),
-            const SizedBox(width: 5),
+            const SizedBox(width: 10),
 
             // 📅 Date Range Picker
             SizedBox(
@@ -295,24 +311,25 @@ class _PosSaleScreenState extends State<PosSaleScreen> {
                 selectedDateRange: selectedDateRange,
                 onDateRangeSelected: (value) {
                   setState(() => selectedDateRange = value);
-                  if (value != null) {
-                    _fetchApi(from: value.start, to: value.end);
-                  } else {
-                    _fetchApi();
-                  }
+                  _applyFilters();
                 },
               ),
             ),
-            const SizedBox(width: 5),
+            const SizedBox(width: 10),
 
-            IconButton(
-              onPressed: () => _clearFilters,
-              icon:  Icon(HugeIcons.strokeRoundedCancelCircle,color: AppColors.errorColor(context),),
-              tooltip: "Cancel",
-            ),   IconButton(
-              onPressed: () => _fetchApi(),
-              icon: const Icon(Icons.refresh),
-              tooltip: "Refresh",
+            // আগে `() => _clearFilters` ছিল — function টা call ই হতো না,
+            // তাই Clear বাটন চাপলে কিছুই ঘটত না
+            _HeaderIconButton(
+              icon: Icons.filter_alt_off_outlined,
+              tooltip: 'Clear filters',
+              color: AppColors.danger,
+              onPressed: _clearFilters,
+            ),
+            const SizedBox(width: 6),
+            _HeaderIconButton(
+              icon: Icons.refresh_rounded,
+              tooltip: 'Refresh',
+              onPressed: _applyFilters,
             ),
           ],
         ),
@@ -371,7 +388,7 @@ class _PosSaleScreenState extends State<PosSaleScreen> {
                 ),
                 const SizedBox(height: 16),
                 ElevatedButton(
-                  onPressed: () => _fetchApi(),
+                  onPressed: () => _applyFilters(),
                   child: const Text("Retry"),
                 ),
               ],
@@ -384,4 +401,45 @@ class _PosSaleScreenState extends State<PosSaleScreen> {
   }
 
 
+}
+
+
+/// filter row এর ডান পাশের ছোট square icon বাটন — field গুলোর সমান উচ্চতা
+class _HeaderIconButton extends StatelessWidget {
+  const _HeaderIconButton({
+    required this.icon,
+    required this.tooltip,
+    required this.onPressed,
+    this.color,
+  });
+
+  final IconData icon;
+  final String tooltip;
+  final VoidCallback onPressed;
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = color ?? AppColors.text(context);
+    return Tooltip(
+      message: tooltip,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onPressed,
+          borderRadius: BorderRadius.circular(AppSizes.radius),
+          hoverColor: c.withValues(alpha: 0.08),
+          child: Container(
+            width: 35,
+            height: 35,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(AppSizes.radius),
+              border: Border.all(color: AppColors.border),
+            ),
+            child: Icon(icon, size: 18, color: c),
+          ),
+        ),
+      ),
+    );
+  }
 }

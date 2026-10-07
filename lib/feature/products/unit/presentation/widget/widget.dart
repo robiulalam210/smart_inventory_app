@@ -230,10 +230,10 @@ class MobileUnitTableCard extends StatelessWidget {
     unitBloc.selectedState = unit.isActive == true ? "Active" : "Inactive";
 
 
-    showDialog(
+    showAppPopover(
       context: context,
       builder: (context) {
-        return Dialog(
+        return AppPopoverShell(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
@@ -311,208 +311,41 @@ class UnitTableCard extends StatelessWidget {
   });
 
   @override
+  // Desktop টেবিল — AppDataTable (SL ছোট, নাম চওড়া, status/action মাঝে)
   Widget build(BuildContext context) {
     if (units.isEmpty) {
       return _buildEmptyState();
     }
 
-    return TableScrollControllers(
-      builder: (context, verticalScrollController, horizontalScrollController) {
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final totalWidth = constraints.maxWidth;
-        const numColumns = 5; // No., Unit Name, Status, Actions
-        const minColumnWidth = 100.0;
-
-        final dynamicColumnWidth =
-        (totalWidth / numColumns).clamp(minColumnWidth, double.infinity);
-
-        return Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withValues(alpha: 0.1),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Scrollbar(
-            controller: verticalScrollController,
-            thumbVisibility: true,
-            child: SingleChildScrollView(
-              controller: verticalScrollController,
-              scrollDirection: Axis.vertical,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: Scrollbar(
-                  controller: horizontalScrollController,
-                  thumbVisibility: true,
-                  child: SingleChildScrollView(
-                    controller: horizontalScrollController,
-                    scrollDirection: Axis.horizontal,
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 5),
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(minWidth: totalWidth),
-                        child: DataTable(
-                          dataRowMinHeight: 40,
-                          dataRowMaxHeight: 40,
-                          columnSpacing: 8,
-                          horizontalMargin: 12,
-                          dividerThickness: 0.5,
-                          headingRowHeight: 40,
-                          headingTextStyle: TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            fontFamily: GoogleFonts.inter().fontFamily,
-                          ),
-                          headingRowColor: WidgetStateProperty.all(
-                            AppColors.primaryColor(context),
-                          ),
-                          dataTextStyle: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w500,
-                            fontFamily: GoogleFonts.inter().fontFamily,
-                          ),
-                          columns: _buildColumns(dynamicColumnWidth),
-                          rows: units.asMap().entries.map((entry) {
-                            final unit = entry.value;
-                            return DataRow(
-                              onSelectChanged: onUnitTap != null
-                                  ? (_) => onUnitTap!()
-                                  : null,
-                              cells: [
-                                _buildDataCell('${entry.key + 1}', dynamicColumnWidth * 0.6),
-                                _buildDataCell(unit.name?.capitalize() ?? "N/A", dynamicColumnWidth),
-                                _buildDataCell(unit.code?.capitalize() ?? "N/A", dynamicColumnWidth),
-                                _buildStatusCell(unit.isActive ?? false, dynamicColumnWidth),
-                                _buildActionCell(unit, context, dynamicColumnWidth),
-                              ],
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-      },
-    );
-  }
-
-  List<DataColumn> _buildColumns(double columnWidth) {
-    return [
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('No.', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Unit Name', textAlign: TextAlign.center),
-        ),
-      ),  DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Code', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Status', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Actions', textAlign: TextAlign.center),
-        ),
-      ),
+    const columns = [
+      AppTableColumn.center('SL', flex: 1, minWidth: 60),
+      AppTableColumn('Unit Name', flex: 4, minWidth: 180),
+      AppTableColumn('Code', flex: 2, minWidth: 100),
+      AppTableColumn.center('Status', flex: 2, minWidth: 110),
+      AppTableColumn.center('Actions', flex: 2, minWidth: 110),
     ];
-  }
 
-  DataCell _buildDataCell(String text, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Text(
-          text,
-          style: const TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w500,
-            color: Colors.black87,
-          ),
-          textAlign: TextAlign.center,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildStatusCell(bool isActive, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: isActive ? AppColors.success.withValues(alpha: 0.1) : AppColors.danger.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Text(
-              isActive ? 'Active' : 'Inactive',
-              style: TextStyle(
-                color: isActive ? AppColors.success : AppColors.danger,
-                fontWeight: FontWeight.w600,
-                fontSize: 11,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildActionCell(UnitsModel unit, BuildContext context, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Edit Button
-            _buildActionButton(
-              icon: Iconsax.edit,
-              color: AppColors.info,
-              tooltip: 'Edit unit',
-              onPressed: () => _showEditDialog(context, unit),
-            ),
-
-            // Delete Button
-            _buildActionButton(
-              icon: HugeIcons.strokeRoundedDeleteThrow,
-              color: AppColors.danger,
-              tooltip: 'Delete unit',
-              onPressed: () => _confirmDelete(context, unit),
-            ),
-          ],
-        ),
-      ),
+    return AppDataTable(
+      columns: columns,
+      rowCount: units.length,
+      cellBuilder: (context, row, col) {
+        final unit = units[row];
+        switch (col) {
+          case 0:
+            return AppTableText('${row + 1}', align: AppCellAlign.center, muted: true);
+          case 1:
+            return AppTableText(unit.name?.capitalize() ?? '-', bold: true);
+          case 2:
+            return AppTableText(unit.code?.capitalize() ?? '-', muted: true);
+          case 3:
+            return AppStatusPill((unit.isActive ?? false) ? 'Active' : 'Inactive', color: (unit.isActive ?? false) ? AppColors.success : AppColors.danger);
+          default:
+            return AppTableEditDelete(
+              onEdit: () => _showEditDialog(context, unit),
+              onDelete: () => _confirmDelete(context, unit),
+            );
+        }
+      },
     );
   }
 
@@ -547,10 +380,10 @@ class UnitTableCard extends StatelessWidget {
     unitBloc.shortNameController.text = unit.code ?? "";
     unitBloc.selectedState = unit.isActive == true ? "Active" : "Inactive";
 
-    showDialog(
+    showAppPopover(
       context: context,
       builder: (context) {
-        return Dialog(
+        return AppPopoverShell(
 
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),

@@ -479,417 +479,98 @@ class CustomerTableCard extends StatelessWidget {
     );
   }
 
+  // Desktop টেবিল — AppDataTable
   Widget _buildDesktopDataTable(BuildContext context) {
-    return TableScrollControllers(
-      builder: (context, verticalScrollController, horizontalScrollController) {
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final totalWidth = constraints.maxWidth;
-        const numColumns = 9; // Increased for new columns
-        const minColumnWidth = 80.0;
-
-        final dynamicColumnWidth =
-        (totalWidth / numColumns).clamp(minColumnWidth, double.infinity);
-
-        return Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withValues(alpha: 0.1),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Scrollbar(
-            controller: verticalScrollController,
-            thumbVisibility: true,
-            child: SingleChildScrollView(
-              controller: verticalScrollController,
-              scrollDirection: Axis.vertical,
-              child: Scrollbar(
-                controller: horizontalScrollController,
-                thumbVisibility: true,
-                child: SingleChildScrollView(
-                  controller: horizontalScrollController,
-                  scrollDirection: Axis.horizontal,
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(minWidth: totalWidth),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
-                      child: DataTable(
-                        dataRowMinHeight: 40,
-                        dataRowMaxHeight: 40,
-                        columnSpacing: 8,
-                        horizontalMargin: 12,
-                        dividerThickness: 0.5,
-                        headingRowHeight: 40,
-                        headingTextStyle: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                        ),
-                        headingRowColor: WidgetStateProperty.all(
-                          AppColors.primaryColor(context),
-                        ),
-                        dataTextStyle: const TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w500,
-                        ),
-                        columns: _buildColumns(dynamicColumnWidth),
-                        rows: customers
-                            .asMap()
-                            .entries
-                            .map((entry) => _buildDataRow(context,
-                          entry.value,
-                          entry.key + 1,
-                          dynamicColumnWidth,
-                        ))
-                            .toList(),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-      },
-    );
-  }
-
-  List<DataColumn> _buildColumns(double columnWidth) {
-    return [
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth * 0.6,
-          child: const Text('No.', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth * 0.8,
-          child: const Text('Type', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Name', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Phone', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth * 1.2,
-          child: const Text('Address', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth * 0.8,
-          child: const Text('Status', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Balance', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth * 0.8,
-          child: const Text('Special', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth * 1.2,
-          child: const Text('Actions', textAlign: TextAlign.center),
-        ),
-      ),
+    const columns = [
+      AppTableColumn('No.', flex: 1, minWidth: 70),
+      AppTableColumn('Name', flex: 3, minWidth: 160),
+      AppTableColumn('Phone', flex: 2, minWidth: 120),
+      AppTableColumn('Address', flex: 3, minWidth: 150),
+      AppTableColumn.center('Status', flex: 2, minWidth: 96),
+      AppTableColumn.numeric('Balance', flex: 2, minWidth: 130),
+      AppTableColumn.center('Actions', flex: 2, minWidth: 120),
     ];
-  }
 
-  DataRow _buildDataRow(BuildContext context, CustomerModel customer, int index, double columnWidth) {
-    return DataRow(
-      cells: [
-        _buildDataCell('#${customer.clientNo}', columnWidth * 0.6, TextAlign.center),
-        _buildCustomerTypeCell(customer.specialCustomer, columnWidth * 0.8),
-        _buildDataCell(customer.name ?? "N/A", columnWidth, TextAlign.center),
-        _buildDataCell(customer.phone ?? "N/A", columnWidth, TextAlign.center),
-        _buildDataCell(customer.address ?? "N/A", columnWidth * 1.2, TextAlign.center),
-        _buildStatusCell(customer.isActive ?? false, columnWidth * 0.8),
-        _buildBalanceCell(customer, columnWidth),
-        _buildSpecialCustomerCell(customer.specialCustomer, columnWidth * 0.8),
-        _buildActionCell(context, customer, columnWidth * 1.2),
-      ],
-    );
-  }
-
-  DataCell _buildDataCell(String text, double width, TextAlign align) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Text(
-          text,
-          style: const TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w500,
-            color: Colors.black87,
-          ),
-          textAlign: align,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildCustomerTypeCell(bool isSpecial, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: isSpecial ? Colors.amber.withOpacity(0.1) : Colors.grey.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(4),
-              border: Border.all(
-                color: isSpecial ? Colors.amber : Colors.grey,
-                width: 1,
-              ),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
+    return AppDataTable(
+      columns: columns,
+      rowCount: customers.length,
+      cellBuilder: (context, row, col) {
+        final c = customers[row];
+        switch (col) {
+          case 0:
+            return AppTableText('#${c.clientNo ?? '-'}', muted: true);
+          case 1:
+            return Row(
               children: [
-                if (isSpecial)
-                  const Icon(
-                    Icons.star,
-                    size: 10,
-                    color: Colors.amber,
+                Flexible(child: AppTableText(c.name ?? '-', bold: true)),
+                if (c.specialCustomer) ...[
+                  const SizedBox(width: 6),
+                  const Tooltip(
+                    message: 'Special customer',
+                    child: Icon(Icons.star_rounded,
+                        size: 16, color: AppColors.warning),
                   ),
-                if (isSpecial)
-                  const SizedBox(width: 4),
-                Text(
-                  isSpecial ? 'Special' : 'Regular',
-                  style: TextStyle(
-                    color: isSpecial ? Colors.amber : Colors.grey,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 10,
-                  ),
+                ],
+              ],
+            );
+          case 2:
+            return AppTableText(c.phone ?? '-');
+          case 3:
+            return AppTableText(c.address ?? '-', muted: true);
+          case 4:
+            final active = c.isActive ?? false;
+            return AppStatusPill(active ? 'Active' : 'Inactive',
+                color: active ? AppColors.success : AppColors.danger);
+          case 5:
+            return _balanceText(c);
+          default:
+            return AppTableEditDelete(
+              onEdit: () => _showEditDialog(context, c, false),
+              onDelete: () => _confirmDelete(context, c),
+              extra: [
+                AppTableAction(
+                  icon: c.specialCustomer
+                      ? Icons.star_rounded
+                      : Icons.star_border_rounded,
+                  tooltip: c.specialCustomer
+                      ? 'Remove special status'
+                      : 'Mark as special',
+                  color: c.specialCustomer
+                      ? AppColors.warning
+                      : AppColors.greyColor(context),
+                  onPressed: () => _toggleSpecialCustomer(context, c),
                 ),
               ],
-            ),
-          ),
-        ),
-      ),
+            );
+        }
+      },
     );
   }
 
-  DataCell _buildStatusCell(bool isActive, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: isActive ? AppColors.success.withValues(alpha: 0.1) : AppColors.danger.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(4),
-              border: Border.all(
-                color: isActive ? AppColors.success : AppColors.danger,
-                width: 1,
-              ),
-            ),
-            child: Text(
-              isActive ? 'Active' : 'Inactive',
-              style: TextStyle(
-                color: isActive ? AppColors.success : AppColors.danger,
-                fontWeight: FontWeight.w600,
-                fontSize: 10,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildBalanceCell(CustomerModel customer, double width) {
+  /// Due লাল, Advance সবুজ, শূন্য হলে ধূসর — নিচে ছোট করে কোনটা
+  Widget _balanceText(CustomerModel customer) {
     final dueAnalysis = customer.paymentBreakdown?.calculation?.dueAnalysis;
     final double netDue =
         (dueAnalysis?.netDueAfterAdvance as num?)?.toDouble() ?? 0.0;
-    final double remainingAdvance =
+    final double advance =
         (dueAnalysis?.remainingAdvanceBalance as num?)?.toDouble() ?? 0.0;
 
-    double amount;
-    String label;
-    Color color;
-
     if (netDue > 0) {
-      amount = netDue;
-      label = "Due";
-      color = AppColors.danger;
-    } else if (remainingAdvance > 0) {
-      amount = remainingAdvance;
-      label = "Advance";
-      color = AppColors.success;
-    } else {
-      amount = 0.0;
-      label = "Paid";
-      color = Colors.grey;
+      return AppTableText('৳${netDue.toStringAsFixed(2)}',
+          align: AppCellAlign.end,
+          bold: true,
+          color: AppColors.danger,
+          subtitle: 'Due');
     }
-
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(4),
-            border: Border.all(color: color, width: 1),
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text(
-                '৳${amount.toStringAsFixed(2)}',
-                style: TextStyle(
-                  color: color,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 11,
-                ),
-              ),
-              Text(
-                label,
-                style: TextStyle(
-                  color: color,
-                  fontWeight: FontWeight.w400,
-                  fontSize: 9,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildSpecialCustomerCell(bool isSpecial, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-            decoration: BoxDecoration(
-              color: isSpecial ? Colors.amber.withOpacity(0.1) : Colors.transparent,
-              borderRadius: BorderRadius.circular(4),
-              border: Border.all(
-                color: isSpecial ? Colors.amber : Colors.grey.withOpacity(0.3),
-                width: 1,
-              ),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  isSpecial ? Icons.star : Icons.star_border,
-                  size: 14,
-                  color: isSpecial ? Colors.amber : Colors.grey,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  isSpecial ? 'Yes' : 'No',
-                  style: TextStyle(
-                    color: isSpecial ? Colors.amber : Colors.grey,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 10,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildActionCell(BuildContext context, CustomerModel customer, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Edit Button
-            Tooltip(
-              message: 'Edit Customer',
-              child: IconButton(
-                onPressed: () => _showEditDialog(context, customer, false),
-                icon: const Icon(
-                  Iconsax.edit,
-                  size: 16,
-                  color: AppColors.info,
-                ),
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(minWidth: 30, minHeight: 30),
-              ),
-            ),
-            const SizedBox(width: 4),
-
-            // Toggle Special Button
-            Tooltip(
-              message: customer.specialCustomer
-                  ? 'Remove Special Status'
-                  : 'Mark as Special Customer',
-              child: IconButton(
-                onPressed: () => _toggleSpecialCustomer(context, customer),
-                icon: Icon(
-                  customer.specialCustomer
-                      ? Icons.star
-                      : Icons.star_border,
-                  size: 16,
-                  color: customer.specialCustomer ? Colors.amber : Colors.grey,
-                ),
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(minWidth: 30, minHeight: 30),
-              ),
-            ),
-            const SizedBox(width: 4),
-
-            // Delete Button
-            Tooltip(
-              message: 'Delete Customer',
-              child: IconButton(
-                onPressed: () => _confirmDelete(context, customer),
-                icon: const Icon(
-                  HugeIcons.strokeRoundedDeleteThrow,
-                  size: 16,
-                  color: AppColors.danger,
-                ),
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(minWidth: 30, minHeight: 30),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+    if (advance > 0) {
+      return AppTableText('৳${advance.toStringAsFixed(2)}',
+          align: AppCellAlign.end,
+          bold: true,
+          color: AppColors.success,
+          subtitle: 'Advance');
+    }
+    return const AppTableText('৳0.00',
+        align: AppCellAlign.end, muted: true, subtitle: 'Settled');
   }
 
   Future<void> _confirmDelete(BuildContext context, CustomerModel customer) async {
@@ -907,10 +588,10 @@ class CustomerTableCard extends StatelessWidget {
         ? 'Remove ${customer.name} from special customers?'
         : 'Mark ${customer.name} as special customer?';
 
-    showDialog(
+    showAppPopover(
       context: context,
       builder: (context) {
-        return AlertDialog(
+        return AppPopoverCard(
           title: Text(
             customer.specialCustomer ? 'Remove Special Status' : 'Mark as Special',
             style: const TextStyle(
@@ -967,10 +648,10 @@ class CustomerTableCard extends StatelessWidget {
       'special_customer': customer.specialCustomer,
     };
 
-    showDialog(
+    showAppPopover(
       context: context,
       builder: (context) {
-        return Dialog(
+        return AppPopoverShell(
           insetPadding: const EdgeInsets.all(20),
           child: ConstrainedBox(
             constraints: BoxConstraints(
@@ -1011,10 +692,10 @@ class CustomerTableCard extends StatelessWidget {
       'special_customer': customer.specialCustomer,
     };
 
-    showDialog(
+    showAppPopover(
       context: context,
       builder: (context) {
-        return Dialog(
+        return AppPopoverShell(
           insetPadding: const EdgeInsets.all(20),
           child: ConstrainedBox(
             constraints: BoxConstraints(

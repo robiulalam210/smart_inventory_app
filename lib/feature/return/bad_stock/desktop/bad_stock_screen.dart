@@ -106,7 +106,7 @@ class _BadStockScreenState extends State<BadStockScreen> {
 
   Widget _buildFilterRow() {
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.end,
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         // 🔍 Search Field
@@ -286,250 +286,51 @@ class BadStockTableCard extends StatelessWidget {
   });
 
   @override
+  // Desktop টেবিল — AppDataTable
   Widget build(BuildContext context) {
     if (badStocks.isEmpty) {
       return _buildEmptyState();
     }
 
-    return TableScrollControllers(
-      builder: (context, verticalScrollController, horizontalScrollController) {
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final totalWidth = constraints.maxWidth;
-        const numColumns = 6; // Product, Quantity, Reason, Date, Reference, Actions
-        const minColumnWidth = 120.0;
-
-        final dynamicColumnWidth =
-        (totalWidth / numColumns).clamp(minColumnWidth, double.infinity);
-
-        return Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withValues(alpha: 0.1),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Scrollbar(
-            controller: verticalScrollController,
-            thumbVisibility: true,
-            child: SingleChildScrollView(
-              controller: verticalScrollController,
-              scrollDirection: Axis.vertical,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: Scrollbar(
-                  controller: horizontalScrollController,
-                  thumbVisibility: true,
-                  child: SingleChildScrollView(
-                    controller: horizontalScrollController,
-                    scrollDirection: Axis.horizontal,
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 5),
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(minWidth: totalWidth),
-                        child: DataTable(
-                          dataRowMinHeight: 40,
-                          dataRowMaxHeight: 40,
-                          columnSpacing: 8,
-                          horizontalMargin: 12,
-                          dividerThickness: 0.5,
-                          headingRowHeight: 40,
-                          headingTextStyle: TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            fontFamily: GoogleFonts.inter().fontFamily,
-                          ),
-                          headingRowColor: WidgetStateProperty.all(
-                            AppColors.primaryColor(context),
-                          ),
-                          dataTextStyle: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w500,
-                            fontFamily: GoogleFonts.inter().fontFamily,
-                          ),
-                          columns: _buildColumns(dynamicColumnWidth),
-                          rows: badStocks.asMap().entries.map((entry) {
-                            final badStock = entry.value;
-                            return DataRow(
-                              onSelectChanged: onBadStockTap != null
-                                  ? (_) => onBadStockTap!()
-                                  : null,
-                              cells: [
-                                _buildDataCell(badStock.productName ?? 'Unknown', dynamicColumnWidth),
-                                _buildDataCell(badStock.quantity.toString(), dynamicColumnWidth),
-                                _buildReasonCell(badStock.reason, dynamicColumnWidth),
-                                _buildDateCell(badStock.date, dynamicColumnWidth),
-                                _buildReferenceCell(badStock, dynamicColumnWidth),
-                                _buildActionCell(badStock, context, dynamicColumnWidth),
-                              ],
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-      },
-    );
-  }
-
-  List<DataColumn> _buildColumns(double columnWidth) {
-    return [
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Product', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Quantity', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Reason', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Date', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Reference', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Actions', textAlign: TextAlign.center),
-        ),
-      ),
+    const columns = [
+      AppTableColumn.center('SL', flex: 1, minWidth: 52),
+      AppTableColumn('Product', flex: 4, minWidth: 180),
+      AppTableColumn.numeric('Quantity', flex: 1, minWidth: 90),
+      AppTableColumn('Reason', flex: 3, minWidth: 150),
+      AppTableColumn('Date', flex: 2, minWidth: 100),
+      AppTableColumn('Reference', flex: 2, minWidth: 130),
+      AppTableColumn.center('Actions', flex: 2, minWidth: 96),
     ];
-  }
 
-  DataCell _buildDataCell(String text, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Text(
-          text,
-          style: const TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w500,
-            color: Colors.black87,
-          ),
-          textAlign: TextAlign.center,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ),
-    );
-  }
-
-
-  DataCell _buildReasonCell(String? reason, double width) {
-    return DataCell(
-      Tooltip(
-        message: reason ?? 'No reason provided',
-        child: SizedBox(
-          width: width,
-          child: Text(
-            reason ?? 'No reason',
-            style: const TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w500,
-              color: Colors.black87,
-            ),
-            textAlign: TextAlign.center,
-            overflow: TextOverflow.ellipsis,
-            maxLines: 2,
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildDateCell(DateTime? date, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Text(
-          _formatDate(date),
-          style: const TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w500,
-            color: Colors.black87,
-          ),
-          textAlign: TextAlign.center,
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildReferenceCell(BadStockReturnModel badStock, double width) {
-    final referenceText = '${badStock.referenceType} #${badStock.referenceId}';
-
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Text(
-          referenceText,
-          style: const TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w500,
-            color: Colors.black87,
-          ),
-          textAlign: TextAlign.center,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildActionCell(BadStockReturnModel badStock, BuildContext context, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // View Button
-            _buildActionButton(
-              icon: HugeIcons.strokeRoundedView,
-              color: AppColors.success,
-              tooltip: 'View bad stock details',
-              onPressed: () => _showViewDialog(context, badStock),
-            ),
-
-            // Delete Button
-            _buildActionButton(
-              icon: HugeIcons.strokeRoundedDeleteThrow,
-              color: AppColors.danger,
-              tooltip: 'Delete bad stock',
-              onPressed: () => _confirmDelete(context, badStock),
-            ),
-          ],
-        ),
-      ),
+    return AppDataTable(
+      columns: columns,
+      rowCount: badStocks.length,
+      onRowTap: onBadStockTap == null ? null : (_) => onBadStockTap!(),
+      cellBuilder: (context, row, col) {
+        final b = badStocks[row];
+        switch (col) {
+          case 0:
+            return AppTableText('${row + 1}',
+                align: AppCellAlign.center, muted: true);
+          case 1:
+            return AppTableText(b.productName ?? 'Unknown', bold: true);
+          case 2:
+            return AppTableText('${b.quantity ?? 0}',
+                align: AppCellAlign.end, bold: true, color: AppColors.danger);
+          case 3:
+            return AppTableText(b.reason ?? '-', muted: true);
+          case 4:
+            return AppTableText(_formatDate(b.date));
+          case 5:
+            return AppTableText('${b.referenceType ?? '-'} #${b.referenceId ?? ''}',
+                muted: true);
+          default:
+            return AppTableEditDelete(
+              onView: () => _showViewDialog(context, b),
+              onDelete: () => _confirmDelete(context, b),
+            );
+        }
+      },
     );
   }
 
@@ -562,10 +363,10 @@ class BadStockTableCard extends StatelessWidget {
   }
 
   void _showViewDialog(BuildContext context, BadStockReturnModel badStock) {
-    showDialog(
+    showAppPopover(
       context: context,
       builder: (context) {
-        return Dialog(
+        return AppPopoverShell(
           child: Container(
             width: AppSizes.width(context) * 0.40,
             padding: const EdgeInsets.all(20),

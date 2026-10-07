@@ -1,113 +1,112 @@
-import 'dart:io';
-
-import 'package:flutter/cupertino.dart';
-
 import '../core.dart';
 
-Future<void> appAlertDialog(BuildContext context, String content,
-    {List<Widget> actions = const <Widget>[],
-    bool barrierDismissible = false,
-    String? title,
-    Color color = AppColors.textLight,
-    IconData icon = Icons.warning}) async {
-  final alert = CupertinoAlertDialog(
-    // titlePadding: EdgeInsets.zero,
-    title: Row(
-      children: [
-        Icon(
-          icon,
-          color: AppColors.text(context)
-        ),
-        const SizedBox(
-          width: 10,
-        ),
-        Text(
-          title ?? "Notice",
-          style:  TextStyle(color: AppColors.text(context)),
-        ),
-      ],
-    ),
-    content: content.isEmpty ? null : Text(content,style: TextStyle(
-      color: AppColors.text(context)
-    ),),
-    actions: actions,
-  );
+// ============================================================
+// appAlertDialog — success / error / notice বার্তা
+// ------------------------------------------------------------
+// আগে CupertinoAlertDialog ছিল (desktop এ iOS এর মতো দেখাত)।
+// এখন AppPopoverCard — একই parameter, তাই কোনো call site বদলাতে
+// হয়নি।
+//
+// actions খালি থাকলে একটা "OK" বাটন দেওয়া হয় — আগে actions ছাড়া
+// আর barrierDismissible = false হলে user আটকে যেত, বন্ধ করার কোনো
+// উপায় থাকত না।
+// ============================================================
 
-  showDialog(
-    barrierDismissible: barrierDismissible,
+Future<void> appAlertDialog(
+  BuildContext context,
+  String content, {
+  List<Widget> actions = const <Widget>[],
+  bool barrierDismissible = false,
+  String? title,
+  Color color = AppColors.textLight,
+  IconData icon = Icons.warning,
+}) async {
+  final PopoverTone tone = _toneFor(icon, title);
+
+  await showAppPopover<void>(
     context: context,
-    builder: (BuildContext context) {
-      return alert;
+    barrierDismissible: barrierDismissible,
+    builder: (BuildContext ctx) {
+      return AppPopoverCard(
+        width: 420,
+        tone: tone,
+        icon: Icon(icon),
+        title: Text(title ?? 'Notice'),
+        content: content.isEmpty ? null : Text(content),
+        actions: actions.isNotEmpty
+            ? actions
+            : [
+                PopoverButton(
+                  label: 'OK',
+                  primary: true,
+                  tone: tone,
+                  autofocus: true,
+                  onPressed: () => Navigator.of(ctx).pop(),
+                ),
+              ],
+      );
     },
   );
 }
 
+/// icon / title দেখে রং ঠিক করা — success সবুজ, error লাল, বাকি নীল
+PopoverTone _toneFor(IconData icon, String? title) {
+  final t = (title ?? '').toLowerCase();
+  if (icon == Icons.check_circle ||
+      icon == Icons.check ||
+      icon == Icons.done ||
+      t.contains('success')) {
+    return PopoverTone.success;
+  }
+  if (icon == Icons.error ||
+      icon == Icons.error_outline ||
+      t.contains('error') ||
+      t.contains('fail')) {
+    return PopoverTone.danger;
+  }
+  if (icon == Icons.warning || icon == Icons.warning_amber) {
+    return PopoverTone.warning;
+  }
+  return PopoverTone.normal;
+}
 
+/// Yes / Cancel ধরনের প্রশ্ন — true ফেরত দিলে user রাজি
 Future<bool> appAdaptiveDialog({
   required BuildContext context,
   required String title,
   required String message,
   List<AdaptiveDialogAction>? actions,
 }) async {
-  final defaultActions = [
-    AdaptiveDialogAction(
-      text: 'Cancel',
-      onPressed: () => Navigator.of(context).pop(false),
-    ),
-    AdaptiveDialogAction(
-      text: 'Yes',
-      isDefault: true,
-      onPressed: () => Navigator.of(context).pop(true),
-    ),
-  ];
-
-  final combinedActions = actions ?? defaultActions;
-
-  if (Platform.isIOS) {
-    return await showCupertinoDialog<bool>(
-      context: context,
-      builder: (context) => CupertinoAlertDialog(
-
-        // backgroundColor: AppColors.bottomNavBg(context),
-        title: Text(title,style: AppTextStyle.bodyLarge(context),),
-        content: Text(message,style: AppTextStyle.body(context),),
-        actions: combinedActions.map((action) {
-          return CupertinoDialogAction(
-
-            onPressed: action.onPressed,
-            isDestructiveAction: action.isDestructive,
-            isDefaultAction: action.isDefault,
-            child: Text(action.text),
-          );
-        }).toList(),
-      ),
-    ) ??
-        false;
-  } else {
-    return await showDialog<bool>(
-      context: context,
-      builder: (context) => CupertinoAlertDialog(
-
-        // backgroundColor: AppColors.bottomNavBg(context),
-        title: Text(title,style: AppTextStyle.bodyLarge(context),),
-        content: Text(message,style: AppTextStyle.body(context),),
-        actions: combinedActions.map((action) {
-          return TextButton(
-            onPressed: action.onPressed,
-            style: TextButton.styleFrom(
-              foregroundColor: action.isDestructive
-                  ? Theme.of(context).colorScheme.error
-                  : Theme.of(context).colorScheme.primary,
-            ),
-            child: Text(action.text),
-          );
-        }).toList(),
-      ),
-    ) ??
-        false;
+  if (actions == null) {
+    return showConfirmPopover(
+      context,
+      title: title,
+      message: message,
+      confirmText: 'Yes',
+    );
   }
-}
 
+  final result = await showAppPopover<bool>(
+    context: context,
+    builder: (ctx) => AppPopoverCard(
+      width: 420,
+      title: Text(title),
+      content: Text(message),
+      actions: actions
+          .map(
+            (a) => PopoverButton(
+              label: a.text,
+              primary: a.isDefault || a.isDestructive,
+              tone: a.isDestructive ? PopoverTone.danger : PopoverTone.normal,
+              autofocus: a.isDefault,
+              onPressed: a.onPressed,
+            ),
+          )
+          .toList(),
+    ),
+  );
+  return result ?? false;
+}
 
 class AdaptiveDialogAction {
   final String text;

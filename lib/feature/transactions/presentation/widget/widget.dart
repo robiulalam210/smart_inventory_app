@@ -24,114 +24,76 @@ class TransactionCard extends StatelessWidget {
         : _buildDesktopTable();
   }
 
+  // Desktop টেবিল — AppDataTable
+  // (আগে header এ "Actions" লেখা ছিল কিন্তু cell এ expense head দেখাত —
+  // এখন header "Head", আর টাকা $ নয় ৳ দিয়ে)
   Widget _buildDesktopTable() {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        const numColumns = 8;
-        const columnSpacing = 10.0;
-        const horizontalMargin = 12.0;
-        const minColumnWidth = 120.0;
+    const columns = [
+      AppTableColumn('Transaction No', flex: 2, minWidth: 120),
+      AppTableColumn('Account', flex: 3, minWidth: 140),
+      AppTableColumn.center('Type', flex: 2, minWidth: 96),
+      AppTableColumn.numeric('Amount', flex: 2, minWidth: 110),
+      AppTableColumn('Description', flex: 3, minWidth: 150),
+      AppTableColumn('Date', flex: 2, minWidth: 100),
+      AppTableColumn.center('Status', flex: 2, minWidth: 104),
+      AppTableColumn('Head', flex: 2, minWidth: 120),
+    ];
 
-        final totalTableWidth = (constraints.maxWidth - 75) +
-            (columnSpacing * (numColumns - 1)) +
-            (horizontalMargin * 2);
-
-        return Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withValues(alpha:0.1),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Scrollbar(
-            thumbVisibility: true,
-            child: SingleChildScrollView(
-              scrollDirection: Axis.vertical,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: Scrollbar(
-                  thumbVisibility: true,
-                  scrollbarOrientation: ScrollbarOrientation.bottom,
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Container(
-                      constraints: BoxConstraints(
-                        minWidth: totalTableWidth,
-                        minHeight: 200,
-                      ),
-                      child: DataTable(
-                        dataRowMinHeight: 50,
-                        dataRowMaxHeight: 60,
-                        columnSpacing: columnSpacing,
-                        horizontalMargin: horizontalMargin,
-                        dividerThickness: 0.5,
-                        headingRowHeight: 50,
-                        headingTextStyle: TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                          fontFamily: GoogleFonts.inter().fontFamily,
-                        ),
-                        headingRowColor: WidgetStateProperty.all(
-                          AppColors.primaryColor(context),
-                        ),
-                        dataTextStyle: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w500,
-                          fontFamily: GoogleFonts.inter().fontFamily,
-                        ),
-                        columns: _buildColumns(minColumnWidth),
-                        rows: transactions.asMap().entries.map((entry) {
-                          final transaction = entry.value;
-                          return DataRow(
-                            color: WidgetStateProperty.resolveWith<Color?>(
-                                  (Set<WidgetState> states) {
-                                if (entry.key.isEven) {
-                                  return Colors.grey.withValues(alpha: 0.03);
-                                }
-                                return null;
-                              },
-                            ),
-                            onSelectChanged: onTransactionTap != null
-                                ? (_) => onTransactionTap!()
-                                : null,
-                            cells: [
-                              _buildDataCell(transaction.transactionNo ?? "N/A", minColumnWidth),
-                              _buildDataCell(transaction.accountName ?? "N/A", minColumnWidth * 1.2),
-                              _buildTypeCell(transaction.transactionType ?? "N/A", minColumnWidth),
-                              _buildAmountCell(
-                                double.tryParse(transaction.amount ?? "0"),
-                                transaction.transactionType,
-                                minColumnWidth,
-                              ),
-                              _buildDataCell(transaction.description ?? "-", minColumnWidth * 1.3),
-                              _buildDateCell(transaction.transactionDate, minColumnWidth),
-                              _buildStatusCell(transaction.status, minColumnWidth),
-
-                              // ✅ 8th CELL (Inventory Expense)
-                              _buildDataCell(
-                                transaction.expenseHead ?? "Inventory Expense",
-                                minColumnWidth,
-                              ),
-                            ],
-
-                          );
-                        }).toList(),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
+    return AppDataTable(
+      columns: columns,
+      rowCount: transactions.length,
+      onRowTap:
+          onTransactionTap == null ? null : (_) => onTransactionTap!(),
+      cellBuilder: (context, row, col) {
+        final t = transactions[row];
+        final isCredit = t.transactionType?.toLowerCase() == 'credit';
+        switch (col) {
+          case 0:
+            return AppTableText(t.transactionNo ?? '-',
+                bold: true, color: AppColors.primaryColor(context));
+          case 1:
+            return AppTableText(t.accountName ?? '-');
+          case 2:
+            return AppStatusPill(isCredit ? 'Credit' : 'Debit',
+                color: isCredit ? AppColors.success : AppColors.danger);
+          case 3:
+            final amount = AppTableMoney.parse(t.amount);
+            return AppTableText(
+              '${isCredit ? '+' : '−'} ৳${amount.toStringAsFixed(2)}',
+              align: AppCellAlign.end,
+              bold: true,
+              color: isCredit ? AppColors.success : AppColors.danger,
+            );
+          case 4:
+            return AppTableText(t.description ?? '-', muted: true);
+          case 5:
+            final d = t.transactionDate;
+            return AppTableText(d == null
+                ? '-'
+                : '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}/${d.year}');
+          case 6:
+            return AppStatusPill((t.status ?? '-').capitalize(),
+                color: _txStatusColor(t.status));
+          default:
+            return AppTableText(t.expenseHead?.toString() ?? '-', muted: true);
+        }
       },
     );
+  }
+
+  Color _txStatusColor(String? status) {
+    switch (status?.toLowerCase()) {
+      case 'completed':
+        return AppColors.success;
+      case 'pending':
+        return AppColors.warning;
+      case 'failed':
+        return AppColors.danger;
+      case 'reversed':
+        return Colors.purple;
+      default:
+        return Colors.grey;
+    }
   }
 
   Widget _buildMobileListView(BuildContext context) {
@@ -346,243 +308,6 @@ class TransactionCard extends StatelessWidget {
       ),
     );
   }
-
-  List<DataColumn> _buildColumns(double columnWidth) {
-    return [
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text(
-            'Transaction No.',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.white),
-          ),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth * 1.2,
-          child: const Text(
-            'Account',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.white),
-          ),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text(
-            'Type',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.white),
-          ),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text(
-            'Amount',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.white),
-          ),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth * 1.3,
-          child: const Text(
-            'Description',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.white),
-          ),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text(
-            'Date',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.white),
-          ),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text(
-            'Status',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.white),
-          ),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth * 0.8,
-          child: const Text(
-            'Actions',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.white),
-          ),
-        ),
-      ),
-    ];
-  }
-
-  DataCell _buildDataCell(String text, double width) {
-    return DataCell(
-      Container(
-        width: width,
-        padding: const EdgeInsets.symmetric(horizontal: 4),
-        child: Text(
-          text,
-          style: const TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w500,
-            color: Colors.black87,
-          ),
-          textAlign: TextAlign.center,
-          overflow: TextOverflow.ellipsis,
-          maxLines: 2,
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildTypeCell(String? type, double width) {
-    final isCredit = type?.toLowerCase() == 'credit';
-    final color = isCredit ? AppColors.success : AppColors.danger;
-    final icon = isCredit ? Icons.arrow_upward : Icons.arrow_downward;
-
-    return DataCell(
-      Container(
-        width: width,
-        padding: const EdgeInsets.symmetric(horizontal: 4),
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha:0.1),
-              borderRadius: BorderRadius.circular(6),
-              border: Border.all(
-                color: color.withValues(alpha:0.3),
-                width: 1,
-              ),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(icon, size: 12, color: color),
-                const SizedBox(width: 4),
-                Text(
-                  type?.toUpperCase() ?? 'N/A',
-                  style: GoogleFonts.inter(
-                    color: color,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 10,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildAmountCell(double? amount, String? type, double width) {
-    final isCredit = type?.toLowerCase() == 'credit';
-    final color = isCredit ? AppColors.success : AppColors.danger;
-    final prefix = isCredit ? '+' : '-';
-
-    return DataCell(
-      Container(
-        width: width,
-        padding: const EdgeInsets.symmetric(horizontal: 4),
-        child: Center(
-          child: Text(
-            '$prefix\$${amount?.toStringAsFixed(2) ?? "0.00"}',
-            style: GoogleFonts.inter(
-              color: color,
-              fontWeight: FontWeight.w600,
-              fontSize: 11,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildDateCell(DateTime? date, double width) {
-    final formattedDate = date != null
-        ? '${date.day}/${date.month}/${date.year}'
-        : 'N/A';
-
-    return DataCell(
-      Container(
-        width: width,
-        padding: const EdgeInsets.symmetric(horizontal: 4),
-        child: Text(
-          formattedDate,
-          style: const TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w500,
-            color: Colors.black87,
-          ),
-          textAlign: TextAlign.center,
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildStatusCell(String? status, double width) {
-    Color getStatusColor() {
-      switch (status?.toLowerCase()) {
-        case 'completed':
-          return AppColors.success;
-        case 'pending':
-          return AppColors.warning;
-        case 'failed':
-          return AppColors.danger;
-        case 'reversed':
-          return Colors.purple;
-        default:
-          return Colors.grey;
-      }
-    }
-
-    final color = getStatusColor();
-
-    return DataCell(
-      Container(
-        width: width,
-        padding: const EdgeInsets.symmetric(horizontal: 4),
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha:0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Text(
-              status?.toUpperCase() ?? 'N/A',
-              style: GoogleFonts.inter(
-                color: color,
-                fontWeight: FontWeight.w600,
-                fontSize: 9,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
 
   Widget _buildEmptyState() {
     return Container(

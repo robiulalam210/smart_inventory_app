@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:meherinMart/core/widgets/app_data_table.dart';
+import 'package:meherinMart/core/widgets/app_popover_route.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hugeicons/hugeicons.dart';
@@ -28,103 +30,34 @@ class BrandTableCard extends StatelessWidget {
         : _buildDesktopTable();
   }
 
+  // Desktop টেবিল — AppDataTable (SL ছোট, নাম চওড়া, status/action মাঝে)
   Widget _buildDesktopTable() {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final totalWidth = constraints.maxWidth;
-        const numColumns = 4;
-        const minColumnWidth = 100.0;
 
-        final dynamicColumnWidth = (totalWidth / numColumns).clamp(
-          minColumnWidth,
-          double.infinity,
-        );
+    const columns = [
+      AppTableColumn.center('SL', flex: 1, minWidth: 60),
+      AppTableColumn('Brand Name', flex: 5, minWidth: 200),
+      AppTableColumn.center('Status', flex: 2, minWidth: 110),
+      AppTableColumn.center('Actions', flex: 2, minWidth: 110),
+    ];
 
-        return Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withValues(alpha: 0.1),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Scrollbar(
-            thumbVisibility: true,
-            child: SingleChildScrollView(
-              scrollDirection: Axis.vertical,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: Scrollbar(
-                  thumbVisibility: true,
-                  scrollbarOrientation: ScrollbarOrientation.bottom,
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 5),
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(minWidth: totalWidth),
-                        child: DataTable(
-                          dataRowMinHeight: 40,
-                          dataRowMaxHeight: 40,
-                          columnSpacing: 8,
-                          horizontalMargin: 12,
-                          dividerThickness: 0.5,
-                          headingRowHeight: 40,
-                          headingTextStyle: TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            fontFamily: GoogleFonts.inter().fontFamily,
-                          ),
-                          headingRowColor: WidgetStateProperty.all(
-                            AppColors.primaryColor(context),
-                          ),
-                          dataTextStyle: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w500,
-                            fontFamily: GoogleFonts.inter().fontFamily,
-                          ),
-                          columns: _buildColumns(dynamicColumnWidth),
-                          rows: brands.asMap().entries.map((entry) {
-                            final brand = entry.value;
-                            return DataRow(
-                              onSelectChanged: onBrandTap != null
-                                  ? (_) => onBrandTap!()
-                                  : null,
-                              cells: [
-                                _buildDataCell(
-                                  '${entry.key + 1}',
-                                  dynamicColumnWidth * 0.6,
-                                ),
-                                _buildDataCell(
-                                  brand.name ?? "N/A",
-                                  dynamicColumnWidth,
-                                ),
-                                _buildStatusCell(
-                                  brand.isActive ?? false,
-                                  dynamicColumnWidth,
-                                ),
-                                _buildActionCell(
-                                  brand,
-                                  context,
-                                  dynamicColumnWidth,
-                                ),
-                              ],
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
+    return AppDataTable(
+      columns: columns,
+      rowCount: brands.length,
+      cellBuilder: (context, row, col) {
+        final brand = brands[row];
+        switch (col) {
+          case 0:
+            return AppTableText('${row + 1}', align: AppCellAlign.center, muted: true);
+          case 1:
+            return AppTableText(brand.name ?? '-', bold: true);
+          case 2:
+            return AppStatusPill((brand.isActive ?? false) ? 'Active' : 'Inactive', color: (brand.isActive ?? false) ? AppColors.success : AppColors.danger);
+          default:
+            return AppTableEditDelete(
+              onEdit: () => _showEditDialog(context, brand),
+              onDelete: () => _confirmDelete(context, brand),
+            );
+        }
       },
     );
   }
@@ -282,113 +215,6 @@ class BrandTableCard extends StatelessWidget {
     );
   }
 
-  List<DataColumn> _buildColumns(double columnWidth) {
-    return [
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth * 0.6,
-          child: const Text('No.', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Brand Name', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Status', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Actions', textAlign: TextAlign.center),
-        ),
-      ),
-    ];
-  }
-
-  DataCell _buildDataCell(String text, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Text(
-          text,
-          style: const TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w500,
-            color: Colors.black87,
-          ),
-          textAlign: TextAlign.center,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildStatusCell(bool isActive, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: isActive
-                  ? AppColors.success.withValues(alpha: 0.1)
-                  : AppColors.danger.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Text(
-              isActive ? 'Active' : 'Inactive',
-              style: TextStyle(
-                color: isActive ? AppColors.success : AppColors.danger,
-                fontWeight: FontWeight.w600,
-                fontSize: 11,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildActionCell(
-    BrandModel brand,
-    BuildContext context,
-    double width,
-  ) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Edit Button
-            _buildActionButton(
-              icon: Iconsax.edit,
-              color: AppColors.info,
-              tooltip: 'Edit brand',
-              onPressed: () => _showEditDialog(context, brand),
-            ),
-
-            // Delete Button
-            _buildActionButton(
-              icon: HugeIcons.strokeRoundedDeleteThrow,
-              color: AppColors.danger,
-              tooltip: 'Delete brand',
-              onPressed: () => _confirmDelete(context, brand),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget _buildActionButton({
     required IconData icon,
     required Color color,
@@ -416,10 +242,10 @@ class BrandTableCard extends StatelessWidget {
     brandBloc.nameController.text = brand.name ?? "";
     brandBloc.selectedState = brand.isActive == true ? "Active" : "Inactive";
 
-    showDialog(
+    showAppPopover(
       context: context,
       builder: (context) {
-        return Dialog(
+        return AppPopoverShell(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),

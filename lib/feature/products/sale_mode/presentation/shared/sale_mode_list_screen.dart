@@ -178,10 +178,10 @@ class _SaleModeListScreenState extends State<SaleModeListScreen> {
   }
 
   void _showCreateDialog(BuildContext context) {
-    showDialog(
+    showAppPopover(
       context: context,
       builder: (context) {
-        return Dialog(
+        return AppPopoverShell(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppSizes.radius),
           ),

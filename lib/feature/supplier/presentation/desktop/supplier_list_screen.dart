@@ -170,7 +170,7 @@ class _SupplierScreenState extends State<SupplierScreen> {
 
                 // Desktop layout
                 Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Expanded(
                       flex: 4,
@@ -218,10 +218,10 @@ class _SupplierScreenState extends State<SupplierScreen> {
                     const SizedBox(width: 16),
                     AppButton(
                       onPressed: () {
-                        showDialog(
+                        showAppPopover(
                           context: context,
                           builder: (context) {
-                            return Dialog(
+                            return AppPopoverShell(
                               insetPadding: const EdgeInsets.all(20),
                               child: SizedBox(
                                 width: AppSizes.width(context) * 0.5,
@@ -331,10 +331,10 @@ gapH16,
 
   void _showEditDialog(BuildContext context, SupplierListModel customer) {
     // Implement edit dialog logic
-    showDialog(
+    showAppPopover(
       context: context,
       builder: (context) {
-        return Dialog(
+        return AppPopoverShell(
           child: SizedBox(
             width: AppSizes.width(context) * 0.50,
             child: CreateSupplierScreen(

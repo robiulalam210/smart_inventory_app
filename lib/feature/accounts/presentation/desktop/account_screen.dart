@@ -193,7 +193,7 @@ class _AccountScreenState extends State<AccountScreen> {
 
   Widget _buildDesktopHeader() {
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.end,
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
         // 🔍 Search Field
@@ -334,10 +334,10 @@ class _AccountScreenState extends State<AccountScreen> {
   void _showCreateAccountDialog(BuildContext context) {
     _clearAccountBlocData();
 
-    showDialog(
+    showAppPopover(
       context: context,
       builder: (context) {
-        return Dialog(
+        return AppPopoverShell(
           insetPadding: const EdgeInsets.all(20),
           child: ConstrainedBox(
             constraints: BoxConstraints(
@@ -366,10 +366,10 @@ class _AccountScreenState extends State<AccountScreen> {
     accountBloc.accountOpeningBalanceController.text =
         account.balance?.toString() ?? "0.0";
 
-    showDialog(
+    showAppPopover(
       context: context,
       builder: (context) {
-        return Dialog(
+        return AppPopoverShell(
           insetPadding: const EdgeInsets.all(20),
           child: ConstrainedBox(
             constraints: BoxConstraints(

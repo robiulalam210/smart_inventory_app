@@ -1,5 +1,6 @@
 // lib/feature/report/presentation/screens/expense_report_screen.dart
 import 'dart:async';
+import 'package:meherinMart/core/widgets/app_data_table.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
@@ -231,7 +232,7 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
       children: [
         // First row: Date range and Clear button
         Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             // Date Range Picker
             SizedBox(
@@ -674,271 +675,39 @@ class ExpenseReportDataTable extends StatelessWidget {
     );
   }
 
+  // Desktop টেবিল — AppDataTable
   Widget _buildDataTable() {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final totalWidth = constraints.maxWidth;
-        const numColumns =
-            8; // #, Date, Head, Sub Head, Amount, Payment Method, Note, Actions
-        const minColumnWidth = 100.0;
+    const columns = [
+      AppTableColumn.center('SL', flex: 1, minWidth: 52),
+      AppTableColumn('Date', flex: 2, minWidth: 100),
+      AppTableColumn('Expense Head', flex: 3, minWidth: 160),
+      AppTableColumn.numeric('Amount', flex: 2, minWidth: 110),
+      AppTableColumn.center('Method', flex: 2, minWidth: 110),
+      AppTableColumn('Note', flex: 4, minWidth: 160),
+    ];
 
-        final dynamicColumnWidth = (totalWidth / numColumns).clamp(
-          minColumnWidth,
-          double.infinity,
-        );
-
-        return Scrollbar(
-          child: SingleChildScrollView(
-            scrollDirection: Axis.vertical,
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: DataTable(
-                headingRowColor: WidgetStateProperty.resolveWith<Color>(
-                  (states) => AppColors.primaryColor(context),
-                ),
-                columnSpacing: 12,
-                dataRowMinHeight: 40,
-                dataRowMaxHeight: 40,
-                headingTextStyle: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                  fontSize: 12,
-                ),
-                dataTextStyle: const TextStyle(
-                  fontSize: 11,
-                  color: Colors.black87,
-                ),
-                columns: [
-                  DataColumn(
-                    label: SizedBox(
-                      width: dynamicColumnWidth * 0.6,
-                      child: const Text('#', textAlign: TextAlign.center),
-                    ),
-                  ),
-                  DataColumn(
-                    label: SizedBox(
-                      width: dynamicColumnWidth,
-                      child: const Text('Date', textAlign: TextAlign.center),
-                    ),
-                  ),
-                  DataColumn(
-                    label: SizedBox(
-                      width: dynamicColumnWidth,
-                      child: const Text('Head', textAlign: TextAlign.center),
-                    ),
-                  ),
-                  DataColumn(
-                    label: SizedBox(
-                      width: dynamicColumnWidth,
-                      child: const Text(
-                        'Sub Head',
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ),
-                  DataColumn(
-                    label: SizedBox(
-                      width: dynamicColumnWidth,
-                      child: const Text('Amount', textAlign: TextAlign.center),
-                    ),
-                    numeric: true,
-                  ),
-                  DataColumn(
-                    label: SizedBox(
-                      width: dynamicColumnWidth,
-                      child: const Text(
-                        'Payment Method',
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ),
-                  DataColumn(
-                    label: SizedBox(
-                      width: dynamicColumnWidth * 1.5,
-                      child: const Text(
-                        'Note',
-                        textAlign: TextAlign.center,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ),
-                  DataColumn(
-                    label: SizedBox(
-                      width: dynamicColumnWidth * 0.8,
-                      child: const Text('Actions', textAlign: TextAlign.center),
-                    ),
-                  ),
-                ],
-                rows: expenses.map((expense) {
-                  return DataRow(
-                    cells: [
-                      DataCell(
-                        SizedBox(
-                          width: dynamicColumnWidth * 0.6,
-                          child: Center(
-                            child: Text(
-                              '${expense.sl}',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      DataCell(
-                        SizedBox(
-                          width: dynamicColumnWidth,
-                          child: Center(
-                            child: Text(
-                              _formatDate(expense.expenseDate),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ),
-                      ),
-                      DataCell(
-                        SizedBox(
-                          width: dynamicColumnWidth,
-                          child: Tooltip(
-                            message: expense.head,
-                            child: Text(
-                              expense.head,
-                              overflow: TextOverflow.ellipsis,
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ),
-                      ),
-                      DataCell(
-                        SizedBox(
-                          width: dynamicColumnWidth,
-                          child: Center(
-                            child: Text(
-                              expense.subhead ?? '-',
-                              style: TextStyle(
-                                color: expense.subhead == null
-                                    ? Colors.grey
-                                    : Colors.black87,
-                                fontStyle: expense.subhead == null
-                                    ? FontStyle.italic
-                                    : FontStyle.normal,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ),
-                      ),
-                      DataCell(
-                        SizedBox(
-                          width: dynamicColumnWidth,
-                          child: Center(
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: AppColors.danger.withValues(alpha: 0.1),
-                                borderRadius: BorderRadius.circular(4),
-                                border: Border.all(
-                                  color: AppColors.danger.withValues(alpha: 0.3),
-                                ),
-                              ),
-                              child: Text(
-                                expense.amount.toStringAsFixed(2),
-                                style: const TextStyle(
-                                  color: AppColors.danger,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 11,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      DataCell(
-                        SizedBox(
-                          width: dynamicColumnWidth,
-                          child: Center(
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 6,
-                                vertical: 3,
-                              ),
-                              decoration: BoxDecoration(
-                                color: _getPaymentMethodColor(
-                                  expense.paymentMethod,
-                                ).withValues(alpha: 0.1),
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: Text(
-                                expense.paymentMethod,
-                                style: TextStyle(
-                                  color: _getPaymentMethodColor(
-                                    expense.paymentMethod,
-                                  ),
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 10,
-                                ),
-                                textAlign: TextAlign.center,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      DataCell(
-                        SizedBox(
-                          width: dynamicColumnWidth * 1.5,
-                          child: Tooltip(
-                            message: expense.note ?? 'No description',
-                            child: Text(
-                              expense.note ?? 'No note',
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                color: expense.note == null
-                                    ? Colors.grey
-                                    : Colors.black87,
-                                fontStyle: expense.note == null
-                                    ? FontStyle.italic
-                                    : FontStyle.normal,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ),
-                      ),
-                      DataCell(
-                        SizedBox(
-                          width: dynamicColumnWidth * 0.8,
-                          child: Center(
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                IconButton(
-                                  icon: const Icon(Icons.visibility, size: 16),
-                                  tooltip: 'View details',
-                                  padding: EdgeInsets.zero,
-                                  constraints: const BoxConstraints(
-                                    minWidth: 24,
-                                    minHeight: 24,
-                                  ),
-                                  onPressed: () {},
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  );
-                }).toList(),
-              ),
-            ),
-          ),
-        );
+    return AppDataTable(
+      columns: columns,
+      rowCount: expenses.length,
+      cellBuilder: (context, row, col) {
+        final e = expenses[row];
+        switch (col) {
+          case 0:
+            return AppTableText('${row + 1}',
+                align: AppCellAlign.center, muted: true);
+          case 1:
+            return AppTableText(_formatDate(e.expenseDate));
+          case 2:
+            return AppTableText(e.head, bold: true, subtitle: e.subhead);
+          case 3:
+            return AppTableMoney(e.amount,
+                bold: true, color: AppColors.danger);
+          case 4:
+            return AppStatusPill(e.paymentMethod,
+                color: _getPaymentMethodColor(e.paymentMethod));
+          default:
+            return AppTableText(e.note ?? '-', muted: true);
+        }
       },
     );
   }

@@ -87,9 +87,9 @@ class _HeaderState extends State<Header> {
             // Sign out button
             AppButton(
               onPressed: () {
-                showDialog(
+                showAppPopover(
                   context: context,
-                  builder: (context) => CupertinoAlertDialog(
+                  builder: (context) => AppPopoverCard(
                     title: const Text("Sign Out"),
                     content: const Text("Are you sure you want to sign out ?"),
                     actions: [

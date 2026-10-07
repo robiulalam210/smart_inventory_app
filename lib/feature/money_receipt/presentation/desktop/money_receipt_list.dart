@@ -243,7 +243,7 @@ class _MoneyReceiptScreenState extends State<MoneyReceiptScreen> {
     return Column(
       children: [
         Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.end,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             // 🔍 Search Field

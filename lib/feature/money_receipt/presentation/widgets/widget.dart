@@ -374,238 +374,72 @@ class MoneyReceiptDataTableWidget extends StatelessWidget {
     );
   }
 
+  // Desktop টেবিল — AppDataTable
   Widget _buildDesktopDataTable() {
-    return TableScrollControllers(
-      builder: (context, verticalController, horizontalController) {
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final totalWidth = constraints.maxWidth - 50;
-        const numColumns = 11;
-        const minColumnWidth = 100.0;
-
-        final dynamicColumnWidth =
-        (totalWidth / numColumns).clamp(minColumnWidth, double.infinity);
-
-        return Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(AppSizes.radius),
-            color: Colors.white,
-          ),
-          child: ClipRRect( borderRadius: BorderRadius.circular(AppSizes.radius),
-            child: Scrollbar(
-              controller: verticalController,
-              thumbVisibility: true,
-              child: SingleChildScrollView(
-                controller: verticalController,
-                scrollDirection: Axis.vertical,
-                child: Scrollbar(
-                  controller: horizontalController,
-                  thumbVisibility: true,
-                  child: SingleChildScrollView(
-                    controller: horizontalController,
-                    scrollDirection: Axis.horizontal,
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(minWidth: totalWidth),
-                      child: DataTable(
-                        columns: _buildColumns(dynamicColumnWidth),
-                        rows: sales
-                            .asMap()
-                            .entries
-                            .map(
-                              (entry) => _buildRow(
-                            context,
-                            entry.key + 1,
-                            entry.value,
-                            dynamicColumnWidth,
-                          ),
-                        )
-                            .toList(),
-                        headingRowColor: WidgetStateProperty.all(
-                          AppColors.primaryColor(context),
-                        ),
-                        headingTextStyle: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                        ),
-                        dataRowMinHeight: 40,
-                        headingRowHeight: 40,
-                        columnSpacing: 0,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-      },
-    );
-  }
-
-  List<DataColumn> _buildColumns(double columnWidth) {
-    const labels = [
-      "SL",
-      "MR No",
-      "Customer",
-      "Seller",
-      "Payment Date",
-      "Payment Method",
-      "Phone",
-      "Amount",
-      "Total Before",
-      "Status",
-      "Actions",
+    const columns = [
+      AppTableColumn.center('SL', flex: 1, minWidth: 52),
+      AppTableColumn('MR No', flex: 2, minWidth: 110),
+      AppTableColumn('Customer', flex: 3, minWidth: 150),
+      AppTableColumn('Seller', flex: 2, minWidth: 110),
+      AppTableColumn('Date', flex: 2, minWidth: 100),
+      AppTableColumn('Method', flex: 2, minWidth: 100),
+      AppTableColumn.numeric('Amount', flex: 2, minWidth: 110),
+      AppTableColumn.numeric('Due Before', flex: 2, minWidth: 110),
+      AppTableColumn.center('Status', flex: 2, minWidth: 100),
+      AppTableColumn.center('Actions', flex: 2, minWidth: 96),
     ];
 
-    return labels
-        .map(
-          (label) => DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: Padding(
-            padding: const EdgeInsets.all(4),
-            child: Text(
-              label,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w700,
-                color: Colors.white,
-              ),
-            ),
-          ),
-        ),
-      ),
-    )
-        .toList();
-  }
-
-  DataRow _buildRow(
-      BuildContext context,
-      int index,
-      MoneyreceiptModel sale,
-      double columnWidth,
-      ) {
-    // Format date safely
-    String formatDate(DateTime? date) {
-      if (date == null) return '-';
-      return "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
-    }
-
-    // Format text safely
-    String formatText(String? text) {
-      if (text == null || text.isEmpty) return '-';
-      return text;
-    }
-
-    // Format currency safely
-    String formatCurrency(double? value) {
-      if (value == null) return '0.00';
-      return value.toStringAsFixed(2);
-    }
-
-    final summary = sale.paymentSummary;
-    final totalBefore = double.tryParse(summary?.beforePayment?.totalDue.toString() ?? "0");
-    final amount = double.tryParse(sale.amount ?? '0') ?? 0;
-    final status = summary?.status ?? '-';
-
-    return DataRow(
-      cells: [
-        _buildDataCell(index.toString(), columnWidth, TextAlign.center),
-        _buildDataCell(formatText(sale.mrNo), columnWidth, TextAlign.center),
-        _buildDataCell(formatText(sale.customerName), columnWidth, TextAlign.center),
-        _buildDataCell(formatText(sale.sellerName), columnWidth, TextAlign.center),
-        _buildDataCell(formatDate(sale.paymentDate), columnWidth, TextAlign.center),
-        _buildDataCell(formatText(sale.paymentMethod), columnWidth, TextAlign.center),
-        _buildDataCell(formatText(sale.customerPhone?.toString()), columnWidth, TextAlign.center),
-        _buildDataCell(formatCurrency(amount), columnWidth, TextAlign.center),
-        _buildDataCell(formatCurrency(totalBefore), columnWidth, TextAlign.center),
-        _buildStatusCell(
-          formatText(status),
-          columnWidth,
-          statusColor: _getStatusColor(status),
-        ),
-        _buildActionsCell(context, sale, columnWidth),
-      ],
-    );
-  }
-
-  DataCell _buildDataCell(String text, double width, TextAlign align) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
-          child: Text(
-            text,
-            style: const TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.w500,
-              color: Colors.black,
-            ),
-            textAlign: align,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildStatusCell(String text, double width, {Color? statusColor}) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: statusColor?.withValues(alpha: 0.1) ?? Colors.grey.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: statusColor ?? Colors.grey),
-            ),
-            child: Text(
-              text,
-              style: TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.w600,
-                color: statusColor ?? Colors.black,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildActionsCell(BuildContext context, MoneyreceiptModel sale, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            IconButton(
-              icon: const Icon(Icons.visibility, size: 16),
-              onPressed: () => _viewReceiptDetails(context, sale),
-              padding: const EdgeInsets.all(4),
-              constraints: const BoxConstraints(),
-              tooltip: 'View Details',
-            ),
-            IconButton(
-              icon: const Icon(Icons.picture_as_pdf, size: 16),
-              onPressed: () => _generatePdf(context, sale),
-              padding: const EdgeInsets.all(4),
-              constraints: const BoxConstraints(),
-              tooltip: 'Generate PDF',
-            ),
-          ],
-        ),
-      ),
+    return AppDataTable(
+      columns: columns,
+      rowCount: sales.length,
+      cellBuilder: (context, row, col) {
+        final r = sales[row];
+        final summary = r.paymentSummary;
+        switch (col) {
+          case 0:
+            return AppTableText('${row + 1}',
+                align: AppCellAlign.center, muted: true);
+          case 1:
+            return AppTableText(r.mrNo ?? '-',
+                bold: true, color: AppColors.primaryColor(context));
+          case 2:
+            return AppTableText(r.customerName ?? '-',
+                subtitle: r.customerPhone?.toString());
+          case 3:
+            return AppTableText(r.sellerName ?? '-', muted: true);
+          case 4:
+            return AppTableText(_formatDate(r.paymentDate));
+          case 5:
+            return AppTableText(r.paymentMethod ?? '-');
+          case 6:
+            return AppTableMoney(AppTableMoney.parse(r.amount),
+                bold: true, color: AppColors.success);
+          case 7:
+            return AppTableMoney(
+                AppTableMoney.parse(summary?.beforePayment?.totalDue));
+          case 8:
+            final status = summary?.status ?? '-';
+            return AppStatusPill(status, color: _getStatusColor(status));
+          default:
+            return Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                AppTableAction(
+                  icon: Icons.visibility_outlined,
+                  tooltip: 'View details',
+                  color: AppColors.info,
+                  onPressed: () => _viewReceiptDetails(context, r),
+                ),
+                AppTableAction(
+                  icon: Icons.picture_as_pdf_outlined,
+                  tooltip: 'Receipt PDF',
+                  color: AppColors.success,
+                  onPressed: () => _generatePdf(context, r),
+                ),
+              ],
+            );
+        }
+      },
     );
   }
 
@@ -621,13 +455,13 @@ class MoneyReceiptDataTableWidget extends StatelessWidget {
       case 'cancelled':
         return AppColors.danger;
       default:
-        return Colors.black;
+        return Colors.grey;
     }
   }
 
   String _formatDate(DateTime? date) {
     if (date == null) return '-';
-    return "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
+    return "${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}";
   }
 
   void _viewReceiptDetails(BuildContext context, MoneyreceiptModel receipt) {

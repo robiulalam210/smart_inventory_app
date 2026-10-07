@@ -410,319 +410,70 @@ class PurchaseReportTableCard extends StatelessWidget {
   });
 
   @override
+  // Desktop টেবিল — AppDataTable
   Widget build(BuildContext context) {
-    return TableScrollControllers(
-      builder: (context, verticalScrollController, horizontalScrollController) {
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final totalWidth = constraints.maxWidth;
-        const numColumns =
-            8; // Invoice No, Date, Supplier, Net Total, Paid, Due, Status, Actions
-        const minColumnWidth = 120.0;
-
-        final dynamicColumnWidth = (totalWidth / numColumns).clamp(
-          minColumnWidth,
-          double.infinity,
-        );
-
-        return Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withValues(alpha: 0.1),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Scrollbar(
-            controller: verticalScrollController,
-            thumbVisibility: true,
-            child: SingleChildScrollView(
-              controller: verticalScrollController,
-              scrollDirection: Axis.vertical,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: Scrollbar(
-                  controller: horizontalScrollController,
-                  thumbVisibility: true,
-                  child: SingleChildScrollView(
-                    controller: horizontalScrollController,
-                    scrollDirection: Axis.horizontal,
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 5),
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(minWidth: totalWidth),
-                        child: DataTable(
-                          dataRowMinHeight: 40,
-                          dataRowMaxHeight: 40,
-                          columnSpacing: 8,
-                          horizontalMargin: 12,
-                          dividerThickness: 0.5,
-                          headingRowHeight: 40,
-                          headingTextStyle: TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            fontFamily: GoogleFonts.inter().fontFamily,
-                          ),
-                          headingRowColor: WidgetStateProperty.all(
-                            AppColors.primaryColor(context),
-                          ),
-                          dataTextStyle: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w500,
-                            fontFamily: GoogleFonts.inter().fontFamily,
-                          ),
-                          columns: _buildColumns(dynamicColumnWidth),
-                          rows: reports.asMap().entries.map((entry) {
-                            final report = entry.value;
-                            return DataRow(
-                              onSelectChanged: onReportTap != null
-                                  ? (_) => onReportTap!()
-                                  : null,
-                              cells: [
-                                _buildDataCell(
-                                  report.invoiceNo,
-                                  dynamicColumnWidth,
-                                ),
-                                _buildDateCell(
-                                  report.purchaseDate,
-                                  dynamicColumnWidth,
-                                ),
-                                _buildDataCell(
-                                  report.supplier,
-                                  dynamicColumnWidth,
-                                ),
-                                _buildAmountCell(
-                                  report.netTotal,
-                                  dynamicColumnWidth,
-                                  isTotal: true,
-                                ),
-                                _buildAmountCell(
-                                  report.paidTotal,
-                                  dynamicColumnWidth,
-                                  isPaid: true,
-                                ),
-                                _buildAmountCell(
-                                  report.dueTotal,
-                                  dynamicColumnWidth,
-                                  isDue: true,
-                                ),
-                                _buildStatusCell(
-                                  report.paymentStatus,
-                                  dynamicColumnWidth,
-                                ),
-                                _buildActionCell(
-                                  report,
-                                  context,
-                                  dynamicColumnWidth,
-                                ),
-                              ],
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-      },
-    );
-  }
-
-  List<DataColumn> _buildColumns(double columnWidth) {
-    return [
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Invoice No', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Date', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Supplier', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Net Total', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Paid', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Due', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Status', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Actions', textAlign: TextAlign.center),
-        ),
-      ),
+    const columns = [
+      AppTableColumn.center('SL', flex: 1, minWidth: 52),
+      AppTableColumn('Invoice No', flex: 2, minWidth: 120),
+      AppTableColumn('Date', flex: 2, minWidth: 100),
+      AppTableColumn('Supplier', flex: 3, minWidth: 160),
+      AppTableColumn.numeric('Net Total', flex: 2, minWidth: 110),
+      AppTableColumn.numeric('Paid', flex: 2, minWidth: 100),
+      AppTableColumn.numeric('Due', flex: 2, minWidth: 100),
+      AppTableColumn.center('Status', flex: 2, minWidth: 104),
+      AppTableColumn.center('Actions', flex: 2, minWidth: 96),
     ];
-  }
 
-  DataCell _buildDataCell(String text, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Text(
-          text,
-          style: const TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w500,
-            color: Colors.black87,
-          ),
-          textAlign: TextAlign.center,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildDateCell(DateTime date, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Text(
-          _formatDate(date),
-          style: const TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w500,
-            color: Colors.black87,
-          ),
-          textAlign: TextAlign.center,
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildAmountCell(
-    double amount,
-    double width, {
-    bool isTotal = false,
-    bool isPaid = false,
-    bool isDue = false,
-  }) {
-    Color getAmountColor() {
-      if (isPaid) return AppColors.success;
-      if (isDue) return AppColors.warning;
-      if (isTotal) return AppColors.info;
-      return Colors.grey;
-    }
-
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: getAmountColor().withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Text(
-              amount.toStringAsFixed(2),
-              style: TextStyle(
-                color: getAmountColor(),
-                fontWeight: FontWeight.w600,
-                fontSize: 11,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildStatusCell(String status, double width) {
-    final statusColor = _getStatusColor(status);
-
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: statusColor.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Text(
-              status.toUpperCase(),
-              style: TextStyle(
-                color: statusColor,
-                fontWeight: FontWeight.w600,
-                fontSize: 10,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildActionCell(
-    PurchaseReportModel report,
-    BuildContext context,
-    double width,
-  ) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // View Button
-            _buildActionButton(
-              icon: HugeIcons.strokeRoundedView,
-              color: AppColors.success,
-              tooltip: 'View purchase details',
-              onPressed: () => _showViewDialog(context, report),
-            ),
-
-            // Print/Export Button
-            _buildActionButton(
-              icon: Iconsax.printer,
-              color: AppColors.info,
-              tooltip: 'Print report',
-              onPressed: () => _printReport(context, report),
-            ),
-          ],
-        ),
-      ),
+    return AppDataTable(
+      columns: columns,
+      rowCount: reports.length,
+      onRowTap: onReportTap == null ? null : (_) => onReportTap!(),
+      cellBuilder: (context, row, col) {
+        final r = reports[row];
+        switch (col) {
+          case 0:
+            return AppTableText('${row + 1}',
+                align: AppCellAlign.center, muted: true);
+          case 1:
+            return AppTableText(r.invoiceNo,
+                bold: true, color: AppColors.primaryColor(context));
+          case 2:
+            return AppTableText(_formatDate(r.purchaseDate));
+          case 3:
+            return AppTableText(r.supplier);
+          case 4:
+            return AppTableMoney(r.netTotal, bold: true);
+          case 5:
+            return AppTableMoney(r.paidTotal, color: AppColors.success);
+          case 6:
+            return AppTableMoney(r.dueTotal,
+                bold: r.dueTotal > 0,
+                color: r.dueTotal > 0
+                    ? AppColors.danger
+                    : AppColors.text(context).withValues(alpha: 0.5));
+          case 7:
+            return AppStatusPill(r.paymentStatus.capitalize(),
+                color: _getStatusColor(r.paymentStatus));
+          default:
+            return Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                AppTableAction(
+                  icon: Icons.visibility_outlined,
+                  tooltip: 'View',
+                  color: AppColors.info,
+                  onPressed: () => _showViewDialog(context, r),
+                ),
+                AppTableAction(
+                  icon: Icons.print_outlined,
+                  tooltip: 'Print',
+                  color: AppColors.success,
+                  onPressed: () => _printReport(context, r),
+                ),
+              ],
+            );
+        }
+      },
     );
   }
 
@@ -763,10 +514,10 @@ class PurchaseReportTableCard extends StatelessWidget {
   }
 
   void _showViewDialog(BuildContext context, PurchaseReportModel report) {
-    showDialog(
+    showAppPopover(
       context: context,
       builder: (context) {
-        return Dialog(
+        return AppPopoverShell(
           child: Container(
             width: AppSizes.width(context) * 0.50,
             padding: const EdgeInsets.all(20),

@@ -371,255 +371,51 @@ class ExpenseTableCard extends StatelessWidget {
     );
   }
 
+  // Desktop টেবিল — AppDataTable
   Widget _buildDesktopDataTable() {
-    return TableScrollControllers(
-      builder: (context, verticalScrollController, horizontalScrollController) {
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final totalWidth = constraints.maxWidth;
-        const numColumns = 9;
-        const minColumnWidth = 120.0;
-
-        final dynamicColumnWidth =
-        (totalWidth / numColumns).clamp(minColumnWidth, double.infinity);
-
-        return Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withValues(alpha: 0.1),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Scrollbar(
-            controller: verticalScrollController,
-            thumbVisibility: true,
-            child: SingleChildScrollView(
-              controller: verticalScrollController,
-              scrollDirection: Axis.vertical,
-              child: Scrollbar(
-                controller: horizontalScrollController,
-                thumbVisibility: true,
-                child: SingleChildScrollView(
-                  controller: horizontalScrollController,
-                  scrollDirection: Axis.horizontal,
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(minWidth: totalWidth),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
-                      child: DataTable(
-                        dataRowMinHeight: 35,
-                        dataRowMaxHeight: 35,
-                        dividerThickness: 0.5,
-                        headingRowHeight: 40,
-                        headingTextStyle: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                        ),
-                        headingRowColor: WidgetStateProperty.all(
-                          AppColors.primaryColor(context),
-                        ),
-                        dataTextStyle: const TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w500,
-                        ),
-                        columns: _buildColumns(dynamicColumnWidth),
-                        rows: expenses
-                            .asMap()
-                            .entries
-                            .map((entry) => _buildDataRow(context,
-                          entry.key + 1,
-                          entry.value,
-                          dynamicColumnWidth,
-                        ))
-                            .toList(),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-      },
-    );
-  }
-
-  List<DataColumn> _buildColumns(double columnWidth) {
-    return [
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth * 0.6,
-          child: const Text('No.', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Invoice No.', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Expense Head', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Sub Head', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Date', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Payment', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Amount', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth * 1.2,
-          child: const Text('Note', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth * 1.2,
-          child: const Text('Actions', textAlign: TextAlign.center),
-        ),
-      ),
+    const columns = [
+      AppTableColumn.center('SL', flex: 1, minWidth: 52),
+      AppTableColumn('Invoice No.', flex: 2, minWidth: 120),
+      AppTableColumn('Expense Head', flex: 3, minWidth: 150),
+      AppTableColumn('Date', flex: 2, minWidth: 100),
+      AppTableColumn('Payment', flex: 2, minWidth: 100),
+      AppTableColumn.numeric('Amount', flex: 2, minWidth: 110),
+      AppTableColumn('Note', flex: 3, minWidth: 140),
+      AppTableColumn.center('Actions', flex: 2, minWidth: 120),
     ];
-  }
 
-  DataRow _buildDataRow(BuildContext context,int index, ExpenseModel expense, double columnWidth) {
-    return DataRow(
-      cells: [
-        _buildDataCell('$index', columnWidth * 0.6, TextAlign.center),
-        _buildDataCell(
-          expense.invoiceNumber?.capitalize() ?? "N/A",
-          columnWidth,
-          TextAlign.center,
-        ),
-        _buildDataCell(expense.headName ?? "N/A", columnWidth, TextAlign.center),
-        _buildDataCell(expense.subheadName ?? "N/A", columnWidth, TextAlign.center),
-        _buildDataCell(
-          AppWidgets().convertDateTimeDDMMYYYY(expense.expenseDate ),
-          columnWidth,
-          TextAlign.center,
-        ),
-        _buildDataCell(expense.paymentMethod ?? "N/A", columnWidth, TextAlign.center),
-        _buildAmountCell(expense.amount, columnWidth),
-        _buildDataCell(expense.note ?? "N/A", columnWidth * 1.2, TextAlign.center),
-        _buildActionCell(context,expense, columnWidth),
-      ],
-    );
-  }
-
-  DataCell _buildDataCell(String text, double width, TextAlign align) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Text(
-          text,
-          style: const TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w500,
-            color: Colors.black87,
-          ),
-          textAlign: align,
-          overflow: TextOverflow.ellipsis,
-          maxLines: 2,
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildAmountCell(String? amount, double width) {
-    final amountValue = double.tryParse(amount ?? '0');
-    final color = amountValue != null && amountValue > 0 ? AppColors.danger : Colors.grey;
-
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Text(
-              amount ?? "0",
-              style: TextStyle(
-                color: color,
-                fontWeight: FontWeight.w600,
-                fontSize: 11,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildActionCell(BuildContext context,ExpenseModel expense, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            IconButton(
-              onPressed: () => _showEditDialog(context, expense, false),
-              icon: const Icon(Icons.edit, size: 18, color: AppColors.info),
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-            ),
-            IconButton(
-              onPressed: () => _showViewDialog(context, expense, false),
-              icon: const Icon(
-                HugeIcons.strokeRoundedView,
-                size: 18,
-                color: AppColors.success,
-              ),
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-            ),
-            IconButton(
-              onPressed: () => _confirmDelete(context, expense),
-              icon: const Icon(
-                HugeIcons.strokeRoundedDeleteThrow,
-                size: 18,
-                color: AppColors.danger,
-              ),
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-            ),
-          ],
-        ),
-      ),
+    return AppDataTable(
+      columns: columns,
+      rowCount: expenses.length,
+      cellBuilder: (context, row, col) {
+        final e = expenses[row];
+        switch (col) {
+          case 0:
+            return AppTableText('${row + 1}',
+                align: AppCellAlign.center, muted: true);
+          case 1:
+            return AppTableText(e.invoiceNumber?.capitalize() ?? '-',
+                bold: true, color: AppColors.primaryColor(context));
+          case 2:
+            return AppTableText(e.headName ?? '-', subtitle: e.subheadName);
+          case 3:
+            return AppTableText(
+                AppWidgets().convertDateTimeDDMMYYYY(e.expenseDate));
+          case 4:
+            return AppTableText(e.paymentMethod ?? '-');
+          case 5:
+            return AppTableMoney(AppTableMoney.parse(e.amount),
+                bold: true, color: AppColors.danger);
+          case 6:
+            return AppTableText(e.note ?? '-', muted: true);
+          default:
+            return AppTableEditDelete(
+              onView: () => _showViewDialog(context, e, false),
+              onEdit: () => _showEditDialog(context, e, false),
+              onDelete: () => _confirmDelete(context, e),
+            );
+        }
+      },
     );
   }
 
@@ -633,10 +429,10 @@ class ExpenseTableCard extends StatelessWidget {
   }
 
   void _showEditDialog(BuildContext context, ExpenseModel expense, bool isMobile) {
-    showDialog(
+    showAppPopover(
       context: context,
       builder: (context) {
-        return Dialog(
+        return AppPopoverShell(
           insetPadding: const EdgeInsets.all(20),
           child: ConstrainedBox(
             constraints: BoxConstraints(
@@ -668,10 +464,10 @@ class ExpenseTableCard extends StatelessWidget {
   }
 
   void _showViewDialog(BuildContext context, ExpenseModel expense, bool isMobile) {
-    showDialog(
+    showAppPopover(
       context: context,
       builder: (context) {
-        return Dialog(
+        return AppPopoverShell(
           insetPadding: const EdgeInsets.all(20),
           child: ConstrainedBox(
             constraints: BoxConstraints(

@@ -98,82 +98,55 @@ class SaleModeTableCard extends StatelessWidget {
           );
         },
       );
-    } else {
-      // Tablet/Desktop: DataTable view
-      return SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Container(
-          decoration: BoxDecoration(
-            color: AppColors.bottomNavBg(context),
-            borderRadius: BorderRadius.circular(AppSizes.radius),
-            border: Border.all(color: AppColors.greyColor(context)),
-          ),
-          child: DataTable(
-            columnSpacing: 20,
-            horizontalMargin: 12,
-            headingRowColor: MaterialStateProperty.all(
-              AppColors.primaryColor(context).withOpacity(0.1),
-            ),
-            columns: const [
-              DataColumn(label: Text('ID')),
-              DataColumn(label: Text('Name')),
-              DataColumn(label: Text('Code')),
-              DataColumn(label: Text('Base Unit')),
-              DataColumn(label: Text('Conversion')),
-              DataColumn(label: Text('Price Type')),
-              DataColumn(label: Text('Status')),
-              DataColumn(label: Text('Actions')),
-            ],
-            rows: saleModes.map((mode) {
-              return DataRow(cells: [
-                DataCell(Text(mode.id?.toString() ?? '-')),
-                DataCell(Text(mode.name ?? '-')),
-                DataCell(Text(mode.code ?? '-')),
-                DataCell(Text(mode.baseUnitName ?? mode.baseUnit?.toString() ?? '-')),
-                DataCell(Text(mode.conversionFactor?.toStringAsFixed(6) ?? '-')),
-                DataCell(
-                  Chip(
-                    label: Text(
-                      _getPriceTypeDisplay(mode.priceType),
-                      style: const TextStyle(color: Colors.white, fontSize: 12),
-                    ),
-                    backgroundColor: _getPriceTypeColor(mode.priceType),
-                  ),
-                ),
-                DataCell(
-                  Chip(
-                    label: Text(
-                      mode.isActive == true ? 'Active' : 'Inactive',
-                      style: TextStyle(
-                        color: mode.isActive == true ? Colors.white : Colors.black,
-                        fontSize: 12,
-                      ),
-                    ),
-                    backgroundColor: mode.isActive == true
-                        ? AppColors.success
-                        : Colors.grey[300],
-                  ),
-                ),
-                DataCell(
-                  Row(
-                    children: [
-                      IconButton(
-                        icon: Icon(Icons.edit, color: AppColors.primaryColor(context)),
-                        onPressed: () => _showEditDialog(context, mode),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.delete, color: AppColors.danger),
-                        onPressed: () => _showDeleteDialog(context, mode),
-                      ),
-                    ],
-                  ),
-                ),
-              ]);
-            }).toList(),
-          ),
-        ),
-      );
     }
+
+    // Tablet/Desktop: AppDataTable
+    const columns = [
+      AppTableColumn.center('SL', flex: 1, minWidth: 52),
+      AppTableColumn('Name', flex: 3, minWidth: 150),
+      AppTableColumn('Code', flex: 2, minWidth: 90),
+      AppTableColumn('Base Unit', flex: 2, minWidth: 100),
+      AppTableColumn.numeric('Conversion', flex: 2, minWidth: 110),
+      AppTableColumn.center('Price Type', flex: 2, minWidth: 120),
+      AppTableColumn.center('Status', flex: 2, minWidth: 96),
+      AppTableColumn.center('Actions', flex: 2, minWidth: 100),
+    ];
+
+    return AppDataTable(
+      columns: columns,
+      rowCount: saleModes.length,
+      cellBuilder: (context, row, col) {
+        final mode = saleModes[row];
+        switch (col) {
+          case 0:
+            return AppTableText('${row + 1}',
+                align: AppCellAlign.center, muted: true);
+          case 1:
+            return AppTableText(mode.name ?? '-', bold: true);
+          case 2:
+            return AppTableText(mode.code ?? '-', muted: true);
+          case 3:
+            return AppTableText(
+                mode.baseUnitName ?? mode.baseUnit?.toString() ?? '-');
+          case 4:
+            return AppTableText(
+                mode.conversionFactor?.toStringAsFixed(4) ?? '-',
+                align: AppCellAlign.end);
+          case 5:
+            return AppStatusPill(_getPriceTypeDisplay(mode.priceType),
+                color: _getPriceTypeColor(mode.priceType));
+          case 6:
+            final active = mode.isActive == true;
+            return AppStatusPill(active ? 'Active' : 'Inactive',
+                color: active ? AppColors.success : AppColors.danger);
+          default:
+            return AppTableEditDelete(
+              onEdit: () => _showEditDialog(context, mode),
+              onDelete: () => _showDeleteDialog(context, mode),
+            );
+        }
+      },
+    );
   }
 
   String _getPriceTypeDisplay(String? priceType) {
@@ -203,10 +176,10 @@ class SaleModeTableCard extends StatelessWidget {
   }
 
   void _showEditDialog(BuildContext context, SaleModeModel saleMode) {
-    showDialog(
+    showAppPopover(
       context: context,
       builder: (context) {
-        return Dialog(
+        return AppPopoverShell(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppSizes.radius),
           ),
@@ -226,10 +199,10 @@ class SaleModeTableCard extends StatelessWidget {
   }
 
   void _showDeleteDialog(BuildContext context, SaleModeModel saleMode) {
-    showDialog(
+    showAppPopover(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
+        return AppPopoverCard(
           title: const Text('Delete Sale Mode'),
           content: Text(
             'Are you sure you want to delete "${saleMode.name}"?',

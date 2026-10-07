@@ -482,440 +482,60 @@ class StockReportTableCard extends StatelessWidget {
   });
 
   @override
+  // Desktop টেবিল — AppDataTable (header ক্লিক করে sort করা যায়)
   Widget build(BuildContext context) {
-    return TableScrollControllers(
-      builder: (context, verticalScrollController, horizontalScrollController) {
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final totalWidth = constraints.maxWidth;
-        const numColumns = 12; // SL, Product Name, Category, Brand, Avg Cost, Selling Price, Current Stock, Stock Value, Potential Value, Profit Margin, Stock Status, Profitability
-        const minColumnWidth = 100.0;
-
-        final dynamicColumnWidth =
-        (totalWidth / numColumns).clamp(minColumnWidth, double.infinity);
-
-        return Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withValues(alpha: 0.1),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Scrollbar(
-            controller: verticalScrollController,
-            thumbVisibility: true,
-            child: SingleChildScrollView(
-              controller: verticalScrollController,
-              scrollDirection: Axis.vertical,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: Scrollbar(
-                  controller: horizontalScrollController,
-                  thumbVisibility: true,
-                  child: SingleChildScrollView(
-                    controller: horizontalScrollController,
-                    scrollDirection: Axis.horizontal,
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 5),
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(minWidth: totalWidth),
-                        child: DataTable(
-                          dataRowMinHeight: 40,
-                          dataRowMaxHeight: 40,
-                          columnSpacing: 8,
-                          horizontalMargin: 12,
-                          dividerThickness: 0.5,
-                          headingRowHeight: 40,
-                          headingTextStyle: TextStyle(
-                            color: Colors.white,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                            fontFamily: GoogleFonts.inter().fontFamily,
-                          ),
-                          headingRowColor: WidgetStateProperty.all(
-                            AppColors.primaryColor(context),
-                          ),
-                          dataTextStyle: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w500,
-                            fontFamily: GoogleFonts.inter().fontFamily,
-                          ),
-                          sortColumnIndex: _getSortColumnIndex(sortBy),
-                          sortAscending: sortAscending,
-                          columns: _buildColumns(dynamicColumnWidth),
-                          rows: products.asMap().entries.map((entry) {
-                            final product = entry.value;
-                            return DataRow(
-                              cells: [
-                                _buildIndexCell(entry.key + 1, dynamicColumnWidth * 0.6),
-                                _buildProductNameCell(product, dynamicColumnWidth * 1.5),
-                                _buildCategoryCell(product.category, dynamicColumnWidth),
-                                _buildBrandCell(product.brand, dynamicColumnWidth * 1.2),
-                                _buildPriceCell(product.avgPurchasePrice, dynamicColumnWidth, isCost: true),
-                                _buildPriceCell(product.sellingPrice, dynamicColumnWidth, isSelling: true),
-                                _buildStockCell(product, dynamicColumnWidth),
-                                _buildValueCell(product.value, dynamicColumnWidth),
-                                _buildPotentialValueCell(product, dynamicColumnWidth),
-                                _buildProfitMarginCell(product, dynamicColumnWidth),
-                                _buildStockStatusCell(product, dynamicColumnWidth),
-                                _buildProfitabilityCell(product, dynamicColumnWidth),
-                              ],
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-      },
-    );
-  }
-
-  List<DataColumn> _buildColumns(double columnWidth) {
-    return [
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth * 0.6,
-          child: const Text('SL', textAlign: TextAlign.center),
-        ),
-      ),
-      _buildSortableColumn('Product Name', 'name', columnWidth * 1.5),
-      _buildSortableColumn('Category', 'category', columnWidth),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth * 1.2,
-          child: const Text('Brand', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Avg Cost', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Selling Price', textAlign: TextAlign.center),
-        ),
-      ),
-      _buildSortableColumn('Current Stock', 'stock', columnWidth),
-      _buildSortableColumn('Stock Value', 'value', columnWidth),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Potential Value', textAlign: TextAlign.center),
-        ),
-      ),
-      _buildSortableColumn('Profit Margin', 'profit_margin', columnWidth),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Stock Status', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Profitability', textAlign: TextAlign.center),
-        ),
-      ),
+    const columns = [
+      AppTableColumn.center('SL', flex: 1, minWidth: 52),
+      AppTableColumn('Product', flex: 4, minWidth: 170, sortKey: 'name'),
+      AppTableColumn('Category', flex: 2, minWidth: 110, sortKey: 'category'),
+      AppTableColumn.numeric('Avg Cost', flex: 2, minWidth: 100),
+      AppTableColumn.numeric('Sell Price', flex: 2, minWidth: 100),
+      AppTableColumn.numeric('Stock', flex: 1, minWidth: 84, sortKey: 'stock'),
+      AppTableColumn.numeric('Stock Value', flex: 2, minWidth: 120, sortKey: 'value'),
+      AppTableColumn.numeric('Potential', flex: 2, minWidth: 110),
+      AppTableColumn.numeric('Margin', flex: 1, minWidth: 90, sortKey: 'profit_margin'),
+      AppTableColumn.center('Status', flex: 2, minWidth: 110),
     ];
-  }
 
-  DataColumn _buildSortableColumn(String label, String columnId, double width) {
-    return DataColumn(
-      label: SizedBox(
-        width: width,
-        child: Text(
-          label,
-          textAlign: TextAlign.center,
-        ),
-      ),
-      onSort: (columnIndex, ascending) {
-        onSort(columnId, ascending);
+    return AppDataTable(
+      columns: columns,
+      rowCount: products.length,
+      sortKey: sortBy,
+      sortAscending: sortAscending,
+      onSort: onSort,
+      cellBuilder: (context, row, col) {
+        final p = products[row];
+        switch (col) {
+          case 0:
+            return AppTableText('${row + 1}',
+                align: AppCellAlign.center, muted: true);
+          case 1:
+            return AppTableText(p.productName, bold: true, subtitle: p.brand);
+          case 2:
+            return AppTableText(p.category, muted: true);
+          case 3:
+            return AppTableMoney(p.avgPurchasePrice);
+          case 4:
+            return AppTableMoney(p.sellingPrice);
+          case 5:
+            return AppTableText('${p.currentStock}',
+                align: AppCellAlign.end,
+                bold: true,
+                color: p.stockStatusColor);
+          case 6:
+            return AppTableMoney(p.value, bold: true);
+          case 7:
+            return AppTableMoney(p.potentialValue,
+                color: p.potentialValue > p.value ? AppColors.info : null);
+          case 8:
+            return AppTableText('${p.profitMargin.toStringAsFixed(1)}%',
+                align: AppCellAlign.end,
+                bold: true,
+                color: p.profitabilityColor);
+          default:
+            return AppStatusPill(p.stockStatus, color: p.stockStatusColor);
+        }
       },
     );
-  }
-
-  DataCell _buildIndexCell(int index, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Center(
-          child: Text(
-            index.toString(),
-            style: const TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.w600,
-              color: Colors.black87,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildProductNameCell(StockProduct product, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Tooltip(
-          message: product.productName,
-          child: Text(
-            product.productName,
-            style: const TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.w500,
-              color: Colors.black87,
-            ),
-            textAlign: TextAlign.center,
-            overflow: TextOverflow.ellipsis,
-            maxLines: 2,
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildCategoryCell(String category, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Text(
-          category,
-          style: const TextStyle(
-            fontSize: 10,
-            fontWeight: FontWeight.w500,
-            color: Colors.black87,
-          ),
-          textAlign: TextAlign.center,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildBrandCell(String brand, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Text(
-          brand,
-          style: const TextStyle(
-            fontSize: 10,
-            fontWeight: FontWeight.w500,
-            color: Colors.black87,
-          ),
-          textAlign: TextAlign.center,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildPriceCell(double price, double width, {bool isCost = false, bool isSelling = false}) {
-    Color getPriceColor() {
-      if (isCost) return AppColors.warning;
-      if (isSelling) return AppColors.info;
-      return Colors.grey;
-    }
-
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-            decoration: BoxDecoration(
-              color: getPriceColor().withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Text(
-              price.toStringAsFixed(2),
-              style: TextStyle(
-                color: getPriceColor(),
-                fontWeight: FontWeight.w600,
-                fontSize: 10,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildStockCell(StockProduct product, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: product.stockStatusColor.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(4),
-              border: Border.all(color: product.stockStatusColor),
-            ),
-            child: Text(
-              product.currentStock.toString(),
-              style: TextStyle(
-                color: product.stockStatusColor,
-                fontWeight: FontWeight.w600,
-                fontSize: 10,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildValueCell(double value, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-            decoration: BoxDecoration(
-              color: AppColors.success.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Text(
-              value.toStringAsFixed(2),
-              style: const TextStyle(
-                color: AppColors.success,
-                fontWeight: FontWeight.w600,
-                fontSize: 10,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildPotentialValueCell(StockProduct product, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Center(
-          child: Text(
-            product.potentialValue.toStringAsFixed(2),
-            style: TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.w500,
-              color: product.potentialValue > product.value ? AppColors.info : Colors.grey,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildProfitMarginCell(StockProduct product, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-            decoration: BoxDecoration(
-              color: product.profitabilityColor.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Text(
-              '${product.profitMargin.toStringAsFixed(1)}%',
-              style: TextStyle(
-                color: product.profitabilityColor,
-                fontWeight: FontWeight.w600,
-                fontSize: 10,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildStockStatusCell(StockProduct product, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-            decoration: BoxDecoration(
-              color: product.stockStatusColor.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Text(
-              product.stockStatus,
-              style: TextStyle(
-                color: product.stockStatusColor,
-                fontWeight: FontWeight.w600,
-                fontSize: 9,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildProfitabilityCell(StockProduct product, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-            decoration: BoxDecoration(
-              color: product.profitabilityColor.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Text(
-              product.profitability,
-              style: TextStyle(
-                color: product.profitabilityColor,
-                fontWeight: FontWeight.w600,
-                fontSize: 9,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  int _getSortColumnIndex(String sortBy) {
-    switch (sortBy) {
-      case 'name': return 1;
-      case 'category': return 2;
-      case 'stock': return 6;
-      case 'value': return 7;
-      case 'profit_margin': return 9;
-      default: return 7;
-    }
   }
 }

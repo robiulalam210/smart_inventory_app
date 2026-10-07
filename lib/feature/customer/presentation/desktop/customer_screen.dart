@@ -197,7 +197,7 @@ class _CustomerScreenState extends State<CustomerScreen> {
 
   Widget _buildDesktopHeader() {
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.end,
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
         // 🔍 Search Field
@@ -326,10 +326,10 @@ class _CustomerScreenState extends State<CustomerScreen> {
   }
 
   void _showCreateCustomerDialog(BuildContext context) {
-    showDialog(
+    showAppPopover(
       context: context,
       builder: (context) {
-        return Dialog(
+        return AppPopoverShell(
           insetPadding: const EdgeInsets.all(20),
           child: ConstrainedBox(
             constraints: BoxConstraints(

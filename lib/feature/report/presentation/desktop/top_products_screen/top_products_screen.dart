@@ -354,434 +354,110 @@ class TopProductsTableCard extends StatelessWidget {
   });
 
   @override
+  // Desktop টেবিল — AppDataTable
+  // Share column এ ছোট progress bar — কোন product মোট বিক্রির কত অংশ,
+  // এক নজরে বোঝা যায়
   Widget build(BuildContext context) {
-    return TableScrollControllers(
-      builder: (context, verticalScrollController, horizontalScrollController) {
+    final double totalRevenue =
+        products.fold(0.0, (sum, p) => sum + p.totalSoldPrice);
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final totalWidth = constraints.maxWidth;
-        const numColumns =
-            7; // #, Product Name, Price, Quantity Sold, Total Revenue, Performance, Actions
-        const minColumnWidth = 120.0;
+    const columns = [
+      AppTableColumn.center('Rank', flex: 1, minWidth: 64),
+      AppTableColumn('Product', flex: 4, minWidth: 180),
+      AppTableColumn.numeric('Price', flex: 2, minWidth: 100),
+      AppTableColumn.numeric('Sold Qty', flex: 1, minWidth: 90),
+      AppTableColumn.numeric('Revenue', flex: 2, minWidth: 120),
+      AppTableColumn('Share', flex: 3, minWidth: 150),
+      AppTableColumn.center('Actions', flex: 2, minWidth: 96),
+    ];
 
-        final dynamicColumnWidth = (totalWidth / numColumns).clamp(
-          minColumnWidth,
-          double.infinity,
-        );
-
-        return Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withValues(alpha: 0.1),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Scrollbar(
-            controller: verticalScrollController,
-            thumbVisibility: true,
-            child: SingleChildScrollView(
-              controller: verticalScrollController,
-              scrollDirection: Axis.vertical,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: Scrollbar(
-                  controller: horizontalScrollController,
-                  thumbVisibility: true,
-                  child: SingleChildScrollView(
-                    controller: horizontalScrollController,
-                    scrollDirection: Axis.horizontal,
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 5),
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(minWidth: totalWidth),
-                        child: DataTable(
-                          dataRowMinHeight: 40,
-                          dataRowMaxHeight: 40,
-                          columnSpacing: 8,
-                          horizontalMargin: 12,
-                          dividerThickness: 0.5,
-                          headingRowHeight: 40,
-                          headingTextStyle: TextStyle(
-                            color: Colors.white,
+    return AppDataTable(
+      columns: columns,
+      rowCount: products.length,
+      onRowTap: onProductTap == null ? null : (_) => onProductTap!(),
+      cellBuilder: (context, row, col) {
+        final p = products[row];
+        switch (col) {
+          case 0:
+            final rank = row + 1;
+            final medal = switch (rank) {
+              1 => const Color(0xFFF59E0B),
+              2 => const Color(0xFF94A3B8),
+              3 => const Color(0xFFB45309),
+              _ => null,
+            };
+            return medal == null
+                ? AppTableText('#$rank',
+                    align: AppCellAlign.center, muted: true)
+                : CircleAvatar(
+                    radius: 12,
+                    backgroundColor: medal.withValues(alpha: 0.15),
+                    child: Text('$rank',
+                        style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w700,
-                            fontFamily: GoogleFonts.inter().fontFamily,
-                          ),
-                          headingRowColor: WidgetStateProperty.all(
-                            AppColors.primaryColor(context),
-                          ),
-                          dataTextStyle: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w500,
-                            fontFamily: GoogleFonts.inter().fontFamily,
-                          ),
-                          columns: _buildColumns(dynamicColumnWidth),
-                          rows: products.asMap().entries.map((entry) {
-                            final product = entry.value;
-                            return DataRow(
-                              onSelectChanged: onProductTap != null
-                                  ? (_) => onProductTap!()
-                                  : null,
-                              cells: [
-                                _buildRankCell(
-                                  entry.key + 1,
-                                  dynamicColumnWidth * 0.6,
-                                ),
-                                _buildProductNameCell(
-                                  product.productName,
-                                  dynamicColumnWidth,
-                                ),
-                                _buildPriceCell(
-                                  product.sellingPrice,
-                                  dynamicColumnWidth,
-                                ),
-                                _buildQuantityCell(
-                                  product.totalSoldQuantity,
-                                  dynamicColumnWidth,
-                                ),
-                                _buildRevenueCell(
-                                  product.totalSoldPrice,
-                                  dynamicColumnWidth,
-                                ),
-                                _buildPerformanceCell(
-                                  product,
-                                  products,
-                                  dynamicColumnWidth,
-                                ),
-                                _buildActionCell(
-                                  product,
-                                  context,
-                                  dynamicColumnWidth,
-                                ),
-                              ],
-                            );
-                          }).toList(),
-                        ),
-                      ),
+                            color: medal)),
+                  );
+          case 1:
+            return AppTableText(p.productName, bold: true);
+          case 2:
+            return AppTableMoney(p.sellingPrice);
+          case 3:
+            return AppTableText('${p.totalSoldQuantity}',
+                align: AppCellAlign.end, bold: true);
+          case 4:
+            return AppTableMoney(p.totalSoldPrice,
+                bold: true, color: AppColors.success);
+          case 5:
+            final share = totalRevenue <= 0
+                ? 0.0
+                : (p.totalSoldPrice / totalRevenue).clamp(0.0, 1.0);
+            return Row(
+              children: [
+                Expanded(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: LinearProgressIndicator(
+                      value: share,
+                      minHeight: 6,
+                      backgroundColor: AppColors.primaryColor(context)
+                          .withValues(alpha: 0.10),
+                      color: AppColors.primaryColor(context),
                     ),
                   ),
                 ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-      },
-    );
-  }
-
-  List<DataColumn> _buildColumns(double columnWidth) {
-    return [
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth * 0.6,
-          child: const Text('#', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Product Name', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Price', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Quantity Sold', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Total Revenue', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Performance', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Actions', textAlign: TextAlign.center),
-        ),
-      ),
-    ];
-  }
-
-  DataCell _buildRankCell(int rank, double width) {
-    Color getRankColor() {
-      switch (rank) {
-        case 1:
-          return Colors.amber;
-        case 2:
-          return Colors.grey;
-        case 3:
-          return AppColors.warning;
-        default:
-          return AppColors.info;
-      }
-    }
-
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Center(
-          child: Container(
-            width: 28,
-            height: 28,
-            decoration: BoxDecoration(
-              color: getRankColor().withValues(alpha: 0.1),
-              shape: BoxShape.circle,
-              border: Border.all(color: getRankColor(), width: 2),
-            ),
-            child: Center(
-              child: Text(
-                rank.toString(),
-                style: TextStyle(
-                  color: getRankColor(),
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12,
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildProductNameCell(String productName, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Text(
-          productName,
-          style: const TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w500,
-            color: Colors.black87,
-          ),
-          textAlign: TextAlign.center,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildPriceCell(double price, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: AppColors.info.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Text(
-              price.toStringAsFixed(2),
-              style: const TextStyle(
-                color: AppColors.info,
-                fontWeight: FontWeight.w600,
-                fontSize: 11,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildQuantityCell(int quantity, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: AppColors.success.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Text(
-              quantity.toString(),
-              style: const TextStyle(
-                color: AppColors.success,
-                fontWeight: FontWeight.w600,
-                fontSize: 11,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildRevenueCell(double revenue, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: Colors.purple.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Text(
-              revenue.toStringAsFixed(2),
-              style: const TextStyle(
-                color: Colors.purple,
-                fontWeight: FontWeight.w600,
-                fontSize: 11,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildPerformanceCell(
-      TopProductModel product,
-      List<TopProductModel> allProducts,
-      double width,
-      ) {
-    final totalRevenue = allProducts.fold(
-      0.0,
-          (sum, p) => sum + p.totalSoldPrice,
-    );
-
-    // Guard against division by zero
-    if (totalRevenue <= 0) {
-      return DataCell(
-        SizedBox(
-          width: width,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                height: 6,
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(3),
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                '0%',
-                style: TextStyle(
-                  fontSize: 10,
-                  color: Colors.grey,
-                  fontWeight: FontWeight.w600,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    final percentage = (product.totalSoldPrice / totalRevenue * 100);
-
-    // Ensure percentage is not negative
-    final safePercentage = percentage.clamp(0.0, 100.0);
-
-    Color getPerformanceColor() {
-      if (safePercentage > 50) return AppColors.success;
-      if (safePercentage > 25) return AppColors.warning;
-      return AppColors.danger;
-    }
-
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Progress bar
-            Container(
-              height: 6,
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(3),
-              ),
-              child: FractionallySizedBox(
-                alignment: Alignment.centerLeft,
-                widthFactor: safePercentage / 100,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: getPerformanceColor(),
-                    borderRadius: BorderRadius.circular(3),
+                const SizedBox(width: 8),
+                SizedBox(
+                  width: 44,
+                  child: Text(
+                    '${(share * 100).toStringAsFixed(1)}%',
+                    textAlign: TextAlign.right,
+                    style: TextStyle(
+                        fontSize: 12, color: AppColors.text(context)),
                   ),
                 ),
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              '${safePercentage.toStringAsFixed(1)}%',
-              style: TextStyle(
-                fontSize: 10,
-                color: getPerformanceColor(),
-                fontWeight: FontWeight.w600,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-  DataCell _buildActionCell(
-    TopProductModel product,
-    BuildContext context,
-    double width,
-  ) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // View Button
-            _buildActionButton(
-              icon: HugeIcons.strokeRoundedView,
-              color: AppColors.success,
-              tooltip: 'View product details',
-              onPressed: () => _showProductDetails(context, product),
-            ),
-
-            // Analytics Button
-            _buildActionButton(
-              icon: Iconsax.chart,
-              color: AppColors.info,
-              tooltip: 'View sales analytics',
-              onPressed: () => _showSalesAnalytics(context, product),
-            ),
-          ],
-        ),
-      ),
+              ],
+            );
+          default:
+            return Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                AppTableAction(
+                  icon: Icons.visibility_outlined,
+                  tooltip: 'Details',
+                  color: AppColors.info,
+                  onPressed: () => _showProductDetails(context, p),
+                ),
+                AppTableAction(
+                  icon: Icons.insights_outlined,
+                  tooltip: 'Sales analytics',
+                  color: AppColors.success,
+                  onPressed: () => _showSalesAnalytics(context, p),
+                ),
+              ],
+            );
+        }
+      },
     );
   }
 
@@ -801,10 +477,10 @@ class TopProductsTableCard extends StatelessWidget {
   }
 
   void _showProductDetails(BuildContext context, TopProductModel product) {
-    showDialog(
+    showAppPopover(
       context: context,
       builder: (context) {
-        return Dialog(
+        return AppPopoverShell(
           child: Container(
             width: AppSizes.width(context) * 0.40,
             padding: const EdgeInsets.all(20),

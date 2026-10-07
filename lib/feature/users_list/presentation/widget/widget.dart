@@ -126,95 +126,52 @@ class UserTableCard extends StatelessWidget {
   // =========================
   // 💻 DESKTOP VIEW
   // =========================
+  // Desktop টেবিল — AppDataTable
   Widget _buildDesktopTable(BuildContext context) {
-    return TableScrollControllers(
-      builder: (context, verticalController, horizontalController) {
+    const columns = [
+      AppTableColumn.center('SL', flex: 1, minWidth: 52),
+      AppTableColumn('Name', flex: 3, minWidth: 160),
+      AppTableColumn('Email', flex: 3, minWidth: 160),
+      AppTableColumn.center('Role', flex: 2, minWidth: 110),
+      AppTableColumn('Phone', flex: 2, minWidth: 120),
+      AppTableColumn('Company', flex: 2, minWidth: 120),
+      AppTableColumn.center('Status', flex: 2, minWidth: 96),
+      AppTableColumn.center('Actions', flex: 1, minWidth: 80),
+    ];
 
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Scrollbar(
-        controller: verticalController,
-        thumbVisibility: true,
-        child: SingleChildScrollView(
-          controller: verticalController,
-          child: Scrollbar(
-            controller: horizontalController,
-            thumbVisibility: true,
-            child: SingleChildScrollView(
-              controller: horizontalController,
-              scrollDirection: Axis.horizontal,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: DataTable(
-                  dataRowMinHeight: 40,
-                  dataRowMaxHeight: 40,
-                  columnSpacing: 8,
-                  horizontalMargin: 12,
-                  dividerThickness: 0.5,
-                  headingRowHeight: 40,
-                  headingRowColor: WidgetStateProperty.all(
-                    AppColors.primaryColor(context),
-                  ),
-                  headingTextStyle: GoogleFonts.inter(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                  ),
-                  dataTextStyle: GoogleFonts.inter(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w500,
-                  ),
-                  columns: const [
-                    DataColumn(label: Text('No.')),
-                    DataColumn(label: Text('Full Name')),
-                    DataColumn(label: Text('User Name')),
-                    DataColumn(label: Text('Email')),
-                    DataColumn(label: Text('Role')),
-                    DataColumn(label: Text('Phone')),
-                    DataColumn(label: Text('Company')),
-                    DataColumn(label: Text('Status')),
-                    DataColumn(label: Text('Actions')),
-                  ],
-                  rows: users.asMap().entries.map((entry) {
-                    final user = entry.value;
-                    return DataRow(cells: [
-                      DataCell(Text('${entry.key + 1}')),
-                      DataCell(Text(
-                          (user.fullName ?? "N/A").trim()))
-                      ,  DataCell(Text(
-                          '${user.username ?? ""} ')),
-                      DataCell(Text(user.email ?? 'N/A')),
-                      DataCell(Text(user.role ?? 'N/A')),
-                      DataCell(Text(user.phone ?? 'N/A')),
-                      DataCell(Text(user.company?.name ?? 'N/A')),
-                      DataCell(_statusChip(_getUserStatus(user))),
-                      DataCell(
-                        IconButton(
-                          icon: const Icon(Icons.visibility,
-                              size: 18, color: AppColors.success),
-                          onPressed: () =>
-                              _showViewDialog(context, user),
-                        ),
-                      ),
-                    ]);
-                  }).toList(),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
+    return AppDataTable(
+      columns: columns,
+      rowCount: users.length,
+      cellBuilder: (context, row, col) {
+        final u = users[row];
+        switch (col) {
+          case 0:
+            return AppTableText('${row + 1}',
+                align: AppCellAlign.center, muted: true);
+          case 1:
+            return AppTableText((u.fullName ?? '-').trim(),
+                bold: true, subtitle: u.username);
+          case 2:
+            return AppTableText(u.email ?? '-');
+          case 3:
+            return AppStatusPill((u.role ?? '-').replaceAll('_', ' '),
+                color: AppColors.info);
+          case 4:
+            return AppTableText(u.phone ?? '-');
+          case 5:
+            return AppTableText(u.company?.name ?? '-', muted: true);
+          case 6:
+            final active = _getUserStatus(u);
+            return AppStatusPill(active ? 'Active' : 'Inactive',
+                color: active ? AppColors.success : AppColors.danger);
+          default:
+            return AppTableAction(
+              icon: Icons.visibility_outlined,
+              tooltip: 'View details',
+              color: AppColors.info,
+              onPressed: () => _showViewDialog(context, u),
+            );
+        }
       },
     );
   }
@@ -250,10 +207,10 @@ class UserTableCard extends StatelessWidget {
   // 🧾 VIEW DIALOG (RESPONSIVE)
   // =========================
   void _showViewDialog(BuildContext context, UsersListModel user) {
-    showDialog(
+    showAppPopover(
       context: context,
       builder: (_) {
-        return Dialog(
+        return AppPopoverShell(
           child: Container(
             color: AppColors.bottomNavBg(context),
             width: MediaQuery.of(context).size.width < 768

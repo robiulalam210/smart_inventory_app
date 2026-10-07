@@ -117,7 +117,7 @@ class _SaleReportScreenState extends State<SaleReportScreen> {
 
   Widget _buildFilterRow() {
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.end,
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
         // 👤 Customer Dropdown
@@ -505,287 +505,44 @@ class SalesReportTableCard extends StatelessWidget {
   });
 
   @override
+  // Desktop টেবিল — AppDataTable
   Widget build(BuildContext context) {
-    return TableScrollControllers(
-      builder: (context, verticalScrollController, horizontalScrollController) {
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final totalWidth = constraints.maxWidth;
-        const numColumns =
-            7; // Invoice No, Date, Customer, Sales Price, Profit, Status, Actions
-        const minColumnWidth = 120.0;
-
-        final dynamicColumnWidth = (totalWidth / numColumns).clamp(
-          minColumnWidth,
-          double.infinity,
-        );
-
-        return Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withValues(alpha: 0.1),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Scrollbar(
-            controller: verticalScrollController,
-            thumbVisibility: true,
-            child: SingleChildScrollView(
-              controller: verticalScrollController,
-              scrollDirection: Axis.vertical,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: Scrollbar(
-                  controller: horizontalScrollController,
-                  thumbVisibility: true,
-                  child: SingleChildScrollView(
-                    controller: horizontalScrollController,
-                    scrollDirection: Axis.horizontal,
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 5),
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(minWidth: totalWidth),
-                        child: DataTable(
-                          dataRowMinHeight: 40,
-                          dataRowMaxHeight: 40,
-                          columnSpacing: 8,
-                          horizontalMargin: 12,
-                          dividerThickness: 0.5,
-                          headingRowHeight: 40,
-                          headingTextStyle: TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            fontFamily: GoogleFonts.inter().fontFamily,
-                          ),
-                          headingRowColor: WidgetStateProperty.all(
-                            AppColors.primaryColor(context),
-                          ),
-                          dataTextStyle: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w500,
-                            fontFamily: GoogleFonts.inter().fontFamily,
-                          ),
-                          columns: _buildColumns(dynamicColumnWidth),
-                          rows: reports.asMap().entries.map((entry) {
-                            final report = entry.value;
-                            return DataRow(
-                              onSelectChanged: onReportTap != null
-                                  ? (_) => onReportTap!()
-                                  : null,
-                              cells: [
-                                _buildDataCell(
-                                  report.invoiceNo,
-                                  dynamicColumnWidth,
-                                ),
-                                _buildDateCell(
-                                  report.saleDate,
-                                  dynamicColumnWidth,
-                                ),
-                                _buildDataCell(
-                                  report.customerName,
-                                  dynamicColumnWidth,
-                                ),
-                                _buildAmountCell(
-                                  report.salesPrice,
-                                  dynamicColumnWidth,
-                                  isSales: true,
-                                ),
-                                _buildProfitCell(
-                                  report.profit,
-                                  dynamicColumnWidth,
-                                ),
-                                _buildStatusCell(
-                                  report.paymentStatus,
-                                  dynamicColumnWidth,
-                                ),
-                              ],
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-      },
-    );
-  }
-
-  List<DataColumn> _buildColumns(double columnWidth) {
-    return [
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Invoice No', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Date', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Customer', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Sales Price', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Profit', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Status', textAlign: TextAlign.center),
-        ),
-      ),
+    const columns = [
+      AppTableColumn.center('SL', flex: 1, minWidth: 52),
+      AppTableColumn('Invoice No', flex: 2, minWidth: 120),
+      AppTableColumn('Date', flex: 2, minWidth: 100),
+      AppTableColumn('Customer', flex: 3, minWidth: 160),
+      AppTableColumn.numeric('Sales Price', flex: 2, minWidth: 120),
+      AppTableColumn.numeric('Profit', flex: 2, minWidth: 110),
+      AppTableColumn.center('Status', flex: 2, minWidth: 104),
     ];
-  }
 
-  DataCell _buildDataCell(String text, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Text(
-          text,
-          style: const TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w500,
-            color: Colors.black87,
-          ),
-          textAlign: TextAlign.center,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildDateCell(DateTime date, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Text(
-          _formatDate(date),
-          style: const TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w500,
-            color: Colors.black87,
-          ),
-          textAlign: TextAlign.center,
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildAmountCell(
-    double amount,
-    double width, {
-    bool isSales = false,
-  }) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: isSales
-                  ? AppColors.info.withValues(alpha: 0.1)
-                  : AppColors.success.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Text(
-              amount.toStringAsFixed(2),
-              style: TextStyle(
-                color: isSales ? AppColors.info : AppColors.success,
-                fontWeight: FontWeight.w600,
-                fontSize: 11,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildProfitCell(double profit, double width) {
-    final isPositive = profit >= 0;
-
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: isPositive
-                  ? AppColors.success.withValues(alpha: 0.1)
-                  : AppColors.danger.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Text(
-              profit.toStringAsFixed(2),
-              style: TextStyle(
-                color: isPositive ? AppColors.success : AppColors.danger,
-                fontWeight: FontWeight.w600,
-                fontSize: 11,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildStatusCell(String status, double width) {
-    final statusColor = _getStatusColor(status);
-
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: statusColor.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Text(
-              status.toUpperCase(),
-              style: TextStyle(
-                color: statusColor,
-                fontWeight: FontWeight.w600,
-                fontSize: 10,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ),
-      ),
+    return AppDataTable(
+      columns: columns,
+      rowCount: reports.length,
+      onRowTap: onReportTap == null ? null : (_) => onReportTap!(),
+      cellBuilder: (context, row, col) {
+        final r = reports[row];
+        switch (col) {
+          case 0:
+            return AppTableText('${row + 1}',
+                align: AppCellAlign.center, muted: true);
+          case 1:
+            return AppTableText(r.invoiceNo,
+                bold: true, color: AppColors.primaryColor(context));
+          case 2:
+            return AppTableText(_formatDate(r.saleDate));
+          case 3:
+            return AppTableText(r.customerName);
+          case 4:
+            return AppTableMoney(r.salesPrice, bold: true);
+          case 5:
+            return AppTableMoney(r.profit, bold: true, signColor: true);
+          default:
+            return AppStatusPill(r.paymentStatus.capitalize(),
+                color: _getStatusColor(r.paymentStatus));
+        }
+      },
     );
   }
 

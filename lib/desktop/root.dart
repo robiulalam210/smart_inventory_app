@@ -209,9 +209,9 @@ Color getConnectivityColor(ConnectivityState state) {
 }
 
 void _showLogoutConfirmation(BuildContext context) {
-  showDialog(
+  showAppPopover(
     context: context,
-    builder: (context) => CupertinoAlertDialog(
+    builder: (context) => AppPopoverCard(
       title: const Text("Sign Out"),
       content: const Text("Are you sure you want to sign out?"),
       actions: [

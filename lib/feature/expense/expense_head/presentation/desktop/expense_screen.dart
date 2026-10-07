@@ -197,10 +197,10 @@ class _ExpenseHeadScreenState extends State<ExpenseHeadScreen> {
 
   void _showCreateDialog(BuildContext context) {
     context.read<ExpenseHeadBloc>().name.clear();
-    showDialog(
+    showAppPopover(
       context: context,
       builder: (context) {
-        return Dialog(
+        return AppPopoverShell(
           insetPadding: const EdgeInsets.all(20),
           child: ConstrainedBox(
             constraints: BoxConstraints(

@@ -34,234 +34,46 @@ class ExpenseHeadTableCard extends StatelessWidget {
   }
 
 
+  // Desktop টেবিল — AppDataTable
   Widget _buildDesktopDataTable() {
     if (expenseHeads.isEmpty) {
       return _buildEmptyState();
     }
 
-    return TableScrollControllers(
-      builder: (context, verticalScrollController, horizontalScrollController) {
+    const columns = [
+      AppTableColumn.center('SL', flex: 1, minWidth: 60),
+      AppTableColumn('Head Name', flex: 5, minWidth: 200),
+      AppTableColumn.center('Status', flex: 2, minWidth: 110),
+      AppTableColumn.center('Actions', flex: 2, minWidth: 110),
+    ];
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final totalWidth = constraints.maxWidth;
-        const numColumns = 5; // No., Sub Head Name, Head Name, Status, Actions
-        const minColumnWidth = 120.0;
-
-        final dynamicColumnWidth = (totalWidth / numColumns).clamp(
-          minColumnWidth,
-          double.infinity,
-        );
-
-        return Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withValues(alpha: 0.1),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Scrollbar(
-            controller: verticalScrollController,
-            thumbVisibility: true,
-            child: SingleChildScrollView(
-              controller: verticalScrollController,
-              scrollDirection: Axis.vertical,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: Scrollbar(
-                  controller: horizontalScrollController,
-                  thumbVisibility: true,
-                  child: SingleChildScrollView(
-                    controller: horizontalScrollController,
-                    scrollDirection: Axis.horizontal,
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 5),
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(minWidth: totalWidth),
-                        child: DataTable(
-                          dataRowMinHeight: 40,
-                          dataRowMaxHeight: 40,
-                          columnSpacing: 8,
-                          horizontalMargin: 12,
-                          dividerThickness: 0.5,
-                          headingRowHeight: 40,
-                          headingTextStyle: TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            fontFamily: GoogleFonts.inter().fontFamily,
-                          ),
-                          headingRowColor: WidgetStateProperty.all(
-                            AppColors.primaryColor(context),
-                          ),
-                          dataTextStyle: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w500,
-                            fontFamily: GoogleFonts.inter().fontFamily,
-                          ),
-                          columns: _buildColumns(dynamicColumnWidth),
-                          rows: expenseHeads.asMap().entries.map((entry) {
-                            final expenseSubHead = entry.value;
-                            return DataRow(
-                              cells: [
-                                _buildDataCell(
-                                  '${entry.key + 1}',
-                                  dynamicColumnWidth * 0.6,
-                                ),
-                                _buildDataCell(
-                                  expenseSubHead.name?.capitalize() ?? "N/A",
-                                  dynamicColumnWidth,
-                                ),
-
-                                _buildStatusCell(
-                                  _getExpenseSubHeadStatus(expenseSubHead),
-                                  dynamicColumnWidth,
-                                ),
-                                _buildActionCell(
-                                  expenseSubHead,
-                                  context,
-                                  dynamicColumnWidth,
-                                ),
-                              ],
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
+    return AppDataTable(
+      columns: columns,
+      rowCount: expenseHeads.length,
+      cellBuilder: (context, row, col) {
+        final head = expenseHeads[row];
+        switch (col) {
+          case 0:
+            return AppTableText('${row + 1}',
+                align: AppCellAlign.center, muted: true);
+          case 1:
+            return AppTableText(head.name?.capitalize() ?? '-', bold: true);
+          case 2:
+            final active = _getExpenseSubHeadStatus(head);
+            return AppStatusPill(active ? 'Active' : 'Inactive',
+                color: active ? AppColors.success : AppColors.danger);
+          default:
+            return AppTableEditDelete(
+              onEdit: () => _showEditDialog(context, head),
+              onDelete: () => _confirmDelete(context, head),
+            );
+        }
       },
     );
   }
 
   bool _getExpenseSubHeadStatus(ExpenseHeadModel expenseSubHead) {
-    // Handle different possible status representations
-    if (expenseSubHead.isActive != null) {
-      if (expenseSubHead.isActive is bool) {
-        return expenseSubHead.isActive as bool;
-      }
-    }
-
-    // Fallback to isActive if available
     return expenseSubHead.isActive ?? false;
-  }
-  List<DataColumn> _buildColumns(double columnWidth) {
-    return [
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth * 0.6,
-          child: const Text('No.', textAlign: TextAlign.center),
-        ),
-      ),
-
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Head Name', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Status', textAlign: TextAlign.center),
-        ),
-      ),
-      DataColumn(
-        label: SizedBox(
-          width: columnWidth,
-          child: const Text('Actions', textAlign: TextAlign.center),
-        ),
-      ),
-    ];
-  }
-
-  DataCell _buildDataCell(String text, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Text(
-          text,
-          style: const TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w500,
-            color: Colors.black87,
-          ),
-          textAlign: TextAlign.center,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildStatusCell(bool isActive, double width) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: isActive
-                  ? AppColors.success.withValues(alpha: 0.1)
-                  : AppColors.danger.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Text(
-              isActive ? 'Active' : 'Inactive',
-              style: TextStyle(
-                color: isActive ? AppColors.success : AppColors.danger,
-                fontWeight: FontWeight.w600,
-                fontSize: 11,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildActionCell(
-      ExpenseHeadModel expenseSubHead,
-      BuildContext context,
-      double width,
-      ) {
-    return DataCell(
-      SizedBox(
-        width: width,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Edit Button
-            _buildActionButton(
-              icon: Iconsax.edit,
-              color: AppColors.info,
-              tooltip: 'Edit expense sub head',
-              onPressed: () => _showEditDialog(context, expenseSubHead),
-            ),
-
-            // Delete Button
-            _buildActionButton(
-              icon: HugeIcons.strokeRoundedDeleteThrow,
-              color: AppColors.danger,
-              tooltip: 'Delete expense sub head',
-              onPressed: () => _confirmDelete(context, expenseSubHead),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 
   Widget _buildActionButton({
@@ -479,10 +291,10 @@ class ExpenseHeadTableCard extends StatelessWidget {
     if (!shouldDelete) return;
 
     // Show loading dialog
-    showDialog(
+    showAppPopover(
       context: context,
       barrierDismissible: false,
-      builder: (context) => const Dialog(
+      builder: (context) => const AppPopoverShell(
         child: Padding(
           padding: EdgeInsets.all(20),
           child: Row(
@@ -509,10 +321,10 @@ class ExpenseHeadTableCard extends StatelessWidget {
     final expenseHeadBloc = context.read<ExpenseHeadBloc>();
     expenseHeadBloc.name.text = expenseHead.name ?? "";
 
-    showDialog(
+    showAppPopover(
       context: context,
       builder: (context) {
-        return Dialog(
+        return AppPopoverShell(
           insetPadding: const EdgeInsets.all(20),
           child: ConstrainedBox(
             constraints: BoxConstraints(

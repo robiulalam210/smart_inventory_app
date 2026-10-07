@@ -531,294 +531,68 @@ class SupplierDataTableWidget extends StatelessWidget {
     return Colors.grey;
   }
 
+  // Desktop টেবিল — AppDataTable
+  // আগে ১৪টা column ছিল, টেবিল পর্দা ছাড়িয়ে যেত। এখন সম্পর্কিত তথ্য
+  // এক cell এ (নামের নিচে Supplier No, দোকানের নিচে পণ্য, ফোনের নিচে email)
   Widget _buildDesktopDataTable(BuildContext context) {
-    return TableScrollControllers(
-      builder: (context, verticalController, horizontalController) {
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final totalWidth = constraints.maxWidth;
-        const numColumns = 13; // Updated from 11 to 13 for new columns
-        const minColumnWidth = 100.0;
-
-        final dynamicColumnWidth = (totalWidth / numColumns).clamp(
-          minColumnWidth,
-          double.infinity,
-        );
-
-        return Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withValues(alpha: 0.1),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Scrollbar(
-            controller: verticalController,
-            thumbVisibility: true,
-            child: SingleChildScrollView(
-              controller: verticalController,
-              child: Scrollbar(
-                controller: horizontalController,
-                thumbVisibility: true,
-                child: SingleChildScrollView(
-                  controller: horizontalController,
-                  scrollDirection: Axis.horizontal,
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(minWidth: totalWidth),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: DataTable(
-                        columns: _buildColumns(dynamicColumnWidth),
-                        rows: suppliers
-                            .asMap()
-                            .entries
-                            .map((e) => _buildRow(e.key + 1, e.value, context))
-                            .toList(),
-                        headingRowColor: WidgetStateProperty.all(
-                          AppColors.primaryColor(context),
-                        ),
-                        headingTextStyle: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                        ),
-                        dataRowMinHeight: 40,
-                        headingRowHeight: 40,
-                        columnSpacing: 0,
-                        dataTextStyle: const TextStyle(fontSize: 12),
-                        dataRowMaxHeight: 50,
-                        horizontalMargin: 12,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-      },
-    );
-  }
-
-  List<DataColumn> _buildColumns(double columnWidth) {
-    final columns = [
-      _DataColumnConfig("SL", columnWidth * 0.7, TextAlign.center),
-      _DataColumnConfig("Supplier No", columnWidth, TextAlign.left),
-      _DataColumnConfig("Name", columnWidth, TextAlign.left),
-      _DataColumnConfig("Shop Name", columnWidth, TextAlign.left), // NEW COLUMN
-      _DataColumnConfig("Products/Services", columnWidth * 1.2, TextAlign.left), // NEW COLUMN
-      _DataColumnConfig("Phone", columnWidth, TextAlign.left),
-      _DataColumnConfig("Email", columnWidth * 1.2, TextAlign.left), // Added email column
-      _DataColumnConfig("Address", columnWidth * 1.5, TextAlign.left),
-      _DataColumnConfig("Purchases", columnWidth, TextAlign.right),
-      _DataColumnConfig("Paid", columnWidth, TextAlign.right),
-      _DataColumnConfig("Due", columnWidth, TextAlign.right),
-      _DataColumnConfig("Advance", columnWidth, TextAlign.center),
-      _DataColumnConfig("Status", columnWidth * 0.8, TextAlign.center), // Added status column
-      _DataColumnConfig("Actions", columnWidth * 1.2, TextAlign.center),
+    const columns = [
+      AppTableColumn.center('SL', flex: 1, minWidth: 52),
+      AppTableColumn('Supplier', flex: 3, minWidth: 150),
+      AppTableColumn('Shop / Products', flex: 3, minWidth: 150),
+      AppTableColumn('Contact', flex: 3, minWidth: 140),
+      AppTableColumn('Address', flex: 3, minWidth: 140),
+      AppTableColumn.numeric('Purchases', flex: 2, minWidth: 110),
+      AppTableColumn.numeric('Paid', flex: 2, minWidth: 100),
+      AppTableColumn.numeric('Due', flex: 2, minWidth: 100),
+      AppTableColumn.numeric('Advance', flex: 2, minWidth: 100),
+      AppTableColumn.center('Status', flex: 2, minWidth: 96),
+      AppTableColumn.center('Actions', flex: 2, minWidth: 96),
     ];
 
-    return columns
-        .map(
-          (col) => DataColumn(
-        label: Container(
-          width: col.width,
-          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-          child: Text(
-            col.label,
-            textAlign: col.textAlign,
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 12,
-            ),
-          ),
-        ),
-      ),
-    )
-        .toList();
-  }
-
-  DataRow _buildRow(int index, SupplierListModel supplier, BuildContext context) {
-    return DataRow(
-      cells: [
-        _buildDataCell(index.toString(), TextAlign.center),
-        _buildDataCell(supplier.supplierNo ?? '-', TextAlign.left),
-        _buildDataCell(supplier.name ?? '-', TextAlign.left, isImportant: true),
-        _buildDataCell(supplier.shopName ?? '-', TextAlign.left),
-        _buildDataCell(supplier.productName ?? '-', TextAlign.left),
-        _buildDataCell(supplier.phone ?? '-', TextAlign.left),
-        _buildDataCell(supplier.email?.toString() ?? '-', TextAlign.left),
-        _buildDataCell(supplier.address ?? '-', TextAlign.left, maxLines: 2),
-        _buildFinancialCell('৳${supplier.totalPurchases}', AppColors.info, TextAlign.right),
-        _buildFinancialCell('৳${supplier.totalPaid}', AppColors.success, TextAlign.right),
-        _buildFinancialCell('৳${supplier.totalDue}', AppColors.warning, TextAlign.right),
-        DataCell(
-          Align(
-            alignment: Alignment.center,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: getAdvanceBalanceColor(supplier.advanceBalance)
-                    .withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: getAdvanceBalanceColor(supplier.advanceBalance),
-                  width: 1,
-                ),
-              ),
-              child: Text(
-                '৳${supplier.advanceBalance ?? '0.00'}',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: getAdvanceBalanceColor(supplier.advanceBalance),
-                  fontWeight: FontWeight.w600,
-                  fontSize: 11,
-                ),
-              ),
-            ),
-          ),
-        ),
-        _buildStatusCell(supplier.isActive == true),
-        DataCell(
-          Align(
-            alignment: Alignment.center,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                IconButton(
-                  icon: const Icon(Iconsax.edit, size: 18),
-                  color: AppColors.info,
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(
-                    minWidth: 32,
-                    minHeight: 32,
-                  ),
-                  onPressed: () => onEdit?.call(supplier),
-                ),
-                const SizedBox(width: 4),
-                IconButton(
-                  icon: const Icon(HugeIcons.strokeRoundedDeleteThrow, size: 18),
-                  color: AppColors.danger,
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(
-                    minWidth: 32,
-                    minHeight: 32,
-                  ),
-                  onPressed: () => onDelete?.call(supplier),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
+    return AppDataTable(
+      columns: columns,
+      rowCount: suppliers.length,
+      cellBuilder: (context, row, col) {
+        final s = suppliers[row];
+        switch (col) {
+          case 0:
+            return AppTableText('${row + 1}',
+                align: AppCellAlign.center, muted: true);
+          case 1:
+            return AppTableText(s.name ?? '-',
+                bold: true, subtitle: s.supplierNo);
+          case 2:
+            return AppTableText(s.shopName ?? '-', subtitle: s.productName);
+          case 3:
+            return AppTableText(s.phone ?? '-', subtitle: s.email?.toString());
+          case 4:
+            return AppTableText(s.address ?? '-', muted: true);
+          case 5:
+            return AppTableMoney(AppTableMoney.parse(s.totalPurchases));
+          case 6:
+            return AppTableMoney(AppTableMoney.parse(s.totalPaid),
+                color: AppColors.success);
+          case 7:
+            final due = AppTableMoney.parse(s.totalDue);
+            return AppTableMoney(due,
+                bold: due > 0,
+                color: due > 0
+                    ? AppColors.danger
+                    : AppColors.text(context).withValues(alpha: 0.5));
+          case 8:
+            return AppTableMoney(AppTableMoney.parse(s.advanceBalance),
+                color: getAdvanceBalanceColor(s.advanceBalance));
+          case 9:
+            final active = s.isActive == true;
+            return AppStatusPill(active ? 'Active' : 'Inactive',
+                color: active ? AppColors.success : AppColors.danger);
+          default:
+            return AppTableEditDelete(
+              onEdit: onEdit == null ? null : () => onEdit!(s),
+              onDelete: onDelete == null ? null : () => onDelete!(s),
+            );
+        }
+      },
     );
   }
-
-  DataCell _buildDataCell(
-      String text,
-      TextAlign align, {
-        bool isImportant = false,
-        int maxLines = 1,
-      }) {
-    return DataCell(
-      Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        alignment: _getAlignment(align),
-        child: Text(
-          text,
-          textAlign: align,
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: isImportant ? FontWeight.w600 : FontWeight.normal,
-            color: isImportant ? Colors.blue.shade700 : Colors.grey.shade800,
-          ),
-          overflow: TextOverflow.ellipsis,
-          maxLines: maxLines,
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildFinancialCell(String text, Color color, TextAlign align) {
-    return DataCell(
-      Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        alignment: _getAlignment(align),
-        child: Text(
-          text,
-          textAlign: align,
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            color: color,
-            fontFamily: 'RobotoMono',
-          ),
-          overflow: TextOverflow.ellipsis,
-          maxLines: 1,
-        ),
-      ),
-    );
-  }
-
-  DataCell _buildStatusCell(bool isActive) {
-    return DataCell(
-      Align(
-        alignment: Alignment.center,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          decoration: BoxDecoration(
-            color: isActive
-                ? AppColors.success.withOpacity(0.1)
-                : AppColors.danger.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: isActive ? AppColors.success : AppColors.danger,
-              width: 1,
-            ),
-          ),
-          child: Text(
-            isActive ? 'Active' : 'Inactive',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: isActive ? AppColors.success : AppColors.danger,
-              fontWeight: FontWeight.w600,
-              fontSize: 11,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  // Helper function to convert TextAlign to Alignment
-  AlignmentGeometry _getAlignment(TextAlign align) {
-    switch (align) {
-      case TextAlign.left:
-        return Alignment.centerLeft;
-      case TextAlign.right:
-        return Alignment.centerRight;
-      case TextAlign.center:
-        return Alignment.center;
-      default:
-        return Alignment.centerLeft;
-    }
-  }
-}
-
-class _DataColumnConfig {
-  final String label;
-  final double width;
-  final TextAlign textAlign;
-
-  const _DataColumnConfig(this.label, this.width, this.textAlign);
 }

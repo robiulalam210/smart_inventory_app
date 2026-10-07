@@ -227,6 +227,7 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
     return Column(
       children: [
         Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             Expanded(
               child: CustomSearchTextFormField(
@@ -405,10 +406,10 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
   }
 
   void _showCreateDialog(BuildContext context) {
-    showDialog(
+    showAppPopover(
       context: context,
       builder: (context) {
-        return Dialog(
+        return AppPopoverShell(
           insetPadding: const EdgeInsets.all(10),
           child: ConstrainedBox(
             constraints: BoxConstraints(

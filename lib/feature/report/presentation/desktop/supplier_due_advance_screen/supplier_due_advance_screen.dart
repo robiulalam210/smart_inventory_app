@@ -579,225 +579,47 @@ class SupplierDueAdvanceDataTable extends StatelessWidget {
     );
   }
 
+  // Desktop টেবিল — AppDataTable
   Widget _buildDataTable() {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final totalWidth = constraints.maxWidth;
-        const numColumns = 8; // #, Name, Phone, Email, Due, Advance, Net Balance, Status
-        const minColumnWidth = 100.0;
+    const columns = [
+      AppTableColumn.center('SL', flex: 1, minWidth: 52),
+      AppTableColumn('Supplier', flex: 3, minWidth: 160),
+      AppTableColumn('Contact', flex: 3, minWidth: 150),
+      AppTableColumn.numeric('Due', flex: 2, minWidth: 110),
+      AppTableColumn.numeric('Advance', flex: 2, minWidth: 110),
+      AppTableColumn.numeric('Net Balance', flex: 2, minWidth: 120),
+      AppTableColumn.center('Status', flex: 2, minWidth: 104),
+    ];
 
-        final dynamicColumnWidth =
-        (totalWidth / numColumns).clamp(minColumnWidth, double.infinity);
-
-        return Scrollbar(
-          child: SingleChildScrollView(
-            scrollDirection: Axis.vertical,
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: DataTable(
-                headingRowColor: WidgetStateProperty.resolveWith<Color>(
-                      (states) => AppColors.primaryColor(context),
-                ),
-                columnSpacing: 12,
-                dataRowMinHeight: 35,
-                dataRowMaxHeight: 35,
-                headingTextStyle: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                  fontSize: 12,
-                ),
-                dataTextStyle: const TextStyle(
-                  fontSize: 11,
-                  color: Colors.black87,
-                ),
-                columns: [
-                  DataColumn(
-                    label: SizedBox(
-                      width: dynamicColumnWidth * 0.6,
-                      child: const Text(
-                        '#',
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ),
-                  DataColumn(
-                    label: SizedBox(
-                      width: dynamicColumnWidth * 1.2,
-                      child: const Text(
-                        'Supplier Name',
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ),
-                  DataColumn(
-                    label: SizedBox(
-                      width: dynamicColumnWidth,
-                      child: const Text(
-                        'Phone',
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ),
-                  DataColumn(
-                    label: SizedBox(
-                      width: dynamicColumnWidth * 1.3,
-                      child: const Text(
-                        'Email',
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ),
-                  DataColumn(
-                    label: SizedBox(
-                      width: dynamicColumnWidth,
-                      child: const Text(
-                        'Due Amount',
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                    numeric: true,
-                  ),
-                  DataColumn(
-                    label: SizedBox(
-                      width: dynamicColumnWidth,
-                      child: const Text(
-                        'Advance Amount',
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                    numeric: true,
-                  ),
-                  DataColumn(
-                    label: SizedBox(
-                      width: dynamicColumnWidth,
-                      child: const Text(
-                        'Net Balance',
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                    numeric: true,
-                  ),
-                  DataColumn(
-                    label: SizedBox(
-                      width: dynamicColumnWidth,
-                      child: const Text(
-                        'Status',
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ),
-                ],
-                rows: suppliers.asMap().entries.map((entry) {
-                  final index = entry.key;
-                  final supplier = entry.value;
-
-                  return DataRow(
-                    color: WidgetStateProperty.resolveWith<Color>(
-                          (Set<WidgetState> states) {
-                        return index % 2 == 0 ? Colors.grey.withValues(alpha: 0.03) : Colors.transparent;
-                      },
-                    ),
-                    cells: [
-                      DataCell(
-                        SizedBox(
-                          width: dynamicColumnWidth * 0.6,
-                          child: Center(
-                            child: Text(
-                              '${index + 1}',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      DataCell(
-                        SizedBox(
-                          width: dynamicColumnWidth * 1.2,
-                          child: Tooltip(
-                            message: supplier.supplierName,
-                            child: Text(
-                              supplier.supplierName,
-                              style: const TextStyle(fontWeight: FontWeight.w500),
-                              overflow: TextOverflow.ellipsis,
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ),
-                      ),
-                      DataCell(
-                        SizedBox(
-                          width: dynamicColumnWidth,
-                          child: Tooltip(
-                            message: supplier.phone,
-                            child: Text(
-                              supplier.phone,
-                              overflow: TextOverflow.ellipsis,
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ),
-                      ),
-                      DataCell(
-                        SizedBox(
-                          width: dynamicColumnWidth * 1.3,
-                          child: Tooltip(
-                            message: supplier.email,
-                            child: Text(
-                              supplier.email,
-                              overflow: TextOverflow.ellipsis,
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ),
-                      ),
-                      DataCell(
-                        SizedBox(
-                          width: dynamicColumnWidth,
-                          child: Center(
-                            child: _buildAmountCell(
-                              supplier.presentDue,
-                              AppColors.danger,
-                              'Due Amount',
-                            ),
-                          ),
-                        ),
-                      ),
-                      DataCell(
-                        SizedBox(
-                          width: dynamicColumnWidth,
-                          child: Center(
-                            child: _buildAmountCell(
-                              supplier.presentAdvance,
-                              AppColors.success,
-                              'Advance Amount',
-                            ),
-                          ),
-                        ),
-                      ),
-                      DataCell(
-                        SizedBox(
-                          width: dynamicColumnWidth,
-                          child: Center(
-                            child: _buildNetBalanceCell(supplier.netBalance),
-                          ),
-                        ),
-                      ),
-                      DataCell(
-                        SizedBox(
-                          width: dynamicColumnWidth,
-                          child: Center(
-                            child: _buildStatusCell(supplier),
-                          ),
-                        ),
-                      ),
-                    ],
-                  );
-                }).toList(),
-              ),
-            ),
-          ),
-        );
+    return AppDataTable(
+      columns: columns,
+      rowCount: suppliers.length,
+      cellBuilder: (context, row, col) {
+        final sp = suppliers[row];
+        final muted = AppColors.text(context).withValues(alpha: 0.45);
+        switch (col) {
+          case 0:
+            return AppTableText('${row + 1}',
+                align: AppCellAlign.center, muted: true);
+          case 1:
+            return AppTableText(sp.supplierName, bold: true);
+          case 2:
+            return AppTableText(sp.phone, subtitle: sp.email);
+          case 3:
+            return AppTableMoney(sp.presentDue,
+                bold: sp.presentDue > 0,
+                color: sp.presentDue > 0 ? AppColors.danger : muted);
+          case 4:
+            return AppTableMoney(sp.presentAdvance,
+                bold: sp.presentAdvance > 0,
+                color: sp.presentAdvance > 0 ? AppColors.success : muted);
+          case 5:
+            return AppTableMoney(sp.netBalance.abs(),
+                bold: true, color: sp.balanceStatusColor);
+          default:
+            return AppStatusPill(sp.balanceStatus,
+                color: sp.balanceStatusColor);
+        }
       },
     );
   }

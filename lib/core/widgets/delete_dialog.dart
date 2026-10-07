@@ -1,37 +1,13 @@
 import '../core.dart';
 
-Future<bool> showDeleteConfirmationDialog(BuildContext context) async {
-  return await showDialog<bool>(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        backgroundColor: AppColors.bottomNavBg(context),
-        title: Text(
-          'Delete Confirmation',
-          style: AppTextStyle.cardTitle(context),
-        ),
-        content: Text(
-          'Are you sure you want to delete this ?',
-          style: AppTextStyle.cardLevelText(context),
-        ),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop(false); // Cancel
-            },
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop(true); // Confirm delete
-            },
-            child: Text(
-                'Delete',
-                style: AppTextStyle.errorTextStyle(context)
-            ),
-          ),
-        ],
-      );
-    },
-  ) ?? false;
+/// Delete নিশ্চিতকরণ — আগে AlertDialog ছিল, এখন desktop popover।
+/// true = Delete, false = Cancel / বাইরে ক্লিক / Esc
+Future<bool> showDeleteConfirmationDialog(BuildContext context) {
+  return showConfirmPopover(
+    context,
+    title: 'Delete Confirmation',
+    message: 'Are you sure you want to delete this?\nThis action cannot be undone.',
+    confirmText: 'Delete',
+    tone: PopoverTone.danger,
+  );
 }

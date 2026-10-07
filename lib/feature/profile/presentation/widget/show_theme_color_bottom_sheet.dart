@@ -29,7 +29,7 @@ void showThemeColorBottomSheet(
 ) {
   final isDark = Theme.of(context).brightness == Brightness.dark;
 
-  showModalBottomSheet(
+  showAppPopoverSheet(
     context: context,
     backgroundColor: AppColors.bottomNavBg(context),
     shape: const RoundedRectangleBorder(

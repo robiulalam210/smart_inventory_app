@@ -970,7 +970,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   // ---------------- Image pick & upload (desktop) ----------------
 
   Future<void> _showImagePickerOptions({required bool allowCompanyLogo}) async {
-    await showModalBottomSheet(
+    await showAppPopoverSheet(
       context: context,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(18))),
       builder: (ctx) {
@@ -1153,7 +1153,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   // ---------------- Dialogs and helpers ----------------
 
   void _showEditProfileDialog() {
-    showDialog(
+    showAppPopover(
       context: context,
       builder: (context) {
         return BlocBuilder<ProfileBloc, ProfileState>(
@@ -1169,7 +1169,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildProfileDialog(ProfilePermissionModel pp) {
-    return AlertDialog(
+    return AppPopoverCard(
       backgroundColor: AppColors.bottomNavBg(context),
       title: Text('edit_profile'.tr()),
       content: SingleChildScrollView(
@@ -1226,10 +1226,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _showSecurityDialog() {
-    showDialog(
+    showAppPopover(
       context: context,
       builder: (context) {
-        return AlertDialog(
+        return AppPopoverCard(
           backgroundColor: AppColors.bottomNavBg(context),
           title: Text('change_password'.tr()),
           content: SingleChildScrollView(
@@ -1296,10 +1296,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> showPermissionsDialog(BuildContext context) async {
     final state = context.read<ProfileBloc>().state;
     if (state is ProfilePermissionSuccess) {
-      await showDialog(
+      await showAppPopover(
         context: context,
         builder: (ctx) {
-          return Dialog(
+          return AppPopoverShell(
             child: SizedBox(
               width: 900,
               height: 600,

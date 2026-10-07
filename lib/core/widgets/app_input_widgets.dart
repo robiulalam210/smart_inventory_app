@@ -173,7 +173,7 @@ Future<DateTimeRange?> appDateRangePicker(
 
 Future<void> appBottomSheet(BuildContext context,
     {required Widget child}) async {
-  await showModalBottomSheet(
+  await showAppPopoverSheet(
       context: context,
       showDragHandle: true,
       useSafeArea: true,
@@ -193,7 +193,7 @@ Future<void> appBottomSheet(BuildContext context,
 Future<XFile?> appImagePicker(BuildContext context) async {
   XFile? photo;
   final ImagePicker picker = ImagePicker();
-  await showModalBottomSheet(
+  await showAppPopoverSheet(
     showDragHandle: true,
     context: context,
     builder: (_) => Container(
@@ -364,7 +364,7 @@ class _AppSheetContentState<T> extends State<_AppSheetContent<T>> {
   }
 
   void _showDropdown() {
-    showModalBottomSheet(
+    showAppPopoverSheet(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
