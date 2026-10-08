@@ -367,7 +367,8 @@ class AppDropdown<T> extends FormField<T> {
     required this.hint,
     this.isRequired = false,
     this.isLabel = false,
-    this.isSearch = false,
+    // সব dropdown এ search থাকবে (নির্দেশনা অনুযায়ী) — parameter টা পুরনো code এর জন্য রাখা
+    this.isSearch = true,
     this.isNeedAll = false,
     this.allItem,
     T? value,
@@ -376,6 +377,8 @@ class AppDropdown<T> extends FormField<T> {
      this.onClear,
     String Function(T)? itemLabel,
     super.validator,
+    // false হলে × (clear) button দেখায় না — যেমন language, sort এর মতো সবসময় মান লাগে এমন জায়গায়
+    this.isClearable = true,
   }) : super(
     initialValue: value,
     autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -409,7 +412,7 @@ class AppDropdown<T> extends FormField<T> {
                 items: items,
                 selectedValue: state.value,
                 hint: hint,
-                isSearch: isSearch,
+                isSearch: true, // সব dropdown এ search
                 itemLabel: labelFn,
                 onChanged: (value) {
                   state.didChange(value);
@@ -483,7 +486,7 @@ class AppDropdown<T> extends FormField<T> {
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        if (displayText.isNotEmpty)
+                        if (displayText.isNotEmpty && isClearable)
                           InkWell(
                             onTap: handleClear,
                             borderRadius: BorderRadius.circular(12),
@@ -526,6 +529,7 @@ class AppDropdown<T> extends FormField<T> {
   final List<T> itemList;
   final void Function(T?) onChanged;
   final void Function(T?)? onClear;
+  final bool isClearable;
 }
 
 class _DropdownBottomSheet<T> extends StatefulWidget {
@@ -564,9 +568,17 @@ class _DropdownBottomSheetState<T> extends State<_DropdownBottomSheet<T>> {
     super.initState();
     filteredItems = widget.items;
     searchController = TextEditingController();
-    // Initialize speech in a post-frame (or directly) — do not block UI.
-    if (widget.isSearch) {
-      _initSpeech();
+    // Voice search এখন mic চাপলে তবেই চালু হয় — আগে প্রতিটা dropdown খোলার সাথে সাথে
+    // speech engine চালু হতো (mobile এ microphone permission চাওয়া, ধীর হওয়া)।
+  }
+
+  /// Mobile এ dropdown খুললেই keyboard উঠে list ঢেকে ফেলে — তাই শুধু desktop এ autofocus
+  bool get _autofocusSearch {
+    try {
+      if (kIsWeb) return true;
+      return !(Platform.isAndroid || Platform.isIOS);
+    } catch (_) {
+      return true;
     }
   }
 
@@ -636,6 +648,7 @@ class _DropdownBottomSheetState<T> extends State<_DropdownBottomSheet<T>> {
   }
 
   Future<void> _toggleListening() async {
+    if (_speech == null) await _initSpeech(); // প্রথমবার mic চাপলে চালু
     if (!_speechAvailable || _speech == null) {
       // Speech isn't available on this platform or initialization failed
       // Optionally show a SnackBar or tooltip. We keep behavior silent to avoid surprises.
@@ -757,7 +770,7 @@ class _DropdownBottomSheetState<T> extends State<_DropdownBottomSheet<T>> {
                     height: 38,
                     child: TextField(
                       controller: searchController,
-                      autofocus: true,
+                      autofocus: _autofocusSearch,
                       style: const TextStyle(fontSize: 14),
                       textInputAction: TextInputAction.done,
                       onSubmitted: (_) => _selectHighlighted(),
@@ -783,8 +796,9 @@ class _DropdownBottomSheetState<T> extends State<_DropdownBottomSheet<T>> {
                                   setState(() => _highlight = -1);
                                 },
                               ),
+                            // init এর আগে mic দেখায়; চালু করতে ব্যর্থ হলে লুকায়
                             if (_platformLikelySupportsSpeech &&
-                                _speechAvailable)
+                                (_speech == null || _speechAvailable))
                               IconButton(
                                 tooltip: _isListening
                                     ? 'Stop listening'

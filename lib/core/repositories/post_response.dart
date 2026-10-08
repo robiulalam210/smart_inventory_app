@@ -13,6 +13,7 @@ import '../offline/uuid_v4.dart';
 Future<Map<String, dynamic>> postResponse({
   required String url,
   Map<String, dynamic>? payload,
+  bool retried = false,
 }) async {
   Uri uriUrl = Uri.parse(url);
   logger.i("Uri : $uriUrl");
@@ -48,6 +49,11 @@ Future<Map<String, dynamic>> postResponse({
 
     logger.i("postResponse body: ${response.body}");
     logger.i("postResponse statusCode: ${response.statusCode}");
+
+    // Token expire (401) → নতুন token নিয়ে একবার আবার চেষ্টা (mobile + desktop)
+    if (response.statusCode == 401 && !retried && await SessionKeeper.renew()) {
+      return postResponse(url: url, payload: payload, retried: true);
+    }
 
     // Parse the JSON response
     final Map<String, dynamic> responseData = jsonDecode(response.body);

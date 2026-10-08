@@ -4,6 +4,26 @@ import '../../data/model/user_model.dart';
 import '../shared/user_permission_screen.dart';
 import 'package:meherinMart/core/widgets/table_scroll_controllers.dart';
 
+/// শুধু Super Admin / Admin অন্যদের permission বদলাতে পারে (backend ও একই নিয়ম মানে)।
+/// Login এর সময় role টা LocalDB তে `userType` নামে রাখা হয়।
+class PermissionAccess {
+  PermissionAccess._();
+
+  /// শেষ জানা মান — list rebuild হলে button যেন একবার লুকিয়ে আবার না আসে (flicker)
+  static bool lastKnown = false;
+
+  static Future<bool> canManage() async {
+    final info = await LocalDB.getLoginInfo();
+    final role = '${info?['userType'] ?? ''}'.toUpperCase();
+    return lastKnown = role == 'SUPER_ADMIN' || role == 'ADMIN';
+  }
+
+  static void open(BuildContext context, UsersListModel user) {
+    final name = user.fullName?.trim().isNotEmpty == true ? user.fullName! : (user.username ?? '');
+    AppRoutes.push(context, UserPermissionScreen(userId: user.id.toString(), userName: name));
+  }
+}
+
 class UserTableCard extends StatelessWidget {
   final List<UsersListModel> users;
   final VoidCallback? onUserTap;
@@ -23,15 +43,22 @@ class UserTableCard extends StatelessWidget {
       return _buildEmptyState();
     }
 
-    return _isMobile(context)
-        ? _buildMobileList(context)
-        : _buildDesktopTable(context);
+    return FutureBuilder<bool>(
+      future: PermissionAccess.canManage(),
+      initialData: PermissionAccess.lastKnown,
+      builder: (context, snap) {
+        final canManage = snap.data ?? false;
+        return _isMobile(context)
+            ? _buildMobileList(context, canManage)
+            : _buildDesktopTable(context, canManage);
+      },
+    );
   }
 
   // =========================
   // 📱 MOBILE VIEW
   // =========================
-  Widget _buildMobileList(BuildContext context) {
+  Widget _buildMobileList(BuildContext context, bool canManage) {
     return ListView.separated(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -61,23 +88,24 @@ class UserTableCard extends StatelessWidget {
                 _mobileInfo('Phone', user.phone,context),
                 _mobileInfo('Role', user.role,context),
                 _mobileInfo('Company', user.company?.name,context),
-                const SizedBox(height: 6),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: IconButton(
-                    icon: const Icon(Icons.visibility, color: AppColors.success),
-                    onPressed: () => _showViewDialog(context, user),
-                  ),
-                ),    Align(
-                  alignment: Alignment.centerRight,
-                  child: IconButton(
-                    icon: const Icon(Icons.edit, color: AppColors.success),
-                    onPressed: () {
-                      AppRoutes.push(context, UserPermissionScreen(userId: user.id.toString(), userName: user.fullName??"",
-
-                      ));
-                    },
-                  ),
+                const SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton.icon(
+                      onPressed: () => _showViewDialog(context, user),
+                      icon: const Icon(Icons.visibility_outlined, size: 18),
+                      label: const Text('Details'),
+                    ),
+                    if (canManage) ...[
+                      const SizedBox(width: 6),
+                      FilledButton.tonalIcon(
+                        onPressed: () => PermissionAccess.open(context, user),
+                        icon: const Icon(Icons.admin_panel_settings_outlined, size: 18),
+                        label: const Text('Permissions'),
+                      ),
+                    ],
+                  ],
                 ),
               ],
             ),
@@ -127,8 +155,8 @@ class UserTableCard extends StatelessWidget {
   // 💻 DESKTOP VIEW
   // =========================
   // Desktop টেবিল — AppDataTable
-  Widget _buildDesktopTable(BuildContext context) {
-    const columns = [
+  Widget _buildDesktopTable(BuildContext context, bool canManage) {
+    final columns = [
       AppTableColumn.center('SL', flex: 1, minWidth: 52),
       AppTableColumn('Name', flex: 3, minWidth: 160),
       AppTableColumn('Email', flex: 3, minWidth: 160),
@@ -136,7 +164,7 @@ class UserTableCard extends StatelessWidget {
       AppTableColumn('Phone', flex: 2, minWidth: 120),
       AppTableColumn('Company', flex: 2, minWidth: 120),
       AppTableColumn.center('Status', flex: 2, minWidth: 96),
-      AppTableColumn.center('Actions', flex: 1, minWidth: 80),
+      AppTableColumn.center('Actions', flex: canManage ? 2 : 1, minWidth: canManage ? 104 : 80),
     ];
 
     return AppDataTable(
@@ -165,11 +193,25 @@ class UserTableCard extends StatelessWidget {
             return AppStatusPill(active ? 'Active' : 'Inactive',
                 color: active ? AppColors.success : AppColors.danger);
           default:
-            return AppTableAction(
+            final view = AppTableAction(
               icon: Icons.visibility_outlined,
               tooltip: 'View details',
               color: AppColors.info,
               onPressed: () => _showViewDialog(context, u),
+            );
+            if (!canManage) return view;
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                view,
+                AppTableAction(
+                  icon: Icons.admin_panel_settings_outlined,
+                  tooltip: 'Manage permissions',
+                  color: AppColors.primaryColor(context),
+                  onPressed: () => PermissionAccess.open(context, u),
+                ),
+              ],
             );
         }
       },

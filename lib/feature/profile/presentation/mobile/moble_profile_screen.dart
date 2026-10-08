@@ -21,6 +21,7 @@ import '../widget/show_theme_color_bottom_sheet.dart';
 import '../widget/user_profile.dart';
 import '../shared/buildPermissionModules.dart';
 import 'mobile_change_password.dart';
+import 'package:meherinMart/core/widgets/app_dropdown.dart';
 
 class MobileProfileScreen extends StatefulWidget {
   const MobileProfileScreen({super.key});
@@ -1107,29 +1108,25 @@ class _MobileProfileScreenState extends State<MobileProfileScreen> {
               color: AppColors.bottomNavBg(context),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: DropdownButton<String>(
-              value: currentCode,
-              underline: const SizedBox(),
-              dropdownColor: Theme.of(context).cardColor,
-              icon: const Icon(Icons.arrow_drop_down),
-              items: languages.entries
-                  .map(
-                    (entry) => DropdownMenuItem(
-                      value: entry.key,
-                      child: Text(
-                        entry.value,
-                        style: AppTextStyle.body(context),
-                      ),
-                    ),
-                  )
-                  .toList(),
-              onChanged: (value) async {
-                if (value != null) {
-                  context.setLocale(Locale(value));
-                  await AuthLocalDB.saveLanguage(value);
-                }
-              },
-            ),
+            child: SizedBox(
+  width: 150,
+  // search সহ dropdown (সব dropdown এ search থাকবে)
+  child: AppDropdown<String>(
+    key: ValueKey(currentCode),
+    label: 'Language',
+    hint: 'Language',
+    value: currentCode,
+    isClearable: false,
+    itemList: languages.keys.toList(),
+    itemLabel: (code) => languages[code] ?? code,
+    onChanged: (value) async {
+      if (value != null) {
+        context.setLocale(Locale(value));
+        await AuthLocalDB.saveLanguage(value);
+      }
+    },
+  ),
+),
           ),
         ],
       ),

@@ -12,6 +12,7 @@ import '../offline/uuid_v4.dart';
 Future<Map<String, dynamic>> patchResponse({
   required String url,
   required Map<String, dynamic> payload,
+  bool retried = false,
 }) async {
   Uri uriUrl = Uri.parse(url);
   // Offline এ edit/delete করা যায় না (conflict ও হিসাবের গরমিল এড়াতে)
@@ -35,6 +36,11 @@ Future<Map<String, dynamic>> patchResponse({
 
     logger.i("patchResponse statusCode: ${response.statusCode}");
     logger.i("patchResponse body: ${response.body}");
+
+    // Token expire (401) → নতুন token নিয়ে একবার আবার চেষ্টা (mobile + desktop)
+    if (response.statusCode == 401 && !retried && await SessionKeeper.renew()) {
+      return patchResponse(url: url, payload: payload, retried: true);
+    }
 
     final Map<String, dynamic> responseData = jsonDecode(response.body);
 

@@ -22,6 +22,7 @@ import '../bloc/products/products_bloc.dart';
 import '../widget/pagination.dart';
 import '../widget/widget.dart';
 import '../shared/mobile_product_create.dart';
+import 'package:meherinMart/core/widgets/app_dropdown.dart';
 
 class MobileProductScreen extends StatefulWidget {
   const MobileProductScreen({super.key});
@@ -947,41 +948,15 @@ class _ProductsScreenState extends State<MobileProductScreen> {
           ),
         ),
         const SizedBox(height: 5),
-        Container(
-          decoration: BoxDecoration(
-            color: AppColors.bottomNavBg(context),
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: Colors.grey[300]!),
-          ),
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<String>(
-              value: selectedValue?.isEmpty ?? true
-                  ? (includeEmpty ? 'All' : null)
-                  : selectedValue,
-              isExpanded: true,
-              items: allOptions.map((option) {
-                return DropdownMenuItem<String>(
-                  value: option.isEmpty ? null : option,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    child: Text(
-                      option.isEmpty ? 'All' : option,
-                      style: AppTextStyle.body(context),
-                    ),
-                  ),
-                );
-              }).toList(),
-              onChanged: onChanged,
-              hint: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                child: Text(
-                  'Select $label',
-                  style: AppTextStyle.body(context),
-                ),
-              ),
-              style: AppTextStyle.body(context),
-            ),
-          ),
+        AppDropdown<String>(
+          // search সহ dropdown — value বদলালে key বদলে নতুন মান দেখায়
+          key: ValueKey('$label-$selectedValue'),
+          label: label,
+          hint: 'Select $label',
+          value: (selectedValue?.isEmpty ?? true) ? (includeEmpty ? 'All' : null) : selectedValue,
+          itemList: allOptions,
+          isClearable: false,
+          onChanged: onChanged,
         ),
       ],
     );
