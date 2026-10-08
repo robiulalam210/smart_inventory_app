@@ -170,6 +170,7 @@ class _SidebarState extends State<Sidebar> {
     'Administration': Icons.admin_panel_settings_outlined,
     'Income': Icons.trending_up_rounded,
     'Transfer Balance': Icons.swap_horiz_rounded,
+    'Security': Icons.policy_outlined,
   };
 
   /// current screen যে group এর, সেটা খুলে রাখা
@@ -249,6 +250,19 @@ class _SidebarState extends State<Sidebar> {
                 title: section.title,
                 items: items,
                 requiredPermission: section.requiredPermission,
+              ));
+            }
+
+            // Audit Log — module permission নয়, role দেখে (শুধু Super Admin / Admin)
+            final role = (profileState is ProfilePermissionSuccess
+                    ? profileState.permissionData.data?.user?.role
+                    : null)
+                ?.toUpperCase();
+            if (role == 'SUPER_ADMIN' || role == 'ADMIN') {
+              sections.add(MenuSection(
+                title: 'Security',
+                items: [MenuItem(title: 'Audit Log', index: 44)],
+                requiredPermission: (_) => true,
               ));
             }
 

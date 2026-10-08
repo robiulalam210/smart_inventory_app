@@ -5,6 +5,7 @@ import '/feature/accounts/presentation/bloc/account/account_bloc.dart';
 import '../../../accounts/data/model/account_active_model.dart';
 import '../bloc/account_transfer/account_transfer_bloc.dart';
 import 'mobile_account_transfer_screen.dart';
+import 'package:meherinMart/core/widgets/app_dropdown.dart';
 
 class MobileAccountTransferForm extends StatefulWidget {
   const MobileAccountTransferForm({super.key});
@@ -544,34 +545,20 @@ class _MobileAccountTransferFormState extends State<MobileAccountTransferForm> {
           ),
         ),
         const SizedBox(height: 8),
-        DropdownButtonFormField<String>(
+        AppDropdown<String>(
+          key: ValueKey(transferBloc.selectedTransferType),
+          label: 'Transfer Type',
+          hint: 'Select type',
           value: transferBloc.selectedTransferType,
-          items: transferBloc.transferTypes.map((type) {
-            return DropdownMenuItem(
-              value: type,
-              child: Text(
-                type.replaceAll('_', ' ').toUpperCase(),
-                style:  AppTextStyle.body(context)
-              ),
-            );
-          }).toList(),
+          isClearable: false,
+          itemList: transferBloc.transferTypes,
+          itemLabel: (type) => type.replaceAll('_', ' ').toUpperCase(),
           onChanged: (value) {
+            if (value == null) return;
             setState(() {
-              transferBloc.selectedTransferType = value!;
+              transferBloc.selectedTransferType = value;
             });
           },
-          decoration: InputDecoration(
-            hintText: "Select type",
-            hintStyle: AppTextStyle.body(context),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: Colors.grey.shade300),
-            ),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 12,
-              vertical: 12,
-            ),
-          ),
           validator: (value) {
             if (value == null || value.isEmpty) {
               return 'Please select transfer type';

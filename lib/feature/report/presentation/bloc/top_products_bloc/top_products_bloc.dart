@@ -19,11 +19,12 @@ class TopProductsBloc extends Bloc<TopProductsEvent, TopProductsState> {
         toDate = event.to ?? toDate;
 
         // Build query parameters
-        final Map<String, String> queryParams = {};
+        // page_size: backend প্রতি page এ ১০০টা দেয় — আগে শুধু প্রথম page আসত, তাই table অসম্পূর্ণ থাকত
+        final Map<String, String> queryParams = {'page_size': '1000'};
 
         if (event.from != null && event.to != null) {
-          queryParams['start_date'] = event.from!.toIso8601String().split('T')[0];
-          queryParams['end_date'] = event.to!.toIso8601String().split('T')[0];
+          queryParams['start'] = event.from!.toIso8601String().split('T')[0];
+          queryParams['end'] = event.to!.toIso8601String().split('T')[0];
         }
 
         // Build filter string

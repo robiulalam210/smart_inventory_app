@@ -178,6 +178,19 @@ class TabSidebar extends StatelessWidget {
                   return section.requiredPermission(permissions) == true;
                 }).toList();
 
+                // Audit Log — শুধু Super Admin / Admin
+                final role = (profileState is ProfilePermissionSuccess
+                        ? profileState.permissionData.data?.user?.role
+                        : null)
+                    ?.toUpperCase();
+                if (role == 'SUPER_ADMIN' || role == 'ADMIN') {
+                  filteredMenuSections.add(MenuSection(
+                    title: 'Audit Log',
+                    items: [MenuItem(title: 'Audit Log', index: 44)],
+                    requiredPermission: (_) => true,
+                  ));
+                }
+
                 // Check if user has any permissions
                 if (filteredMenuSections.isEmpty) {
                   return _buildNoAccessState(context);

@@ -31,6 +31,40 @@ class LocalDB {
         '${_prefix}token_expiry', tokenExpiry.toIso8601String()); // নতুন সেভ
   }
 
+  //! Refresh token (JWT) — access token expire হলে এটা দিয়ে নতুন token নেওয়া হয়
+  static Future<void> saveRefreshToken(String refresh) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('${_prefix}refresh', refresh);
+  }
+
+  static Future<String?> getRefreshToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    final v = prefs.getString('${_prefix}refresh');
+    return (v == null || v.isEmpty) ? null : v;
+  }
+
+  /// Refresh সফল হলে শুধু token আর expiry আপডেট — বাকি login info যেমন আছে থাকবে
+  static Future<void> updateTokens({
+    required String access,
+    String? refresh,
+    required DateTime tokenExpiry,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('${_prefix}token', access);
+    if (refresh != null && refresh.isNotEmpty) {
+      await prefs.setString('${_prefix}refresh', refresh);
+    }
+    await prefs.setString('${_prefix}token_expiry', tokenExpiry.toIso8601String());
+  }
+
+  /// Password change সফল হলে local copy আপডেট (না হলে পরের auto re-login fail করবে)
+  static Future<void> updatePassword(String password) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (prefs.containsKey('${_prefix}password')) {
+      await prefs.setString('${_prefix}password', password);
+    }
+  }
+
   //! Read login info
   static Future<Map<String, dynamic>?> getLoginInfo() async {
     final prefs = await SharedPreferences.getInstance();

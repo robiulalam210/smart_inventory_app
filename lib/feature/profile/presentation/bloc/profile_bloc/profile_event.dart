@@ -26,11 +26,13 @@ class UpdateUserProfile extends ProfileEvent {
 class ChangePassword extends ProfileEvent {
   final String currentPassword;
   final String newPassword;
+  final String confirmPassword; // backend এ confirm_password বাধ্যতামূলক
   final BuildContext context;
 
   ChangePassword({
     required this.currentPassword,
     required this.newPassword,
+    required this.confirmPassword,
     required this.context,
   });
 }

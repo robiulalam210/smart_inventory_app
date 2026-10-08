@@ -29,7 +29,9 @@ class AppUrls {
   static  String userPermissions = '$baseUrl/user-permissions';
   static  String updatePermissions = '$baseUrl/user-permissions/update/';
   static  String resetPermissions = '$baseUrl/user-permissions/reset/';
-  static  String checkPermission = '$baseUrl/permissions/check/';
+  /// নির্দিষ্ট একজন user এর permission (admin এর permission editor)
+  static String userPermissionDetail(String userId) => '$baseUrl/user-permissions/user/$userId/';
+  static  String checkPermission = '$baseUrl/user-permissions/check/'; // FIX: আগে /permissions/check/ (404) ছিল
   static  String companyUsers = '$baseUrl/company-users/';
 
   static  String saleModes = "$baseUrl/sale-modes/";
@@ -98,10 +100,15 @@ class AppUrls {
   static final String purchaseInvoice = '$baseUrl/purchases-invoice/supplier/';
   static final String dashboard = '$baseUrl/reports/dashboard/';
 
+  // Audit log (শুধু Super Admin / Admin)
+  static final String auditLog = '$baseUrl/sync/audit/';
+  static final String auditMeta = '$baseUrl/sync/audit/meta/';
+
   static final String userProfile = "$baseUrl/profile/";
   // static final String profilePermission = "$baseUrl/profile/permissions/";
   static final String updateProfile = "$baseUrl/profile/update/";
-  static final String changePassword = "$baseUrl/profile/change-password/";
+  static final String changePassword = "$baseUrl/auth/change-password/"; // FIX: backend path (POST)
+  static final String tokenRefresh = "$baseUrl/auth/token/refresh/";
 
   //!for App update link
   static const String playStoreLink= '';

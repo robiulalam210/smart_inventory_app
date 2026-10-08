@@ -22,6 +22,12 @@ class AuthService {
       tokenExpiry: AppConstants.sessionExpire,
     );
 
+    // Refresh token রাখা হচ্ছে — access token (১ দিন) শেষ হলে user কে logout না করে নতুন token নেওয়া হবে
+    final refresh = response.tokens?.refresh;
+    if (refresh != null && refresh.isNotEmpty) {
+      await LocalDB.saveRefreshToken(refresh);
+    }
+
   }
 
 

@@ -14,7 +14,7 @@ class AppDropdownSmall<T> extends FormField<T> {
     this.initialValue,
     this.validator,
     this.isLabel = false,
-    this.isSearch = false,
+    this.isSearch = true, // সব dropdown এ search
     this.isEnabled = true,
   }) : super(
     initialValue: initialValue,

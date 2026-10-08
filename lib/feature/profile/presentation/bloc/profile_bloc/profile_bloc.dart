@@ -2,6 +2,7 @@
 import '../../../../../core/configs/configs.dart';
 import '../../../../../core/repositories/get_response.dart';
 import '../../../../../core/repositories/patch_response.dart';
+import '../../../../../core/repositories/post_response.dart';
 import '../../../../common/data/models/api_response_mod.dart';
 import '../../../../common/data/models/app_parse_json.dart';
 import '../../../data/model/profile_perrmission_model.dart';
@@ -158,24 +159,30 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     emit(PasswordChanging());
 
     try {
-      final res = await patchResponse(
+      // FIX: backend শুধু POST নেয় (আগে PATCH যেত) এবং confirm_password চায়
+      final res = await postResponse(
         url: AppUrls.changePassword,
         payload: {
           'current_password': event.currentPassword,
           'new_password': event.newPassword,
+          'confirm_password': event.confirmPassword,
         },
       );
-      final jsonString = jsonEncode(res);
 
-      ApiResponse response = appParseJson(jsonString, (data) => data);
+      // postResponse → {status, statusCode, data: {status, message, data}, message}
+      final body = res['data'];
+      final serverSuccess = body is Map ? body['status'] != false : true;
+      final message = (body is Map ? body['message'] : null) ?? res['message'];
 
-      if (response.success == true) {
+      if (res['status'] == true && serverSuccess) {
+        // Desktop এ token renew এর জন্য সংরক্ষিত password ও নতুনটা দিয়ে আপডেট
+        await LocalDB.updatePassword(event.newPassword);
         emit(PasswordChangeSuccess());
       } else {
         emit(
           PasswordChangeFailed(
             title: "Password Change Failed",
-            content: response.message ?? "Failed to change password",
+            content: message?.toString() ?? "Failed to change password",
           ),
         );
       }

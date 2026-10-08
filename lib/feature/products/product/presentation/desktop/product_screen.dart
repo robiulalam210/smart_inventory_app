@@ -22,6 +22,7 @@ import '../bloc/products/products_bloc.dart';
 import '../widget/pagination.dart';
 import '../widget/widget.dart';
 import 'product_create.dart';
+import 'package:meherinMart/core/widgets/app_dropdown.dart';
 
 class ProductsScreen extends StatefulWidget {
   const ProductsScreen({super.key});
@@ -744,57 +745,15 @@ class _ProductsScreenState extends State<ProductsScreen> {
           ),
         ),
         const SizedBox(height: 4),
-        Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: Colors.grey[300]!),
-          ),
-          constraints: const BoxConstraints(minHeight: 35),
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<String>(
-              value: selectedValue.isEmpty
-                  ? (includeEmpty ? 'All' : null)
-                  : selectedValue,
-              isExpanded: true,
-              // This is important!
-              isDense: true,
-              icon: const Icon(Icons.arrow_drop_down, size: 20),
-              style: const TextStyle(
-                fontSize: 14,
-                color: Colors.black87,
-                overflow: TextOverflow.ellipsis,
-              ),
-              items: allOptions.map((option) {
-                return DropdownMenuItem<String>(
-                  value: option.isEmpty ? null : option,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    child: Text(
-                      option.isEmpty ? 'All' : option,
-                      style: const TextStyle(fontSize: 14),
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
-                    ),
-                  ),
-                );
-              }).toList(),
-              onChanged: onChanged,
-              hint: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: Text(
-                  'Select $label',
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ),
-              dropdownColor: Colors.white,
-              menuMaxHeight: 300,
-            ),
-          ),
+        AppDropdown<String>(
+          // search সহ dropdown — value বদলালে key বদলে নতুন মান দেখায়
+          key: ValueKey('$label-$selectedValue'),
+          label: label,
+          hint: 'Select $label',
+          value: selectedValue.isEmpty ? (includeEmpty ? 'All' : null) : selectedValue,
+          itemList: allOptions,
+          isClearable: false,
+          onChanged: onChanged,
         ),
       ],
     );

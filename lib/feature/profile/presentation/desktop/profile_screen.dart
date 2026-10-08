@@ -17,6 +17,7 @@ import '../../data/service/image_upload_service.dart';
 import '../bloc/profile_bloc/profile_bloc.dart';
 import '../widget/company_info.dart';
 import '../widget/show_theme_color_bottom_sheet.dart';
+import 'package:meherinMart/core/widgets/app_dropdown.dart';
 
 
 class ProfileScreen extends StatefulWidget {
@@ -939,6 +940,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       context.read<ProfileBloc>().add(ChangePassword(
         currentPassword: _currentPasswordController.text,
         newPassword: _newPasswordController.text,
+        confirmPassword: _confirmPasswordController.text,
         context: context,
       ));
     }
@@ -1341,19 +1343,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 6),
             decoration: BoxDecoration(color: AppColors.bottomNavBg(context), borderRadius: BorderRadius.circular(8)),
-            child: DropdownButton<String>(
-              value: currentCode,
-              underline: const SizedBox(),
-              dropdownColor: Theme.of(context).cardColor,
-              icon: const Icon(Icons.arrow_drop_down),
-              items: languages.entries.map((entry) => DropdownMenuItem(value: entry.key, child: Text(entry.value, style: AppTextStyle.body(context)))).toList(),
-              onChanged: (value) async {
-                if (value != null) {
-                  context.setLocale(Locale(value));
-                  await AuthLocalDB.saveLanguage(value);
-                }
-              },
-            ),
+            child: SizedBox(
+  width: 150,
+  // search সহ dropdown (সব dropdown এ search থাকবে)
+  child: AppDropdown<String>(
+    key: ValueKey(currentCode),
+    label: 'Language',
+    hint: 'Language',
+    value: currentCode,
+    isClearable: false,
+    itemList: languages.keys.toList(),
+    itemLabel: (code) => languages[code] ?? code,
+    onChanged: (value) async {
+      if (value != null) {
+        context.setLocale(Locale(value));
+        await AuthLocalDB.saveLanguage(value);
+      }
+    },
+  ),
+),
           ),
         ],
       ),

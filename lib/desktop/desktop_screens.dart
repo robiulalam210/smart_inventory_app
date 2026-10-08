@@ -44,6 +44,7 @@ import 'package:meherinMart/feature/supplier/presentation/desktop/supplier_payme
 import 'package:meherinMart/feature/transactions/presentation/desktop/transaction_screen.dart';
 import 'package:meherinMart/feature/users_list/presentation/desktop/users_screen.dart';
 import 'package:meherinMart/desktop/widgets/embedded_full_page.dart';
+import 'package:meherinMart/feature/audit_log/presentation/audit_log_screen.dart';
 
 /// Desktop root এর main area তে যে স্ক্রিনগুলো index অনুযায়ী দেখায়।
 /// (আগে DashboardBloc.myScreens ছিল — সেটা mobile build এও সব desktop স্ক্রিন টেনে আনত।)
@@ -111,6 +112,7 @@ final List<Widget> desktopScreens = [
     AppWrapper(child: EmbeddedFullPage(child: MobileIncomeListScreen())),   // 41 Income List
     AppWrapper(child: EmbeddedFullPage(child: MobileIncomeHeadScreen())),   // 42 Income Head
     AppWrapper(child: EmbeddedFullPage(child: SaleModeListScreen())),       // 43 Sale Mode
+    AppWrapper(child: EmbeddedFullPage(child: AuditLogScreen(showAppBar: false))), // 44 Audit Log (Super Admin / Admin)
 
 
 

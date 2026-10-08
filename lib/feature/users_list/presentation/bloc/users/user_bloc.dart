@@ -329,7 +329,11 @@ class UserBloc extends Bloc<UserEvent, UserState> {
 
       ApiResponse response = appParseJson(
         jsonEncode(res),
-            (data) => data['has_permission'] as bool,
+            // postResponse এর data = server body {status, message, data: {has_permission}}
+            (data) {
+          final inner = (data is Map && data['data'] is Map) ? data['data'] : data;
+          return inner is Map && inner['has_permission'] == true;
+        },
       );
 
       if (response.success == true && response.data != null) {

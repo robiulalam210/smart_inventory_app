@@ -48,8 +48,8 @@ Future<String> getResponse({
 
     // 401 Unauthorized -> force logout
     if (response.statusCode == 401) {
-      // Desktop: token expire হলে আগে চুপচাপ নতুন token নিয়ে একবার চেষ্টা
-      if (gateway.enabled && !retried && await SessionKeeper.renew()) {
+      // Token expire হলে আগে চুপচাপ নতুন token নিয়ে একবার চেষ্টা (mobile + desktop)
+      if (!retried && await SessionKeeper.renew()) {
         // ignore: use_build_context_synchronously
         return getResponse(context: context, url: url, queryParams: queryParams, retried: true);
       }
@@ -77,6 +77,11 @@ Future<String> getResponse({
     );
 
     if (authError != null) {
+      if (!retried && authError.item1 == "Authentication Failed" && await SessionKeeper.renew()) {
+        // ignore: use_build_context_synchronously
+        return getResponse(context: context, url: url, queryParams: queryParams, retried: true);
+      }
+      // ignore: use_build_context_synchronously
       await _handleTokenExpiration(context);
       return _buildErrorResponse(authError.item1, authError.item2);
     }

@@ -11,6 +11,7 @@ import '../offline/uuid_v4.dart';
 
 Future<Map<String, dynamic>> deleteResponse({
   required String url,
+  bool retried = false,
 }) async {
   Uri uriUrl = Uri.parse(url);
   // Offline এ edit/delete করা যায় না (conflict ও হিসাবের গরমিল এড়াতে)
@@ -34,6 +35,11 @@ Future<Map<String, dynamic>> deleteResponse({
 
     logger.i("deleteResponse statusCode: ${response.statusCode}");
     logger.i("deleteResponse body: ${response.body}");
+
+    // Token expire (401) → নতুন token নিয়ে একবার আবার চেষ্টা (mobile + desktop)
+    if (response.statusCode == 401 && !retried && await SessionKeeper.renew()) {
+      return deleteResponse(url: url, retried: true);
+    }
 
     // ✅ Handle 204 No Content response
     if (response.statusCode == 204) {

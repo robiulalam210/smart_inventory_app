@@ -23,7 +23,8 @@ class SupplierLedgerBloc extends Bloc<SupplierLedgerEvent, SupplierLedgerState> 
         selectedSupplierId = event.supplierId ?? selectedSupplierId;
 
         // Build query parameters
-        final Map<String, String> queryParams = {};
+        // page_size: backend প্রতি page এ ১০০টা দেয় — আগে শুধু প্রথম page আসত, তাই table অসম্পূর্ণ থাকত
+        final Map<String, String> queryParams = {'page_size': '1000'};
 
         if (event.from != null && event.to != null) {
           queryParams['start'] = event.from!.toIso8601String().split('T')[0];

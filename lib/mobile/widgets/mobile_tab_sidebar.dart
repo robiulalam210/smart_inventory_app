@@ -1,4 +1,5 @@
 import 'package:meherinMart/feature/auth/presentation/mobile/mobile_login_scr.dart';
+import 'package:meherinMart/feature/audit_log/presentation/audit_log_screen.dart';
 import 'package:meherinMart/feature/expense/expense_head/presentation/mobile/mobile_expense_head_screen.dart';
 import 'package:meherinMart/feature/expense/expense_sub_head/presentation/mobile/mobile_expense_sub_head_screen.dart';
 import 'package:meherinMart/feature/expense/presentation/mobile/mobile_expense_list_screen.dart';
@@ -53,7 +54,7 @@ class MobileTabSidebar extends StatelessWidget {
   const MobileTabSidebar({super.key});
 
   // Same menu structure as Sidebar for consistency
-  List<MenuSection> getMenuSections(Permissions? permissions) {
+  List<MenuSection> getMenuSections(Permissions? permissions, {String? role}) {
     final sections = <MenuSection>[];
 
     // Dashboard Section
@@ -278,6 +279,17 @@ class MobileTabSidebar extends StatelessWidget {
       );
     }
 
+    // Audit Log — module permission নয়, role দেখে (শুধু Super Admin / Admin)
+    final r = role?.toUpperCase();
+    if (r == 'SUPER_ADMIN' || r == 'ADMIN') {
+      sections.add(
+        MenuSection(
+          title: "Security",
+          items: [MenuItem(title: "Audit Log", index: 45)],
+        ),
+      );
+    }
+
     return sections;
   }
 
@@ -301,7 +313,8 @@ class MobileTabSidebar extends StatelessWidget {
                 ?.permissions;
 
             // Get dynamic menu sections based on permissions
-            final menuSections = getMenuSections(permission);
+            final role = context.read<ProfileBloc>().permissionModel?.data?.user?.role;
+            final menuSections = getMenuSections(permission, role: role);
 
             // Show empty state if no permissions
             if (menuSections.isEmpty) {
@@ -878,6 +891,10 @@ class MobileTabSidebar extends StatelessWidget {
           return;
         }
         AppRoutes.push(context, MobileTransactionScreen());
+        break;
+
+      case 45: // Audit Log — getMenuSections এ শুধু Super Admin / Admin এর জন্য যোগ হয়
+        AppRoutes.push(context, const AuditLogScreen());
         break;
 
       default:

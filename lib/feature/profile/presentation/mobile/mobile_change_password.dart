@@ -87,6 +87,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
         ChangePassword(
           currentPassword: _currentPasswordController.text,
           newPassword: _newPasswordController.text,
+          confirmPassword: _confirmPasswordController.text,
           context: context,
         ),
       );
