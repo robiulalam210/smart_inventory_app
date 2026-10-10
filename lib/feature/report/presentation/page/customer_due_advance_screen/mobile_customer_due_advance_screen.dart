@@ -913,7 +913,7 @@ class _MobileCustomerDueAdvanceScreenState
             ),
             body: PdfPreview(
               build: (format) =>
-                  generateCustomerDueAdvanceReportPdf(state.response,context.read<ProfileBloc>().permissionModel?.data?.companyInfo),
+                  generateCustomerDueAdvanceReportPdf(state.response,context.read<ProfileBloc>().permissionModel?.data?.businessInfo),
               canChangeOrientation: false,
               canChangePageFormat: false,
               canDebug: false,

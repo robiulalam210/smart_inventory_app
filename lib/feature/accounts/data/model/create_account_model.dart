@@ -41,7 +41,6 @@ class Data {
   final String? bankName;
   final String? branch;
   final dynamic openingBalance;
-  final int? company;
 
   Data({
     this.acId,
@@ -52,7 +51,6 @@ class Data {
     this.bankName,
     this.branch,
     this.openingBalance,
-    this.company,
   });
 
   factory Data.fromJson(Map<String, dynamic> json) => Data(
@@ -64,7 +62,6 @@ class Data {
     bankName: json["bank_name"],
     branch: json["branch"],
     openingBalance: json["opening_balance"],
-    company: json["company"],
   );
 
   Map<String, dynamic> toJson() => {
@@ -76,6 +73,5 @@ class Data {
     "bank_name": bankName,
     "branch": branch,
     "opening_balance": openingBalance,
-    "company": company,
   };
 }

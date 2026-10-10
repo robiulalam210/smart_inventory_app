@@ -87,7 +87,6 @@ class UserTableCard extends StatelessWidget {
                 _mobileInfo('Email', user.email,context),
                 _mobileInfo('Phone', user.phone,context),
                 _mobileInfo('Role', user.role,context),
-                _mobileInfo('Company', user.company?.name,context),
                 const SizedBox(height: 10),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -162,7 +161,6 @@ class UserTableCard extends StatelessWidget {
       AppTableColumn('Email', flex: 3, minWidth: 160),
       AppTableColumn.center('Role', flex: 2, minWidth: 110),
       AppTableColumn('Phone', flex: 2, minWidth: 120),
-      AppTableColumn('Company', flex: 2, minWidth: 120),
       AppTableColumn.center('Status', flex: 2, minWidth: 96),
       AppTableColumn.center('Actions', flex: canManage ? 2 : 1, minWidth: canManage ? 104 : 80),
     ];
@@ -187,8 +185,6 @@ class UserTableCard extends StatelessWidget {
           case 4:
             return AppTableText(u.phone ?? '-');
           case 5:
-            return AppTableText(u.company?.name ?? '-', muted: true);
-          case 6:
             final active = _getUserStatus(u);
             return AppStatusPill(active ? 'Active' : 'Inactive',
                 color: active ? AppColors.success : AppColors.danger);
@@ -272,7 +268,6 @@ class UserTableCard extends StatelessWidget {
                   _detailRow('Email', user.email,context),
                   _detailRow('Role', user.role,context),
                   _detailRow('Phone', user.phone,context),
-                  _detailRow('Company', user.company?.name,context),
                   _detailRow('Status',
                       _getUserStatus(user) ? 'Active' : 'Inactive',context),
                   const SizedBox(height: 16),

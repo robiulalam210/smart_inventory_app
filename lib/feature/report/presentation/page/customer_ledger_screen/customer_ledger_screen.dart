@@ -293,7 +293,7 @@ class _CustomerLedgerScreenState extends State<CustomerLedgerScreen> {
                             canChangePageFormat: false,
                             dynamicLayout: true,
                             build: (format) => generateCustomerLedgerReportPdf(
-                             state.response,context.read<ProfileBloc>().permissionModel?.data?.companyInfo
+                             state.response,context.read<ProfileBloc>().permissionModel?.data?.businessInfo
 
                             ),
                             pdfPreviewPageDecoration:

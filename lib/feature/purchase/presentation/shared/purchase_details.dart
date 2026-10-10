@@ -203,7 +203,7 @@ class PurchaseDetailsScreen extends StatelessWidget {
             dynamicLayout: true,
             build: (format) => generatePurchasePdf(
               purchase,
-              context.read<ProfileBloc>().permissionModel?.data?.companyInfo,
+              context.read<ProfileBloc>().permissionModel?.data?.businessInfo,
             ),
             pdfPreviewPageDecoration: BoxDecoration(color: AppColors.white),
             actionBarTheme: PdfActionBarTheme(

@@ -10,7 +10,6 @@ String expenseModelToJson(List<ExpenseModel> data) => json.encode(List<dynamic>.
 
 class ExpenseModel {
   final int? id;
-  final int? company;
   final int? head;
   final int? subhead;
   final String? headName;
@@ -28,7 +27,6 @@ class ExpenseModel {
 
   ExpenseModel({
     this.id,
-    this.company,
     this.head,
     this.subhead,
     this.headName,
@@ -47,7 +45,6 @@ class ExpenseModel {
 
   factory ExpenseModel.fromJson(Map<String, dynamic> json) => ExpenseModel(
     id: json["id"],
-    company: json["company"],
     head: json["head"],
     subhead: json["subhead"],
     headName: json["head_name"],
@@ -66,7 +63,6 @@ class ExpenseModel {
 
   Map<String, dynamic> toJson() => {
     "id": id,
-    "company": company,
     "head": head,
     "subhead": subhead,
     "head_name": headName,

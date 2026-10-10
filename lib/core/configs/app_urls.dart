@@ -1,6 +1,6 @@
 
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-final bool isLive = false; // Set to true for production environment
+final bool isLive = true; // Set to true for production environment
 
 
 class AppUrls {
@@ -32,7 +32,6 @@ class AppUrls {
   /// নির্দিষ্ট একজন user এর permission (admin এর permission editor)
   static String userPermissionDetail(String userId) => '$baseUrl/user-permissions/user/$userId/';
   static  String checkPermission = '$baseUrl/user-permissions/check/'; // FIX: আগে /permissions/check/ (404) ছিল
-  static  String companyUsers = '$baseUrl/company-users/';
 
   static  String saleModes = "$baseUrl/sale-modes/";
   static  String priceTiers = "$baseUrl/price-tiers/";

@@ -148,7 +148,7 @@ class _TopProductsScreenState extends State<TopProductsScreen> {
                       canChangePageFormat: false,
                       dynamicLayout: true,
                       build: (format) => generateTopProductsReportPdf(
-                        state.response, context.read<ProfileBloc>().permissionModel?.data?.companyInfo
+                        state.response, context.read<ProfileBloc>().permissionModel?.data?.businessInfo
 
                       ),
                       pdfPreviewPageDecoration:

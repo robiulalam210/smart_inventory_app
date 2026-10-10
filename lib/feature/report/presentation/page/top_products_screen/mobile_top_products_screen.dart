@@ -679,7 +679,7 @@ class _MobileTopProductsScreenState extends State<MobileTopProductsScreen> {
               ],
             ),
             body: PdfPreview(
-              build: (format) => generateTopProductsReportPdf(state.response, context.read<ProfileBloc>().permissionModel?.data?.companyInfo),
+              build: (format) => generateTopProductsReportPdf(state.response, context.read<ProfileBloc>().permissionModel?.data?.businessInfo),
               canChangeOrientation: false,
               canChangePageFormat: false,
               canDebug: false,

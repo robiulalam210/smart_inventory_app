@@ -275,7 +275,7 @@ class _StockReportScreenState extends State<StockReportScreen> {
                       canChangePageFormat: false,
                       dynamicLayout: true,
                       build: (format) => generateStockReportPdf(
-                        state.response,context.read<ProfileBloc>().permissionModel?.data?.companyInfo
+                        state.response,context.read<ProfileBloc>().permissionModel?.data?.businessInfo
 
                       ),
                       pdfPreviewPageDecoration:

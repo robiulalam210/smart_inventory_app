@@ -60,7 +60,7 @@ class SupplierPaymentBloc extends Bloc<SupplierPaymentEvent, SupplierPaymentStat
     emit(SupplierPaymentDeleteLoading());
 
     try {
-      final res  = await deleteResponse(url: "${AppUrls.supplierPayment}/${event.id.toString()}");
+      final res  = await deleteResponse(url: "${AppUrls.supplierPayment}${event.id.toString()}/"); // FIX: আগে supplier-payments//15 (404) হত
 
       final jsonString = jsonEncode(res);
 
@@ -214,7 +214,7 @@ class SupplierPaymentBloc extends Bloc<SupplierPaymentEvent, SupplierPaymentStat
 
     try {
       // Fetch the warehouse product details
-      final warehouseRes = await getResponse(url:"${ AppUrls.supplierPayment}/${event.id.toString()}", context: event.context);
+      final warehouseRes = await getResponse(url:"${ AppUrls.supplierPayment}${event.id.toString()}/", context: event.context);
       ApiResponse<SupplierPaymentDetailsModel> warehouseResponse = appParseJson<SupplierPaymentDetailsModel>(
         warehouseRes,
             (data) => SupplierPaymentDetailsModel.fromJson(data),

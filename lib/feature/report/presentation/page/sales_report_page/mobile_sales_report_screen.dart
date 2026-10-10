@@ -619,7 +619,7 @@ class _MobileSaleReportScreenState extends State<MobileSalesReportScreen> {
               ],
             ),
             body: PdfPreview(
-              build: (format) => generateSalesReportPdf(state.response, context.read<ProfileBloc>().permissionModel?.data?.companyInfo),
+              build: (format) => generateSalesReportPdf(state.response, context.read<ProfileBloc>().permissionModel?.data?.businessInfo),
               canChangeOrientation: false,
               canChangePageFormat: false,
               canDebug: false,

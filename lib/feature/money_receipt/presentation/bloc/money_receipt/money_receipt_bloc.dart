@@ -77,7 +77,7 @@ class MoneyReceiptBloc extends Bloc<MoneyReceiptEvent, MoneyReceiptState> {
     try {
       final res = await deleteResponse(
           url:
-              "${AppUrls.moneyReceipt}/${event.id.toString()}"); // Use the correct API URL
+              "${AppUrls.moneyReceipt}${event.id.toString()}/"); // FIX: আগে money-receipts//15 (404) হত
 
       final jsonString = jsonEncode(res);
 
@@ -270,7 +270,7 @@ class MoneyReceiptBloc extends Bloc<MoneyReceiptEvent, MoneyReceiptState> {
     try {
       // Fetch the warehouse product details
       final warehouseRes = await getResponse(
-          url: "${AppUrls.moneyReceipt}/${event.id.toString()}",
+          url: "${AppUrls.moneyReceipt}${event.id.toString()}/",
           context: event.context);
       ApiResponse<MoneyReceiptInvoiceModel> warehouseResponse =
           appParseJson<MoneyReceiptInvoiceModel>(

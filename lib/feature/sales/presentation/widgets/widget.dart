@@ -481,7 +481,7 @@ class PosSaleDataTableWidget extends StatelessWidget {
             ],
             build: (format) => generateSalesPdf(
               sale,
-              context.read<ProfileBloc>().permissionModel?.data?.companyInfo,
+              context.read<ProfileBloc>().permissionModel?.data?.businessInfo,
             ),
             pagesBuilder: (context, pages) {
               debugPrint('Rendering ${pages.length} pages');

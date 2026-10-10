@@ -256,7 +256,7 @@ class _MobileProfitLossScreenState extends State<MobileProfitLossScreen> {
       context,
       MaterialPageRoute(
         builder: (_) => PdfPreview(
-          build: (_) => generateProfitLossReportPdf(state.response, context.read<ProfileBloc>().permissionModel?.data?.companyInfo),
+          build: (_) => generateProfitLossReportPdf(state.response, context.read<ProfileBloc>().permissionModel?.data?.businessInfo),
           canChangeOrientation: false,
           canChangePageFormat: false,
         ),

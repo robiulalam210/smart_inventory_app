@@ -10,7 +10,6 @@ class SaleModeModel extends Equatable {
   final double? conversionFactor;
   final String? priceType;
   final bool? isActive;
-  final int? company;
   final String? createdAt;
   final String? updatedAt;
   final String? baseUnitName;
@@ -23,7 +22,6 @@ class SaleModeModel extends Equatable {
     this.conversionFactor,
     this.priceType,
     this.isActive,
-    this.company,
     this.createdAt,
     this.updatedAt,
     this.baseUnitName,
@@ -40,7 +38,6 @@ class SaleModeModel extends Equatable {
           : null,
       priceType: json['price_type'],
       isActive: json['is_active'],
-      company: json['company'],
       createdAt: json['created_at'],
       updatedAt: json['updated_at'],
       baseUnitName: json['base_unit_name'],
@@ -56,7 +53,6 @@ class SaleModeModel extends Equatable {
       'conversion_factor': conversionFactor,
       'price_type': priceType,
       'is_active': isActive,
-      'company': company,
       'created_at': createdAt,
       'updated_at': updatedAt,
     };
@@ -71,7 +67,6 @@ class SaleModeModel extends Equatable {
     conversionFactor,
     priceType,
     isActive,
-    company,
     createdAt,
     updatedAt,
     baseUnitName,

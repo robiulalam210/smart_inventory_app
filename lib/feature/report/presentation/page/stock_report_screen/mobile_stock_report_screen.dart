@@ -773,7 +773,7 @@ class _MobileStockReportScreenState extends State<MobileStockReportScreen> {
               ],
             ),
             body: PdfPreview(
-              build: (format) => generateStockReportPdf(state.response, context.read<ProfileBloc>().permissionModel?.data?.companyInfo),
+              build: (format) => generateStockReportPdf(state.response, context.read<ProfileBloc>().permissionModel?.data?.businessInfo),
               canChangeOrientation: false,
               canChangePageFormat: false,
               canDebug: false,

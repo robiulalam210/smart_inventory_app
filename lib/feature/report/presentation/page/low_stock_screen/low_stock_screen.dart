@@ -201,7 +201,7 @@ class _LowStockScreenState extends State<LowStockScreen> {
                       dynamicLayout: true,
                       build: (format) => generateLowStockReportPdf(
                         state.response,
-                          context.read<ProfileBloc>().permissionModel?.data?.companyInfo
+                          context.read<ProfileBloc>().permissionModel?.data?.businessInfo
 
                       ),
                       pdfPreviewPageDecoration:

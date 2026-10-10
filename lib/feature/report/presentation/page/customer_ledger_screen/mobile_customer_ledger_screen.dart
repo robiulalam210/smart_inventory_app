@@ -1041,7 +1041,7 @@ class _MobileCustomerLedgerScreenState
             ),
             body: PdfPreview(
               build: (format) =>
-                  generateCustomerLedgerReportPdf(state.response,context.read<ProfileBloc>().permissionModel?.data?.companyInfo),
+                  generateCustomerLedgerReportPdf(state.response,context.read<ProfileBloc>().permissionModel?.data?.businessInfo),
               canChangeOrientation: false,
               canChangePageFormat: false,
               canDebug: false,

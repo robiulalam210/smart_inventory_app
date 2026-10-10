@@ -253,7 +253,7 @@ gapW8,
                         canChangePageFormat: false,
                         dynamicLayout: true,
                         build: (format) =>
-                            generateSalesReportPdf(state.response, context.read<ProfileBloc>().permissionModel?.data?.companyInfo),
+                            generateSalesReportPdf(state.response, context.read<ProfileBloc>().permissionModel?.data?.businessInfo),
                         pdfPreviewPageDecoration: BoxDecoration(
                           color: AppColors.white,
                         ),

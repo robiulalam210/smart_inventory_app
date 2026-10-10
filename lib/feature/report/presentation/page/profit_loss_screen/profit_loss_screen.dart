@@ -165,7 +165,7 @@ class _ProfitLossScreenState extends State<ProfitLossScreen> {
                       canChangePageFormat: false,
                       dynamicLayout: true,
                       build: (format) => generateProfitLossReportPdf(
-                        state.response, context.read<ProfileBloc>().permissionModel?.data?.companyInfo
+                        state.response, context.read<ProfileBloc>().permissionModel?.data?.businessInfo
 
                       ),
                       pdfPreviewPageDecoration:

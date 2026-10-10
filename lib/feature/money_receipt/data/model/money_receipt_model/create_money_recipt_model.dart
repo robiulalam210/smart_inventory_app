@@ -35,7 +35,6 @@ class CreateMoneyReciptModel {
 class Data {
   final int? id;
   final String? mrNo;
-  final int? company;
   final int? customer;
   final String? customerName;
   final dynamic customerPhone;
@@ -58,7 +57,6 @@ class Data {
   Data({
     this.id,
     this.mrNo,
-    this.company,
     this.customer,
     this.customerName,
     this.customerPhone,
@@ -82,7 +80,6 @@ class Data {
   factory Data.fromJson(Map<String, dynamic> json) => Data(
     id: json["id"],
     mrNo: json["mr_no"],
-    company: json["company"],
     customer: json["customer"],
     customerName: json["customer_name"],
     customerPhone: json["customer_phone"],
@@ -106,7 +103,6 @@ class Data {
   Map<String, dynamic> toJson() => {
     "id": id,
     "mr_no": mrNo,
-    "company": company,
     "customer": customer,
     "customer_name": customerName,
     "customer_phone": customerPhone,

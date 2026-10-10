@@ -720,7 +720,7 @@ class _MobilePurchaseReportScreenState
               ],
             ),
             body: PdfPreview(
-              build: (format) => generatePurchaseReportPdf(state.response, context.read<ProfileBloc>().permissionModel?.data?.companyInfo),
+              build: (format) => generatePurchaseReportPdf(state.response, context.read<ProfileBloc>().permissionModel?.data?.businessInfo),
               canChangeOrientation: false,
               canChangePageFormat: false,
               canDebug: false,

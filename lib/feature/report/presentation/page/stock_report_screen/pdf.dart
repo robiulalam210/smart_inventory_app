@@ -9,7 +9,7 @@ import '../../../data/model/stock_report_model.dart';
 
 
 Future<Uint8List> generateStockReportPdf(
-    StockReportResponse reportResponse, CompanyInfo? company,
+    StockReportResponse reportResponse, BusinessInfo? company,
     ) async {Uint8List? logoBytes;
 if (company?.logo != null && company!.logo.isNotEmpty) {
   try {
@@ -50,11 +50,11 @@ if (company?.logo != null && company!.logo.isNotEmpty) {
                     ),
                   ),
                   pw.SizedBox(height: 4),
-                  if (company?.address != null )
+                  if ((company?.address ?? '').trim().isNotEmpty )
                     pw.Text(company?.address??"", style: const pw.TextStyle(fontSize: 10)),
-                  if (company?.phone != null )
+                  if ((company?.phone ?? '').trim().isNotEmpty )
                     pw.Text(company?.phone??"", style: const pw.TextStyle(fontSize: 10)),
-                  if (company?.email != null )
+                  if ((company?.email ?? '').trim().isNotEmpty )
                     pw.Text(company?.email??"", style: const pw.TextStyle(fontSize: 10)),
                 ],
               ),

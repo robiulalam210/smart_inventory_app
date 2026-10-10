@@ -10,8 +10,7 @@ import '../data/audit_repo.dart';
 /// Audit Log — কে, কখন, কোন app/device থেকে, কোন record এ কী বদলেছে।
 /// শুধু Super Admin ও Admin (backend ও একই নিয়ম মানে)।
 ///
-/// - Super Admin: সব company দেখে, company দিয়ে filter করতে পারে
-/// - Admin: শুধু নিজের company
+/// - Super Admin ও Admin: ব্যবসার সব log দেখে
 ///
 /// Layout: চওড়া screen (≥ 1100px) এ বাঁয়ে timeline, ডানে বিস্তারিত panel।
 /// ছোট screen এ timeline, ট্যাপ করলে নিচ থেকে বিস্তারিত উঠে আসে।
@@ -140,7 +139,7 @@ class _AuditLogScreenState extends State<AuditLogScreen> {
   /// একটা record এর পুরো ইতিহাস (কে কবে কী বদলেছে) দেখানো
   void _showHistoryOf(AuditEntry e) {
     _searchCtrl.clear();
-    _applyFilter(AuditFilter(model: e.model, objectId: e.objectId, companyId: _filter.companyId));
+    _applyFilter(AuditFilter(model: e.model, objectId: e.objectId));
   }
 
   Future<void> _pickRange() async {
@@ -177,7 +176,6 @@ class _AuditLogScreenState extends State<AuditLogScreen> {
                 : _AuditDetail(
                     key: ValueKey(_selected!.id),
                     entry: _selected!,
-                    showCompany: _meta.isSuperAdmin,
                     onShowHistory: () => _showHistoryOf(_selected!),
                   ),
           ),
@@ -217,7 +215,7 @@ class _AuditLogScreenState extends State<AuditLogScreen> {
             sliver: SliverList(
               delegate: SliverChildListDelegate([
                 if (!widget.showAppBar) ...[
-                  _PageHeader(onRefresh: _loading ? null : _refresh, isSuperAdmin: _meta.isSuperAdmin),
+                  _PageHeader(onRefresh: _loading ? null : _refresh),
                   const SizedBox(height: 16),
                 ],
                 _StatsRow(summary: _meta.summary, width: listWidth - pad * 2),
@@ -314,7 +312,6 @@ class _AuditLogScreenState extends State<AuditLogScreen> {
       rows.add(_AuditTile(
         entry: e,
         selected: wide && _selected?.id == e.id,
-        showCompany: _meta.isSuperAdmin && _filter.companyId == null,
         onTap: () {
           if (wide) {
             setState(() => _selected = e);
@@ -363,7 +360,6 @@ class _AuditLogScreenState extends State<AuditLogScreen> {
         maxChildSize: 0.95,
         builder: (ctx, controller) => _AuditDetail(
           entry: e,
-          showCompany: _meta.isSuperAdmin,
           scrollController: controller,
           showHandle: true,
           onShowHistory: () {
@@ -400,9 +396,8 @@ BoxDecoration _card(BuildContext context, {Color? border}) => BoxDecoration(
 
 class _PageHeader extends StatelessWidget {
   final VoidCallback? onRefresh;
-  final bool isSuperAdmin;
 
-  const _PageHeader({required this.onRefresh, required this.isSuperAdmin});
+  const _PageHeader({required this.onRefresh});
 
   @override
   Widget build(BuildContext context) {
@@ -426,9 +421,7 @@ class _PageHeader extends StatelessWidget {
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.text(context))),
               const SizedBox(height: 2),
               Text(
-                isSuperAdmin
-                    ? 'Every change across all companies — who, when, from where'
-                    : 'Every change in your company — who, when, from where',
+                'Every change in your business — who, when, from where',
                 style: TextStyle(fontSize: 12.5, color: AppColors.subText),
               ),
             ],
@@ -578,15 +571,6 @@ class _FilterBar extends StatelessWidget {
     );
 
     final dropdowns = <Widget>[
-      if (meta.isSuperAdmin)
-        _FilterDropdown(
-          icon: Icons.business_outlined,
-          hint: 'All companies',
-          value: filter.companyId,
-          options: meta.companies,
-          showCount: false,
-          onChanged: (v) => onChanged(filter.copyWith(companyId: () => v, userId: () => null)),
-        ),
       _FilterDropdown(
         icon: Icons.category_outlined,
         hint: 'All modules',
@@ -849,10 +833,9 @@ class _DayHeader extends StatelessWidget {
 class _AuditTile extends StatelessWidget {
   final AuditEntry entry;
   final bool selected;
-  final bool showCompany;
   final VoidCallback onTap;
 
-  const _AuditTile({required this.entry, required this.selected, required this.showCompany, required this.onTap});
+  const _AuditTile({required this.entry, required this.selected, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -926,8 +909,6 @@ class _AuditTile extends StatelessWidget {
                             ),
                           if (entry.wasOffline)
                             const _MetaChip(icon: Icons.cloud_off_rounded, label: 'Synced later', color: AppColors.warning),
-                          if (showCompany && entry.company != null)
-                            _MetaChip(icon: Icons.business_outlined, label: entry.company!),
                         ],
                       ),
                     ],
@@ -977,7 +958,6 @@ class _MetaChip extends StatelessWidget {
 /// একটা audit entry এর পুরো বিস্তারিত — desktop এ ডান panel, mobile এ bottom sheet
 class _AuditDetail extends StatelessWidget {
   final AuditEntry entry;
-  final bool showCompany;
   final VoidCallback onShowHistory;
   final ScrollController? scrollController;
   final bool showHandle;
@@ -985,7 +965,6 @@ class _AuditDetail extends StatelessWidget {
   const _AuditDetail({
     super.key,
     required this.entry,
-    required this.showCompany,
     required this.onShowHistory,
     this.scrollController,
     this.showHandle = false,
@@ -1070,8 +1049,6 @@ class _AuditDetail extends StatelessWidget {
               ),
               if (entry.device != null) _InfoRow(icon: Icons.memory_rounded, label: 'Device', value: entry.device!),
               if (entry.ip != null) _InfoRow(icon: Icons.lan_outlined, label: 'IP address', value: entry.ip!),
-              if (showCompany && entry.company != null)
-                _InfoRow(icon: Icons.business_outlined, label: 'Company', value: entry.company!),
             ],
           ),
         ),

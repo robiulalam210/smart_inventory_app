@@ -815,7 +815,7 @@ class _MobileSupplierDueAdvanceScreenState
             ),
             body: PdfPreview(
               build: (format) =>
-                  generateSupplierDueAdvanceReportPdf(state.response, context.read<ProfileBloc>().permissionModel?.data?.companyInfo),
+                  generateSupplierDueAdvanceReportPdf(state.response, context.read<ProfileBloc>().permissionModel?.data?.businessInfo),
               canChangeOrientation: false,
               canChangePageFormat: false,
               canDebug: false,

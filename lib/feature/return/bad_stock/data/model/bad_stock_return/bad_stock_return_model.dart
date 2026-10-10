@@ -13,7 +13,6 @@ class BadStockReturnModel {
   final int? product;
   final String? productName;
   final int? quantity;
-  final int? companyId;
   final String? reason;
   final DateTime? date;
   final String? referenceType;
@@ -24,7 +23,6 @@ class BadStockReturnModel {
     this.product,
     this.productName,
     this.quantity,
-    this.companyId,
     this.reason,
     this.date,
     this.referenceType,
@@ -36,7 +34,6 @@ class BadStockReturnModel {
     product: json["product"],
     productName: json["product_name"],
     quantity: json["quantity"],
-    companyId: json["company_id"],
     reason: json["reason"],
     date: json["date"] == null ? null : DateTime.parse(json["date"]),
     referenceType: json["reference_type"],
@@ -48,7 +45,6 @@ class BadStockReturnModel {
     "product": product,
     "product_name": productName,
     "quantity": quantity,
-    "company_id": companyId,
     "reason": reason,
     "date": "${date!.year.toString().padLeft(4, '0')}-${date!.month.toString().padLeft(2, '0')}-${date!.day.toString().padLeft(2, '0')}",
     "reference_type": referenceType,

@@ -10,7 +10,6 @@ String purchaseInvoiceModelToJson(List<PurchaseInvoiceModel> data) => json.encod
 
 class PurchaseInvoiceModel {
   final int? id;
-  final int? company;
   final int? supplier;
   final String? supplierName;
   final DateTime? purchaseDate;
@@ -40,7 +39,6 @@ class PurchaseInvoiceModel {
 
   PurchaseInvoiceModel({
     this.id,
-    this.company,
     this.supplier,
     this.supplierName,
     this.purchaseDate,
@@ -74,7 +72,6 @@ class PurchaseInvoiceModel {
   }
   factory PurchaseInvoiceModel.fromJson(Map<String, dynamic> json) => PurchaseInvoiceModel(
     id: json["id"],
-    company: json["company"],
     supplier: json["supplier"],
     supplierName: json["supplier_name"],
     purchaseDate: json["purchase_date"] == null ? null : DateTime.parse(json["purchase_date"]),
@@ -103,7 +100,6 @@ class PurchaseInvoiceModel {
 
   Map<String, dynamic> toJson() => {
     "id": id,
-    "company": company,
     "supplier": supplier,
     "supplier_name": supplierName,
     "purchase_date": "${purchaseDate!.year.toString().padLeft(4, '0')}-${purchaseDate!.month.toString().padLeft(2, '0')}-${purchaseDate!.day.toString().padLeft(2, '0')}",

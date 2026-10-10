@@ -281,7 +281,7 @@ class _MobileProfileScreenState extends State<MobileProfileScreen> {
       'logo': await MultipartFile.fromFile(file.path, filename: filename),
     });
 
-    final url = '${AppUrls.baseUrlMain}/api/company/logo/';
+    final url = '${AppUrls.baseUrlMain}/api/business/logo/';
 
     try {
       final response = await _uploadService.uploadWithPatchFallback(
@@ -417,7 +417,7 @@ class _MobileProfileScreenState extends State<MobileProfileScreen> {
                                     onTap: () {
                                       _showImagePickerOptions(
                                         allowCompanyLogo:
-                                            my.data?.companyInfo != null,
+                                            my.data?.businessInfo != null,
                                       );
                                     },
                                     child: buildDoctorAvatar(
@@ -431,7 +431,7 @@ class _MobileProfileScreenState extends State<MobileProfileScreen> {
                                   const SizedBox(height: 8),
                                   GestureDetector(
                                     onTap: () {
-                                      if (my.data?.companyInfo != null) {
+                                      if (my.data?.businessInfo != null) {
                                         _showImagePickerOptions(
                                           allowCompanyLogo: true,
                                         );
@@ -513,7 +513,7 @@ class _MobileProfileScreenState extends State<MobileProfileScreen> {
                               ),
                               const SizedBox(height: 8),
                               CompanyProfileCardWithUpload(
-                                company: state.permissionData.data?.companyInfo,
+                                company: state.permissionData.data?.businessInfo,
                                 onUpdated: _loadProfileData,
                               ),
                               const SizedBox(height: 10),

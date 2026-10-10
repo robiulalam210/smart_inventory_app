@@ -418,7 +418,7 @@ class _MobileLowStockScreenState extends State<MobileLowStockScreen> {
               title: const Text('Low Stock PDF'),
               actions: [IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close))],
             ),
-            body: PdfPreview(build: (format) => generateLowStockReportPdf(state.response, context.read<ProfileBloc>().permissionModel?.data?.companyInfo)),
+            body: PdfPreview(build: (format) => generateLowStockReportPdf(state.response, context.read<ProfileBloc>().permissionModel?.data?.businessInfo)),
           ),
         ),
       );

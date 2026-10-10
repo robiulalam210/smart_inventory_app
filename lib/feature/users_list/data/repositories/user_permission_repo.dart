@@ -56,6 +56,62 @@ class UserPermissionDetail {
   }
 }
 
+/// ওয়েবের User Permissions তালিকার একটা সারি (GET /api/users/team/)
+class TeamPerson {
+  final int id;
+  final String name;
+  final String username;
+  final String email;
+  final String role;
+  final bool isActive;
+  final bool isMe;
+  final bool canEditPermissions;
+  final String permissionSource; // ROLE | CUSTOM | MIXED
+  final String? lastLogin;
+  final Map<String, Map<String, bool>> permissions;
+
+  const TeamPerson({
+    required this.id,
+    required this.name,
+    required this.username,
+    required this.email,
+    required this.role,
+    required this.isActive,
+    required this.isMe,
+    required this.canEditPermissions,
+    required this.permissionSource,
+    required this.lastLogin,
+    required this.permissions,
+  });
+
+  bool get isAdmin => role == 'ADMIN' || role == 'SUPER_ADMIN';
+
+  /// কতগুলো module এ অন্তত "view" আছে (ওয়েবের "N of M areas")
+  int reach(List<String> moduleKeys) =>
+      moduleKeys.where((k) => permissions[k]?['view'] == true).length;
+
+  factory TeamPerson.fromJson(Map<String, dynamic> j) {
+    final raw = (j['permissions'] as Map?)?.cast<String, dynamic>() ?? const {};
+    final perms = <String, Map<String, bool>>{};
+    raw.forEach((m, v) {
+      if (v is Map) perms[m] = v.map((k, x) => MapEntry(k.toString(), x == true));
+    });
+    return TeamPerson(
+      id: (j['id'] as num?)?.toInt() ?? 0,
+      name: '${j['name'] ?? j['username'] ?? ''}',
+      username: '${j['username'] ?? ''}',
+      email: '${j['email'] ?? ''}',
+      role: '${j['role'] ?? ''}',
+      isActive: j['is_active'] != false,
+      isMe: j['is_me'] == true,
+      canEditPermissions: j['can_edit_permissions'] == true,
+      permissionSource: '${j['permission_source'] ?? 'ROLE'}',
+      lastLogin: j['last_login']?.toString(),
+      permissions: perms,
+    );
+  }
+}
+
 class PermissionResult<T> {
   final T? data;
   final String? error;
@@ -82,6 +138,25 @@ class UserPermissionRepo {
       return PermissionResult.fail(json is Map ? '${json['message'] ?? 'Failed to load permissions'}' : 'Failed to load permissions');
     } catch (e) {
       return PermissionResult.fail('Failed to load permissions: $e');
+    }
+  }
+
+  /// সবার তালিকা — role, permission সারাংশ ও কে বদলানো যাবে (শুধু Admin এর জন্য কাজে লাগে)
+  Future<PermissionResult<List<TeamPerson>>> team(BuildContext context) async {
+    try {
+      final res = await getResponse(context: context, url: '${AppUrls.baseUrl}/users/team/');
+      final json = jsonDecode(res);
+      if (json is Map && json['status'] == true && json['data'] is Map) {
+        final list = (json['data']['results'] as List? ?? const []);
+        return PermissionResult.ok([
+          for (final r in list)
+            if (r is Map) TeamPerson.fromJson(r.cast<String, dynamic>()),
+        ]);
+      }
+      return PermissionResult.fail(
+          json is Map ? '${json['message'] ?? 'Could not load people'}' : 'Could not load people');
+    } catch (e) {
+      return PermissionResult.fail('Could not load people: $e');
     }
   }
 

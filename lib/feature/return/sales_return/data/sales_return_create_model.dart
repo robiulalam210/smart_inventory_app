@@ -44,7 +44,6 @@ class Data {
   final dynamic returnChargeType;
   final String? returnAmount;
   final String? status;
-  final int? companyId;
   final List<Item>? items;
 
   Data({
@@ -59,7 +58,6 @@ class Data {
     this.returnChargeType,
     this.returnAmount,
     this.status,
-    this.companyId,
     this.items,
   });
 
@@ -75,7 +73,6 @@ class Data {
     returnChargeType: json["return_charge_type"],
     returnAmount: json["return_amount"],
     status: json["status"],
-    companyId: json["company_id"],
     items: json["items"] == null ? [] : List<Item>.from(json["items"]!.map((x) => Item.fromJson(x))),
   );
 
@@ -91,7 +88,6 @@ class Data {
     "return_charge_type": returnChargeType,
     "return_amount": returnAmount,
     "status": status,
-    "company_id": companyId,
     "items": items == null ? [] : List<dynamic>.from(items!.map((x) => x.toJson())),
   };
 }

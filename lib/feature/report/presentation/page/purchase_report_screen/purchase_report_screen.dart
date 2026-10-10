@@ -212,7 +212,7 @@ class _PurchaseReportScreenState extends State<PurchaseReportScreen> {
                         canChangePageFormat: false,
                         dynamicLayout: true,
                         build: (format) =>
-                            generatePurchaseReportPdf(state.response, context.read<ProfileBloc>().permissionModel?.data?.companyInfo),
+                            generatePurchaseReportPdf(state.response, context.read<ProfileBloc>().permissionModel?.data?.businessInfo),
                         pdfPreviewPageDecoration: BoxDecoration(
                           color: AppColors.white,
                         ),

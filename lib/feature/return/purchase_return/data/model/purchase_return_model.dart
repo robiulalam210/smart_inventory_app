@@ -10,7 +10,6 @@ class PurchaseReturnModel {
   final String? returnAmount;
   final String? reason;
   final String? status;
-  final int? companyId;
   final List<PurchaseReturnItem>? items;
 
   PurchaseReturnModel({
@@ -25,7 +24,6 @@ class PurchaseReturnModel {
     this.returnAmount,
     this.reason,
     this.status,
-    this.companyId,
     this.items,
   });
 
@@ -42,7 +40,6 @@ class PurchaseReturnModel {
       returnAmount: json['return_amount'],
       reason: json['reason'],
       status: json['status'],
-      companyId: json['company_id'],
       items: json['items'] != null
           ? List<PurchaseReturnItem>.from(
           json['items'].map((x) => PurchaseReturnItem.fromJson(x)))

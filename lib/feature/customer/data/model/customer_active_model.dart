@@ -20,7 +20,6 @@ class CustomerActiveModel {
   final dynamic totalDue;
   final dynamic totalPaid;
   final String? amountType;
-  final int? company;
   final dynamic totalSales;
   final DateTime? dateCreated;
   final int? createdBy;
@@ -41,7 +40,6 @@ class CustomerActiveModel {
     this.totalDue,
     this.totalPaid,
     this.amountType,
-    this.company,
     this.totalSales,
     this.dateCreated,
     this.createdBy,
@@ -90,7 +88,6 @@ class CustomerActiveModel {
         totalDue: json["total_due"],
         totalPaid: json["total_paid"],
         amountType: json["amount_type"],
-        company: json["company"],
         totalSales: json["total_sales"],
         dateCreated: json["date_created"] == null
             ? null
@@ -112,7 +109,6 @@ class CustomerActiveModel {
     "total_due": totalDue,
     "total_paid": totalPaid,
     "amount_type": amountType,
-    "company": company,
     "total_sales": totalSales,
     "date_created": dateCreated?.toIso8601String(),
     "created_by": createdBy,

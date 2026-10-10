@@ -10,7 +10,6 @@ String unitsModelToJson(List<UnitsModel> data) => json.encode(List<dynamic>.from
 
 class UnitsModel {
   final int? id;
-  final int? company;
   final int? createdBy;
   final String? name;
   final String? code;
@@ -18,7 +17,6 @@ class UnitsModel {
 
   UnitsModel({
     this.id,
-    this.company,
     this.createdBy,
     this.name,
     this.code,
@@ -27,7 +25,6 @@ class UnitsModel {
 
   factory UnitsModel.fromJson(Map<String, dynamic> json) => UnitsModel(
     id: json["id"],
-    company: json["company"],
     createdBy: json["created_by"],
     name: json["name"],
     code: json["code"],
@@ -36,7 +33,6 @@ class UnitsModel {
 
   Map<String, dynamic> toJson() => {
     "id": id,
-    "company": company,
     "created_by": createdBy,
     "name": name,
     "code": code,

@@ -36,7 +36,7 @@ Future<Uint8List> _loadImageBytes(String? imageUrl) async {
 // Main function for generating final sales PDF
 Future<Uint8List> generateSalesPdf(
     PosSaleModel sale,
-    CompanyInfo? company,
+    BusinessInfo? company,
     ) async {
   final pdf = pw.Document();
 
@@ -98,7 +98,7 @@ Future<Uint8List> generateSalesPdf(
                   crossAxisAlignment: pw.CrossAxisAlignment.start,
                   children: [
                     pw.Text(
-                      company?.name ?? "Your Company",
+                      company?.name ?? "Your Business",
                       style: pw.TextStyle(
                         fontSize: 16,
                         fontWeight: pw.FontWeight.bold,
@@ -106,17 +106,17 @@ Future<Uint8List> generateSalesPdf(
                       ),
                     ),
                     pw.SizedBox(height: 4),
-                    if (company?.address != null)
+                    if ((company?.address ?? '').trim().isNotEmpty)
                       pw.Text(
                         company!.address!,
                         style: const pw.TextStyle(fontSize: 10),
                       ),
-                    if (company?.phone != null)
+                    if ((company?.phone ?? '').trim().isNotEmpty)
                       pw.Text(
                         "Phone: ${company!.phone!}",
                         style: const pw.TextStyle(fontSize: 10),
                       ),
-                    if (company?.email != null)
+                    if ((company?.email ?? '').trim().isNotEmpty)
                       pw.Text(
                         "Email: ${company!.email!}",
                         style: const pw.TextStyle(fontSize: 10),
@@ -501,7 +501,7 @@ Future<Uint8List> generateSalesPdf(
 // Function for preview PDF (simpler version)
 Future<Uint8List> generateSalesPreviewPdf(
     PosSaleModel sale,
-    CompanyInfo? company,
+    BusinessInfo? company,
     ) async {
   final pdf = pw.Document();
 
@@ -546,7 +546,7 @@ Future<Uint8List> generateSalesPreviewPdf(
                     ),
                     pw.SizedBox(height: 4),
                     pw.Text(
-                      company?.name ?? "Your Company",
+                      company?.name ?? "Your Business",
                       style: const pw.TextStyle(fontSize: 12),
                     ),
                   ],

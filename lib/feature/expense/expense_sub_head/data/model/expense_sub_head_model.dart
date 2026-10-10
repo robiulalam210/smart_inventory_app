@@ -13,7 +13,6 @@ class ExpenseSubHeadModel {
   final String? name;
   final int? head;
   final String? headName;
-  final int? company;
   final bool? isActive;
 
   ExpenseSubHeadModel({
@@ -21,7 +20,6 @@ class ExpenseSubHeadModel {
     this.name,
     this.head,
     this.headName,
-    this.company,
     this.isActive,
   });
 
@@ -37,7 +35,6 @@ class ExpenseSubHeadModel {
     name: json["name"],
     head: json["head"],
     headName: json["head_name"],
-    company: json["company"],
     isActive: json["is_active"],
   );
 
@@ -46,7 +43,6 @@ class ExpenseSubHeadModel {
     "name": name,
     "head": head,
     "head_name": headName,
-    "company": company,
     "is_active": isActive,
   };
 }

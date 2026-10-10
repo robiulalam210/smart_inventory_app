@@ -46,7 +46,7 @@ class PermissionCatalog {
 
   // ── Action গুলো (রং দেখে এক নজরে বোঝা যায়: দেখা=নীল, তৈরি=সবুজ, এডিট=কমলা, ডিলিট=লাল)
   static const view = PermissionActionDef('view', 'View', Icons.visibility_outlined, Color(0xFF2563EB));
-  static const create = PermissionActionDef('create', 'Create', Icons.add_circle_outline_rounded, Color(0xFF16A34A));
+  static const create = PermissionActionDef('create', 'Add', Icons.add_circle_outline_rounded, Color(0xFF16A34A));
   static const edit = PermissionActionDef('edit', 'Edit', Icons.edit_outlined, Color(0xFFF59E0B));
   static const delete = PermissionActionDef('delete', 'Delete', Icons.delete_outline_rounded, Color(0xFFDC2626));
   static const createPos = PermissionActionDef('create_pos', 'POS Sale', Icons.point_of_sale_rounded, Color(0xFF7C3AED));
@@ -60,7 +60,7 @@ class PermissionCatalog {
       PermissionModuleDef(
         key: 'dashboard',
         label: 'Dashboard',
-        description: 'Sales, stock and cash summary on the home screen',
+        description: 'Sales, profit and money summary',
         icon: Icons.space_dashboard_outlined,
         color: Color(0xFF2563EB),
         actions: [PermissionActionDef('view', 'Access', Icons.visibility_outlined, Color(0xFF2563EB))],
@@ -70,15 +70,15 @@ class PermissionCatalog {
       PermissionModuleDef(
         key: 'sales',
         label: 'Sales',
-        description: 'Sale invoices, POS and quick sale',
+        description: 'Invoices and sale list',
         icon: Icons.shopping_cart_outlined,
         color: Color(0xFF16A34A),
         actions: [view, create, createPos, createShort, edit, delete],
       ),
       PermissionModuleDef(
         key: 'money_receipt',
-        label: 'Money Receipt',
-        description: 'Collect due payments from customers',
+        label: 'Money receipts',
+        description: 'Collecting customer dues',
         icon: Icons.receipt_long_outlined,
         color: Color(0xFF0891B2),
         actions: _crud,
@@ -103,7 +103,7 @@ class PermissionCatalog {
       ),
       PermissionModuleDef(
         key: 'products',
-        label: 'Products',
+        label: 'Products & stock',
         description: 'Products, category, brand, unit and price',
         icon: Icons.inventory_2_outlined,
         color: Color(0xFFDB2777),
@@ -112,7 +112,7 @@ class PermissionCatalog {
       PermissionModuleDef(
         key: 'suppliers',
         label: 'Suppliers',
-        description: 'Supplier list and their details',
+        description: 'Including supplier payments',
         icon: Icons.storefront_outlined,
         color: Color(0xFF9333EA),
         actions: _crud,
@@ -130,15 +130,15 @@ class PermissionCatalog {
       PermissionModuleDef(
         key: 'accounts',
         label: 'Accounts',
-        description: 'Cash, bank, mobile banking and transfers',
+        description: 'Cash, bank, transfers, income',
         icon: Icons.account_balance_wallet_outlined,
         color: Color(0xFF059669),
         actions: _crud,
       ),
       PermissionModuleDef(
         key: 'expense',
-        label: 'Income & Expense',
-        description: 'Daily expenses, income and their heads',
+        label: 'Expenses',
+        description: 'Daily expenses and their heads',
         icon: Icons.payments_outlined,
         color: Color(0xFFDC2626),
         actions: _crud,
@@ -151,22 +151,22 @@ class PermissionCatalog {
         description: 'Sales, purchase, stock, ledger and profit reports',
         icon: Icons.bar_chart_rounded,
         color: Color(0xFF0D9488),
-        actions: [view, PermissionActionDef('create', 'Generate', Icons.auto_graph_rounded, Color(0xFF16A34A)), export],
+        actions: [view, export],
       ),
     ]),
-    PermissionGroupDef('System & Administration', 'Staff, company setup and settings', [
+    PermissionGroupDef('System & Administration', 'Staff, business setup and settings', [
       PermissionModuleDef(
         key: 'users',
-        label: 'Users',
-        description: 'Staff accounts and their access',
+        label: 'Staff',
+        description: 'Adding and changing people',
         icon: Icons.manage_accounts_outlined,
         color: Color(0xFF4F46E5),
         actions: _crud,
       ),
       PermissionModuleDef(
         key: 'administration',
-        label: 'Administration',
-        description: 'Company information and master setup',
+        label: 'Setup',
+        description: 'Units, categories, brands, business profile',
         icon: Icons.admin_panel_settings_outlined,
         color: Color(0xFF475569),
         actions: _crud,

@@ -916,7 +916,7 @@ class _MobileExpenseReportScreenState extends State<MobileExpenseReportScreen> {
               ],
             ),
             body: PdfPreview(
-              build: (format) => generateExpenseReportPdf(state.response, context.read<ProfileBloc>().permissionModel?.data?.companyInfo),
+              build: (format) => generateExpenseReportPdf(state.response, context.read<ProfileBloc>().permissionModel?.data?.businessInfo),
               canChangeOrientation: false,
               canChangePageFormat: false,
               canDebug: false,
