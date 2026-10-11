@@ -42,7 +42,7 @@ import 'package:meherinMart/feature/sales/presentation/desktop/pos_sale_screen.d
 import 'package:meherinMart/feature/supplier/presentation/desktop/supplier_list_screen.dart';
 import 'package:meherinMart/feature/supplier/presentation/desktop/supplier_payment_list_screen.dart';
 import 'package:meherinMart/feature/transactions/presentation/desktop/transaction_screen.dart';
-import 'package:meherinMart/feature/users_list/presentation/desktop/users_screen.dart';
+import 'package:meherinMart/feature/users_list/presentation/desktop/desktop_users_screen.dart';
 import 'package:meherinMart/desktop/widgets/embedded_full_page.dart';
 import 'package:meherinMart/feature/audit_log/presentation/audit_log_screen.dart';
 import 'package:meherinMart/feature/payroll/presentation/mobile_salary_sheet_screen.dart';
@@ -51,6 +51,8 @@ import 'package:meherinMart/feature/payroll/presentation/mobile_payroll_report_s
 import 'package:meherinMart/feature/users_list/presentation/shared/mobile_user_permissions_screen.dart';
 import 'package:meherinMart/feature/shop/presentation/mobile_online_orders_screen.dart';
 import 'package:meherinMart/feature/shop/presentation/mobile_shop_settings_screen.dart';
+import 'package:meherinMart/feature/shop/presentation/desktop/desktop_online_orders_screen.dart';
+import 'package:meherinMart/feature/shop/presentation/desktop/desktop_shop_settings_screen.dart';
 
 import '../feature/account_transfer/presentation/desktop/account_transfer_screen.dart';
 
@@ -103,7 +105,7 @@ final List<Widget> desktopScreens = [
     AppWrapper(child: ExpenseReportScreen()),
     AppWrapper(child: BadStockScreen()),
 
-    AppWrapper(child: UsersScreen()),
+    AppWrapper(child: DesktopUsersScreen()),
     AppWrapper(child: SourceScreen()),
     AppWrapper(child: UnitScreen()),
     AppWrapper(child: BrandScreen()),
@@ -125,8 +127,8 @@ final List<Widget> desktopScreens = [
     AppWrapper(child: EmbeddedFullPage(child: MobileAdvancesScreen())), // 46 Advances (Admin)
     AppWrapper(child: EmbeddedFullPage(child: MobilePayrollReportScreen())), // 47 Payroll Report (Admin)
     AppWrapper(child: EmbeddedFullPage(child: MobileUserPermissionsScreen())), // 48 User Permissions (Admin)
-    AppWrapper(child: EmbeddedFullPage(child: MobileOnlineOrdersScreen())), // 49 Online Orders
-    AppWrapper(child: EmbeddedFullPage(child: MobileShopSettingsScreen())), // 50 Shop Settings
+    AppWrapper(child: DesktopOnlineOrdersScreen()), // 49 Online Orders (desktop design)
+    AppWrapper(child: DesktopShopSettingsScreen()), // 50 Shop Settings (desktop design)
     AppWrapper(child: DueRemindersScreen()), // 51 Due Reminders
 
 

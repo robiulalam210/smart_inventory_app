@@ -6,6 +6,11 @@ import '../../data/models/dashboard/dashboard_model.dart';
 import '../bloc/dashboard/dashboard_bloc.dart';
 import '../widgets/dash_kit.dart';
 import '../widgets/dashboard_extras.dart';
+import 'package:meherinMart/desktop/widgets/sidebar.dart' show quickJumpEntries;
+import '../../../profile/presentation/bloc/profile_bloc/profile_bloc.dart';
+import '../../../shop/data/shop_models.dart';
+import '../../../shop/data/shop_repo.dart';
+import '../../../shop/presentation/shop_common.dart';
 
 /// Desktop Dashboard — ওয়েবের dashboard এর হুবহু গঠন:
 ///   greeting + সময়কাল  →  ৪টা KPI  →  চার্ট (৭/৩০ দিন) + খরচের ভাগ
@@ -32,6 +37,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   List<Map<String, dynamic>>? _top;
   List<Map<String, dynamic>>? _low;
   int _extrasToken = 0; // পুরনো উত্তর নতুনকে চাপা না দেয়
+  ShopOrderPage? _online; // Online Shop এর pending অর্ডার (permission/সার্ভার না থাকলে null → প্যানেল লুকানো)
 
   @override
   void initState() {
@@ -69,8 +75,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
       run(DashboardExtras.accounts(ctx), (v) => _accounts = v),
       run(DashboardExtras.topProducts(ctx, start, end), (v) => _top = v),
       run(DashboardExtras.lowStock(ctx), (v) => _low = v),
+      _loadOnline(ctx),
     ]);
   }
+
+  Future<void> _loadOnline(BuildContext ctx) async {
+    final (d, _) = await const ShopRepo().orders(ctx, status: 'pending');
+    if (!mounted) return;
+    setState(() => _online = d);
+  }
+
+  void _go(int index) =>
+      context.read<DashboardBloc>().add(ChangeDashboardScreen(index: index));
 
   Future<void> _loadTrend() async {
     setState(() => _trendLoading = true);
@@ -114,12 +130,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _header(c),
-                const SizedBox(height: 18),
+                const SizedBox(height: 14),
+                _quickActions(c),
+                const SizedBox(height: 16),
                 if (state is DashboardError && _data == null)
                   _error(state.message, c)
                 else ...[
                   _kpis(_data, loading, box.maxWidth),
                   const SizedBox(height: 16),
+                  if (_online != null) ...[
+                    _onlinePanel(c),
+                    const SizedBox(height: 16),
+                  ],
                   _row(wide, _trendPanel(c), _expensePanel(c), 2, 1),
                   const SizedBox(height: 16),
                   _row(wide, _flowPanel(c), _stockPanel(c), 2, 1),
@@ -147,6 +169,112 @@ class _DashboardScreenState extends State<DashboardScreen> {
         const SizedBox(width: 16),
         Expanded(flex: fb, child: b),
       ],
+    );
+  }
+
+
+  // ───────────────────────── quick actions ─────────────────────────
+
+  Widget _quickActions(DashColors c) {
+    return BlocBuilder<ProfileBloc, ProfileState>(
+      builder: (context, ps) {
+        if (ps is! ProfilePermissionSuccess) return const SizedBox.shrink();
+        final allowed = quickJumpEntries(
+          ps.permissionData.data?.permissions,
+          ps.permissionData.data?.user?.role,
+        ).map((e) => e.index).toSet();
+
+        final pending = _online?.counts['pending'] ?? 0;
+        final defs = <(int, String, IconData, Color, int)>[
+          (1, 'New sale', Icons.point_of_sale_rounded, c.blue, 0),
+          (6, 'New purchase', Icons.local_shipping_outlined, c.purple, 0),
+          (4, 'Money receipt', Icons.receipt_long_outlined, c.green, 0),
+          (8, 'Products', Icons.inventory_2_outlined, c.cyan, 0),
+          (10, 'Customers', Icons.groups_outlined, c.orange, 0),
+          (51, 'Due reminders', Icons.notifications_active_outlined, c.amber, 0),
+          (49, 'Online orders', Icons.storefront_outlined, c.red, pending),
+        ].where((d) => allowed.contains(d.$1)).toList();
+        if (defs.isEmpty) return const SizedBox.shrink();
+
+        return Wrap(spacing: 10, runSpacing: 10, children: [
+          for (final d in defs)
+            Material(
+              color: c.surface,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: BorderSide(color: c.line),
+              ),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(12),
+                onTap: () => _go(d.$1),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(10, 8, 14, 8),
+                  child: Row(mainAxisSize: MainAxisSize.min, children: [
+                    Container(
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        color: d.$4.withValues(alpha: c.dark ? .18 : .10),
+                        borderRadius: BorderRadius.circular(9),
+                      ),
+                      child: Icon(d.$3, size: 18, color: d.$4),
+                    ),
+                    const SizedBox(width: 10),
+                    Text(d.$2,
+                        style: TextStyle(
+                            fontSize: 13.5, fontWeight: FontWeight.w600, color: c.ink)),
+                    if (d.$5 > 0) ...[
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                        decoration: BoxDecoration(
+                            color: c.red, borderRadius: BorderRadius.circular(20)),
+                        child: Text('${d.$5}',
+                            style: const TextStyle(
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.w800,
+                                color: Colors.white)),
+                      ),
+                    ],
+                  ]),
+                ),
+              ),
+            ),
+        ]);
+      },
+    );
+  }
+
+  // ───────────────────────── online orders ─────────────────────────
+
+  Widget _onlinePanel(DashColors c) {
+    final d = _online!;
+    final pending = d.counts['pending'] ?? 0;
+    final confirmed = d.counts['confirmed'] ?? 0;
+    final rows = d.items.take(5).toList();
+    return DashPanel(
+      title: 'Online orders',
+      subtitle: '· $pending pending, $confirmed to deliver${d.shopIsOpen ? '' : ' · shop paused'}',
+      trailing: TextButton(
+        onPressed: () => _go(49),
+        child: const Text('View all'),
+      ),
+      child: rows.isEmpty
+          ? DashEmpty('No pending online orders.',
+              icon: Icons.check_circle_outline, color: c.green)
+          : Column(children: [
+              for (var i = 0; i < rows.length; i++)
+                InkWell(
+                  onTap: () => _go(49),
+                  child: DashRow(
+                    title: '${rows[i].orderNo} · ${rows[i].customerName}',
+                    sub: '${rows[i].phone}  ·  ${rows[i].itemCount} item${rows[i].itemCount == 1 ? '' : 's'}',
+                    date: orderWhen(rows[i].createdAt),
+                    last: i == rows.length - 1,
+                    trailing: DashAmount(taka(rows[i].total)),
+                  ),
+                ),
+            ]),
     );
   }
 
