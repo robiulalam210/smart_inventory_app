@@ -483,7 +483,7 @@ class OfflineGuards {
       builder: (c) => AppPopoverCard(
         title: const Text('কিছু entry এখনো sync হয়নি'),
         content: Text('$pending টি entry এখনো server এ যায়নি। Logout করলেও এগুলো এই কম্পিউটারে নিরাপদে থাকবে, '
-            'এবং একই company র কেউ login করলে internet পেলেই চলে যাবে।'),
+            'এবং যে কেউ login করলে internet পেলেই চলে যাবে।'),
         actions: [
           TextButton(onPressed: () => Navigator.pop(c, false), child: const Text('থাক')),
           FilledButton(onPressed: () => Navigator.pop(c, true), child: const Text('Logout')),

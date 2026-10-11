@@ -66,7 +66,7 @@ class SalesDetailsScreen extends StatelessWidget {
             dynamicLayout: true,
             build: (format) => generateSalesPdf(
               sale,
-              context.read<ProfileBloc>().permissionModel?.data?.companyInfo,
+              context.read<ProfileBloc>().permissionModel?.data?.businessInfo,
             ),
             pdfPreviewPageDecoration: BoxDecoration(color: AppColors.text(context)),
             actionBarTheme: PdfActionBarTheme(

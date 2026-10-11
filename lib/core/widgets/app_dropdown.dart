@@ -356,10 +356,15 @@
 //   }
 // }
 import '../configs/configs.dart';
+import 'web_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import 'dart:io' show Platform;
 
+/// ওয়েবের মতো বাছাই ঘর (ওয়েবের .chips ও .combo):
+///  * ২–৪টা ছোট অপশন (Active/Inactive, Paid/Unpaid…) → এক ক্লিকের chip, dropdown খোলার দরকার নেই
+///  * লম্বা তালিকা (customer, product…) → সার্চসহ কম্বো; বাছাই করা থাকলে নীল-wash
+/// API আগের মতোই; [useChips] দিয়ে জোর করে chip (true) বা কম্বো (false) করা যায়।
 class AppDropdown<T> extends FormField<T> {
   AppDropdown({
     super.key,
@@ -379,6 +384,8 @@ class AppDropdown<T> extends FormField<T> {
     super.validator,
     // false হলে × (clear) button দেখায় না — যেমন language, sort এর মতো সবসময় মান লাগে এমন জায়গায়
     this.isClearable = true,
+    // null = নিজে ঠিক করবে (≤৪টা ছোট অপশন হলে chip)
+    this.useChips,
   }) : super(
     initialValue: value,
     autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -397,6 +404,102 @@ class AppDropdown<T> extends FormField<T> {
       final displayText =
       state.value != null ? labelFn(state.value as T) : '';
 
+      void handleClear() {
+        state.didChange(null);
+
+        if (onClear != null) {
+          onClear(null);
+        }
+
+        onChanged(null);
+      }
+
+      // ছোট ও সংক্ষিপ্ত তালিকা হলে chip — মোট লেখা ২৮ অক্ষরের মধ্যে
+      final int totalChars =
+          items.fold<int>(0, (sum, e) => sum + labelFn(e).length);
+      final bool chips = useChips ??
+          (items.length >= 2 && items.length <= 4 && totalChars <= 28);
+
+      Widget errorText() => state.hasError
+          ? Padding(
+              padding: const EdgeInsets.only(top: 4, left: 6),
+              child: Text(
+                state.errorText!,
+                style: AppTextStyle.errorTextStyle(context),
+              ),
+            )
+          : const SizedBox.shrink();
+
+      Widget labelRow() => isLabel
+          ? Padding(
+              padding: const EdgeInsets.only(bottom: 4),
+              child: Row(
+                children: [
+                  Text(label,
+                      style: AppTextStyle.labelDropdownTextStyle(context)),
+                  if (isRequired)
+                    const Text('*', style: TextStyle(color: AppColors.danger)),
+                ],
+              ),
+            )
+          : const SizedBox.shrink();
+
+      // ───────────── chip রূপ ─────────────
+      if (chips) {
+        // value না থাকলে "All" chip টাই বাছাই ধরা হয়
+        final T? current = state.value ??
+            ((isNeedAll && allItem != null) ? allItem : null);
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            labelRow(),
+            SizedBox(
+              height: 35,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                children: [
+                  // label আলাদা না থাকলে chip এর আগে ছোট করে বিষয়টা লিখে দিই
+                  if (!isLabel && hint.isNotEmpty)
+                    Center(
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: Text(hint,
+                            style: TextStyle(
+                                fontSize: 12.5, color: W.muted(context))),
+                      ),
+                    ),
+                  for (final item in items)
+                    Padding(
+                      padding: const EdgeInsets.only(right: 6),
+                      child: Center(
+                        child: WChip(
+                          label: labelFn(item),
+                          selected: item == current,
+                          onTap: () {
+                            final bool isSelected = item == current;
+                            final bool isAll = isNeedAll &&
+                                allItem != null &&
+                                item == allItem;
+                            if (isSelected) {
+                              // আবার চাপলে বাছাই সরে — শুধু যেখানে সরানো যায়
+                              if (isClearable && !isAll) handleClear();
+                              return;
+                            }
+                            state.didChange(item);
+                            onChanged(item);
+                          },
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            errorText(),
+          ],
+        );
+      }
+
+      // ───────────── সার্চ-কম্বো রূপ ─────────────
       void showDropdown() {
         FocusScope.of(context).unfocus();
         Future.delayed(const Duration(milliseconds: 50), () {
@@ -425,95 +528,62 @@ class AppDropdown<T> extends FormField<T> {
         });
       }
 
-      void handleClear() {
-        state.didChange(null);
-
-        if (onClear != null) {
-          onClear(null);
-        }
-
-        onChanged(null);
-      }
-
+      final bool hasValue = displayText.isNotEmpty;
+      final Color lineColor = state.hasError
+          ? AppColors.danger
+          : hasValue
+              ? W.blue(context)
+              : W.line2(context);
 
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (isLabel) ...[
-            Row(
-              children: [
-                Text(label,
-                    style: AppTextStyle.labelDropdownTextStyle(context)),
-                if (isRequired)
-                  const Text('*', style: TextStyle(color: AppColors.danger)),
-              ],
-            ),
-            const SizedBox(height: 4),
-          ],
+          labelRow(),
           SizedBox(
             height: 35,
             child: InkWell(
               onTap: showDropdown,
-              borderRadius: BorderRadius.circular(AppSizes.radius),
+              borderRadius: BorderRadius.circular(W.rSm),
               child: Container(
                 decoration: BoxDecoration(
-                  border: Border.all(
-                    color: state.hasError
-                        ? AppColors.danger
-                        : AppColors.greyColor(context),
-                    width: 1,
-                  ),
-                  borderRadius:
-                  BorderRadius.circular(AppSizes.radius),
+                  // বাছাই থাকলে নীল রেখা + নীল-wash (ওয়েবের .combo-btn.has-value)
+                  color: hasValue ? W.blueWash(context) : W.surface(context),
+                  border: Border.all(color: lineColor, width: 1),
+                  borderRadius: BorderRadius.circular(W.rSm),
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 12),
+                padding: const EdgeInsets.only(left: 10, right: 6),
                 child: Row(
                   children: [
                     Expanded(
                       child: Text(
-                        displayText.isEmpty ? hint : displayText,
+                        hasValue ? displayText : hint,
                         style: TextStyle(
-                          color: displayText.isEmpty
-                              ? AppColors.greyColor(context)
-                              : AppColors.text(context),
+                          color: hasValue ? W.ink(context) : W.muted(context),
                           fontSize: 14,
                         ),
                         overflow: TextOverflow.ellipsis,
                         maxLines: 1,
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (displayText.isNotEmpty && isClearable)
-                          InkWell(
-                            onTap: handleClear,
-                            borderRadius: BorderRadius.circular(12),
-                            child: Padding(
-                              padding: const EdgeInsets.all(4),
-                              child: Icon(Icons.close,
-                                  size: 18,
-                                  color: AppColors.greyColor(context)),
-                            ),
-                          ),
-                        Icon(Icons.keyboard_arrow_down,
-                            color: AppColors.greyColor(context)),
-                      ],
-                    ),
+                    const SizedBox(width: 6),
+                    if (hasValue && isClearable)
+                      InkWell(
+                        onTap: handleClear,
+                        borderRadius: BorderRadius.circular(6),
+                        child: Padding(
+                          padding: const EdgeInsets.all(3),
+                          child: Icon(Icons.close_rounded,
+                              size: 16, color: W.muted(context)),
+                        ),
+                      ),
+                    Icon(Icons.keyboard_arrow_down_rounded,
+                        size: 20, color: W.muted(context)),
                   ],
                 ),
               ),
             ),
           ),
-          if (state.hasError)
-            Padding(
-              padding: const EdgeInsets.only(top: 4, left: 6),
-              child: Text(
-                state.errorText!,
-                style: AppTextStyle.errorTextStyle(context),
-              ),
-            ),
+          errorText(),
         ],
       );
     },
@@ -530,6 +600,7 @@ class AppDropdown<T> extends FormField<T> {
   final void Function(T?) onChanged;
   final void Function(T?)? onClear;
   final bool isClearable;
+  final bool? useChips;
 }
 
 class _DropdownBottomSheet<T> extends StatefulWidget {
@@ -741,9 +812,7 @@ class _DropdownBottomSheetState<T> extends State<_DropdownBottomSheet<T>> {
 
   @override
   Widget build(BuildContext context) {
-    final Color border = Theme.of(context).brightness == Brightness.dark
-        ? Colors.white.withValues(alpha: 0.10)
-        : AppColors.borderLight;
+    final Color border = W.line(context);
     final double listHeight =
         (filteredItems.length * _itemExtent + 8).clamp(_itemExtent + 8, 320.0);
 
@@ -815,20 +884,10 @@ class _DropdownBottomSheetState<T> extends State<_DropdownBottomSheet<T>> {
                         ),
                         contentPadding: const EdgeInsets.symmetric(
                             vertical: 8, horizontal: 10),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: border),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: border),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(
-                              color: AppColors.primaryColor(context),
-                              width: 1.2),
-                        ),
+                        filled: false,
+                        border: InputBorder.none,
+                        enabledBorder: InputBorder.none,
+                        focusedBorder: InputBorder.none,
                       ),
                       onChanged: (v) {
                         _filterItems(v);
@@ -871,20 +930,18 @@ class _DropdownBottomSheetState<T> extends State<_DropdownBottomSheet<T>> {
                         final item = filteredItems[index];
                         final bool isSelected = item == widget.selectedValue;
                         final bool isHighlighted = index == _highlight;
-                        final Color primary = AppColors.primaryColor(context);
+                        final Color primary = W.blue(context);
 
                         return Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 6),
                           child: Material(
-                            color: isSelected
-                                ? primary.withValues(alpha: 0.10)
-                                : isHighlighted
-                                    ? primary.withValues(alpha: 0.06)
-                                    : Colors.transparent,
-                            borderRadius: BorderRadius.circular(6),
+                            color: isHighlighted
+                                ? W.tint(context)
+                                : Colors.transparent,
+                            borderRadius: BorderRadius.circular(7),
                             child: InkWell(
-                              borderRadius: BorderRadius.circular(6),
-                              hoverColor: primary.withValues(alpha: 0.06),
+                              borderRadius: BorderRadius.circular(7),
+                              hoverColor: W.tint(context),
                               onTap: () => widget.onChanged(item),
                               child: Padding(
                                 padding:
@@ -900,7 +957,7 @@ class _DropdownBottomSheetState<T> extends State<_DropdownBottomSheet<T>> {
                                           fontSize: 14,
                                           color: isSelected
                                               ? primary
-                                              : AppColors.text(context),
+                                              : W.ink(context),
                                           fontWeight: isSelected
                                               ? FontWeight.w600
                                               : FontWeight.w400,

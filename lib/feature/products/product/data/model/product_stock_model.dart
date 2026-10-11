@@ -10,7 +10,6 @@ String productModelStockModelToJson(List<ProductModelStockModel> data) => json.e
 
 class ProductModelStockModel {
   final int? id;
-  final int? company;
   final int? createdBy;
   final String? name;
   final String? sku;
@@ -51,7 +50,6 @@ class ProductModelStockModel {
 
   ProductModelStockModel({
     this.id,
-    this.company,
     this.createdBy,
     this.name,
     this.sku,
@@ -120,7 +118,6 @@ class ProductModelStockModel {
   factory ProductModelStockModel.fromJson(Map<String, dynamic> json) {
     return ProductModelStockModel(
       id: json["id"],
-      company: json["company"],
       createdBy: json["created_by"],
       name: json["name"],
       sku: json["sku"],
@@ -177,7 +174,6 @@ class ProductModelStockModel {
 
   Map<String, dynamic> toJson() => {
     "id": id,
-    "company": company,
     "created_by": createdBy,
     "name": name,
     "sku": sku,

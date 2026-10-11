@@ -190,7 +190,7 @@ class TransactionCard extends StatelessWidget {
             children: [
               Text(
                 '$prefix\$${amount.toStringAsFixed(2)}',
-                style: GoogleFonts.inter(
+                style: GoogleFonts.ibmPlexSans(
                   color: amountColor,
                   fontWeight: FontWeight.w600,
                   fontSize: 16,
@@ -267,7 +267,7 @@ class TransactionCard extends StatelessWidget {
       ),
       child: Text(
         status?.toUpperCase() ?? 'N/A',
-        style: GoogleFonts.inter(
+        style: GoogleFonts.ibmPlexSans(
           color: color,
           fontWeight: FontWeight.w600,
           fontSize: 9,
@@ -298,7 +298,7 @@ class TransactionCard extends StatelessWidget {
           const SizedBox(width: 4),
           Text(
             type?.toUpperCase() ?? 'N/A',
-            style: GoogleFonts.inter(
+            style: GoogleFonts.ibmPlexSans(
               color: color,
               fontWeight: FontWeight.w600,
               fontSize: 10,
@@ -335,7 +335,7 @@ class TransactionCard extends StatelessWidget {
           const SizedBox(height: 16),
           Text(
             'No Transactions Found',
-            style: GoogleFonts.inter(
+            style: GoogleFonts.ibmPlexSans(
               fontSize: 16,
               fontWeight: FontWeight.w600,
               color: Colors.grey,
@@ -344,7 +344,7 @@ class TransactionCard extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             'Create your first transaction to get started',
-            style: GoogleFonts.inter(
+            style: GoogleFonts.ibmPlexSans(
               fontSize: 12,
               fontWeight: FontWeight.w400,
               color: Colors.grey,

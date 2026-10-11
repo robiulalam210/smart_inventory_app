@@ -17,7 +17,6 @@ class CustomerModel {
   final double? totalDue;
   final double? totalPaid;
   final String? amountType;
-  final int? company;
   final int? totalSales;
   final DateTime? dateCreated;
   final int? createdBy;
@@ -37,7 +36,6 @@ class CustomerModel {
     this.totalDue,
     this.totalPaid,
     this.amountType,
-    this.company,
     this.totalSales,
     this.dateCreated,
     this.createdBy,
@@ -58,7 +56,6 @@ class CustomerModel {
     totalDue: (json["total_due"] ?? 0).toDouble(),
     totalPaid: (json["total_paid"] ?? 0).toDouble(),
     amountType: json["amount_type"],
-    company: json["company"],
     totalSales: json["total_sales"],
     dateCreated: json["date_created"] == null
         ? null
@@ -84,7 +81,6 @@ class CustomerModel {
     "total_due": totalDue,
     "total_paid": totalPaid,
     "amount_type": amountType,
-    "company": company,
     "total_sales": totalSales,
     "date_created": dateCreated?.toIso8601String(),
     "created_by": createdBy,

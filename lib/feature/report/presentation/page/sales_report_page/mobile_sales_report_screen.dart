@@ -539,7 +539,7 @@ class _MobileSaleReportScreenState extends State<MobileSalesReportScreen> {
             const SizedBox(height: 16),
             Text(
               "No Sales Report Data Found",
-              style: GoogleFonts.inter(
+              style: GoogleFonts.ibmPlexSans(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
                 color: Colors.grey,
@@ -549,7 +549,7 @@ class _MobileSaleReportScreenState extends State<MobileSalesReportScreen> {
             const SizedBox(height: 8),
             Text(
               "Sales report data will appear here when available",
-              style: GoogleFonts.inter(
+              style: GoogleFonts.ibmPlexSans(
                 fontSize: 12,
                 fontWeight: FontWeight.w400,
                 color: Colors.grey,
@@ -578,7 +578,7 @@ class _MobileSaleReportScreenState extends State<MobileSalesReportScreen> {
             const SizedBox(height: 16),
             Text(
               "Error Loading Sales Report",
-              style: GoogleFonts.inter(
+              style: GoogleFonts.ibmPlexSans(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
                 color: Colors.grey,
@@ -619,7 +619,7 @@ class _MobileSaleReportScreenState extends State<MobileSalesReportScreen> {
               ],
             ),
             body: PdfPreview(
-              build: (format) => generateSalesReportPdf(state.response, context.read<ProfileBloc>().permissionModel?.data?.companyInfo),
+              build: (format) => generateSalesReportPdf(state.response, context.read<ProfileBloc>().permissionModel?.data?.businessInfo),
               canChangeOrientation: false,
               canChangePageFormat: false,
               canDebug: false,

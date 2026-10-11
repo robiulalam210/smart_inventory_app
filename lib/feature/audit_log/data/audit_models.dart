@@ -8,7 +8,6 @@ class AuditEntry {
   final String model; // e.g. sales.Sale
   final String objectId;
   final String objectRepr;
-  final String? company;
   final int? userId;
   final String user;
   final String source; // mobile / desktop / desktop_offline / api / admin / system
@@ -24,7 +23,6 @@ class AuditEntry {
     required this.model,
     required this.objectId,
     required this.objectRepr,
-    required this.company,
     required this.userId,
     required this.user,
     required this.source,
@@ -41,7 +39,6 @@ class AuditEntry {
         model: '${j['model'] ?? ''}',
         objectId: '${j['object_id'] ?? ''}',
         objectRepr: '${j['object_repr'] ?? ''}',
-        company: j['company']?.toString(),
         userId: int.tryParse('${j['user_id']}'),
         user: (j['user']?.toString().trim().isNotEmpty ?? false) ? j['user'].toString() : 'System',
         source: '${j['source'] ?? ''}',
@@ -105,7 +102,6 @@ class AuditMeta {
   final List<AuditOption> models;
   final List<AuditOption> users;
   final List<AuditOption> sources;
-  final List<AuditOption> companies;
 
   const AuditMeta({
     this.isSuperAdmin = false,
@@ -113,7 +109,6 @@ class AuditMeta {
     this.models = const [],
     this.users = const [],
     this.sources = const [],
-    this.companies = const [],
   });
 
   factory AuditMeta.fromJson(Map<String, dynamic> j) {
@@ -128,7 +123,6 @@ class AuditMeta {
       models: list('models', 'model', (x) => AuditFormat.modelName('${x['model']}')),
       users: list('users', 'id', (x) => '${x['name'] ?? 'Unknown'}'),
       sources: list('sources', 'source', (x) => AuditFormat.sourceName('${x['source']}')),
-      companies: list('companies', 'id', (x) => '${x['name'] ?? ''}'),
     );
   }
 }
@@ -140,7 +134,6 @@ class AuditFilter {
   final String? model;
   final String? userId;
   final String? source;
-  final String? companyId;
   final DateTimeRange? range;
   final String? objectId; // একটা record এর পুরো ইতিহাস দেখতে
 
@@ -150,14 +143,13 @@ class AuditFilter {
     this.model,
     this.userId,
     this.source,
-    this.companyId,
     this.range,
     this.objectId,
   });
 
   /// dropdown/date filter কয়টা চালু (search আর action tab বাদে)
   int get advancedCount =>
-      [model, userId, source, companyId, objectId].where((v) => v != null).length + (range != null ? 1 : 0);
+      [model, userId, source, objectId].where((v) => v != null).length + (range != null ? 1 : 0);
 
   bool get isEmpty => query.isEmpty && action == null && advancedCount == 0;
 
@@ -167,7 +159,6 @@ class AuditFilter {
     String? Function()? model,
     String? Function()? userId,
     String? Function()? source,
-    String? Function()? companyId,
     DateTimeRange? Function()? range,
     String? Function()? objectId,
   }) =>
@@ -177,7 +168,6 @@ class AuditFilter {
         model: model != null ? model() : this.model,
         userId: userId != null ? userId() : this.userId,
         source: source != null ? source() : this.source,
-        companyId: companyId != null ? companyId() : this.companyId,
         range: range != null ? range() : this.range,
         objectId: objectId != null ? objectId() : this.objectId,
       );
@@ -192,7 +182,6 @@ class AuditFilter {
       if (model != null) 'model': model!,
       if (userId != null) 'user_id': userId!,
       if (source != null) 'source': source!,
-      if (companyId != null) 'company_id': companyId!,
       if (objectId != null) 'object_id': objectId!,
       if (range != null) 'date_from': f.format(range!.start),
       if (range != null) 'date_to': f.format(range!.end),
@@ -241,7 +230,7 @@ class AuditFormat {
     'products.PriceTier': 'Price tier',
     'products.ProductSaleMode': 'Product sale mode',
     'core.User': 'User',
-    'core.Company': 'Company',
+    'core.BusinessProfile': 'Business profile',
     'core.UserPermission': 'User permission',
     'core.StaffRole': 'Staff role',
     'core.Staff': 'Staff',

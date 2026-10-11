@@ -22,7 +22,6 @@ class SupplierListModel {
   final int? purchaseCount;
   final String? advanceBalance;
   final String? amountType;
-  final int? company;
   final int? createdBy;
   final DateTime? createdAt;
   final DateTime? updatedAt;
@@ -45,7 +44,6 @@ class SupplierListModel {
     this.purchaseCount,
     this.advanceBalance,
     this.amountType,
-    this.company,
     this.createdBy,
     this.createdAt,
     this.updatedAt,
@@ -74,7 +72,6 @@ class SupplierListModel {
     purchaseCount: json["purchase_count"],
     advanceBalance: json["advance_balance"],
     amountType: json["amount_type"],
-    company: json["company"],
     createdBy: json["created_by"],
     createdAt: json["created_at"] == null ? null : DateTime.parse(json["created_at"]),
     updatedAt: json["updated_at"] == null ? null : DateTime.parse(json["updated_at"]),
@@ -98,7 +95,6 @@ class SupplierListModel {
     "purchase_count": purchaseCount,
     "advance_balance": advanceBalance,
     "amount_type": amountType,
-    "company": company,
     "created_by": createdBy,
     "created_at": createdAt?.toIso8601String(),
     "updated_at": updatedAt?.toIso8601String(),

@@ -1,6 +1,5 @@
 class ProductModel {
   final int? id;
-  final int? company;
   final int? createdBy;
   final int? category;
   final int? unit;
@@ -43,7 +42,6 @@ class ProductModel {
 
   ProductModel({
     this.id,
-    this.company,
     this.createdBy,
     this.category,
     this.unit,
@@ -90,7 +88,6 @@ class ProductModel {
 
   factory ProductModel.fromJson(Map<String, dynamic> json) => ProductModel(
     id: json["id"],
-    company: json["company"],
     createdBy: json["created_by"],
     category: json["category"],
     unit: json["unit"],
@@ -151,7 +148,6 @@ class ProductModel {
 
   Map<String, dynamic> toJson() => {
     "id": id,
-    "company": company,
     "created_by": createdBy,
     "category": category,
     "unit": unit,

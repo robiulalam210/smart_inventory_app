@@ -34,7 +34,6 @@ class CreatePurchaseModel {
 
 class PurchaseData {
   final int? id;
-  final int? company;
   final int? supplier;
   final String? supplierName;
   final DateTime? purchaseDate;
@@ -62,7 +61,6 @@ class PurchaseData {
 
   PurchaseData({
     this.id,
-    this.company,
     this.supplier,
     this.supplierName,
     this.purchaseDate,
@@ -91,7 +89,6 @@ class PurchaseData {
 
   factory PurchaseData.fromJson(Map<String, dynamic> json) => PurchaseData(
     id: json["id"],
-    company: json["company"],
     supplier: json["supplier"],
     supplierName: json["supplier_name"],
     purchaseDate: json["purchase_date"] == null ? null : DateTime.tryParse(json["purchase_date"]),
@@ -120,7 +117,6 @@ class PurchaseData {
 
   Map<String, dynamic> toJson() => {
     "id": id,
-    "company": company,
     "supplier": supplier,
     "supplier_name": supplierName,
     "purchase_date": purchaseDate?.toIso8601String(),

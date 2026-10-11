@@ -2,6 +2,10 @@ import '../../feature/lab_dashboard/presentation/bloc/dashboard/dashboard_bloc.d
 import '../../feature/profile/data/model/profile_perrmission_model.dart';
 import '../../feature/profile/presentation/bloc/profile_bloc/profile_bloc.dart';
 import '../../core/configs/configs.dart';
+import '../../core/widgets/web_ui.dart';
+
+/// স্থায়ী sidebar এর প্রস্থ (root আর header দুজনেই এটা ব্যবহার করে — ওয়েবের --sidebar: 268px এর কাছাকাছি)
+const double kSidebarWidth = 268;
 
 class Sidebar extends StatefulWidget {
   const Sidebar({super.key});
@@ -29,6 +33,14 @@ class _SidebarState extends State<Sidebar> {
       ],
       requiredPermission: (permissions) =>
       permissions?.sales?.view == true || permissions?.sales?.create == true,
+    ),
+    MenuSection(
+      title: "Online Shop",
+      items: [
+        MenuItem(title: "Online Orders", index: 49, requiredPermission: (permissions) => permissions?.sales?.view == true),
+        MenuItem(title: "Shop Settings", index: 50, requiredPermission: (permissions) => permissions?.sales?.edit == true),
+      ],
+      requiredPermission: (permissions) => permissions?.sales?.view == true,
     ),
     MenuSection(
       title: "Money Receipt",
@@ -66,6 +78,7 @@ class _SidebarState extends State<Sidebar> {
       title: "Customers",
       items: [
         MenuItem(title: "Customer", index: 10, requiredPermission: (permissions) => permissions?.customers?.view == true),
+        MenuItem(title: "Due Reminders", index: 51, requiredPermission: (permissions) => permissions?.customers?.view == true),
       ],
       requiredPermission: (permissions) => permissions?.customers?.view == true,
     ),
@@ -146,6 +159,27 @@ class _SidebarState extends State<Sidebar> {
     ),
   ];
 
+  // শুধু Super Admin / Admin দেখে — module permission নয়, role দেখে (ওয়েবের menu এর roles নিয়ম)
+  static final List<MenuSection> _adminSections = [
+    MenuSection(
+      title: "Payroll",
+      items: [
+        MenuItem(title: "Salary Sheet", index: 45),
+        MenuItem(title: "Advances", index: 46),
+        MenuItem(title: "Payroll Report", index: 47),
+      ],
+      requiredPermission: (_) => true,
+    ),
+    MenuSection(
+      title: "Security",
+      items: [
+        MenuItem(title: "Audit Log", index: 44),
+        MenuItem(title: "User Permissions", index: 48),
+      ],
+      requiredPermission: (_) => true,
+    ),
+  ];
+
   // ------------------------------------------------------------
   // UI state
   // ------------------------------------------------------------
@@ -171,6 +205,8 @@ class _SidebarState extends State<Sidebar> {
     'Income': Icons.trending_up_rounded,
     'Transfer Balance': Icons.swap_horiz_rounded,
     'Security': Icons.policy_outlined,
+    'Online Shop': Icons.storefront_outlined,
+    'Payroll': Icons.badge_outlined,
   };
 
   /// current screen যে group এর, সেটা খুলে রাখা
@@ -186,10 +222,7 @@ class _SidebarState extends State<Sidebar> {
     }
   }
 
-  Color _sidebarBorder(BuildContext context) =>
-      Theme.of(context).brightness == Brightness.dark
-          ? Colors.white.withValues(alpha: 0.08)
-          : AppColors.borderLight;
+  Color _sidebarBorder(BuildContext context) => W.line(context);
 
   /// sidebar এর বাইরের খোলস — পর্দার পুরো উচ্চতা জুড়ে, ডানে পাতলা border।
   /// আগে Drawer widget ব্যবহার হতো (নিজস্ব রং, গোল কোণা, shadow) আর
@@ -203,7 +236,7 @@ class _SidebarState extends State<Sidebar> {
         return Container(
           height: height,
           decoration: BoxDecoration(
-            color: AppColors.bottomNavBg(context),
+            color: W.surface(context),
             border: Border(right: BorderSide(color: _sidebarBorder(context))),
           ),
           child: child,
@@ -259,11 +292,7 @@ class _SidebarState extends State<Sidebar> {
                     : null)
                 ?.toUpperCase();
             if (role == 'SUPER_ADMIN' || role == 'ADMIN') {
-              sections.add(MenuSection(
-                title: 'Security',
-                items: [MenuItem(title: 'Audit Log', index: 44)],
-                requiredPermission: (_) => true,
-              ));
+              sections.addAll(_adminSections);
             }
 
             if (sections.isEmpty) {
@@ -338,7 +367,7 @@ class _SidebarState extends State<Sidebar> {
             child: Icon(
               Icons.keyboard_arrow_down_rounded,
               size: 20,
-              color: AppColors.text(context).withValues(alpha: 0.5),
+              color: W.muted(context),
             ),
           ),
           onTap: () => setState(() {
@@ -356,7 +385,7 @@ class _SidebarState extends State<Sidebar> {
                   padding: const EdgeInsets.only(left: 10),
                   decoration: BoxDecoration(
                     border: Border(
-                      left: BorderSide(color: _sidebarBorder(context), width: 1.5),
+                      left: BorderSide(color: _sidebarBorder(context), width: 1),
                     ),
                   ),
                   child: Column(
@@ -390,8 +419,8 @@ class _SidebarState extends State<Sidebar> {
               height: 36,
               margin: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
               decoration: BoxDecoration(
-                color: Colors.grey.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(8),
+                color: W.tint(context),
+                borderRadius: BorderRadius.circular(10),
               ),
             ),
         ],
@@ -622,15 +651,53 @@ class _SidebarTileState extends State<_SidebarTile> {
 
   @override
   Widget build(BuildContext context) {
+    // ওয়েবের .sb-link: ১০px কোণা; hover এ canvas রং; চালু থাকলে নীল-wash + নীল লেখা (সেমি-বোল্ড)
     final Color primary = AppColors.primaryColor(context);
-    final Color text = AppColors.text(context);
     final bool active = widget.selected;
-    final Color fg = active || widget.highlightText
+    final bool tinted = active || widget.highlightText;
+    final Color fg = tinted
         ? primary
-        : text.withValues(alpha: widget.dense ? 0.72 : 0.85);
+        : (_hover ? W.ink(context) : W.ink2(context));
+
+    final tile = AnimatedContainer(
+      duration: const Duration(milliseconds: 120),
+      height: widget.dense ? 34 : 40,
+      padding: EdgeInsets.only(left: widget.dense ? 10 : 11, right: 8),
+      decoration: BoxDecoration(
+        color: active
+            ? primary.withValues(alpha: W.dark(context) ? 0.16 : 0.10)
+            : _hover
+                ? W.canvas(context)
+                : Colors.transparent,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Row(
+        children: [
+          if (widget.icon != null) ...[
+            Icon(widget.icon, size: 19, color: fg),
+            const SizedBox(width: 11),
+          ],
+          Expanded(
+            child: Text(
+              widget.title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: widget.dense ? 13.5 : 14,
+                fontWeight: tinted
+                    ? FontWeight.w600
+                    : (widget.dense ? FontWeight.w400 : FontWeight.w500),
+                color: fg,
+              ),
+            ),
+          ),
+          if (widget.trailing != null) widget.trailing!,
+        ],
+      ),
+    );
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 1.5),
+      padding: const EdgeInsets.symmetric(vertical: 1),
       child: MouseRegion(
         cursor: SystemMouseCursors.click,
         onEnter: (_) => setState(() => _hover = true),
@@ -638,42 +705,22 @@ class _SidebarTileState extends State<_SidebarTile> {
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: widget.onTap,
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 120),
-            height: widget.dense ? 36 : 42,
-            padding: EdgeInsets.only(left: widget.dense ? 10 : 12, right: 8),
-            decoration: BoxDecoration(
-              color: active
-                  ? primary.withValues(alpha: 0.10)
-                  : _hover
-                      ? text.withValues(alpha: 0.04)
-                      : Colors.transparent,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Row(
-              children: [
-                if (widget.icon != null) ...[
-                  Icon(widget.icon, size: 19, color: fg),
-                  const SizedBox(width: 12),
-                ],
-                Expanded(
-                  child: Text(
-                    widget.title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: widget.dense ? 13 : 14,
-                      fontWeight: active || widget.highlightText
-                          ? FontWeight.w600
-                          : FontWeight.w500,
-                      color: fg,
+          // চালু সাব-আইটেমের বাঁয়ে ২px নীল দাগ (ওয়েবের .sb-items .is-active::before)
+          child: widget.dense && active
+              ? Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    tile,
+                    Positioned(
+                      left: -11,
+                      top: 6,
+                      bottom: 6,
+                      width: 2,
+                      child: ColoredBox(color: primary),
                     ),
-                  ),
-                ),
-                if (widget.trailing != null) widget.trailing!,
-              ],
-            ),
-          ),
+                  ],
+                )
+              : tile,
         ),
       ),
     );
@@ -704,7 +751,10 @@ class SidebarPageInfo {
 }
 
 SidebarPageInfo sidebarPageInfo(int index) {
-  for (final section in _SidebarState._fullMenuSections) {
+  for (final section in [
+    ..._SidebarState._fullMenuSections,
+    ..._SidebarState._adminSections,
+  ]) {
     for (final item in section.items) {
       if (item.index != index) continue;
       final icon =
@@ -721,4 +771,63 @@ SidebarPageInfo sidebarPageInfo(int index) {
     section: null,
     icon: Icons.space_dashboard_outlined,
   );
+}
+
+
+// ============================================================
+// QUICK JUMP — Ctrl+K প্যালেটের জন্য permission-ছাঁকা page তালিকা
+// ============================================================
+
+class QuickJumpEntry {
+  const QuickJumpEntry({
+    required this.title,
+    required this.group,
+    required this.index,
+    required this.icon,
+  });
+
+  final String title;
+
+  /// group এর নাম (sidebar এর section)
+  final String group;
+  final int index;
+  final IconData icon;
+}
+
+/// sidebar এর মতো একই permission নিয়মে যেসব page ব্যবহারকারী খুলতে পারে
+List<QuickJumpEntry> quickJumpEntries(Permissions? permissions, String? role) {
+  final out = <QuickJumpEntry>[];
+  for (final section in _SidebarState._fullMenuSections) {
+    if (section.requiredPermission(permissions) != true) continue;
+    final icon =
+        _SidebarState._sectionIcons[section.title] ?? Icons.circle_outlined;
+    for (final item in section.items) {
+      if (item.requiredPermission != null &&
+          item.requiredPermission!(permissions) != true) {
+        continue;
+      }
+      out.add(QuickJumpEntry(
+        title: item.title,
+        group: section.title,
+        index: item.index,
+        icon: icon,
+      ));
+    }
+  }
+  final r = role?.toUpperCase();
+  if (r == 'SUPER_ADMIN' || r == 'ADMIN') {
+    for (final section in _SidebarState._adminSections) {
+      final icon =
+          _SidebarState._sectionIcons[section.title] ?? Icons.circle_outlined;
+      for (final item in section.items) {
+        out.add(QuickJumpEntry(
+          title: item.title,
+          group: section.title,
+          index: item.index,
+          icon: icon,
+        ));
+      }
+    }
+  }
+  return out;
 }

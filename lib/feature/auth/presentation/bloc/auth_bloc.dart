@@ -70,13 +70,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       print("object${response.message}");
       print("object${response.message}");
       if (response.success == true && response.user != null) {
-        // Validate company status with complete data
-        final validationResult = _validateCompany(response);
-        if (!validationResult.isValid) {
-          emit(AuthError(validationResult.errorMessage));
-          return;
-        }
-
         // Save user locally and emit success
         await authService.saveUserLocally(event.password, response);
         await OfflineAuth.remember(event.username.trim(), event.password, response);
@@ -98,55 +91,4 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(AuthError("Login failed. Please try again."));
     }
   }
-
-  CompanyValidationResult _validateCompany(LoginModel user) {
-    final company = user.company;
-
-    // If no company data, allow login (some users might not have company)
-    if (company == null) {
-      return CompanyValidationResult(isValid: true);
-    }
-
-    // Check if company is active
-    if (company.isActive == false) {
-      return CompanyValidationResult(
-        isValid: false,
-        errorMessage: "Your company account is inactive. Please contact support.",
-      );
-    }
-
-    // Check expiry date if available
-    if (company.expiryDate != null ) {
-      try {
-        final expiryDate = DateTime.parse(company.expiryDate.toString());
-        final currentDate = DateTime.now();
-
-        // Add one day to expiry date to include the entire day
-        final expiryEndOfDay = DateTime(expiryDate.year, expiryDate.month, expiryDate.day, 23, 59, 59);
-
-        if (currentDate.isAfter(expiryEndOfDay)) {
-          final formattedDate = "${expiryDate.day}/${expiryDate.month}/${expiryDate.year}";
-          return CompanyValidationResult(
-            isValid: false,
-            errorMessage: "Your company subscription expired on $formattedDate. Please contact support.",
-          );
-        }
-      } catch (e) {
-        debugPrint("Error parsing expiry date: $e");
-        // If date parsing fails, continue with login
-      }
-    }
-
-    return CompanyValidationResult(isValid: true);
-  }
-}
-
-class CompanyValidationResult {
-  final bool isValid;
-  final String errorMessage;
-
-  CompanyValidationResult({
-    required this.isValid,
-    this.errorMessage = '',
-  });
 }

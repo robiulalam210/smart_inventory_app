@@ -11,7 +11,6 @@ String supplierPaymentModelToJson(List<SupplierPaymentModel> data) => json.encod
 class SupplierPaymentModel {
   final int? id;
   final String? spNo;
-  final int? company;
   final int? supplier;
   final String? supplierName;
   final String? supplierPhone;
@@ -36,7 +35,6 @@ class SupplierPaymentModel {
   SupplierPaymentModel({
     this.id,
     this.spNo,
-    this.company,
     this.supplier,
     this.supplierName,
     this.supplierPhone,
@@ -62,7 +60,6 @@ class SupplierPaymentModel {
   factory SupplierPaymentModel.fromJson(Map<String, dynamic> json) => SupplierPaymentModel(
     id: json["id"],
     spNo: json["sp_no"],
-    company: json["company"],
     supplier: json["supplier"],
     supplierName: json["supplier_name"],
     supplierPhone: json["supplier_phone"],
@@ -88,7 +85,6 @@ class SupplierPaymentModel {
   Map<String, dynamic> toJson() => {
     "id": id,
     "sp_no": spNo,
-    "company": company,
     "supplier": supplier,
     "supplier_name": supplierName,
     "supplier_phone": supplierPhone,

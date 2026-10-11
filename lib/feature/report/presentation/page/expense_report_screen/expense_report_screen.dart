@@ -425,7 +425,7 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
                       canChangePageFormat: false,
                       dynamicLayout: true,
                       build: (format) => generateExpenseReportPdf(
-                        state.response, context.read<ProfileBloc>().permissionModel?.data?.companyInfo
+                        state.response, context.read<ProfileBloc>().permissionModel?.data?.businessInfo
 
                       ),
                       pdfPreviewPageDecoration:

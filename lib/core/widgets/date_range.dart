@@ -1,9 +1,10 @@
+import 'package:intl/intl.dart';
+import 'web_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:meherinMart/core/widgets/app_popover_route.dart';
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
 
 import '../configs/app_colors.dart';
-import '../configs/app_sizes.dart';
 import '../configs/app_text.dart';
 
 class CustomDateRangeField extends StatefulWidget {
@@ -133,52 +134,36 @@ class _CustomDateRangeFieldState extends State<CustomDateRangeField> {
               widget.onDateRangeSelected(result);
             }
           },
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              minHeight: 30,
-              maxHeight: 35,
+          // ওয়েবের .f-date / .combo-btn এর মতো: বাছাই থাকলে নীল রেখা ও নীল-wash
+          child: Container(
+            height: 35,
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            decoration: BoxDecoration(
+              color: selectedDateRange != null ? W.blueWash(context) : W.surface(context),
+              border: Border.all(
+                color: selectedDateRange != null ? W.blue(context) : W.line2(context),
+              ),
+              borderRadius: BorderRadius.circular(W.rSm),
             ),
-            child: InputDecorator(
-              decoration: InputDecoration(
-                isDense: true,
-                hintText: 'Please select a start end date',
-                hintStyle: TextStyle(
-                  color:  AppColors.text(context).withValues(alpha: 0.5),
-                  fontSize: 12,
+            child: Row(
+              children: [
+                Icon(Icons.calendar_today_outlined, size: 15, color: W.muted(context)),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    selectedDateRange != null
+                        ? '${DateFormat('d MMM yyyy').format(selectedDateRange!.start)} → '
+                            '${DateFormat('d MMM yyyy').format(selectedDateRange!.end)}'
+                        : 'Select date range',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: selectedDateRange != null ? W.ink(context) : W.muted(context),
+                    ),
+                  ),
                 ),
-                suffixIcon:
-                const Icon(Icons.date_range, size: 16),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 8,
-                  vertical: 8,
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius:
-                  BorderRadius.circular(AppSizes.radius),
-                  borderSide:
-                  BorderSide(color: AppColors.border),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius:
-                  BorderRadius.circular(AppSizes.radius),
-                  borderSide:
-                  BorderSide(color:  AppColors.text(context)),
-                ),
-              ),
-              child: Text(
-                selectedDateRange != null
-                    ? '${selectedDateRange!.start.toString().split(' ')[0]} → '
-                    '${selectedDateRange!.end.toString().split(' ')[0]}'
-                    : 'Please select a start end date',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: selectedDateRange != null
-                      ?  AppColors.text(context)
-                      :  AppColors.text(context)
-                      .withValues(alpha: 0.5),
-                ),
-                overflow: TextOverflow.ellipsis,
-              ),
+              ],
             ),
           ),
         ),

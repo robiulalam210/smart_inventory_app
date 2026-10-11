@@ -415,7 +415,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           right: 0,
           child: GestureDetector(
             onTap: () {
-              _showImagePickerOptions(allowCompanyLogo: profile.data?.companyInfo != null);
+              _showImagePickerOptions(allowCompanyLogo: profile.data?.businessInfo != null);
             },
             child: Container(
               padding: const EdgeInsets.all(8),
@@ -458,7 +458,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                 // Company info card (with upload)
                 CompanyProfileCardWithUpload(
-                  company: pp.data?.companyInfo,
+                  company: pp.data?.businessInfo,
                   onUpdated: _loadProfileData,
                 ),
                 const SizedBox(height: 24),
@@ -1110,7 +1110,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       'logo': await MultipartFile.fromFile(file.path, filename: filename),
     });
 
-    final url = '${AppUrls.baseUrlMain}/api/company/logo/';
+    final url = '${AppUrls.baseUrlMain}/api/business/logo/';
 
     try {
       final response = await _uploadService.uploadWithPatchFallback(

@@ -12,14 +12,14 @@ class LoginModel {
   String? message;
   final User? user;
   final Tokens? tokens;
-  final Company? company;
+  final Business? business;
 
   LoginModel({
     this.success,
     this.message,
     this.user,
     this.tokens,
-    this.company,
+    this.business,
   });
 
   factory LoginModel.fromJson(Map<String, dynamic> json) {
@@ -30,8 +30,10 @@ class LoginModel {
       message: json["message"],
       user: data?["user"] == null ? null : User.fromJson(data["user"]),
       tokens: data?["tokens"] == null ? null : Tokens.fromJson(data["tokens"]),
-      company:
-      data?["company"] == null ? null : Company.fromJson(data["company"]),
+      // পুরনো cache করা login (key = company) ও পড়া যাবে
+      business: (data?["business"] ?? data?["company"]) == null
+          ? null
+          : Business.fromJson(Map<String, dynamic>.from(data["business"] ?? data["company"])),
     );
   }
 
@@ -41,120 +43,69 @@ class LoginModel {
     "data": {
       "user": user?.toJson(),
       "tokens": tokens?.toJson(),
-      "company": company?.toJson(),
+      "business": business?.toJson(),
     }
   };
 }
 
-class Company {
+/// একমাত্র ব্যবসার তথ্য (server: BusinessProfile, login response এর `business`)
+class Business {
   final int? id;
   final String? name;
-  final dynamic tradeLicense;
-  final dynamic address;
-  final dynamic phone;
-  final dynamic email;
-  final dynamic website;
+  final String? tagline;
+  final String? phone;
+  final String? whatsapp;
+  final String? email;
+  final String? address;
+  final String? website;
+  final String? tradeLicense;
   final dynamic logo;
   final String? currency;
-  final String? timezone;
-  final DateTime? fiscalYearStart;
-  final String? planType;
-  final DateTime? startDate;
-  final DateTime? expiryDate;
-  final bool? isActive;
-  final int? maxUsers;
-  final int? maxProducts;
-  final int? maxBranches;
-  final String? companyCode;
-  final DateTime? createdAt;
   final DateTime? updatedAt;
-  final bool? isExpired;
-  final int? daysUntilExpiry;
-  final int? activeUserCount;
-  final int? productCount;
 
-  Company({
+  Business({
     this.id,
     this.name,
-    this.tradeLicense,
-    this.address,
+    this.tagline,
     this.phone,
+    this.whatsapp,
     this.email,
+    this.address,
     this.website,
+    this.tradeLicense,
     this.logo,
     this.currency,
-    this.timezone,
-    this.fiscalYearStart,
-    this.planType,
-    this.startDate,
-    this.expiryDate,
-    this.isActive,
-    this.maxUsers,
-    this.maxProducts,
-    this.maxBranches,
-    this.companyCode,
-    this.createdAt,
     this.updatedAt,
-    this.isExpired,
-    this.daysUntilExpiry,
-    this.activeUserCount,
-    this.productCount,
   });
 
-  factory Company.fromJson(Map<String, dynamic> json) => Company(
+  factory Business.fromJson(Map<String, dynamic> json) => Business(
     id: json["id"],
     name: json["name"],
-    tradeLicense: json["trade_license"],
-    address: json["address"],
+    tagline: json["tagline"],
     phone: json["phone"],
+    whatsapp: json["whatsapp"],
     email: json["email"],
+    address: json["address"],
     website: json["website"],
+    tradeLicense: json["trade_license"],
     logo: json["logo"],
     currency: json["currency"],
-    timezone: json["timezone"],
-    fiscalYearStart: json["fiscal_year_start"] == null ? null : DateTime.parse(json["fiscal_year_start"]),
-    planType: json["plan_type"],
-    startDate: json["start_date"] == null ? null : DateTime.parse(json["start_date"]),
-    expiryDate: json["expiry_date"] == null ? null : DateTime.parse(json["expiry_date"]),
-    isActive: json["is_active"],
-    maxUsers: json["max_users"],
-    maxProducts: json["max_products"],
-    maxBranches: json["max_branches"],
-    companyCode: json["company_code"],
-    createdAt: json["created_at"] == null ? null : DateTime.parse(json["created_at"]),
-    updatedAt: json["updated_at"] == null ? null : DateTime.parse(json["updated_at"]),
-    isExpired: json["is_expired"],
-    daysUntilExpiry: json["days_until_expiry"],
-    activeUserCount: json["active_user_count"],
-    productCount: json["product_count"],
+    updatedAt: json["updated_at"] == null ? null : DateTime.tryParse(json["updated_at"].toString()),
   );
 
   Map<String, dynamic> toJson() => {
     "id": id,
     "name": name,
-    "trade_license": tradeLicense,
-    "address": address,
+    "tagline": tagline,
     "phone": phone,
+    "whatsapp": whatsapp,
     "email": email,
+    "address": address,
     "website": website,
+    "trade_license": tradeLicense,
     "logo": logo,
     "currency": currency,
-    "timezone": timezone,
-    "fiscal_year_start": "${fiscalYearStart!.year.toString().padLeft(4, '0')}-${fiscalYearStart!.month.toString().padLeft(2, '0')}-${fiscalYearStart!.day.toString().padLeft(2, '0')}",
-    "plan_type": planType,
-    "start_date": "${startDate!.year.toString().padLeft(4, '0')}-${startDate!.month.toString().padLeft(2, '0')}-${startDate!.day.toString().padLeft(2, '0')}",
-    "expiry_date": "${expiryDate!.year.toString().padLeft(4, '0')}-${expiryDate!.month.toString().padLeft(2, '0')}-${expiryDate!.day.toString().padLeft(2, '0')}",
-    "is_active": isActive,
-    "max_users": maxUsers,
-    "max_products": maxProducts,
-    "max_branches": maxBranches,
-    "company_code": companyCode,
-    "created_at": createdAt?.toIso8601String(),
     "updated_at": updatedAt?.toIso8601String(),
-    "is_expired": isExpired,
-    "days_until_expiry": daysUntilExpiry,
-    "active_user_count": activeUserCount,
-    "product_count": productCount,
   };
 }
 

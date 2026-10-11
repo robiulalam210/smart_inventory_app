@@ -83,7 +83,7 @@ class SalesReturnTableCard extends StatelessWidget {
                             color: Colors.white,
                             fontSize: 12,
                             fontWeight: FontWeight.w700,
-                            fontFamily: GoogleFonts.inter().fontFamily,
+                            fontFamily: GoogleFonts.ibmPlexSans().fontFamily,
                           ),
                           headingRowColor: WidgetStateProperty.all(
                             AppColors.primaryColor(context),
@@ -91,7 +91,7 @@ class SalesReturnTableCard extends StatelessWidget {
                           dataTextStyle: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w500,
-                            fontFamily: GoogleFonts.inter().fontFamily,
+                            fontFamily: GoogleFonts.ibmPlexSans().fontFamily,
                           ),
                           rows: _buildTableRows(context, dynamicColumnWidth),
                           columns: _buildColumns(dynamicColumnWidth),
@@ -973,7 +973,7 @@ class SalesReturnTableCard extends StatelessWidget {
           const SizedBox(height: 16),
           Text(
             'No Sales Returns Found',
-            style: GoogleFonts.inter(
+            style: GoogleFonts.ibmPlexSans(
               fontSize: 16,
               fontWeight: FontWeight.w600,
               color: Colors.grey,
@@ -982,7 +982,7 @@ class SalesReturnTableCard extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             'Sales returns will appear here when created',
-            style: GoogleFonts.inter(
+            style: GoogleFonts.ibmPlexSans(
               fontSize: 12,
               fontWeight: FontWeight.w400,
               color: Colors.grey,

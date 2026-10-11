@@ -282,7 +282,7 @@ Spacer(),
                       canChangePageFormat: false,
                       dynamicLayout: true,
                       build: (format) => generateSupplierDueAdvanceReportPdf(
-                        state.response, context.read<ProfileBloc>().permissionModel?.data?.companyInfo
+                        state.response, context.read<ProfileBloc>().permissionModel?.data?.businessInfo
 
                       ),
                       pdfPreviewPageDecoration:

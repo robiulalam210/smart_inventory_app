@@ -12,7 +12,7 @@ import '../../../data/model/purchase_report_model.dart';
 
 
 Future<Uint8List> generatePurchaseReportPdf(
-    PurchaseReportResponse reportResponse,CompanyInfo? company,
+    PurchaseReportResponse reportResponse,BusinessInfo? company,
     ) async { // Load company logo asynchronously
   Uint8List? logoBytes;
   if (company?.logo != null && company!.logo.isNotEmpty) {
@@ -54,11 +54,11 @@ Future<Uint8List> generatePurchaseReportPdf(
                     ),
                   ),
                   pw.SizedBox(height: 4),
-                  if (company?.address != null )
+                  if ((company?.address ?? '').trim().isNotEmpty )
                     pw.Text(company?.address??"", style: const pw.TextStyle(fontSize: 10)),
-                  if (company?.phone != null )
+                  if ((company?.phone ?? '').trim().isNotEmpty )
                     pw.Text(company?.phone??"", style: const pw.TextStyle(fontSize: 10)),
-                  if (company?.email != null )
+                  if ((company?.email ?? '').trim().isNotEmpty )
                     pw.Text(company?.email??"", style: const pw.TextStyle(fontSize: 10)),
                 ],
               ),

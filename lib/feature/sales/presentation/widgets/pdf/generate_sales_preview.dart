@@ -36,7 +36,7 @@ Future<Uint8List> _loadImageBytes(String? imageUrl) async {
 
 Future<Uint8List> generateSalesPreviewPdf(
     PosSaleModel sale,
-    CompanyInfo? company,
+    BusinessInfo? company,
     ) async {
   final pdf = pw.Document();
 
@@ -135,7 +135,7 @@ Future<Uint8List> generateSalesPreviewPdf(
                 crossAxisAlignment: pw.CrossAxisAlignment.start,
                 children: [
                   pw.Text(
-                    company?.name ?? "Company Name",
+                    company?.name ?? "Business Name",
                     style: pw.TextStyle(
                       fontSize: 14,
                       fontWeight: pw.FontWeight.bold,
@@ -143,17 +143,17 @@ Future<Uint8List> generateSalesPreviewPdf(
                     ),
                   ),
                   pw.SizedBox(height: 4),
-                  if (company?.address != null)
+                  if ((company?.address ?? '').trim().isNotEmpty)
                     pw.Text(
                       company?.address??"",
                       style: const pw.TextStyle(fontSize: 10),
                     ),
-                  if (company?.phone != null)
+                  if ((company?.phone ?? '').trim().isNotEmpty)
                     pw.Text(
                       company?.phone??"",
                       style: const pw.TextStyle(fontSize: 10),
                     ),
-                  if (company?.email != null)
+                  if ((company?.email ?? '').trim().isNotEmpty)
                     pw.Text(
                       company?.email??"",
                       style: const pw.TextStyle(fontSize: 10),

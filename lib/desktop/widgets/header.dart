@@ -4,10 +4,11 @@ import 'package:flutter/cupertino.dart';
 import '../../feature/feature.dart';
 import '../../feature/splash/presentation/bloc/connectivity_bloc/connectivity_state.dart';
 import '../../core/configs/configs.dart';
-import '../../core/widgets/app_button.dart';
 import '../../core/offline/offline_config.dart';
 import '../../core/offline/sync_widgets.dart';
 import 'sidebar.dart';
+import 'quick_jump.dart';
+import '../../core/widgets/web_ui.dart';
 
 class Header extends StatefulWidget {
   const Header({
@@ -32,33 +33,28 @@ class _HeaderState extends State<Header> {
     // ছিল শুধু sidebar এর highlight।
     // ------------------------------------------------------------
     final bool isMobile = Responsive.isMobile(context);
-    final Color border = Theme.of(context).brightness == Brightness.dark
-        ? Colors.white.withValues(alpha: 0.08)
-        : AppColors.borderLight;
+    final Color border = W.line(context);
 
     return Column(mainAxisSize: MainAxisSize.min, children: [Container(
       height: 64,
       padding: EdgeInsets.only(
           right: isMobile ? AppSizes.paddingInside / 2 : AppSizes.paddingInside),
       decoration: BoxDecoration(
-        color: AppColors.bottomNavBg(context),
+        color: W.surface(context),
         border: Border(bottom: BorderSide(color: border)),
       ),
       child: SafeArea(
         bottom: false,
         child: LayoutBuilder(builder: (context, constraints) {
-          // screen গুলো sidebar কে ১২ ভাগের ২ ভাগ দেয়, আর content এর দুই
-          // পাশে bodyPadding × 1.5 ফাঁকা — তাই brand এর প্রস্থও সেভাবে
-          const double sidePad = AppSizes.bodyPadding * 1.5;
-          final double brandWidth =
-              sidePad + (constraints.maxWidth - sidePad * 2) / 6;
+          // brand এর প্রস্থ = নিচের স্থায়ী sidebar এর প্রস্থ, তাই দুটো এক লাইনে মেলে
+          const double brandWidth = kSidebarWidth;
 
           return Row(
           children: [
             SizedBox(
               width: brandWidth,
               child: Padding(
-                padding: const EdgeInsets.only(left: sidePad + 12, right: 8),
+                padding: const EdgeInsets.only(left: 20, right: 8),
                 child: Row(
                   children: [
                     Flexible(
@@ -86,6 +82,9 @@ class _HeaderState extends State<Header> {
             const SizedBox(width: 16),
             const Expanded(child: _PageTitle()),
             gapW8,
+            // Ctrl+K — যেকোনো page এ সরাসরি যাওয়া
+            if (!isMobile) const QuickJumpButton(),
+            gapW8,
             // Connectivity status
             if (OfflineConfig.enabled)
               const SyncStatusChip()
@@ -101,13 +100,14 @@ class _HeaderState extends State<Header> {
                     status = "Offline";
                   }
 
-                  return SizedBox(
-                    height: 34,
-                    child: AppButton(
-                      onPressed: () {},
-                      color: getConnectivityColor(state),
-                      name: status,
-                    ),
+                  return WPill(
+                    status,
+                    tone: state is ConnectivityOnline
+                        ? WTone.green
+                        : state is ConnectivityConnecting
+                            ? WTone.amber
+                            : WTone.red,
+                    icon: Icons.circle,
                   );
                 },
               ),
@@ -148,7 +148,6 @@ class _PageTitle extends StatelessWidget {
         final int index = state is DashboardScreenChanged ? state.index : 0;
         final info = sidebarPageInfo(index);
         final Color primary = AppColors.primaryColor(context);
-        final Color text = AppColors.text(context);
 
         return Row(
           children: [
@@ -173,16 +172,16 @@ class _PageTitle extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                          fontSize: 11.5, color: text.withValues(alpha: 0.55)),
+                          fontSize: 11.5, color: W.muted(context)),
                     ),
                   Text(
                     info.title,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontSize: 17,
+                      fontSize: 18,
                       fontWeight: FontWeight.w700,
-                      color: text,
+                      color: W.ink(context),
                     ),
                   ),
                 ],
@@ -232,16 +231,16 @@ class _SignOutButton extends StatelessWidget {
             style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600),
           ),
           style: OutlinedButton.styleFrom(
-            foregroundColor: AppColors.danger,
-            side: BorderSide(color: AppColors.danger.withValues(alpha: 0.45)),
+            foregroundColor: W.redInk(context),
+            backgroundColor: W.surface(context),
+            side: BorderSide(color: W.redLine(context)),
             padding: const EdgeInsets.symmetric(horizontal: 14),
+            minimumSize: const Size(0, 36),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(18),
+              borderRadius: BorderRadius.circular(W.rMd),
             ),
           ).copyWith(
-            overlayColor: WidgetStatePropertyAll(
-              AppColors.danger.withValues(alpha: 0.08),
-            ),
+            overlayColor: WidgetStatePropertyAll(W.redWash(context)),
           ),
         ),
       ),

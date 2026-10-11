@@ -1,6 +1,6 @@
 
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-final bool isLive = false; // Set to true for production environment
+final bool isLive = true; // Set to true for production environment
 
 
 class AppUrls {
@@ -32,7 +32,6 @@ class AppUrls {
   /// নির্দিষ্ট একজন user এর permission (admin এর permission editor)
   static String userPermissionDetail(String userId) => '$baseUrl/user-permissions/user/$userId/';
   static  String checkPermission = '$baseUrl/user-permissions/check/'; // FIX: আগে /permissions/check/ (404) ছিল
-  static  String companyUsers = '$baseUrl/company-users/';
 
   static  String saleModes = "$baseUrl/sale-modes/";
   static  String priceTiers = "$baseUrl/price-tiers/";
@@ -63,6 +62,7 @@ class AppUrls {
   static final String expenseSubHead          = '$baseUrl/expenses/expense-subheads/';
   static final String expense          = '$baseUrl/expenses/expenses/';
   static final String posSale          = '$baseUrl/sales/';
+  static final String posSaleSummary   = '$baseUrl/sales/summary/';
   static final String purchase          = '$baseUrl/purchases/';
   static final String supplierList          = '$baseUrl/suppliers/';
   static final String moneyReceipt          = '$baseUrl/money-receipts/';
@@ -103,6 +103,12 @@ class AppUrls {
   // Audit log (শুধু Super Admin / Admin)
   static final String auditLog = '$baseUrl/sync/audit/';
   static final String auditMeta = '$baseUrl/sync/audit/meta/';
+
+  // Online Shop (অনলাইন অর্ডার + শপ সেটিংস)
+  static final String shopOrders = '$baseUrl/shop/orders/';
+  static String shopOrderDetail(int id) => '$baseUrl/shop/orders/$id/';
+  static String shopOrderStatus(int id) => '$baseUrl/shop/orders/$id/status/';
+  static final String shopSettings = '$baseUrl/shop/settings/';
 
   static final String userProfile = "$baseUrl/profile/";
   // static final String profilePermission = "$baseUrl/profile/permissions/";

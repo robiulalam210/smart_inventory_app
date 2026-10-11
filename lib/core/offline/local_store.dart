@@ -290,7 +290,7 @@ class LocalStore {
 
   Future<List<Map<String, Object?>>> issues() => db.query('sync_issues', orderBy: 'created_at DESC');
 
-  /// লগআউট/অন্য company: শুধু cache মুছবে, কিন্তু sync না হওয়া outbox কখনো মুছবে না
+  /// লগআউট: শুধু cache মুছবে, কিন্তু sync না হওয়া outbox কখনো মুছবে না
   Future<void> clearCaches() async {
     await db.delete('entities', where: 'pending = 0');
     await db.delete('response_cache');

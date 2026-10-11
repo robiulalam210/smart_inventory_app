@@ -49,8 +49,8 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
 
   // ================= HERO (স্বাগতম + নিট লাভ) =================
   Widget _buildHero(DashboardData? data) {
-    final companyInfo =
-        context.read<ProfileBloc>().permissionModel?.data?.companyInfo;
+    final businessInfo =
+        context.read<ProfileBloc>().permissionModel?.data?.businessInfo;
     final primary = AppColors.primaryColor(context);
     final onPrimary = AppColors.onColor(primary);
     final netProfit = (data?.profitLoss?.netProfit ?? 0).toDouble();
@@ -80,8 +80,8 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      companyInfo?.name?.isNotEmpty == true
-                          ? 'Welcome, ${companyInfo!.name}'
+                      businessInfo?.name?.isNotEmpty == true
+                          ? 'Welcome, ${businessInfo!.name}'
                           : 'Welcome',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,

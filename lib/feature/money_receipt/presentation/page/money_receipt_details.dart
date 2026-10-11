@@ -1317,7 +1317,7 @@ class MoneyReceiptDetailsScreen extends StatelessWidget {
             canChangeOrientation: false,
             canChangePageFormat: false,
             dynamicLayout: true,
-            build: (format) => generateMoneyReceiptPdf(receipt, context.read<ProfileBloc>().permissionModel?.data?.companyInfo),
+            build: (format) => generateMoneyReceiptPdf(receipt, context.read<ProfileBloc>().permissionModel?.data?.businessInfo),
 
             pdfPreviewPageDecoration: BoxDecoration(color: AppColors.greyColor(context)),
             actionBarTheme: PdfActionBarTheme(

@@ -14,9 +14,9 @@ import 'configs.dart';
    static const Color lightText = Color(0xFF0F172A); // খাঁটি কালোর বদলে slate-900
 
    // Dark theme defaults
-   static const Color darkBg = Color(0xFF0B1220);
-   static const Color darkBgBottomNav = Color(0xFF111A2E);
-   static const Color darkText = Color(0xFFE5E7EB);
+   static const Color darkBg = Color(0xFF0B101B); // ওয়েবের --canvas (dark)
+   static const Color darkBgBottomNav = Color(0xFF131A2A); // ওয়েবের --surface (dark)
+   static const Color darkText = Color(0xFFE8EDF7); // ওয়েবের --ink (dark)
 
  
   // ───────── Semantic রঙ (সব স্ক্রিনে একই অর্থে ব্যবহার করুন) ─────────

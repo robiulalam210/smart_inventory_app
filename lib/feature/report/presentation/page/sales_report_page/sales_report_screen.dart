@@ -253,7 +253,7 @@ gapW8,
                         canChangePageFormat: false,
                         dynamicLayout: true,
                         build: (format) =>
-                            generateSalesReportPdf(state.response, context.read<ProfileBloc>().permissionModel?.data?.companyInfo),
+                            generateSalesReportPdf(state.response, context.read<ProfileBloc>().permissionModel?.data?.businessInfo),
                         pdfPreviewPageDecoration: BoxDecoration(
                           color: AppColors.white,
                         ),
@@ -436,7 +436,7 @@ gapW8,
           const SizedBox(height: 16),
           Text(
             "No Sales Report Data Found",
-            style: GoogleFonts.inter(
+            style: GoogleFonts.ibmPlexSans(
               fontSize: 16,
               fontWeight: FontWeight.w600,
               color: Colors.grey,
@@ -445,7 +445,7 @@ gapW8,
           const SizedBox(height: 8),
           Text(
             "Sales report data will appear here when available",
-            style: GoogleFonts.inter(
+            style: GoogleFonts.ibmPlexSans(
               fontSize: 12,
               fontWeight: FontWeight.w400,
               color: Colors.grey,
@@ -470,7 +470,7 @@ gapW8,
           const SizedBox(height: 16),
           Text(
             "Error Loading Sales Report",
-            style: GoogleFonts.inter(
+            style: GoogleFonts.ibmPlexSans(
               fontSize: 16,
               fontWeight: FontWeight.w600,
               color: Colors.grey,
@@ -561,7 +561,7 @@ class SalesReportTableCard extends StatelessWidget {
                             color: Colors.white,
                             fontSize: 12,
                             fontWeight: FontWeight.w700,
-                            fontFamily: GoogleFonts.inter().fontFamily,
+                            fontFamily: GoogleFonts.ibmPlexSans().fontFamily,
                           ),
                           headingRowColor: WidgetStateProperty.all(
                             AppColors.primaryColor(context),
@@ -569,7 +569,7 @@ class SalesReportTableCard extends StatelessWidget {
                           dataTextStyle: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w500,
-                            fontFamily: GoogleFonts.inter().fontFamily,
+                            fontFamily: GoogleFonts.ibmPlexSans().fontFamily,
                           ),
                           columns: _buildColumns(dynamicColumnWidth),
                           rows: reports.asMap().entries.map((entry) {

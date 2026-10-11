@@ -165,7 +165,7 @@ class _ProfitLossScreenState extends State<ProfitLossScreen> {
                       canChangePageFormat: false,
                       dynamicLayout: true,
                       build: (format) => generateProfitLossReportPdf(
-                        state.response, context.read<ProfileBloc>().permissionModel?.data?.companyInfo
+                        state.response, context.read<ProfileBloc>().permissionModel?.data?.businessInfo
 
                       ),
                       pdfPreviewPageDecoration:
@@ -360,7 +360,7 @@ class _ProfitLossScreenState extends State<ProfitLossScreen> {
           const SizedBox(height: 16),
           Text(
             message,
-            style: GoogleFonts.inter(
+            style: GoogleFonts.ibmPlexSans(
               fontSize: 16,
               fontWeight: FontWeight.w600,
               color: Colors.grey,
@@ -380,7 +380,7 @@ class _ProfitLossScreenState extends State<ProfitLossScreen> {
           const SizedBox(height: 16),
           Text(
             "Error Loading Profit & Loss Report",
-            style: GoogleFonts.inter(
+            style: GoogleFonts.ibmPlexSans(
               fontSize: 16,
               fontWeight: FontWeight.w600,
               color: Colors.grey,
@@ -464,7 +464,7 @@ class ExpenseBreakdownTableCard extends StatelessWidget {
                             color: Colors.white,
                             fontSize: 12,
                             fontWeight: FontWeight.w700,
-                            fontFamily: GoogleFonts.inter().fontFamily,
+                            fontFamily: GoogleFonts.ibmPlexSans().fontFamily,
                           ),
                           headingRowColor: WidgetStateProperty.all(
                             AppColors.primaryColor(context),
@@ -472,7 +472,7 @@ class ExpenseBreakdownTableCard extends StatelessWidget {
                           dataTextStyle: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w500,
-                            fontFamily: GoogleFonts.inter().fontFamily,
+                            fontFamily: GoogleFonts.ibmPlexSans().fontFamily,
                           ),
                           columns: _buildColumns(dynamicColumnWidth),
                           rows: expenses.asMap().entries.map((entry) {

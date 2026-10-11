@@ -144,11 +144,11 @@ class _MobileReportsTabScreenState extends State<MobileReportsTabScreen>
               child: TabBar(
                 controller: _tabController,
                 isScrollable: true,
-                labelStyle: GoogleFonts.inter(
+                labelStyle: GoogleFonts.ibmPlexSans(
                   fontWeight: FontWeight.w600,
                   fontSize: 12,
                 ),
-                unselectedLabelStyle: GoogleFonts.inter(
+                unselectedLabelStyle: GoogleFonts.ibmPlexSans(
                   fontWeight: FontWeight.normal,
                   fontSize: 12,
                 ),

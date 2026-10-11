@@ -275,7 +275,7 @@ class _StockReportScreenState extends State<StockReportScreen> {
                       canChangePageFormat: false,
                       dynamicLayout: true,
                       build: (format) => generateStockReportPdf(
-                        state.response,context.read<ProfileBloc>().permissionModel?.data?.companyInfo
+                        state.response,context.read<ProfileBloc>().permissionModel?.data?.businessInfo
 
                       ),
                       pdfPreviewPageDecoration:
@@ -409,7 +409,7 @@ class _StockReportScreenState extends State<StockReportScreen> {
           const SizedBox(height: 16),
           Text(
             "No Stock Data Found",
-            style: GoogleFonts.inter(
+            style: GoogleFonts.ibmPlexSans(
               fontSize: 16,
               fontWeight: FontWeight.w600,
               color: Colors.grey,
@@ -418,7 +418,7 @@ class _StockReportScreenState extends State<StockReportScreen> {
           const SizedBox(height: 8),
           Text(
             "Stock data will appear here when available",
-            style: GoogleFonts.inter(
+            style: GoogleFonts.ibmPlexSans(
               fontSize: 12,
               fontWeight: FontWeight.w400,
               color: Colors.grey,
@@ -443,7 +443,7 @@ class _StockReportScreenState extends State<StockReportScreen> {
           const SizedBox(height: 16),
           Text(
             "Error Loading Stock Report",
-            style: GoogleFonts.inter(
+            style: GoogleFonts.ibmPlexSans(
               fontSize: 16,
               fontWeight: FontWeight.w600,
               color: Colors.grey,
@@ -535,7 +535,7 @@ class StockReportTableCard extends StatelessWidget {
                             color: Colors.white,
                             fontSize: 11,
                             fontWeight: FontWeight.w700,
-                            fontFamily: GoogleFonts.inter().fontFamily,
+                            fontFamily: GoogleFonts.ibmPlexSans().fontFamily,
                           ),
                           headingRowColor: WidgetStateProperty.all(
                             AppColors.primaryColor(context),
@@ -543,7 +543,7 @@ class StockReportTableCard extends StatelessWidget {
                           dataTextStyle: TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.w500,
-                            fontFamily: GoogleFonts.inter().fontFamily,
+                            fontFamily: GoogleFonts.ibmPlexSans().fontFamily,
                           ),
                           sortColumnIndex: _getSortColumnIndex(sortBy),
                           sortAscending: sortAscending,

@@ -48,7 +48,7 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
 
   // ================= HEADER =================
   Widget _buildHeader() {
-    final companyInfo = context.read<ProfileBloc>().permissionModel?.data?.companyInfo;
+    final businessInfo = context.read<ProfileBloc>().permissionModel?.data?.businessInfo;
 
     return Container(
       padding: const EdgeInsets.all(8),
@@ -78,7 +78,7 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
                 ),
               ),
               const SizedBox(height: 4),
-              Text("Welcome ${companyInfo?.name??""}",style: AppTextStyle.body(context).copyWith(
+              Text("Welcome ${businessInfo?.name??""}",style: AppTextStyle.body(context).copyWith(
                 color: AppColors.whiteColor(context)
               ),),
               const SizedBox(height: 4),

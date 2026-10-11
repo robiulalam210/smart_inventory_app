@@ -22,7 +22,6 @@ class SupplierActiveModel {
   final dynamic totalPurchases;
   final int? purchaseCount;
   final String? amountType;
-  final int? company;
   final int? createdBy;
   final DateTime? createdAt;
   final DateTime? updatedAt;
@@ -42,7 +41,6 @@ class SupplierActiveModel {
     this.totalPurchases,
     this.purchaseCount,
     this.amountType,
-    this.company,
     this.createdBy,
     this.createdAt,
     this.updatedAt,
@@ -66,7 +64,6 @@ class SupplierActiveModel {
     totalPurchases: json["total_purchases"],
     purchaseCount: json["purchase_count"],
     amountType: json["amount_type"],
-    company: json["company"],
     createdBy: json["created_by"],
     createdAt: json["created_at"] == null ? null : DateTime.parse(json["created_at"]),
     updatedAt: json["updated_at"] == null ? null : DateTime.parse(json["updated_at"]),
@@ -85,7 +82,6 @@ class SupplierActiveModel {
     "total_purchases": totalPurchases,
     "purchase_count": purchaseCount,
     "amount_type": amountType,
-    "company": company,
     "created_by": createdBy,
     "created_at": createdAt?.toIso8601String(),
     "updated_at": updatedAt?.toIso8601String(),

@@ -1,22 +1,12 @@
-import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
-
 import '../../../../core/configs/configs.dart';
 import '../../../../desktop/widgets/sidebar.dart';
 import '../../../../core/widgets/app_alert_dialog.dart';
-import '../../../../core/widgets/app_dropdown.dart';
 import '../../../../core/widgets/app_loader.dart';
-import '../../../../core/widgets/coustom_search_text_field.dart';
-import '../../../../core/widgets/date_range.dart';
-import '../../../customer/data/model/customer_active_model.dart';
-import '../../../customer/presentation/bloc/customer/customer_bloc.dart';
-import '../../../products/product/presentation/bloc/products/products_bloc.dart';
-import '../../../products/product/presentation/widget/pagination.dart';
-import '../../../users_list/data/model/user_model.dart';
-import '../../../users_list/presentation/bloc/users/user_bloc.dart';
 import '../bloc/possale/crate_pos_sale/create_pos_sale_bloc.dart';
-import '../bloc/possale/possale_bloc.dart';
-import '../widgets/widget.dart';
+import '../widgets/sale_list_view.dart';
 
+/// Sale List (ডেস্কটপ) — ওয়েবের Sale List পেজের মতো। ফিল্টার, মোট হিসাব, টেবিল ও
+/// পাতা বদলের সব কাজ [SaleListView] এ; এই স্ক্রিন শুধু সাইডবারসহ কাঠামো দেয়।
 class PosSaleScreen extends StatefulWidget {
   const PosSaleScreen({super.key, this.posSale});
 
@@ -27,106 +17,7 @@ class PosSaleScreen extends StatefulWidget {
 }
 
 class _PosSaleScreenState extends State<PosSaleScreen> {
-  DateTime now = DateTime.now();
-  DateRange? selectedDateRange;
-  final TextEditingController filterTextController = TextEditingController();
-  final ValueNotifier<String?> selectedCustomerNotifier = ValueNotifier(null);
-  final ValueNotifier<String?> selectedSellerNotifier = ValueNotifier(null);
-
-  @override
-  void initState() {
-    super.initState();
-    filterTextController.clear();
-
-    selectedDateRange = DateRange(
-      DateTime(now.year, now.month - 1, now.day),
-      DateTime(now.year, now.month, now.day),
-    );
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<UserBloc>().add(
-        FetchUserList(context, dropdownFilter: "?status=1"),
-      );
-      context.read<CustomerBloc>().add(FetchCustomerActiveList(context));
-      context.read<ProductsBloc>().add(FetchProductsStockList(context));
-
-      _applyFilters();
-    });
-  }
-
-  @override
-  void dispose() {
-    filterTextController.dispose();
-    selectedCustomerNotifier.dispose();
-    selectedSellerNotifier.dispose();
-    super.dispose();
-  }
-
-  void _fetchApi({
-    String filterText = '',
-    String customer = '',
-    String seller = '',
-    DateTime? from,
-    DateTime? to,
-    int pageNumber = 1,
-  }) {
-    if (!mounted) return;
-
-    String filter = "?page=$pageNumber";
-
-    if (filterText.isNotEmpty) filter += "&search=$filterText";
-    if (customer.isNotEmpty) filter += "&customer=$customer";
-    if (seller.isNotEmpty) filter += "&seller=$seller";
-    if (from != null && to != null) {
-      filter +=
-          "&start_date=${from.toIso8601String()}&end_date=${to.toIso8601String()}";
-    }
-
-    context.read<PosSaleBloc>().add(
-      FetchPosSaleList(context, dropdownFilter: filter),
-    );
-  }
-
-  /// সব filter একসাথে — আগে customer বাছলে search / seller / date
-  /// হারিয়ে যেত, কারণ প্রতিটা filter আলাদা করে শুধু নিজের মান পাঠাত
-  void _applyFilters({int pageNumber = 1}) {
-    _fetchApi(
-      pageNumber: pageNumber,
-      filterText: filterTextController.text.trim(),
-      customer: selectedCustomerNotifier.value ?? '',
-      seller: selectedSellerNotifier.value ?? '',
-      from: selectedDateRange?.start,
-      to: selectedDateRange?.end,
-    );
-  }
-
-  void _fetchProductList({required int pageNumber, required int pageSize}) {
-    _fetchApi(
-      pageNumber: pageNumber,
-      filterText: filterTextController.text,
-      customer: selectedCustomerNotifier.value ?? '',
-      seller: selectedSellerNotifier.value ?? '',
-      from: selectedDateRange?.start,
-      to: selectedDateRange?.end,
-    );
-  }
-
-  void _clearFilters() {
-    setState(() {
-      selectedDateRange = DateRange(
-        DateTime(now.year, now.month - 1, now.day),
-        DateTime(now.year, now.month, now.day),
-      );
-    });
-    filterTextController.clear();
-    selectedCustomerNotifier.value = null;
-    selectedSellerNotifier.value = null;
-
-    // Clear bloc states
-    context.read<PosSaleBloc>().selectCustomerModel = null;
-    context.read<PosSaleBloc>().selectUserModel = null;
-
-    _applyFilters();
-  }
+  final GlobalKey<SaleListViewState> _list = GlobalKey<SaleListViewState>();
 
   @override
   Widget build(BuildContext context) {
@@ -139,7 +30,7 @@ class _PosSaleScreenState extends State<PosSaleScreen> {
         child: ResponsiveRow(
           children: [
             if (isBigScreen) _buildSidebar(),
-            _buildContentArea(isBigScreen),
+            _buildContentArea(),
           ],
         ),
       ),
@@ -147,296 +38,55 @@ class _PosSaleScreenState extends State<PosSaleScreen> {
   }
 
   Widget _buildSidebar() => ResponsiveCol(
-    xs: 0,
-    sm: 1,
-    md: 1,
-    lg: 2,
-    xl: 2,
-    child: Container(color: Colors.white, child: const Sidebar()),
-  );
+        xs: 0,
+        sm: 1,
+        md: 1,
+        lg: 2,
+        xl: 2,
+        child: Container(color: Colors.white, child: const Sidebar()),
+      );
 
-  Widget _buildContentArea(bool isBigScreen) {
+  Widget _buildContentArea() {
     return ResponsiveCol(
       xs: 12,
       lg: 10,
       child: RefreshIndicator(
-        onRefresh: () async => _applyFilters(),
+        onRefresh: () async => _list.currentState?.refresh(),
         color: AppColors.primaryColor(context),
         child: Container(
+          color: AppColors.background(context),
           padding: AppTextStyle.getResponsivePaddingBody(context),
-          child: MultiBlocListener(
-            listeners: [
-              BlocListener<CreatePosSaleBloc, CreatePosSaleState>(
-                listener: (context, state) {
-                  if (state is CreatePosSaleLoading) {
-                    appLoader(context, "Creating POS Sale...");
-                  } else if (state is CreatePosSaleSuccess) {
-                    Navigator.pop(context);
-                    _applyFilters();
-                  } else if (state is CreatePosSaleFailed) {
-                    if (context.mounted) {
-                      Navigator.pop(context);
-                      appAlertDialog(
-                        context,
-                        state.content,
-                        title: state.title,
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(context),
-                            child: const Text("Dismiss"),
-                          ),
-                        ],
-                      );
-                    }
-                  }
-                },
-              ),
-            ],
-            child: Column(
-              children: [
-                if (isBigScreen) ...[
-                  _buildDesktopHeader(),
-                  const SizedBox(height: 14),
-                ],
-                _buildDataTable(),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDesktopHeader() {
-    return Column(
-      children: [
-        // crossAxisAlignment.end — dropdown গুলোর উপরে label আছে, search
-        // এ নেই। start দিলে search field উপরে উঠে থাকত আর বাকিগুলো নিচে —
-        // end দিলে সব field এর নিচের কিনারা এক লাইনে মেলে
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            // 🔍 Search Field
-            Expanded(
-              flex: 2,
-              child: CustomSearchTextFormField(
-                controller: filterTextController,
-                onChanged: (_) => _applyFilters(),
-                onClear: () {
-                  filterTextController.clear();
-                  _applyFilters();
-                },
-                hintText: "InvoiceNo, Name, or Phone",
-              ),
-            ),
-            const SizedBox(width: 10),
-
-            // 👤 Customer Dropdown
-            Expanded(
-              flex: 1,
-              child: BlocBuilder<CustomerBloc, CustomerState>(
-                builder: (context, state) {
-                  return ValueListenableBuilder<String?>(
-                    valueListenable: selectedCustomerNotifier,
-                    builder: (context, customerId, child) {
-                      final selectedCustomer = context
-                          .read<PosSaleBloc>()
-                          .selectCustomerModel;
-
-                      return AppDropdown<CustomerActiveModel>(
-                        label: "Customer",
-                        isSearch: true,
-                        hint: selectedCustomer?.name ?? "Select Customer",
-                        isNeedAll: true,
-                        isRequired: false,
-                        isLabel: true,
-                        value: selectedCustomer,
-                        itemList: context.read<CustomerBloc>().activeCustomer,
-                        onChanged: (newVal) {
-                          context.read<PosSaleBloc>().selectCustomerModel =
-                              newVal;
-                          selectedCustomerNotifier.value = newVal?.id
-                              .toString();
-                          _applyFilters();
-                        },
-                        validator: (value) => null,
-
-                      );
-                    },
+          child: BlocListener<CreatePosSaleBloc, CreatePosSaleState>(
+            listener: (context, state) {
+              if (state is CreatePosSaleLoading) {
+                appLoader(context, "Creating POS Sale...");
+              } else if (state is CreatePosSaleSuccess) {
+                Navigator.pop(context);
+                _list.currentState?.refresh();
+              } else if (state is CreatePosSaleFailed) {
+                if (context.mounted) {
+                  Navigator.pop(context);
+                  appAlertDialog(
+                    context,
+                    state.content,
+                    title: state.title,
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text("Dismiss"),
+                      ),
+                    ],
                   );
-                },
+                }
+              }
+            },
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 24),
+                child: SaleListView(key: _list),
               ),
             ),
-            const SizedBox(width: 10),
-
-            // 🧑‍💼 Seller Dropdown
-            Expanded(
-              flex: 1,
-              child: BlocBuilder<UserBloc, UserState>(
-                builder: (context, state) {
-                  return ValueListenableBuilder<String?>(
-                    valueListenable: selectedSellerNotifier,
-                    builder: (context, sellerId, child) {
-                      final selectedSeller = context
-                          .read<PosSaleBloc>()
-                          .selectUserModel;
-
-                      return AppDropdown<UsersListModel>(
-                        label: "Seller",
-                        hint: selectedSeller?.username ?? "Select Seller",
-                        isLabel: true,
-                        isRequired: false,
-                        isNeedAll: true,
-                        value: selectedSeller,
-                        itemList: context.read<UserBloc>().list,
-                        onChanged: (newVal) {
-                          context.read<PosSaleBloc>().selectUserModel = newVal;
-                          selectedSellerNotifier.value = newVal?.id.toString();
-                          _applyFilters();
-                        },
-                        validator: (value) => null,
-                      );
-                    },
-                  );
-                },
-              ),
-            ),
-            const SizedBox(width: 10),
-
-            // 📅 Date Range Picker
-            SizedBox(
-              width: 260,
-              child: CustomDateRangeField(
-                isLabel: false,
-                selectedDateRange: selectedDateRange,
-                onDateRangeSelected: (value) {
-                  setState(() => selectedDateRange = value);
-                  _applyFilters();
-                },
-              ),
-            ),
-            const SizedBox(width: 10),
-
-            // আগে `() => _clearFilters` ছিল — function টা call ই হতো না,
-            // তাই Clear বাটন চাপলে কিছুই ঘটত না
-            _HeaderIconButton(
-              icon: Icons.filter_alt_off_outlined,
-              tooltip: 'Clear filters',
-              color: AppColors.danger,
-              onPressed: _clearFilters,
-            ),
-            const SizedBox(width: 6),
-            _HeaderIconButton(
-              icon: Icons.refresh_rounded,
-              tooltip: 'Refresh',
-              onPressed: _applyFilters,
-            ),
-          ],
-        ),
-
-      ],
-    );
-  }
-
-
-  Widget _buildDataTable() {
-    return BlocBuilder<PosSaleBloc, PosSaleState>(
-      builder: (context, state) {
-        if (state is PosSaleListLoading) {
-          return const Center(child: CircularProgressIndicator());
-        } else if (state is PosSaleListSuccess) {
-          if (state.list.isEmpty) {
-            return Center(child: Lottie.asset(AppImages.noData));
-          }
-          return Column(
-            children: [
-              SizedBox(child: PosSaleDataTableWidget(sales: state.list)),
-              const SizedBox(height: 6),
-              PaginationBar(
-                count: state.count,
-                totalPages: state.totalPages,
-                currentPage: state.currentPage,
-                pageSize: state.pageSize,
-                from: state.from,
-                to: state.to,
-                onPageChanged: (page) => _fetchProductList(
-                  pageNumber: page,
-                  pageSize: state.pageSize,
-                ),
-                onPageSizeChanged: (newSize) =>
-                    _fetchProductList(pageNumber: 1, pageSize: newSize),
-              ),
-            ],
-          );
-        } else if (state is PosSaleListFailed) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.error_outline, size: 60, color: AppColors.danger),
-                const SizedBox(height: 16),
-                Text(
-                  'Failed to load sales',
-                  style: const TextStyle(fontSize: 16),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  state.content,
-                  style: const TextStyle(fontSize: 14, color: Colors.grey),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () => _applyFilters(),
-                  child: const Text("Retry"),
-                ),
-              ],
-            ),
-          );
-        }
-        return Center(child: Lottie.asset(AppImages.noData));
-      },
-    );
-  }
-
-
-}
-
-
-/// filter row এর ডান পাশের ছোট square icon বাটন — field গুলোর সমান উচ্চতা
-class _HeaderIconButton extends StatelessWidget {
-  const _HeaderIconButton({
-    required this.icon,
-    required this.tooltip,
-    required this.onPressed,
-    this.color,
-  });
-
-  final IconData icon;
-  final String tooltip;
-  final VoidCallback onPressed;
-  final Color? color;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = color ?? AppColors.text(context);
-    return Tooltip(
-      message: tooltip,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onPressed,
-          borderRadius: BorderRadius.circular(AppSizes.radius),
-          hoverColor: c.withValues(alpha: 0.08),
-          child: Container(
-            width: 35,
-            height: 35,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(AppSizes.radius),
-              border: Border.all(color: AppColors.border),
-            ),
-            child: Icon(icon, size: 18, color: c),
           ),
         ),
       ),

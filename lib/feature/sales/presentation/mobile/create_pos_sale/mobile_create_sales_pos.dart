@@ -1524,12 +1524,12 @@ class _SalesScreenState extends State<MobileSalesScreen> {
     );
 
     try {
-      final companyInfo = context
+      final businessInfo = context
           .read<ProfileBloc>()
           .permissionModel
           ?.data
-          ?.companyInfo;
-      final pdfBytes = await generateSalesPreviewPdf(previewSale, companyInfo);
+          ?.businessInfo;
+      final pdfBytes = await generateSalesPreviewPdf(previewSale, businessInfo);
       await Printing.layoutPdf(onLayout: (format) => pdfBytes);
     } catch (e) {
       showCustomToast(

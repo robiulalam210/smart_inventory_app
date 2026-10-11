@@ -8,7 +8,7 @@ import '../../../../../profile/data/model/profile_perrmission_model.dart';
 import '../../../../data/model/low_stock_model.dart';
 
 Future<Uint8List> generateLowStockReportPdf(
-    LowStockResponse reportResponse,CompanyInfo? company,
+    LowStockResponse reportResponse,BusinessInfo? company,
     ) async {
   // Load company logo asynchronously
   Uint8List? logoBytes;
@@ -51,11 +51,11 @@ Future<Uint8List> generateLowStockReportPdf(
                     ),
                   ),
                   pw.SizedBox(height: 4),
-                  if (company?.address != null )
+                  if ((company?.address ?? '').trim().isNotEmpty )
                     pw.Text(company?.address??"", style: const pw.TextStyle(fontSize: 10)),
-                  if (company?.phone != null )
+                  if ((company?.phone ?? '').trim().isNotEmpty )
                     pw.Text(company?.phone??"", style: const pw.TextStyle(fontSize: 10)),
-                  if (company?.email != null )
+                  if ((company?.email ?? '').trim().isNotEmpty )
                     pw.Text(company?.email??"", style: const pw.TextStyle(fontSize: 10)),
                 ],
               ),

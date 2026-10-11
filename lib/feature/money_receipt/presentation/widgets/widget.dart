@@ -488,7 +488,7 @@ class MoneyReceiptDataTableWidget extends StatelessWidget {
             canChangeOrientation: false,
             canChangePageFormat: false,
             dynamicLayout: true,
-            build: (format) => generateMoneyReceiptPdf(receipt, context.read<ProfileBloc>().permissionModel?.data?.companyInfo),
+            build: (format) => generateMoneyReceiptPdf(receipt, context.read<ProfileBloc>().permissionModel?.data?.businessInfo),
             pagesBuilder: (context, pages) {
               return PageView.builder(
                 itemCount: pages.length,

@@ -132,20 +132,10 @@ class SyncEngine {
   Future<bool> isSetupDone() async {
     if (!_store.isOpen) return false;
     final done = await _store.getMeta('setup_done') == '1';
-    final login = await LocalDB.getLoginInfo();
-    final userCompanyKey = '${login?['email'] ?? ''}';
-    final setupFor = await _store.getMeta('setup_user');
-    // অন্য user/company তে login হলে আবার setup লাগবে (তাদের data আলাদা)
-    final valid = done && (setupFor == null || setupFor == userCompanyKey || await _sameCompanyLogin());
+    // একটাই ব্যবসা — সব user এর data এক, তাই অন্য user login করলেও আবার setup লাগে না
+    final valid = done;
     if (state.value.setupDone != valid) state.value = state.value.copyWith(setupDone: valid);
     return valid;
-  }
-
-  Future<bool> _sameCompanyLogin() async {
-    // setup_company meta আর বর্তমান user এর company এক কিনা — device register এর সময় জানা যায়
-    final company = await _store.getMeta('setup_company');
-    final current = await _store.getMeta('current_company');
-    return company != null && company == current;
   }
 
   // ------------------------------------------------------------------ HTTP
@@ -215,7 +205,6 @@ class SyncEngine {
     });
     final data = res['data'] as Map<String, dynamic>? ?? const {};
     await _store.setMeta('device_code', '${data['device_code'] ?? ''}');
-    await _store.setMeta('current_company', '${data['company_id'] ?? ''}');
   }
 
   /// প্রথমবার: সব data নামানো। User পুরো অগ্রগতি দেখে।
@@ -228,16 +217,6 @@ class SyncEngine {
         throw SyncHttpException(0, 'প্রথম setup এর জন্য internet দরকার');
       }
       await registerDevice();
-
-      final pending = await _store.countOps(['pending', 'blocked', 'error', 'issue']);
-      final prevCompany = await _store.getMeta('setup_company');
-      final company = await _store.getMeta('current_company');
-      if (prevCompany != null && prevCompany != company) {
-        if (pending > 0) {
-          throw SyncHttpException(0, 'আগের company র $pending টা entry এখনো sync হয়নি — আগের account দিয়ে login করে sync করুন');
-        }
-        await _store.clearCaches();
-      }
 
       state.value = state.value.copyWith(setupLabel: 'কী কী data লাগবে দেখা হচ্ছে…', setupProgress: 0.02);
       final manifest = (await _api('GET', '/sync/manifest/'))['data'] as Map<String, dynamic>;
@@ -273,7 +252,6 @@ class SyncEngine {
       final login = await LocalDB.getLoginInfo();
       await _store.setMeta('cursor', '$cursor');
       await _store.setMeta('setup_done', '1');
-      await _store.setMeta('setup_company', company);
       await _store.setMeta('setup_user', '${login?['email'] ?? ''}');
       await _store.setMeta('last_full_refresh', DateTime.now().toIso8601String());
 

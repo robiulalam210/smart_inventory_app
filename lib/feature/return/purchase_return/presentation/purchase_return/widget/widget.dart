@@ -466,9 +466,9 @@ class PurchaseReturnTableCard extends StatelessWidget {
         children: [
           Lottie.asset(AppImages.noData, width: 200, height: 200),
           const SizedBox(height: 16),
-          Text('No Purchase Returns Found', style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.grey)),
+          Text('No Purchase Returns Found', style: GoogleFonts.ibmPlexSans(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.grey)),
           const SizedBox(height: 8),
-          Text('Purchase returns will appear here when created', style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w400, color: Colors.grey), textAlign: TextAlign.center),
+          Text('Purchase returns will appear here when created', style: GoogleFonts.ibmPlexSans(fontSize: 12, fontWeight: FontWeight.w400, color: Colors.grey), textAlign: TextAlign.center),
         ],
       ),
     );

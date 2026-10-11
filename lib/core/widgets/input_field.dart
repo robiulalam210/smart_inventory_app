@@ -1,5 +1,6 @@
 
 
+import 'web_ui.dart';
 import '../core.dart';
 
 
@@ -121,9 +122,9 @@ class _CustomInputFieldState extends State<CustomInputField> {
               counterText: "",
               hintText: widget.hintText,
               hintStyle: TextStyle(
-                color: AppColors.greyColor(context),
+                color: W.muted(context),
                 fontSize: 14,
-                fontWeight: FontWeight.w300,
+                fontWeight: FontWeight.w400,
               ),
               isDense: true,
               enabled: true,
@@ -132,25 +133,24 @@ class _CustomInputFieldState extends State<CustomInputField> {
               contentPadding:
               const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
 
+              // ওয়েবের ইনপুট: সাদা surface, ১px ধূসর রেখা, ফোকাসে নীল
+              filled: true,
+              fillColor: widget.fillColor ?? W.surface(context),
               enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(AppSizes.radius),
-                borderSide:
-                BorderSide(color: AppColors.greyColor(context)),
+                borderRadius: BorderRadius.circular(W.rMd),
+                borderSide: BorderSide(color: W.line2(context)),
               ),
               focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(AppSizes.radius),
-                borderSide:
-                BorderSide(color: AppColors.text(context)),
+                borderRadius: BorderRadius.circular(W.rMd),
+                borderSide: BorderSide(color: W.blue(context), width: 1.6),
               ),
               errorBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(AppSizes.radius),
-                borderSide:
-                BorderSide(color: AppColors.error),
+                borderRadius: BorderRadius.circular(W.rMd),
+                borderSide: const BorderSide(color: AppColors.error),
               ),
               focusedErrorBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(AppSizes.radius),
-                borderSide:
-                BorderSide(color: AppColors.error),
+                borderRadius: BorderRadius.circular(W.rMd),
+                borderSide: const BorderSide(color: AppColors.error, width: 1.6),
               ),
             ),
             onTapOutside: (_) =>

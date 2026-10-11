@@ -14,7 +14,6 @@ class UserModel extends Equatable {
   final bool? isStaff;
   final bool? isSuperuser;
   final bool? isVerified;
-  final CompanyModel? company;
   final Map<String, dynamic>? permissions;
   final List<dynamic>? customPermissions;
   final DateTime? dateJoined;
@@ -34,7 +33,6 @@ class UserModel extends Equatable {
     this.isStaff,
     this.isSuperuser,
     this.isVerified,
-    this.company,
     this.permissions,
     this.customPermissions,
     this.dateJoined,
@@ -55,9 +53,6 @@ class UserModel extends Equatable {
     isStaff: json["is_staff"] as bool?,
     isSuperuser: json["is_superuser"] as bool?,
     isVerified: json["is_verified"] as bool?,
-    company: json["company"] == null
-        ? null
-        : CompanyModel.fromJson(json["company"] as Map<String, dynamic>),
     permissions: json["permissions"] as Map<String, dynamic>?,
     customPermissions: json["custom_permissions"] as List<dynamic>?,
     dateJoined: json["date_joined"] == null
@@ -85,7 +80,6 @@ class UserModel extends Equatable {
     "is_staff": isStaff,
     "is_superuser": isSuperuser,
     "is_verified": isVerified,
-    "company": company?.toJson(),
     "permissions": permissions,
     "custom_permissions": customPermissions,
     "date_joined": dateJoined?.toIso8601String(),
@@ -107,7 +101,6 @@ class UserModel extends Equatable {
     isStaff,
     isSuperuser,
     isVerified,
-    company,
     permissions,
     customPermissions,
     dateJoined,
@@ -115,158 +108,6 @@ class UserModel extends Equatable {
   ];
 }
 
-class CompanyModel extends Equatable {
-  final int? id;
-  final String? name;
-  final String? tradeLicense;
-  final String? address;
-  final String? phone;
-  final String? email;
-  final String? website;
-  final String? logo;
-  final String? currency;
-  final String? timezone;
-  final DateTime? fiscalYearStart;
-  final String? planType;
-  final DateTime? startDate;
-  final DateTime? expiryDate;
-  final bool? isActive;
-  final int? maxUsers;
-  final int? maxProducts;
-  final int? maxBranches;
-  final String? companyCode;
-  final int? activeUserCount;
-  final int? productCount;
-  final bool? isExpired;
-  final int? daysUntilExpiry;
-  final DateTime? createdAt;
-  final DateTime? updatedAt;
-
-  const CompanyModel({
-    this.id,
-    this.name,
-    this.tradeLicense,
-    this.address,
-    this.phone,
-    this.email,
-    this.website,
-    this.logo,
-    this.currency,
-    this.timezone,
-    this.fiscalYearStart,
-    this.planType,
-    this.startDate,
-    this.expiryDate,
-    this.isActive,
-    this.maxUsers,
-    this.maxProducts,
-    this.maxBranches,
-    this.companyCode,
-    this.activeUserCount,
-    this.productCount,
-    this.isExpired,
-    this.daysUntilExpiry,
-    this.createdAt,
-    this.updatedAt,
-  });
-
-  factory CompanyModel.fromJson(Map<String, dynamic> json) => CompanyModel(
-    id: json["id"] as int?,
-    name: json["name"] as String?,
-    tradeLicense: json["trade_license"] as String?,
-    address: json["address"] as String?,
-    phone: json["phone"] as String?,
-    email: json["email"] as String?,
-    website: json["website"] as String?,
-    logo: json["logo"] as String?,
-    currency: json["currency"] as String?,
-    timezone: json["timezone"] as String?,
-    fiscalYearStart: json["fiscal_year_start"] == null
-        ? null
-        : DateTime.parse(json["fiscal_year_start"] as String),
-    planType: json["plan_type"] as String?,
-    startDate: json["start_date"] == null
-        ? null
-        : DateTime.parse(json["start_date"] as String),
-    expiryDate: json["expiry_date"] == null
-        ? null
-        : DateTime.parse(json["expiry_date"] as String),
-    isActive: json["is_active"] as bool?,
-    maxUsers: json["max_users"] as int?,
-    maxProducts: json["max_products"] as int?,
-    maxBranches: json["max_branches"] as int?,
-    companyCode: json["company_code"] as String?,
-    activeUserCount: json["active_user_count"] as int?,
-    productCount: json["product_count"] as int?,
-    isExpired: json["is_expired"] as bool?,
-    daysUntilExpiry: json["days_until_expiry"] as int?,
-    createdAt: json["created_at"] == null
-        ? null
-        : DateTime.parse(json["created_at"] as String),
-    updatedAt: json["updated_at"] == null
-        ? null
-        : DateTime.parse(json["updated_at"] as String),
-  );
-
-  Map<String, dynamic> toJson() => {
-    "id": id,
-    "name": name,
-    "trade_license": tradeLicense,
-    "address": address,
-    "phone": phone,
-    "email": email,
-    "website": website,
-    "logo": logo,
-    "currency": currency,
-    "timezone": timezone,
-    "fiscal_year_start": fiscalYearStart?.toIso8601String(),
-    "plan_type": planType,
-    "start_date": startDate?.toIso8601String(),
-    "expiry_date": expiryDate?.toIso8601String(),
-    "is_active": isActive,
-    "max_users": maxUsers,
-    "max_products": maxProducts,
-    "max_branches": maxBranches,
-    "company_code": companyCode,
-    "active_user_count": activeUserCount,
-    "product_count": productCount,
-    "is_expired": isExpired,
-    "days_until_expiry": daysUntilExpiry,
-    "created_at": createdAt?.toIso8601String(),
-    "updated_at": updatedAt?.toIso8601String(),
-  };
-
-  @override
-  List<Object?> get props => [
-    id,
-    name,
-    tradeLicense,
-    address,
-    phone,
-    email,
-    website,
-    logo,
-    currency,
-    timezone,
-    fiscalYearStart,
-    planType,
-    startDate,
-    expiryDate,
-    isActive,
-    maxUsers,
-    maxProducts,
-    maxBranches,
-    companyCode,
-    activeUserCount,
-    productCount,
-    isExpired,
-    daysUntilExpiry,
-    createdAt,
-    updatedAt,
-  ];
-}
-
-// Permission models
 class UserPermissionModel {
   final int? id;
   final String? module;
@@ -415,7 +256,6 @@ class UsersListModel {
   final bool? isStaff;
   final bool? isSuperuser;
   final bool? isVerified;
-  final CompanyModel? company;
   final Map<String, dynamic>? permissions;
   @override
   String toString() {
@@ -439,7 +279,6 @@ class UsersListModel {
     this.isStaff,
     this.isSuperuser,
     this.isVerified,
-    this.company,
     this.permissions,
   });
 
@@ -457,9 +296,6 @@ class UsersListModel {
     isStaff: json["is_staff"] as bool?,
     isSuperuser: json["is_superuser"] as bool?,
     isVerified: json["is_verified"] as bool?,
-    company: json["company"] == null
-        ? null
-        : CompanyModel.fromJson(json["company"] as Map<String, dynamic>),
     permissions: json["permissions"] as Map<String, dynamic>?,
   );
 
@@ -477,7 +313,6 @@ class UsersListModel {
     "is_staff": isStaff,
     "is_superuser": isSuperuser,
     "is_verified": isVerified,
-    "company": company?.toJson(),
     "permissions": permissions,
   };
 }

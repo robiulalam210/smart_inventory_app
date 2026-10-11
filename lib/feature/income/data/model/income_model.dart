@@ -11,7 +11,6 @@ class IncomeModel {
   final int? createdBy;
   final String? createdByName;
   final String? dateCreated;
-  final int? company;
 
   IncomeModel({
     this.id,
@@ -26,7 +25,6 @@ class IncomeModel {
     this.createdBy,
     this.createdByName,
     this.dateCreated,
-    this.company,
   });
 
   factory IncomeModel.fromJson(Map<String, dynamic> json) => IncomeModel(
@@ -42,7 +40,6 @@ class IncomeModel {
     createdBy: json['created_by'],
     createdByName: json['created_by_name'],
     dateCreated: json['date_created'],
-    company: json['company'],
   );
 
   Map<String, dynamic> toJson() => {
@@ -55,6 +52,5 @@ class IncomeModel {
     'note': note,
     'created_by': createdBy,
     'date_created': dateCreated,
-    'company': company,
   };
 }

@@ -148,7 +148,7 @@ class _TopProductsScreenState extends State<TopProductsScreen> {
                       canChangePageFormat: false,
                       dynamicLayout: true,
                       build: (format) => generateTopProductsReportPdf(
-                        state.response, context.read<ProfileBloc>().permissionModel?.data?.companyInfo
+                        state.response, context.read<ProfileBloc>().permissionModel?.data?.businessInfo
 
                       ),
                       pdfPreviewPageDecoration:
@@ -285,7 +285,7 @@ class _TopProductsScreenState extends State<TopProductsScreen> {
           const SizedBox(height: 16),
           Text(
             "No Top Products Data Found",
-            style: GoogleFonts.inter(
+            style: GoogleFonts.ibmPlexSans(
               fontSize: 16,
               fontWeight: FontWeight.w600,
               color: Colors.grey,
@@ -294,7 +294,7 @@ class _TopProductsScreenState extends State<TopProductsScreen> {
           const SizedBox(height: 8),
           Text(
             "Top products data will appear here when available",
-            style: GoogleFonts.inter(
+            style: GoogleFonts.ibmPlexSans(
               fontSize: 12,
               fontWeight: FontWeight.w400,
               color: Colors.grey,
@@ -319,7 +319,7 @@ class _TopProductsScreenState extends State<TopProductsScreen> {
           const SizedBox(height: 16),
           Text(
             "Error Loading Top Products Report",
-            style: GoogleFonts.inter(
+            style: GoogleFonts.ibmPlexSans(
               fontSize: 16,
               fontWeight: FontWeight.w600,
               color: Colors.grey,
@@ -410,7 +410,7 @@ class TopProductsTableCard extends StatelessWidget {
                             color: Colors.white,
                             fontSize: 12,
                             fontWeight: FontWeight.w700,
-                            fontFamily: GoogleFonts.inter().fontFamily,
+                            fontFamily: GoogleFonts.ibmPlexSans().fontFamily,
                           ),
                           headingRowColor: WidgetStateProperty.all(
                             AppColors.primaryColor(context),
@@ -418,7 +418,7 @@ class TopProductsTableCard extends StatelessWidget {
                           dataTextStyle: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w500,
-                            fontFamily: GoogleFonts.inter().fontFamily,
+                            fontFamily: GoogleFonts.ibmPlexSans().fontFamily,
                           ),
                           columns: _buildColumns(dynamicColumnWidth),
                           rows: products.asMap().entries.map((entry) {

@@ -592,7 +592,7 @@ class _MobileSupplierDueAdvanceScreenState
           const SizedBox(height: 16),
           Text(
             "No Supplier Data Found",
-            style: GoogleFonts.inter(
+            style: GoogleFonts.ibmPlexSans(
               fontSize: 16,
               fontWeight: FontWeight.w600,
               color: Colors.grey,
@@ -602,7 +602,7 @@ class _MobileSupplierDueAdvanceScreenState
           const SizedBox(height: 8),
           Text(
             "Supplier due and advance data will appear here when available",
-            style: GoogleFonts.inter(
+            style: GoogleFonts.ibmPlexSans(
               fontSize: 12,
               fontWeight: FontWeight.w400,
               color: Colors.grey,
@@ -630,7 +630,7 @@ class _MobileSupplierDueAdvanceScreenState
           const SizedBox(height: 16),
           Text(
             "Error Loading Supplier Data",
-            style: GoogleFonts.inter(
+            style: GoogleFonts.ibmPlexSans(
               fontSize: 16,
               fontWeight: FontWeight.w600,
               color: Colors.grey,
@@ -815,7 +815,7 @@ class _MobileSupplierDueAdvanceScreenState
             ),
             body: PdfPreview(
               build: (format) =>
-                  generateSupplierDueAdvanceReportPdf(state.response, context.read<ProfileBloc>().permissionModel?.data?.companyInfo),
+                  generateSupplierDueAdvanceReportPdf(state.response, context.read<ProfileBloc>().permissionModel?.data?.businessInfo),
               canChangeOrientation: false,
               canChangePageFormat: false,
               canDebug: false,

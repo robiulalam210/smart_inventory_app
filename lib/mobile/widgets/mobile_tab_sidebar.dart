@@ -1,5 +1,11 @@
 import 'package:meherinMart/feature/auth/presentation/mobile/mobile_login_scr.dart';
 import 'package:meherinMart/feature/audit_log/presentation/audit_log_screen.dart';
+import 'package:meherinMart/feature/users_list/presentation/shared/mobile_user_permissions_screen.dart';
+import 'package:meherinMart/feature/payroll/presentation/mobile_advances_screen.dart';
+import 'package:meherinMart/feature/shop/presentation/mobile_online_orders_screen.dart';
+import 'package:meherinMart/feature/shop/presentation/mobile_shop_settings_screen.dart';
+import 'package:meherinMart/feature/payroll/presentation/mobile_payroll_report_screen.dart';
+import 'package:meherinMart/feature/payroll/presentation/mobile_salary_sheet_screen.dart';
 import 'package:meherinMart/feature/expense/expense_head/presentation/mobile/mobile_expense_head_screen.dart';
 import 'package:meherinMart/feature/expense/expense_sub_head/presentation/mobile/mobile_expense_sub_head_screen.dart';
 import 'package:meherinMart/feature/expense/presentation/mobile/mobile_expense_list_screen.dart';
@@ -49,6 +55,7 @@ import '../../feature/transactions/presentation/mobile/mobile_transaction_screen
 import '../../feature/users_list/presentation/shared/moblie_users_screen.dart';
 import '../../core/configs/configs.dart';
 import '../../core/shared/widgets/sideMenu/menu_tile.dart';
+import '../../core/widgets/web_ui.dart';
 
 class MobileTabSidebar extends StatelessWidget {
   const MobileTabSidebar({super.key});
@@ -76,7 +83,7 @@ class MobileTabSidebar extends StatelessWidget {
             if (permissions?.sales?.create == true)
               MenuItem(title: "Sale", index: 1),
             if (permissions?.sales?.create == true)
-              MenuItem(title: "Pos Sale", index: 2),
+              MenuItem(title: "POS Sale", index: 2),
             if (permissions?.sales?.create == true)
               MenuItem(title: "Short Sale", index: 3),
             if (permissions?.sales?.view == true)
@@ -95,7 +102,7 @@ class MobileTabSidebar extends StatelessWidget {
             if (permissions?.moneyReceipt?.create == true)
               MenuItem(title: "Create Money Receipt", index: 5),
             if (permissions?.moneyReceipt?.view == true)
-              MenuItem(title: "Money Receipt", index: 6),
+              MenuItem(title: "Money Receipt List", index: 6),
           ],
         ),
       );
@@ -121,7 +128,7 @@ class MobileTabSidebar extends StatelessWidget {
       sections.add(
         MenuSection(
           title: "Products",
-          items: [MenuItem(title: "Product", index: 9)],
+          items: [MenuItem(title: "Products", index: 9)],
         ),
       );
     }
@@ -141,7 +148,7 @@ class MobileTabSidebar extends StatelessWidget {
       sections.add(
         MenuSection(
           title: "Customers",
-          items: [MenuItem(title: "Customer", index: 11)],
+          items: [MenuItem(title: "Customers", index: 11)],
         ),
       );
     }
@@ -178,21 +185,6 @@ class MobileTabSidebar extends StatelessWidget {
       );
     }
 
-    // Expense Section
-    if (permissions?.expense?.view == true) {
-      sections.add(
-        MenuSection(
-          title: "Income",
-          items: [
-            if (permissions?.expense?.view == true)
-              MenuItem(title: "Income List", index: 17),
-            if (permissions?.expense?.view == true)
-              MenuItem(title: "Income Expense Head", index: 18),
-          ],
-        ),
-      );
-    }
-
     // Return Section
     if (permissions?.permissionsReturn?.view == true) {
       sections.add(
@@ -221,21 +213,21 @@ class MobileTabSidebar extends StatelessWidget {
             if (permissions?.reports?.view == true)
               MenuItem(title: "Purchase Report", index: 23),
             if (permissions?.reports?.view == true)
-              MenuItem(title: "Profit/Loss Report", index: 24),
+              MenuItem(title: "Profit / Loss", index: 24),
             if (permissions?.reports?.view == true)
-              MenuItem(title: "Top Sale Product Report", index: 25),
+              MenuItem(title: "Top Selling Products", index: 25),
             if (permissions?.reports?.view == true)
-              MenuItem(title: "Low Stock Product Report", index: 26),
+              MenuItem(title: "Low Stock", index: 26),
             if (permissions?.reports?.view == true)
-              MenuItem(title: "Stock Product Report", index: 27),
+              MenuItem(title: "Stock Report", index: 27),
             if (permissions?.reports?.view == true)
               MenuItem(title: "Customer Ledger", index: 28),
             if (permissions?.reports?.view == true)
-              MenuItem(title: "Customer Due/Advance Report", index: 29),
+              MenuItem(title: "Customer Due / Advance", index: 29),
             if (permissions?.reports?.view == true)
               MenuItem(title: "Supplier Ledger", index: 30),
             if (permissions?.reports?.view == true)
-              MenuItem(title: "Supplier Due/Advance Report", index: 31),
+              MenuItem(title: "Supplier Due / Advance", index: 31),
             if (permissions?.reports?.view == true)
               MenuItem(title: "Expense Report", index: 32),
             if (permissions?.reports?.view == true)
@@ -265,15 +257,56 @@ class MobileTabSidebar extends StatelessWidget {
       );
     }
 
+    // Income Section — ওয়েবের মতো Administration এর পরে, permission = accounts.view
+    if (permissions?.accounts?.view == true) {
+      sections.add(
+        MenuSection(
+          title: "Income",
+          items: [
+            MenuItem(title: "Income List", index: 17),
+            MenuItem(title: "Income Head", index: 18),
+          ],
+        ),
+      );
+    }
+
     // Transfer Balance Section (assuming it's under accounts)
     if (permissions?.accounts?.view == true) {
       sections.add(
         MenuSection(
           title: "Transfer Balance",
           items: [
-            MenuItem(title: "Account Transfer From", index: 42),
-            MenuItem(title: "Account Transfer List", index: 43),
+            MenuItem(title: "Account Transfer", index: 42),
+            MenuItem(title: "Transfer List", index: 43),
             MenuItem(title: "Transactions", index: 44),
+          ],
+        ),
+      );
+    }
+
+    // Online Shop — ওয়েবের মতো: Online Orders = sales.view, Shop Settings = sales.edit
+    if (permissions?.sales?.view == true) {
+      sections.add(
+        MenuSection(
+          title: "Online Shop",
+          items: [
+            MenuItem(title: "Online Orders", index: 50),
+            if (permissions?.sales?.edit == true) MenuItem(title: "Shop Settings", index: 51),
+          ],
+        ),
+      );
+    }
+
+    // Payroll Section — ওয়েবের মতো শুধু Super Admin / Admin
+    final roleUp = role?.toUpperCase();
+    if (roleUp == 'SUPER_ADMIN' || roleUp == 'ADMIN') {
+      sections.add(
+        MenuSection(
+          title: "Payroll",
+          items: [
+            MenuItem(title: "Salary Sheet", index: 46),
+            MenuItem(title: "Advances", index: 47),
+            MenuItem(title: "Payroll Report", index: 48),
           ],
         ),
       );
@@ -285,7 +318,10 @@ class MobileTabSidebar extends StatelessWidget {
       sections.add(
         MenuSection(
           title: "Security",
-          items: [MenuItem(title: "Audit Log", index: 45)],
+          items: [
+            MenuItem(title: "Audit Log", index: 45),
+            MenuItem(title: "User Permissions", index: 49),
+          ],
         ),
       );
     }
@@ -296,7 +332,7 @@ class MobileTabSidebar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Drawer(
-      backgroundColor: AppColors.bottomNavBg(context),
+      backgroundColor: W.surface(context),
       child: SafeArea(
         child: BlocBuilder<DashboardBloc, DashboardState>(
           builder: (context, state) {
@@ -344,31 +380,28 @@ class MobileTabSidebar extends StatelessWidget {
 
             return Column(
               children: [
-                /// Drawer Header — লোগো + কোম্পানির নাম
+                /// Drawer Header — লোগো + ব্যবসার নাম
                 Builder(builder: (context) {
                   final primary = AppColors.primaryColor(context);
-                  final onPrimary = AppColors.onColor(primary);
-                  final company = context
+                  final businessName = context
                       .read<ProfileBloc>()
                       .permissionModel
                       ?.data
-                      ?.companyInfo
+                      ?.businessInfo
                       ?.name;
                   return Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.fromLTRB(16, 18, 16, 18),
-                    decoration: BoxDecoration(
-                      gradient: AppColors.primaryGradient(context),
-                    ),
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
                     child: Row(
                       children: [
                         Container(
-                          width: 52,
-                          height: 52,
-                          padding: const EdgeInsets.all(6),
+                          width: 40,
+                          height: 40,
+                          padding: const EdgeInsets.all(5),
                           decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(14),
+                            color: W.soft(context),
+                            border: Border.all(color: W.line(context)),
+                            borderRadius: BorderRadius.circular(10),
                           ),
                           child: Image.asset(
                             "assets/images/logo.png",
@@ -377,7 +410,7 @@ class MobileTabSidebar extends StatelessWidget {
                               return Icon(
                                 Icons.storefront_rounded,
                                 color: primary,
-                                size: 28,
+                                size: 22,
                               );
                             },
                           ),
@@ -388,23 +421,23 @@ class MobileTabSidebar extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                (company == null || company.isEmpty)
+                                (businessName == null || businessName.isEmpty)
                                     ? AppConstants.appName
-                                    : company,
+                                    : businessName,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w800,
-                                  color: onPrimary,
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w700,
+                                  color: W.ink(context),
                                 ),
                               ),
-                              const SizedBox(height: 2),
+                              const SizedBox(height: 1),
                               Text(
                                 'Inventory & POS',
                                 style: TextStyle(
                                   fontSize: 12,
-                                  color: onPrimary.withValues(alpha: 0.8),
+                                  color: W.muted(context),
                                 ),
                               ),
                             ],
@@ -415,7 +448,7 @@ class MobileTabSidebar extends StatelessWidget {
                   );
                 }),
 
-                const Divider(height: 1),
+                Divider(height: 1, color: W.line(context)),
 
                 /// Menu Content
                 Expanded(
@@ -456,12 +489,23 @@ class MobileTabSidebar extends StatelessWidget {
                             initiallyExpanded: section.items.any(
                               (item) => currentIndex == item.index,
                             ),
+                            tilePadding: const EdgeInsets.symmetric(horizontal: 12),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10)),
+                            collapsedShape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10)),
+                            iconColor: W.muted(context),
+                            collapsedIconColor: W.muted(context),
+                            childrenPadding: const EdgeInsets.only(left: 10),
                             title: Text(
                               section.title,
                               style: TextStyle(
-                                fontWeight: FontWeight.w600,
+                                fontWeight: FontWeight.w500,
                                 fontSize: 14,
-                                color: AppColors.text(context),
+                                color: section.items.any(
+                                        (item) => currentIndex == item.index)
+                                    ? AppColors.primaryColor(context)
+                                    : W.ink2(context),
                               ),
                             ),
                             children: section.items.map((item) {
@@ -496,13 +540,11 @@ class MobileTabSidebar extends StatelessWidget {
                     style: ElevatedButton.styleFrom(
                       minimumSize: const Size.fromHeight(46),
                       elevation: 0,
-                      backgroundColor: AppColors.danger.withValues(alpha: 0.10),
-                      foregroundColor: AppColors.danger,
-                      side: BorderSide(
-                        color: AppColors.danger.withValues(alpha: 0.35),
-                      ),
+                      backgroundColor: W.surface(context),
+                      foregroundColor: W.redInk(context),
+                      side: BorderSide(color: W.redLine(context)),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(10),
                       ),
                     ),
                     icon: const Icon(Icons.logout, size: 18),
@@ -667,7 +709,7 @@ class MobileTabSidebar extends StatelessWidget {
         break;
 
       case 17: // Income List
-        if (permissions?.expense?.view != true) {
+        if (permissions?.accounts?.view != true) {
           _showPermissionDeniedDialog(context);
           return;
         }
@@ -675,7 +717,7 @@ class MobileTabSidebar extends StatelessWidget {
         break;
 
       case 18: // Income Head
-        if (permissions?.expense?.view != true) {
+        if (permissions?.accounts?.view != true) {
           _showPermissionDeniedDialog(context);
           return;
         }
@@ -895,6 +937,38 @@ class MobileTabSidebar extends StatelessWidget {
 
       case 45: // Audit Log — getMenuSections এ শুধু Super Admin / Admin এর জন্য যোগ হয়
         AppRoutes.push(context, const AuditLogScreen());
+        break;
+
+      case 46: // Salary Sheet
+        AppRoutes.push(context, const MobileSalarySheetScreen());
+        break;
+
+      case 47: // Advances
+        AppRoutes.push(context, const MobileAdvancesScreen());
+        break;
+
+      case 48: // Payroll Report
+        AppRoutes.push(context, const MobilePayrollReportScreen());
+        break;
+
+      case 49: // User Permissions — getMenuSections এ শুধু Super Admin / Admin এর জন্য যোগ হয়
+        AppRoutes.push(context, const MobileUserPermissionsScreen());
+        break;
+
+      case 50: // Online Orders
+        if (permissions?.sales?.view != true) {
+          _showPermissionDeniedDialog(context);
+          return;
+        }
+        AppRoutes.push(context, const MobileOnlineOrdersScreen());
+        break;
+
+      case 51: // Shop Settings
+        if (permissions?.sales?.edit != true) {
+          _showPermissionDeniedDialog(context);
+          return;
+        }
+        AppRoutes.push(context, const MobileShopSettingsScreen());
         break;
 
       default:

@@ -640,7 +640,7 @@ class _MobilePurchaseReportScreenState
             const SizedBox(height: 16),
             Text(
               "No Purchase Report Data Found",
-              style: GoogleFonts.inter(
+              style: GoogleFonts.ibmPlexSans(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
                 color: Colors.grey,
@@ -650,7 +650,7 @@ class _MobilePurchaseReportScreenState
             const SizedBox(height: 8),
             Text(
               "Purchase report data will appear here when available",
-              style: GoogleFonts.inter(
+              style: GoogleFonts.ibmPlexSans(
                 fontSize: 12,
                 fontWeight: FontWeight.w400,
                 color: Colors.grey,
@@ -679,7 +679,7 @@ class _MobilePurchaseReportScreenState
             const SizedBox(height: 16),
             Text(
               "Error Loading Purchase Report",
-              style: GoogleFonts.inter(
+              style: GoogleFonts.ibmPlexSans(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
                 color: Colors.grey,
@@ -720,7 +720,7 @@ class _MobilePurchaseReportScreenState
               ],
             ),
             body: PdfPreview(
-              build: (format) => generatePurchaseReportPdf(state.response, context.read<ProfileBloc>().permissionModel?.data?.companyInfo),
+              build: (format) => generatePurchaseReportPdf(state.response, context.read<ProfileBloc>().permissionModel?.data?.businessInfo),
               canChangeOrientation: false,
               canChangePageFormat: false,
               canDebug: false,

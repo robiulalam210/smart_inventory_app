@@ -114,6 +114,7 @@
 //   }
 // }
 import '../configs/configs.dart';
+import 'web_ui.dart';
 
 class CustomSearchTextFormField extends StatelessWidget {
   final TextEditingController controller;
@@ -206,7 +207,7 @@ class CustomSearchTextFormField extends StatelessWidget {
         autofocus: autofocus,
         validator: validator,
         style: TextStyle(
-          color: enabled ?  AppColors.text(context) :  AppColors.text(context).withValues(alpha: 0.6),
+          color: enabled ? W.ink(context) : W.muted(context),
           fontSize: 14,
           fontWeight: FontWeight.w400,
         ),
@@ -214,8 +215,8 @@ class CustomSearchTextFormField extends StatelessWidget {
           isDense: true,
           hintText: forSearch ? "Search $hintText" : hintText,
           hintStyle: TextStyle(
-            color:  AppColors.text(context).withValues(alpha: 0.5),
-            fontWeight: FontWeight.w300,
+            color: W.muted(context),
+            fontWeight: FontWeight.w400,
             fontSize: 14,
           ),
           prefixIcon: prefixIcon ?? (forSearch ? _buildDefaultSearchIcon(context) : null),
@@ -233,31 +234,31 @@ class CustomSearchTextFormField extends StatelessWidget {
             vertical: 0.0,
             horizontal: 12.0,
           ),
-          filled: !enabled,
-          fillColor: !enabled ? Colors.grey[100] : null,
+          filled: true,
+          fillColor: enabled ? W.surface(context) : W.tint(context),
           errorMaxLines: 2,
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(AppSizes.radius),
-            borderSide: BorderSide(color: AppColors.border),
+            borderRadius: BorderRadius.circular(W.rMd),
+            borderSide: BorderSide(color: W.line2(context)),
           ),
           errorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(AppSizes.radius),
+            borderRadius: BorderRadius.circular(W.rMd),
             borderSide: BorderSide(color: AppColors.error),
           ),
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(AppSizes.radius),
-            borderSide: BorderSide(color: AppColors.primaryColor(context)),
+            borderRadius: BorderRadius.circular(W.rMd),
+            borderSide: BorderSide(color: W.blue(context), width: 1.6),
           ),
           enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(AppSizes.radius),
-            borderSide: BorderSide(color: AppColors.border),
+            borderRadius: BorderRadius.circular(W.rMd),
+            borderSide: BorderSide(color: W.line2(context)),
           ),
           disabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(AppSizes.radius),
-            borderSide: BorderSide(color: AppColors.border.withValues(alpha: 0.5)),
+            borderRadius: BorderRadius.circular(W.rMd),
+            borderSide: BorderSide(color: W.line(context)),
           ),
           focusedErrorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(AppSizes.radius),
+            borderRadius: BorderRadius.circular(W.rMd),
             borderSide: BorderSide(color: AppColors.error),
           ),
         ),
@@ -271,7 +272,7 @@ class CustomSearchTextFormField extends StatelessWidget {
       child: Icon(
         Icons.search,
         size: 20,
-        color:  AppColors.text(context).withValues(alpha: 0.5),
+        color: W.muted(context),
       ),
     );
   }
@@ -281,7 +282,7 @@ class CustomSearchTextFormField extends StatelessWidget {
       icon: Icon(
         Icons.clear,
         size: 20,
-        color:  AppColors.text(context).withValues(alpha: 0.5),
+        color: W.muted(context),
       ),
       onPressed: onClear ?? () {
         controller.clear();

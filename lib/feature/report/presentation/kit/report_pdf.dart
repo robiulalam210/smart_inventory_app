@@ -49,7 +49,7 @@ class ReportPdf {
   static Future<Uint8List> build<T>({
     required String title,
     required String period,
-    CompanyInfo? company,
+    BusinessInfo? company,
     Color accent = const Color(0xFF2563EB),
     List<ReportStat> stats = const [],
     List<ReportColumn<T>>? columns,
@@ -209,7 +209,7 @@ class ReportPdf {
   }
 
   static pw.Widget _companyHeader(
-      CompanyInfo? company, Uint8List? logo, String title, String period, PdfColor accent) {
+      BusinessInfo? company, Uint8List? logo, String title, String period, PdfColor accent) {
     final contact = [company?.phone, company?.email].where((e) => e != null && e.trim().isNotEmpty).join('  ·  ');
     return pw.Container(
       padding: const pw.EdgeInsets.only(bottom: 10),
@@ -362,9 +362,9 @@ class ReportPdf {
 }
 
 /// Company info (logo, নাম, ঠিকানা) — login এর পর profile থেকে আসে
-CompanyInfo? reportCompany(BuildContext context) {
+BusinessInfo? reportCompany(BuildContext context) {
   try {
-    return context.read<ProfileBloc>().permissionModel?.data?.companyInfo;
+    return context.read<ProfileBloc>().permissionModel?.data?.businessInfo;
   } catch (_) {
     return null;
   }

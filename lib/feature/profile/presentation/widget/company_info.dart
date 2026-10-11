@@ -12,7 +12,7 @@ import '../../data/service/image_upload_service.dart';
 /// Company profile card that can also upload company logo.
 /// Uses ImageUploadService to avoid duplicating upload logic.
 class CompanyProfileCardWithUpload extends StatefulWidget {
-  final CompanyInfo? company;
+  final BusinessInfo? company;
   final VoidCallback? onUpdated;
   final bool allowPick; // whether pick/upload UI should be enabled
 
@@ -83,7 +83,7 @@ class _CompanyProfileCardWithUploadState
     final form = FormData.fromMap({
       'logo': await MultipartFile.fromFile(file.path, filename: filename),
     });
-    final url = '${AppUrls.baseUrlMain}/api/company/logo/';
+    final url = '${AppUrls.baseUrlMain}/api/business/logo/';
 
     try {
       final resp = await _uploadService.uploadWithPatchFallback(
@@ -234,7 +234,7 @@ class _CompanyProfileCardWithUploadState
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text("Company Information",style: AppTextStyle.bodyLarge(context),),
+                Text("Business Information",style: AppTextStyle.bodyLarge(context),),
                 Row(
                   children: [
                     GestureDetector(
@@ -278,18 +278,12 @@ class _CompanyProfileCardWithUploadState
                   ],
                 ),
                 const Divider(),
-                // _infoRow('Trade License', company.tradeLicense, context),
-                _infoRow('Company Code', company.companyCode, context),
-
+                _infoRow('Tagline', company.tagline, context),
                 _infoRow('Phone', company.phone, context),
+                _infoRow('WhatsApp', company.whatsapp, context),
                 _infoRow('Email', company.email, context),
-                _infoRow('Plan Type', company.planType, context),
-                _infoRow(
-                  'Status',
-                  company.isActive == true ? 'Active' : 'Inactive',
-                  context,
-                ),
-                // _infoRow('Website', company.website, context),
+                _infoRow('Website', company.website, context),
+                _infoRow('Trade License', company.tradeLicense, context),
                 _infoRow('Address', company.address, context),
 
               ],

@@ -218,7 +218,7 @@ class _BadStockScreenState extends State<BadStockScreen> {
           const SizedBox(height: 16),
           Text(
             "No bad stock records found",
-            style: GoogleFonts.inter(
+            style: GoogleFonts.ibmPlexSans(
               fontSize: 16,
               fontWeight: FontWeight.w600,
               color: Colors.grey,
@@ -227,7 +227,7 @@ class _BadStockScreenState extends State<BadStockScreen> {
           const SizedBox(height: 8),
           Text(
             "Bad stock records will appear here when created",
-            style: GoogleFonts.inter(
+            style: GoogleFonts.ibmPlexSans(
               fontSize: 12,
               fontWeight: FontWeight.w400,
               color: Colors.grey,
@@ -252,7 +252,7 @@ class _BadStockScreenState extends State<BadStockScreen> {
           const SizedBox(height: 16),
           Text(
             "Error loading bad stock records",
-            style: GoogleFonts.inter(
+            style: GoogleFonts.ibmPlexSans(
               fontSize: 16,
               fontWeight: FontWeight.w600,
               color: Colors.grey,
@@ -457,7 +457,7 @@ class BadStockTableCard extends StatelessWidget {
           const SizedBox(height: 16),
           Text(
             'No Bad Stock Records',
-            style: GoogleFonts.inter(
+            style: GoogleFonts.ibmPlexSans(
               fontSize: 16,
               fontWeight: FontWeight.w600,
               color: Colors.grey,
@@ -466,7 +466,7 @@ class BadStockTableCard extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             'Bad stock records will appear here when created',
-            style: GoogleFonts.inter(
+            style: GoogleFonts.ibmPlexSans(
               fontSize: 12,
               fontWeight: FontWeight.w400,
               color: Colors.grey,

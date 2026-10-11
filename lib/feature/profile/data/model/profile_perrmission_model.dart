@@ -36,122 +36,87 @@ class Data {
   final User? user;
   final dynamic staffProfile;
   final Permissions? permissions;
-  final CompanyInfo? companyInfo;
+  final BusinessInfo? businessInfo;
 
   Data({
     this.user,
     this.staffProfile,
     this.permissions,
-    this.companyInfo,
+    this.businessInfo,
   });
 
   factory Data.fromJson(Map<String, dynamic> json) => Data(
     user: json["user"] == null ? null : User.fromJson(json["user"]),
     staffProfile: json["staff_profile"],
     permissions: json["permissions"] == null ? null : Permissions.fromJson(json["permissions"]),
-    companyInfo: json["company_info"] == null ? null : CompanyInfo.fromJson(json["company_info"]),
+    businessInfo: json["business_info"] == null ? null : BusinessInfo.fromJson(json["business_info"]),
   );
 
   Map<String, dynamic> toJson() => {
     "user": user?.toJson(),
     "staff_profile": staffProfile,
     "permissions": permissions?.toJson(),
-    "company_info": companyInfo?.toJson(),
+    "business_info": businessInfo?.toJson(),
   };
 }
 
-class CompanyInfo {
+/// একমাত্র ব্যবসার তথ্য (server: BusinessProfile, key = business_info)
+class BusinessInfo {
   final int? id;
   final String? name;
-  final String? tradeLicense;
-  final String? address;
+  final String? tagline;
   final String? phone;
+  final String? whatsapp;
   final String? email;
+  final String? address;
   final String? website;
+  final String? tradeLicense;
   final dynamic logo;
   final String? currency;
-  final String? timezone;
-  final DateTime? fiscalYearStart;
-  final String? planType;
-  final DateTime? startDate;
-  final DateTime? expiryDate;
-  final bool? isActive;
-  final int? maxUsers;
-  final int? maxProducts;
-  final int? maxBranches;
-  final String? companyCode;
-  final DateTime? createdAt;
   final DateTime? updatedAt;
 
-  CompanyInfo({
+  BusinessInfo({
     this.id,
     this.name,
-    this.tradeLicense,
-    this.address,
+    this.tagline,
     this.phone,
+    this.whatsapp,
     this.email,
+    this.address,
     this.website,
+    this.tradeLicense,
     this.logo,
     this.currency,
-    this.timezone,
-    this.fiscalYearStart,
-    this.planType,
-    this.startDate,
-    this.expiryDate,
-    this.isActive,
-    this.maxUsers,
-    this.maxProducts,
-    this.maxBranches,
-    this.companyCode,
-    this.createdAt,
     this.updatedAt,
   });
 
-  factory CompanyInfo.fromJson(Map<String, dynamic> json) => CompanyInfo(
+  factory BusinessInfo.fromJson(Map<String, dynamic> json) => BusinessInfo(
     id: json["id"],
     name: json["name"],
-    tradeLicense: json["trade_license"],
-    address: json["address"],
+    tagline: json["tagline"],
     phone: json["phone"],
+    whatsapp: json["whatsapp"],
     email: json["email"],
+    address: json["address"],
     website: json["website"],
+    tradeLicense: json["trade_license"],
     logo: json["logo"],
     currency: json["currency"],
-    timezone: json["timezone"],
-    fiscalYearStart: json["fiscal_year_start"] == null ? null : DateTime.parse(json["fiscal_year_start"]),
-    planType: json["plan_type"],
-    startDate: json["start_date"] == null ? null : DateTime.parse(json["start_date"]),
-    expiryDate: json["expiry_date"] == null ? null : DateTime.parse(json["expiry_date"]),
-    isActive: json["is_active"],
-    maxUsers: json["max_users"],
-    maxProducts: json["max_products"],
-    maxBranches: json["max_branches"],
-    companyCode: json["company_code"],
-    createdAt: json["created_at"] == null ? null : DateTime.parse(json["created_at"]),
-    updatedAt: json["updated_at"] == null ? null : DateTime.parse(json["updated_at"]),
+    updatedAt: json["updated_at"] == null ? null : DateTime.tryParse(json["updated_at"].toString()),
   );
 
   Map<String, dynamic> toJson() => {
     "id": id,
     "name": name,
-    "trade_license": tradeLicense,
-    "address": address,
+    "tagline": tagline,
     "phone": phone,
+    "whatsapp": whatsapp,
     "email": email,
+    "address": address,
     "website": website,
+    "trade_license": tradeLicense,
     "logo": logo,
     "currency": currency,
-    "timezone": timezone,
-    "fiscal_year_start": "${fiscalYearStart!.year.toString().padLeft(4, '0')}-${fiscalYearStart!.month.toString().padLeft(2, '0')}-${fiscalYearStart!.day.toString().padLeft(2, '0')}",
-    "plan_type": planType,
-    "start_date": "${startDate!.year.toString().padLeft(4, '0')}-${startDate!.month.toString().padLeft(2, '0')}-${startDate!.day.toString().padLeft(2, '0')}",
-    "expiry_date": "${expiryDate!.year.toString().padLeft(4, '0')}-${expiryDate!.month.toString().padLeft(2, '0')}-${expiryDate!.day.toString().padLeft(2, '0')}",
-    "is_active": isActive,
-    "max_users": maxUsers,
-    "max_products": maxProducts,
-    "max_branches": maxBranches,
-    "company_code": companyCode,
-    "created_at": createdAt?.toIso8601String(),
     "updated_at": updatedAt?.toIso8601String(),
   };
 }
@@ -320,8 +285,7 @@ class User {
   final String? lastName;
   final String? fullName;
   final String? role;
-  final int? company;
-  final CompanyInfo? companyInfo;
+  final BusinessInfo? businessInfo;
   final String? phone;
   final dynamic profilePicture;
   final DateTime? dateOfBirth;
@@ -339,8 +303,7 @@ class User {
     this.lastName,
     this.fullName,
     this.role,
-    this.company,
-    this.companyInfo,
+    this.businessInfo,
     this.phone,
     this.profilePicture,
     this.dateOfBirth,
@@ -359,8 +322,7 @@ class User {
     lastName: json["last_name"],
     fullName: json["full_name"],
     role: json["role"],
-    company: json["company"],
-    companyInfo: json["company_info"] == null ? null : CompanyInfo.fromJson(json["company_info"]),
+    businessInfo: json["business_info"] == null ? null : BusinessInfo.fromJson(json["business_info"]),
     phone: json["phone"],
     profilePicture: json["profile_picture"],
     dateOfBirth: json["date_of_birth"] == null ? null : DateTime.parse(json["date_of_birth"]),
@@ -379,8 +341,7 @@ class User {
     "last_name": lastName,
     "full_name": fullName,
     "role": role,
-    "company": company,
-    "company_info": companyInfo?.toJson(),
+    "business_info": businessInfo?.toJson(),
     "phone": phone,
     "profile_picture": profilePicture,
     "date_of_birth": "${dateOfBirth!.year.toString().padLeft(4, '0')}-${dateOfBirth!.month.toString().padLeft(2, '0')}-${dateOfBirth!.day.toString().padLeft(2, '0')}",

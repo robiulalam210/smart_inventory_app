@@ -1,5 +1,6 @@
 
 import '../../../../core/configs/configs.dart';
+import '../../../../core/widgets/web_ui.dart';
 import '../../../../core/utilities/app_url_launcher.dart';
 import '../../../../core/widgets/delete_dialog.dart';
 import '../../data/model/customer_model.dart';
@@ -42,18 +43,15 @@ class CustomerTableCard extends StatelessWidget {
   }
 
   Widget _buildCustomerCard(CustomerModel customer, BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textColor = AppColors.text(context);
-    final primary = AppColors.primaryColor(context);
+    final textColor = W.ink(context);
+    final muted = W.muted(context);
     final special = customer.specialCustomer;
     final active = customer.isActive ?? false;
     final name = (customer.name ?? '').trim();
     final phone = (customer.phone ?? '').trim();
     final address = (customer.address ?? '').trim();
-    final accent = special ? AppColors.warning : primary;
-    final divider = isDark
-        ? Colors.white.withValues(alpha: 0.08)
-        : AppColors.borderLight;
+    final accentInk = special ? W.amberInk(context) : W.blueInk(context);
+    final accentWash = special ? W.amberWash(context) : W.blueWash(context);
 
     // ── বকেয়া / অগ্রিম হিসাব (আগের নিয়মই) ──
     final dueAnalysis = customer.paymentBreakdown?.calculation?.dueAnalysis;
@@ -76,19 +74,18 @@ class CustomerTableCard extends StatelessWidget {
     } else {
       amount = 0.0;
       label = 'Settled';
-      balanceColor = textColor.withValues(alpha: 0.5);
+      balanceColor = muted;
     }
 
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.bottomNavBg(context),
-        borderRadius: BorderRadius.circular(16),
+        color: W.surface(context),
+        borderRadius: BorderRadius.circular(W.rLg),
         border: Border.all(
-          color: special ? AppColors.warning.withValues(alpha: 0.5) : divider,
-          width: special ? 1.2 : 1,
+          color: special ? W.amberLine(context) : W.line(context),
         ),
       ),
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -97,21 +94,21 @@ class CustomerTableCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                width: 46,
-                height: 46,
+                width: 42,
+                height: 42,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: accent.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(14),
+                  color: accentWash,
+                  borderRadius: BorderRadius.circular(W.rMd),
                 ),
                 child: Text(
                   name.isEmpty
                       ? '?'
                       : String.fromCharCode(name.runes.first).toUpperCase(),
                   style: TextStyle(
-                    fontSize: 19,
-                    fontWeight: FontWeight.w800,
-                    color: accent,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: accentInk,
                   ),
                 ),
               ),
@@ -128,7 +125,7 @@ class CustomerTableCard extends StatelessWidget {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
-                              fontSize: 14.5,
+                              fontSize: 15,
                               fontWeight: FontWeight.w700,
                               color: textColor,
                             ),
@@ -150,7 +147,7 @@ class CustomerTableCard extends StatelessWidget {
                         Icon(
                           Iconsax.call,
                           size: 13,
-                          color: textColor.withValues(alpha: 0.5),
+                          color: muted,
                         ),
                         const SizedBox(width: 5),
                         Flexible(
@@ -159,8 +156,8 @@ class CustomerTableCard extends StatelessWidget {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
-                              fontSize: 12.5,
-                              color: textColor.withValues(alpha: 0.65),
+                              fontSize: 13,
+                              color: muted,
                             ),
                           ),
                         ),
@@ -180,10 +177,10 @@ class CustomerTableCard extends StatelessWidget {
                 padding: EdgeInsets.zero,
                 icon: Icon(
                   Icons.more_vert_rounded,
-                  color: textColor.withValues(alpha: 0.6),
+                  color: muted,
                 ),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(W.rMd),
                 ),
                 onSelected: (v) {
                   switch (v) {
@@ -224,8 +221,9 @@ class CustomerTableCard extends StatelessWidget {
                 color: active ? AppColors.success : AppColors.danger,
               ),
               if ((customer.clientNo ?? '').isNotEmpty)
-                _tag(context, '#${customer.clientNo}'),
-              _tag(context, special ? 'Special' : 'Regular'),
+                WPill('#${customer.clientNo}'),
+              WPill(special ? 'Special' : 'Regular',
+                  tone: special ? WTone.amber : WTone.neutral),
             ],
           ),
 
@@ -237,7 +235,7 @@ class CustomerTableCard extends StatelessWidget {
                 Icon(
                   Iconsax.location,
                   size: 14,
-                  color: textColor.withValues(alpha: 0.5),
+                  color: muted,
                 ),
                 const SizedBox(width: 6),
                 Expanded(
@@ -248,7 +246,7 @@ class CustomerTableCard extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 12.5,
                       height: 1.3,
-                      color: textColor.withValues(alpha: 0.7),
+                      color: W.ink2(context),
                     ),
                   ),
                 ),
@@ -262,11 +260,14 @@ class CustomerTableCard extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             decoration: BoxDecoration(
               color: amount > 0
-                  ? balanceColor.withValues(alpha: 0.09)
-                  : (isDark
-                      ? Colors.white.withValues(alpha: 0.04)
-                      : const Color(0xFFF8FAFC)),
-              borderRadius: BorderRadius.circular(12),
+                  ? (label == 'Due' ? W.redWash(context) : W.greenWash(context))
+                  : W.soft(context),
+              border: Border.all(
+                color: amount > 0
+                    ? (label == 'Due' ? W.redLine(context) : W.greenLine(context))
+                    : W.line(context),
+              ),
+              borderRadius: BorderRadius.circular(W.rMd),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -275,16 +276,17 @@ class CustomerTableCard extends StatelessWidget {
                   label,
                   style: TextStyle(
                     fontSize: 12.5,
-                    fontWeight: FontWeight.w600,
-                    color: textColor.withValues(alpha: 0.65),
+                    fontWeight: FontWeight.w500,
+                    color: muted,
                   ),
                 ),
                 Text(
                   '৳${amount.toStringAsFixed(2)}',
                   style: TextStyle(
                     fontSize: 16,
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.w700,
                     color: balanceColor,
+                    fontFeatures: W.tabular,
                   ),
                 ),
               ],
@@ -330,25 +332,6 @@ class CustomerTableCard extends StatelessWidget {
           const SizedBox(width: 10),
           Text(label),
         ],
-      ),
-    );
-  }
-
-  Widget _tag(BuildContext context, String text) {
-    final c = AppColors.text(context);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
-      decoration: BoxDecoration(
-        color: c.withValues(alpha: 0.06),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(
-          fontSize: 11.5,
-          fontWeight: FontWeight.w500,
-          color: c.withValues(alpha: 0.7),
-        ),
       ),
     );
   }

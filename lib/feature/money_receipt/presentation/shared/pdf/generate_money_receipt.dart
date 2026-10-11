@@ -8,7 +8,7 @@ import '../../../../profile/data/model/profile_perrmission_model.dart';
 import '../../../data/model/money_receipt_model/money_receipt_model.dart';
 
 
-Future<Uint8List> generateMoneyReceiptPdf(MoneyreceiptModel receipt, CompanyInfo? company,) async {
+Future<Uint8List> generateMoneyReceiptPdf(MoneyreceiptModel receipt, BusinessInfo? company,) async {
   // Fetch company logo as Uint8List
 
   // Load company logo asynchronously
@@ -62,11 +62,11 @@ Future<Uint8List> generateMoneyReceiptPdf(MoneyreceiptModel receipt, CompanyInfo
                     ),
                   ),
                   pw.SizedBox(height: 4),
-                  if (company?.address != null )
+                  if ((company?.address ?? '').trim().isNotEmpty )
                     pw.Text(company?.address??"", style: const pw.TextStyle(fontSize: 10)),
-                  if (company?.phone != null )
+                  if ((company?.phone ?? '').trim().isNotEmpty )
                     pw.Text(company?.phone??"", style: const pw.TextStyle(fontSize: 10)),
-                  if (company?.email != null )
+                  if ((company?.email ?? '').trim().isNotEmpty )
                     pw.Text(company?.email??"", style: const pw.TextStyle(fontSize: 10)),
                 ],
               ),
