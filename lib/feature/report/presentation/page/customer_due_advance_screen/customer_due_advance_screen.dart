@@ -158,7 +158,7 @@ class _CustomerDueAdvanceScreenState extends State<CustomerDueAdvanceScreen> {
             const SizedBox(height: 4),
             Text(
               "Monitor customer balances and payment status",
-              style: GoogleFonts.inter(
+              style: GoogleFonts.ibmPlexSans(
                 fontSize: 14,
                 color: Colors.grey,
               ),
@@ -474,7 +474,7 @@ AppButton(name: "Clear", onPressed: (){
           const SizedBox(height: 16),
           Text(
             "No Customer Due & Advance Data Found",
-            style: GoogleFonts.inter(
+            style: GoogleFonts.ibmPlexSans(
               fontSize: 16,
               fontWeight: FontWeight.w600,
               color: Colors.grey,
@@ -483,7 +483,7 @@ AppButton(name: "Clear", onPressed: (){
           const SizedBox(height: 8),
           Text(
             "Customer due and advance data will appear here when available",
-            style: GoogleFonts.inter(
+            style: GoogleFonts.ibmPlexSans(
               fontSize: 12,
               fontWeight: FontWeight.w400,
               color: Colors.grey,
@@ -508,7 +508,7 @@ AppButton(name: "Clear", onPressed: (){
           const SizedBox(height: 16),
           Text(
             "Error Loading Customer Due & Advance Report",
-            style: GoogleFonts.inter(
+            style: GoogleFonts.ibmPlexSans(
               fontSize: 16,
               fontWeight: FontWeight.w600,
               color: Colors.grey,
@@ -596,7 +596,7 @@ class CustomerDueAdvanceTableCard extends StatelessWidget {
                             color: Colors.white,
                             fontSize: 11,
                             fontWeight: FontWeight.w700,
-                            fontFamily: GoogleFonts.inter().fontFamily,
+                            fontFamily: GoogleFonts.ibmPlexSans().fontFamily,
                           ),
                           headingRowColor: WidgetStateProperty.all(
                             AppColors.primaryColor(context),
@@ -604,7 +604,7 @@ class CustomerDueAdvanceTableCard extends StatelessWidget {
                           dataTextStyle: TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.w500,
-                            fontFamily: GoogleFonts.inter().fontFamily,
+                            fontFamily: GoogleFonts.ibmPlexSans().fontFamily,
                           ),
                           columns: _buildColumns(dynamicColumnWidth),
                           rows: customers.asMap().entries.map((entry) {

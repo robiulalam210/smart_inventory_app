@@ -1,4 +1,5 @@
 
+import '../../../widgets/web_ui.dart';
 import '../../../configs/configs.dart';
 
 class MenuTile extends StatelessWidget {
@@ -50,39 +51,35 @@ class MobileMenuTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ওয়েবের .sb-link: ১০px কোণা; চালু থাকলে হালকা নীল-wash + নীল লেখা (সেমি-বোল্ড)
     final primary = AppColors.primaryColor(context);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
-      child: ListTile(
-        dense: true,
-        visualDensity: const VisualDensity(vertical: -0.5),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 14),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        tileColor: isSelected ? primary.withValues(alpha: 0.12) : null,
-        leading: Container(
-          width: 6,
-          height: 6,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: isSelected
-                ? primary
-                : AppColors.text(context).withValues(alpha: 0.25),
+      padding: const EdgeInsets.symmetric(vertical: 1),
+      child: Material(
+        color: isSelected
+            ? primary.withValues(alpha: W.dark(context) ? 0.16 : 0.10)
+            : Colors.transparent,
+        borderRadius: BorderRadius.circular(10),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(10),
+          onTap: onPressed,
+          child: Container(
+            height: 40,
+            alignment: Alignment.centerLeft,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: Text(
+              title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                color: isSelected ? primary : W.ink2(context),
+              ),
+            ),
           ),
         ),
-        horizontalTitleGap: 8,
-        minLeadingWidth: 6,
-        title: Text(
-          title,
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-            color: isSelected
-                ? primary
-                : AppColors.text(context).withValues(alpha: 0.9),
-          ),
-        ),
-        onTap: onPressed,
       ),
     );
   }

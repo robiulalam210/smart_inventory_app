@@ -82,6 +82,19 @@ class ResponsiveRow extends StatelessWidget {
   }
 }
 
+/// Root screen যখন বাঁয়ে স্থায়ী (fixed) sidebar দেখায়, তখন এই scope মূল content এর উপরে বসে।
+/// scope থাকলে পুরোনো screen গুলোর নিজস্ব sidebar column আর দেখানো হয় না,
+/// আর content column ১২ ভাগই পায় — ফলে ~৪০টা screen আলাদা করে বদলাতে হয়নি।
+class PermanentSidebarScope extends InheritedWidget {
+  const PermanentSidebarScope({super.key, required super.child});
+
+  static bool active(BuildContext context) =>
+      context.getInheritedWidgetOfExactType<PermanentSidebarScope>() != null;
+
+  @override
+  bool updateShouldNotify(PermanentSidebarScope oldWidget) => false;
+}
+
 // Responsive Column Widget
 class ResponsiveCol extends StatelessWidget {
   final double? xs;
@@ -107,6 +120,15 @@ class ResponsiveCol extends StatelessWidget {
       builder: (context, constraints) {
         final width = constraints.maxWidth;
         double? columns;
+
+        // স্থায়ী sidebar থাকলে: পুরোনো sidebar column (xs:0, lg:2, xl:2) লুকাও,
+        // আর content column (lg:10) কে পুরো ১২ ভাগ দাও।
+        if (PermanentSidebarScope.active(context)) {
+          if (xs == 0 && lg == 2 && xl == 2) return const SizedBox.shrink();
+          if (lg == 10 && (xl == null || xl == 10)) {
+            return SizedBox(width: width, child: child);
+          }
+        }
 
         if (width >= 2600 && xl != null) {
           columns = xl;

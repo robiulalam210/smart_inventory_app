@@ -240,7 +240,7 @@ class _MobileSupplierLedgerScreenState
                   const SizedBox(height: 16),
                   Text(
                     "Select a Supplier",
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.ibmPlexSans(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                       color: AppColors.text(context),
@@ -249,7 +249,7 @@ class _MobileSupplierLedgerScreenState
                   const SizedBox(height: 8),
                   Text(
                     "Choose a supplier from the dropdown to view their ledger",
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.ibmPlexSans(
                       fontSize: 14,
                       color: AppColors.text(context),
                     ),
@@ -779,7 +779,7 @@ class _MobileSupplierLedgerScreenState
           const SizedBox(height: 16),
           Text(
             message,
-            style: GoogleFonts.inter(
+            style: GoogleFonts.ibmPlexSans(
               fontSize: 16,
               fontWeight: FontWeight.w600,
               color: Colors.grey,
@@ -807,7 +807,7 @@ class _MobileSupplierLedgerScreenState
           const SizedBox(height: 16),
           Text(
             "Error Loading Transactions",
-            style: GoogleFonts.inter(
+            style: GoogleFonts.ibmPlexSans(
               fontSize: 16,
               fontWeight: FontWeight.w600,
               color: Colors.grey,

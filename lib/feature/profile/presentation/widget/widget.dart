@@ -82,7 +82,7 @@ import 'package:meherinMart/core/configs/app_colors.dart';
 //                           color: Colors.white,
 //                           fontSize: 12,
 //                           fontWeight: FontWeight.w700,
-//                           fontFamily: GoogleFonts.inter().fontFamily,
+//                           fontFamily: GoogleFonts.ibmPlexSans().fontFamily,
 //                         ),
 //                         headingRowColor: WidgetStateProperty.all(
 //                           AppColors.primaryColor(context),
@@ -90,7 +90,7 @@ import 'package:meherinMart/core/configs/app_colors.dart';
 //                         dataTextStyle: TextStyle(
 //                           fontSize: 11,
 //                           fontWeight: FontWeight.w500,
-//                           fontFamily: GoogleFonts.inter().fontFamily,
+//                           fontFamily: GoogleFonts.ibmPlexSans().fontFamily,
 //                         ),
 //                         columns: _buildColumns(minColumnWidth),
 //                         rows: accounts.asMap().entries.map((entry) {
@@ -299,7 +299,7 @@ import 'package:meherinMart/core/configs/app_colors.dart';
 //             ),
 //             child: Text(
 //               '${getAmountPrefix()}${getAmountText()}',
-//               style: GoogleFonts.inter(
+//               style: GoogleFonts.ibmPlexSans(
 //                 color: color,
 //                 fontWeight: FontWeight.w600,
 //                 fontSize: 11,
@@ -368,7 +368,7 @@ import 'package:meherinMart/core/configs/app_colors.dart';
 //               const SizedBox(width: 8),
 //               Text(
 //                 'Delete Account',
-//                 style: GoogleFonts.inter(
+//                 style: GoogleFonts.ibmPlexSans(
 //                   fontWeight: FontWeight.w600,
 //                   fontSize: 16,
 //                 ),
@@ -381,7 +381,7 @@ import 'package:meherinMart/core/configs/app_colors.dart';
 //             children: [
 //               Text(
 //                 'Are you sure you want to delete this account?',
-//                 style: GoogleFonts.inter(
+//                 style: GoogleFonts.ibmPlexSans(
 //                   fontSize: 14,
 //                   color: Colors.grey.shade700,
 //                 ),
@@ -399,7 +399,7 @@ import 'package:meherinMart/core/configs/app_colors.dart';
 //                   children: [
 //                     Text(
 //                       account.acName ?? 'Unnamed Account',
-//                       style: GoogleFonts.inter(
+//                       style: GoogleFonts.ibmPlexSans(
 //                         fontWeight: FontWeight.w600,
 //                         fontSize: 14,
 //                       ),
@@ -407,7 +407,7 @@ import 'package:meherinMart/core/configs/app_colors.dart';
 //                     if (account.acNumber != null && account.acNumber!.isNotEmpty)
 //                       Text(
 //                         'Account: ${account.acNumber}',
-//                         style: GoogleFonts.inter(
+//                         style: GoogleFonts.ibmPlexSans(
 //                           fontSize: 12,
 //                           color: Colors.grey.shade600,
 //                         ),
@@ -415,7 +415,7 @@ import 'package:meherinMart/core/configs/app_colors.dart';
 //                     if (account.acType != null && account.acType!.isNotEmpty)
 //                       Text(
 //                         'Type: ${account.acType}',
-//                         style: GoogleFonts.inter(
+//                         style: GoogleFonts.ibmPlexSans(
 //                           fontSize: 12,
 //                           color: Colors.grey.shade600,
 //                         ),
@@ -426,7 +426,7 @@ import 'package:meherinMart/core/configs/app_colors.dart';
 //               const SizedBox(height: 4),
 //               Text(
 //                 'This action cannot be undone.',
-//                 style: GoogleFonts.inter(
+//                 style: GoogleFonts.ibmPlexSans(
 //                   fontSize: 12,
 //                   color: Colors.red.shade600,
 //                   fontWeight: FontWeight.w500,
@@ -439,7 +439,7 @@ import 'package:meherinMart/core/configs/app_colors.dart';
 //               onPressed: () => Navigator.of(context).pop(),
 //               child: Text(
 //                 'Cancel',
-//                 style: GoogleFonts.inter(
+//                 style: GoogleFonts.ibmPlexSans(
 //                   color: Colors.grey.shade600,
 //                   fontWeight: FontWeight.w500,
 //                 ),
@@ -455,7 +455,7 @@ import 'package:meherinMart/core/configs/app_colors.dart';
 //               ),
 //               child: Text(
 //                 'Delete',
-//                 style: GoogleFonts.inter(
+//                 style: GoogleFonts.ibmPlexSans(
 //                   color: Colors.red.shade700,
 //                   fontWeight: FontWeight.w600,
 //                 ),
@@ -496,7 +496,7 @@ import 'package:meherinMart/core/configs/app_colors.dart';
 //           const SizedBox(height: 16),
 //           Text(
 //             'No Accounts Found',
-//             style: GoogleFonts.inter(
+//             style: GoogleFonts.ibmPlexSans(
 //               fontSize: 16,
 //               fontWeight: FontWeight.w600,
 //               color: Colors.grey,
@@ -505,7 +505,7 @@ import 'package:meherinMart/core/configs/app_colors.dart';
 //           const SizedBox(height: 8),
 //           Text(
 //             'Create your first account to get started',
-//             style: GoogleFonts.inter(
+//             style: GoogleFonts.ibmPlexSans(
 //               fontSize: 12,
 //               fontWeight: FontWeight.w400,
 //               color: Colors.grey,

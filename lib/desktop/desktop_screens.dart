@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:meherinMart/enery_screen.dart';
 import 'package:meherinMart/feature/account_transfer/presentation/desktop/account_transfer_form.dart';
-import 'package:meherinMart/feature/account_transfer/presentation/desktop/account_transfer_screen.dart';
 import 'package:meherinMart/feature/accounts/presentation/desktop/account_screen.dart';
 import 'package:meherinMart/feature/customer/presentation/desktop/customer_screen.dart';
+import 'package:meherinMart/feature/customer/presentation/desktop/due_reminders_screen.dart';
 import 'package:meherinMart/feature/expense/expense_head/presentation/desktop/expense_screen.dart';
 import 'package:meherinMart/feature/expense/expense_sub_head/presentation/desktop/expense_sub_head_screen.dart';
 import 'package:meherinMart/feature/expense/presentation/desktop/expense_list_screen.dart';
-import 'package:meherinMart/feature/income/income_expense/presentation/shared/income_expense_head_page.dart';
-import 'package:meherinMart/feature/income/presentation/shared/income_page_list.dart';
+import 'package:meherinMart/feature/income/income_expense/presentation/desktop/income_head_desktop_screen.dart';
+import 'package:meherinMart/feature/income/presentation/desktop/income_list_desktop_screen.dart';
 import 'package:meherinMart/feature/lab_dashboard/presentation/desktop/lab_dashboard_screen.dart';
 import 'package:meherinMart/feature/money_receipt/presentation/desktop/monery_receipt_create.dart';
 import 'package:meherinMart/feature/money_receipt/presentation/desktop/money_receipt_list.dart';
@@ -45,6 +45,14 @@ import 'package:meherinMart/feature/transactions/presentation/desktop/transactio
 import 'package:meherinMart/feature/users_list/presentation/desktop/users_screen.dart';
 import 'package:meherinMart/desktop/widgets/embedded_full_page.dart';
 import 'package:meherinMart/feature/audit_log/presentation/audit_log_screen.dart';
+import 'package:meherinMart/feature/payroll/presentation/mobile_salary_sheet_screen.dart';
+import 'package:meherinMart/feature/payroll/presentation/mobile_advances_screen.dart';
+import 'package:meherinMart/feature/payroll/presentation/mobile_payroll_report_screen.dart';
+import 'package:meherinMart/feature/users_list/presentation/shared/mobile_user_permissions_screen.dart';
+import 'package:meherinMart/feature/shop/presentation/mobile_online_orders_screen.dart';
+import 'package:meherinMart/feature/shop/presentation/mobile_shop_settings_screen.dart';
+
+import '../feature/account_transfer/presentation/desktop/account_transfer_screen.dart';
 
 /// Desktop root এর main area তে যে স্ক্রিনগুলো index অনুযায়ী দেখায়।
 /// (আগে DashboardBloc.myScreens ছিল — সেটা mobile build এও সব desktop স্ক্রিন টেনে আনত।)
@@ -109,10 +117,17 @@ final List<Widget> desktopScreens = [
     AppWrapper(child: TransactionScreen()),
 
     // index 41-43: আগে sidebar ছাড়া আলাদা page এ খুলত
-    AppWrapper(child: EmbeddedFullPage(child: MobileIncomeListScreen())),   // 41 Income List
-    AppWrapper(child: EmbeddedFullPage(child: MobileIncomeHeadScreen())),   // 42 Income Head
+    AppWrapper(child: DesktopIncomeListScreen()),   // 41 Income List (desktop design)
+    AppWrapper(child: DesktopIncomeHeadScreen()),   // 42 Income Head (desktop design)
     AppWrapper(child: EmbeddedFullPage(child: SaleModeListScreen())),       // 43 Sale Mode
     AppWrapper(child: EmbeddedFullPage(child: AuditLogScreen(showAppBar: false))), // 44 Audit Log (Super Admin / Admin)
+    AppWrapper(child: EmbeddedFullPage(child: MobileSalarySheetScreen())), // 45 Salary Sheet (Admin)
+    AppWrapper(child: EmbeddedFullPage(child: MobileAdvancesScreen())), // 46 Advances (Admin)
+    AppWrapper(child: EmbeddedFullPage(child: MobilePayrollReportScreen())), // 47 Payroll Report (Admin)
+    AppWrapper(child: EmbeddedFullPage(child: MobileUserPermissionsScreen())), // 48 User Permissions (Admin)
+    AppWrapper(child: EmbeddedFullPage(child: MobileOnlineOrdersScreen())), // 49 Online Orders
+    AppWrapper(child: EmbeddedFullPage(child: MobileShopSettingsScreen())), // 50 Shop Settings
+    AppWrapper(child: DueRemindersScreen()), // 51 Due Reminders
 
 
 

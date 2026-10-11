@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../configs/app_colors.dart';
-import '../configs/app_sizes.dart';
 import '../configs/app_text.dart';
 
 /// অ্যাপের পুরো রঙ/কম্পোনেন্ট থিম (desktop + mobile একই)।
@@ -57,8 +56,8 @@ class AppTheme {
       error: const Color(0xFFF87171),
       surface: AppColors.darkBgBottomNav,
       onSurface: AppColors.darkText,
-      outline: const Color(0xFF334155),
-      outlineVariant: const Color(0xFF243044),
+      outline: const Color(0xFF34425F),
+      outlineVariant: const Color(0xFF243049),
     );
 
     return _base(
@@ -70,8 +69,8 @@ class AppTheme {
       scaffold: AppColors.darkBg,
       surface: AppColors.darkBgBottomNav,
       text: AppColors.darkText,
-      border: const Color(0xFF243044),
-      tooltipBg: const Color(0xFF1E293B),
+      border: const Color(0xFF243049),
+      tooltipBg: const Color(0xFF1C2640),
     );
   }
 
@@ -88,7 +87,11 @@ class AppTheme {
     required Color tooltipBg,
   }) {
     final isDark = brightness == Brightness.dark;
-    final radius = BorderRadius.circular(AppSizes.radiusSmall);
+    final radius = BorderRadius.circular(10); // ওয়েবের --r-md
+    // ওয়েবের .btn-ghost: surface + নিরপেক্ষ রেখা + ink-2 লেখা
+    final ghostLine = isDark ? const Color(0xFF34425F) : const Color(0xFFCBD5E1);
+    final ghostInk = isDark ? const Color(0xFFC4CDE1) : const Color(0xFF334155);
+    const btnText = TextStyle(fontWeight: FontWeight.w600, fontSize: 14);
 
     return ThemeData(
       useMaterial3: true,
@@ -97,7 +100,8 @@ class AppTheme {
       canvasColor: surface,
       cardColor: surface,
       dividerColor: border,
-      fontFamily: 'Poppins',
+      fontFamily: AppTextStyle.fontFamily,
+      fontFamilyFallback: AppTextStyle.fontFallback,
       colorScheme: scheme,
       textTheme: TextTheme(
         displayLarge: AppTextStyle.titleBold(context),
@@ -107,14 +111,15 @@ class AppTheme {
       ),
       appBarTheme: AppBarTheme(
         backgroundColor: Colors.transparent,
-        centerTitle: true,
+        centerTitle: false,
         elevation: 0,
         scrolledUnderElevation: 0,
+        surfaceTintColor: Colors.transparent,
         iconTheme: IconThemeData(color: text),
         titleTextStyle: TextStyle(
           color: text,
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
+          fontSize: 18,
+          fontWeight: FontWeight.w700,
         ),
       ),
       cardTheme: CardThemeData(
@@ -130,13 +135,36 @@ class AppTheme {
       dialogTheme: DialogThemeData(
         backgroundColor: surface,
         surfaceTintColor: Colors.transparent,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(14),
+          side: BorderSide(color: border),
+        ),
+        titleTextStyle: TextStyle(color: text, fontSize: 17, fontWeight: FontWeight.w700),
+      ),
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: surface,
+        surfaceTintColor: Colors.transparent,
+        modalBackgroundColor: surface,
+        showDragHandle: false,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+        ),
+      ),
+      popupMenuTheme: PopupMenuThemeData(
+        color: surface,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+          side: BorderSide(color: border),
+        ),
       ),
       dividerTheme: DividerThemeData(color: border, thickness: 1, space: 1),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
           backgroundColor: primary,
           foregroundColor: onPrimary,
+          minimumSize: const Size(0, 44),
+          textStyle: btnText,
           shape: RoundedRectangleBorder(borderRadius: radius),
           shadowColor: Colors.transparent,
           elevation: 0,
@@ -146,6 +174,8 @@ class AppTheme {
         style: ElevatedButton.styleFrom(
           backgroundColor: isDark ? surface : Colors.white,
           foregroundColor: primary,
+          minimumSize: const Size(0, 44),
+          textStyle: btnText,
           shape: RoundedRectangleBorder(
             borderRadius: radius,
             side: BorderSide(color: primary),
@@ -154,14 +184,18 @@ class AppTheme {
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          foregroundColor: primary,
-          side: BorderSide(color: primary),
+          foregroundColor: ghostInk,
+          backgroundColor: surface,
+          minimumSize: const Size(0, 44),
+          textStyle: btnText,
+          side: BorderSide(color: ghostLine),
           shape: RoundedRectangleBorder(borderRadius: radius),
         ),
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: primary,
+          textStyle: btnText,
           shape: RoundedRectangleBorder(borderRadius: radius),
         ),
       ),
@@ -169,6 +203,7 @@ class AppTheme {
         backgroundColor: primary,
         foregroundColor: onPrimary,
         elevation: 2,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       ),
       progressIndicatorTheme: ProgressIndicatorThemeData(color: primary),
       scrollbarTheme: ScrollbarThemeData(
@@ -193,11 +228,13 @@ class AppTheme {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
       dataTableTheme: DataTableThemeData(
-        headingRowColor: WidgetStateProperty.all(primary.withValues(alpha: 0.08)),
+        headingRowColor: WidgetStateProperty.all(
+          isDark ? const Color(0xFF172034) : const Color(0xFFFAFBFD),
+        ),
         headingTextStyle: TextStyle(
-          color: text,
-          fontWeight: FontWeight.w700,
-          fontSize: 12,
+          color: isDark ? const Color(0xFF8E9AB2) : const Color(0xFF64748B),
+          fontWeight: FontWeight.w600,
+          fontSize: 12.5,
         ),
         dividerThickness: 0.6,
         // সব desktop টেবিলের জন্য একই নিয়ম:

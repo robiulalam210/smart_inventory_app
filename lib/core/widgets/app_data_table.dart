@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'dart:ui' show FontFeature;
 
 import '../configs/configs.dart';
+import 'web_ui.dart';
 
 // ============================================================
 // AppDataTable — desktop এর সব list টেবিলের জন্য একটাই component
@@ -145,9 +146,7 @@ class AppDataTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool isDark = Theme.of(context).brightness == Brightness.dark;
-    final Color border =
-        isDark ? Colors.white.withValues(alpha: 0.08) : AppColors.borderLight;
+    final Color border = W.line(context);
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -190,8 +189,8 @@ class AppDataTable extends StatelessWidget {
 
         return Container(
           decoration: BoxDecoration(
-            color: AppColors.bottomNavBg(context),
-            borderRadius: BorderRadius.circular(12),
+            color: W.surface(context),
+            borderRadius: BorderRadius.circular(W.rLg),
             border: Border.all(color: border),
           ),
           clipBehavior: Clip.antiAlias,
@@ -257,25 +256,27 @@ class _HeaderRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color primary = AppColors.primaryColor(context);
-    final Color onPrimary = AppColors.onColor(primary);
+    final Color muted = W.muted(context);
 
     return Container(
       height: height,
-      color: primary,
+      decoration: BoxDecoration(
+        color: W.soft(context),
+        border: Border(bottom: BorderSide(color: W.line(context))),
+      ),
       child: Row(
         children: [
           for (int i = 0; i < columns.length; i++)
             SizedBox(
               width: widths[i],
-              child: _headerCell(columns[i], onPrimary),
+              child: _headerCell(context, columns[i], muted),
             ),
         ],
       ),
     );
   }
 
-  Widget _headerCell(AppTableColumn col, Color onPrimary) {
+  Widget _headerCell(BuildContext context, AppTableColumn col, Color onPrimary) {
     final String? key = col.sortKey;
     final bool sortable = key != null && onSort != null;
     final bool active = sortable && key == sortKey;
@@ -286,10 +287,9 @@ class _HeaderRow extends StatelessWidget {
       overflow: TextOverflow.ellipsis,
       textAlign: AppDataTable.textAlignOf(col.align),
       style: TextStyle(
-        color: onPrimary,
+        color: active ? W.ink(context) : onPrimary,
         fontSize: 12.5,
         fontWeight: FontWeight.w600,
-        letterSpacing: 0.2,
       ),
     );
 
@@ -306,7 +306,7 @@ class _HeaderRow extends StatelessWidget {
                         : Icons.arrow_downward_rounded)
                     : Icons.unfold_more_rounded,
                 size: 14,
-                color: onPrimary.withValues(alpha: active ? 1 : 0.6),
+                color: active ? W.blue(context) : onPrimary.withValues(alpha: 0.7),
               ),
             ],
           )
@@ -363,16 +363,7 @@ class _BodyRowState extends State<_BodyRow> {
 
   @override
   Widget build(BuildContext context) {
-    final Color primary = AppColors.primaryColor(context);
-    final bool isDark = Theme.of(context).brightness == Brightness.dark;
-
-    final Color bg = _hover
-        ? primary.withValues(alpha: 0.06)
-        : widget.index.isOdd
-            ? (isDark
-                ? Colors.white.withValues(alpha: 0.02)
-                : const Color(0xFFF8FAFC))
-            : Colors.transparent;
+    final Color bg = _hover ? W.canvas(context) : Colors.transparent;
 
     return MouseRegion(
       onEnter: (_) => setState(() => _hover = true),
@@ -449,7 +440,7 @@ class AppTableText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color base = AppColors.text(context);
+    final Color base = W.ink(context);
     final String shown = (text.trim().isEmpty || text == 'null') ? '-' : text;
     final Widget t = Text(
       shown,
@@ -457,10 +448,10 @@ class AppTableText extends StatelessWidget {
       overflow: TextOverflow.ellipsis,
       textAlign: AppDataTable.textAlignOf(align),
       style: TextStyle(
-        fontSize: 13,
+        fontSize: 13.5,
         height: 1.3,
         fontWeight: bold ? FontWeight.w600 : FontWeight.w400,
-        color: color ?? (muted ? base.withValues(alpha: 0.6) : base),
+        color: color ?? (muted ? W.muted(context) : base),
         fontFeatures: align == AppCellAlign.end
             ? const [FontFeature.tabularFigures()]
             : null,
@@ -484,7 +475,7 @@ class AppTableText extends StatelessWidget {
             sub,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(fontSize: 11.5, color: base.withValues(alpha: 0.55)),
+            style: TextStyle(fontSize: 12.5, color: W.muted(context)),
           ),
         ],
       );
@@ -589,27 +580,16 @@ class AppStatusPill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
+        color: color.withValues(alpha: W.dark(context) ? 0.18 : 0.12),
         borderRadius: BorderRadius.circular(20),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 6,
-            height: 6,
-            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-          ),
-          const SizedBox(width: 6),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: color,
-            ),
-          ),
-        ],
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          color: color,
+        ),
       ),
     );
   }

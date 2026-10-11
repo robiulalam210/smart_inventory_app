@@ -334,7 +334,7 @@ class IncomeHeadTableCard extends StatelessWidget {
           const SizedBox(height: 20),
           Text(
             'No Income Heads Found',
-            style: GoogleFonts.inter(
+            style: GoogleFonts.ibmPlexSans(
               fontSize: 16,
               fontWeight: FontWeight.w600,
               color: Colors.grey,
@@ -343,7 +343,7 @@ class IncomeHeadTableCard extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             'Create your first income head to get started',
-            style: GoogleFonts.inter(
+            style: GoogleFonts.ibmPlexSans(
               fontSize: 12,
               fontWeight: FontWeight.w400,
               color: Colors.grey,

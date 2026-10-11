@@ -350,9 +350,9 @@ class _MobileLowStockScreenState extends State<MobileLowStockScreen> {
         children: [
           Lottie.asset(AppImages.noData, width: 150, height: 150),
           const SizedBox(height: 16),
-          Text("No Low Stock Items", style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.green)),
+          Text("No Low Stock Items", style: GoogleFonts.ibmPlexSans(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.green)),
           const SizedBox(height: 8),
-          Text("All products are well-stocked! 🎉", style: GoogleFonts.inter(fontSize: 12, color: Colors.grey)),
+          Text("All products are well-stocked! 🎉", style: GoogleFonts.ibmPlexSans(fontSize: 12, color: Colors.grey)),
           const SizedBox(height: 16),
           ElevatedButton.icon(onPressed: _fetchLowStockReport, icon: const Icon(Icons.refresh), label: const Text("Check Again")),
         ],
@@ -367,7 +367,7 @@ class _MobileLowStockScreenState extends State<MobileLowStockScreen> {
         children: [
           const Icon(Icons.error_outline, size: 60, color: Colors.red),
           const SizedBox(height: 16),
-          Text("Error Loading Low Stock", style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.grey)),
+          Text("Error Loading Low Stock", style: GoogleFonts.ibmPlexSans(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.grey)),
           const SizedBox(height: 8),
           Text(error, style: const TextStyle(fontSize: 14, color: Colors.red)),
           const SizedBox(height: 16),

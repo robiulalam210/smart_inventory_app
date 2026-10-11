@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
+
 import '../../../../core/configs/app_colors.dart';
-import '../../../../core/configs/app_sizes.dart';
-import '../../../../desktop/widgets/sidebar.dart';
-import '../../../../responsive.dart';
 import '../../data/models/dashboard/dashboard_model.dart';
 import '../bloc/dashboard/dashboard_bloc.dart';
-import '../widgets/dashboard_card.dart';
-import '../widgets/stats_card_monthly.dart';
+import '../widgets/dash_kit.dart';
+import '../widgets/dashboard_extras.dart';
 
+/// Desktop Dashboard — ওয়েবের dashboard এর হুবহু গঠন:
+///   greeting + সময়কাল  →  ৪টা KPI  →  চার্ট (৭/৩০ দিন) + খরচের ভাগ
+///   →  Money flow + Stock alerts  →  Recent activity + Account balance
+///   →  Best sellers + Restock soon
+/// sidebar/scroll এখন root.dart এর — এখানে আর নিজের sidebar বা স্থির উচ্চতা নেই।
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
 
@@ -20,537 +20,548 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-  int selectedIndex = 1;
-  String selectedPurchaseOverviewType = 'current_day';
-  final GlobalKey<ScaffoldState> drawerKey = GlobalKey<ScaffoldState>();
-  // build() এর ভেতরে বানালে প্রতি rebuild এ scroll উপরে চলে যেত
-  final ScrollController scrollController = ScrollController();
+  String _period = 'current_day';
+  int _trendDays = 7;
+  String _tab = 'sales';
+
+  DashboardData? _data;
+
+  Map<String, dynamic>? _trend;
+  bool _trendLoading = false;
+  List<Map<String, dynamic>>? _accounts;
+  List<Map<String, dynamic>>? _top;
+  List<Map<String, dynamic>>? _low;
+  int _extrasToken = 0; // পুরনো উত্তর নতুনকে চাপা না দেয়
 
   @override
   void initState() {
     super.initState();
-    // Fetch initial dashboard data
-    context.read<DashboardBloc>().add(FetchDashboardData(context: context));
+    context
+        .read<DashboardBloc>()
+        .add(FetchDashboardData(dateFilter: _period, context: context));
   }
 
-  @override
-  void dispose() {
-    scrollController.dispose();
-    super.dispose();
+  String get _noun =>
+      {'current_day': 'today', 'this_month': 'this month', 'lifeTime': 'so far'}[_period]!;
+
+  void _setPeriod(String p) {
+    if (p == _period) return;
+    setState(() => _period = p);
+    context
+        .read<DashboardBloc>()
+        .add(FetchDashboardData(dateFilter: p, context: context));
   }
+
+  Future<void> _loadExtras(DashboardData d) async {
+    final token = ++_extrasToken;
+    final ctx = context;
+    final start = d.dateFilterInfo?.startDate;
+    final end = d.dateFilterInfo?.endDate;
+
+    Future<void> run<T>(Future<T> f, void Function(T) set) async {
+      final v = await f;
+      if (!mounted || token != _extrasToken) return;
+      setState(() => set(v));
+    }
+
+    await Future.wait([
+      _loadTrend(),
+      run(DashboardExtras.accounts(ctx), (v) => _accounts = v),
+      run(DashboardExtras.topProducts(ctx, start, end), (v) => _top = v),
+      run(DashboardExtras.lowStock(ctx), (v) => _low = v),
+    ]);
+  }
+
+  Future<void> _loadTrend() async {
+    setState(() => _trendLoading = true);
+    final t = await DashboardExtras.trend(context, _trendDays);
+    if (!mounted) return;
+    setState(() {
+      _trend = t;
+      _trendLoading = false;
+    });
+  }
+
+  void _setTrendDays(int days) {
+    if (days == _trendDays) return;
+    _trendDays = days;
+    _loadTrend();
+  }
+
+  // ───────────────────────── build ─────────────────────────
 
   @override
   Widget build(BuildContext context) {
-    final isBigScreen =
-        Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
+    final c = DashColors(context);
     return BlocConsumer<DashboardBloc, DashboardState>(
+      listenWhen: (p, s) => s is DashboardLoaded,
       listener: (context, state) {
-        if (state is DashboardError) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.message)),
-          );
+        if (state is DashboardLoaded) {
+          _data = state.dashboardData;
+          _loadExtras(state.dashboardData);
         }
       },
+      buildWhen: (p, s) =>
+          s is DashboardLoaded || s is DashboardLoading || s is DashboardError,
       builder: (context, state) {
+        final loading = _data == null && state is! DashboardError;
         return Container(
-          color: AppColors.bottomNavBg(context),
-          key: drawerKey,
-          child: SafeArea(
-            child: SizedBox(
-              height: AppSizes.height(context) * 0.95,
-              child: ResponsiveRow(
-                spacing: 0,
-                runSpacing: 0,
-                children: [
-                  if (isBigScreen)
-                    ResponsiveCol(
-                      xs: 0,
-                      sm: 1,
-                      md: 1,
-                      lg: 2,
-                      xl: 2,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          border: Border.all(
-                            color: AppColors.border.withAlpha(128),
-                            width: 0.5,
-                          ),
-                        ),
-                        child: isBigScreen ? const Sidebar() : null,
-                      ),
-                    ),
-                  ResponsiveCol(
-                    xs: 12,
-                    sm: 12,
-                    md: isBigScreen ? 11 : 12,
-                    lg: isBigScreen ? 10 : 12,
-                    xl: isBigScreen ? 10 : 12,
-                    child: SizedBox(
-                      height: AppSizes.height(context) * 0.90,
-                      child: Scrollbar(
-                        controller: scrollController,
-                        thickness: 8,
-                        thumbVisibility: true,
-                        child: SingleChildScrollView(
-                          controller: scrollController,
-                          padding: EdgeInsets.all(Responsive.isMobile(context) ? 8.0 : 12.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // ==== HEADER AND FILTER ====
-                              Responsive.isMobile(context)
-                                  ? Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    "Dashboard",
-                                    style: TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 12),
-                                  _buildFilterSegmentedControl(),
-                                ],
-                              )
-                                  : Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  const Text(
-                                    "Dashboard",
-                                    style: TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  _buildFilterSegmentedControl(),
-                                ],
-                              ),
-                              const SizedBox(height: 16),
-
-                              // ==== LOADING STATE ====
-                              if (state is DashboardLoading)
-                                const Center(
-                                  child: CircularProgressIndicator(),
-                                ),
-
-                              // ==== DASHBOARD CARDS ====
-                              if (state is DashboardLoaded) ...[
-                                _buildDashboardCards(state.dashboardData),
-                                const SizedBox(height: 12),
-
-                                // ==== SALES & PURCHASE OVERVIEW ====
-                                _buildSalesPurchaseOverview(state.dashboardData),
-                                const SizedBox(height: 100),
-
-                                // ==== RECENT ACTIVITIES ====
-                              ],
-
-                              // ==== ERROR STATE ====
-                              if (state is DashboardError)
-                                Center(
-                                  child: Column(
-                                    children: [
-                                      Text('Error: ${state.message}'),
-                                      ElevatedButton(
-                                        onPressed: () {
-                                          context.read<DashboardBloc>().add(
-                                            FetchDashboardData(context: context),
-                                          );
-                                        },
-                                        child: const Text('Retry'),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
+          color: AppColors.background(context),
+          padding: const EdgeInsets.fromLTRB(24, 20, 24, 40),
+          child: LayoutBuilder(builder: (context, box) {
+            final wide = box.maxWidth >= 1000;
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _header(c),
+                const SizedBox(height: 18),
+                if (state is DashboardError && _data == null)
+                  _error(state.message, c)
+                else ...[
+                  _kpis(_data, loading, box.maxWidth),
+                  const SizedBox(height: 16),
+                  _row(wide, _trendPanel(c), _expensePanel(c), 2, 1),
+                  const SizedBox(height: 16),
+                  _row(wide, _flowPanel(c), _stockPanel(c), 2, 1),
+                  const SizedBox(height: 16),
+                  _row(wide, _recentPanel(c), _accountsPanel(c), 2, 1),
+                  const SizedBox(height: 16),
+                  _row(wide, _topPanel(c), _lowPanel(c), 1, 2),
                 ],
-              ),
-            ),
-          ),
+              ],
+            );
+          }),
         );
       },
     );
   }
 
-  Widget _buildFilterSegmentedControl() {
-    final isMobile = Responsive.isMobile(context);
-
-    return SizedBox(
-      width: isMobile ? double.infinity : AppSizes.width(context) * 0.25,
-      child: CupertinoSegmentedControl<String>(
-        padding: EdgeInsets.zero,
-        children: {
-          'current_day': Padding(
-            padding: const EdgeInsets.symmetric(
-              vertical: 4.0,
-              horizontal: 4.0,
-            ),
-            child: Text(
-              'Today',
-              style: TextStyle(
-                fontFamily: GoogleFonts.playfairDisplay().fontFamily,
-                fontSize: isMobile ? 12 : 14,
-                color: selectedPurchaseOverviewType == 'current_day'
-                    ? Colors.white
-                    : Colors.black,
-              ),
-            ),
-          ),
-          'this_month': Padding(
-            padding: const EdgeInsets.symmetric(
-              vertical: 4.0,
-              horizontal: 4.0,
-            ),
-            child: Text(
-              isMobile ? DateFormat('MMM').format(DateTime.now()) : DateFormat('MMMM').format(DateTime.now()),
-              style: TextStyle(
-                fontFamily: GoogleFonts.playfairDisplay().fontFamily,
-                fontSize: isMobile ? 12 : 14,
-                color: selectedPurchaseOverviewType == 'this_month'
-                    ? Colors.white
-                    : Colors.black,
-              ),
-            ),
-          ),
-          'lifeTime': Padding(
-            padding: const EdgeInsets.symmetric(
-              vertical: 4.0,
-              horizontal: 4.0,
-            ),
-            child: Text(
-              isMobile ? 'All' : 'Life Time',
-              style: TextStyle(
-                fontFamily: GoogleFonts.playfairDisplay().fontFamily,
-                fontSize: isMobile ? 12 : 14,
-                color: selectedPurchaseOverviewType == 'lifeTime'
-                    ? Colors.white
-                    : Colors.black,
-              ),
-            ),
-          ),
-        },
-        onValueChanged: (value) {
-          setState(() {
-            selectedPurchaseOverviewType = value;
-            context.read<DashboardBloc>().add(
-              FetchDashboardData(
-                dateFilter: value,
-                context: context,
-              ),
-            );
-          });
-        },
-        groupValue: selectedPurchaseOverviewType,
-        unselectedColor: Colors.white54,
-        selectedColor: AppColors.primaryColor(context),
-        borderColor: AppColors.primaryColor(context),
-      ),
-    );
-  }
-
-  Widget _buildDashboardCards(DashboardData data) {
-    final isMobile = Responsive.isMobile(context);
-
-    return GridView.count(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      crossAxisCount: isMobile ? 2 : 5,
-      childAspectRatio: isMobile ? 2.2 : 1.5,
-      crossAxisSpacing: 5,
-      mainAxisSpacing: 5,
+  Widget _row(bool wide, Widget a, Widget b, int fa, int fb) {
+    if (!wide) {
+      return Column(children: [a, const SizedBox(height: 16), b]);
+    }
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        dashboardCardItem(
-          title: "Total Sales",
-          value: data.todayMetrics?.sales?.total?.toDouble() ?? 0.0,
-          icon: Icons.shopping_cart,
-          color: AppColors.success,
-          isCurrency: true,
-        ),
-        dashboardCardItem(
-          title: "Total Purchases",
-          value: data.todayMetrics?.purchases?.total?.toDouble() ?? 0.0,
-          icon: Icons.inventory_2,
-          color: AppColors.info,
-          isCurrency: true,
-        ),
-        dashboardCardItem(
-          title: "Total Expenses",
-          value: data.todayMetrics?.expenses?.total?.toDouble() ?? 0.0,
-          icon: Icons.money_off,
-          color: AppColors.danger,
-          isCurrency: true,
-        ),
-        dashboardCardItem(
-          title: "Net Profit",
-          value: data.profitLoss?.netProfit?.toDouble() ?? 0.0,
-          icon: Icons.trending_up,
-          color: (data.profitLoss?.netProfit ?? 0) >= 0 ? AppColors.success : AppColors.danger,
-          isCurrency: true,
-        ),
-        dashboardCardItem(
-          title: "Stock Alerts",
-          value: ((data.stockAlerts?.lowStock ?? 0) + (data.stockAlerts?.outOfStock ?? 0)).toDouble(),
-          icon: Icons.warning,
-          color: AppColors.warning,
-        ),
+        Expanded(flex: fa, child: a),
+        const SizedBox(width: 16),
+        Expanded(flex: fb, child: b),
       ],
     );
   }
 
-  Widget _buildSalesPurchaseOverview(DashboardData data) {
-    if (Responsive.isMobile(context)) {
-      return Column(
-        children: [
-          _buildSalesOverview(data),
-          const SizedBox(height: 16),
-          _buildPurchaseOverview(data),
-        ],
+  // ───────────────────────── header ─────────────────────────
+
+  Widget _header(DashColors c) {
+    final h = DateTime.now().hour;
+    final greet = h < 12
+        ? 'Good morning'
+        : h < 17
+            ? 'Good afternoon'
+            : 'Good evening';
+    final r = _data?.dateFilterInfo;
+    final range = r?.startDate == null
+        ? dateText(DateTime.now())
+        : (_period == 'current_day'
+            ? dateText(r!.startDate)
+            : '${dateText(r!.startDate)} – ${dateText(r.endDate)}');
+    return Wrap(
+      alignment: WrapAlignment.spaceBetween,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      runSpacing: 12,
+      children: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(greet,
+                style: TextStyle(
+                    fontSize: 24, fontWeight: FontWeight.w800, color: c.ink)),
+            const SizedBox(height: 2),
+            Text("Here's how the shop is doing · $range",
+                style: TextStyle(fontSize: 13.5, color: c.muted)),
+          ],
+        ),
+        Row(mainAxisSize: MainAxisSize.min, children: [
+          IconButton(
+            tooltip: 'Refresh',
+            onPressed: () => context.read<DashboardBloc>().add(
+                FetchDashboardData(dateFilter: _period, context: context)),
+            icon: Icon(Icons.refresh_rounded, color: c.muted),
+          ),
+          const SizedBox(width: 6),
+          DashSegmented<String>(
+            value: _period,
+            onChanged: _setPeriod,
+            options: const [
+              ('current_day', 'Today'),
+              ('this_month', 'This month'),
+              ('lifeTime', 'All time'),
+            ],
+          ),
+        ]),
+      ],
+    );
+  }
+
+  Widget _error(String msg, DashColors c) => DashPanel(
+        title: "Couldn't load the dashboard",
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(msg, style: TextStyle(color: c.muted)),
+            const SizedBox(height: 12),
+            FilledButton.icon(
+              onPressed: () => context.read<DashboardBloc>().add(
+                  FetchDashboardData(dateFilter: _period, context: context)),
+              icon: const Icon(Icons.refresh_rounded, size: 18),
+              label: const Text('Try again'),
+            ),
+          ],
+        ),
       );
+
+  // ───────────────────────── KPI ─────────────────────────
+
+  Widget _kpis(DashboardData? d, bool loading, double width) {
+    final c = DashColors(context);
+    final m = d?.todayMetrics;
+    final pl = d?.profitLoss;
+    final sales = m?.sales, pur = m?.purchases, exp = m?.expenses;
+
+    String inv(int? n, String one, String many) =>
+        '${n ?? 0} ${(n ?? 0) == 1 ? one : many}';
+
+    final salesDue = dashNum(sales?.totalDue);
+    final purDue = dashNum(pur?.totalDue);
+    final inc = dashNum(m?.incomes?.total);
+    final net = dashNum(pl?.netProfit);
+    final isLoss = d != null && net < 0;
+
+    final cards = <Widget>[
+      DashKpi(
+        title: 'Sales',
+        icon: Icons.shopping_cart_outlined,
+        color: c.blue,
+        loading: loading,
+        value: taka(sales?.total),
+        note: d == null
+            ? null
+            : inv(sales?.count, 'invoice', 'invoices') +
+                (salesDue > 0 ? ', ${taka(salesDue)} due' : ''),
+      ),
+      DashKpi(
+        title: 'Purchases',
+        icon: Icons.local_shipping_outlined,
+        color: c.purple,
+        loading: loading,
+        value: taka(pur?.total),
+        note: d == null
+            ? null
+            : inv(pur?.count, 'invoice', 'invoices') +
+                (purDue > 0 ? ', ${taka(purDue)} to pay' : ''),
+      ),
+      DashKpi(
+        title: 'Expenses',
+        icon: Icons.receipt_long_outlined,
+        color: c.orange,
+        loading: loading,
+        value: taka(exp?.total),
+        note: d == null
+            ? null
+            : inv(exp?.count, 'entry', 'entries') +
+                (inc > 0 ? ', other income ${taka(inc)}' : ''),
+      ),
+      DashKpi(
+        title: isLoss ? 'Net loss' : 'Net profit',
+        icon: Icons.trending_up_rounded,
+        color: isLoss ? c.red : c.green,
+        loss: isLoss,
+        loading: loading,
+        value: taka(pl?.netProfit),
+        note: d == null
+            ? null
+            : 'Gross profit ${taka(pl?.grossProfit)}'
+                '${dashNum(sales?.total) > 0 ? ', ${(pl?.profitMargin ?? 0).toStringAsFixed(1)}% margin' : ''}',
+      ),
+    ];
+
+    final cols = width >= 1000 ? 4 : (width >= 600 ? 2 : 1);
+    const gap = 14.0;
+    final w = (width - gap * (cols - 1)) / cols;
+    return Wrap(
+      spacing: gap,
+      runSpacing: gap,
+      children: [for (final k in cards) SizedBox(width: w, child: k)],
+    );
+  }
+
+  // ───────────────────────── charts ─────────────────────────
+
+  Widget _trendPanel(DashColors c) {
+    final t = _trend;
+    final labels = [for (final x in (t?['labels'] as List? ?? const [])) '$x'];
+    List<double> vals(String k) => [
+          for (final x in (t?[k] as List? ?? const [])) dashNum(x).toDouble()
+        ];
+    final sales = vals('sales'), pur = vals('purchases'), exp = vals('expenses');
+    final has = [sales, pur, exp].any((l) => l.any((v) => v > 0));
+
+    Widget body;
+    if (t == null) {
+      body = DashEmpty(_trendLoading ? 'Loading chart…' : "Couldn't load the chart.");
+    } else if (!has) {
+      body = const DashEmpty('No sales, purchases or expenses in this range yet.');
     } else {
-      return Row(
-        children: [
-          Expanded(child: _buildSalesOverview(data)),
-          const SizedBox(width: 16),
-          Expanded(child: _buildPurchaseOverview(data)),
-        ],
+      body = AnimatedOpacity(
+        opacity: _trendLoading ? 0.5 : 1,
+        duration: const Duration(milliseconds: 150),
+        child: DashLineChart(
+          labels: labels,
+          series: [
+            TrendSeries('Sales', sales, c.blue, fill: true),
+            TrendSeries('Purchases', pur, c.purple),
+            TrendSeries('Expenses', exp, c.orange),
+          ],
+        ),
       );
     }
-  }
 
-  Widget _buildSalesOverview(DashboardData data) {
-    final isMobile = Responsive.isMobile(context);
-
-    return Container(
-      padding: EdgeInsets.all(isMobile ? 8.0 : 12.0),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8),
-        color: Colors.white,
+    return DashPanel(
+      title: 'Sales, purchases & expenses',
+      subtitle: '· last $_trendDays days',
+      trailing: DashSegmented<int>(
+        small: true,
+        value: _trendDays,
+        onChanged: _setTrendDays,
+        options: const [(7, '7 days'), (30, '30 days')],
       ),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                "Sales Overview",
-                style: TextStyle(
-                  fontFamily: GoogleFonts.playfairDisplay().fontFamily,
-                  fontWeight: FontWeight.w500,
-                  fontSize: isMobile ? 14 : 18,
-                ),
-              ),
-              if (!isMobile) _buildSegmentedControl('sales'),
-            ],
-          ),
-          if (isMobile) ...[
-            const SizedBox(height: 8),
-            _buildSegmentedControl('sales'),
-          ],
-          const SizedBox(height: 12),
-          Column(
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: StatsCardMonthly(
-                      title: "Total Sold Quantity",
-                      count: data.todayMetrics?.sales?.totalQuantity?.toString() ?? "0",
-                      color: Colors.pink,
-                      icon: "assets/images/sold.png",
-                    ),
-                  ),
-                  SizedBox(width: isMobile ? 5 : 10),
-                  Expanded(
-                    child: StatsCardMonthly(
-                      title: "Total Amount",
-                      count: (data.todayMetrics?.sales?.total ?? 0).toStringAsFixed(2),
-                      color: Colors.purple,
-                      icon: "assets/images/gross.png",
-                    ),
-                  ),
-                ],
-              ),
-               SizedBox(height: isMobile ? 8 : 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: StatsCardMonthly(
-                      title: "Total Due",
-                      count: (data.todayMetrics?.sales?.totalDue ?? 0).toStringAsFixed(2),
-                      color: Colors.redAccent,
-                      icon: "assets/images/cancel.png",
-                    ),
-                  ),
-                  SizedBox(width: isMobile ? 5 : 10),
-                  Expanded(
-                    child: StatsCardMonthly(
-                      title: "Profit / Loss",
-                      count: (data.profitLoss?.netProfit ?? 0).toStringAsFixed(2),
-                      color: (data.profitLoss?.netProfit ?? 0) >= 0 ? AppColors.success : AppColors.danger,
-                      icon: "assets/images/expenses.png",
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ],
-      ),
+      child: body,
     );
   }
 
-  Widget _buildPurchaseOverview(DashboardData data) {
-    final isMobile = Responsive.isMobile(context);
-
-    return Container(
-      padding: EdgeInsets.all(isMobile ? 8.0 : 12.0),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8),
-        color: Colors.white,
-      ),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                "Purchase Overview",
-                style: TextStyle(
-                  fontFamily: GoogleFonts.playfairDisplay().fontFamily,
-                  fontWeight: FontWeight.w600,
-                  fontSize: isMobile ? 14 : 18,
-                ),
-              ),
-              if (!isMobile) _buildSegmentedControl('purchase'),
-            ],
-          ),
-          if (isMobile) ...[
-            const SizedBox(height: 8),
-            _buildSegmentedControl('purchase'),
-          ],
-          const SizedBox(height: 12),
-          Column(
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: StatsCardMonthly(
-                      title: "Total Purchase\nQuantity",
-                      count: data.todayMetrics?.purchases?.totalQuantity?.toString() ?? "0",
-                      color: AppColors.info,
-                      icon: "assets/images/buy.png",
-                    ),
-                  ),
-                  SizedBox(width: isMobile ? 5 : 10),
-                  Expanded(
-                    child: StatsCardMonthly(
-                      title: "Total Amount",
-                      count: (data.todayMetrics?.purchases?.total ?? 0).toStringAsFixed(2),
-                      color: AppColors.success,
-                      icon: "assets/images/gross.png",
-                    ),
-                  ),
-                ],
-              ),
-               SizedBox(height: isMobile ? 8 : 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: StatsCardMonthly(
-                      title: "Total Due",
-                      count: (data.todayMetrics?.purchases?.totalDue ?? 0).toStringAsFixed(2),
-                      color: Colors.redAccent,
-                      icon: "assets/images/cancel.png",
-                    ),
-                  ),
-                  SizedBox(width: isMobile ? 5 : 10),
-                  Expanded(
-                    child: StatsCardMonthly(
-                      title: "Total Returns",
-                      count: (data.todayMetrics?.purchaseReturns?.totalAmount ?? 0).toStringAsFixed(2),
-                      color: Colors.black,
-                      icon: "assets/images/product_return.png",
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ],
-      ),
+  Widget _expensePanel(DashColors c) {
+    final heads = (_trend?['expense_by_head'] as List? ?? const []);
+    final pal = c.palette;
+    final slices = <DonutSlice>[
+      for (var i = 0; i < heads.length; i++)
+        if (heads[i] is Map)
+          DonutSlice('${(heads[i] as Map)['name'] ?? 'Other'}',
+              dashNum((heads[i] as Map)['total']).toDouble(), pal[i % pal.length]),
+    ];
+    return DashPanel(
+      title: 'Where expenses go',
+      child: slices.isEmpty
+          ? DashEmpty(_trend == null
+              ? 'Loading…'
+              : 'No expenses in the last $_trendDays days.')
+          : DashDonut(slices: slices),
     );
   }
 
-  Widget _buildSegmentedControl(String type) {
-    final isMobile = Responsive.isMobile(context);
-    final width = isMobile ? double.infinity : AppSizes.width(context) * 0.20;
+  // ───────────────────────── money flow / stock ─────────────────────────
 
-    return SizedBox(
-      width: width,
-      child: CupertinoSegmentedControl<String>(
-        padding: EdgeInsets.zero,
-        children: {
-          'current_day': Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 4.0),
-            child: Text(
-              'Today',
-              style: TextStyle(
-                fontFamily: GoogleFonts.playfairDisplay().fontFamily,
-                fontSize: isMobile ? 12 : 14,
-                color: selectedPurchaseOverviewType == 'current_day'
-                    ? Colors.white
-                    : Colors.black,
-              ),
-            ),
-          ),
-          'this_month': Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 4.0),
-            child: Text(
-              isMobile ? DateFormat('MMM').format(DateTime.now()) : DateFormat('MMMM').format(DateTime.now()),
-              style: TextStyle(
-                fontFamily: GoogleFonts.playfairDisplay().fontFamily,
-                fontSize: isMobile ? 12 : 14,
-                color: selectedPurchaseOverviewType == 'this_month'
-                    ? Colors.white
-                    : Colors.black,
-              ),
-            ),
-          ),
-          'lifeTime': Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 4.0),
-            child: Text(
-              isMobile ? 'All' : 'Life Time',
-              style: TextStyle(
-                fontFamily: GoogleFonts.playfairDisplay().fontFamily,
-                fontSize: isMobile ? 12 : 14,
-                color: selectedPurchaseOverviewType == 'lifeTime'
-                    ? Colors.white
-                    : Colors.black,
-              ),
-            ),
-          ),
-        },
-        onValueChanged: (value) {
-          setState(() {
-            selectedPurchaseOverviewType = value;
-            context.read<DashboardBloc>().add(
-              FetchDashboardData(dateFilter: value, context: context),
-            );
-          });
-        },
-        groupValue: selectedPurchaseOverviewType,
-        unselectedColor: Colors.white54,
-        selectedColor: AppColors.primaryColor(context),
-        borderColor: AppColors.primaryColor(context),
+  Widget _flowPanel(DashColors c) {
+    final fs = _data?.financialSummary;
+    final cc = fs?.cashComponents;
+    final rows = [
+      ('Money in', 'Sales collected and other income', dashNum(cc?.cashIn).toDouble(), true),
+      ('Purchases paid', 'Paid to suppliers', dashNum(cc?.cashOutPurchases).toDouble(), false),
+      ('Expenses', 'Shop expenses', dashNum(cc?.cashOutExpenses).toDouble(), false),
+    ];
+    final max = rows.fold<double>(1, (m, r) => r.$3 > m ? r.$3 : m);
+    final net = dashNum(fs?.operatingCashFlow).toDouble();
+    return DashPanel(
+      title: 'Money flow',
+      subtitle: _noun,
+      trailing: _data == null
+          ? null
+          : Text.rich(TextSpan(children: [
+              TextSpan(text: 'Net  ', style: TextStyle(fontSize: 12.5, color: c.muted)),
+              TextSpan(
+                  text: taka(net),
+                  style: TextStyle(
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w800,
+                      color: net < 0 ? c.red : c.green)),
+            ])),
+      child: Column(children: [
+        for (final r in rows)
+          DashFlowRow(label: r.$1, hint: r.$2, value: r.$3, max: max, incoming: r.$4),
+      ]),
+    );
+  }
+
+  Widget _stockPanel(DashColors c) {
+    final a = _data?.stockAlerts;
+    final out = a?.outOfStock ?? 0, low = a?.lowStock ?? 0;
+    return DashPanel(
+      title: 'Stock alerts',
+      child: Column(children: [
+        Row(children: [
+          Expanded(child: DashAlertBox(count: out, label: 'Out of stock', hot: c.red)),
+          const SizedBox(width: 12),
+          Expanded(child: DashAlertBox(count: low, label: 'Running low', hot: c.amber)),
+        ]),
+        if (_data != null && out == 0 && low == 0)
+          DashEmpty('Every product is above its alert quantity.',
+              icon: Icons.check_circle_outline, color: c.green),
+      ]),
+    );
+  }
+
+  // ───────────────────────── recent / accounts ─────────────────────────
+
+  Widget _recentPanel(DashColors c) {
+    final ra = _data?.recentActivities;
+    final items = <Widget>[];
+    void add(String title, String sub, dynamic amt, dynamic due, DateTime? date,
+        bool last) {
+      final dueN = dashNum(due);
+      items.add(DashRow(
+        title: title,
+        sub: sub,
+        date: dateText(date),
+        last: last,
+        trailing: DashAmount(taka(amt), due: dueN > 0 ? '${taka(dueN)} due' : null),
+      ));
+    }
+
+    if (_tab == 'sales') {
+      final l = ra?.sales ?? const <Purchase>[];
+      for (var i = 0; i < l.length; i++) {
+        add(l[i].invoiceNo ?? '', l[i].customer ?? '', l[i].amount,
+            l[i].dueAmount, l[i].date, i == l.length - 1);
+      }
+    } else if (_tab == 'purchases') {
+      final l = ra?.purchases ?? const <Purchase>[];
+      for (var i = 0; i < l.length; i++) {
+        add(l[i].invoiceNo ?? '', l[i].supplier ?? '', l[i].amount,
+            l[i].dueAmount, l[i].date, i == l.length - 1);
+      }
+    } else {
+      final l = ra?.expenses ?? const <ExpenseIncome>[];
+      for (var i = 0; i < l.length; i++) {
+        final e = l[i];
+        final sub = (e.note?.isNotEmpty ?? false)
+            ? e.note!
+            : ((e.account?.isNotEmpty ?? false) ? e.account! : (e.invoiceNo ?? ''));
+        add(e.head ?? 'Expense', sub, e.amount, 0, e.date, i == l.length - 1);
+      }
+    }
+
+    return DashPanel(
+      title: 'Recent activity',
+      trailing: DashSegmented<String>(
+        small: true,
+        value: _tab,
+        onChanged: (v) => setState(() => _tab = v),
+        options: const [
+          ('sales', 'Sales'),
+          ('purchases', 'Purchases'),
+          ('expenses', 'Expenses'),
+        ],
       ),
+      child: items.isEmpty
+          ? DashEmpty(_data == null ? 'Loading…' : 'Nothing recorded yet.')
+          : Column(children: items),
+    );
+  }
+
+  Widget _accountsPanel(DashColors c) {
+    final list = _accounts;
+    final total = (list ?? const []).fold<double>(
+        0, (s, a) => s + dashNum(a['balance']).toDouble());
+    return DashPanel(
+      title: 'Account balance',
+      trailing: (list == null || list.isEmpty)
+          ? null
+          : Text(taka(total),
+              style: TextStyle(
+                  fontSize: 13.5, fontWeight: FontWeight.w800, color: c.ink)),
+      child: list == null
+          ? const DashEmpty('Loading…')
+          : list.isEmpty
+              ? const DashEmpty('No active accounts.')
+              : Column(children: [
+                  for (var i = 0; i < list.length; i++)
+                    DashRow(
+                      title: '${list[i]['name'] ?? ''}',
+                      sub: [
+                        list[i]['ac_type'],
+                        (list[i]['bank_name']?.toString().isNotEmpty ?? false)
+                            ? list[i]['bank_name']
+                            : list[i]['ac_number'],
+                      ]
+                          .where((e) => e != null && '$e'.isNotEmpty)
+                          .join(', '),
+                      last: i == list.length - 1,
+                      trailing: DashAmount(taka(list[i]['balance']),
+                          color: dashNum(list[i]['balance']) < 0 ? c.red : null),
+                    ),
+                ]),
+    );
+  }
+
+  // ───────────────────────── best sellers / restock ─────────────────────────
+
+  Widget _topPanel(DashColors c) {
+    final list = _top;
+    final max = (list ?? const []).fold<double>(
+        1, (m, p) => dashNum(p['total_sold_price']).toDouble() > m
+            ? dashNum(p['total_sold_price']).toDouble()
+            : m);
+    return DashPanel(
+      title: 'Best sellers',
+      subtitle: _noun,
+      child: list == null
+          ? const DashEmpty('Loading…')
+          : list.isEmpty
+              ? const DashEmpty('No sales in this period.')
+              : Column(children: [
+                  for (var i = 0; i < list.length; i++)
+                    DashRankRow(
+                      rank: i + 1,
+                      name: '${list[i]['product_name'] ?? ''}',
+                      sub: '${qtyText(list[i]['total_sold_quantity'])} sold',
+                      amount: taka(list[i]['total_sold_price']),
+                      frac: dashNum(list[i]['total_sold_price']).toDouble() / max,
+                      last: i == list.length - 1,
+                    ),
+                ]),
+    );
+  }
+
+  Widget _lowPanel(DashColors c) {
+    final list = _low;
+    return DashPanel(
+      title: 'Restock soon',
+      trailing: (list != null && list.isNotEmpty)
+          ? Text('Lowest stock first',
+              style: TextStyle(fontSize: 12, color: c.muted))
+          : null,
+      child: list == null
+          ? const DashEmpty('Loading…')
+          : list.isEmpty
+              ? DashEmpty('Nothing needs restocking.',
+                  icon: Icons.check_circle_outline, color: c.green)
+              : Column(children: [
+                  for (var i = 0; i < list.length; i++)
+                    Builder(builder: (context) {
+                      final p = list[i];
+                      final stock = dashNum(p['total_stock_quantity']);
+                      return DashRow(
+                        title: '${p['product_name'] ?? ''}',
+                        sub: [p['category'], p['brand']]
+                            .where((e) => e != null && '$e'.isNotEmpty)
+                            .join(', '),
+                        date: 'Alert at ${qtyText(p['alert_quantity'])}',
+                        last: i == list.length - 1,
+                        trailing: stock <= 0
+                            ? DashPill('Out of stock', c.red)
+                            : DashPill('${qtyText(stock)} left', c.amber),
+                      );
+                    }),
+                ]),
     );
   }
 }
-

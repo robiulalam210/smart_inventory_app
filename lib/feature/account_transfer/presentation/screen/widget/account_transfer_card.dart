@@ -66,7 +66,7 @@ class MobileAccountTransferCard extends StatelessWidget {
                   Expanded(
                     child: Text(
                       'Transfer #${transfer.transferNo}',
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.ibmPlexSans(
                         fontWeight: FontWeight.w600,
                         fontSize: 16,
                         color: AppColors.text(context),
@@ -119,7 +119,7 @@ class MobileAccountTransferCard extends StatelessWidget {
       ),
       child: Text(
         statusText,
-        style: GoogleFonts.inter(
+        style: GoogleFonts.ibmPlexSans(
           fontSize: 10,
           fontWeight: FontWeight.w600,
           color: color,
@@ -150,7 +150,7 @@ class MobileAccountTransferCard extends StatelessWidget {
           const SizedBox(width: 4),
           Text(
             typeText,
-            style: GoogleFonts.inter(
+            style: GoogleFonts.ibmPlexSans(
               fontSize: 10,
               fontWeight: FontWeight.w600,
               color: color,
@@ -168,7 +168,7 @@ class MobileAccountTransferCard extends StatelessWidget {
 
     return Text(
       '\$${amountValue.abs().toStringAsFixed(2)}',
-      style: GoogleFonts.inter(
+      style: GoogleFonts.ibmPlexSans(
         fontSize: 18,
         fontWeight: FontWeight.w700,
         color: color,
@@ -185,7 +185,7 @@ class MobileAccountTransferCard extends StatelessWidget {
             width: 50,
             child: Text(
               label,
-              style: GoogleFonts.inter(
+              style: GoogleFonts.ibmPlexSans(
                 fontSize: 12,
                 color: AppColors.text(context),
                 fontWeight: FontWeight.w500,
@@ -196,7 +196,7 @@ class MobileAccountTransferCard extends StatelessWidget {
           Expanded(
             child: Text(
               value,
-              style: GoogleFonts.inter(
+              style: GoogleFonts.ibmPlexSans(
                 fontSize: 12,
                 color: AppColors.text(context),
                 fontWeight: FontWeight.w400,
@@ -289,7 +289,7 @@ class MobileAccountTransferCard extends StatelessWidget {
         icon: Icon(icon, size: 14, color: color),
         label: Text(
           text,
-          style: GoogleFonts.inter(
+          style: GoogleFonts.ibmPlexSans(
             fontSize: 11,
             fontWeight: FontWeight.w600,
             color: color,
@@ -327,7 +327,7 @@ class MobileAccountTransferCard extends StatelessWidget {
                 children: [
                   Text(
                     'Transfer Details',
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.ibmPlexSans(
                       fontWeight: FontWeight.w600,
                       color: AppColors.text(context),
                       fontSize: 18,
@@ -387,7 +387,7 @@ class MobileAccountTransferCard extends StatelessWidget {
             width: 120,
             child: Text(
               label,
-              style: GoogleFonts.inter(
+              style: GoogleFonts.ibmPlexSans(
                 fontWeight: FontWeight.w500,
                 fontSize: 14,
                 color: AppColors.text(context),
@@ -398,7 +398,7 @@ class MobileAccountTransferCard extends StatelessWidget {
           Expanded(
             child: Text(
               value,
-              style: GoogleFonts.inter(
+              style: GoogleFonts.ibmPlexSans(
                 fontWeight: FontWeight.w400,
                 fontSize: 14,
                 color: color ??               AppColors.text(context)
@@ -476,7 +476,7 @@ class MobileAccountTransferCard extends StatelessWidget {
           const SizedBox(height: 16),
           Text(
             'No Transfers Found',
-            style: GoogleFonts.inter(
+            style: GoogleFonts.ibmPlexSans(
               fontSize: 16,
               fontWeight: FontWeight.w600,
               color: Colors.grey,
@@ -485,7 +485,7 @@ class MobileAccountTransferCard extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             'Create your first transfer to get started',
-            style: GoogleFonts.inter(
+            style: GoogleFonts.ibmPlexSans(
               fontSize: 14,
               fontWeight: FontWeight.w400,
               color: Colors.grey,
@@ -571,7 +571,7 @@ class AccountTransferCard extends StatelessWidget {
                           color: Colors.white,
                           fontSize: 12,
                           fontWeight: FontWeight.w700,
-                          fontFamily: GoogleFonts.inter().fontFamily,
+                          fontFamily: GoogleFonts.ibmPlexSans().fontFamily,
                         ),
                         headingRowColor: WidgetStateProperty.all(
                           AppColors.primaryColor(context),
@@ -579,7 +579,7 @@ class AccountTransferCard extends StatelessWidget {
                         dataTextStyle: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w500,
-                          fontFamily: GoogleFonts.inter().fontFamily,
+                          fontFamily: GoogleFonts.ibmPlexSans().fontFamily,
                         ),
                         columns: _buildColumns(minColumnWidth),
                         rows: transfers.asMap().entries.map((entry) {
@@ -761,7 +761,7 @@ class AccountTransferCard extends StatelessWidget {
             ),
             child: Text(
               amountValue.abs().toStringAsFixed(2),
-              style: GoogleFonts.inter(
+              style: GoogleFonts.ibmPlexSans(
                 color: color,
                 fontWeight: FontWeight.w600,
                 fontSize: 11,
@@ -799,7 +799,7 @@ class AccountTransferCard extends StatelessWidget {
             ),
             child: Text(
               statusText,
-              style: GoogleFonts.inter(
+              style: GoogleFonts.ibmPlexSans(
                 color: color,
                 fontWeight: FontWeight.w600,
                 fontSize: 10,
@@ -837,7 +837,7 @@ class AccountTransferCard extends StatelessWidget {
             ),
             child: Text(
               typeText,
-              style: GoogleFonts.inter(
+              style: GoogleFonts.ibmPlexSans(
                 color: color,
                 fontWeight: FontWeight.w600,
                 fontSize: 10,
@@ -968,7 +968,7 @@ class AccountTransferCard extends StatelessWidget {
             const SizedBox(width: 8),
             Text(
               'Transfer Details',
-              style: GoogleFonts.inter(
+              style: GoogleFonts.ibmPlexSans(
                 fontWeight: FontWeight.w600,
                 fontSize: 16,
               ),
@@ -1010,7 +1010,7 @@ class AccountTransferCard extends StatelessWidget {
             onPressed: () => Navigator.of(context).pop(),
             child: Text(
               'Close',
-              style: GoogleFonts.inter(
+              style: GoogleFonts.ibmPlexSans(
                 color: Colors.grey.shade600,
                 fontWeight: FontWeight.w500,
               ),
@@ -1034,7 +1034,7 @@ class AccountTransferCard extends StatelessWidget {
             width: 120,
             child: Text(
               label,
-              style: GoogleFonts.inter(
+              style: GoogleFonts.ibmPlexSans(
                 fontWeight: FontWeight.w500,
                 fontSize: 12,
                 color: Colors.grey.shade700,
@@ -1045,7 +1045,7 @@ class AccountTransferCard extends StatelessWidget {
           Expanded(
             child: Text(
               value,
-              style: GoogleFonts.inter(
+              style: GoogleFonts.ibmPlexSans(
                 fontWeight: FontWeight.w400,
                 fontSize: 12,
                 color: color ?? Colors.black87,
@@ -1121,7 +1121,7 @@ class AccountTransferCard extends StatelessWidget {
           const SizedBox(height: 16),
           Text(
             'No Transfers Found',
-            style: GoogleFonts.inter(
+            style: GoogleFonts.ibmPlexSans(
               fontSize: 16,
               fontWeight: FontWeight.w600,
               color: Colors.grey,
@@ -1130,7 +1130,7 @@ class AccountTransferCard extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             'Create your first transfer to get started',
-            style: GoogleFonts.inter(
+            style: GoogleFonts.ibmPlexSans(
               fontSize: 12,
               fontWeight: FontWeight.w400,
               color: Colors.grey,

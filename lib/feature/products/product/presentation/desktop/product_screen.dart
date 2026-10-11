@@ -128,7 +128,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
           crossAxisAlignment: CrossAxisAlignment.start, // FIX: content উপরে থাকবে (sidebar লম্বা হলে মাঝখানে নামত)
           children: [
             // Sidebar (if big screen)
-            if (isBigScreen)
+            if (isBigScreen && !PermanentSidebarScope.active(context))
               Container(
                 width: 250,
                 decoration: const BoxDecoration(color: Colors.white),

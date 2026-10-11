@@ -342,7 +342,7 @@ class _AccountTransferScreenState extends State<AccountTransferScreen> {
             const SizedBox(width: 8),
             Text(
               'Reverse Transfer',
-              style: GoogleFonts.inter(
+              style: GoogleFonts.ibmPlexSans(
                 fontWeight: FontWeight.w600,
                 fontSize: 16,
               ),
@@ -355,7 +355,7 @@ class _AccountTransferScreenState extends State<AccountTransferScreen> {
           children: [
             Text(
               'Are you sure you want to reverse this transfer?',
-              style: GoogleFonts.inter(
+              style: GoogleFonts.ibmPlexSans(
                 fontSize: 14,
                 color: Colors.grey.shade700,
               ),
@@ -373,7 +373,7 @@ class _AccountTransferScreenState extends State<AccountTransferScreen> {
                 children: [
                   Text(
                     'Transfer #${transfer.transferNo}',
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.ibmPlexSans(
                       fontWeight: FontWeight.w600,
                       fontSize: 14,
                     ),
@@ -381,21 +381,21 @@ class _AccountTransferScreenState extends State<AccountTransferScreen> {
                   const SizedBox(height: 4),
                   Text(
                     'From: ${transfer.fromAccount?.name ?? "Unknown"}',
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.ibmPlexSans(
                       fontSize: 12,
                       color: Colors.grey.shade600,
                     ),
                   ),
                   Text(
                     'To: ${transfer.toAccount?.name ?? "Unknown"}',
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.ibmPlexSans(
                       fontSize: 12,
                       color: Colors.grey.shade600,
                     ),
                   ),
                   Text(
                     'Amount: ${transfer.amount ?? "0.00"}',
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.ibmPlexSans(
                       fontSize: 12,
                       color: Colors.grey.shade600,
                     ),
@@ -406,7 +406,7 @@ class _AccountTransferScreenState extends State<AccountTransferScreen> {
             const SizedBox(height: 16),
             Text(
               'Reason (optional):',
-              style: GoogleFonts.inter(
+              style: GoogleFonts.ibmPlexSans(
                 fontSize: 14,
                 color: Colors.grey.shade700,
               ),
@@ -434,7 +434,7 @@ class _AccountTransferScreenState extends State<AccountTransferScreen> {
             onPressed: () => Navigator.of(context).pop(),
             child: Text(
               'Cancel',
-              style: GoogleFonts.inter(
+              style: GoogleFonts.ibmPlexSans(
                 color: Colors.grey.shade600,
                 fontWeight: FontWeight.w500,
               ),
@@ -456,7 +456,7 @@ class _AccountTransferScreenState extends State<AccountTransferScreen> {
             style: TextButton.styleFrom(backgroundColor: Colors.orange.shade50),
             child: Text(
               'Reverse',
-              style: GoogleFonts.inter(
+              style: GoogleFonts.ibmPlexSans(
                 color: Colors.orange.shade700,
                 fontWeight: FontWeight.w600,
               ),
@@ -480,7 +480,7 @@ class _AccountTransferScreenState extends State<AccountTransferScreen> {
             const SizedBox(width: 8),
             Text(
               'Cancel Transfer',
-              style: GoogleFonts.inter(
+              style: GoogleFonts.ibmPlexSans(
                 fontWeight: FontWeight.w600,
                 fontSize: 16,
               ),
@@ -493,7 +493,7 @@ class _AccountTransferScreenState extends State<AccountTransferScreen> {
           children: [
             Text(
               'Are you sure you want to cancel this transfer?',
-              style: GoogleFonts.inter(
+              style: GoogleFonts.ibmPlexSans(
                 fontSize: 14,
                 color: Colors.grey.shade700,
               ),
@@ -511,7 +511,7 @@ class _AccountTransferScreenState extends State<AccountTransferScreen> {
                 children: [
                   Text(
                     'Transfer #${transfer.transferNo}',
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.ibmPlexSans(
                       fontWeight: FontWeight.w600,
                       fontSize: 14,
                     ),
@@ -519,14 +519,14 @@ class _AccountTransferScreenState extends State<AccountTransferScreen> {
                   const SizedBox(height: 4),
                   Text(
                     'Status: ${transfer.status?.toUpperCase() ?? "UNKNOWN"}',
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.ibmPlexSans(
                       fontSize: 12,
                       color: _getStatusColor(transfer.status),
                     ),
                   ),
                   Text(
                     'Amount: ${transfer.amount ?? "0.00"}',
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.ibmPlexSans(
                       fontSize: 12,
                       color: Colors.grey.shade600,
                     ),
@@ -537,7 +537,7 @@ class _AccountTransferScreenState extends State<AccountTransferScreen> {
             const SizedBox(height: 16),
             Text(
               'Reason (optional):',
-              style: GoogleFonts.inter(
+              style: GoogleFonts.ibmPlexSans(
                 fontSize: 14,
                 color: Colors.grey.shade700,
               ),
@@ -565,7 +565,7 @@ class _AccountTransferScreenState extends State<AccountTransferScreen> {
             onPressed: () => Navigator.of(context).pop(),
             child: Text(
               'Cancel',
-              style: GoogleFonts.inter(
+              style: GoogleFonts.ibmPlexSans(
                 color: Colors.grey.shade600,
                 fontWeight: FontWeight.w500,
               ),
@@ -587,7 +587,7 @@ class _AccountTransferScreenState extends State<AccountTransferScreen> {
             style: TextButton.styleFrom(backgroundColor: Colors.red.shade50),
             child: Text(
               'Cancel Transfer',
-              style: GoogleFonts.inter(
+              style: GoogleFonts.ibmPlexSans(
                 color: Colors.red.shade700,
                 fontWeight: FontWeight.w600,
               ),

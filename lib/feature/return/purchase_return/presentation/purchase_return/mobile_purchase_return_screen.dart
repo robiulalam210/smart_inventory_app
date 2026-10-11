@@ -1017,7 +1017,7 @@ class PurchaseReturnTableCard extends StatelessWidget {
           const SizedBox(height: 16),
           Text(
             'No Purchase Returns Found',
-            style: GoogleFonts.inter(
+            style: GoogleFonts.ibmPlexSans(
               fontSize: 16,
               fontWeight: FontWeight.w600,
               color: Colors.grey,
@@ -1026,7 +1026,7 @@ class PurchaseReturnTableCard extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             'Purchase returns will appear here when created',
-            style: GoogleFonts.inter(
+            style: GoogleFonts.ibmPlexSans(
               fontSize: 12,
               fontWeight: FontWeight.w400,
               color: Colors.grey,

@@ -28,6 +28,14 @@ class TabSidebar extends StatelessWidget {
       permissions?.sales?.view == true || permissions?.sales?.create == true,
     ),
     MenuSection(
+      title: "Online Shop",
+      items: [
+        MenuItem(title: "Online Orders", index: 49, requiredPermission: (permissions) => permissions?.sales?.view == true),
+        MenuItem(title: "Shop Settings", index: 50, requiredPermission: (permissions) => permissions?.sales?.edit == true),
+      ],
+      requiredPermission: (permissions) => permissions?.sales?.view == true,
+    ),
+    MenuSection(
       title: "Money Receipt",
       items: [
         MenuItem(title: "Create Money Receipt", index: 4, requiredPermission: (permissions) => permissions?.moneyReceipt?.create == true),
@@ -63,6 +71,7 @@ class TabSidebar extends StatelessWidget {
       title: "Customers",
       items: [
         MenuItem(title: "Customer", index: 10, requiredPermission: (permissions) => permissions?.customers?.view == true),
+        MenuItem(title: "Due Reminders", index: 51, requiredPermission: (permissions) => permissions?.customers?.view == true),
       ],
       requiredPermission: (permissions) => permissions?.customers?.view == true,
     ),
@@ -143,6 +152,27 @@ class TabSidebar extends StatelessWidget {
     ),
   ];
 
+  // শুধু Super Admin / Admin দেখে — module permission নয়, role দেখে (ওয়েবের menu এর roles নিয়ম)
+  final List<MenuSection> _adminSections = [
+    MenuSection(
+      title: "Payroll",
+      items: [
+        MenuItem(title: "Salary Sheet", index: 45),
+        MenuItem(title: "Advances", index: 46),
+        MenuItem(title: "Payroll Report", index: 47),
+      ],
+      requiredPermission: (_) => true,
+    ),
+    MenuSection(
+      title: "Security",
+      items: [
+        MenuItem(title: "Audit Log", index: 44),
+        MenuItem(title: "User Permissions", index: 48),
+      ],
+      requiredPermission: (_) => true,
+    ),
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Drawer(
@@ -178,17 +208,13 @@ class TabSidebar extends StatelessWidget {
                   return section.requiredPermission(permissions) == true;
                 }).toList();
 
-                // Audit Log — শুধু Super Admin / Admin
+                // Payroll + Security (Audit Log, User Permissions) — শুধু Super Admin / Admin
                 final role = (profileState is ProfilePermissionSuccess
                         ? profileState.permissionData.data?.user?.role
                         : null)
                     ?.toUpperCase();
                 if (role == 'SUPER_ADMIN' || role == 'ADMIN') {
-                  filteredMenuSections.add(MenuSection(
-                    title: 'Audit Log',
-                    items: [MenuItem(title: 'Audit Log', index: 44)],
-                    requiredPermission: (_) => true,
-                  ));
+                  filteredMenuSections.addAll(_adminSections);
                 }
 
                 // Check if user has any permissions

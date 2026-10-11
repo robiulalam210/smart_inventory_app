@@ -98,7 +98,7 @@ class CategoriesListMobile extends StatelessWidget {
                     child: Center(
                       child: Text(
                         '$index',
-                        style: GoogleFonts.inter(
+                        style: GoogleFonts.ibmPlexSans(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                           color: AppColors.primaryColor(context),
@@ -108,7 +108,7 @@ class CategoriesListMobile extends StatelessWidget {
                   ),
                   Text(
                     category.name?.capitalize() ?? "Unnamed Category",
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.ibmPlexSans(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                       color: AppColors.text(context),
@@ -145,7 +145,7 @@ class CategoriesListMobile extends StatelessWidget {
                         const SizedBox(width: 4),
                         Text(
                           isActive ? 'Active' : 'Inactive',
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.ibmPlexSans(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
                             color: isActive ? AppColors.success : Colors.grey,
@@ -204,7 +204,7 @@ class CategoriesListMobile extends StatelessWidget {
                     const SizedBox(height: 12),
                     Text(
                       category.description!,
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.ibmPlexSans(
                         fontSize: 13,
                         color: Colors.grey.shade700,
                       ),
@@ -309,7 +309,7 @@ class CategoriesListMobile extends StatelessWidget {
             // Title
             Text(
               'No Categories Found',
-              style: GoogleFonts.inter(
+              style: GoogleFonts.ibmPlexSans(
                 fontSize: 20,
                 fontWeight: FontWeight.w600,
                 color: Colors.grey.shade700,
@@ -322,7 +322,7 @@ class CategoriesListMobile extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 40),
               child: Text(
                 'Create your first category to organize your products',
-                style: GoogleFonts.inter(
+                style: GoogleFonts.ibmPlexSans(
                   fontSize: 14,
                   color: Colors.grey.shade600,
                 ),
@@ -369,7 +369,7 @@ class CategoriesListMobile extends StatelessWidget {
                     const SizedBox(width: 8),
                     Text(
                       'Create Category',
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.ibmPlexSans(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                         color: Colors.white,
@@ -499,7 +499,7 @@ class CategoriesTableCard extends StatelessWidget {
           const SizedBox(height: 16),
           Text(
             'No Categories Found',
-            style: GoogleFonts.inter(
+            style: GoogleFonts.ibmPlexSans(
               fontSize: 16,
               fontWeight: FontWeight.w600,
               color: Colors.grey,
@@ -508,7 +508,7 @@ class CategoriesTableCard extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             'Create your first category to get started',
-            style: GoogleFonts.inter(
+            style: GoogleFonts.ibmPlexSans(
               fontSize: 12,
               fontWeight: FontWeight.w400,
               color: Colors.grey,

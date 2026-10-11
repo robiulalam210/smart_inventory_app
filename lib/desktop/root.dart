@@ -4,6 +4,8 @@ import 'package:meherinMart/desktop/desktop_screens.dart';
 import 'package:flutter/cupertino.dart';
 import '../core/core.dart';
 import 'widgets/tab_sidebar.dart';
+import 'widgets/sidebar.dart' show Sidebar, kSidebarWidth;
+import 'widgets/quick_jump.dart';
 import '../feature/feature.dart';
 import '../feature/profile/presentation/bloc/profile_bloc/profile_bloc.dart';
 import '../feature/splash/presentation/bloc/connectivity_bloc/connectivity_state.dart';
@@ -37,7 +39,17 @@ class _RootScreenState extends State<RootScreen> {
     final isBigScreen =
         Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
 
-    return SafeArea(
+    // Ctrl+K / ⌘K — যেকোনো page এ নাম লিখে সরাসরি যাওয়া
+    return CallbackShortcuts(
+      bindings: {
+        const SingleActivator(LogicalKeyboardKey.keyK, control: true): () =>
+            showQuickJump(context),
+        const SingleActivator(LogicalKeyboardKey.keyK, meta: true): () =>
+            showQuickJump(context),
+      },
+      child: Focus(
+        autofocus: true,
+        child: SafeArea(
       child: Scaffold(
         key: _drawerKey,
 
@@ -65,44 +77,33 @@ class _RootScreenState extends State<RootScreen> {
                 currentIndex = state.index;
               }
 
-              // Desktop: permanent sidebar + content
+              // Desktop: উপরে Header, নিচে বাঁয়ে স্থায়ী Sidebar (নিজস্ব scroll),
+              // ডানে content। আগে প্রতিটা screen নিজের ভেতরে sidebar বসাত আর
+              // sidebar content এর সাথে scroll হয়ে উঠে যেত।
               if (isBigScreen) {
-                return Row(
+                return Column(
                   children: [
-                    // Permanent Sidebar
-                    // const SizedBox(
-                    //   width: 300, // adjust as needed
-                    //   child: Sidebar(),
-                    // ),
-
-                    // Vertical divider (optional)
-                    Container(width: 1, color: AppColors.text(context)),
-
-                    // Main content area
+                    Header(drawerKey: _drawerKey),
                     Expanded(
-                      child: Column(
-                        children: [
-                          // Header only on big screens
-                           Header(drawerKey: _drawerKey,),
-
-                          // Content area: refreshable scrollable view
-                          Expanded(
-                            child: RefreshIndicator(
-                              onRefresh: () async {
-                                context.read<DashboardBloc>().add(
-                                  ChangeDashboardScreen(index: currentIndex),
-                                );
-                              },
-                              child: SingleChildScrollView(
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: AppSizes.bodyPadding *
-                                      (Responsive.isMobile(context) ? 0.5 : 1.5),
+                      child: PermanentSidebarScope(
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            const SizedBox(width: kSidebarWidth, child: Sidebar()),
+                            Expanded(
+                              child: RefreshIndicator(
+                                onRefresh: () async {
+                                  context.read<DashboardBloc>().add(
+                                    ChangeDashboardScreen(index: currentIndex),
+                                  );
+                                },
+                                child: SingleChildScrollView(
+                                  child: desktopScreens[currentIndex],
                                 ),
-                                child: desktopScreens[currentIndex],
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ],
@@ -137,6 +138,8 @@ class _RootScreenState extends State<RootScreen> {
         // FAB not needed on desktop since sidebar is permanent.
         // If you still want a FAB on some screens, toggle it with isSmallScreen/isBigScreen.
         floatingActionButton: null,
+      ),
+        ),
       ),
     );
   }

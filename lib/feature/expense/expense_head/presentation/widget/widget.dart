@@ -355,7 +355,7 @@ class ExpenseHeadTableCard extends StatelessWidget {
           const SizedBox(height: 20),
           Text(
             'No Expense Heads Found',
-            style: GoogleFonts.inter(
+            style: GoogleFonts.ibmPlexSans(
               fontSize: 16,
               fontWeight: FontWeight.w600,
               color: Colors.grey,
@@ -364,7 +364,7 @@ class ExpenseHeadTableCard extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             'Create your first expense head to get started',
-            style: GoogleFonts.inter(
+            style: GoogleFonts.ibmPlexSans(
               fontSize: 12,
               fontWeight: FontWeight.w400,
               color: Colors.grey,

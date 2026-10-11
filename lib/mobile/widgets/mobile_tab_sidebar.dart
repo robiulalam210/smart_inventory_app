@@ -2,6 +2,8 @@ import 'package:meherinMart/feature/auth/presentation/mobile/mobile_login_scr.da
 import 'package:meherinMart/feature/audit_log/presentation/audit_log_screen.dart';
 import 'package:meherinMart/feature/users_list/presentation/shared/mobile_user_permissions_screen.dart';
 import 'package:meherinMart/feature/payroll/presentation/mobile_advances_screen.dart';
+import 'package:meherinMart/feature/shop/presentation/mobile_online_orders_screen.dart';
+import 'package:meherinMart/feature/shop/presentation/mobile_shop_settings_screen.dart';
 import 'package:meherinMart/feature/payroll/presentation/mobile_payroll_report_screen.dart';
 import 'package:meherinMart/feature/payroll/presentation/mobile_salary_sheet_screen.dart';
 import 'package:meherinMart/feature/expense/expense_head/presentation/mobile/mobile_expense_head_screen.dart';
@@ -53,6 +55,7 @@ import '../../feature/transactions/presentation/mobile/mobile_transaction_screen
 import '../../feature/users_list/presentation/shared/moblie_users_screen.dart';
 import '../../core/configs/configs.dart';
 import '../../core/shared/widgets/sideMenu/menu_tile.dart';
+import '../../core/widgets/web_ui.dart';
 
 class MobileTabSidebar extends StatelessWidget {
   const MobileTabSidebar({super.key});
@@ -281,6 +284,19 @@ class MobileTabSidebar extends StatelessWidget {
       );
     }
 
+    // Online Shop — ওয়েবের মতো: Online Orders = sales.view, Shop Settings = sales.edit
+    if (permissions?.sales?.view == true) {
+      sections.add(
+        MenuSection(
+          title: "Online Shop",
+          items: [
+            MenuItem(title: "Online Orders", index: 50),
+            if (permissions?.sales?.edit == true) MenuItem(title: "Shop Settings", index: 51),
+          ],
+        ),
+      );
+    }
+
     // Payroll Section — ওয়েবের মতো শুধু Super Admin / Admin
     final roleUp = role?.toUpperCase();
     if (roleUp == 'SUPER_ADMIN' || roleUp == 'ADMIN') {
@@ -316,7 +332,7 @@ class MobileTabSidebar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Drawer(
-      backgroundColor: AppColors.bottomNavBg(context),
+      backgroundColor: W.surface(context),
       child: SafeArea(
         child: BlocBuilder<DashboardBloc, DashboardState>(
           builder: (context, state) {
@@ -367,7 +383,6 @@ class MobileTabSidebar extends StatelessWidget {
                 /// Drawer Header — লোগো + ব্যবসার নাম
                 Builder(builder: (context) {
                   final primary = AppColors.primaryColor(context);
-                  final onPrimary = AppColors.onColor(primary);
                   final businessName = context
                       .read<ProfileBloc>()
                       .permissionModel
@@ -376,19 +391,17 @@ class MobileTabSidebar extends StatelessWidget {
                       ?.name;
                   return Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.fromLTRB(16, 18, 16, 18),
-                    decoration: BoxDecoration(
-                      gradient: AppColors.primaryGradient(context),
-                    ),
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
                     child: Row(
                       children: [
                         Container(
-                          width: 52,
-                          height: 52,
-                          padding: const EdgeInsets.all(6),
+                          width: 40,
+                          height: 40,
+                          padding: const EdgeInsets.all(5),
                           decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(14),
+                            color: W.soft(context),
+                            border: Border.all(color: W.line(context)),
+                            borderRadius: BorderRadius.circular(10),
                           ),
                           child: Image.asset(
                             "assets/images/logo.png",
@@ -397,7 +410,7 @@ class MobileTabSidebar extends StatelessWidget {
                               return Icon(
                                 Icons.storefront_rounded,
                                 color: primary,
-                                size: 28,
+                                size: 22,
                               );
                             },
                           ),
@@ -414,17 +427,17 @@ class MobileTabSidebar extends StatelessWidget {
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w800,
-                                  color: onPrimary,
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w700,
+                                  color: W.ink(context),
                                 ),
                               ),
-                              const SizedBox(height: 2),
+                              const SizedBox(height: 1),
                               Text(
                                 'Inventory & POS',
                                 style: TextStyle(
                                   fontSize: 12,
-                                  color: onPrimary.withValues(alpha: 0.8),
+                                  color: W.muted(context),
                                 ),
                               ),
                             ],
@@ -435,7 +448,7 @@ class MobileTabSidebar extends StatelessWidget {
                   );
                 }),
 
-                const Divider(height: 1),
+                Divider(height: 1, color: W.line(context)),
 
                 /// Menu Content
                 Expanded(
@@ -476,12 +489,23 @@ class MobileTabSidebar extends StatelessWidget {
                             initiallyExpanded: section.items.any(
                               (item) => currentIndex == item.index,
                             ),
+                            tilePadding: const EdgeInsets.symmetric(horizontal: 12),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10)),
+                            collapsedShape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10)),
+                            iconColor: W.muted(context),
+                            collapsedIconColor: W.muted(context),
+                            childrenPadding: const EdgeInsets.only(left: 10),
                             title: Text(
                               section.title,
                               style: TextStyle(
-                                fontWeight: FontWeight.w600,
+                                fontWeight: FontWeight.w500,
                                 fontSize: 14,
-                                color: AppColors.text(context),
+                                color: section.items.any(
+                                        (item) => currentIndex == item.index)
+                                    ? AppColors.primaryColor(context)
+                                    : W.ink2(context),
                               ),
                             ),
                             children: section.items.map((item) {
@@ -516,13 +540,11 @@ class MobileTabSidebar extends StatelessWidget {
                     style: ElevatedButton.styleFrom(
                       minimumSize: const Size.fromHeight(46),
                       elevation: 0,
-                      backgroundColor: AppColors.danger.withValues(alpha: 0.10),
-                      foregroundColor: AppColors.danger,
-                      side: BorderSide(
-                        color: AppColors.danger.withValues(alpha: 0.35),
-                      ),
+                      backgroundColor: W.surface(context),
+                      foregroundColor: W.redInk(context),
+                      side: BorderSide(color: W.redLine(context)),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(10),
                       ),
                     ),
                     icon: const Icon(Icons.logout, size: 18),
@@ -931,6 +953,22 @@ class MobileTabSidebar extends StatelessWidget {
 
       case 49: // User Permissions — getMenuSections এ শুধু Super Admin / Admin এর জন্য যোগ হয়
         AppRoutes.push(context, const MobileUserPermissionsScreen());
+        break;
+
+      case 50: // Online Orders
+        if (permissions?.sales?.view != true) {
+          _showPermissionDeniedDialog(context);
+          return;
+        }
+        AppRoutes.push(context, const MobileOnlineOrdersScreen());
+        break;
+
+      case 51: // Shop Settings
+        if (permissions?.sales?.edit != true) {
+          _showPermissionDeniedDialog(context);
+          return;
+        }
+        AppRoutes.push(context, const MobileShopSettingsScreen());
         break;
 
       default:

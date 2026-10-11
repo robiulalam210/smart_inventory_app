@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:meherinMart/core/core.dart';
+import 'package:meherinMart/core/widgets/web_ui.dart';
 
 import '../data/payroll_models.dart';
 
@@ -60,43 +61,14 @@ Future<bool> payConfirm(BuildContext context,
   return ok == true;
 }
 
-/// উপরের সংখ্যার সারি (ওয়েবের sumbar এর মতো)
+/// উপরের সংখ্যার সারি — ওয়েবের .sumbar (১px রেখায় আলাদা ঘর)
 class SumBar extends StatelessWidget {
   final List<SumItem> items;
   const SumBar({super.key, required this.items});
 
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-      decoration: BoxDecoration(
-        color: AppColors.bottomNavBg(context),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.greyColor(context).withValues(alpha: 0.35), width: 0.6),
-      ),
-      child: Row(
-        children: [
-          for (final i in items)
-            Expanded(
-              child: Column(
-                children: [
-                  FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Text(i.value,
-                        style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14, color: i.color)),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(i.label,
-                      textAlign: TextAlign.center,
-                      style: AppTextStyle.bodySmall(context).copyWith(fontSize: 11)),
-                ],
-              ),
-            ),
-        ],
-      ),
-    );
-  }
+  Widget build(BuildContext context) =>
+      WSumBar(items: [for (final i in items) WSum(i.label, i.value, color: i.color)]);
 }
 
 class SumItem {
@@ -112,12 +84,12 @@ class PayPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
         decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.12),
+          color: color.withValues(alpha: W.dark(context) ? 0.18 : 0.12),
           borderRadius: BorderRadius.circular(20),
         ),
-        child: Text(text, style: TextStyle(color: color, fontSize: 11, fontWeight: FontWeight.w700)),
+        child: Text(text, style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.w600)),
       );
 }
 
@@ -136,26 +108,12 @@ class PayEmpty extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) => Center(
-        child: Padding(
-          padding: const EdgeInsets.all(32),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(icon, size: 44, color: AppColors.greyColor(context)),
-              const SizedBox(height: 12),
-              Text(title, textAlign: TextAlign.center, style: AppTextStyle.titleMedium(context)),
-              if (body.isNotEmpty) ...[
-                const SizedBox(height: 6),
-                Text(body, textAlign: TextAlign.center, style: AppTextStyle.bodySmall(context)),
-              ],
-              if (actionLabel != null) ...[
-                const SizedBox(height: 14),
-                OutlinedButton(onPressed: onAction, child: Text(actionLabel!)),
-              ],
-            ],
-          ),
-        ),
+  Widget build(BuildContext context) => WEmpty(
+        icon: icon,
+        title: title,
+        body: body,
+        actionLabel: actionLabel,
+        onAction: onAction,
       );
 }
 
@@ -172,13 +130,7 @@ class MoneyField extends StatelessWidget {
         controller: controller,
         onChanged: onChanged,
         keyboardType: const TextInputType.numberWithOptions(decimal: true),
-        decoration: InputDecoration(
-          labelText: label,
-          helperText: hint,
-          prefixText: '৳ ',
-          border: const OutlineInputBorder(),
-          isDense: true,
-        ),
+        decoration: wInput(context, label, hint: hint, prefix: '৳ '),
       );
 }
 

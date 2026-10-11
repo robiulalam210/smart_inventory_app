@@ -62,6 +62,7 @@ class AppUrls {
   static final String expenseSubHead          = '$baseUrl/expenses/expense-subheads/';
   static final String expense          = '$baseUrl/expenses/expenses/';
   static final String posSale          = '$baseUrl/sales/';
+  static final String posSaleSummary   = '$baseUrl/sales/summary/';
   static final String purchase          = '$baseUrl/purchases/';
   static final String supplierList          = '$baseUrl/suppliers/';
   static final String moneyReceipt          = '$baseUrl/money-receipts/';
@@ -102,6 +103,12 @@ class AppUrls {
   // Audit log (শুধু Super Admin / Admin)
   static final String auditLog = '$baseUrl/sync/audit/';
   static final String auditMeta = '$baseUrl/sync/audit/meta/';
+
+  // Online Shop (অনলাইন অর্ডার + শপ সেটিংস)
+  static final String shopOrders = '$baseUrl/shop/orders/';
+  static String shopOrderDetail(int id) => '$baseUrl/shop/orders/$id/';
+  static String shopOrderStatus(int id) => '$baseUrl/shop/orders/$id/status/';
+  static final String shopSettings = '$baseUrl/shop/settings/';
 
   static final String userProfile = "$baseUrl/profile/";
   // static final String profilePermission = "$baseUrl/profile/permissions/";

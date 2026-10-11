@@ -19,6 +19,11 @@ class EmbeddedFullPage extends StatelessWidget {
     final isBigScreen =
         Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
 
+    // root এ স্থায়ী sidebar থাকলে এখানে আলাদা sidebar লাগে না
+    if (PermanentSidebarScope.active(context)) {
+      return SizedBox(height: h < 400 ? 400 : h, child: child);
+    }
+
     return SizedBox(
       height: h < 400 ? 400 : h,
       child: isBigScreen

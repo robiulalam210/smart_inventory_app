@@ -254,7 +254,7 @@ class _MobileCustomerLedgerScreenState
                   const SizedBox(height: 16),
                   Text(
                     "Select a Customer",
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.ibmPlexSans(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
                       color: Colors.grey,
@@ -263,7 +263,7 @@ class _MobileCustomerLedgerScreenState
                   const SizedBox(height: 8),
                   Text(
                     "Choose a customer from the dropdown to view their ledger transactions",
-                    style: GoogleFonts.inter(fontSize: 14, color: Colors.grey),
+                    style: GoogleFonts.ibmPlexSans(fontSize: 14, color: Colors.grey),
                     textAlign: TextAlign.center,
                   ),
                 ],
@@ -804,7 +804,7 @@ class _MobileCustomerLedgerScreenState
           const SizedBox(height: 16),
           Text(
             message,
-            style: GoogleFonts.inter(
+            style: GoogleFonts.ibmPlexSans(
               fontSize: 16,
               fontWeight: FontWeight.w600,
               color: Colors.grey,
@@ -839,7 +839,7 @@ class _MobileCustomerLedgerScreenState
           const SizedBox(height: 16),
           Text(
             "Error Loading Transactions",
-            style: GoogleFonts.inter(
+            style: GoogleFonts.ibmPlexSans(
               fontSize: 16,
               fontWeight: FontWeight.w600,
               color: Colors.grey,

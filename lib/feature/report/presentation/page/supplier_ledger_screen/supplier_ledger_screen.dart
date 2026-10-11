@@ -120,7 +120,7 @@ class _SupplierLedgerScreenState extends State<SupplierLedgerScreen> {
             const SizedBox(height: 4),
             Text(
               "Monitor supplier transactions and balances",
-              style: GoogleFonts.inter(
+              style: GoogleFonts.ibmPlexSans(
                 fontSize: 14,
                 color: Colors.grey,
               ),
@@ -265,7 +265,7 @@ class _SupplierLedgerScreenState extends State<SupplierLedgerScreen> {
                   const SizedBox(height: 12),
                   Text(
                     "Select a Supplier to View Ledger",
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.ibmPlexSans(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                       color: Colors.grey,
@@ -274,7 +274,7 @@ class _SupplierLedgerScreenState extends State<SupplierLedgerScreen> {
                   const SizedBox(height: 8),
                   Text(
                     "Choose a supplier from the dropdown above to see their transaction history",
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.ibmPlexSans(
                       fontSize: 12,
                       fontWeight: FontWeight.w400,
                       color: Colors.grey,
@@ -469,7 +469,7 @@ class _SupplierLedgerScreenState extends State<SupplierLedgerScreen> {
           const SizedBox(height: 16),
           Text(
             "No Supplier Ledger Data Found",
-            style: GoogleFonts.inter(
+            style: GoogleFonts.ibmPlexSans(
               fontSize: 16,
               fontWeight: FontWeight.w600,
               color: Colors.grey,
@@ -478,7 +478,7 @@ class _SupplierLedgerScreenState extends State<SupplierLedgerScreen> {
           const SizedBox(height: 8),
           Text(
             "Supplier ledger data will appear here when available",
-            style: GoogleFonts.inter(
+            style: GoogleFonts.ibmPlexSans(
               fontSize: 12,
               fontWeight: FontWeight.w400,
               color: Colors.grey,
@@ -503,7 +503,7 @@ class _SupplierLedgerScreenState extends State<SupplierLedgerScreen> {
           const SizedBox(height: 16),
           Text(
             "Error Loading Supplier Ledger Report",
-            style: GoogleFonts.inter(
+            style: GoogleFonts.ibmPlexSans(
               fontSize: 16,
               fontWeight: FontWeight.w600,
               color: Colors.grey,
@@ -591,7 +591,7 @@ class SupplierLedgerTableCard extends StatelessWidget {
                             color: Colors.white,
                             fontSize: 11,
                             fontWeight: FontWeight.w700,
-                            fontFamily: GoogleFonts.inter().fontFamily,
+                            fontFamily: GoogleFonts.ibmPlexSans().fontFamily,
                           ),
                           headingRowColor: WidgetStateProperty.all(
                             AppColors.primaryColor(context),
@@ -599,7 +599,7 @@ class SupplierLedgerTableCard extends StatelessWidget {
                           dataTextStyle: TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.w500,
-                            fontFamily: GoogleFonts.inter().fontFamily,
+                            fontFamily: GoogleFonts.ibmPlexSans().fontFamily,
                           ),
                           columns: _buildColumns(dynamicColumnWidth),
                           rows: ledgers.asMap().entries.map((entry) {

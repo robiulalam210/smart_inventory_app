@@ -80,7 +80,7 @@ class MobileSourceTableCard extends StatelessWidget {
                   Expanded(
                     child: Text(
                       source.name?.capitalize() ?? 'Unnamed Source',
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.ibmPlexSans(
                         fontWeight: FontWeight.w600,
                         fontSize: 16,
                         color: AppColors.text(context),
@@ -171,7 +171,7 @@ class MobileSourceTableCard extends StatelessWidget {
           icon: Icon(icon, size: 16, color: color),
           label: Text(
             text,
-            style: GoogleFonts.inter(
+            style: GoogleFonts.ibmPlexSans(
               fontSize: 11,
               fontWeight: FontWeight.w600,
               color: color,
@@ -269,7 +269,7 @@ class MobileSourceTableCard extends StatelessWidget {
           const SizedBox(height: 16),
           Text(
             'No Sources Found',
-            style: GoogleFonts.inter(
+            style: GoogleFonts.ibmPlexSans(
               fontSize: 16,
               fontWeight: FontWeight.w600,
               color: Colors.grey,
@@ -278,7 +278,7 @@ class MobileSourceTableCard extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             'Create your first source to get started',
-            style: GoogleFonts.inter(
+            style: GoogleFonts.ibmPlexSans(
               fontSize: 14,
               fontWeight: FontWeight.w400,
               color: Colors.grey,
@@ -413,7 +413,7 @@ class SourceTableCard extends StatelessWidget {
           const SizedBox(height: 16),
           Text(
             'No Sources Found',
-            style: GoogleFonts.inter(
+            style: GoogleFonts.ibmPlexSans(
               fontSize: 16,
               fontWeight: FontWeight.w600,
               color: Colors.grey,
@@ -422,7 +422,7 @@ class SourceTableCard extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             'Create your first source to get started',
-            style: GoogleFonts.inter(
+            style: GoogleFonts.ibmPlexSans(
               fontSize: 12,
               fontWeight: FontWeight.w400,
               color: Colors.grey,
