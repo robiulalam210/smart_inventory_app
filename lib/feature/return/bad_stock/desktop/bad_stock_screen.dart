@@ -1,3 +1,4 @@
+import '../../../../core/widgets/web_ui.dart';
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -63,7 +64,7 @@ class _BadStockScreenState extends State<BadStockScreen> {
     final isBigScreen = Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
 
     return Container(
-      color: AppColors.bottomNavBg(context),
+      color: W.canvas(context),
       child: SafeArea(
         child: ResponsiveRow(
           children: [
@@ -173,7 +174,7 @@ class _BadStockScreenState extends State<BadStockScreen> {
           );
         } else if (state is BadStockListSuccess) {
           if (state.list.isEmpty) {
-            return _buildEmptyState();
+            return _buildEmptyState(context);
           }
           return Column(
             children: [
@@ -204,12 +205,12 @@ class _BadStockScreenState extends State<BadStockScreen> {
         } else if (state is BadStockListFailed) {
           return _buildErrorState(state.content);
         }
-        return _buildEmptyState();
+        return _buildEmptyState(context);
       },
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(BuildContext context) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -289,7 +290,7 @@ class BadStockTableCard extends StatelessWidget {
   // Desktop টেবিল — AppDataTable
   Widget build(BuildContext context) {
     if (badStocks.isEmpty) {
-      return _buildEmptyState();
+      return _buildEmptyState(context);
     }
 
     const columns = [
@@ -432,11 +433,12 @@ class BadStockTableCard extends StatelessWidget {
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        color: Colors.white,
+        borderRadius: BorderRadius.circular(W.rMd),
+        border: Border.all(color: W.line(context)),
+        color: W.surface(context),
         boxShadow: [
           BoxShadow(
             color: Colors.grey.withValues(alpha: 0.1),

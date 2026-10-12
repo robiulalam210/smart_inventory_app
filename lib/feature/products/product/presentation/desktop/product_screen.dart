@@ -1,3 +1,4 @@
+import '../../../../../core/widgets/web_ui.dart';
 
 import '../../../../../core/configs/configs.dart';
 import '../../../../../desktop/widgets/sidebar.dart';
@@ -135,7 +136,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
             if (isBigScreen && !PermanentSidebarScope.active(context))
               Container(
                 width: 250,
-                decoration: const BoxDecoration(color: Colors.white),
+                decoration: BoxDecoration(color: W.surface(context)),
                 child: const Sidebar(),
               ),
 

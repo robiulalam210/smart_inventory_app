@@ -1,3 +1,4 @@
+import '../../../../core/widgets/web_ui.dart';
 import 'package:intl/intl.dart';
 import '../../../profile/presentation/bloc/profile_bloc/profile_bloc.dart';
 import '/core/core.dart';
@@ -686,7 +687,7 @@ class _MoneyReceiptListScreenState extends State<MobileMoneyReceiptForm> {
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color:AppColors.bottomNavBg(context),
+        color: W.canvas(context),
         borderRadius: BorderRadius.circular(6),
       ),
       child: Column(

@@ -1,3 +1,4 @@
+import '../../../../core/widgets/web_ui.dart';
 import 'package:meherinMart/desktop/widgets/sidebar.dart';
 import 'package:intl/intl.dart';
 import '/core/core.dart';
@@ -140,7 +141,7 @@ class _MoneyReceiptListScreenState extends State<MoneyReceiptForm> {
       key: formKey,
       child: Container(
         padding: const EdgeInsets.all(10),
-        color: AppColors.bottomNavBg(context),
+        color: W.canvas(context),
         child: BlocListener<MoneyReceiptBloc, MoneyReceiptState>(
           listener: (context, state) {
             if (state is MoneyReceiptAddLoading) {
@@ -219,8 +220,9 @@ class _MoneyReceiptListScreenState extends State<MoneyReceiptForm> {
               const SizedBox(height: 10),
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(6),
+                  color: W.surface(context),
+                  border: Border.all(color: W.line(context)),
+                  borderRadius: BorderRadius.circular(W.rMd),
                 ),
                 padding: const EdgeInsets.all(20),
                 child: Column(
@@ -450,8 +452,9 @@ class _MoneyReceiptListScreenState extends State<MoneyReceiptForm> {
               const SizedBox(height: 16),
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(6),
+                  color: W.surface(context),
+                  border: Border.all(color: W.line(context)),
+                  borderRadius: BorderRadius.circular(W.rMd),
                 ),
                 padding: const EdgeInsets.all(20),
                 child: Column(

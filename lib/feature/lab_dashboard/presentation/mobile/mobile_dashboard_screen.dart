@@ -9,7 +9,9 @@ import '../../../../mobile/mobile_root.dart';
 import '../../../../mobile/widgets/mobile_tab_sidebar.dart';
 import '../../../feature.dart';
 import '../../../profile/presentation/bloc/profile_bloc/profile_bloc.dart';
+import '../widgets/dash_more_charts.dart';
 import '../widgets/mobile_stat_card.dart';
+import '../../../stock_tools/presentation/expiry_screen.dart';
 
 class DashBoardScreen extends StatefulWidget {
   const DashBoardScreen({super.key});
@@ -624,6 +626,10 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
                       'Purchase Overview',
                       Icons.local_shipping_rounded,
                       _buildPurchaseOverview(loaded),
+                    ),
+                    const SizedBox(height: 14),
+                    DashMoreCharts(
+                      onOpenExpiry: () => AppRoutes.push(context, const ExpiryScreen()),
                     ),
                   ],
                   if (state is DashboardError)

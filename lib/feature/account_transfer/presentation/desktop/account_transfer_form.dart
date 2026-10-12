@@ -1,3 +1,4 @@
+import '../../../../core/widgets/web_ui.dart';
 import 'package:meherinMart/desktop/widgets/sidebar.dart';
 // lib/account_transfer/presentation/screens/account_transfer_form.dart
 
@@ -108,7 +109,7 @@ class _AccountTransferFormState extends State<AccountTransferForm> {
               key: formKey,
               child: Container(
                 padding: const EdgeInsets.all(10),
-                color: AppColors.bottomNavBg(context),
+                color: W.canvas(context),
                 child: BlocListener<AccountTransferBloc, AccountTransferState>(
                   listener: (context, state) {
                     if (state is AccountTransferAddLoading ||
@@ -201,8 +202,9 @@ _fetchApi();
                       const SizedBox(height: 16),
                       Container(
                         decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(6),
+                          color: W.surface(context),
+                          border: Border.all(color: W.line(context)),
+                          borderRadius: BorderRadius.circular(W.rMd),
                         ),
                         padding: const EdgeInsets.all(20),
                         child: Column(

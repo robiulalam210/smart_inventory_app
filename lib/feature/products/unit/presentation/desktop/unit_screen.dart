@@ -1,3 +1,4 @@
+import '../../../../../core/widgets/web_ui.dart';
 import '/feature/products/unit/presentation/shared/unit_create.dart';
 
 import '../../../../../core/configs/configs.dart';
@@ -39,7 +40,7 @@ class _UnitScreenState extends State<UnitScreen> {
     final isBigScreen =
         Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
     return Container(
-      color: AppColors.bottomNavBg(context),
+      color: W.canvas(context),
       child: SafeArea(
         child: ResponsiveRow(
           spacing: 0,
@@ -61,7 +62,7 @@ class _UnitScreenState extends State<UnitScreen> {
       lg: 2,
       xl: 2,
       child: Container(
-        decoration: const BoxDecoration(color: Colors.white),
+        decoration: BoxDecoration(color: W.surface(context)),
         child: const Sidebar(),
       ),
     );

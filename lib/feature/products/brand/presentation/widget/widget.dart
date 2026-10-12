@@ -1,3 +1,4 @@
+import '../../../../../core/widgets/web_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:meherinMart/core/widgets/app_data_table.dart';
 import 'package:meherinMart/core/widgets/app_popover_route.dart';
@@ -22,7 +23,7 @@ class BrandTableCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (brands.isEmpty) {
-      return _buildEmptyState();
+      return _buildEmptyState(context);
     }
 
     return Responsive.isMobile(context)
@@ -249,11 +250,12 @@ class BrandTableCard extends StatelessWidget {
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        color: Colors.white,
+        borderRadius: BorderRadius.circular(W.rMd),
+        border: Border.all(color: W.line(context)),
+        color: W.surface(context),
         boxShadow: [
           BoxShadow(
             color: Colors.grey.withValues(alpha: 0.1),

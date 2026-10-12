@@ -1,5 +1,6 @@
 import '/feature/supplier/data/model/supplier_list_model.dart';
 import '../../../../core/configs/configs.dart';
+import '../../../../core/widgets/web_ui.dart';
 import 'package:meherinMart/core/widgets/table_scroll_controllers.dart';
 
 class SupplierDataTableWidget extends StatelessWidget {
@@ -52,24 +53,22 @@ class SupplierDataTableWidget extends StatelessWidget {
         vertical: 8.0,
       ),
       decoration: BoxDecoration(
-        color: AppColors.bottomNavBg(context),
-        borderRadius: BorderRadius.circular(AppSizes.radius),
-        border: Border.all(
-          color: AppColors.greyColor(context).withValues(alpha: 0.5),
-          width: 0.5,
-        ),
+        color: W.surface(context),
+        borderRadius: BorderRadius.circular(W.rLg),
+        border: Border.all(color: W.line(context)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Header with SL and Status
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
-              color: AppColors.primaryColor(context).withValues(alpha: 0.05),
+              color: W.soft(context),
+              border: Border(bottom: BorderSide(color: W.line(context))),
               borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(16),
-                topRight: Radius.circular(16),
+                topLeft: Radius.circular(W.rLg - 1),
+                topRight: Radius.circular(W.rLg - 1),
               ),
             ),
             child: Row(
@@ -83,13 +82,13 @@ class SupplierDataTableWidget extends StatelessWidget {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: AppColors.primaryColor(context),
+                        color: W.tint(context),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
                         '#$index',
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: TextStyle(
+                          color: W.ink2(context),
                           fontWeight: FontWeight.w600,
                           fontSize: 12,
                         ),
@@ -99,21 +98,21 @@ class SupplierDataTableWidget extends StatelessWidget {
                     Text(
                       supplier.supplierNo ?? '-',
                       style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.text(context),
+                        fontWeight: FontWeight.w700,
+                        color: W.ink(context),
                         fontSize: 14,
                       ),
                     ),
                   ],
                 ),
-                _buildAdvanceBalanceChip(supplier.advanceBalance),
+                _buildAdvanceBalanceChip(context, supplier.advanceBalance),
               ],
             ),
           ),
 
           // Supplier Details
           Padding(
-            padding: const EdgeInsets.all(10),
+            padding: const EdgeInsets.all(14),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -197,16 +196,16 @@ class SupplierDataTableWidget extends StatelessWidget {
                         children: [
                           Icon(
                             Iconsax.location,
-                            size: 18,
-                            color: AppColors.text(context),
+                            size: 16,
+                            color: W.muted(context),
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            'Address:',
+                            'Address',
                             style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.text(context),
-                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                              color: W.muted(context),
+                              fontSize: 12.5,
                             ),
                           ),
                         ],
@@ -217,8 +216,8 @@ class SupplierDataTableWidget extends StatelessWidget {
                         child: Text(
                           supplier.address!,
                           style: TextStyle(
-                            color: AppColors.text(context),
-                            fontSize: 13,
+                            color: W.ink(context),
+                            fontSize: 14,
                           ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
@@ -232,11 +231,9 @@ class SupplierDataTableWidget extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: AppColors.bottomNavBg(context),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: Colors.grey.shade200,
-                    ),
+                    color: W.soft(context),
+                    borderRadius: BorderRadius.circular(W.rMd),
+                    border: Border.all(color: W.line(context)),
                   ),
                   child: Column(
                     children: [
@@ -247,15 +244,15 @@ class SupplierDataTableWidget extends StatelessWidget {
                           Icon(
                             Iconsax.wallet_money,
                             size: 16,
-                            color: AppColors.primaryColor(context),
+                            color: W.muted(context),
                           ),
                           const SizedBox(width: 6),
                           Text(
                             'Financial Summary',
                             style: TextStyle(
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.primaryColor(context),
-                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: W.muted(context),
+                              fontSize: 12.5,
                             ),
                           ),
                         ],
@@ -290,7 +287,7 @@ class SupplierDataTableWidget extends StatelessWidget {
                             label: 'Due',
                             value: '৳${supplier.totalDue.toString()}',
                             icon: Iconsax.wallet_minus,
-                            color: AppColors.warning,
+                            color: AppColors.danger,
                           ),
                           _buildFinancialCard(
                             context: context,
@@ -312,19 +309,14 @@ class SupplierDataTableWidget extends StatelessWidget {
 
           // Action Buttons
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             decoration: BoxDecoration(
-              color: AppColors.bottomNavBg(context),
+              color: W.surface(context),
               borderRadius: const BorderRadius.only(
-                bottomLeft: Radius.circular(16),
-                bottomRight: Radius.circular(16),
+                bottomLeft: Radius.circular(W.rLg),
+                bottomRight: Radius.circular(W.rLg),
               ),
-              border: Border(
-                top: BorderSide(
-                  color: Colors.grey.shade200,
-                  width: 1,
-                ),
-              ),
+              border: Border(top: BorderSide(color: W.line(context))),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -338,8 +330,8 @@ class SupplierDataTableWidget extends StatelessWidget {
                     ),
                     label: const Text('Edit'),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.info,
-                      side: BorderSide(color: Colors.blue.shade300),
+                      foregroundColor: W.blueInk(context),
+                      side: BorderSide(color: W.blueLine(context)),
                       padding: const EdgeInsets.symmetric(vertical: 10),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
@@ -357,8 +349,8 @@ class SupplierDataTableWidget extends StatelessWidget {
                     ),
                     label: const Text('Delete'),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.danger,
-                      side: BorderSide(color: Colors.red.shade300),
+                      foregroundColor: W.redInk(context),
+                      side: BorderSide(color: W.redLine(context)),
                       padding: const EdgeInsets.symmetric(vertical: 10),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
@@ -389,8 +381,8 @@ class SupplierDataTableWidget extends StatelessWidget {
         children: [
           Icon(
             icon,
-            size: 18,
-            color: AppColors.text(context),
+            size: 16,
+            color: W.muted(context),
           ),
           const SizedBox(width: 8),
           Expanded(
@@ -400,9 +392,9 @@ class SupplierDataTableWidget extends StatelessWidget {
                 Text(
                   label,
                   style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.text(context),
-                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    color: W.muted(context),
+                    fontSize: 12.5,
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -410,9 +402,7 @@ class SupplierDataTableWidget extends StatelessWidget {
                   value,
                   style: TextStyle(
                     fontWeight: isImportant ? FontWeight.w700 : FontWeight.w500,
-                    color: isImportant
-                        ? AppColors.primaryColor(context)
-                        : AppColors.text(context),
+                    color: W.ink(context),
                     fontSize: isImportant ? 15 : 14,
                   ),
                   maxLines: 2,
@@ -436,9 +426,9 @@ class SupplierDataTableWidget extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.05),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withValues(alpha: 0.2)),
+        color: W.surface(context),
+        borderRadius: BorderRadius.circular(W.rSm),
+        border: Border.all(color: W.line(context)),
       ),
       child: Row(
         children: [
@@ -452,17 +442,18 @@ class SupplierDataTableWidget extends StatelessWidget {
                 Text(
                   label,
                   style: TextStyle(
-                    fontSize: 10,
-                    color: AppColors.text(context),
+                    fontSize: 11.5,
+                    color: W.muted(context),
                     fontWeight: FontWeight.w500,
                   ),
                 ),
                 Text(
                   value,
                   style: TextStyle(
-                    fontSize: 12,
+                    fontSize: 13,
                     color: color,
                     fontWeight: FontWeight.w700,
+                    fontFeatures: W.tabular,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -475,7 +466,7 @@ class SupplierDataTableWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildAdvanceBalanceChip(String? advanceBalance) {
+  Widget _buildAdvanceBalanceChip(BuildContext context, String? advanceBalance) {
     final balance = double.tryParse(advanceBalance ?? '0') ?? 0;
     Color color;
     String text;
@@ -490,17 +481,16 @@ class SupplierDataTableWidget extends StatelessWidget {
       text = '৳${balance.toStringAsFixed(2)}';
       icon = Iconsax.arrow_down_2;
     } else {
-      color = Colors.grey;
+      color = W.muted(context);
       text = '৳0.00';
       icon = Iconsax.minus;
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
+        color: color.withValues(alpha: W.dark(context) ? 0.18 : 0.12),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

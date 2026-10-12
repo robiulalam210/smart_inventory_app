@@ -4,6 +4,7 @@ import '/feature/purchase/presentation/shared/purchase_details.dart';
 import 'package:printing/printing.dart';
 
 import '../../../core/configs/configs.dart';
+import '../../../core/widgets/web_ui.dart';
 import '../data/model/purchase_sale_model.dart';
 import 'shared/pdf/generate_purchase_pdf.dart';
 import 'package:meherinMart/core/widgets/table_scroll_controllers.dart';
@@ -38,9 +39,8 @@ class PurchaseDataTableWidget extends StatelessWidget {
   }
 
   Widget _buildPurchaseCard(PurchaseModel purchase, BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textColor = AppColors.text(context);
-    final primary = AppColors.primaryColor(context);
+    final textColor = W.ink(context);
+    final muted = W.muted(context);
 
     final total = AppTableMoney.parse(purchase.total);
     final paid = AppTableMoney.parse(purchase.paidAmount);
@@ -49,28 +49,25 @@ class PurchaseDataTableWidget extends StatelessWidget {
     final statusColor = _getPaymentStatusColor(status);
     final supplier = (purchase.supplierName ?? '').trim();
     final method = (purchase.paymentMethod ?? '').trim();
-    final divider = isDark
-        ? Colors.white.withValues(alpha: 0.08)
-        : AppColors.borderLight;
 
     String money(double v) => '৳${v.toStringAsFixed(2)}';
 
     return Material(
-      color: AppColors.bottomNavBg(context),
-      borderRadius: BorderRadius.circular(16),
+      color: W.surface(context),
+      borderRadius: BorderRadius.circular(W.rLg),
       child: InkWell(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(W.rLg),
         onTap: () => _viewPurchaseDetails(context, purchase),
         child: Container(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: divider),
+            borderRadius: BorderRadius.circular(W.rLg),
+            border: Border.all(color: W.line(context)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
-                padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
+                padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -81,13 +78,13 @@ class PurchaseDataTableWidget extends StatelessWidget {
                           width: 40,
                           height: 40,
                           decoration: BoxDecoration(
-                            color: AppColors.info.withValues(alpha: 0.10),
-                            borderRadius: BorderRadius.circular(12),
+                            color: W.blueWash(context),
+                            borderRadius: BorderRadius.circular(W.rMd),
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Iconsax.box,
                             size: 20,
-                            color: AppColors.info,
+                            color: W.blueInk(context),
                           ),
                         ),
                         const SizedBox(width: 10),
@@ -100,17 +97,17 @@ class PurchaseDataTableWidget extends StatelessWidget {
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
-                                  fontSize: 14.5,
-                                  fontWeight: FontWeight.w800,
-                                  color: primary,
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w700,
+                                  color: textColor,
                                 ),
                               ),
                               const SizedBox(height: 2),
                               Text(
                                 _formatDate(purchase.purchaseDate.toString()),
                                 style: TextStyle(
-                                  fontSize: 12,
-                                  color: textColor.withValues(alpha: 0.6),
+                                  fontSize: 12.5,
+                                  color: muted,
                                 ),
                               ),
                             ],
@@ -127,7 +124,7 @@ class PurchaseDataTableWidget extends StatelessWidget {
                         Icon(
                           Iconsax.shop,
                           size: 15,
-                          color: textColor.withValues(alpha: 0.55),
+                          color: muted,
                         ),
                         const SizedBox(width: 6),
                         Expanded(
@@ -136,7 +133,7 @@ class PurchaseDataTableWidget extends StatelessWidget {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
-                              fontSize: 13.5,
+                              fontSize: 14,
                               fontWeight: FontWeight.w600,
                               color: textColor,
                             ),
@@ -146,21 +143,21 @@ class PurchaseDataTableWidget extends StatelessWidget {
                           const SizedBox(width: 8),
                           Container(
                             padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
+                              horizontal: 10,
                               vertical: 3,
                             ),
                             decoration: BoxDecoration(
-                              color: textColor.withValues(alpha: 0.06),
-                              borderRadius: BorderRadius.circular(8),
+                              color: W.tint(context),
+                              borderRadius: BorderRadius.circular(20),
                             ),
                             child: Text(
                               method,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
-                                fontSize: 11,
+                                fontSize: 12,
                                 fontWeight: FontWeight.w500,
-                                color: textColor.withValues(alpha: 0.7),
+                                color: W.ink2(context),
                               ),
                             ),
                           ),
@@ -176,10 +173,9 @@ class PurchaseDataTableWidget extends StatelessWidget {
                         vertical: 10,
                       ),
                       decoration: BoxDecoration(
-                        color: isDark
-                            ? Colors.white.withValues(alpha: 0.04)
-                            : const Color(0xFFF8FAFC),
-                        borderRadius: BorderRadius.circular(12),
+                        color: W.soft(context),
+                        border: Border.all(color: W.line(context)),
+                        borderRadius: BorderRadius.circular(W.rMd),
                       ),
                       child: Row(
                         children: [
@@ -208,7 +204,7 @@ class PurchaseDataTableWidget extends StatelessWidget {
                               money(due),
                               due > 0
                                   ? AppColors.danger
-                                  : textColor.withValues(alpha: 0.5),
+                                  : muted,
                             ),
                           ),
                         ],
@@ -221,7 +217,7 @@ class PurchaseDataTableWidget extends StatelessWidget {
               // ── অ্যাকশন ──
               Container(
                 decoration: BoxDecoration(
-                  border: Border(top: BorderSide(color: divider)),
+                  border: Border(top: BorderSide(color: W.line(context))),
                 ),
                 child: Row(
                   children: [
@@ -231,11 +227,11 @@ class PurchaseDataTableWidget extends StatelessWidget {
                         icon: const Icon(Iconsax.eye, size: 17),
                         label: const Text('Details'),
                         style: TextButton.styleFrom(
-                          foregroundColor: AppColors.info,
+                          foregroundColor: W.blueInk(context),
                           padding: const EdgeInsets.symmetric(vertical: 11),
                           shape: const RoundedRectangleBorder(
                             borderRadius: BorderRadius.only(
-                              bottomLeft: Radius.circular(16),
+                              bottomLeft: Radius.circular(W.rLg),
                             ),
                           ),
                         ),
@@ -244,7 +240,7 @@ class PurchaseDataTableWidget extends StatelessWidget {
                     Container(
                       width: 1,
                       height: 22,
-                      color: textColor.withValues(alpha: 0.1),
+                      color: W.line(context),
                     ),
                     Expanded(
                       child: TextButton.icon(
@@ -252,11 +248,11 @@ class PurchaseDataTableWidget extends StatelessWidget {
                         icon: const Icon(Iconsax.document_download, size: 17),
                         label: const Text('Invoice PDF'),
                         style: TextButton.styleFrom(
-                          foregroundColor: AppColors.success,
+                          foregroundColor: W.ink2(context),
                           padding: const EdgeInsets.symmetric(vertical: 11),
                           shape: const RoundedRectangleBorder(
                             borderRadius: BorderRadius.only(
-                              bottomRight: Radius.circular(16),
+                              bottomRight: Radius.circular(W.rLg),
                             ),
                           ),
                         ),
@@ -284,8 +280,8 @@ class PurchaseDataTableWidget extends StatelessWidget {
         Text(
           label,
           style: TextStyle(
-            fontSize: 11,
-            color: AppColors.text(context).withValues(alpha: 0.55),
+            fontSize: 12,
+            color: W.muted(context),
           ),
         ),
         const SizedBox(height: 3),
@@ -297,8 +293,9 @@ class PurchaseDataTableWidget extends StatelessWidget {
             maxLines: 1,
             style: TextStyle(
               fontSize: 14.5,
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w700,
               color: valueColor,
+              fontFeatures: W.tabular,
             ),
           ),
         ),
@@ -310,7 +307,7 @@ class PurchaseDataTableWidget extends StatelessWidget {
         width: 1,
         height: 32,
         margin: const EdgeInsets.symmetric(horizontal: 10),
-        color: AppColors.text(context).withValues(alpha: 0.08),
+        color: W.line(context),
       );
 
   // Desktop টেবিল — AppDataTable

@@ -1,4 +1,5 @@
 import '../../../../core/configs/configs.dart';
+import '../../../../core/widgets/web_ui.dart';
 import '../../../../desktop/widgets/sidebar.dart';
 import '../../../../core/widgets/app_alert_dialog.dart';
 import '../../../../core/widgets/app_loader.dart';
@@ -25,7 +26,7 @@ class _PosSaleScreenState extends State<PosSaleScreen> {
         Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
 
     return Container(
-      color: AppColors.bottomNavBg(context),
+      color: W.canvas(context),
       child: SafeArea(
         child: ResponsiveRow(
           children: [
@@ -43,7 +44,7 @@ class _PosSaleScreenState extends State<PosSaleScreen> {
         md: 1,
         lg: 2,
         xl: 2,
-        child: Container(color: Colors.white, child: const Sidebar()),
+        child: Container(color: W.surface(context), child: const Sidebar()),
       );
 
   Widget _buildContentArea() {
@@ -54,7 +55,7 @@ class _PosSaleScreenState extends State<PosSaleScreen> {
         onRefresh: () async => _list.currentState?.refresh(),
         color: AppColors.primaryColor(context),
         child: Container(
-          color: AppColors.background(context),
+          color: W.canvas(context),
           padding: AppTextStyle.getResponsivePaddingBody(context),
           child: BlocListener<CreatePosSaleBloc, CreatePosSaleState>(
             listener: (context, state) {

@@ -45,6 +45,11 @@ import 'package:meherinMart/feature/transactions/presentation/desktop/transactio
 import 'package:meherinMart/feature/users_list/presentation/desktop/desktop_users_screen.dart';
 import 'package:meherinMart/desktop/widgets/embedded_full_page.dart';
 import 'package:meherinMart/feature/audit_log/presentation/audit_log_screen.dart';
+import 'package:meherinMart/feature/stock_tools/presentation/stock_adjust_screen.dart';
+import 'package:meherinMart/feature/stock_tools/presentation/stocktake_list_screen.dart';
+import 'package:meherinMart/feature/stock_tools/presentation/expiry_screen.dart';
+import 'package:meherinMart/feature/day_close/presentation/day_close_screen.dart';
+import 'package:meherinMart/feature/stock_tools/presentation/label_print_screen.dart';
 import 'package:meherinMart/feature/payroll/presentation/mobile_salary_sheet_screen.dart';
 import 'package:meherinMart/feature/payroll/presentation/mobile_advances_screen.dart';
 import 'package:meherinMart/feature/payroll/presentation/mobile_payroll_report_screen.dart';
@@ -130,6 +135,11 @@ final List<Widget> desktopScreens = [
     AppWrapper(child: DesktopOnlineOrdersScreen()), // 49 Online Orders (desktop design)
     AppWrapper(child: DesktopShopSettingsScreen()), // 50 Shop Settings (desktop design)
     AppWrapper(child: DueRemindersScreen()), // 51 Due Reminders
+    AppWrapper(child: EmbeddedFullPage(child: StockAdjustScreen(showAppBar: false))), // 52 Stock Adjustment
+    AppWrapper(child: EmbeddedFullPage(child: StocktakeListScreen(showAppBar: false))), // 53 Stocktake
+    AppWrapper(child: EmbeddedFullPage(child: ExpiryScreen(showAppBar: false))), // 54 Expiry Alerts
+    AppWrapper(child: EmbeddedFullPage(child: LabelPrintScreen(showAppBar: false))), // 55 Barcode Labels
+    AppWrapper(child: EmbeddedFullPage(child: DayCloseScreen(showAppBar: false))), // 56 Day Close
 
 
 

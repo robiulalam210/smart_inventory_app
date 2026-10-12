@@ -1,3 +1,4 @@
+import '../../../../core/widgets/web_ui.dart';
 import 'dart:io';
 
 import 'package:meherinMart/core/widgets/app_scaffold.dart';
@@ -131,7 +132,7 @@ class _MobileSplashScreenState extends State<MobileSplashScreen>
         },
         child: SafeArea(
           child: Container(
-            decoration: BoxDecoration(color: AppColors.bottomNavBg(context)),
+            decoration: BoxDecoration(color: W.canvas(context)),
             child: Stack(
               fit: StackFit.expand,
               children: [

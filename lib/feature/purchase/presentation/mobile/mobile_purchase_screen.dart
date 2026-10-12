@@ -1,3 +1,4 @@
+import '../../../../core/widgets/web_ui.dart';
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
 import 'package:meherinMart/core/widgets/app_scaffold.dart';
 
@@ -205,7 +206,7 @@ class _PurchaseScreenState extends State<MobilePurchaseScreen> {
         // Search Bar
         Container(
           decoration: BoxDecoration(
-            color: AppColors.bottomNavBg(context),
+            color: W.canvas(context),
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
               color: Theme.of(context).brightness == Brightness.dark
@@ -395,7 +396,7 @@ class _PurchaseScreenState extends State<MobilePurchaseScreen> {
         return StatefulBuilder(
           builder: (context, setState) {
             return Container(
-              color: AppColors.bottomNavBg(context),
+              color: W.canvas(context),
               padding: const EdgeInsets.all(20),
               child: Column(
                 mainAxisSize: MainAxisSize.min,

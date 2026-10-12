@@ -13,6 +13,7 @@ class AppScaffold extends StatelessWidget {
   final GlobalKey<ScaffoldState>? scaffoldKey;
   final bool? resizeToAvoidBottomInset;
   final bool isCenterFAB;
+  final Color? backgroundColor;
 
   const AppScaffold({
     super.key,
@@ -22,6 +23,7 @@ class AppScaffold extends StatelessWidget {
     this.drawer,
     this.endDrawer,
     this.isCenterFAB = false,
+    this.backgroundColor,
     this.scaffoldKey,
     this.bottomNavigationBar,
     this.resizeToAvoidBottomInset,
@@ -52,7 +54,7 @@ class AppScaffold extends StatelessWidget {
               children: [
                 Scaffold(
                   key: scaffoldKey,
-                  backgroundColor: overlayColor,
+                  backgroundColor: backgroundColor ?? overlayColor,
                   appBar: appBar,
                   drawer: drawer,
                   endDrawer: endDrawer,

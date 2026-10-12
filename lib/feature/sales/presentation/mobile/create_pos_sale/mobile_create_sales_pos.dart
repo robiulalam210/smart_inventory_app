@@ -1,3 +1,4 @@
+import '../../../../../core/widgets/web_ui.dart';
 // NOTE: adjust imports paths to match your project structure
 import '../../shared/create_pos_sale/sale_payment_rules.dart';
 import 'dart:async';
@@ -642,7 +643,7 @@ class _SalesScreenState extends State<MobileSalesScreen> {
           return Container(
             margin: const EdgeInsets.only(bottom: 5),
             decoration: BoxDecoration(
-              color: AppColors.bottomNavBg(context),
+              color: W.canvas(context),
               borderRadius: BorderRadius.circular(AppSizes.radius),
               border: Border.all(
                 color: AppColors.greyColor(context).withValues(alpha: 0.5),
@@ -1146,7 +1147,7 @@ class _SalesScreenState extends State<MobileSalesScreen> {
             padding: const EdgeInsets.all(8),
             margin: const EdgeInsets.only(bottom: 10),
             decoration: BoxDecoration(
-              color: AppColors.bottomNavBg(context),
+              color: W.canvas(context),
               borderRadius: BorderRadius.circular(8),
               border: Border.all(color: AppColors.warning),
             ),
@@ -1172,7 +1173,7 @@ class _SalesScreenState extends State<MobileSalesScreen> {
             padding: const EdgeInsets.all(8),
             margin: const EdgeInsets.only(bottom: 10),
             decoration: BoxDecoration(
-              color: AppColors.bottomNavBg(context),
+              color: W.canvas(context),
               borderRadius: BorderRadius.circular(8),
               border: Border.all(color: AppColors.success),
             ),
@@ -1197,7 +1198,7 @@ class _SalesScreenState extends State<MobileSalesScreen> {
         Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: AppColors.bottomNavBg(context),
+            color: W.canvas(context),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Column(
@@ -1761,9 +1762,10 @@ class _SalesScreenState extends State<MobileSalesScreen> {
       },
 
       child: Container(
+
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(10),
+          color: W.surface(context),
+          borderRadius: BorderRadius.circular(W.rMd),
           border: Border.all(
             color: isAdded
                 ? AppColors.primaryColor(context)
@@ -1778,6 +1780,7 @@ class _SalesScreenState extends State<MobileSalesScreen> {
             ),
           ],
         ),
+
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

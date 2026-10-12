@@ -1,3 +1,4 @@
+import '../../../../core/widgets/web_ui.dart';
 // lib/account_transfer/presentation/screens/account_transfer_screen.dart
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -129,7 +130,7 @@ class _AccountTransferScreenState extends State<AccountTransferScreen> {
         Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
 
     return Container(
-      color: AppColors.bottomNavBg(context),
+      color: W.canvas(context),
       child: SafeArea(
         child: ResponsiveRow(
           spacing: 0,
@@ -151,7 +152,7 @@ class _AccountTransferScreenState extends State<AccountTransferScreen> {
       lg: 2,
       xl: 2,
       child: Container(
-        decoration: const BoxDecoration(color: Colors.white),
+        decoration: BoxDecoration(color: W.surface(context)),
         child: const Sidebar(),
       ),
     );

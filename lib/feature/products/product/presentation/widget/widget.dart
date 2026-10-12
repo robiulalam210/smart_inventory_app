@@ -1,5 +1,6 @@
 
 import '../../../../../core/configs/configs.dart';
+import '../../../../../core/widgets/web_ui.dart';
 import '../../data/model/product_model.dart';
 import '../shared/product_details.dart';
 import 'package:meherinMart/core/widgets/app_network_img.dart';
@@ -53,8 +54,8 @@ class ProductDataTableWidget extends StatelessWidget {
   }
 
   Widget _buildProductCard(ProductModel product, BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textColor = AppColors.text(context);
+    final textColor = W.ink(context);
+    final muted = W.muted(context);
     final primary = AppColors.primaryColor(context);
     final stockState = _stockState(product);
     final active = product.isActive ?? false;
@@ -63,23 +64,19 @@ class ProductDataTableWidget extends StatelessWidget {
     final buyPrice = AppTableMoney.parse(product.purchasePrice);
 
     return Material(
-      color: AppColors.bottomNavBg(context),
-      borderRadius: BorderRadius.circular(16),
+      color: W.surface(context),
+      borderRadius: BorderRadius.circular(W.rLg),
       child: InkWell(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(W.rLg),
         onTap: () => AppRoutes.push(
           context,
           ProductDetailsScreen(productId: product.id.toString()),
         ),
         child: Container(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: isDark
-                  ? Colors.white.withValues(alpha: 0.08)
-                  : AppColors.borderLight,
-            ),
+            borderRadius: BorderRadius.circular(W.rLg),
+            border: Border.all(color: W.line(context)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -89,19 +86,19 @@ class ProductDataTableWidget extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
-                    width: 46,
-                    height: 46,
+                    width: 42,
+                    height: 42,
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
-                      color: primary.withValues(alpha: 0.10),
-                      borderRadius: BorderRadius.circular(12),
+                      color: W.blueWash(context),
+                      borderRadius: BorderRadius.circular(W.rMd),
                     ),
                     child: Text(
                       name.isEmpty ? '?' : String.fromCharCode(name.runes.first).toUpperCase(),
                       style: TextStyle(
-                        fontSize: 19,
-                        fontWeight: FontWeight.w800,
-                        color: primary,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: W.blueInk(context),
                       ),
                     ),
                   ),
@@ -115,7 +112,7 @@ class ProductDataTableWidget extends StatelessWidget {
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            fontSize: 14.5,
+                            fontSize: 15,
                             height: 1.25,
                             fontWeight: FontWeight.w700,
                             color: textColor,
@@ -127,7 +124,7 @@ class ProductDataTableWidget extends StatelessWidget {
                             Icon(
                               Iconsax.tag,
                               size: 13,
-                              color: textColor.withValues(alpha: 0.5),
+                              color: muted,
                             ),
                             const SizedBox(width: 4),
                             Flexible(
@@ -136,8 +133,8 @@ class ProductDataTableWidget extends StatelessWidget {
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
-                                  fontSize: 12,
-                                  color: textColor.withValues(alpha: 0.6),
+                                  fontSize: 12.5,
+                                  color: muted,
                                 ),
                               ),
                             ),
@@ -172,10 +169,9 @@ class ProductDataTableWidget extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                 decoration: BoxDecoration(
-                  color: isDark
-                      ? Colors.white.withValues(alpha: 0.04)
-                      : const Color(0xFFF8FAFC),
-                  borderRadius: BorderRadius.circular(12),
+                  color: W.soft(context),
+                  border: Border.all(color: W.line(context)),
+                  borderRadius: BorderRadius.circular(W.rMd),
                 ),
                 child: Row(
                   children: [
@@ -209,8 +205,8 @@ class ProductDataTableWidget extends StatelessWidget {
                           Text(
                             'Status',
                             style: TextStyle(
-                              fontSize: 11,
-                              color: textColor.withValues(alpha: 0.55),
+                              fontSize: 12,
+                              color: muted,
                             ),
                           ),
                           const SizedBox(height: 5),
@@ -237,9 +233,9 @@ class ProductDataTableWidget extends StatelessWidget {
       padding: EdgeInsets.zero,
       icon: Icon(
         Icons.more_vert_rounded,
-        color: AppColors.text(context).withValues(alpha: 0.6),
+        color: W.muted(context),
       ),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(W.rMd)),
       onSelected: (v) {
         switch (v) {
           case 'view':
@@ -284,17 +280,16 @@ class ProductDataTableWidget extends StatelessWidget {
   }
 
   Widget _tag(BuildContext context, IconData icon, String text) {
-    final c = AppColors.text(context);
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: c.withValues(alpha: 0.06),
-        borderRadius: BorderRadius.circular(8),
+        color: W.tint(context),
+        borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 12, color: c.withValues(alpha: 0.6)),
+          Icon(icon, size: 12, color: W.muted(context)),
           const SizedBox(width: 5),
           ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 130),
@@ -303,9 +298,9 @@ class ProductDataTableWidget extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                fontSize: 11.5,
+                fontSize: 12,
                 fontWeight: FontWeight.w500,
-                color: c.withValues(alpha: 0.75),
+                color: W.ink2(context),
               ),
             ),
           ),
@@ -322,13 +317,13 @@ class ProductDataTableWidget extends StatelessWidget {
     String? sub,
     Color? subColor,
   }) {
-    final c = AppColors.text(context);
+    final c = W.muted(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: TextStyle(fontSize: 11, color: c.withValues(alpha: 0.55)),
+          style: TextStyle(fontSize: 12, color: c),
         ),
         const SizedBox(height: 3),
         FittedBox(
@@ -339,8 +334,9 @@ class ProductDataTableWidget extends StatelessWidget {
             maxLines: 1,
             style: TextStyle(
               fontSize: 15,
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w700,
               color: valueColor,
+              fontFeatures: W.tabular,
             ),
           ),
         ),
@@ -351,9 +347,9 @@ class ProductDataTableWidget extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
-              fontSize: 10.5,
+              fontSize: 11.5,
               fontWeight: FontWeight.w500,
-              color: subColor ?? c.withValues(alpha: 0.5),
+              color: subColor ?? c,
             ),
           ),
         ],
@@ -365,7 +361,7 @@ class ProductDataTableWidget extends StatelessWidget {
         width: 1,
         height: 34,
         margin: const EdgeInsets.symmetric(horizontal: 10),
-        color: AppColors.text(context).withValues(alpha: 0.08),
+        color: W.line(context),
       );
 
   // Desktop টেবিল — AppDataTable

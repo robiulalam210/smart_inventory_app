@@ -1,3 +1,5 @@
+import '../../../../core/widgets/web_ui.dart';
+import 'package:meherinMart/feature/stock_tools/presentation/batch_expiry_fields.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -353,7 +355,7 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
     final isBigScreen =
         Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
     return Container(
-      color: AppColors.bottomNavBg(context),
+      color: W.canvas(context),
       child: SafeArea(
         child: ResponsiveRow(
           spacing: 0,
@@ -375,7 +377,7 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
       lg: 2,
       xl: 2,
       child: Container(
-        decoration: const BoxDecoration(color: Colors.white),
+        decoration: BoxDecoration(color: W.surface(context)),
         child: const Sidebar(),
       ),
     );
@@ -429,6 +431,12 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(height: 10),
+                    WPanel(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                    const WPanelHead('Purchase details'),
+                    const SizedBox(height: 12),
                     ResponsiveRow(
                       spacing: 20,
                       runSpacing: 10,
@@ -489,7 +497,7 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                             hintText: 'Purchase Date',
                             keyboardType: TextInputType.datetime,
 
-                            fillColor: AppColors.whiteColor(context),
+                            fillColor: W.surface(context),
                             validator: (value) {
                               return value!.isEmpty
                                   ? 'Please enter date'
@@ -509,10 +517,22 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                         ),
                       ],
                     ),
+                        ],
+                      ),
+                    ),
                     const SizedBox(height: 10),
                     _buildProductRows(),
                     const SizedBox(height: 10),
-                    _buildChargesSection(),
+                    WPanel(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const WPanelHead('Charges & discount'),
+                          const SizedBox(height: 12),
+                          _buildChargesSection(),
+                        ],
+                      ),
+                    ),
                     const SizedBox(height: 10),
                     _buildSummarySection(),
 
@@ -556,7 +576,7 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
           padding: const EdgeInsets.all(6),
           margin: const EdgeInsets.all(0),
           decoration: BoxDecoration(
-            color:AppColors.bottomNavBg(context),
+            color: W.canvas(context),
             borderRadius: BorderRadius.circular(8),
           ),
           child: ResponsiveRow(
@@ -683,7 +703,7 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                       "Price",
                       style: AppTextStyle.cardLevelText(context),
                     ),
-                    fillColor: AppColors.whiteColor(context),
+                    fillColor: W.surface(context),
                     filled: true,
                     hintStyle: AppTextStyle.cardLevelText(context),
                     isCollapsed: true,
@@ -796,7 +816,7 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                         : null,
                   )(v),
                   decoration: InputDecoration(
-                    fillColor: AppColors.whiteColor(context),
+                    fillColor: W.surface(context),
                     filled: true,
                     hintStyle: AppTextStyle.cardLevelText(context),
                     isCollapsed: true,
@@ -902,7 +922,7 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                       "Ticket Total",
                       style: AppTextStyle.cardLevelText(context),
                     ),
-                    fillColor: AppColors.whiteColor(context),
+                    fillColor: W.surface(context),
                     filled: true,
                     hintStyle: AppTextStyle.cardLevelText(context),
                     isCollapsed: true,
@@ -956,7 +976,7 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                       "Total Amount",
                       style: AppTextStyle.cardLevelText(context),
                     ),
-                    fillColor: AppColors.whiteColor(context),
+                    fillColor: W.surface(context),
                     filled: true,
                     hintStyle: AppTextStyle.cardLevelText(context),
                     isCollapsed: true,
@@ -1015,6 +1035,15 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                     }
                   },
                 ),
+              ),
+              // ব্যাচ নম্বর ও মেয়াদ (optional)
+              ResponsiveCol(
+                xs: 12,
+                sm: 12,
+                md: 12,
+                lg: 12,
+                xl: 12,
+                child: BatchExpiryFields(key: ValueKey('batch-${product["id"]}'), row: product),
               ),
             ],
           ),
@@ -1130,7 +1159,7 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                   controller: controller,
                   hintText: '$label ',
                   isRequiredLable: false,
-                  fillColor: Colors.white,
+                  fillColor: W.surface(context),
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
                   ),
@@ -1170,8 +1199,9 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
           child: Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
-              color: Colors.white,
+              borderRadius: BorderRadius.circular(W.rMd),
+              border: Border.all(color: W.line(context)),
+              color: W.surface(context),
             ),
             child: Column(
               children: [
@@ -1274,8 +1304,9 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8),
-        color: Colors.white,
+        borderRadius: BorderRadius.circular(W.rMd),
+        border: Border.all(color: W.line(context)),
+        color: W.surface(context),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1405,7 +1436,7 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
                   hintText: 'Paid Amount',
                   // label: 'Paid Amount',
                   isRequiredLable: false,
-                  fillColor: Colors.white,
+                  fillColor: W.surface(context),
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
                   ),
@@ -1596,6 +1627,8 @@ class _CreatePurchaseScreenState extends State<CreatePurchaseScreen> {
           "price": price,
           "discount": discount,
           "discount_type": discountType,
+          if ('${product["batch_no"] ?? ''}'.isNotEmpty) "batch_no": '${product["batch_no"]}',
+          if ('${product["expiry_date"] ?? ''}'.isNotEmpty) "expiry_date": '${product["expiry_date"]}',
         };
       })
           .toList();

@@ -1,5 +1,11 @@
+import 'package:meherinMart/core/widgets/page_guide_widgets.dart';
 import 'package:meherinMart/feature/auth/presentation/mobile/mobile_login_scr.dart';
 import 'package:meherinMart/feature/audit_log/presentation/audit_log_screen.dart';
+import 'package:meherinMart/feature/stock_tools/presentation/stock_adjust_screen.dart';
+import 'package:meherinMart/feature/stock_tools/presentation/stocktake_list_screen.dart';
+import 'package:meherinMart/feature/stock_tools/presentation/expiry_screen.dart';
+import 'package:meherinMart/feature/day_close/presentation/day_close_screen.dart';
+import 'package:meherinMart/feature/stock_tools/presentation/label_print_screen.dart';
 import 'package:meherinMart/feature/users_list/presentation/shared/mobile_user_permissions_screen.dart';
 import 'package:meherinMart/feature/payroll/presentation/mobile_advances_screen.dart';
 import 'package:meherinMart/feature/shop/presentation/mobile_online_orders_screen.dart';
@@ -128,7 +134,13 @@ class MobileTabSidebar extends StatelessWidget {
       sections.add(
         MenuSection(
           title: "Products",
-          items: [MenuItem(title: "Products", index: 9)],
+          items: [
+            MenuItem(title: "Products", index: 9),
+            MenuItem(title: "Barcode Labels", index: 55),
+            MenuItem(title: "Stock Adjustment", index: 52),
+            MenuItem(title: "Stocktake", index: 53),
+            MenuItem(title: "Expiry Alerts", index: 54),
+          ],
         ),
       );
     }
@@ -232,6 +244,7 @@ class MobileTabSidebar extends StatelessWidget {
               MenuItem(title: "Expense Report", index: 32),
             if (permissions?.reports?.view == true)
               MenuItem(title: "Bad Stock Report", index: 33),
+              MenuItem(title: "Day Close", index: 56),
           ],
         ),
       );
@@ -585,7 +598,7 @@ class MobileTabSidebar extends StatelessWidget {
           _showPermissionDeniedDialog(context);
           return;
         }
-        AppRoutes.push(context, MobileCreatePosSale());
+        AppRoutes.push(context, GuideHost.mobile(index: index, child: MobileCreatePosSale()));
         break;
 
       case 2: // Pos Sale
@@ -593,7 +606,7 @@ class MobileTabSidebar extends StatelessWidget {
           _showPermissionDeniedDialog(context);
           return;
         }
-        AppRoutes.push(context, MobileSalesScreen());
+        AppRoutes.push(context, GuideHost.mobile(index: index, child: MobileSalesScreen()));
         break;
 
       case 3: // Short Sale
@@ -601,7 +614,7 @@ class MobileTabSidebar extends StatelessWidget {
           _showPermissionDeniedDialog(context);
           return;
         }
-        AppRoutes.push(context, MobileShortCreatePosSale());
+        AppRoutes.push(context, GuideHost.mobile(index: index, child: MobileShortCreatePosSale()));
         break;
 
       case 4: // Sale List
@@ -609,7 +622,7 @@ class MobileTabSidebar extends StatelessWidget {
           _showPermissionDeniedDialog(context);
           return;
         }
-        AppRoutes.push(context, MobilePosSaleScreen());
+        AppRoutes.push(context, GuideHost.mobile(index: index, child: MobilePosSaleScreen()));
         break;
 
       case 5: // Create Money Receipt
@@ -617,7 +630,7 @@ class MobileTabSidebar extends StatelessWidget {
           _showPermissionDeniedDialog(context);
           return;
         }
-        AppRoutes.push(context, MobileMoneyReceiptForm());
+        AppRoutes.push(context, GuideHost.mobile(index: index, child: MobileMoneyReceiptForm()));
         break;
 
       case 6: // Money Receipt List
@@ -625,7 +638,7 @@ class MobileTabSidebar extends StatelessWidget {
           _showPermissionDeniedDialog(context);
           return;
         }
-        AppRoutes.push(context, MobileMoneyReceiptList());
+        AppRoutes.push(context, GuideHost.mobile(index: index, child: MobileMoneyReceiptList()));
         break;
 
       case 7: // Create Purchase
@@ -633,7 +646,7 @@ class MobileTabSidebar extends StatelessWidget {
           _showPermissionDeniedDialog(context);
           return;
         }
-        AppRoutes.push(context, MobileCreatePurchaseScreen());
+        AppRoutes.push(context, GuideHost.mobile(index: index, child: MobileCreatePurchaseScreen()));
         break;
 
       case 8: // Purchase List
@@ -641,7 +654,7 @@ class MobileTabSidebar extends StatelessWidget {
           _showPermissionDeniedDialog(context);
           return;
         }
-        AppRoutes.push(context, MobilePurchaseScreen());
+        AppRoutes.push(context, GuideHost.mobile(index: index, child: MobilePurchaseScreen()));
         break;
 
       case 9: // Product
@@ -649,7 +662,7 @@ class MobileTabSidebar extends StatelessWidget {
           _showPermissionDeniedDialog(context);
           return;
         }
-        AppRoutes.push(context, MobileProductScreen());
+        AppRoutes.push(context, GuideHost.mobile(index: index, child: MobileProductScreen()));
         break;
 
       case 10: // Accounts
@@ -657,7 +670,7 @@ class MobileTabSidebar extends StatelessWidget {
           _showPermissionDeniedDialog(context);
           return;
         }
-        AppRoutes.push(context, MobileAccountScreen());
+        AppRoutes.push(context, GuideHost.mobile(index: index, child: MobileAccountScreen()));
         break;
 
       case 11: // Customer
@@ -665,7 +678,7 @@ class MobileTabSidebar extends StatelessWidget {
           _showPermissionDeniedDialog(context);
           return;
         }
-        AppRoutes.push(context, MobileCustomerScreen());
+        AppRoutes.push(context, GuideHost.mobile(index: index, child: MobileCustomerScreen()));
         break;
 
       case 12: // Supplier List
@@ -673,7 +686,7 @@ class MobileTabSidebar extends StatelessWidget {
           _showPermissionDeniedDialog(context);
           return;
         }
-        AppRoutes.push(context, MobileSupplierListScreen());
+        AppRoutes.push(context, GuideHost.mobile(index: index, child: MobileSupplierListScreen()));
         break;
 
       case 13: // Supplier Payment
@@ -681,7 +694,7 @@ class MobileTabSidebar extends StatelessWidget {
           _showPermissionDeniedDialog(context);
           return;
         }
-        AppRoutes.push(context, MobileSupplierPaymentListScreen());
+        AppRoutes.push(context, GuideHost.mobile(index: index, child: MobileSupplierPaymentListScreen()));
         break;
 
       case 14: // Expense List
@@ -689,7 +702,7 @@ class MobileTabSidebar extends StatelessWidget {
           _showPermissionDeniedDialog(context);
           return;
         }
-        AppRoutes.push(context, MobileExpenseListScreen());
+        AppRoutes.push(context, GuideHost.mobile(index: index, child: MobileExpenseListScreen()));
         break;
 
       case 15: // Expense Head
@@ -697,7 +710,7 @@ class MobileTabSidebar extends StatelessWidget {
           _showPermissionDeniedDialog(context);
           return;
         }
-        AppRoutes.push(context, MobileExpenseHeadScreen());
+        AppRoutes.push(context, GuideHost.mobile(index: index, child: MobileExpenseHeadScreen()));
         break;
 
       case 16: // Expense Sub Head
@@ -705,7 +718,7 @@ class MobileTabSidebar extends StatelessWidget {
           _showPermissionDeniedDialog(context);
           return;
         }
-        AppRoutes.push(context, MobileExpenseSubHeadScreen());
+        AppRoutes.push(context, GuideHost.mobile(index: index, child: MobileExpenseSubHeadScreen()));
         break;
 
       case 17: // Income List
@@ -713,7 +726,7 @@ class MobileTabSidebar extends StatelessWidget {
           _showPermissionDeniedDialog(context);
           return;
         }
-        AppRoutes.push(context, MobileIncomeListScreen());
+        AppRoutes.push(context, GuideHost.mobile(index: index, child: MobileIncomeListScreen()));
         break;
 
       case 18: // Income Head
@@ -721,7 +734,7 @@ class MobileTabSidebar extends StatelessWidget {
           _showPermissionDeniedDialog(context);
           return;
         }
-        AppRoutes.push(context, MobileIncomeHeadScreen());
+        AppRoutes.push(context, GuideHost.mobile(index: index, child: MobileIncomeHeadScreen()));
         break;
 
 
@@ -731,7 +744,7 @@ class MobileTabSidebar extends StatelessWidget {
           _showPermissionDeniedDialog(context);
           return;
         }
-        AppRoutes.push(context, MobileSalesReturnPage());
+        AppRoutes.push(context, GuideHost.mobile(index: index, child: MobileSalesReturnPage()));
         break;
 
       case 20: // Bad Stock List
@@ -739,7 +752,7 @@ class MobileTabSidebar extends StatelessWidget {
           _showPermissionDeniedDialog(context);
           return;
         }
-        AppRoutes.push(context, MobileBadStockScreen());
+        AppRoutes.push(context, GuideHost.mobile(index: index, child: MobileBadStockScreen()));
         break;
 
       case 21: // Purchase Return
@@ -747,7 +760,7 @@ class MobileTabSidebar extends StatelessWidget {
           _showPermissionDeniedDialog(context);
           return;
         }
-        AppRoutes.push(context, MobilePurchaseReturnScreen());
+        AppRoutes.push(context, GuideHost.mobile(index: index, child: MobilePurchaseReturnScreen()));
         break;
 
       case 22: // Sales Report
@@ -755,7 +768,7 @@ class MobileTabSidebar extends StatelessWidget {
           _showPermissionDeniedDialog(context);
           return;
         }
-        AppRoutes.push(context, MobileSalesReportScreen());
+        AppRoutes.push(context, GuideHost.mobile(index: index, child: MobileSalesReportScreen()));
         break;
 
       case 23: // Purchase Report
@@ -763,7 +776,7 @@ class MobileTabSidebar extends StatelessWidget {
           _showPermissionDeniedDialog(context);
           return;
         }
-        AppRoutes.push(context, MobilePurchaseReportScreen());
+        AppRoutes.push(context, GuideHost.mobile(index: index, child: MobilePurchaseReportScreen()));
         break;
 
       case 24: // Profit/Loss Report
@@ -771,7 +784,7 @@ class MobileTabSidebar extends StatelessWidget {
           _showPermissionDeniedDialog(context);
           return;
         }
-        AppRoutes.push(context, MobileProfitLossScreen());
+        AppRoutes.push(context, GuideHost.mobile(index: index, child: MobileProfitLossScreen()));
         break;
 
       case 25: // Top Sale Product Report
@@ -779,7 +792,7 @@ class MobileTabSidebar extends StatelessWidget {
           _showPermissionDeniedDialog(context);
           return;
         }
-        AppRoutes.push(context, MobileTopProductsScreen());
+        AppRoutes.push(context, GuideHost.mobile(index: index, child: MobileTopProductsScreen()));
         break;
 
       case 26: // Low Stock Product Report
@@ -787,7 +800,7 @@ class MobileTabSidebar extends StatelessWidget {
           _showPermissionDeniedDialog(context);
           return;
         }
-        AppRoutes.push(context, MobileLowStockScreen());
+        AppRoutes.push(context, GuideHost.mobile(index: index, child: MobileLowStockScreen()));
         break;
 
       case 27: // Stock Product Report
@@ -795,7 +808,7 @@ class MobileTabSidebar extends StatelessWidget {
           _showPermissionDeniedDialog(context);
           return;
         }
-        AppRoutes.push(context, MobileStockReportScreen());
+        AppRoutes.push(context, GuideHost.mobile(index: index, child: MobileStockReportScreen()));
         break;
 
       case 28: // Customer Ledger
@@ -803,7 +816,7 @@ class MobileTabSidebar extends StatelessWidget {
           _showPermissionDeniedDialog(context);
           return;
         }
-        AppRoutes.push(context, MobileCustomerLedgerScreen());
+        AppRoutes.push(context, GuideHost.mobile(index: index, child: MobileCustomerLedgerScreen()));
         break;
 
       case 29: // Customer Due/Advance Report
@@ -811,7 +824,7 @@ class MobileTabSidebar extends StatelessWidget {
           _showPermissionDeniedDialog(context);
           return;
         }
-        AppRoutes.push(context, MobileCustomerDueAdvanceScreen());
+        AppRoutes.push(context, GuideHost.mobile(index: index, child: MobileCustomerDueAdvanceScreen()));
         break;
 
       case 30: // Supplier Ledger
@@ -819,7 +832,7 @@ class MobileTabSidebar extends StatelessWidget {
           _showPermissionDeniedDialog(context);
           return;
         }
-        AppRoutes.push(context, MobileSupplierLedgerScreen());
+        AppRoutes.push(context, GuideHost.mobile(index: index, child: MobileSupplierLedgerScreen()));
         break;
 
       case 31: // Supplier Due/Advance Report
@@ -827,7 +840,7 @@ class MobileTabSidebar extends StatelessWidget {
           _showPermissionDeniedDialog(context);
           return;
         }
-        AppRoutes.push(context, MobileSupplierDueAdvanceScreen());
+        AppRoutes.push(context, GuideHost.mobile(index: index, child: MobileSupplierDueAdvanceScreen()));
         break;
 
       case 32: // Expense Report
@@ -835,7 +848,7 @@ class MobileTabSidebar extends StatelessWidget {
           _showPermissionDeniedDialog(context);
           return;
         }
-        AppRoutes.push(context, MobileExpenseReportScreen());
+        AppRoutes.push(context, GuideHost.mobile(index: index, child: MobileExpenseReportScreen()));
         break;
 
       case 33: // Bad Stock Report
@@ -843,7 +856,7 @@ class MobileTabSidebar extends StatelessWidget {
           _showPermissionDeniedDialog(context);
           return;
         }
-        AppRoutes.push(context, MobileBadStockScreen());
+        AppRoutes.push(context, GuideHost.mobile(index: index, child: MobileBadStockScreen()));
         break;
 
       case 34: // Staff
@@ -851,7 +864,7 @@ class MobileTabSidebar extends StatelessWidget {
           _showPermissionDeniedDialog(context);
           return;
         }
-        AppRoutes.push(context, MoblieUsersScreen());
+        AppRoutes.push(context, GuideHost.mobile(index: index, child: MoblieUsersScreen()));
         break;
 
       case 35: // Source
@@ -859,7 +872,7 @@ class MobileTabSidebar extends StatelessWidget {
           _showPermissionDeniedDialog(context);
           return;
         }
-        AppRoutes.push(context, MobileSourceScreen());
+        AppRoutes.push(context, GuideHost.mobile(index: index, child: MobileSourceScreen()));
         break;
 
       case 36: // Unit
@@ -867,7 +880,7 @@ class MobileTabSidebar extends StatelessWidget {
           _showPermissionDeniedDialog(context);
           return;
         }
-        AppRoutes.push(context, MobileUnitScreen());
+        AppRoutes.push(context, GuideHost.mobile(index: index, child: MobileUnitScreen()));
         break;
 
       case 37: // Brand
@@ -875,7 +888,7 @@ class MobileTabSidebar extends StatelessWidget {
           _showPermissionDeniedDialog(context);
           return;
         }
-        AppRoutes.push(context, MobileBrandScreen());
+        AppRoutes.push(context, GuideHost.mobile(index: index, child: MobileBrandScreen()));
         break;
 
       case 38: // Category
@@ -883,7 +896,7 @@ class MobileTabSidebar extends StatelessWidget {
           _showPermissionDeniedDialog(context);
           return;
         }
-        AppRoutes.push(context, MobileCategoriesScreen());
+        AppRoutes.push(context, GuideHost.mobile(index: index, child: MobileCategoriesScreen()));
         break;
 
       case 39: // Group
@@ -891,7 +904,7 @@ class MobileTabSidebar extends StatelessWidget {
           _showPermissionDeniedDialog(context);
           return;
         }
-        AppRoutes.push(context, MobileGroupsScreen());
+        AppRoutes.push(context, GuideHost.mobile(index: index, child: MobileGroupsScreen()));
         break;
 
       case 40: // Sale Mode
@@ -899,7 +912,7 @@ class MobileTabSidebar extends StatelessWidget {
           _showPermissionDeniedDialog(context);
           return;
         }
-        AppRoutes.push(context, SaleModeListScreen());
+        AppRoutes.push(context, GuideHost.mobile(index: index, child: SaleModeListScreen()));
         break;
 
 
@@ -908,7 +921,7 @@ class MobileTabSidebar extends StatelessWidget {
           _showPermissionDeniedDialog(context);
           return;
         }
-        AppRoutes.push(context, MobileProfileScreen());
+        AppRoutes.push(context, GuideHost.mobile(index: index, child: MobileProfileScreen()));
         break;
 
       case 42: // Account Transfer From
@@ -916,7 +929,7 @@ class MobileTabSidebar extends StatelessWidget {
           _showPermissionDeniedDialog(context);
           return;
         }
-        AppRoutes.push(context, MobileAccountTransferForm());
+        AppRoutes.push(context, GuideHost.mobile(index: index, child: MobileAccountTransferForm()));
         break;
 
       case 43: // Account Transfer List
@@ -924,7 +937,7 @@ class MobileTabSidebar extends StatelessWidget {
           _showPermissionDeniedDialog(context);
           return;
         }
-        AppRoutes.push(context, MobileAccountTransferScreen());
+        AppRoutes.push(context, GuideHost.mobile(index: index, child: MobileAccountTransferScreen()));
         break;
 
       case 44: // Transactions
@@ -932,27 +945,27 @@ class MobileTabSidebar extends StatelessWidget {
           _showPermissionDeniedDialog(context);
           return;
         }
-        AppRoutes.push(context, MobileTransactionScreen());
+        AppRoutes.push(context, GuideHost.mobile(index: index, child: MobileTransactionScreen()));
         break;
 
       case 45: // Audit Log — getMenuSections এ শুধু Super Admin / Admin এর জন্য যোগ হয়
-        AppRoutes.push(context, const AuditLogScreen());
+        AppRoutes.push(context, GuideHost.mobile(index: index, child: const AuditLogScreen()));
         break;
 
       case 46: // Salary Sheet
-        AppRoutes.push(context, const MobileSalarySheetScreen());
+        AppRoutes.push(context, GuideHost.mobile(index: index, child: const MobileSalarySheetScreen()));
         break;
 
       case 47: // Advances
-        AppRoutes.push(context, const MobileAdvancesScreen());
+        AppRoutes.push(context, GuideHost.mobile(index: index, child: const MobileAdvancesScreen()));
         break;
 
       case 48: // Payroll Report
-        AppRoutes.push(context, const MobilePayrollReportScreen());
+        AppRoutes.push(context, GuideHost.mobile(index: index, child: const MobilePayrollReportScreen()));
         break;
 
       case 49: // User Permissions — getMenuSections এ শুধু Super Admin / Admin এর জন্য যোগ হয়
-        AppRoutes.push(context, const MobileUserPermissionsScreen());
+        AppRoutes.push(context, GuideHost.mobile(index: index, child: const MobileUserPermissionsScreen()));
         break;
 
       case 50: // Online Orders
@@ -960,7 +973,7 @@ class MobileTabSidebar extends StatelessWidget {
           _showPermissionDeniedDialog(context);
           return;
         }
-        AppRoutes.push(context, const MobileOnlineOrdersScreen());
+        AppRoutes.push(context, GuideHost.mobile(index: index, child: const MobileOnlineOrdersScreen()));
         break;
 
       case 51: // Shop Settings
@@ -968,7 +981,33 @@ class MobileTabSidebar extends StatelessWidget {
           _showPermissionDeniedDialog(context);
           return;
         }
-        AppRoutes.push(context, const MobileShopSettingsScreen());
+        AppRoutes.push(context, GuideHost.mobile(index: index, child: const MobileShopSettingsScreen()));
+        break;
+
+      case 52: // Stock Adjustment
+      case 53: // Stocktake
+      case 54: // Expiry Alerts
+      case 55: // Barcode Labels
+        if (permissions?.products?.view != true) {
+          _showPermissionDeniedDialog(context);
+          return;
+        }
+        AppRoutes.push(
+          context, GuideHost.mobile(index: index, child: index == 52
+              ? const StockAdjustScreen()
+              : index == 53
+                  ? const StocktakeListScreen()
+                  : index == 54
+                      ? const ExpiryScreen()
+                      : const LabelPrintScreen()),);
+        break;
+
+      case 56: // Day Close
+        if (permissions?.reports?.view != true) {
+          _showPermissionDeniedDialog(context);
+          return;
+        }
+        AppRoutes.push(context, GuideHost.mobile(index: index, child: const DayCloseScreen()));
         break;
 
       default:

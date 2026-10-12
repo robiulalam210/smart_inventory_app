@@ -1,3 +1,5 @@
+import '../../../../core/widgets/web_ui.dart';
+import 'package:meherinMart/feature/stock_tools/presentation/batch_expiry_fields.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -829,7 +831,7 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
             padding: const EdgeInsets.all(6),
             margin: const EdgeInsets.all(0),
             decoration: BoxDecoration(
-              color: AppColors.bottomNavBg(context),
+              color: W.canvas(context),
               borderRadius: BorderRadius.circular(8),
             ),
             child: ResponsiveRow(
@@ -1362,6 +1364,15 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
                     },
                   ),
                 ),
+                // ব্যাচ নম্বর ও মেয়াদ (optional)
+                ResponsiveCol(
+                  xs: 12,
+                  sm: 12,
+                  md: 12,
+                  lg: 12,
+                  xl: 12,
+                  child: BatchExpiryFields(key: ValueKey('batch-${product["id"]}'), row: product),
+                ),
               ],
             ),
           );
@@ -1518,7 +1529,7 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(8),
-                color: AppColors.bottomNavBg(context),
+                color: W.canvas(context),
               ),
               child: Column(
                 children: [
@@ -1623,7 +1634,7 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
-        color:AppColors.bottomNavBg(context)
+        color: W.canvas(context)
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1809,7 +1820,7 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
-        color:AppColors.bottomNavBg(context)
+        color: W.canvas(context)
       ),
       child: Column(
         children: [
@@ -1987,6 +1998,8 @@ class _CreatePurchaseScreenState extends State<MobileCreatePurchaseScreen> {
         "price": price,
         "discount": discount,
         "discount_type": discountType,
+        if ('${product["batch_no"] ?? ''}'.isNotEmpty) "batch_no": '${product["batch_no"]}',
+        if ('${product["expiry_date"] ?? ''}'.isNotEmpty) "expiry_date": '${product["expiry_date"]}',
       };
     })
         .toList();

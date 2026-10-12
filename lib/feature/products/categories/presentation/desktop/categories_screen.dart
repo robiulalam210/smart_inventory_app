@@ -1,3 +1,4 @@
+import '../../../../../core/widgets/web_ui.dart';
 import '../../../../../core/configs/configs.dart';
 import '../../../../../desktop/widgets/sidebar.dart';
 import '../../../../../core/widgets/app_button.dart';
@@ -46,7 +47,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
     final isBigScreen =
         Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
     return Container(
-      color: AppColors.bottomNavBg(context),
+      color: W.canvas(context),
       child: SafeArea(
         child: ResponsiveRow(
           spacing: 0,
@@ -68,7 +69,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
       lg: 2,
       xl: 2,
       child: Container(
-        decoration: const BoxDecoration(color: Colors.white),
+        decoration: BoxDecoration(color: W.surface(context)),
         child: const Sidebar(),
       ),
     );
@@ -81,7 +82,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
       md: 12,
       lg: 10,
       xl: 10,
-      child: Container(color: AppColors.bottomNavBg(context), child: buildContent()),
+      child: Container(color: W.canvas(context), child: buildContent()),
     );
   }
 

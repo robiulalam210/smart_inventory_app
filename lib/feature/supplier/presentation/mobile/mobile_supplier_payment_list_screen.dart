@@ -1,3 +1,4 @@
+import '../../../../core/widgets/web_ui.dart';
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
 import 'package:meherinMart/core/widgets/app_scaffold.dart';
 
@@ -92,7 +93,7 @@ class _SupplierPaymentScreenState extends State<MobileSupplierPaymentListScreen>
                 child: Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(16),
-                    color: AppColors.bottomNavBg(context),
+                    color: W.canvas(context),
 
                   ),
 
@@ -121,7 +122,7 @@ class _SupplierPaymentScreenState extends State<MobileSupplierPaymentListScreen>
       lg: 10,
       xl: 10,
       child: Container(
-        color: AppColors.bottomNavBg(context),
+        color: W.canvas(context),
         padding: AppTextStyle.getResponsivePaddingBody(context),
         child: RefreshIndicator(
           onRefresh: ()async{

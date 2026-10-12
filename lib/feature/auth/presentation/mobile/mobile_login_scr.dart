@@ -1,3 +1,4 @@
+import '../../../../core/widgets/web_ui.dart';
 import 'dart:async';
 
 import 'package:easy_localization/easy_localization.dart';
@@ -91,6 +92,7 @@ class _MobileLoginScrState extends State<MobileLoginScr>
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
+      backgroundColor: W.canvas(context),
       body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) async {
           if (state is AuthAuthenticated || state is AuthAuthenticatedOffline) {
@@ -165,7 +167,13 @@ class _MobileLoginScrState extends State<MobileLoginScr>
                       /// Glass Card
                       AnimatedContainer(
                         duration: const Duration(milliseconds: 600),
-                        padding: const EdgeInsets.all(24),
+                        margin: const EdgeInsets.symmetric(horizontal: 16),
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: W.surface(context),
+                          border: Border.all(color: W.line(context)),
+                          borderRadius: BorderRadius.circular(W.rLg),
+                        ),
 
                         child: Form(
                           key: _formKey,
@@ -226,20 +234,16 @@ class _MobileLoginScrState extends State<MobileLoginScr>
                                       duration: const Duration(
                                         milliseconds: 200,
                                       ),
-                                      height: 40,
+                                      height: 46,
                                       alignment: Alignment.center,
                                       decoration: BoxDecoration(
-                                        gradient: loading
-                                            ? AppColors.primaryGradient(
-                                                context,
-                                              ).withOpacity(0.3)
-                                            : AppColors.primaryGradient(
-                                                context,
-                                              ),
+                                        color: loading
+                                            ? W.blue(context).withValues(alpha: 0.5)
+                                            : W.blue(context),
                                         // color: loading
                                         //     ? Colors.indigo.shade200
                                         //     : Colors.indigo,
-                                        borderRadius: BorderRadius.circular(12),
+                                        borderRadius: BorderRadius.circular(W.rMd),
                                       ),
                                       child: loading
                                           ? const SizedBox(

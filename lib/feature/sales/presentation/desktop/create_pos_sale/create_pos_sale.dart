@@ -7,6 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../../../../profile/presentation/bloc/profile_bloc/profile_bloc.dart';
 import '/core/core.dart';
+import '/core/widgets/web_ui.dart';
 import '/feature/products/product/data/model/product_stock_model.dart';
 import '/feature/users_list/presentation/bloc/users/user_bloc.dart';
 
@@ -422,7 +423,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: AppColors.bottomNavBg(context),
+      color: W.canvas(context),
       child: SafeArea(
         child: _buildDesktopLayout(),
       ),
@@ -444,7 +445,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
             lg: 2,
             xl: 2,
             child: Container(
-              decoration: const BoxDecoration(color: Colors.white),
+              decoration: BoxDecoration(color: W.surface(context)),
               child: const Sidebar(),
             ),
           ),
@@ -523,17 +524,14 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
   }
 
   Widget _card({String? title, required Widget child}) {
-    final border = Theme.of(context).brightness == Brightness.dark
-        ? Colors.white.withValues(alpha: 0.10)
-        : AppColors.borderLight;
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.bottomNavBg(context),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: border),
+        color: W.surface(context),
+        borderRadius: BorderRadius.circular(W.rLg),
+        border: Border.all(color: W.line(context)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -542,9 +540,9 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
             Text(
               title,
               style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: AppColors.text(context),
+                fontSize: 15.5,
+                fontWeight: FontWeight.w700,
+                color: W.ink(context),
               ),
             ),
             const SizedBox(height: 12),
@@ -651,7 +649,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                   hintText: 'Sale Date',
                   keyboardType: TextInputType.datetime,
                   autofillHints: AutofillHints.name,
-                  fillColor: AppColors.whiteColor(context),
+                  fillColor: W.surface(context),
                   validator: (value) =>
                   value!.isEmpty ? 'Please enter date' : null,
                   onTap: _selectDate,
@@ -679,8 +677,9 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
           padding: const EdgeInsets.all(6),
           margin: const EdgeInsets.all(0),
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(8),
+            color: W.soft(context),
+            borderRadius: BorderRadius.circular(W.rMd),
+            border: Border.all(color: W.line(context)),
           ),
           child: ResponsiveRow(
             spacing: 4,
@@ -803,7 +802,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                       "Price",
                       style: AppTextStyle.cardLevelText(context),
                     ),
-                    fillColor: AppColors.whiteColor(context),
+                    fillColor: W.surface(context),
                     filled: true,
                     hintStyle: AppTextStyle.cardLevelText(context),
                     isCollapsed: true,
@@ -903,7 +902,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                   ),
                   readOnly: true,
                   decoration: InputDecoration(
-                    fillColor: AppColors.whiteColor(context),
+                    fillColor: W.surface(context),
                     filled: true,
                     hintStyle: AppTextStyle.cardLevelText(context),
                     isCollapsed: true,
@@ -994,7 +993,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                       "Ticket Total",
                       style: AppTextStyle.cardLevelText(context),
                     ),
-                    fillColor: AppColors.whiteColor(context),
+                    fillColor: W.surface(context),
                     filled: true,
                     hintStyle: AppTextStyle.cardLevelText(context),
                     isCollapsed: true,
@@ -1031,7 +1030,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                       "Final Total",
                       style: AppTextStyle.cardLevelText(context),
                     ),
-                    fillColor: AppColors.whiteColor(context),
+                    fillColor: W.surface(context),
                     filled: true,
                     hintStyle: AppTextStyle.cardLevelText(context),
                     isCollapsed: true,
@@ -1190,7 +1189,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                   isRequiredLevle: false,
                   controller: controller,
                   hintText: label,
-                  fillColor: Colors.white,
+                  fillColor: W.surface(context),
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
                   ),
@@ -1233,8 +1232,9 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
           child: Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
-              color: Colors.white,
+              borderRadius: BorderRadius.circular(W.rMd),
+              color: W.soft(context),
+              border: Border.all(color: W.line(context)),
             ),
             child: Column(
               children: [
@@ -1370,7 +1370,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                   // isRequiredLable: false,
                   controller: changeAmountController,
                   hintText: 'Change Amount',
-                  // fillColor: Colors.white,
+                  // fillColor: W.surface(context),
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
                   ),
@@ -1417,7 +1417,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
                 //   // isRequiredLable: false,
                 //   controller: bloc.payableAmount,
                 //   hintText: 'Payable Amount',
-                //   // fillColor: Colors.white,
+                //   // fillColor: W.surface(context),
                 //   keyboardType: const TextInputType.numberWithOptions(
                 //     decimal: true,
                 //   ),
@@ -1435,7 +1435,7 @@ class _CreatePosSalePageState extends State<CreatePosSalePage> {
           isRequiredLable: true,
           controller: bloc.remarkController,
           hintText: 'Remark',
-          fillColor: Colors.white,
+          fillColor: W.surface(context),
           validator: (value) => value!.isEmpty ? 'Please enter Remark' : null,
           onChanged: (value) => setState(() {}),
           keyboardType: TextInputType.text,

@@ -1,3 +1,4 @@
+import '../../../../core/widgets/web_ui.dart';
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
 
 import '../../../../core/configs/configs.dart';
@@ -130,7 +131,7 @@ class _MoneyReceiptScreenState extends State<MoneyReceiptScreen> {
     final isBigScreen =
         Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
     return Container(
-      color: AppColors.bottomNavBg(context),
+      color: W.canvas(context),
       child: SafeArea(
         child: ResponsiveRow(
           spacing: 0,
@@ -152,7 +153,7 @@ class _MoneyReceiptScreenState extends State<MoneyReceiptScreen> {
       lg: 2,
       xl: 2,
       child: Container(
-        decoration: const BoxDecoration(color: Colors.white),
+        decoration: BoxDecoration(color: W.surface(context)),
         child: const Sidebar(),
       ),
     );

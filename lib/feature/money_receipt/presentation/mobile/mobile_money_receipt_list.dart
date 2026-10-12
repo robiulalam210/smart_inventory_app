@@ -1,3 +1,4 @@
+import '../../../../core/widgets/web_ui.dart';
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
 
 import '../../../../core/configs/configs.dart';
@@ -357,7 +358,7 @@ class _MoneyReceiptScreenState extends State<MobileMoneyReceiptList> {
           builder: (context, setState) {
             return SafeArea(
               child: Container(
-                color: AppColors.bottomNavBg(context),
+                color: W.canvas(context),
                 padding: const EdgeInsets.all(20),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,

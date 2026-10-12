@@ -1,3 +1,4 @@
+import '../../../../core/widgets/web_ui.dart';
 
 import '../../../../core/configs/configs.dart';
 import '../../../../desktop/widgets/sidebar.dart';
@@ -74,7 +75,7 @@ class _CustomerScreenState extends State<CustomerScreen> {
     final isBigScreen =
         Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
     return Container(
-      color: AppColors.bottomNavBg(context),
+      color: W.canvas(context),
       child: SafeArea(
         child: ResponsiveRow(
           spacing: 0,
@@ -96,7 +97,7 @@ class _CustomerScreenState extends State<CustomerScreen> {
       lg: 2,
       xl: 2,
       child: Container(
-        decoration: const BoxDecoration(color: Colors.white),
+        decoration: BoxDecoration(color: W.surface(context)),
         child: const Sidebar(),
       ),
     );

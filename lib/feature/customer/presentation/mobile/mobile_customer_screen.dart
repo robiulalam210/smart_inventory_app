@@ -1,3 +1,4 @@
+import '../../../../core/widgets/web_ui.dart';
 import 'package:meherinMart/core/widgets/app_scaffold.dart';
 import '../../../../core/configs/configs.dart';
 import '../../../../core/widgets/app_alert_dialog.dart';
@@ -424,7 +425,7 @@ class _CustomerScreenState extends State<MobileCustomerScreen> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: AppColors.bottomNavBg(context),
+                    color: W.canvas(context),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Row(
@@ -670,7 +671,7 @@ class _CustomerScreenState extends State<MobileCustomerScreen> {
           builder: (context, setState) {
             return SafeArea(
               child: Container(
-                color: AppColors.bottomNavBg(context),
+                color: W.canvas(context),
                 padding: const EdgeInsets.all(20),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,

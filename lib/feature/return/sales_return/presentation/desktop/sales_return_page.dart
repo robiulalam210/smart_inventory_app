@@ -1,3 +1,4 @@
+import '../../../../../core/widgets/web_ui.dart';
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
 import '/core/configs/configs.dart';
 import '/feature/customer/data/model/customer_active_model.dart';
@@ -69,7 +70,7 @@ class _SalesReturnScreenState extends State<SalesReturnScreen> {
     final isBigScreen = Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
 
     return Container(
-      color: AppColors.bottomNavBg(context),
+      color: W.canvas(context),
       child: SafeArea(
         child: ResponsiveRow(
           children: [

@@ -1,3 +1,4 @@
+import '../../../../../../core/widgets/web_ui.dart';
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:meherinMart/core/widgets/app_scaffold.dart';
@@ -239,7 +240,7 @@ class _PurchaseReturnScreenState extends State<MobilePurchaseReturnScreen> {
   Widget _buildFilterRow() {
     return Card(
       elevation: 0,
-      color: AppColors.bottomNavBg(context),
+      color: W.canvas(context),
 
       child: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -503,7 +504,7 @@ class PurchaseReturnTableCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (purchaseReturns.isEmpty) return _buildEmptyState();
+    if (purchaseReturns.isEmpty) return _buildEmptyState(context);
 
 
     return _buildMobileList(context);
@@ -523,7 +524,7 @@ class PurchaseReturnTableCard extends StatelessWidget {
         final statusColor = _getStatusColor(pr.status ?? '');
         return Card(
 
-          color: AppColors.bottomNavBg(context),
+          color: W.canvas(context),
           margin: const EdgeInsets.symmetric(vertical: 4),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           elevation: 0,
@@ -996,11 +997,12 @@ class PurchaseReturnTableCard extends StatelessWidget {
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        color: Colors.white,
+        borderRadius: BorderRadius.circular(W.rMd),
+        border: Border.all(color: W.line(context)),
+        color: W.surface(context),
         boxShadow: [
           BoxShadow(
             color: Colors.grey.withValues(alpha: 0.1),

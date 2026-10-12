@@ -1,3 +1,4 @@
+import '../../../../core/widgets/web_ui.dart';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
@@ -82,7 +83,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final iconBg = primary.withValues(alpha: 0.11);
 
     return Container(
-      color: AppColors.bottomNavBg(context),
+      color: W.canvas(context),
       child: SafeArea(
         child: ResponsiveRow(
           children: [
@@ -1342,7 +1343,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Expanded(child: Text('language'.tr(), style: AppTextStyle.body(context))),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 6),
-            decoration: BoxDecoration(color: AppColors.bottomNavBg(context), borderRadius: BorderRadius.circular(8)),
+            decoration: BoxDecoration(color: W.canvas(context), borderRadius: BorderRadius.circular(8)),
             child: SizedBox(
   width: 150,
   // search সহ dropdown (সব dropdown এ search থাকবে)

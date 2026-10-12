@@ -1,3 +1,4 @@
+import '../../../../../core/widgets/web_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lottie/lottie.dart';
@@ -63,7 +64,7 @@ class _GroupsScreenState extends State<MobileGroupsScreen> {
           lg: 10,
           xl: 10,
           child: Container(
-            color: AppColors.bottomNavBg(context),
+            color: W.canvas(context),
             child: RefreshIndicator(
               onRefresh: () async {
                 _fetchApi();

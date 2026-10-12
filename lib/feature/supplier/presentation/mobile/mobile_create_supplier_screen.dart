@@ -1,3 +1,4 @@
+import '../../../../core/widgets/web_ui.dart';
 import '/core/core.dart';
 import '../bloc/supplier/supplier_list_bloc.dart';
 
@@ -38,7 +39,7 @@ class _CreateSupplierScreenState extends State<MobileCreateSupplierScreen> {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.bottomNavBg(context),
+        color: W.canvas(context),
         borderRadius: BorderRadius.circular(AppSizes.bodyPadding),
       ),
       child: SafeArea(
@@ -53,7 +54,7 @@ class _CreateSupplierScreenState extends State<MobileCreateSupplierScreen> {
                 Container(
                   padding: const EdgeInsets.all(4),
                   decoration: BoxDecoration(
-                    color: AppColors.bottomNavBg(context),
+                    color: W.canvas(context),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(

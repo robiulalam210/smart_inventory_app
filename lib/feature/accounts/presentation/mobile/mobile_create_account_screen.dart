@@ -1,3 +1,4 @@
+import '../../../../core/widgets/web_ui.dart';
 import '/core/core.dart';
 
 import '../../data/model/account_model.dart';
@@ -51,7 +52,7 @@ class _MobileCreateAccountScreenState extends State<MobileCreateAccountScreen> {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.bottomNavBg(context),
+        color: W.canvas(context),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Padding(

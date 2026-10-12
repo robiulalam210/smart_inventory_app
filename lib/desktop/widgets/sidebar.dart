@@ -64,6 +64,10 @@ class _SidebarState extends State<Sidebar> {
       title: "Products",
       items: [
         MenuItem(title: "Product", index: 8, requiredPermission: (permissions) => permissions?.products?.view == true),
+        MenuItem(title: "Barcode Labels", index: 55, requiredPermission: (permissions) => permissions?.products?.view == true),
+        MenuItem(title: "Stock Adjustment", index: 52, requiredPermission: (permissions) => permissions?.products?.view == true),
+        MenuItem(title: "Stocktake", index: 53, requiredPermission: (permissions) => permissions?.products?.view == true),
+        MenuItem(title: "Expiry Alerts", index: 54, requiredPermission: (permissions) => permissions?.products?.view == true),
       ],
       requiredPermission: (permissions) => permissions?.products?.view == true,
     ),
@@ -123,6 +127,7 @@ class _SidebarState extends State<Sidebar> {
         MenuItem(title: "Supplier Due/Advance Report", index: 28, requiredPermission: (permissions) => permissions?.reports?.view == true),
         MenuItem(title: "Expense Report", index: 29, requiredPermission: (permissions) => permissions?.reports?.view == true),
         MenuItem(title: "Bad Stock Report", index: 30, requiredPermission: (permissions) => permissions?.reports?.view == true),
+        MenuItem(title: "Day Close", index: 56, requiredPermission: (permissions) => permissions?.reports?.view == true),
       ],
       requiredPermission: (permissions) => permissions?.reports?.view == true,
     ),

@@ -6,6 +6,7 @@ import '../../data/models/dashboard/dashboard_model.dart';
 import '../bloc/dashboard/dashboard_bloc.dart';
 import '../widgets/dash_kit.dart';
 import '../widgets/dashboard_extras.dart';
+import '../widgets/dash_more_charts.dart';
 import 'package:meherinMart/desktop/widgets/sidebar.dart' show quickJumpEntries;
 import '../../../profile/presentation/bloc/profile_bloc/profile_bloc.dart';
 import '../../../shop/data/shop_models.dart';
@@ -145,6 +146,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   _row(wide, _trendPanel(c), _expensePanel(c), 2, 1),
                   const SizedBox(height: 16),
                   _row(wide, _flowPanel(c), _stockPanel(c), 2, 1),
+                  const SizedBox(height: 16),
+                  DashMoreCharts(wide: wide, accounts: _accounts, onOpenExpiry: () => _go(54)),
                   const SizedBox(height: 16),
                   _row(wide, _recentPanel(c), _accountsPanel(c), 2, 1),
                   const SizedBox(height: 16),

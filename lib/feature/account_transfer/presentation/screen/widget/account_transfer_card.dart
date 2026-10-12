@@ -1,3 +1,4 @@
+import '../../../../../core/widgets/web_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '/core/configs/configs.dart';
 
@@ -25,7 +26,7 @@ class MobileAccountTransferCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (transfers.isEmpty) {
-      return _buildEmptyState();
+      return _buildEmptyState(context);
     }
 
     return ListView.builder(
@@ -462,7 +463,7 @@ class MobileAccountTransferCard extends StatelessWidget {
     return '${_formatDate(date)} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(40),
       child: Column(
@@ -516,7 +517,7 @@ class AccountTransferCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (transfers.isEmpty) {
-      return _buildEmptyState();
+      return _buildEmptyState(context);
     }
 
     final verticalScrollController = ScrollController();
@@ -531,8 +532,9 @@ class AccountTransferCard extends StatelessWidget {
 
         return Container(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            color: Colors.white,
+            borderRadius: BorderRadius.circular(W.rMd),
+            border: Border.all(color: W.line(context)),
+            color: W.surface(context),
             boxShadow: [
               BoxShadow(
                 color: Colors.grey.withValues(alpha: 0.1),
@@ -1095,12 +1097,13 @@ class AccountTransferCard extends StatelessWidget {
     return '${_formatDate(date)} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(BuildContext context) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        color: Colors.white,
+        borderRadius: BorderRadius.circular(W.rMd),
+        border: Border.all(color: W.line(context)),
+        color: W.surface(context),
         boxShadow: [
           BoxShadow(
             color: Colors.grey.withValues(alpha: 0.1),

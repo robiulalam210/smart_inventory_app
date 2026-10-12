@@ -1,3 +1,4 @@
+import '../../../../core/widgets/web_ui.dart';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
@@ -1105,7 +1106,7 @@ class _MobileProfileScreenState extends State<MobileProfileScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 6),
             decoration: BoxDecoration(
-              color: AppColors.bottomNavBg(context),
+              color: W.canvas(context),
               borderRadius: BorderRadius.circular(8),
             ),
             child: SizedBox(

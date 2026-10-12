@@ -1,3 +1,4 @@
+import '../../../../core/widgets/web_ui.dart';
 
 import 'package:meherinMart/core/widgets/app_scaffold.dart';
 
@@ -173,7 +174,7 @@ class _SupplierScreenState extends State<MobileSupplierListScreen> {
                         // Search Bar with Icon Button
                         Container(
                           decoration: BoxDecoration(
-                            color: AppColors.bottomNavBg(context),
+                            color: W.canvas(context),
                             borderRadius: BorderRadius.circular(12),
                             boxShadow: [
                               BoxShadow(
@@ -408,7 +409,7 @@ class _SupplierScreenState extends State<MobileSupplierListScreen> {
           builder: (context, setState) {
             return SafeArea(
               child: Container(
-                color: AppColors.bottomNavBg(context),
+                color: W.canvas(context),
                 padding: const EdgeInsets.all(20),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,

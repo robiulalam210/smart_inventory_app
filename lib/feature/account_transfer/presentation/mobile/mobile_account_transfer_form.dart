@@ -1,3 +1,4 @@
+import '../../../../core/widgets/web_ui.dart';
 import 'package:intl/intl.dart';
 import 'package:meherinMart/core/widgets/app_scaffold.dart';
 import '/core/core.dart';
@@ -122,7 +123,7 @@ class _MobileAccountTransferFormState extends State<MobileAccountTransferForm> {
                   // Quick Transfer Toggle
                   Container(
                     decoration: BoxDecoration(
-                      color: AppColors.bottomNavBg(context),
+                      color: W.canvas(context),
                       borderRadius: BorderRadius.circular(12),
                       boxShadow: [
                         BoxShadow(
@@ -196,7 +197,7 @@ class _MobileAccountTransferFormState extends State<MobileAccountTransferForm> {
                   // Transfer Details Card
                   Container(
                     decoration: BoxDecoration(
-                      color: AppColors.bottomNavBg(context),
+                      color: W.canvas(context),
                       borderRadius: BorderRadius.circular(12),
                       boxShadow: [
                         BoxShadow(
@@ -266,7 +267,7 @@ class _MobileAccountTransferFormState extends State<MobileAccountTransferForm> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.bottomNavBg(context),
+        color: W.canvas(context),
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -383,7 +384,7 @@ class _MobileAccountTransferFormState extends State<MobileAccountTransferForm> {
       builder: (context) {
         return SafeArea(
           child: Container(
-            color: AppColors.bottomNavBg(context),
+            color: W.canvas(context),
             padding: const EdgeInsets.all(8),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -617,7 +618,7 @@ class _MobileAccountTransferFormState extends State<MobileAccountTransferForm> {
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
             decoration: BoxDecoration(
-              color: AppColors.bottomNavBg(context),
+              color: W.canvas(context),
               borderRadius: BorderRadius.circular(8),
               border: Border.all(color: Colors.grey.shade300),
             ),

@@ -1,3 +1,4 @@
+import '../../../../../../core/widgets/web_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:meherinMart/core/core.dart';
 import '/feature/return/sales_return/data/model/sales_return_model.dart';
@@ -17,7 +18,7 @@ class SalesReturnTableCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (salesReturns.isEmpty) {
-      return _buildEmptyState();
+      return _buildEmptyState(context);
     }
 
     final width = MediaQuery.of(context).size.width;
@@ -44,8 +45,9 @@ class SalesReturnTableCard extends StatelessWidget {
 
         return Container(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            color: Colors.white,
+            borderRadius: BorderRadius.circular(W.rMd),
+            border: Border.all(color: W.line(context)),
+            color: W.surface(context),
             boxShadow: [
               BoxShadow(
                 color: Colors.grey.withValues(alpha: 0.1),
@@ -948,11 +950,12 @@ class SalesReturnTableCard extends StatelessWidget {
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        color: Colors.white,
+        borderRadius: BorderRadius.circular(W.rMd),
+        border: Border.all(color: W.line(context)),
+        color: W.surface(context),
         boxShadow: [
           BoxShadow(
             color: Colors.grey.withValues(alpha: 0.1),
