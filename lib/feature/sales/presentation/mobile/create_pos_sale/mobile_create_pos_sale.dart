@@ -962,6 +962,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                 builder: (context, state) {
                   return AppDropdown<CustomerActiveModel>(
                     label: "Customer",
+                    useChips: false, // people/customer picker = always a dropdown (like web)
                     hint: bloc.selectClintModel?.name ?? "Select Customer",
                     isSearch: true,
                     isNeedAll: false,
@@ -1025,6 +1026,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                       if (state is UserListLoading) {
                         return AppDropdown(
                           label: "Collected By",
+                          useChips: false, // people/customer picker = always a dropdown (like web)
                           hint: "Loading users...",
                           isRequired: true,
                           itemList: const [],
@@ -1042,6 +1044,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                       if (state is UserListSuccess) {
                         return AppDropdown<UsersListModel>(
                           label: "Sales By",
+                          useChips: false, // people/customer picker = always a dropdown (like web)
                           hint:
                               bloc.selectSalesModel?.username ?? "Select Sales",
                           isLabel: false,

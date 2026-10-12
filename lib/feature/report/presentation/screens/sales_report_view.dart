@@ -139,6 +139,7 @@ class _SalesReportViewState extends State<SalesReportView> with ReportPeriodMixi
                 builder: (context, _) => AppDropdown<CustomerActiveModel>(
                   key: ValueKey('customer-${_customer?.id}'),
                   label: 'Customer',
+                  useChips: false, // people/customer picker = always a dropdown (like web)
                   hint: 'All customers',
                   value: _customer,
                   itemList: context.read<CustomerBloc>().activeCustomer,

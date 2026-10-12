@@ -214,6 +214,7 @@ class _MobileCustomerDueAdvanceScreenState
                     builder: (context, state) {
                       return AppDropdown<CustomerActiveModel>(
                         label: "Customer",
+                        useChips: false, // people/customer picker = always a dropdown (like web)
                         hint: 'Select Customer',
                         isNeedAll: true,
                         value: _selectedCustomer,

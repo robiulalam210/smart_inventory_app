@@ -118,6 +118,7 @@ class _CustomerLedgerScreenState extends State<CustomerLedgerScreen> {
             builder: (context, state) {
               return AppDropdown<CustomerActiveModel>(
                 label: "Customer",
+                useChips: false, // people/customer picker = always a dropdown (like web)
                 isSearch: true,
                 hint:  "Select Customer",
                 isNeedAll: false,

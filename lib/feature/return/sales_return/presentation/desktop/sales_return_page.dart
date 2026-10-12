@@ -207,6 +207,7 @@ class _SalesReturnScreenState extends State<SalesReturnScreen> {
             builder: (context, state) {
               return AppDropdown<CustomerActiveModel>(
                 label: "Customer",
+                useChips: false, // people/customer picker = always a dropdown (like web)
                 isSearch: true,
                 hint: _selectedCustomer?.name ?? "Select Customer",
                 isNeedAll: true,

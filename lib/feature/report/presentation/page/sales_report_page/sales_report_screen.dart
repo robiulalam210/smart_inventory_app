@@ -127,6 +127,7 @@ class _SaleReportScreenState extends State<SaleReportScreen> {
             builder: (context, state) {
               return AppDropdown<CustomerActiveModel>(
                 label: "Customer",
+                useChips: false, // people/customer picker = always a dropdown (like web)
                 isSearch: true,
                 isLabel: false,
                 hint: "Select Customer",

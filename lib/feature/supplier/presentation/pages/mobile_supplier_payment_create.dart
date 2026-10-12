@@ -268,6 +268,7 @@ class _MobileSupplierPaymentCreateState
       builder: (context, state) {
         return AppDropdown(
           label: "Collected By",
+          useChips: false, // people/customer picker = always a dropdown (like web)
           isRequired: true,
           value: context.read<SupplierPaymentBloc>().selectUserModel,
           itemList: context.read<UserBloc>().list,
