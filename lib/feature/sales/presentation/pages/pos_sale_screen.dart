@@ -229,6 +229,7 @@ class _PosSaleScreenState extends State<PosSaleScreen> {
 
                       return AppDropdown<CustomerActiveModel>(
                         label: "Customer",
+                        useChips: false, // people/customer picker = always a dropdown (like web)
                         isSearch: true,
                         hint: selectedCustomer?.name ?? "Select Customer",
                         isNeedAll: true,

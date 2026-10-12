@@ -276,6 +276,7 @@ class _MoneyReceiptScreenState extends State<MoneyReceiptScreen> {
 
                       return AppDropdown<CustomerActiveModel>(
                         label: "Customer",
+                        useChips: false, // people/customer picker = always a dropdown (like web)
                         isSearch: true,
                         isLabel: true,
                         hint: selectedCustomer?.name ?? "Select Customer",

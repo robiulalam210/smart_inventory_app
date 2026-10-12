@@ -173,6 +173,7 @@ class _CustomerLedgerViewState extends State<CustomerLedgerView> with ReportPeri
                 builder: (context, _) => AppDropdown<CustomerActiveModel>(
                   key: ValueKey('ledger-customer-${_customer?.id}'),
                   label: 'Customer',
+                  useChips: false, // people/customer picker = always a dropdown (like web)
                   hint: 'Select customer',
                   value: _customer,
                   itemList: context.read<CustomerBloc>().activeCustomer,
@@ -334,6 +335,7 @@ class _CustomerDueAdvanceViewState extends State<CustomerDueAdvanceView> with Re
                 builder: (context, _) => AppDropdown<CustomerActiveModel>(
                   key: ValueKey('due-customer-${_customer?.id}'),
                   label: 'Customer',
+                  useChips: false, // people/customer picker = always a dropdown (like web)
                   hint: 'All customers',
                   value: _customer,
                   itemList: context.read<CustomerBloc>().activeCustomer,

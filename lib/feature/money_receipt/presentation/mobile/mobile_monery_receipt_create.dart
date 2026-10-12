@@ -383,6 +383,7 @@ class _MoneyReceiptListScreenState extends State<MobileMoneyReceiptForm> {
             final customerBloc = context.read<CustomerBloc>();
             return AppDropdown(
               label: "Customer",
+              useChips: false, // people/customer picker = always a dropdown (like web)
               isSearch: true,
 
               isLabel: false,
@@ -451,6 +452,7 @@ class _MoneyReceiptListScreenState extends State<MobileMoneyReceiptForm> {
           if (state is UserListLoading) {
             return AppDropdown(
               label: "Collected By",
+              useChips: false, // people/customer picker = always a dropdown (like web)
               hint: "Loading users...",
               isRequired: true,
               itemList: const [],
@@ -469,6 +471,7 @@ class _MoneyReceiptListScreenState extends State<MobileMoneyReceiptForm> {
 
             return AppDropdown(
               label: "Collected By",
+              useChips: false, // people/customer picker = always a dropdown (like web)
               hint: moneyReceiptBloc
                   .selectUserModel?.username ??
                   "Select Collected By",

@@ -419,6 +419,7 @@ class _SalesScreenState extends State<SalesScreen> {
             builder: (context, state) {
               return AppDropdown(
                 label: "Customer",
+                useChips: false, // people/customer picker = always a dropdown (like web)
                 hint: bloc.selectClintModel?.name ?? "Select Customer",
                 isSearch: true,
                 isNeedAll: false,
@@ -456,6 +457,7 @@ class _SalesScreenState extends State<SalesScreen> {
             builder: (context, state) {
               return AppDropdown(
                 label: "Sales By",
+                useChips: false, // people/customer picker = always a dropdown (like web)
                 hint: bloc.selectSalesModel?.username ?? "Select Sales",
                 isSearch: true,
                 isNeedAll: false,

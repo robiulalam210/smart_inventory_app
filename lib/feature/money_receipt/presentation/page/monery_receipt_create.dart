@@ -241,6 +241,7 @@ class _MoneyReceiptListScreenState extends State<MoneyReceiptForm> {
                               final customerBloc = context.read<CustomerBloc>();
                               return AppDropdown(
                                 label: "Customer",
+                                useChips: false, // people/customer picker = always a dropdown (like web)
                                 isSearch: true,
                                 hint: moneyBloc.selectCustomerModel?.name
                                     ?.toString() ??
@@ -292,6 +293,7 @@ class _MoneyReceiptListScreenState extends State<MoneyReceiptForm> {
 
                               return AppDropdown(
                                 label: "Collected By",
+                                useChips: false, // people/customer picker = always a dropdown (like web)
                                 hint: moneyBloc.selectUserModel?.username
                                     ?.toString() ??
                                     "Select Collected By",

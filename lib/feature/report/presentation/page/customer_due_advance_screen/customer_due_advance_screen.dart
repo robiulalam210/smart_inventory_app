@@ -204,6 +204,7 @@ class _CustomerDueAdvanceScreenState extends State<CustomerDueAdvanceScreen> {
               if (state is CustomerListLoading) {
                 return AppDropdown<CustomerActiveModel>(
                   label: "Customer",
+                  useChips: false, // people/customer picker = always a dropdown (like web)
                   hint: "Loading customers...",
                   isNeedAll: true,
                   isRequired: false,
@@ -215,6 +216,7 @@ class _CustomerDueAdvanceScreenState extends State<CustomerDueAdvanceScreen> {
 
               return AppDropdown<CustomerActiveModel>(
                 label: "Customer", isLabel: false,
+                useChips: false, // people/customer picker = always a dropdown (like web)
                 hint: "Select Customer",
                 isNeedAll: true,
                 isRequired: false,

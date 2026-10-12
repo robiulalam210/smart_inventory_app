@@ -148,6 +148,7 @@ class _MoneyReceiptListScreenState extends State<SupplierPaymentForm> {
                           builder: (context, state) {
                             return AppDropdown(
                               label: "Collected By",
+                              useChips: false, // people/customer picker = always a dropdown (like web)
                               hint: context.read<SupplierPaymentBloc>().selectUserModel?.username.toString() ??
                                   "Select Collected By",
                               isLabel: false,
