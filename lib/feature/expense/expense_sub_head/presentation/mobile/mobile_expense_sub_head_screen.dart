@@ -1,3 +1,4 @@
+import '../../../../../core/widgets/web_ui.dart';
 import '../../../../../core/configs/configs.dart';
 import '../../../../../core/widgets/app_alert_dialog.dart';
 import '../../../../../core/widgets/app_loader.dart';
@@ -68,7 +69,7 @@ class _ExpenseHeadScreenState extends State<MobileExpenseSubHeadScreen> {
                   child: Container(
                     decoration: BoxDecoration(
                       shape: BoxShape.rectangle,
-                      color: AppColors.bottomNavBg(context),
+                      color: W.canvas(context),
                       borderRadius: BorderRadius.circular(AppSizes.radius),
                     ),
                     width: double.infinity,

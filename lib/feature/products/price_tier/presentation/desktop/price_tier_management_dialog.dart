@@ -1,3 +1,4 @@
+import '../../../../../core/widgets/web_ui.dart';
 import 'package:intl/intl.dart';
 import '../../../../../core/configs/configs.dart';
 import '../../../../../core/widgets/app_button.dart';
@@ -74,7 +75,7 @@ class _PriceTierManagementDialogState extends State<PriceTierManagementDialog> {
               borderRadius:BorderRadiusGeometry.circular(AppSizes.radius),
               child: Container(
                 width: double.infinity,
-                color: AppColors.bottomNavBg(context),
+                color: W.canvas(context),
                 height: MediaQuery.of(context).size.height * 0.45,
                 padding: const EdgeInsets.all(20),
                 child: Column(

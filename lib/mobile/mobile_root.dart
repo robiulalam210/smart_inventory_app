@@ -1,3 +1,4 @@
+import '../core/widgets/web_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hugeicons/hugeicons.dart';
@@ -93,7 +94,7 @@ class _MobileRootScreenState extends State<MobileRootScreen> {
 
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.bottomNavBg(context),
+        color: W.canvas(context),
         border: Border(
           top: BorderSide(
             color: isDark

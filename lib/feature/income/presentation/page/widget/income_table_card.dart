@@ -1,3 +1,4 @@
+import '../../../../../core/widgets/web_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -324,8 +325,9 @@ class IncomeTableCard extends StatelessWidget {
 
         return Container(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            color: Colors.white,
+            borderRadius: BorderRadius.circular(W.rMd),
+            border: Border.all(color: W.line(context)),
+            color: W.surface(context),
             boxShadow: [
               BoxShadow(
                 color: Colors.grey.withValues(alpha: 0.1),

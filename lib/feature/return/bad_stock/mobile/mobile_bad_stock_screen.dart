@@ -1,3 +1,4 @@
+import '../../../../core/widgets/web_ui.dart';
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -237,7 +238,7 @@ class _BadStockScreenState extends State<MobileBadStockScreen> {
           );
         } else if (state is BadStockListSuccess) {
           if (state.list.isEmpty) {
-            return _buildEmptyState();
+            return _buildEmptyState(context);
           }
           return Column(
             children: [
@@ -268,12 +269,12 @@ class _BadStockScreenState extends State<MobileBadStockScreen> {
         } else if (state is BadStockListFailed) {
           return _buildErrorState(state.content);
         }
-        return _buildEmptyState();
+        return _buildEmptyState(context);
       },
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(BuildContext context) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -353,7 +354,7 @@ class BadStockTableCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (badStocks.isEmpty) {
-      return _buildEmptyState();
+      return _buildEmptyState(context);
     }
 
     final width = MediaQuery.of(context).size.width;
@@ -378,8 +379,9 @@ class BadStockTableCard extends StatelessWidget {
 
         return Container(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            color: Colors.white,
+            borderRadius: BorderRadius.circular(W.rMd),
+            border: Border.all(color: W.line(context)),
+            color: W.surface(context),
             boxShadow: [
               BoxShadow(
                 color: Colors.grey.withValues(alpha: 0.1),
@@ -469,7 +471,7 @@ class BadStockTableCard extends StatelessWidget {
       itemBuilder: (context, index) {
         final badStock = badStocks[index];
         return Card(
-          color: AppColors.bottomNavBg(context),
+          color: W.canvas(context),
           margin: const EdgeInsets.symmetric(vertical: 4),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           elevation: 0,
@@ -523,7 +525,7 @@ class BadStockTableCard extends StatelessWidget {
                           badStock.referenceType != null
                               ? '${badStock.referenceType} #${badStock.referenceId}'
                               : 'No Ref',
-                          style:  TextStyle(fontSize: 11,  color: AppColors.bottomNavBg(context),),
+                          style:  TextStyle(fontSize: 11,  color: W.canvas(context),),
                         ),
                       ],
                     ),
@@ -752,7 +754,7 @@ class BadStockTableCard extends StatelessWidget {
       builder: (context) {
         return Dialog(
           child: Container(
-            color: AppColors.bottomNavBg(context),
+            color: W.canvas(context),
             width: AppSizes.width(context) * 0.40,
             padding: const EdgeInsets.all(20),
             child: SingleChildScrollView(
@@ -822,11 +824,12 @@ class BadStockTableCard extends StatelessWidget {
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        color: Colors.white,
+        borderRadius: BorderRadius.circular(W.rMd),
+        border: Border.all(color: W.line(context)),
+        color: W.surface(context),
         boxShadow: [
           BoxShadow(
             color: Colors.grey.withValues(alpha: 0.1),

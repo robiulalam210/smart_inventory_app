@@ -1,3 +1,4 @@
+import '../../../../../core/widgets/web_ui.dart';
 import '../../../../../core/configs/configs.dart';
 import '../../../../../desktop/widgets/sidebar.dart';
 import '../../../../../core/widgets/app_alert_dialog.dart';
@@ -53,7 +54,7 @@ class _ExpenseHeadScreenState extends State<ExpenseSubHeadScreen> {
     final isBigScreen =
         Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
     return Container(
-      color: AppColors.bottomNavBg(context),
+      color: W.canvas(context),
       child: SafeArea(
         child: ResponsiveRow(
           spacing: 0,
@@ -75,7 +76,7 @@ class _ExpenseHeadScreenState extends State<ExpenseSubHeadScreen> {
       lg: 2,
       xl: 2,
       child: Container(
-        decoration: const BoxDecoration(color: Colors.white),
+        decoration: BoxDecoration(color: W.surface(context)),
         child: const Sidebar(),
       ),
     );

@@ -1,3 +1,4 @@
+import '../../../../core/widgets/web_ui.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/configs/configs.dart';
@@ -98,7 +99,7 @@ class _MobileSupplierPaymentCreateState
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: AppColors.bottomNavBg(context),
+        color: W.canvas(context),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -118,7 +119,7 @@ class _MobileSupplierPaymentCreateState
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: AppColors.bottomNavBg(context),
+        color: W.canvas(context),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
@@ -157,7 +158,7 @@ class _MobileSupplierPaymentCreateState
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.bottomNavBg(context),
+        color: W.canvas(context),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(

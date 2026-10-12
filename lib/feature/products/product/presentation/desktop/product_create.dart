@@ -1,3 +1,5 @@
+import '../../../../../core/widgets/page_guide_widgets.dart';
+import '../../../../../core/widgets/web_ui.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '/feature/products/brand/data/model/brand_model.dart';
@@ -162,7 +164,7 @@ class _ProductsFormState extends State<ProductsForm> {
   Widget _buildDialogContent() {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.bottomNavBg(context),
+        color: W.canvas(context),
         borderRadius: BorderRadius.circular(12),
       ),
       padding: const EdgeInsets.all(12),
@@ -176,9 +178,15 @@ class _ProductsFormState extends State<ProductsForm> {
                 _isEditMode ? "Update Product" : "Create New Product",
                 style:AppTextStyle.titleMedium(context)
               ),
-              IconButton(
-                icon: const Icon(Icons.close),
-                onPressed: () => Navigator.pop(context),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const GuideIconButton(guideKey: 'product_form'),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
               ),
             ],
           ),
@@ -192,6 +200,11 @@ class _ProductsFormState extends State<ProductsForm> {
                   key: formKey,
                   child: Column(
                     children: [
+                      WPanel(
+ margin: const EdgeInsets.only(bottom: 12),
+ child: Column(children: [
+ WPanelHead('Basic information'),
+ const SizedBox(height: 12),
                       // First Row: Category and Unit
                       Row(
                         children: [
@@ -212,6 +225,13 @@ gapH8,
                         ],
                       ),
 
+                       ]),
+ ),
+                      WPanel(
+ margin: const EdgeInsets.only(bottom: 12),
+ child: Column(children: [
+ WPanelHead('Pricing & stock'),
+ const SizedBox(height: 12),
                       // Third Row: Product Name and Opening Stock
                       Row(
                         children: [
@@ -232,6 +252,13 @@ gapH8,
                       ),
                       const SizedBox(height: 8),
 
+                       ]),
+ ),
+                      WPanel(
+ margin: const EdgeInsets.only(bottom: 12),
+ child: Column(children: [
+ WPanelHead('Discount & alerts'),
+ const SizedBox(height: 12),
                       // Fifth Row: Discount Toggle
                       Row(
                         children: [
@@ -275,6 +302,8 @@ gapH8,
                         ],
                       ),
 
+                       ]),
+ ),
                       const SizedBox(height: 10),
                       if (widget.productId != null) ...[
                         LayoutBuilder(
@@ -648,7 +677,7 @@ gapH8,
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 0),
       decoration: BoxDecoration(
-        color: AppColors.bottomNavBg(context),
+        color: W.canvas(context),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: Colors.grey[300]!),
       ),

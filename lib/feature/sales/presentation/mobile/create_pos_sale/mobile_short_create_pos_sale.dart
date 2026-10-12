@@ -1,3 +1,4 @@
+import '../../../../../core/widgets/web_ui.dart';
 import 'dart:developer';
 
 import '../../shared/create_pos_sale/sale_payment_rules.dart';
@@ -1065,7 +1066,7 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8),
       decoration: BoxDecoration(
-        color: AppColors.bottomNavBg(context),
+        color: W.canvas(context),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
           color: AppColors.greyColor(context).withValues(alpha: 0.5),
@@ -1108,7 +1109,7 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
               margin: const EdgeInsets.only(bottom: 6),
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: AppColors.bottomNavBg(context),
+                color: W.canvas(context),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
                   color: AppColors.greyColor(context).withValues(alpha: 0.5),
@@ -1795,7 +1796,7 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
       ),
       body: SafeArea(
         child: Container(
-          color: AppColors.bottomNavBg(context),
+          color: W.canvas(context),
           child: BlocConsumer<CreatePosSaleBloc, CreatePosSaleState>(
             listener: (context, state) {
               if (state is CreatePosSaleLoading) {
@@ -1912,7 +1913,7 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
     return Container(
       padding: const EdgeInsets.all(0.0),
       decoration: BoxDecoration(
-        color: AppColors.bottomNavBg(context),
+        color: W.canvas(context),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
@@ -2067,7 +2068,7 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
     return Container(
       padding: const EdgeInsets.all(8.0),
       decoration: BoxDecoration(
-        color: AppColors.bottomNavBg(context),
+        color: W.canvas(context),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
           color: AppColors.greyColor(context).withValues(alpha: 0.5),
@@ -2149,7 +2150,7 @@ class _CreatePosSalePageState extends State<MobileShortCreatePosSale> {
     return Container(
       padding: const EdgeInsets.all(8.0),
       decoration: BoxDecoration(
-        color: AppColors.bottomNavBg(context),
+        color: W.canvas(context),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
           color: AppColors.greyColor(context).withValues(alpha: 0.5),

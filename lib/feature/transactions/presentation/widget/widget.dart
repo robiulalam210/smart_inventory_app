@@ -1,3 +1,4 @@
+import '../../../../core/widgets/web_ui.dart';
 // transactions/presentation/widgets/transaction_card.dart
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/configs/configs.dart';
@@ -16,7 +17,7 @@ class TransactionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (transactions.isEmpty) {
-      return _buildEmptyState();
+      return _buildEmptyState(context);
     }
 
     return Responsive.isMobile(context)
@@ -309,12 +310,13 @@ class TransactionCard extends StatelessWidget {
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(BuildContext context) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        color: Colors.white,
+        borderRadius: BorderRadius.circular(W.rMd),
+        border: Border.all(color: W.line(context)),
+        color: W.surface(context),
         boxShadow: [
           BoxShadow(
             color: Colors.grey.withValues(alpha: 0.1),

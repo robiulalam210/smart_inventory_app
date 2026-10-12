@@ -11,6 +11,7 @@ import 'package:http/http.dart' as http;
 
 import '../../../../profile/presentation/bloc/profile_bloc/profile_bloc.dart';
 import '/core/core.dart';
+import '/core/widgets/web_ui.dart';
 import '/feature/products/product/data/model/product_stock_model.dart';
 import '/feature/users_list/presentation/bloc/users/user_bloc.dart';
 
@@ -418,9 +419,7 @@ class _SalesScreenState extends State<SalesScreen> {
   static const double _wAct = 40;
   static const double _fieldH = 34;
 
-  Color get _borderColor => Theme.of(context).brightness == Brightness.dark
-      ? Colors.white.withValues(alpha: 0.10)
-      : AppColors.borderLight;
+  Color get _borderColor => W.line(context);
 
   /// সব অংশের জন্য একই card
   Widget _section({String? title, Widget? trailing, required Widget child}) {
@@ -429,8 +428,8 @@ class _SalesScreenState extends State<SalesScreen> {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: AppColors.bottomNavBg(context),
-        borderRadius: BorderRadius.circular(12),
+        color: W.surface(context),
+        borderRadius: BorderRadius.circular(W.rLg),
         border: Border.all(color: _borderColor),
       ),
       child: Column(
@@ -443,9 +442,9 @@ class _SalesScreenState extends State<SalesScreen> {
                   child: Text(
                     title,
                     style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.text(context),
+                      fontSize: 15.5,
+                      fontWeight: FontWeight.w700,
+                      color: W.ink(context),
                     ),
                   ),
                 ),
@@ -465,7 +464,7 @@ class _SalesScreenState extends State<SalesScreen> {
       padding: const EdgeInsets.only(bottom: 4),
       child: Row(
         children: [
-          Text(text, style: AppTextStyle.labelDropdownTextStyle(context)),
+          Text(text, style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600, color: W.ink2(context))),
           if (required)
             const Text(' *', style: TextStyle(color: AppColors.danger)),
         ],
@@ -475,23 +474,22 @@ class _SalesScreenState extends State<SalesScreen> {
 
   InputDecoration _boxDecoration({String? hint, bool error = false}) {
     OutlineInputBorder b(Color c, [double w = 1]) => OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(W.rMd),
           borderSide: BorderSide(color: c, width: w),
         );
     return InputDecoration(
       isDense: true,
       hintText: hint,
-      hintStyle: TextStyle(
-          fontSize: 13, color: AppColors.text(context).withValues(alpha: 0.4)),
+      hintStyle: TextStyle(fontSize: 13, color: W.muted(context)),
       contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
       filled: true,
-      fillColor: AppColors.bottomNavBg(context),
-      enabledBorder: b(error ? AppColors.danger : AppColors.border),
+      fillColor: W.surface(context),
+      enabledBorder: b(error ? AppColors.danger : W.line2(context)),
       focusedBorder:
-          b(error ? AppColors.danger : AppColors.primaryColor(context), 1.4),
+          b(error ? AppColors.danger : W.blue(context), 1.4),
       errorBorder: b(AppColors.danger),
       focusedErrorBorder: b(AppColors.danger, 1.4),
-      border: b(AppColors.border),
+      border: b(W.line2(context)),
       errorStyle: const TextStyle(fontSize: 11, height: 1.1),
     );
   }
@@ -503,10 +501,8 @@ class _SalesScreenState extends State<SalesScreen> {
       alignment: Alignment.centerRight,
       padding: const EdgeInsets.symmetric(horizontal: 10),
       decoration: BoxDecoration(
-        color: Theme.of(context).brightness == Brightness.dark
-            ? Colors.white.withValues(alpha: 0.03)
-            : const Color(0xFFF8FAFC),
-        borderRadius: BorderRadius.circular(8),
+        color: W.soft(context),
+        borderRadius: BorderRadius.circular(W.rMd),
         border: Border.all(color: _borderColor),
       ),
       child: Text(
@@ -515,8 +511,8 @@ class _SalesScreenState extends State<SalesScreen> {
         overflow: TextOverflow.ellipsis,
         style: TextStyle(
           fontSize: 13,
-          fontWeight: strong ? FontWeight.w600 : FontWeight.w400,
-          color: AppColors.text(context),
+          fontWeight: strong ? FontWeight.w700 : FontWeight.w500,
+          color: W.ink(context),
           fontFeatures: const [FontFeature.tabularFigures()],
         ),
       ),
@@ -528,22 +524,19 @@ class _SalesScreenState extends State<SalesScreen> {
   Widget _typeToggle(String value, ValueChanged<String>? onChanged) {
     Widget seg(String key, String label) {
       final bool selected = value == key;
-      final Color primary = AppColors.primaryColor(context);
       return Expanded(
         child: InkWell(
           onTap: onChanged == null ? null : () => onChanged(key),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 120),
             alignment: Alignment.center,
-            color: selected ? primary : Colors.transparent,
+            color: selected ? W.blueWash(context) : Colors.transparent,
             child: Text(
               label,
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: selected
-                    ? AppColors.onColor(primary)
-                    : AppColors.text(context).withValues(alpha: 0.7),
+                color: selected ? W.blueInk(context) : W.muted(context),
               ),
             ),
           ),
@@ -555,8 +548,8 @@ class _SalesScreenState extends State<SalesScreen> {
       width: 64,
       height: _fieldH,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppColors.border),
+        borderRadius: BorderRadius.circular(W.rMd),
+        border: Border.all(color: W.line2(context)),
       ),
       clipBehavior: Clip.antiAlias,
       child: Material(
@@ -702,7 +695,7 @@ class _SalesScreenState extends State<SalesScreen> {
           fontSize: 12,
           fontWeight: FontWeight.w600,
           letterSpacing: 0.2,
-          color: AppColors.text(context).withValues(alpha: 0.6),
+          color: W.muted(context),
         ),
       );
 
@@ -816,7 +809,7 @@ class _SalesScreenState extends State<SalesScreen> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Click a product on the right, or scan a barcode',
+                    'Click a product on the left, or scan a barcode',
                     style: TextStyle(
                       fontSize: 12,
                       color: AppColors.text(context).withValues(alpha: 0.6),
@@ -1381,16 +1374,16 @@ class _SalesScreenState extends State<SalesScreen> {
                   style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.text(context),
+                    color: W.ink(context),
                   ),
                 ),
               ),
               Text(
                 '৳ ${t.net.toStringAsFixed(2)}',
                 style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.primaryColor(context),
+                  fontSize: 20,
+                  fontWeight: FontWeight.w800,
+                  color: W.blue(context),
                   fontFeatures: const [FontFeature.tabularFigures()],
                 ),
               ),
@@ -1626,7 +1619,7 @@ class _SalesScreenState extends State<SalesScreen> {
   }
 
   Widget _buildSummaryRow(String label, double value, {bool muted = false}) {
-    final Color c = AppColors.text(context);
+    final Color c = W.ink(context);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 3),
       child: Row(
@@ -1636,7 +1629,7 @@ class _SalesScreenState extends State<SalesScreen> {
               label,
               style: TextStyle(
                 fontSize: 13,
-                color: muted ? c.withValues(alpha: 0.65) : c,
+                color: muted ? W.muted(context) : c,
                 fontWeight: muted ? FontWeight.w400 : FontWeight.w500,
               ),
             ),
@@ -1647,7 +1640,7 @@ class _SalesScreenState extends State<SalesScreen> {
                 : value.toStringAsFixed(2),
             style: TextStyle(
               fontSize: 13,
-              color: muted ? c.withValues(alpha: 0.75) : c,
+              color: muted ? W.ink2(context) : c,
               fontWeight: muted ? FontWeight.w400 : FontWeight.w600,
               fontFeatures: const [FontFeature.tabularFigures()],
             ),
@@ -1872,90 +1865,85 @@ class _SalesScreenState extends State<SalesScreen> {
           return matchesSearch && matchesCategory && matchesBrand;
         }).toList();
 
+        // category অনুযায়ী পণ্যের সংখ্যা (chip এর পাশে)
+        final catCounts = <String, int>{};
+        for (final p in productList) {
+          final c = p.categoryInfo?.name;
+          if (c != null && c.isNotEmpty) catCounts[c] = (catCounts[c] ?? 0) + 1;
+        }
+        final catNames = catCounts.keys.toList()..sort();
+
         return Container(
-          padding: const EdgeInsets.all(6),
-          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8)),
+          margin: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: W.surface(context),
+            borderRadius: BorderRadius.circular(W.rLg),
+            border: Border.all(color: W.line(context)),
+          ),
           child: Column(
             children: [
-              // ---------------- Filters ----------------
-              Row(
-                children: [
-                  Expanded(
-                    child: BlocBuilder<CategoriesBloc, CategoriesState>(
-                      builder: (context, state) {
-                        final categoryList = categoriesBloc.list;
-                        return AppDropdown(
-                          label: "Category",
-                          hint: "Select Category",
-                          isLabel: false,
-                          isNeedAll: true,
-                          isSearch: true,
-                          value: selectedCategoryFilter.isEmpty ? null : selectedCategoryFilter,
-                          itemList: categoryList.map((e) => e.name ?? '').toList(),
-                          onChanged: (v) => setState(() {
-                            selectedCategoryFilter = v?.toString() ?? '';
-                          }),
-                        );
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: 6),
-                  Expanded(
-                    child: BlocBuilder<BrandBloc, BrandState>(
-                      builder: (context, state) {
-                        final brandList = brandBloc.brandModel;
-                        return AppDropdown(
-                          label: "Brand",
-                          hint: "Select Brand",
-                          isLabel: false,
-                          isNeedAll: true,
-                          isSearch: true,
-                          value: selectedBrandFilter.isEmpty ? null : selectedBrandFilter,
-                          itemList: brandList.map((e) => e.name ?? '').toList(),
-                          onChanged: (v) => setState(() {
-                            selectedBrandFilter = v?.toString() ?? '';
-                          }),
-                        );
-                      },
-                    ),
-                  ),
-                ],
+              // ---------------- Search ----------------
+              WSearchField(
+                controller: productSearchController,
+                hint: 'Search name or SKU, or scan a barcode',
+                showClear: productSearchController.text.isNotEmpty,
+                onClear: () => setState(productSearchController.clear),
+                onChanged: (_) => setState(() {}),
               ),
+              const SizedBox(height: 10),
 
-              const SizedBox(height: 6),
-
-              // ---------------- Search + small status ----------------
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: productSearchController,
-                      decoration: InputDecoration(
-                        prefixIcon: const Icon(Icons.search),
-                        hintText: 'Search by name / SKU / barcode',
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(6)),
+              // ---------------- Category chips ----------------
+              SizedBox(
+                height: 34,
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  children: [
+                    WChip(
+                      label: 'All',
+                      count: productList.length,
+                      selected: selectedCategoryFilter.isEmpty,
+                      onTap: () => setState(() => selectedCategoryFilter = ''),
+                    ),
+                    for (final c in catNames) ...[
+                      const SizedBox(width: 6),
+                      WChip(
+                        label: c,
+                        count: catCounts[c],
+                        selected: selectedCategoryFilter == c,
+                        onTap: () => setState(() =>
+                            selectedCategoryFilter = selectedCategoryFilter == c ? '' : c),
                       ),
-                      onChanged: (_) => setState(() {}),
-                    ),
-                  ),
-                ],
+                    ],
+                  ],
+                ),
               ),
-
-              const SizedBox(height: 12),
+              const SizedBox(height: 10),
 
               // ---------------- Grid ----------------
               Expanded(
-                child: GridView.builder(
-                  padding: EdgeInsets.zero,
-                  itemCount: filteredProducts.length,
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
-                    childAspectRatio: 0.5,
-                    crossAxisSpacing: 5,
-                    mainAxisSpacing: 5,
-                  ),
-                  itemBuilder: (context, index) => _buildProductCard(filteredProducts[index]),
-                ),
+                child: filteredProducts.isEmpty
+                    ? WEmpty(
+                        icon: Icons.inventory_2_outlined,
+                        title: productList.isEmpty ? 'No products yet' : 'No product matches',
+                        body: productList.isEmpty
+                            ? 'Add products first, then sell them here.'
+                            : 'Try another name or clear the category.',
+                      )
+                    : LayoutBuilder(builder: (context, box) {
+                        final cols = (box.maxWidth / 150).floor().clamp(2, 5);
+                        return GridView.builder(
+                          padding: EdgeInsets.zero,
+                          itemCount: filteredProducts.length,
+                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: cols,
+                            childAspectRatio: 0.82,
+                            crossAxisSpacing: 8,
+                            mainAxisSpacing: 8,
+                          ),
+                          itemBuilder: (context, index) => _buildProductCard(filteredProducts[index]),
+                        );
+                      }),
               ),
             ],
           ),
@@ -2020,118 +2008,124 @@ class _SalesScreenState extends State<SalesScreen> {
         }
         setState(() {});
       },
-      child:Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(10),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 6,
-              offset: const Offset(0, 2),
+      child: Builder(builder: (context) {
+        final stock = p.stockQty ?? 0;
+        final out = stock <= 0;
+        final low = !out && (p.alertQuantity ?? 0) > 0 && stock <= (p.alertQuantity ?? 0);
+        final bloc = context.read<CreatePosSaleBloc>();
+        double inCart = 0;
+        for (final r in bloc.products) {
+          if (r["product_id"] == p.id) inCart += _toDouble(r["quantity"]);
+        }
+        final catName = p.categoryInfo?.name ?? '';
+        final hue = ((catName.isEmpty ? 65 : catName.codeUnitAt(0)) * 37) % 360;
+        final avatarBg = HSLColor.fromAHSL(1, hue.toDouble(), 0.55, W.dark(context) ? 0.28 : 0.90).toColor();
+        final avatarFg = HSLColor.fromAHSL(1, hue.toDouble(), 0.60, W.dark(context) ? 0.75 : 0.33).toColor();
+        final name = (p.name ?? '').trim();
+
+        return Opacity(
+          opacity: out ? 0.55 : 1,
+          child: Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: W.surface(context),
+              borderRadius: BorderRadius.circular(W.rLg),
+              border: Border.all(
+                color: inCart > 0 ? W.blue(context) : W.line(context),
+                width: inCart > 0 ? 1.4 : 1,
+              ),
             ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(10),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              /// IMAGE
-              Stack(
-                children: [
-                  AspectRatio(
-                    aspectRatio: 1,
-                    child: p.image != null
-                        ? Image.network(
-                      p.image!,
-                      fit: BoxFit.cover,
-                    )
-                        : Container(
-                      color: Colors.grey.shade200,
-                      child: const Icon(
-                        Icons.image_not_supported,
-                        size: 30,
-                        color: Colors.black26,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: SizedBox(
+                        width: 40,
+                        height: 40,
+                        child: p.image != null
+                            ? Image.network(
+                                p.image!,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) => Container(
+                                  color: avatarBg,
+                                  alignment: Alignment.center,
+                                  child: Text(name.isEmpty ? '?' : name.substring(0, 1).toUpperCase(),
+                                      style: TextStyle(fontWeight: FontWeight.w800, fontSize: 17, color: avatarFg)),
+                                ),
+                              )
+                            : Container(
+                                color: avatarBg,
+                                alignment: Alignment.center,
+                                child: Text(name.isEmpty ? '?' : name.substring(0, 1).toUpperCase(),
+                                    style: TextStyle(fontWeight: FontWeight.w800, fontSize: 17, color: avatarFg)),
+                              ),
                       ),
                     ),
-                  ),
-
-                  /// STOCK
-                  Positioned(
-                    top: 6,
-                    right: 6,
-                    child: Container(
-                      padding:
-                      const EdgeInsets.symmetric(horizontal: 3, vertical: 3),
-                      decoration: BoxDecoration(
-                        color: p.stockQty == 0
-                            ? Colors.grey
-                            : Colors.redAccent,
-                        borderRadius: BorderRadius.circular(20),
+                    const Spacer(),
+                    if (inCart > 0)
+                      Container(
+                        constraints: const BoxConstraints(minWidth: 22),
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(color: W.blue(context), borderRadius: BorderRadius.circular(20)),
+                        child: Text(
+                          inCart == inCart.roundToDouble() ? inCart.toInt().toString() : inCart.toStringAsFixed(1),
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(color: Colors.white, fontSize: 11.5, fontWeight: FontWeight.w700),
+                        ),
                       ),
-                      child: Text(
-                        'Stock ${p.stockQty ?? 0}',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  name.isEmpty ? p.toString() : name,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: W.ink(context), height: 1.25),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  p.sku ?? '',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontSize: 11, color: W.muted(context)),
+                ),
+                const Spacer(),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Expanded(
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          '৳ ${_toDouble(p.sellingPrice).toStringAsFixed(2)}',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w800,
+                            color: W.ink(context),
+                            fontFeatures: const [FontFeature.tabularFigures()],
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-
-              /// DETAILS
-              Padding(
-                padding: const EdgeInsets.all(2),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    /// PRICE (FOCUS)
                     Text(
-                      '৳ ${_toDouble(p.sellingPrice).toStringAsFixed(2)}',
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-
-                    const SizedBox(height: 4),
-
-                    /// NAME
-                    Text(
-                      p.toString(),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-
-                    const SizedBox(height: 2),
-
-                    /// BRAND / CATEGORY
-                    Text(
-                      '${p.brandInfo?.name ?? ''} • ${p.categoryInfo?.name ?? ''}',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                      out ? 'Out' : '$stock left',
                       style: TextStyle(
-                        fontSize: 10,
-                        color: Colors.grey.shade600,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: out ? W.redInk(context) : (low ? W.amberInk(context) : W.muted(context)),
                       ),
                     ),
                   ],
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      )
-
-
+        );
+      }),
     );
   }
 
@@ -2267,7 +2261,7 @@ class _SalesScreenState extends State<SalesScreen> {
       autofocus: true,
       onKey: _handleKey,
       child: Container(
-        color: AppColors.bottomNavBg(context),
+        color: W.canvas(context),
         child: SafeArea(
           child: ResponsiveRow(
             spacing: 0,
@@ -2281,7 +2275,7 @@ class _SalesScreenState extends State<SalesScreen> {
                   lg: 2,
                   xl: 2,
                   child: Container(
-                    decoration: const BoxDecoration(color: Colors.white),
+                    decoration: BoxDecoration(color: W.surface(context)),
                     child: const Sidebar(),
                   ),
                 ),
@@ -2333,13 +2327,20 @@ class _SalesScreenState extends State<SalesScreen> {
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // LEFT: Sales form (~65%)
+                          // LEFT: Product catalog (ওয়েব POS এর মতো)
                           Expanded(
+                            flex: 4,
+                            child: _buildProductBrowser(),
+                          ),
+
+                          // RIGHT: Cart / form
+                          Expanded(
+                            flex: 6,
                             child: SingleChildScrollView(
                               child: Form(
                                 key: formKey,
                                 child: Padding(
-                                  padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+                                  padding: const EdgeInsets.fromLTRB(0, 12, 12, 0),
                                   child: Column(
                                     mainAxisAlignment: MainAxisAlignment.start,
                                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -2355,8 +2356,6 @@ class _SalesScreenState extends State<SalesScreen> {
                               ),
                             ),
                           ),
-
-                          SizedBox(width: 280, child: _buildProductBrowser()),
                         ],
                       );
                     },

@@ -1,3 +1,4 @@
+import '../../../../../core/widgets/web_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../../core/configs/configs.dart';
@@ -116,7 +117,7 @@ class ExpenseHeadTableCard extends StatelessWidget {
         vertical: 8.0,
       ),
       decoration: BoxDecoration(
-        color: AppColors.bottomNavBg(context),
+        color: W.canvas(context),
         borderRadius: BorderRadius.circular(AppSizes.radius),
 
         border: Border.all(
@@ -206,7 +207,7 @@ class ExpenseHeadTableCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
             decoration: BoxDecoration(
-              color: AppColors.bottomNavBg(context),
+              color: W.canvas(context),
               borderRadius: const BorderRadius.only(
                 bottomLeft: Radius.circular(16),
                 bottomRight: Radius.circular(16),

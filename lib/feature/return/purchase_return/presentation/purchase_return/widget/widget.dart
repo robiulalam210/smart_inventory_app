@@ -1,3 +1,4 @@
+import '../../../../../../core/widgets/web_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../../../core/configs/configs.dart';
@@ -18,7 +19,7 @@ class PurchaseReturnTableCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (purchaseReturns.isEmpty) return _buildEmptyState();
+    if (purchaseReturns.isEmpty) return _buildEmptyState(context);
 
     final width = MediaQuery.of(context).size.width;
     final isMobile = width < 600; // breakpoint - adjust if needed
@@ -457,9 +458,9 @@ class PurchaseReturnTableCard extends StatelessWidget {
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), color: Colors.white, boxShadow: [BoxShadow(color: Colors.grey.withValues(alpha: 0.1), blurRadius: 8, offset: const Offset(0, 2))]),
+      decoration: BoxDecoration(borderRadius: BorderRadius.circular(W.rMd), border: Border.all(color: W.line(context)), color: W.surface(context), boxShadow: [BoxShadow(color: Colors.grey.withValues(alpha: 0.1), blurRadius: 8, offset: const Offset(0, 2))]),
       padding: const EdgeInsets.all(40),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,

@@ -1,4 +1,5 @@
 import '../configs/configs.dart';
+import 'web_ui.dart';
 
 class AppButton extends StatefulWidget {
   const AppButton({
@@ -49,7 +50,7 @@ class _AppButtonState extends State<AppButton> {
 
   @override
   Widget build(BuildContext context) {
-    final br = BorderRadius.circular(widget.borderRadius ?? 8);
+    final br = BorderRadius.circular(widget.borderRadius ?? W.rMd);
 
     return MouseRegion(
       onEnter: (_) => setState(() => isHover = true),
@@ -121,19 +122,19 @@ class _AppButtonState extends State<AppButton> {
       );
     }
 
-    return AppColors.primaryGradient(context);
+    return null; // ওয়েবের মতো solid নীল (gradient নয়)
   }
 
   Color? _getBackgroundColor(BuildContext context) {
     if (widget.isOutlined) return Colors.transparent;
-    if (widget.isDisabled || widget.isLoading) return Colors.grey.shade400;
+    if (widget.isDisabled || widget.isLoading) return W.line2(context);
     if (widget.color != null) {
       return isHover
         ? widget.color!.withValues(alpha: 0.9)
         : widget.color;
     }
 
-    return null;
+    return isHover ? W.blueInk(context) : W.blue(context);
   }
 
   Widget _buildButtonContent(BuildContext context) {

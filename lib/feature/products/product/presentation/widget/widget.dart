@@ -1,7 +1,11 @@
 
 import '../../../../../core/configs/configs.dart';
+import '../../../../../core/widgets/web_ui.dart';
 import '../../data/model/product_model.dart';
 import '../shared/product_details.dart';
+import 'package:meherinMart/core/widgets/app_network_img.dart';
+import 'package:meherinMart/desktop/widgets/desk_kit.dart' show DeskCard;
+import 'package:meherinMart/feature/lab_dashboard/presentation/widgets/dash_kit.dart' show DashColors;
 
 class ProductDataTableWidget extends StatelessWidget {
   final List<ProductModel> products;
@@ -50,8 +54,8 @@ class ProductDataTableWidget extends StatelessWidget {
   }
 
   Widget _buildProductCard(ProductModel product, BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textColor = AppColors.text(context);
+    final textColor = W.ink(context);
+    final muted = W.muted(context);
     final primary = AppColors.primaryColor(context);
     final stockState = _stockState(product);
     final active = product.isActive ?? false;
@@ -60,23 +64,19 @@ class ProductDataTableWidget extends StatelessWidget {
     final buyPrice = AppTableMoney.parse(product.purchasePrice);
 
     return Material(
-      color: AppColors.bottomNavBg(context),
-      borderRadius: BorderRadius.circular(16),
+      color: W.surface(context),
+      borderRadius: BorderRadius.circular(W.rLg),
       child: InkWell(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(W.rLg),
         onTap: () => AppRoutes.push(
           context,
           ProductDetailsScreen(productId: product.id.toString()),
         ),
         child: Container(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: isDark
-                  ? Colors.white.withValues(alpha: 0.08)
-                  : AppColors.borderLight,
-            ),
+            borderRadius: BorderRadius.circular(W.rLg),
+            border: Border.all(color: W.line(context)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -86,19 +86,19 @@ class ProductDataTableWidget extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
-                    width: 46,
-                    height: 46,
+                    width: 42,
+                    height: 42,
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
-                      color: primary.withValues(alpha: 0.10),
-                      borderRadius: BorderRadius.circular(12),
+                      color: W.blueWash(context),
+                      borderRadius: BorderRadius.circular(W.rMd),
                     ),
                     child: Text(
                       name.isEmpty ? '?' : String.fromCharCode(name.runes.first).toUpperCase(),
                       style: TextStyle(
-                        fontSize: 19,
-                        fontWeight: FontWeight.w800,
-                        color: primary,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: W.blueInk(context),
                       ),
                     ),
                   ),
@@ -112,7 +112,7 @@ class ProductDataTableWidget extends StatelessWidget {
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            fontSize: 14.5,
+                            fontSize: 15,
                             height: 1.25,
                             fontWeight: FontWeight.w700,
                             color: textColor,
@@ -124,7 +124,7 @@ class ProductDataTableWidget extends StatelessWidget {
                             Icon(
                               Iconsax.tag,
                               size: 13,
-                              color: textColor.withValues(alpha: 0.5),
+                              color: muted,
                             ),
                             const SizedBox(width: 4),
                             Flexible(
@@ -133,8 +133,8 @@ class ProductDataTableWidget extends StatelessWidget {
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
-                                  fontSize: 12,
-                                  color: textColor.withValues(alpha: 0.6),
+                                  fontSize: 12.5,
+                                  color: muted,
                                 ),
                               ),
                             ),
@@ -169,10 +169,9 @@ class ProductDataTableWidget extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                 decoration: BoxDecoration(
-                  color: isDark
-                      ? Colors.white.withValues(alpha: 0.04)
-                      : const Color(0xFFF8FAFC),
-                  borderRadius: BorderRadius.circular(12),
+                  color: W.soft(context),
+                  border: Border.all(color: W.line(context)),
+                  borderRadius: BorderRadius.circular(W.rMd),
                 ),
                 child: Row(
                   children: [
@@ -206,8 +205,8 @@ class ProductDataTableWidget extends StatelessWidget {
                           Text(
                             'Status',
                             style: TextStyle(
-                              fontSize: 11,
-                              color: textColor.withValues(alpha: 0.55),
+                              fontSize: 12,
+                              color: muted,
                             ),
                           ),
                           const SizedBox(height: 5),
@@ -234,9 +233,9 @@ class ProductDataTableWidget extends StatelessWidget {
       padding: EdgeInsets.zero,
       icon: Icon(
         Icons.more_vert_rounded,
-        color: AppColors.text(context).withValues(alpha: 0.6),
+        color: W.muted(context),
       ),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(W.rMd)),
       onSelected: (v) {
         switch (v) {
           case 'view':
@@ -281,17 +280,16 @@ class ProductDataTableWidget extends StatelessWidget {
   }
 
   Widget _tag(BuildContext context, IconData icon, String text) {
-    final c = AppColors.text(context);
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: c.withValues(alpha: 0.06),
-        borderRadius: BorderRadius.circular(8),
+        color: W.tint(context),
+        borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 12, color: c.withValues(alpha: 0.6)),
+          Icon(icon, size: 12, color: W.muted(context)),
           const SizedBox(width: 5),
           ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 130),
@@ -300,9 +298,9 @@ class ProductDataTableWidget extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                fontSize: 11.5,
+                fontSize: 12,
                 fontWeight: FontWeight.w500,
-                color: c.withValues(alpha: 0.75),
+                color: W.ink2(context),
               ),
             ),
           ),
@@ -319,13 +317,13 @@ class ProductDataTableWidget extends StatelessWidget {
     String? sub,
     Color? subColor,
   }) {
-    final c = AppColors.text(context);
+    final c = W.muted(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: TextStyle(fontSize: 11, color: c.withValues(alpha: 0.55)),
+          style: TextStyle(fontSize: 12, color: c),
         ),
         const SizedBox(height: 3),
         FittedBox(
@@ -336,8 +334,9 @@ class ProductDataTableWidget extends StatelessWidget {
             maxLines: 1,
             style: TextStyle(
               fontSize: 15,
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w700,
               color: valueColor,
+              fontFeatures: W.tabular,
             ),
           ),
         ),
@@ -348,9 +347,9 @@ class ProductDataTableWidget extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
-              fontSize: 10.5,
+              fontSize: 11.5,
               fontWeight: FontWeight.w500,
-              color: subColor ?? c.withValues(alpha: 0.5),
+              color: subColor ?? c,
             ),
           ),
         ],
@@ -362,64 +361,144 @@ class ProductDataTableWidget extends StatelessWidget {
         width: 1,
         height: 34,
         margin: const EdgeInsets.symmetric(horizontal: 10),
-        color: AppColors.text(context).withValues(alpha: 0.08),
+        color: W.line(context),
       );
 
   // Desktop টেবিল — AppDataTable
   // দাম আর stock যোগ করা হয়েছে — product list এ সবচেয়ে বেশি এগুলোই দেখা হয়।
   // stock alert quantity এর নিচে নামলে লাল।
   Widget _buildDesktopDataTable() {
-    const columns = [
-      AppTableColumn.center('SL', flex: 1, minWidth: 52),
-      AppTableColumn('Product', flex: 4, minWidth: 180),
-      AppTableColumn('Category', flex: 2, minWidth: 110),
-      AppTableColumn('Brand', flex: 2, minWidth: 100),
-      AppTableColumn('Unit', flex: 1, minWidth: 70),
-      AppTableColumn.numeric('Sell Price', flex: 2, minWidth: 100),
-      AppTableColumn.numeric('Stock', flex: 1, minWidth: 80),
-      AppTableColumn.center('Status', flex: 2, minWidth: 96),
-      AppTableColumn.center('Actions', flex: 2, minWidth: 120),
-    ];
+    return Builder(builder: (context) {
+      final c = DashColors(context);
+      Widget th(String t, {int flex = 1, double? width, bool right = false}) {
+        final w = Text(t.toUpperCase(),
+            textAlign: right ? TextAlign.right : TextAlign.left,
+            style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, letterSpacing: .5, color: c.muted));
+        return width != null ? SizedBox(width: width, child: w) : Expanded(flex: flex, child: w);
+      }
 
-    return AppDataTable(
-      columns: columns,
-      rowCount: products.length,
-      cellBuilder: (context, row, col) {
-        final p = products[row];
-        switch (col) {
-          case 0:
-            return AppTableText('${row + 1}',
-                align: AppCellAlign.center, muted: true);
-          case 1:
-            return AppTableText(p.name ?? '-', bold: true, subtitle: p.sku);
-          case 2:
-            return AppTableText(p.categoryInfo?.name ?? '-');
-          case 3:
-            return AppTableText(p.brandInfo?.name ?? '-', muted: true);
-          case 4:
-            return AppTableText(p.unitInfo?.name ?? '-', muted: true);
-          case 5:
-            return AppTableMoney(AppTableMoney.parse(p.sellingPrice));
-          case 6:
-            final stock = p.stockQty ?? 0;
-            final low = stock <= (p.alertQuantity ?? 0);
-            return AppTableText('$stock',
-                align: AppCellAlign.end,
-                bold: true,
-                color: low ? AppColors.danger : null);
-          case 7:
-            final active = p.isActive ?? false;
-            return AppStatusPill(active ? 'Active' : 'Inactive',
-                color: active ? AppColors.success : AppColors.danger);
-          default:
-            return AppTableEditDelete(
-              onView: () => AppRoutes.push(
-                  context, ProductDetailsScreen(productId: p.id.toString())),
-              onEdit: onEdit == null ? null : () => onEdit!(p),
-              onDelete: () => _showDeleteConfirmation(context, p),
-            );
-        }
-      },
+      return DeskCard(
+        padding: EdgeInsets.zero,
+        child: Column(children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(18, 12, 18, 10),
+            child: Row(children: [
+              th('Product', flex: 5),
+              th('Brand / Unit', flex: 2),
+              th('Price', flex: 2, right: true),
+              th('Stock', flex: 2, right: true),
+              th('Status', width: 92, right: true),
+              th('', width: 124, right: true),
+            ]),
+          ),
+          Divider(height: 1, color: c.line),
+          for (final p in products) _desktopRow(context, c, p),
+        ]),
+      );
+    });
+  }
+
+  String _money(num v) {
+    final s = v.toStringAsFixed(v == v.roundToDouble() ? 0 : 2);
+    final parts = s.split('.');
+    final whole = parts[0].replaceAllMapped(RegExp(r'(\d)(?=(\d{3})+(?!\d))'), (m) => '${m[1]},');
+    return parts.length > 1 ? '$whole.${parts[1]}' : whole;
+  }
+
+  Widget _thumb(DashColors c, ProductModel p) {
+    final img = p.image is String ? (p.image as String).trim() : '';
+    final box = Container(
+      width: 44,
+      height: 44,
+      decoration: BoxDecoration(color: c.tint, borderRadius: BorderRadius.circular(10), border: Border.all(color: c.line)),
+      clipBehavior: Clip.antiAlias,
+      alignment: Alignment.center,
+      child: img.startsWith('http')
+          ? AppNetworkImage(imageUrl: img, height: 44, icon: Icons.inventory_2_outlined, iconSize: 20)
+          : Icon(Icons.inventory_2_outlined, size: 20, color: c.muted),
+    );
+    return box;
+  }
+
+  Widget _desktopRow(BuildContext context, DashColors c, ProductModel p) {
+    final stock = p.stockQty ?? 0;
+    final st = _stockState(p);
+    final active = p.isActive ?? false;
+    final sell = AppTableMoney.parse(p.sellingPrice);
+    final fin = AppTableMoney.parse(p.finalPrice);
+    final hasDiscount = (p.discountApplied ?? false) && fin > 0 && fin < sell;
+    final cat = p.categoryInfo?.name ?? '';
+
+    Widget action(IconData i, String tip, Color col, VoidCallback? t) => IconButton(
+          tooltip: tip,
+          visualDensity: VisualDensity.compact,
+          onPressed: t,
+          icon: Icon(i, size: 19, color: col),
+        );
+
+    return InkWell(
+      onTap: () => AppRoutes.push(context, ProductDetailsScreen(productId: p.id.toString())),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+        decoration: BoxDecoration(border: Border(bottom: BorderSide(color: c.line))),
+        child: Row(children: [
+          Expanded(
+            flex: 5,
+            child: Row(children: [
+              _thumb(c, p),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text(p.name ?? '-', maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontWeight: FontWeight.w700, color: c.ink)),
+                  Text([if ((p.sku ?? '').isNotEmpty) p.sku!, if (cat.isNotEmpty) cat].join('  ·  '),
+                      maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 12, color: c.muted)),
+                ]),
+              ),
+            ]),
+          ),
+          Expanded(
+            flex: 2,
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(p.brandInfo?.name ?? '—', maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 13, color: c.ink2)),
+              Text(p.unitInfo?.name ?? '—', style: TextStyle(fontSize: 12, color: c.muted)),
+            ]),
+          ),
+          Expanded(
+            flex: 2,
+            child: Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+              Text('৳${_money(hasDiscount ? fin : sell)}', style: TextStyle(fontWeight: FontWeight.w800, color: c.ink)),
+              if (hasDiscount)
+                Text('৳${_money(sell)}',
+                    style: TextStyle(fontSize: 12, color: c.muted, decoration: TextDecoration.lineThrough))
+              else
+                Text('Buy ৳${_money(AppTableMoney.parse(p.purchasePrice))}', style: TextStyle(fontSize: 12, color: c.muted)),
+            ]),
+          ),
+          Expanded(
+            flex: 2,
+            child: Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+              Text('$stock', style: TextStyle(fontWeight: FontWeight.w800, color: stock <= 0 ? st.color : c.ink)),
+              Text(st.label, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: st.color)),
+            ]),
+          ),
+          SizedBox(
+            width: 92,
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: AppStatusPill(active ? 'Active' : 'Inactive', color: active ? AppColors.success : AppColors.danger),
+            ),
+          ),
+          SizedBox(
+            width: 124,
+            child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+              action(Icons.visibility_outlined, 'View', c.blue,
+                  () => AppRoutes.push(context, ProductDetailsScreen(productId: p.id.toString()))),
+              if (onEdit != null) action(Icons.edit_outlined, 'Edit', c.amber, () => onEdit!(p)),
+              action(Icons.delete_outline_rounded, 'Delete', c.red, () => _showDeleteConfirmation(context, p)),
+            ]),
+          ),
+        ]),
+      ),
     );
   }
 

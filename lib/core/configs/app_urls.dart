@@ -100,6 +100,22 @@ class AppUrls {
   static final String purchaseInvoice = '$baseUrl/purchases-invoice/supplier/';
   static final String dashboard = '$baseUrl/reports/dashboard/';
 
+  // Stock Adjustment / Stocktake / Expiry / Dashboard charts
+  static final String stockAdjustments = '$baseUrl/stock/adjustments/';
+  static final String stockCounts = '$baseUrl/stock/counts/';
+  static String stockCount(int id) => '$baseUrl/stock/counts/$id/';
+  static String stockCountSave(int id) => '$baseUrl/stock/counts/$id/count/';
+  static String stockCountApply(int id) => '$baseUrl/stock/counts/$id/apply/';
+  static String stockCountCancel(int id) => '$baseUrl/stock/counts/$id/cancel/';
+  static final String expiryAlerts = '$baseUrl/reports/expiry-alerts/';
+  static String expiryWriteOff(int batchId) => '$baseUrl/reports/expiry-alerts/$batchId/write-off/';
+  static final String dashboardCharts = '$baseUrl/reports/dashboard-charts/';
+
+  // Day close (দিন শেষে হিসাব বন্ধ)
+  static final String dayClose = '$baseUrl/day-close/';
+  static final String dayCloseSummary = '$baseUrl/day-close/summary/';
+  static String dayCloseDetail(int id) => '$baseUrl/day-close/$id/';
+
   // Audit log (শুধু Super Admin / Admin)
   static final String auditLog = '$baseUrl/sync/audit/';
   static final String auditMeta = '$baseUrl/sync/audit/meta/';

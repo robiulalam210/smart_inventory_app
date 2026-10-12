@@ -1,3 +1,4 @@
+import '../../../../core/widgets/web_ui.dart';
 
 import 'package:meherinMart/core/widgets/app_scaffold.dart';
 
@@ -377,7 +378,7 @@ class _AccountScreenState extends State<MobileAccountScreen> {
           builder: (context, setState) {
             return SafeArea(
               child: Container(
-                color: AppColors.bottomNavBg(context),
+                color: W.canvas(context),
                 padding: const EdgeInsets.all(20),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,

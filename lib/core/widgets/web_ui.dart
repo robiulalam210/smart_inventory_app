@@ -201,7 +201,7 @@ class WChip extends StatelessWidget {
         child: Container(
           height: 32,
           padding: const EdgeInsets.symmetric(horizontal: 12),
-          alignment: Alignment.center,
+          // alignment দিলে Wrap এ chip পুরো প্রস্থ নিত — তাই নেই; Row নিজেই মাঝে বসে
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [

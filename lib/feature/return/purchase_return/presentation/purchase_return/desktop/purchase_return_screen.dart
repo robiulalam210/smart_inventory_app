@@ -1,3 +1,4 @@
+import '../../../../../../core/widgets/web_ui.dart';
 
 import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
 
@@ -207,7 +208,7 @@ class _PurchaseReturnScreenState extends State<PurchaseReturnScreen> {
   Widget _buildFilterRow() {
     return Card(
       elevation: 0,
-      color: AppColors.bottomNavBg(context),
+      color: W.canvas(context),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
         mainAxisAlignment: MainAxisAlignment.start,
@@ -311,7 +312,7 @@ class _PurchaseReturnScreenState extends State<PurchaseReturnScreen> {
                   return Container(
                     height: MediaQuery.of(context).size.height * 0.85,
                     decoration: BoxDecoration(
-                      color: AppColors.bottomNavBg(context),
+                      color: W.canvas(context),
                       borderRadius: const BorderRadius.only(
                         topLeft: Radius.circular(20),
                         topRight: Radius.circular(20),

@@ -1,3 +1,4 @@
+import '../../../../core/widgets/web_ui.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/configs/configs.dart';
@@ -78,7 +79,7 @@ class _MoneyReceiptListScreenState extends State<SupplierPaymentForm> {
                 Container(
                   padding:  EdgeInsets.symmetric(horizontal: 8,vertical: 4),
                   decoration: BoxDecoration(
-                    color: AppColors.bottomNavBg(context),
+                    color: W.canvas(context),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
@@ -101,8 +102,9 @@ class _MoneyReceiptListScreenState extends State<SupplierPaymentForm> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: AppColors.whiteColor(context),
-                    borderRadius: BorderRadius.circular(8),
+                    color: W.surface(context),
+                    border: Border.all(color: W.line(context)),
+                    borderRadius: BorderRadius.circular(W.rMd),
                   ),
                   child: Column(
                     children: [
@@ -259,8 +261,9 @@ class _MoneyReceiptListScreenState extends State<SupplierPaymentForm> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: AppColors.whiteColor(context),
-                    borderRadius: BorderRadius.circular(8),
+                    color: W.surface(context),
+                    border: Border.all(color: W.line(context)),
+                    borderRadius: BorderRadius.circular(W.rMd),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,

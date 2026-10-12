@@ -1,3 +1,4 @@
+import '../../../../../core/widgets/web_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../../core/configs/configs.dart';
 import '../../../../../core/widgets/delete_dialog.dart';
@@ -23,13 +24,13 @@ class ExpenseSubHeadTableCard extends StatelessWidget {
     final bool isTablet = Responsive.isTablet(context);
 
     if (expenseSubHeads.isEmpty) {
-      return _buildEmptyState();
+      return _buildEmptyState(context);
     }
 
     if (isMobile || isTablet) {
       return _buildMobileCardView(context, isMobile);
     } else {
-      return _buildDesktopDataTable();
+      return _buildDesktopDataTable(context);
     }
   }
 
@@ -62,7 +63,7 @@ class ExpenseSubHeadTableCard extends StatelessWidget {
         vertical: 8.0,
       ),
       decoration: BoxDecoration(
-        color: AppColors.bottomNavBg(context),
+        color: W.canvas(context),
         borderRadius: BorderRadius.circular(AppSizes.radius),
 
         border: Border.all(
@@ -188,7 +189,7 @@ class ExpenseSubHeadTableCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
-              color: AppColors.bottomNavBg(context),
+              color: W.canvas(context),
               borderRadius: const BorderRadius.only(
                 bottomLeft: Radius.circular(16),
                 bottomRight: Radius.circular(16),
@@ -303,9 +304,9 @@ class ExpenseSubHeadTableCard extends StatelessWidget {
   }
 
   // Desktop টেবিল — AppDataTable
-  Widget _buildDesktopDataTable() {
+  Widget _buildDesktopDataTable(BuildContext context) {
     if (expenseSubHeads.isEmpty) {
-      return _buildEmptyState();
+      return _buildEmptyState(context);
     }
 
     const columns = [
@@ -423,7 +424,7 @@ class ExpenseSubHeadTableCard extends StatelessWidget {
           child: ClipRRect(
             borderRadius: BorderRadius.circular(16),
             child: Container(
-              color: AppColors.bottomNavBg(context),
+              color: W.canvas(context),
 
               width: Responsive.isMobile(context)
                   ? double.infinity
@@ -446,11 +447,11 @@ class ExpenseSubHeadTableCard extends StatelessWidget {
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        color: Colors.white,
+        borderRadius: BorderRadius.circular(W.rMd),
+        color: W.surface(context),
         boxShadow: [
           BoxShadow(
             color: Colors.grey.withValues(alpha: 0.1),

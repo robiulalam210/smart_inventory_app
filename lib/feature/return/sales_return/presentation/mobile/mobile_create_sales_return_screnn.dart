@@ -1,3 +1,4 @@
+import '../../../../../core/widgets/web_ui.dart';
 import 'package:intl/intl.dart';
 import '/feature/accounts/data/model/account_active_model.dart';
 import '/feature/accounts/presentation/bloc/account/account_bloc.dart';
@@ -256,7 +257,7 @@ class _CreateSalesReturnScreenState
     return SafeArea(
       child: Container(
         decoration: BoxDecoration(
-          color: AppColors.bottomNavBg(context),
+          color: W.canvas(context),
           borderRadius: BorderRadius.circular(12),
         ),
         padding: AppTextStyle.getResponsivePaddingBody(context),
@@ -448,7 +449,7 @@ class _CreateSalesReturnScreenState
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: AppColors.bottomNavBg(context),
+        color: W.canvas(context),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: Colors.grey.shade300),
       ),
@@ -663,7 +664,7 @@ class _CreateSalesReturnScreenState
 
     return Card(
       elevation: 0,
-      color: AppColors.bottomNavBg(context),
+      color: W.canvas(context),
       margin: EdgeInsets.zero,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
@@ -827,7 +828,7 @@ class _CreateSalesReturnScreenState
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.bottomNavBg(context),
+        color: W.canvas(context),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: Colors.blue.shade200),
       ),

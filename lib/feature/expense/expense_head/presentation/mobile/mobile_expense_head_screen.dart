@@ -1,3 +1,4 @@
+import '../../../../../core/widgets/web_ui.dart';
 import '/core/core.dart';
 
 import '../../../../../core/widgets/coustom_search_text_field.dart';
@@ -115,7 +116,7 @@ class _ExpenseHeadScreenState extends State<MobileExpenseHeadScreen> {
   Widget _buildMobileHeader(BuildContext context) {
     return  Container(
       decoration: BoxDecoration(
-        color:AppColors.bottomNavBg(context),
+        color: W.canvas(context),
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(

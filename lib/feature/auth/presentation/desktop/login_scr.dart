@@ -1,3 +1,4 @@
+import '../../../../core/widgets/web_ui.dart';
 import 'dart:async';
 import 'dart:ui';
 import '../../../../core/core.dart';
@@ -105,9 +106,9 @@ class _LogInScreenState extends State<LogInScreen> {
           width: _getFormWidth(screenWidth),
           padding: const EdgeInsets.all(AppSizes.bodyTabPadding),
           decoration: BoxDecoration(
-            color: const Color.fromRGBO(233, 233, 233, 0.22),
-            border: Border.all(color: const Color(0xFFE3E3E3)),
-            borderRadius: BorderRadius.circular(20),
+            color: W.surface(context),
+            border: Border.all(color: W.line(context)),
+            borderRadius: BorderRadius.circular(W.rLg),
           ),
           child: Form(
             key: _formKey,
@@ -121,7 +122,7 @@ class _LogInScreenState extends State<LogInScreen> {
                     style: TextStyle(
                       fontSize: screenWidth >= 800 ? 28 : 20,
                       fontWeight: FontWeight.w500,
-                      color: AppColors.white,
+                      color: W.ink(context),
                     ),
                   ),
                 ),
@@ -184,7 +185,7 @@ class _LogInScreenState extends State<LogInScreen> {
                       height: 24,
                       child: CircularProgressIndicator.adaptive(
                         strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                        valueColor: AlwaysStoppedAnimation<Color>(W.blue(context)),
                       ),
                     )
                         : AppButton(
@@ -251,7 +252,7 @@ class _LogInScreenState extends State<LogInScreen> {
             child: Container(
               width: double.infinity,
               height: double.infinity,
-              decoration: BoxDecoration(gradient: AppColors.primaryGradient(context)),
+              decoration: BoxDecoration(color: W.canvas(context)),
               child: Center(
                 child: SingleChildScrollView(
                   padding: EdgeInsets.only(bottom: keyboardInset),

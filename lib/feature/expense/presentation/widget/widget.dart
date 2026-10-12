@@ -1,6 +1,7 @@
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/configs/configs.dart';
+import '../../../../core/widgets/web_ui.dart';
 import '../../../../core/widgets/delete_dialog.dart';
 import '../../data/model/expense.dart';
 import '../../expense_head/data/model/expense_head_model.dart';
@@ -61,25 +62,22 @@ class ExpenseTableCard extends StatelessWidget {
         vertical: 8.0,
       ),
       decoration: BoxDecoration(
-        color: AppColors.bottomNavBg(context),
-        borderRadius: BorderRadius.circular(AppSizes.radius),
-
-        border: Border.all(
-          color: AppColors.greyColor(context).withValues(alpha: 0.5),
-          width: 0.5,
-        ),
+        color: W.surface(context),
+        borderRadius: BorderRadius.circular(W.rLg),
+        border: Border.all(color: W.line(context)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Header
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             decoration: BoxDecoration(
-              color: AppColors.primaryColor(context).withValues(alpha: 0.05),
+              color: W.soft(context),
+              border: Border(bottom: BorderSide(color: W.line(context))),
               borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(16),
-                topRight: Radius.circular(16),
+                topLeft: Radius.circular(W.rLg - 1),
+                topRight: Radius.circular(W.rLg - 1),
               ),
             ),
             child: Row(
@@ -93,13 +91,13 @@ class ExpenseTableCard extends StatelessWidget {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: AppColors.primaryColor(context),
+                        color: W.tint(context),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
                         '#$index',
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: TextStyle(
+                          color: W.ink2(context),
                           fontWeight: FontWeight.w600,
                           fontSize: 12,
                         ),
@@ -112,9 +110,9 @@ class ExpenseTableCard extends StatelessWidget {
                         children: [
                           Text(
                             expense.invoiceNumber?.capitalize() ?? 'N/A',
-                            style:  TextStyle(
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.text(context),
+                            style: TextStyle(
+                              fontWeight: FontWeight.w700,
+                              color: W.ink(context),
                               fontSize: 14,
                             ),
                           ),
@@ -122,8 +120,8 @@ class ExpenseTableCard extends StatelessWidget {
                           Text(
                             expense.paymentMethod ?? 'N/A',
                             style: TextStyle(
-                              fontSize: 12,
-                              color:  AppColors.text(context),
+                              fontSize: 12.5,
+                              color: W.muted(context),
                             ),
                           ),
                         ],
@@ -132,21 +130,18 @@ class ExpenseTableCard extends StatelessWidget {
                   ],
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
                   decoration: BoxDecoration(
-                    color: AppColors.danger.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: AppColors.danger,
-                      width: 1,
-                    ),
+                    color: W.redWash(context),
+                    borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
                     '৳${amountValue.toStringAsFixed(2)}',
-                    style: const TextStyle(
-                      color: AppColors.danger,
+                    style: TextStyle(
+                      color: W.redInk(context),
                       fontWeight: FontWeight.w700,
-                      fontSize: 12,
+                      fontSize: 13,
+                      fontFeatures: W.tabular,
                     ),
                   ),
                 ),
@@ -156,7 +151,7 @@ class ExpenseTableCard extends StatelessWidget {
 
           // Details
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(14),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -204,15 +199,15 @@ class ExpenseTableCard extends StatelessWidget {
                           Icon(
                             Iconsax.note,
                             size: 16,
-                            color: Colors.grey.shade600,
+                            color: W.muted(context),
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            'Note:',
+                            'Note',
                             style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              color: Colors.grey.shade700,
-                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                              color: W.muted(context),
+                              fontSize: 12.5,
                             ),
                           ),
                         ],
@@ -223,8 +218,8 @@ class ExpenseTableCard extends StatelessWidget {
                         child: Text(
                           expense.note!,
                           style: TextStyle(
-                            color: Colors.grey.shade600,
-                            fontSize: 13,
+                            color: W.ink2(context),
+                            fontSize: 13.5,
                           ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
@@ -239,19 +234,14 @@ class ExpenseTableCard extends StatelessWidget {
 
           // Action Buttons
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             decoration: BoxDecoration(
-              color: AppColors.bottomNavBg(context),
+              color: W.surface(context),
               borderRadius: const BorderRadius.only(
-                bottomLeft: Radius.circular(16),
-                bottomRight: Radius.circular(16),
+                bottomLeft: Radius.circular(W.rLg),
+                bottomRight: Radius.circular(W.rLg),
               ),
-              border: Border(
-                top: BorderSide(
-                  color: Colors.grey.shade200,
-                  width: 1,
-                ),
-              ),
+              border: Border(top: BorderSide(color: W.line(context))),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -266,8 +256,8 @@ class ExpenseTableCard extends StatelessWidget {
                     ),
                     label: const Text('View'),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.success,
-                      side: BorderSide(color: Colors.green.shade300),
+                      foregroundColor: W.ink2(context),
+                      side: BorderSide(color: W.line2(context)),
                       padding: const EdgeInsets.symmetric(vertical: 10),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
@@ -287,8 +277,8 @@ class ExpenseTableCard extends StatelessWidget {
                     ),
                     label: const Text('Edit'),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.info,
-                      side: BorderSide(color: Colors.blue.shade300),
+                      foregroundColor: W.blueInk(context),
+                      side: BorderSide(color: W.blueLine(context)),
                       padding: const EdgeInsets.symmetric(vertical: 10),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
@@ -308,8 +298,8 @@ class ExpenseTableCard extends StatelessWidget {
                     ),
                     label: const Text('Delete'),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.danger,
-                      side: BorderSide(color: Colors.red.shade300),
+                      foregroundColor: W.redInk(context),
+                      side: BorderSide(color: W.redLine(context)),
                       padding: const EdgeInsets.symmetric(vertical: 10),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
@@ -338,7 +328,7 @@ class ExpenseTableCard extends StatelessWidget {
         Icon(
           icon,
           size: 16,
-          color:  AppColors.text(context),
+          color: W.muted(context),
         ),
         const SizedBox(width: 8),
         Expanded(
@@ -348,18 +338,18 @@ class ExpenseTableCard extends StatelessWidget {
               Text(
                 label,
                 style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  color:  AppColors.text(context),
+                  fontWeight: FontWeight.w500,
+                  color: W.muted(context),
                   fontSize: 12,
                 ),
               ),
               const SizedBox(height: 2),
               Text(
                 value,
-                style:  TextStyle(
-                  fontSize: 13,
+                style: TextStyle(
+                  fontSize: 13.5,
                   fontWeight: FontWeight.w500,
-                  color:  AppColors.text(context)
+                  color: W.ink(context),
                 ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,

@@ -1,3 +1,5 @@
+import 'package:meherinMart/core/widgets/page_guide_widgets.dart';
+import 'package:meherinMart/core/widgets/page_guides.dart';
 import 'package:meherinMart/feature/auth/presentation/desktop/login_scr.dart';
 import 'package:meherinMart/desktop/widgets/header.dart';
 import 'package:meherinMart/desktop/desktop_screens.dart';
@@ -98,7 +100,7 @@ class _RootScreenState extends State<RootScreen> {
                                   );
                                 },
                                 child: SingleChildScrollView(
-                                  child: desktopScreens[currentIndex],
+                                  child: _withGuide(currentIndex),
                                 ),
                               ),
                             ),
@@ -126,7 +128,7 @@ class _RootScreenState extends State<RootScreen> {
                         horizontal: AppSizes.bodyPadding *
                             (Responsive.isMobile(context) ? 0.5 : 1.5),
                       ),
-                      child: desktopScreens[currentIndex],
+                      child: _withGuide(currentIndex),
                     ),
                   ],
                 ),
@@ -141,6 +143,18 @@ class _RootScreenState extends State<RootScreen> {
       ),
         ),
       ),
+    );
+  }
+
+  /// প্রতিটা desktop পেজের মাথায় "কীভাবে কাজ করবেন" গাইড-কার্ড
+  Widget _withGuide(int index) {
+    final key = index >= 0 && index < kDesktopGuideKeys.length ? kDesktopGuideKeys[index] : '';
+    final screen = desktopScreens[index];
+    if (!kPageGuides.containsKey(key)) return screen;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [PageGuideCard(guideKey: key), screen],
     );
   }
 

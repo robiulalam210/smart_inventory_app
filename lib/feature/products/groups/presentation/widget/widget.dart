@@ -1,3 +1,4 @@
+import '../../../../../core/widgets/web_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../../core/configs/configs.dart';
 import '../../../../../core/widgets/delete_dialog.dart';
@@ -14,7 +15,7 @@ class GroupsTableCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (groups.isEmpty) {
-      return _buildEmptyState();
+      return _buildEmptyState(context);
     }
 
     return Responsive.isMobile(context)
@@ -238,11 +239,12 @@ class GroupsTableCard extends StatelessWidget {
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        color: Colors.white,
+        borderRadius: BorderRadius.circular(W.rMd),
+        border: Border.all(color: W.line(context)),
+        color: W.surface(context),
         boxShadow: [
           BoxShadow(
             color: Colors.grey.withValues(alpha: 0.1),

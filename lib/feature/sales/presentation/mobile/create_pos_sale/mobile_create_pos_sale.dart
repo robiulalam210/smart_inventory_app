@@ -1,3 +1,4 @@
+import '../../../../../core/widgets/web_ui.dart';
 import 'dart:developer';
 
 import '../../shared/create_pos_sale/sale_payment_rules.dart';
@@ -512,7 +513,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
       ),
       body: SafeArea(
         child: Container(
-          color: AppColors.bottomNavBg(context),
+          color: W.canvas(context),
           child: BlocConsumer<CreatePosSaleBloc, CreatePosSaleState>(
             listener: (context, state) {
               if (state is CreatePosSaleLoading) {
@@ -1157,7 +1158,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
             margin: const EdgeInsets.only(bottom: 4),
             padding: const EdgeInsets.all(4),
             decoration: BoxDecoration(
-              color: AppColors.bottomNavBg(context),
+              color: W.canvas(context),
               borderRadius: BorderRadius.circular(8),
               border: Border.all(color: Colors.grey.shade300),
             ),
@@ -1763,7 +1764,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
               padding: const EdgeInsets.all(8),
               margin: const EdgeInsets.only(bottom: 10),
               decoration: BoxDecoration(
-                color: AppColors.bottomNavBg(context),
+                color: W.canvas(context),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(color: AppColors.warning),
               ),
@@ -1788,7 +1789,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
               padding: const EdgeInsets.all(8),
               margin: const EdgeInsets.only(bottom: 10),
               decoration: BoxDecoration(
-                color: AppColors.bottomNavBg(context),
+                color: W.canvas(context),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(color: AppColors.success),
               ),
@@ -1823,7 +1824,7 @@ class _CreatePosSalePageState extends State<MobileCreatePosSale> {
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(8),
-                    color: AppColors.bottomNavBg(context),
+                    color: W.canvas(context),
                   ),
                   child: Column(
                     children: [

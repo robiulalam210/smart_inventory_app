@@ -1,3 +1,4 @@
+import '../../../../../core/widgets/web_ui.dart';
 import 'package:meherinMart/core/widgets/app_scaffold.dart';
 
 import '../../../../../core/configs/configs.dart';
@@ -190,7 +191,7 @@ class _ProductsScreenState extends State<MobileProductScreen> {
         // Search Bar
         Container(
           decoration: BoxDecoration(
-            color: AppColors.bottomNavBg(context),
+            color: W.canvas(context),
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
               color: Theme.of(context).brightness == Brightness.dark
@@ -400,7 +401,7 @@ class _ProductsScreenState extends State<MobileProductScreen> {
           child: Container(
             height: height,
             decoration: BoxDecoration(
-              color: AppColors.bottomNavBg(context),
+              color: W.canvas(context),
               borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
             ),
             child: const MobileProductCreate(),
@@ -428,7 +429,7 @@ class _ProductsScreenState extends State<MobileProductScreen> {
           child: Container(
             height: height,
             decoration: BoxDecoration(
-              color: AppColors.bottomNavBg(context),
+              color: W.canvas(context),
               borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
             ),
             child: MobileProductCreate(
@@ -467,7 +468,7 @@ class _ProductsScreenState extends State<MobileProductScreen> {
           builder: (context, setState) {
             return SafeArea(
               child: Container(
-                color: AppColors.bottomNavBg(context),
+                color: W.canvas(context),
                 padding: const EdgeInsets.all(20),
                 child: SingleChildScrollView(
                   child: Column(
@@ -900,7 +901,7 @@ class _ProductsScreenState extends State<MobileProductScreen> {
         const SizedBox(height: 5),
         Container(
           decoration: BoxDecoration(
-            color: AppColors.bottomNavBg(context),
+            color: W.canvas(context),
             borderRadius: BorderRadius.circular(8),
             border: Border.all(color: Colors.grey[300]!),
           ),

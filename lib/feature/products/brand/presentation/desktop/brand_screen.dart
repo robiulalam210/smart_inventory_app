@@ -1,3 +1,4 @@
+import '../../../../../core/widgets/web_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:meherinMart/core/widgets/app_popover_route.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -58,7 +59,7 @@ class _BrandScreenState extends State<BrandScreen> {
     final isMobile = Responsive.isMobile(context);
 
     return Container(
-      color: AppColors.bottomNavBg(context),
+      color: W.canvas(context),
       child: SafeArea(
         child: ResponsiveRow(
           spacing: 0,
@@ -80,7 +81,7 @@ class _BrandScreenState extends State<BrandScreen> {
       lg: 2,
       xl: 2,
       child: Container(
-        decoration: const BoxDecoration(color: Colors.white),
+        decoration: BoxDecoration(color: W.surface(context)),
         child: const Sidebar(),
       ),
     );

@@ -1,3 +1,4 @@
+import '../../../../../core/widgets/web_ui.dart';
 
 import '../../../../../core/configs/configs.dart';
 import '../../../../../desktop/widgets/sidebar.dart';
@@ -23,6 +24,8 @@ import '../widget/pagination.dart';
 import '../widget/widget.dart';
 import 'product_create.dart';
 import 'package:meherinMart/core/widgets/app_dropdown.dart';
+import 'package:meherinMart/desktop/widgets/desk_kit.dart';
+import 'package:meherinMart/feature/lab_dashboard/presentation/widgets/dash_kit.dart' show DashColors;
 
 class ProductsScreen extends StatefulWidget {
   const ProductsScreen({super.key});
@@ -121,8 +124,10 @@ class _ProductsScreenState extends State<ProductsScreen> {
     final isBigScreen =
         Responsive.isDesktop(context) || Responsive.isMaxDesktop(context);
 
+    final dc = DashColors(context);
+
     return Container(
-      color: AppColors.bottomNavBg(context),
+      color: AppColors.background(context),
       child: SafeArea(
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start, // FIX: content উপরে থাকবে (sidebar লম্বা হলে মাঝখানে নামত)
@@ -131,7 +136,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
             if (isBigScreen && !PermanentSidebarScope.active(context))
               Container(
                 width: 250,
-                decoration: const BoxDecoration(color: Colors.white),
+                decoration: BoxDecoration(color: W.surface(context)),
                 child: const Sidebar(),
               ),
 
@@ -143,8 +148,9 @@ class _ProductsScreenState extends State<ProductsScreen> {
                   _fetchProductList();
                 },
                 child: Container(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.fromLTRB(24, 20, 24, 40),
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _buildDesktopHeader(isBigScreen),
                       if (_hasActiveFilters()) _buildActiveFiltersIndicator(),
@@ -172,9 +178,9 @@ class _ProductsScreenState extends State<ProductsScreen> {
               width: _showFilterDrawer ? 300 : 0,
               curve: Curves.easeInOut,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: dc.surface,
                 border: Border(
-                  left: BorderSide(color: Colors.grey[300]!, width: 1),
+                  left: BorderSide(color: dc.line, width: 1),
                 ),
                 boxShadow: [
                   if (_showFilterDrawer)
@@ -229,86 +235,52 @@ class _ProductsScreenState extends State<ProductsScreen> {
   }
 
   Widget _buildDesktopHeader(bool isBigScreen) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        SizedBox(
-          width: 400,
-          child: CustomSearchTextFormField(
-            controller: context.read<ProductsBloc>().filterTextController,
-            onChanged: (value) {
-              _fetchProductList(filterText: value);
-            },
-            isRequiredLabel: false,
-            onClear: () {
-              context.read<ProductsBloc>().filterTextController.clear();
-              _fetchProductList();
-            },
-            hintText: "products...",
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      DeskPageHeader(
+        title: 'Products',
+        subtitle: 'Your catalogue — prices, stock levels and availability.',
+        actions: [
+          DeskButton(
+            label: _showFilterDrawer ? 'Hide filters' : 'Filters',
+            icon: Icons.tune_rounded,
+            outlined: true,
+            onPressed: () => setState(() => _showFilterDrawer = !_showFilterDrawer),
           ),
-        ),
-        const SizedBox(width: 16),
-        Row(
-          children: [
-            // Filter Toggle Button
-            IconButton(
-              icon: Icon(
-                Icons.filter_alt,
-                color: _showFilterDrawer
-                    ? AppColors.primaryColor(context)
-                    : Colors.grey,
-                size: 24,
-              ),
-              onPressed: () {
-                setState(() {
-                  _showFilterDrawer = !_showFilterDrawer;
-                });
-              },
-              tooltip: 'Toggle Filters',
-            ),
-            const SizedBox(width: 8),
-            AppButton(
-              name: "Create Product",
-              onPressed: () => _showCreateProductDialog(context),
-            ),
-          ],
-        ),
-      ],
-    );
+          DeskButton(label: 'Create product', icon: Icons.add_rounded, onPressed: () => _showCreateProductDialog(context)),
+        ],
+      ),
+      const SizedBox(height: 16),
+      DeskSearchField(
+        controller: context.read<ProductsBloc>().filterTextController,
+        hint: 'Search products by name, SKU or barcode…',
+        width: 420,
+        onChanged: (value) => _fetchProductList(filterText: value),
+        onClear: () {
+          context.read<ProductsBloc>().filterTextController.clear();
+          _fetchProductList();
+        },
+      ),
+    ]);
   }
 
   Widget _buildActiveFiltersIndicator() {
+    final c = DashColors(context);
     return Container(
-      margin: const EdgeInsets.only(top: 8, bottom: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      margin: const EdgeInsets.only(top: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       decoration: BoxDecoration(
-        color: AppColors.primaryColor(context).withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(8),
+        color: c.blue.withValues(alpha: c.dark ? .14 : .07),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: c.blue.withValues(alpha: .25)),
       ),
       child: Row(
         children: [
-          Icon(
-            Icons.filter_alt,
-            size: 16,
-            color: AppColors.primaryColor(context),
-          ),
+          Icon(Icons.filter_alt_rounded, size: 16, color: c.blue),
           const SizedBox(width: 8),
-          Expanded(
-            child: Wrap(
-              spacing: 8,
-              runSpacing: 4,
-              children: _getActiveFilterChips(),
-            ),
-          ),
+          Expanded(child: Wrap(spacing: 8, runSpacing: 4, children: _getActiveFilterChips())),
           TextButton(
             onPressed: _clearAllFilters,
-            child: Text(
-              'Clear All',
-              style: TextStyle(
-                fontSize: 12,
-                color: AppColors.errorColor(context),
-              ),
-            ),
+            child: Text('Clear all', style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: c.red)),
           ),
         ],
       ),
@@ -867,10 +839,17 @@ class _ProductsScreenState extends State<ProductsScreen> {
 
   Widget _buildProductList(ProductsState state) {
     if (state is ProductsListLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return DeskState.loading();
     } else if (state is ProductsListSuccess) {
       if (state.list.isEmpty) {
-        return Center(child: Lottie.asset(AppImages.noData));
+        return DeskState(
+          icon: Icons.inventory_2_outlined,
+          title: _hasActiveFilters() ? 'No products match these filters' : 'No products yet',
+          message: _hasActiveFilters() ? 'Try clearing a filter or searching for something else.' : 'Create your first product to start selling.',
+          action: _hasActiveFilters()
+              ? DeskButton(label: 'Clear filters', icon: Icons.filter_alt_off_rounded, outlined: true, onPressed: _clearAllFilters)
+              : DeskButton(label: 'Create product', icon: Icons.add_rounded, onPressed: () => _showCreateProductDialog(context)),
+        );
       } else {
         return Column(
           children: [
@@ -911,27 +890,12 @@ class _ProductsScreenState extends State<ProductsScreen> {
         );
       }
     } else if (state is ProductsListFailed) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.error_outline, size: 60, color: AppColors.danger),
-            const SizedBox(height: 16),
-            const Text(
-              'Failed to load products',
-              style: TextStyle(fontSize: 16),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              state.content,
-              style: const TextStyle(fontSize: 14, color: Colors.grey),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            AppButton(name: "Retry", onPressed: () => _fetchProductList()),
-          ],
-        ),
+      return DeskState(
+        icon: Icons.cloud_off_rounded,
+        title: 'Failed to load products',
+        message: state.content,
+        color: AppColors.danger,
+        action: DeskButton(label: 'Retry', icon: Icons.refresh_rounded, onPressed: () => _fetchProductList()),
       );
     } else {
       return Container();

@@ -1,3 +1,4 @@
+import '../../../../core/widgets/web_ui.dart';
 import '../../../accounts/data/model/account_active_model.dart';
 import '../../data/model/expense.dart';
 import '/feature/expense/expense_head/data/model/expense_head_model.dart';
@@ -224,7 +225,7 @@ class _ExpenseCreateScreenState extends State<MobileExpenseCreate> {
       width: MediaQuery.of(context).size.width,
       decoration: BoxDecoration(
         shape: BoxShape.rectangle,
-        color: AppColors.bottomNavBg(context),
+        color: W.canvas(context),
         borderRadius: BorderRadius.circular(AppSizes.borderRadiusSize),
       ),
       padding: AppTextStyle.getResponsivePaddingBody(context),
